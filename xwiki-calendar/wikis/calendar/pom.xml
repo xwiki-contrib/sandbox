@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.xpn.xwiki.platform</groupId>
+    <artifactId>xwiki-calendar-wikis</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>xwiki-calendar-wikis-calendar</artifactId>
+  <name>XWiki Platform - Calendar - Wikis - Calendar Wiki</name>
+  <packaging>xar</packaging>
+  <description>XWiki Calendar Default Pages</description>
+  <build>
+    <plugins>
+      <!-- 1) copy the GWT zip to the target directory so that it can be added as an attachment
+           to the CalendarCode.GWT document. This allows distributing Watch as a single XAR fil -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.xpn.xwiki.platform</groupId>
+                  <artifactId>xwiki-calendar-gwt</artifactId>
+                  <version>${pom.version}</version>
+                  <type>zip</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.build.directory}/gwt</outputDirectory>
+                  <destFileName>calendar.zip</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- 2) Attach watch JS-compiled code and resources zip to CalendarCode.GWT document. -->
+      <plugin>
+        <groupId>com.xpn.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-xmldoc-update-plugin</artifactId>
+        <version>${platform.tool.xmldoc.version}</version>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>attach</goal>
+            </goals>
+            <configuration>
+              <file>${project.build.directory}/gwt/calendar.zip</file>
+              <sourceDocument>${basedir}/src/main/resources/CalendarCode/GWT</sourceDocument>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- 3) Generate the XAR (the xAr packaging does this but we need the definition below
+              to exclude translations since the Packager currently doesn't handle translated
+              resources and thus will fail in the database/ modules. -->
+      <plugin>
+        <groupId>com.xpn.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-xar-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- Since we're excluding we also need to exclude the META-INF/ dir. It's a default
+                 exclude but we're overriding it. -->
+            <exclude>**/META-INF/**</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+

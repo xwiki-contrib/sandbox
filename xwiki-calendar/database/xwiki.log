@@ -1,0 +1,6 @@
+2008-07-11 16:40:00,973 [] [main] WARN  impl.OSCacheService             - Could not load cache properties oscache.properties: null 
+2008-07-11 16:40:00,976 [] [main] WARN  impl.OSCacheService             - Could not load cache properties oscache-local.properties: null 
+2008-07-11 16:40:06,380 [] [main] WARN  interwiki.InterWiki             - Unable to read conf/intermap.txt 
+2008-07-12 00:28:02,775 [] [main] WARN  impl.OSCacheService             - Could not load cache properties oscache.properties: null 
+2008-07-12 00:28:02,792 [] [main] WARN  impl.OSCacheService             - Could not load cache properties oscache-local.properties: null 
+2008-07-12 00:28:08,265 [] [main] WARN  interwiki.InterWiki             - Unable to read conf/intermap.txt 

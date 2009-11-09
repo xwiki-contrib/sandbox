@@ -1,0 +1,486 @@
+.Calendar {
+	clear:both;
+	font : 14px Verdana, Arial, 'Trebuchet MS', Tahoma, sans-serif; 
+	margin: 0;
+	padding:0;
+	border:0;
+	height: 600px;
+	text-align: left;
+	border: 0 none;
+	padding: 0;
+	margin: 0;
+	color: #000;
+	background: #fff;
+}
+
+.Calendar table {
+	margin: 0;
+	border: 0 none;
+	padding: 0;
+}
+/*
+#calendar td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+
+#calendar tr {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+*/
+
+/* XGC main widget style, this is the main panel containing all the calendar widgets */
+.xgwt-calendar-widget { 
+	width:100%; 
+	float:left; 
+	margin:0; 
+	padding:0; 
+	border:0;
+}
+
+.xgwt-calendar-widget table {
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.xgwt-calendar-widget tr {
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.xgwt-calendar-widget td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.gwt-TabBar table tbody tr td { 
+   margin: 2px;
+}
+
+.gwt-TabBar { 
+	font: .90em Verdana, Arial, 'Trebuchet MS', Tahoma, sans-serif; 
+	float:right; 
+	margin: 0;
+	padding: 0;
+	border: 0; 
+	vertical-align:middle; 
+}
+
+.gwt-TabBar .gwt-TabBarFirst { 
+	width:8px;
+	border:0; 
+	background-color: transparent;
+}
+
+.gwt-TabBar .gwt-TabBarItem { 
+	margin-left:1px;
+	margin-right:1px;
+	padding:6px;
+	background-color: #e8eef7;
+	color: #112abb; 
+}
+
+.gwt-TabBar .gwt-TabBarItem-selected { 
+	background-color: #c3d9ff;
+	color: #000000; 
+	font-size: 1em;
+	font-weight: bold;
+}
+
+.gwt-TabBar .gwt-TabBarRest {
+}
+
+
+/* XGC Time-Grid widget, this is the time grid that contains all informations relative to time */
+.xgwt-grid-widget {
+	border: 2px solid #000;
+	margin: 0px;
+	padding: 2px;
+	float: right;
+	background-color: #c3d9ff;
+	border-color: #a2bbdd;
+}
+
+.xgwt-grid-panel{
+	border-color:#a2bbdd #FFFFFF #FFFFFF #a2bbdd;
+	border-style:solid;
+	border-width:1px;
+	height:400px;
+	margin:4px;
+	overflow:auto;
+}
+
+.xgwt-grid-panel table{
+	border:0;
+	padding: 0;
+	margin: 0;
+	vertical-align: text-top;
+	width: 100%;
+}
+
+
+.xgwt-grid-panel table tr{
+	height: 40px;
+	border: 0 none;
+	margin: 0;
+	padding: 0;
+	vertical-align: top;
+}
+
+.xgwt-grid-panel table tr td{
+	margin: 0;
+	padding: 0;
+	border-right: 1px double #a2bbdd;
+	border-bottom: 1px solid #a2bbdd;
+	vertical-align: top;
+}
+
+.xgwt-headgrid-panel{
+	width: 98%;
+	margin: 4px;
+}
+
+.xgwt-maingrid{
+	width: 100%;
+	border:0 none;
+	margin: 0;
+	padding: 0;
+}
+
+.xgwt-maintable{
+	width: 100%;
+	border:0 none;
+	margin: 0;
+	padding: 0;
+}
+
+.xgwt-maintable tr {
+	border: 0 none;
+	margin: 0;
+	padding: 0;
+	vertical-align: top;
+}
+
+.xgwt-maintable tr td {
+	margin: 0;
+	padding: 0;
+	border: 0 none;
+	vertical-align: top;
+}
+
+.xgwt-grid-table{
+	border-color:#a2bbdd #FFFFFF #FFFFFF #a2bbdd;
+	border-style:solid;
+	border-width:1px;
+	background-color: #FFFFFF;
+	height:400px;
+	margin:4px;
+	overflow:auto;
+}
+
+.xgwt-grid-table table{
+	border:0;
+	padding: 0;
+	margin: 0;
+	vertical-align: text-top;
+	width: 100%;
+}
+
+
+.xgwt-grid-table table tr{
+	border: 0 none;
+	margin: 0;
+	padding: 0;
+	vertical-align: top;
+}
+
+.xgwt-grid-table table tr td{
+	margin: 0;
+	padding: 0;
+	border: 0 none;
+	vertical-align: top;
+	border-bottom-color: #a2bbdd;
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+}
+
+.xgwt-myplanning-events-panel {
+	font-size: .75em;
+	font-weight: bold;
+}
+
+.xgwt-grid-table table tr td .xgwt-myplanning-events-panel tr {
+	border: 0 none;
+}
+
+.xgwt-grid-table table tr td .xgwt-myplanning-events-panel tr td{
+	border: 0 none;
+}
+
+.xgwt-myplanning-event {
+	background-color: #E8EEF7;
+	color: #112ABB;
+	font-size: 1em;
+	height: 20px;
+}
+
+.xgwt-myplanning-event-0 {
+	background-color: #f2f4f7;
+	color: #112ABB;
+	font-size: .9em;
+	height: 20px;
+	padding-left: 4px;
+}
+
+.xgwt-myplanning-event-1 {
+	background-color: #E8EEF7;
+	color: #112ABB;
+	font-size: .9em;
+	height: 20px;
+	padding-left: 4px;
+}
+
+.xgwt-myplanning-event-head {
+	font-size: .75em;
+	font-weight: bold;
+	color: #000000;
+	padding: 2px;
+	
+}
+
+/*
+.xgwt-maingrid tr {
+	height: 40px;
+	border: 0 none;
+	margin: 0;
+	padding: 0;
+	vertical-align: top;
+}
+
+.xgwt-maingrid tr td {
+	margin: 0;
+	padding: 0;
+	border-right: 1px double #a2bbdd;
+	border-bottom: 1px solid #a2bbdd;
+	vertical-align: top;
+}
+*/
+
+.xgwt-headgrid {
+	vertical-align: text-top;
+	width: 100%;
+}
+
+.xgwt-dayhead{
+	font-size: .75em;
+	background-color: #c3d9ff;
+	color: #112abb;	
+	padding: 2px;
+}
+
+.xgwt-todayhead{
+	font-size: .75em;
+	font-weight: bold;
+	background-color: #88aacc;
+	color: #ffffff;	
+	padding: 2px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #4E6172 #E8EEF7 #E8EEF7 #4E6172;
+}
+
+/* XGC Day-Scroll widget, this is the widget style responsible of time scrolling*/
+.xgwt-dayscroll-widget {
+	font: 75em bold;
+	text-align: center;
+	vertical-align:bottom;
+}
+
+.xgwt-today-label{
+	height: 100%;
+	font-weight: bold;
+	vertical-align: middle;
+	text-align:center;
+	width: 200px;
+}
+
+.xgwt-timescoll-img{
+	margin: 4px;
+}
+
+/* XGC time slot widget style, this the time fragment in the grid, this time-slot represent one unit of time in the current time-scale*/
+.xgwt-dayslot-widget {
+	background-color: #ffffff;
+	text-align: left;
+	vertical-align: top;
+}
+
+.xgwt-todayslot-widget {
+	background-color: #f0f6dd; 
+	text-align: left;
+	vertical-align: top;
+	/*
+	border-width: 1px;
+	border-style: solid;
+	border-color: #dddddd;	
+	*/
+}
+
+/* day slot head, de small rectangle in the timeslot entry */
+.xgwt-dayslot-head {
+	background-color: #e8eef7;
+	font:.75em Verdana, Arial, 'Trebuchet MS', Tahoma, sans-serif; 
+	color: #112abb;
+	text-align: right;
+	vertical-align: top;
+}
+
+/* event entry in the time slot widget*/
+.xgwt-dayslot-entry {
+	background-color: #FFD799;
+	font: 0.75em Arial, Verdana, 'Trebuchet MS', Tahoma, sans-serif; 
+	color: 2f3b45;
+	vertical-align: top;
+	text-align: left;
+	border-color:#FFF5E6 #C27D02 #C27D02 #FFF5E6;
+	border-style:solid;
+	border-width:1px;
+	height: 15px;
+}
+
+.xgwt-eventscroll {
+	height: auto;
+}
+
+.xgwt-eventscroll tr td {
+	vertical-align: bottom;
+	text-align: center;	
+	border-width: 1px;
+	border-color: #000;
+	border-style: solid;
+	
+}
+
+.xgwt-dayslot-widget table tr {
+	height:8px;
+	width: 100%;
+	border: 0 none;
+}
+
+.xgwt-todayslot-widget table tr {
+	height:8px;
+	width: 100%;
+	border: 0 none;
+}
+
+.xgwt-dayslot-widget table tr td {
+	border: 0 none;
+}
+
+.xgwt-todayslot-widget table tr td {
+	border: 0 none;
+}
+
+.xgwt-timescale{
+}
+
+/* event form - */
+.xgwt-formentry{
+	width: 100%;
+}
+
+/* event form field title style*/
+.xgwt-formentry-title{
+	width: 30%;
+	text-align: right;
+}
+
+/* event form field style */
+.xgwt-formentry-field{
+	text-align: left;
+}
+
+/* waiting dialog-box*/
+.gwt-DialogBox dialog-loading{
+	padding: 10px;
+	background-color: #E8EEF7;
+	color: #112ABB;
+	font-size: .9em;
+}
+
+/* event details dialog */
+.gwt-Label {
+	font-size: .9em;
+	color:#4E6172;
+}
+
+.gwt-Label-title {
+	font-size: 1.15em;
+	color:#464b50;
+	font-weight: bold;
+}
+
+.xgwt-event-display-dialog{
+	padding: 10px;
+	font-size: .90em;
+	background-color: #ffffff; /* #E8EEF7; */
+	border-color: #4E6172;
+	border-style:solid;
+	border-width:1px;
+	color:#FFFFFF;
+	font-weight:bold;
+	padding:2px;
+
+}
+
+.xgwt-event-display-dialog .Caption{
+	text-align: center;
+	color: #ffffff;
+	background-color: #88AACC;
+	height: 18px;
+}
+
+.xgwt-event-button-panel-dialog{
+	width: 100%;
+	text-align: right;
+}
+
+/* create event dialog */
+.xgwt-create-event-dialog{
+	padding: 10px;
+	font-size: .90em;
+	background-color: #ffffff; /* #E8EEF7; */
+	border-color: #4E6172;
+	border-style:solid;
+	border-width:1px;
+	color:#FFFFFF;
+	font-weight:bold;
+	padding:2px;
+}
+
+.xgwt-create-event-dialog input {
+	width: 98%;
+}
+
+.xgwt-create-event-dialog textarea {
+	width: 98%;
+}
+
+.xgwt-create-event-dialog .gwt-Label-Field {
+	text-align: right;
+	color: #464b50;
+}
+
+.xgwt-create-event-dialog .Caption{
+	text-align: center;
+	color: #ffffff;
+	background-color: #88AACC;
+	height: 18px;
+}

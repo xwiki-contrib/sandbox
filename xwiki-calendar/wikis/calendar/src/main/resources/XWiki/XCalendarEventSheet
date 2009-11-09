@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>XWiki</web>
+<name>XCalendarEventSheet</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1216312090000</creationDate>
+<date>1222085731000</date>
+<contentUpdateDate>1222085731000</contentUpdateDate>
+<version>4.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>XWiki.XCalendarEventSheet</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<property>
+<tags/>
+</property>
+</object>
+<content>#set($event = $doc.getObject("XWiki.CalendarEvent"))
+#if($event)
+&lt;dl&gt;
+&lt;dt&gt;Title :&lt;/dt&gt;
+&lt;dd&gt;$event.get("title")&lt;/dd&gt;
+&lt;hr&gt;
+&lt;dt&gt;Description :&lt;/dt&gt;
+&lt;dd&gt;$event.get("description")&lt;/dd&gt;
+
+&lt;dt&gt;Category :&lt;/dt&gt;
+&lt;dd&gt;$event.get("category")&lt;/dd&gt;
+
+&lt;dt&gt;Start Date :&lt;/dt&gt;
+&lt;dd&gt;$event.get("startDate")&lt;/dd&gt;
+
+&lt;dt&gt;End Date :&lt;/dt&gt;
+&lt;dd&gt;$event.get("endDate")&lt;/dd&gt;
+
+
+&lt;dt&gt;Agenda :&lt;/dt&gt;
+&lt;dd&gt;$event.get("agenda")&lt;/dd&gt;
+
+&lt;/dl&gt;
+#else
+#warning("This document cannot be called directly or used in other templates!")
+#end</content>
+</xwikidoc>
