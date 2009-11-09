@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>Main</web>
+<name>Tasks</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<author>XWiki.Admin</author>
+<creationDate>1125497992000</creationDate>
+<date>1126036858800</date>
+<version>1.525</version>
+<content>#set($tasks = $xwiki.tasks)
+
+#if($request.pause)
+ $tasks.pauseTask($request.task, $doc)
+#end
+
+#if($request.resume)
+ $tasks.resumeTask($request.task, $doc)
+#end
+
+#if($request.delete)
+ $tasks.unscheduleTask($request.task, $doc)
+#end
+
+1 Tasks Manager
+$tasks.scheduleTasks($doc, $context)
+
+1.1 Tasks List
+
+{table}
+Name|Next Fire|JobClass|Status|Action
+#foreach($task in $doc.getObjects("XWiki.Task"))
+ $task.taskName|$tasks.getNextFireTime($task)|$task.taskClass|$task.status| #if($task.status == "Scheduled")
+  [Pause&gt;$doc.name?pause=true&amp;task=$task.number]  [Delete&gt;$doc.name?delete=true&amp;task=$task.number]
+ #end
+ #if($task.status == "Paused")
+  [Resume&gt;$doc.name?resume=true&amp;task=$task.number] [Delete&gt;$doc.name?delete=true&amp;task=$task.number]
+ #end
+ #if($task.status == "Unscheduled" || $task.status == "")
+  [Delete&gt;$doc.name?delete=true&amp;task=$task.number]
+ #end
+#end
+{table}
+
+1.1 New Task
+
+
+#set($cclass = $xwiki.getDocument("XWiki.Task").getxWikiClass())
+#set($task = $cclass.newObject())
+&lt;form action="$doc.getURL('objectadd')" method="get"&gt;
+&lt;p&gt;
+&lt;input type="hidden" name="classname" value="XWiki.Task" /&gt;
+&lt;input type="hidden" name="xredirect" value="${doc.getURL('view')}" /&gt;
+&lt;input name='XWiki.Task_status' type='hidden' value="Unscheduled" /&gt;
+&lt;table&gt;
+ &lt;tr&gt;
+  #set($pclass = $cclass.get("taskName"))
+  &lt;td&gt;$pclass.prettyName :&lt;/td&gt;&lt;td&gt;$doc.displayEdit($pclass,"XWiki.Task_",$task)&lt;td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  #set($pclass = $cclass.get("taskClass"))
+  &lt;td&gt;$pclass.prettyName :&lt;/td&gt;
+  &lt;td&gt;$doc.displayEdit($pclass, "XWiki.Task_", $task)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  #set($pclass = $cclass.get("cron"))
+  &lt;td&gt;$pclass.prettyName :&lt;/td&gt;
+  &lt;td&gt;$doc.displayEdit($pclass, "XWiki.Task_", $task)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  #set($pclass = $cclass.get("script"))
+  &lt;td&gt;$pclass.prettyName :&lt;/td&gt;
+  &lt;td&gt;$doc.displayEdit($pclass, "XWiki.Task_", $task)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  &lt;td&gt;&lt;/td&gt;
+  &lt;td&gt;&lt;input type="submit" value="Add this task" /&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/form&gt;</content>
+<renderedcontent>&lt;h3 class="heading-1"&gt;&lt;a id="Tasks+Manager" name="Tasks+Manager"&gt;Tasks Manager&lt;/a&gt;&lt;/h3&gt; 
+&lt;h3 class="heading-1-1"&gt;&lt;a id="Tasks+List" name="Tasks+List"&gt;Tasks List&lt;/a&gt;&lt;/h3&gt;&lt;p class="paragraph"/&gt;&lt;table class="wiki-table" cellpadding="0" cellspacing="0" border="0"&gt;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Next Fire&lt;/th&gt;&lt;th&gt;JobClass&lt;/th&gt;&lt;th&gt;Status&lt;/th&gt;&lt;th&gt;Action&lt;/th&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;h3 class="heading-1-1"&gt;&lt;a id="New+Task" name="New+Task"&gt;New Task&lt;/a&gt;&lt;/h3&gt;&lt;p class="paragraph"/&gt;
+&lt;form action="/xwiki/bin/objectadd/Main/Tasks" method="get"&gt;
+&lt;p&gt;
+&lt;input type="hidden" name="classname" value="XWiki.Task" /&gt;
+&lt;input type="hidden" name="xredirect" value="/xwiki/bin/view/Main/Tasks" /&gt;
+&lt;input name='XWiki.Task_status' type='hidden' value="Unscheduled" /&gt;
+&lt;table&gt;
+ &lt;tr&gt;
+    &lt;td&gt;Task Name :&lt;/td&gt;&lt;td&gt;&lt;input name='XWiki.Task_taskName' type='text' size='30'/&gt;&lt;td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+    &lt;td&gt;Task Class :&lt;/td&gt;
+  &lt;td&gt;&lt;input name='XWiki.Task_taskClass' type='text' size='30'/&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+    &lt;td&gt;Cron Expression :&lt;/td&gt;
+  &lt;td&gt;&lt;input name='XWiki.Task_cron' type='text' size='30'/&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+    &lt;td&gt;Groovy Script :&lt;/td&gt;
+  &lt;td&gt;&lt;textarea cols='40' name='XWiki.Task_script' rows='5'&gt;&lt;/textarea&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  &lt;td&gt;&lt;/td&gt;
+  &lt;td&gt;&lt;input type="submit" value="Add this task" /&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/form&gt;
+</renderedcontent>
+</xwikidoc>
