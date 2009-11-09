@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="AddPage" dlg:left="100" dlg:top="52" dlg:width="133" dlg:height="139" dlg:page="2" dlg:closeable="true" dlg:moveable="true" dlg:title="Add new page">
+ <dlg:bulletinboard>
+  <dlg:radiogroup>
+   <dlg:radio dlg:id="optExSpace" dlg:tab-index="0" dlg:left="6" dlg:top="17" dlg:width="47" dlg:height="10" dlg:value="Existing Space">
+    <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:optExSpace_Clicked" script:language="UNO"/>
+   </dlg:radio>
+   <dlg:radio dlg:id="optNewSpace" dlg:tab-index="1" dlg:left="88" dlg:top="17" dlg:width="38" dlg:height="10" dlg:value="New Space" dlg:checked="true">
+    <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:optNewSpace_Clicked" script:language="UNO"/>
+   </dlg:radio>
+  </dlg:radiogroup>
+  <dlg:titledbox dlg:id="frmSpace" dlg:tab-index="2" dlg:left="4" dlg:top="5" dlg:width="127" dlg:height="52">
+   <dlg:title dlg:value="Wiki Space"/>
+  </dlg:titledbox>
+  <dlg:text dlg:id="Label1" dlg:tab-index="3" dlg:left="8" dlg:top="37" dlg:width="35" dlg:height="10" dlg:value="Space name"/>
+  <dlg:combobox dlg:id="cmbSpaceName" dlg:tab-index="4" dlg:left="64" dlg:top="37" dlg:width="63" dlg:height="10" dlg:printable="false" dlg:page="2" dlg:spin="true"/>
+  <dlg:textfield dlg:id="txtSpaceName" dlg:tab-index="5" dlg:left="64" dlg:top="37" dlg:width="63" dlg:height="10" dlg:page="1"/>
+  <dlg:titledbox dlg:id="frmPage" dlg:tab-index="6" dlg:left="5" dlg:top="61" dlg:width="127" dlg:height="49">
+   <dlg:title dlg:value="Wiki Page"/>
+  </dlg:titledbox>
+  <dlg:text dlg:id="Label2" dlg:tab-index="7" dlg:left="8" dlg:top="76" dlg:width="34" dlg:height="10" dlg:value="Page name"/>
+  <dlg:text dlg:id="Label3" dlg:tab-index="8" dlg:left="8" dlg:top="92" dlg:width="34" dlg:height="10" dlg:value="Page Title"/>
+  <dlg:textfield dlg:id="txtPageName" dlg:tab-index="9" dlg:left="64" dlg:top="76" dlg:width="63" dlg:height="10"/>
+  <dlg:textfield dlg:id="txtPageTitle" dlg:tab-index="10" dlg:left="64" dlg:top="91" dlg:width="63" dlg:height="10"/>
+  <dlg:button dlg:id="btnCancel" dlg:tab-index="11" dlg:left="94" dlg:top="116" dlg:width="37" dlg:height="16" dlg:value="Cancel" dlg:image-src="" dlg:image-position="left-center" dlg:image-align="left">
+   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:btnCancel_Clicked" script:language="UNO"/>
+  </dlg:button>
+  <dlg:button dlg:id="btnOK" dlg:tab-index="12" dlg:left="54" dlg:top="116" dlg:width="37" dlg:height="16" dlg:value="OK" dlg:image-src="" dlg:image-position="left-center" dlg:image-align="left">
+   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:btnOK_Clicked" script:language="UNO"/>
+  </dlg:button>
+ </dlg:bulletinboard>
+</dlg:window>

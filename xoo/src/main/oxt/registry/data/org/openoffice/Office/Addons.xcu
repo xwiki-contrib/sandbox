@@ -1,0 +1,283 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<oor:component-data xmlns:oor="http://openoffice.org/2001/registry"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" oor:name="Addons"
+	oor:package="org.openoffice.Office">
+	<node oor:name="AddonUI">
+		<node oor:name="OfficeMenuBar">
+			<node oor:name="org.xwiki.xoo.xoo" oor:op="replace">
+				<prop oor:name="Title" oor:type="xs:string">
+					<value />
+					<value xml:lang="en">XWiki</value>
+				</prop>
+				<prop oor:name="Target" oor:type="xs:string">
+					<value>_self</value>
+				</prop>
+				<prop oor:name="ImageIdentifier" oor:type="xs:string">
+					<value />
+				</prop>
+				<prop oor:name="Context" oor:type="xs:string">
+                      <value>com.sun.star.text.WebDocument,com.sun.star.text.TextDocument</value>
+                 </prop>
+				<node oor:name="Submenu">
+					<node oor:name="m1" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>org.xwiki.xoo.xoo:cmdLogin</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value />
+							<value xml:lang="en">Login</value>
+						</prop>
+					</node>
+					<node oor:name="m2" oor:op="replace">
+						<prop oor:name="URL" oor:type="xs:string">
+							<value>org.xwiki.xoo.xoo:cmdTree</value>
+						</prop>
+						<prop oor:name="ImageIdentifier" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+						<prop oor:name="Context" oor:type="xs:string">
+							<value />
+						</prop>
+						<prop oor:name="Title" oor:type="xs:string">
+							<value />
+							<value xml:lang="en">Navigation Panel</value>
+						</prop>
+					</node>
+				</node>
+			</node>
+		</node>
+		<node oor:name="OfficeToolBar">
+			<node oor:name="org.xwiki.xoo.xootoolbar" oor:op="replace">
+				<node oor:name="m1" oor:op="replace">
+					<prop oor:name="URL" oor:type="xs:string">
+						<value>org.xwiki.xoo.xootoolbar:cmdAddPage</value>
+					</prop>
+					<prop oor:name="ImageIdentifier" oor:type="xs:string">
+						<value />
+					</prop>
+					<prop oor:name="Target" oor:type="xs:string">
+						<value>_self</value>
+					</prop>
+					<prop oor:name="Title" oor:type="xs:string">
+						<value />
+						<value xml:lang="en">Add a new page to XWiki</value>
+					</prop>
+					<prop oor:name="Context" oor:type="xs:string">
+                      <value>com.sun.star.text.WebDocument,com.sun.star.text.TextDocument</value>
+                 </prop>
+				</node>
+				<node oor:name="m2" oor:op="replace">
+					<prop oor:name="URL" oor:type="xs:string">
+						<value>org.xwiki.xoo.xootoolbar:cmdEditPage</value>
+					</prop>
+					<prop oor:name="ImageIdentifier" oor:type="xs:string">
+						<value />
+					</prop>
+					<prop oor:name="Target" oor:type="xs:string">
+						<value>_self</value>
+					</prop>
+					<prop oor:name="Context" oor:type="xs:string">
+                      <value>com.sun.star.text.WebDocument,com.sun.star.text.TextDocument</value>
+                 	</prop>
+					<prop oor:name="Title" oor:type="xs:string">
+						<value />
+						<value xml:lang="en">Edit existing page from XWiki</value>
+					</prop>	
+				</node>
+				<node oor:name="m3" oor:op="replace">
+					<prop oor:name="URL" oor:type="xs:string">
+						<value>org.xwiki.xoo.xootoolbar:cmdPublishPage</value>
+					</prop>
+					<prop oor:name="ImageIdentifier" oor:type="xs:string">
+						<value />
+					</prop>
+					<prop oor:name="Target" oor:type="xs:string">
+						<value>_self</value>
+					</prop>
+					<prop oor:name="Context" oor:type="xs:string">
+                      <value>com.sun.star.text.WebDocument,com.sun.star.text.TextDocument</value>
+                 	</prop>
+					<prop oor:name="Title" oor:type="xs:string">
+						<value />
+						<value xml:lang="en">Publish page to XWiki</value>
+					</prop>	
+				</node>
+				<node oor:name="m4" oor:op="replace">
+					<prop oor:name="URL" oor:type="xs:string">
+						<value>org.xwiki.xoo.xootoolbar:cmdBrowser</value>
+					</prop>
+					<prop oor:name="ImageIdentifier" oor:type="xs:string">
+						<value />
+					</prop>
+					<prop oor:name="Target" oor:type="xs:string">
+						<value>_self</value>
+					</prop>
+					<prop oor:name="Context" oor:type="xs:string">
+                      <value>com.sun.star.text.WebDocument,com.sun.star.text.TextDocument</value>
+                 	</prop>
+					<prop oor:name="Title" oor:type="xs:string">
+						<value />
+						<value xml:lang="en">View page in browser</value>
+					</prop>	
+				</node>
+				<node oor:name="m5" oor:op="replace">
+		        	<prop oor:name="URL" oor:type="xs:string">
+		          		<value>private:separator</value>
+		        	</prop>
+      			</node>
+      			<node oor:name="m6" oor:op="replace">
+					<prop oor:name="URL" oor:type="xs:string">
+						<value>org.xwiki.xoo.xootoolbar:cmdUploadAtt</value>
+					</prop>
+					<prop oor:name="ImageIdentifier" oor:type="xs:string">
+						<value />
+					</prop>
+					<prop oor:name="Target" oor:type="xs:string">
+						<value>_self</value>
+					</prop>
+					<prop oor:name="Context" oor:type="xs:string">
+                      <value>com.sun.star.text.WebDocument,com.sun.star.text.TextDocument</value>
+                 	</prop>
+					<prop oor:name="Title" oor:type="xs:string">
+						<value />
+						<value xml:lang="en">Attach the current document to a page</value>
+					</prop>	
+				</node>
+				<node oor:name="m7" oor:op="replace">
+					<prop oor:name="URL" oor:type="xs:string">
+						<value>org.xwiki.xoo.xootoolbar:cmdDownloadAtt</value>
+					</prop>
+					<prop oor:name="ImageIdentifier" oor:type="xs:string">
+						<value />
+					</prop>
+					<prop oor:name="Target" oor:type="xs:string">
+						<value>_self</value>
+					</prop>
+					<prop oor:name="Context" oor:type="xs:string">
+                      <value>com.sun.star.text.WebDocument,com.sun.star.text.TextDocument</value>
+                 	</prop>
+					<prop oor:name="Title" oor:type="xs:string">
+						<value />
+						<value xml:lang="en">Download Attachment</value>
+					</prop>	
+				</node>
+				
+			</node>
+		</node>
+		<node oor:name="Images">
+			<node oor:name="org.xwiki.xoo.xoo.cmdLogin.images" oor:op="replace">
+				<prop oor:name="URL" oor:type="xs:string">
+					<value>org.xwiki.xoo.xoo:cmdLogin</value>
+				</prop>
+				<node oor:name="UserDefinedImages">
+					<prop oor:name="ImageSmallURL">
+						<value>%origin%/../../../../../images/connection_settings_16.png</value>
+					</prop>
+					<prop oor:name="ImageBigURL">
+						<value>%origin%/../../../../../images/connection_settings_26</value>
+					</prop>
+				</node>
+			</node>
+			<node oor:name="org.xwiki.xoo.xoo.cmdTree.images" oor:op="replace">
+				<prop oor:name="URL" oor:type="xs:string">
+					<value>org.xwiki.xoo.xoo:cmdTree</value>
+				</prop>
+				<node oor:name="UserDefinedImages">
+					<prop oor:name="ImageSmallURL">
+						<value>%origin%/../../../../../images/nav_16.png</value>
+					</prop>
+					<prop oor:name="ImageBigURL">
+						<value>%origin%/../../../../../images/nav_26.png</value>
+					</prop>
+				</node>
+			</node>	
+			<node oor:name="org.xwiki.xoo.xootoolbar.cmdBrowser.images" oor:op="replace">
+				<prop oor:name="URL" oor:type="xs:string">
+					<value>org.xwiki.xoo.xootoolbar:cmdBrowser</value>
+				</prop>
+				<node oor:name="UserDefinedImages">
+					<prop oor:name="ImageSmallURL">
+						<value>%origin%/../../../../../images/browser_16.png</value>
+					</prop>
+					<prop oor:name="ImageBigURL">
+						<value>%origin%/../../../../../images/browser_26.png</value>
+					</prop>
+				</node>
+			</node>
+			<node oor:name="org.xwiki.xoo.xootoolbar.cmdAddPage.images" oor:op="replace">
+				<prop oor:name="URL" oor:type="xs:string">
+					<value>org.xwiki.xoo.xootoolbar:cmdAddPage</value>
+				</prop>
+				<node oor:name="UserDefinedImages">
+					<prop oor:name="ImageSmallURL">
+						<value>%origin%/../../../../../images/add_16.png</value>
+					</prop>
+					<prop oor:name="ImageBigURL">
+						<value>%origin%/../../../../../images/add_26.png</value>
+					</prop>
+				</node>
+			</node>
+			<node oor:name="org.xwiki.xoo.xootoolbar.cmdEditPage.images" oor:op="replace">
+				<prop oor:name="URL" oor:type="xs:string">
+					<value>org.xwiki.xoo.xootoolbar:cmdEditPage</value>
+				</prop>
+				<node oor:name="UserDefinedImages">
+					<prop oor:name="ImageSmallURL">
+						<value>%origin%/../../../../../images/edit_16.png</value>
+					</prop>
+					<prop oor:name="ImageBigURL">
+						<value>%origin%/../../../../../images/edit_26.png</value>
+					</prop>
+				</node>
+			</node>
+			<node oor:name="org.xwiki.xoo.xootoolbar.cmdPublishPage.images" oor:op="replace">
+				<prop oor:name="URL" oor:type="xs:string">
+					<value>org.xwiki.xoo.xootoolbar:cmdPublishPage</value>
+				</prop>
+				<node oor:name="UserDefinedImages">
+					<prop oor:name="ImageSmallURL">
+						<value>%origin%/../../../../../images/publish_16.png</value>
+					</prop>
+					<prop oor:name="ImageBigURL">
+						<value>%origin%/../../../../../images/publish_26.png</value>
+					</prop>
+				</node>
+			</node>
+			<node oor:name="org.xwiki.xoo.xootoolbar.cmdUploadAtt.images" oor:op="replace">
+				<prop oor:name="URL" oor:type="xs:string">
+					<value>org.xwiki.xoo.xootoolbar:cmdUploadAtt</value>
+				</prop>
+				<node oor:name="UserDefinedImages">
+					<prop oor:name="ImageSmallURL">
+						<value>%origin%/../../../../../images/uploadAtt_16.png</value>
+					</prop>
+					<prop oor:name="ImageBigURL">
+						<value>%origin%/../../../../../images/uploadAtt_26.png</value>
+					</prop>
+				</node>
+			</node>
+			<node oor:name="org.xwiki.xoo.xootoolbar.cmdDownloadAtt.images" oor:op="replace">
+				<prop oor:name="URL" oor:type="xs:string">
+					<value>org.xwiki.xoo.xootoolbar:cmdDownloadAtt</value>
+				</prop>
+				<node oor:name="UserDefinedImages">
+					<prop oor:name="ImageSmallURL">
+						<value>%origin%/../../../../../images/downloadAtt_16.png</value>
+					</prop>
+					<prop oor:name="ImageBigURL">
+						<value>%origin%/../../../../../images/downloadAtt_26.png</value>
+					</prop>
+				</node>
+			</node>
+		</node>
+	</node>
+</oor:component-data>

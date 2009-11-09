@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="CustomSettings" dlg:left="101" dlg:top="46" dlg:width="158" dlg:height="68" dlg:closeable="true" dlg:moveable="true" dlg:title="Custom installation settings">
+ <dlg:bulletinboard>
+  <dlg:text dlg:id="Label1" dlg:tab-index="1" dlg:left="2" dlg:top="11" dlg:width="34" dlg:height="10" dlg:value="Wiki URL"/>
+  <dlg:textfield dlg:id="txtWiki" dlg:tab-index="0" dlg:left="74" dlg:top="11" dlg:width="82" dlg:height="10" dlg:value="/xwiki"/>
+  <dlg:text dlg:id="Label2" dlg:tab-index="2" dlg:left="2" dlg:top="29" dlg:width="34" dlg:height="10" dlg:value="XMLRPC URL"/>
+  <dlg:textfield dlg:id="txtXMLRPC" dlg:tab-index="3" dlg:left="74" dlg:top="29" dlg:width="82" dlg:height="10" dlg:value="/xmlrpc"/>
+  <dlg:titledbox dlg:id="FrameControl1" dlg:tab-index="4" dlg:left="0" dlg:top="1" dlg:width="157" dlg:height="45">
+   <dlg:title dlg:value="Installation settings"/>
+  </dlg:titledbox>
+  <dlg:button dlg:id="cmdCancel" dlg:tab-index="6" dlg:left="120" dlg:top="49" dlg:width="37" dlg:height="16" dlg:value="Cancel" dlg:image-src="" dlg:image-position="left-center" dlg:image-align="left">
+   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:btnCancel_Clicked" script:language="UNO"/>
+  </dlg:button>
+  <dlg:button dlg:id="cmdOK" dlg:tab-index="5" dlg:left="80" dlg:top="49" dlg:width="37" dlg:height="16" dlg:value="OK" dlg:image-src="" dlg:image-position="left-center" dlg:image-align="left">
+   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:btnOK_Clicked" script:language="UNO"/>
+  </dlg:button>
+ </dlg:bulletinboard>
+</dlg:window>

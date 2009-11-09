@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<oor:component-data
+  oor:name="ImageLocations"
+  oor:package="org.xwiki.xoo.locations"
+  xmlns:oor="http://openoffice.org/2001/registry">
+   <prop oor:name="ImageDir">
+      <value>%origin%/../../../../../images</value>
+   </prop>
+</oor:component-data>

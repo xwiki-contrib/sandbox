@@ -1,0 +1,20 @@
+This is a "work in progress" project, developed as a Google Summer of Code 2009 project.
+
+Name: XWiki Integration With Open Office
+Author: Cristina Scheau
+Mentor: Sergiu Dumitriu
+Website: http://gsoc.myxwiki.org/xwiki/bin/view/XWiki+Integration+With+Open+Office/
+
+How to build and install the project:
+1. Download and install OpenOffice.org 3. from http://www.openoffice.org/
+2. Download and install OpenOffice SDK 3. from http://download.openoffice.org/3.1.0/sdk.html
+3. Download the CVS project http://api.openoffice.org/source/browse/api/maven2integration/ and run mvn install in order to install the maven open office plugin in the local repository
+4. Enter in the root folder of the XOO project and run
+mvn install
+5. In the target folder there is an archive xoo-1.0-bin.zip. This is the extension. In order to install it run:
+ [<OfficePath>/program] $ unopkg add --shared xoo-1.0-bin.zip
+Another method to install the extension is:
+OppenOffice.org Writer -> Tools -> Extension Manager -> Add -> Browse to the path of the zip file xoo-1.0-bin.zip
+Restart the Writer. A new menu XWiki should be enabled.
+
+You can find more details at: http://gsoc.myxwiki.org/xwiki/bin/view/XWiki+Integration+With+Open+Office/How+to+build+and+install+XOO

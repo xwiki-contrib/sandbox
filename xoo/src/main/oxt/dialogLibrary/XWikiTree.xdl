@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="XWikiTree" dlg:left="249" dlg:top="16" dlg:width="85" dlg:height="261" dlg:closeable="true" dlg:moveable="true" dlg:title="XWiki">
+ <dlg:bulletinboard>
+  <dlg:treecontrol dlg:id="treeXWiki" dlg:tab-index="0" dlg:left="3" dlg:top="29" dlg:width="80" dlg:height="226" dlg:selectiontype="single" dlg:rootdisplayed="false"/>
+  <dlg:button dlg:id="btnRefresh" dlg:tab-index="1" dlg:left="3" dlg:top="7" dlg:width="41" dlg:height="16" dlg:value="Refresh" dlg:image-src="" dlg:image-position="left-center" dlg:image-align="left">
+   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:btnRefresh_Clicked" script:language="UNO"/>
+  </dlg:button>
+  <dlg:button dlg:id="btnAddSpace" dlg:tab-index="2" dlg:left="42" dlg:top="7" dlg:width="41" dlg:height="16" dlg:value="Add space" dlg:image-src="" dlg:image-position="left-center" dlg:image-align="left">
+   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:btnAddSpace_Clicked" script:language="UNO"/>
+  </dlg:button>
+ </dlg:bulletinboard>
+</dlg:window>

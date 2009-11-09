@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest:manifest xmlns:manifest="http://openoffice.org/2001/manifest">
+	<manifest:file-entry manifest:media-type="application/vnd.sun.star.uno-component;type=Java"
+		manifest:full-path="xoo-1.0.jar" />
+	<manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data"
+		manifest:full-path="registry/data/org/openoffice/Office/ProtocolHandler.xcu" />
+	<manifest:file-entry manifest:full-path="dialogLibrary/"
+		manifest:media-type="application/vnd.sun.star.basic-library" />
+	<manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data"
+		manifest:full-path="registry/data/org/openoffice/Office/Addons.xcu" />
+	
+	<manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data"
+		manifest:full-path="registry/data/org/openoffice/Office/WriterWindowState.xcu" />
+	<manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data"
+		manifest:full-path="registry/data/org/openoffice/Office/WriterWebWindowState.xcu" />
+	<manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data"
+		manifest:full-path="registry/data/org/openoffice/Office/WriterGlobalWindowState.xcu" />
+	
+	<manifest:file-entry manifest:full-path="registry/data/org/openoffice/Office/ImageLocations.xcs" manifest:media-type="application/vnd.sun.star.configuration-schema"/>
+ 	<manifest:file-entry manifest:full-path="registry/data/org/openoffice/Office/ImageLocations.xcu" manifest:media-type="application/vnd.sun.star.configuration-data"/> 
+	
+</manifest:manifest>
