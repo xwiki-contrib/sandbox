@@ -1,0 +1,172 @@
+/*
+    background : back_orange
+    font : 503100
+    dark : ed7f00
+    light : ffdba1
+*/
+
+img {
+    border:0;
+}
+/* font #000 => #503100 */
+a {font-family:monospace; font-size: 13px; color: #503100; background: transparent; }
+
+/* back => back_orange */
+body {
+    font-family: monospace;
+    font-size: 11px;
+    border:0;
+    marging:0;
+    padding:0;
+    background:url(../images/back_orange.png) repeat left top;
+    }
+
+#colors{
+    padding-top:10px;
+    height:105px;
+}
+    
+#content {
+    font-family: monospace;
+    font-size: 11px;
+    width:1024px;
+    margin-left:auto;
+    margin-right:auto;
+    background-color:white;
+    display: block;
+    border: 1px solid #111111;
+    }
+    
+#logo {
+    font-family: monospace;
+    font-size: 11px;
+    border:0;
+    marging:0;
+    padding:5;
+    background:url(../images/IWoot.jpg) no-repeat 10px 10px;
+    height:105px;
+    width: 1000px;
+    display: block;
+    float: left;
+    }
+    
+
+/* dark : #BBBBBB => #ed7f00 */    
+#toolbar {
+    font-family: monospace;
+    font-size: 11px;
+    border:0;
+    marging:0;
+    padding:5px 0 5px 15px;
+    background-color:#ed7f00;
+    }
+
+/* light #DDDDDD => #ffdba1 */    
+#boxes {
+    font-family: monospace;
+    font-size: 11px;
+    border:0;
+    marging:0;
+    padding:0;
+    background-color:#ffdba1;
+    }
+
+#box-left {
+    margin:20px 10px 20px 20px;
+    width: 350px;
+}
+
+#box-right {
+    margin:20px 20px 20px 10px;
+    width: 610px;
+}
+
+#box-unic {
+    margin:20px 20px 20px 10px;
+    height:auto;
+}
+
+#button {
+    display: block;
+    float: left;
+    margin-right: 10px;
+}
+/* font #AAAAAA => #503100 */    
+#box_title {
+    font-family: monospace;
+    font-size: 15px;
+    font-weight:bold;
+    text-align: center;
+    border-bottom:1px solid #503100;
+}
+
+/* #AAAAAA */
+#bootstrap_menu {
+    margin:20px 10px 20px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    border-bottom:1px solid #AAAAAA;
+}
+
+#deconnected_neighbor {
+    font-family: monospace;
+    font-size: 13px;
+    font-weight:italic;
+    color: #BBBBBB;
+}
+
+
+/* font #000 => #503100 */
+.box {
+    font-family: monospace;
+    font-size: 11px;
+    color:#503100;
+    border:1px solid #888888;
+    padding:0px;
+    background-color:white;
+    overflow: auto;
+    height: 200px;
+    display: block;
+    float: left;
+    }
+
+.checkbox{
+    margin-top:15px;
+    padding-left:15px;
+}
+
+.button_margin{
+    margin:20px 10px 20px 5px;    
+}
+
+.menu_margin {
+    margin:20px 10px 20px 20px;
+}
+    
+.box ul { 
+    margin:O;
+    padding:0;
+    list-style-type: none;
+}
+
+.box ul li {
+    padding-left:15px;
+}
+
+.clearer{
+    clear:both;
+}
+
+.icon{
+    padding:10;
+    
+    }
+
+.small_icon{
+    padding:3;
+    
+    }
+    
+        
+    
+    

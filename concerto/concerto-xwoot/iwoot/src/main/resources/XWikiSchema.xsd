@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://www.w3schools.com"
+xmlns="http://www.w3schools.com"
+elementFormDefault="qualified">
+
+  <xs:element name="WikiPage" type="WikiPageType" />
+  <xs:attribute name="id" type="xs:string" use="required"/>
+  <xs:attribute name="href" type="xs:anyURI" use="required" />
+  <xs:complexType name="WikiPageType">
+    <xs:sequence>
+      <xs:element name="Entries" type="EntriesType" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="EntriesType">
+    <xs:sequence>
+      <xs:element name="Entry" type="EntryType" minOccurs="0"
+        maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="EntryType">
+    <xs:all>
+      <xs:element name="Key" type="xs:string" />
+      <xs:element name="Value" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+</xs:schema>

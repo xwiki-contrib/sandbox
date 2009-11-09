@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>
+<shortcuts>
+  <skipIfNotSupported/>
+  <programGroup defaultName="XWoot" location="applications"/>
+  <shortcut
+           name="Start Concerto server"
+           target="$INSTALL_PATH\start_xwiki.bat"
+           iconFile="$INSTALL_PATH\xe.ico"
+           iconIndex="0"
+           workingDirectory="$INSTALL_PATH"
+           description="Starts the XWiki Concerto bundled container"
+           initialState="normal"
+           programGroup="yes"
+           desktop="yes"
+           startMenu="no"/>
+  <shortcut
+           name="Stop XWoot server"
+           target="$INSTALL_PATH\stop_xwiki.bat"
+           iconFile="$INSTALL_PATH\xe.ico"
+           iconIndex="0"
+           workingDirectory="$INSTALL_PATH"
+           description="Stops the XWiki Concerto bundled container"
+           initialState="normal"
+           programGroup="yes"
+           desktop="yes"
+           startMenu="no"/>
+  <shortcut
+           name="My Wiki"
+           target="http://localhost:8080/xwiki/"
+           iconFile="$INSTALL_PATH\xe.ico"
+           iconIndex="0"
+           workingDirectory=""
+           description="Go to the local XWiki installation home page"
+           initialState="normal"
+           programGroup="yes"
+           desktop="yes"
+           startMenu="no"/>
+  <shortcut
+           name="The XWiki Concerto Homepage"
+           target="http://concerto.xwiki.com/"
+           iconFile="$INSTALL_PATH\xe.ico"
+           iconIndex="0"
+           workingDirectory=""
+           description="The XWiki Concerto project homepage"
+           initialState="normal"
+           programGroup="yes"
+           desktop="no"
+           startMenu="no"/>
+  <shortcut
+           name="XWiki Documentation"
+           target="http://www.xwiki.org/"
+           iconFile="$INSTALL_PATH\xe.ico"
+           iconIndex="0"
+           workingDirectory=""
+           description="XWiki Documentation"
+           initialState="normal"
+           programGroup="yes"
+           desktop="no"
+           startMenu="no"/>
+  <shortcut
+           name="Uninstall"
+           target="javaw"
+           iconFile="$INSTALL_PATH\xe.ico"
+           iconIndex="0"
+           commandLine="-jar &quot;$INSTALL_PATH\Uninstaller\uninstaller.jar&quot;"
+           description="Uninstall XWiki"
+           initialState="normal"
+           programGroup="yes"
+           desktop="no"
+           startMenu="no"/>
+</shortcuts>

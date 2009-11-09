@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+  <display-name>XWoot</display-name>
+
+  <!-- filter -->
+  <filter>
+    <filter-name>baseFilter</filter-name>
+    <filter-class>org.xwoot.xwootApp.web.filters.BaseFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>baseFilter</filter-name>
+    <url-pattern>*.do</url-pattern>
+  </filter-mapping>
+
+  <!-- bootstrap -->
+  <servlet>
+    <servlet-name>bootstrap</servlet-name>
+    <servlet-class>org.xwoot.xwootApp.web.servlets.Bootstrap</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>bootstrap</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>bootstrap</servlet-name>
+    <url-pattern>/bootstrap.do</url-pattern>
+  </servlet-mapping>
+
+  <!-- synchronize -->
+  <servlet>
+    <servlet-name>synchronize</servlet-name>
+    <servlet-class>org.xwoot.xwootApp.web.servlets.Synchronize</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>synchronize</servlet-name>
+    <url-pattern>/synchronize.do</url-pattern>
+  </servlet-mapping>
+
+  <!-- bootstrapNetwork -->
+  <servlet>
+    <servlet-name>bootstrapNetwork</servlet-name>
+    <servlet-class>org.xwoot.xwootApp.web.servlets.BootstrapNetwork</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>bootstrapNetwork</servlet-name>
+    <url-pattern>/bootstrapNetwork.do</url-pattern>
+  </servlet-mapping>    
+
+  <!-- bootstrapGroup -->
+  <servlet>
+    <servlet-name>bootstrapGroup</servlet-name>
+    <servlet-class>org.xwoot.xwootApp.web.servlets.BootstrapGroup</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>bootstrapGroup</servlet-name>
+    <url-pattern>/bootstrapGroup.do</url-pattern>
+  </servlet-mapping>  
+
+  <!-- stateManagement -->
+  <servlet>
+    <servlet-name>stateManagement</servlet-name>
+    <servlet-class>org.xwoot.xwootApp.web.servlets.StateManagement</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>stateManagement</servlet-name>
+    <url-pattern>/stateManagement.do</url-pattern>
+  </servlet-mapping>    
+
+  <!--information--> 
+  <servlet>
+    <servlet-name>information</servlet-name>
+    <servlet-class>org.xwoot.xwootApp.web.servlets.Information</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>information</servlet-name>
+    <url-pattern>/information</url-pattern>
+  </servlet-mapping>
+  
+  <!-- diagnostics -->
+  <servlet>
+    <servlet-name>contentProviderDiagnostics</servlet-name>
+    <servlet-class>org.xwoot.xwootApp.web.servlets.ContentProviderDiagnostics</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>contentProviderDiagnostics</servlet-name>
+    <url-pattern>/contentProviderDiagnostics</url-pattern>
+  </servlet-mapping>   
+  
+  <!-- status -->
+  <servlet>
+    <servlet-name>status</servlet-name>
+    <servlet-class>org.xwoot.xwootApp.web.servlets.Status</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>status</servlet-name>
+    <url-pattern>/status</url-pattern>
+  </servlet-mapping>    
+
+  <!-- standard mappings -->
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.css</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.jpg</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.png</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.gif</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.ico</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.txt</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.js</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.jar</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>jsp</servlet-name>
+    <url-pattern>*.jsp</url-pattern>
+  </servlet-mapping>
+</web-app>

@@ -1,0 +1,122 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.xwiki.concerto</groupId>
+    <artifactId>concerto-xwiki</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>xwiki-concerto-database</artifactId>
+  <name>XWiki Concerto - Database</name>
+  <packaging>pom</packaging>
+  <description>Modified version of the XWiki Enterprise database, which includes XWoot management pages.</description>
+  <dependencies>
+    <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>1.8.0.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.concerto</groupId>
+      <artifactId>xwiki-concerto-wiki</artifactId>
+      <version>${pom.version}</version>
+      <type>xar</type>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <!-- Step 1: Copy and filter the Hibernate config file which will be used by the packager
+           plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>xwiki-configuration-resources</id>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <resourceBundles>
+                <resourceBundle>com.xpn.xwiki.platform.tools:xwiki-configuration-resources:${platform.tool.configuration.version}</resourceBundle>
+              </resourceBundles>
+              <properties>
+                <xwikiDbConnectionUrl>jdbc:hsqldb:file:${project.build.directory}/database/xwiki_db;shutdown=true</xwikiDbConnectionUrl>
+              </properties>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Step 2: Expand the XAR file -->
+      <plugin>
+        <groupId>com.xpn.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-xar-plugin</artifactId>
+        <version>${platform.tool.xar-plugin.version}</version>
+        <configuration>
+          <groupId>org.xwiki.concerto</groupId>
+          <artifactId>xwiki-concerto-wiki</artifactId>
+          <outputDirectory>${project.build.directory}/xar</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unxar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Step 3: Import the XAR content into the Database -->
+      <plugin>
+        <groupId>com.xpn.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-packager-plugin</artifactId>
+        <version>${platform.tool.packager.version}</version>
+        <configuration>
+          <sourceDirectory>${project.build.directory}/xar</sourceDirectory>
+          <hibernateConfig>
+            ${project.build.directory}/maven-shared-archive-resources/hibernate.cfg.xml
+          </hibernateConfig>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>${xwiki.db.jdbc.groupId}</groupId>
+            <artifactId>${xwiki.db.jdbc.artifactId}</artifactId>
+            <version>${xwiki.db.jdbc.version}</version>
+          </dependency>
+          <!-- We need the Servlet API dep since it's used by the Packager and since it has
+               a provided scope in XWiki core it's not inherited as part of transitive deps -->
+          <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.4</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>import</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Step 4: Zip the generated database (for embedded databases only) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>${basedir}/src/assemble/database.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

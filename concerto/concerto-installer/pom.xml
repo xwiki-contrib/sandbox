@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ *
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ *
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.xwiki.concerto</groupId>
+    <artifactId>concerto</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>xwiki-concerto-installer</artifactId>
+  <name>XWiki Concerto - Installer</name>
+  <packaging>pom</packaging>
+  <description>XWiki Concerto - Generic java-based installer</description>
+  <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/resources</directory>
+        <includes>
+          <include>install.xml</include>
+        </includes>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>${basedir}/src/main/resources</directory>
+        <excludes>
+          <exclude>install.xml</exclude>
+        </excludes>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>xwiki-configuration-resources</id>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <resourceBundles>
+                <resourceBundle>com.xpn.xwiki.platform.tools:xwiki-configuration-resources:${platform.tool.configuration.version}</resourceBundle>
+              </resourceBundles>
+              <properties>
+                <!-- Default configuration data for hibernate.cfg.xml -->
+                <xwikiDbConnectionUrl>${xwiki.db.connection.url}</xwikiDbConnectionUrl>
+                <xwikiDbConnectionUsername>${xwiki.db.connection.username}</xwikiDbConnectionUsername>
+                <xwikiDbConnectionPassword>${xwiki.db.connection.password}</xwikiDbConnectionPassword>
+                <xwikiDbConnectionDriverClass>${xwiki.db.connection.driver_class}</xwikiDbConnectionDriverClass>
+                <xwikiDbDialect>${xwiki.db.dialect}</xwikiDbDialect>
+                <xwikiDbHbmXwiki>${xwiki.db.hbm.xwiki}</xwikiDbHbmXwiki>
+                <xwikiDbHbmFeeds>${xwiki.db.hbm.feeds}</xwikiDbHbmFeeds>
+              </properties>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.xpn.xwiki.platform.tools</groupId>
+                  <artifactId>xwiki-jetty-resources</artifactId>
+                  <version>${platform.tool.jetty.version}</version>
+                  <type>zip</type>
+                  <outputDirectory>${xwiki.container}</outputDirectory>
+                  <!-- Note: This the Dependency plugin doesn't support includes/excludes we
+                       copy all the jetty resources in the jetty/ dir and then using the AntRun
+                       plugin below we move all shell scripts file into the root. -->
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.xwoot</groupId>
+                  <artifactId>xwootApp-jetty-resources</artifactId>
+                  <version>${pom.version}</version>
+                  <type>zip</type>
+                  <outputDirectory>${xwiki.container}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.xwoot</groupId>
+                  <artifactId>xwootApp</artifactId>
+                  <version>${pom.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${xwoot.webappDir}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.xwiki.concerto</groupId>
+                  <artifactId>xwiki-concerto-web</artifactId>
+                  <version>${pom.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${xwiki.webappDir}</outputDirectory>
+                  <excludes>**/xwiki-rest-1.8.1.jar</excludes>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.xwiki.concerto</groupId>
+                  <artifactId>xwiki-concerto-database</artifactId>
+                  <version>${pom.version}</version>
+                  <type>zip</type>
+                  <outputDirectory>${xwiki.database}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.xpn.xwiki.platform.tools</groupId>
+                  <artifactId>xwiki-rootwebapp</artifactId>
+                  <version>${platform.tool.rootwebapp.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${xwiki.container}/webapps/root</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${xwiki.db.jdbc.groupId}</groupId>
+                  <artifactId>${xwiki.db.jdbc.artifactId}</artifactId>
+                  <version>${xwiki.db.jdbc.version}</version>
+                  <outputDirectory>${xwiki.container}/webapps/xwiki/WEB-INF/lib</outputDirectory>
+                </artifactItem>
+				<artifactItem>
+                  <groupId>com.xpn.xwiki.platform</groupId>
+                  <artifactId>xwiki-rest</artifactId>
+                  <version>1.8.1-concerto</version>
+                  <outputDirectory>${xwiki.container}/webapps/xwiki/WEB-INF/lib</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>mkdirs</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <mkdir dir="${xwiki.container}/jetty" />
+                <mkdir dir="${xwiki.webappDir}" />
+                <mkdir dir="${xwiki.database}" />
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
+            <id>mvscripts</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <delete file="${xwiki.webappDir}/WEB-INF/hibernate.cfg.xml" />
+                <move todir="${xwiki.container}">
+                  <fileset dir="${xwiki.container}/jetty">
+                    <include name="**/*.sh" />
+                    <include name="**/*.bat" />
+                  </fileset>
+                </move>
+                <copy todir="${xwiki.webappDir}/WEB-INF">
+                  <file file="/Users/fm/yupi.txt"/>
+				</copy>                
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.izpack</groupId>
+        <artifactId>izpack-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
+        <configuration>
+          <izpackBasedir>${project.build.directory}/classes</izpackBasedir>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>izpack</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <properties>
+    <!--<platform.tool.configuration.version>1.25</platform.tool.configuration.version>
+    <platform.tool.jetty.version>1.13</platform.tool.jetty.version>
+    <platform.tool.rootwebapp.version>1.0</platform.tool.rootwebapp.version>
+    <xwiki.webapp.version>1.8</xwiki.webapp.version>-->
+    <xwiki.hibernate>${project.build.directory}/maven-shared-archive-resources/hibernate.cfg.xml</xwiki.hibernate>
+    <xwoot.license>${project.build.directory}/classes/LICENCE.txt</xwoot.license>
+    <xwoot.readme>${project.build.directory}/classes/README.html</xwoot.readme>
+    <xwiki.container>${project.build.directory}/classes/container</xwiki.container>
+    <xwiki.webappDir>${project.build.directory}/classes/xwiki</xwiki.webappDir>
+    <xwoot.webappDir>${project.build.directory}/classes/xwootApp</xwoot.webappDir>
+    <xwiki.database>${project.build.directory}/database</xwiki.database>
+    <xwoot.logo>${project.build.directory}/classes/images/logo.jpg</xwoot.logo>
+    <xwiki.border1.png>${project.build.directory}/classes/images/border1.png</xwiki.border1.png>
+    <xwiki.border2.png>${project.build.directory}/classes/images/border2.png</xwiki.border2.png>
+    <xwiki.border3.png>${project.build.directory}/classes/images/border3.png</xwiki.border3.png>
+    <xwiki.border4.png>${project.build.directory}/classes/images/border4.png</xwiki.border4.png>
+    <xwiki.border5.png>${project.build.directory}/classes/images/border5.png</xwiki.border5.png>
+    <xwiki.border6.png>${project.build.directory}/classes/images/border6.png</xwiki.border6.png>
+    <xwiki.border7.png>${project.build.directory}/classes/images/border7.png</xwiki.border7.png>
+    <xwiki.border8.png>${project.build.directory}/classes/images/border8.png</xwiki.border8.png>
+    <xwiki.core.png>${project.build.directory}/classes/images/core.png</xwiki.core.png>
+    <xwiki.shortcutSpec.windows>${project.build.directory}/classes/shortcutSpec_windows.xml</xwiki.shortcutSpec.windows>
+    <xwiki.shortcutSpec.unix>${project.build.directory}/classes/shortcutSpec_unix.xml</xwiki.shortcutSpec.unix>
+    <xwoot.shortcut.icon.unix>${project.build.directory}/classes/images/xe.png</xwoot.shortcut.icon.unix>
+    <xwoot.shortcut.icon.windows>${project.build.directory}/classes/images/xe.ico</xwoot.shortcut.icon.windows>
+    <xwiki.shortcut.icon.unix>${project.build.directory}/classes/images/xe.png</xwiki.shortcut.icon.unix>
+    <xwiki.shortcut.icon.windows>${project.build.directory}/classes/images/xe.ico</xwiki.shortcut.icon.windows>
+
+    <xwiki.db>hsqldb</xwiki.db>
+    <xwiki.db.jdbc.groupId>hsqldb</xwiki.db.jdbc.groupId>
+    <xwiki.db.jdbc.artifactId>hsqldb</xwiki.db.jdbc.artifactId>
+    <xwiki.db.jdbc.version>1.8.0.7</xwiki.db.jdbc.version>
+    <xwiki.db.connection.url>jdbc:hsqldb:file:database/xwiki_db;shutdown=true</xwiki.db.connection.url>
+    <xwiki.db.connection.username>sa</xwiki.db.connection.username>
+    <xwiki.db.connection.password />
+    <xwiki.db.connection.driver_class>org.hsqldb.jdbcDriver</xwiki.db.connection.driver_class>
+    <xwiki.db.dialect>org.hibernate.dialect.HSQLDialect</xwiki.db.dialect>
+    <xwiki.db.hbm.xwiki>xwiki.hbm.xml</xwiki.db.hbm.xwiki>
+    <xwiki.db.hbm.feeds>feeds.hbm.xml</xwiki.db.hbm.feeds>
+  </properties>
+</project>

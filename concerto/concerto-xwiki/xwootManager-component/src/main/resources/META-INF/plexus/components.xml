@@ -1,0 +1,21 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.xwiki.xwoot.manager.XWootManager</role>
+      <role-hint>default</role-hint>
+      <implementation>org.xwiki.xwoot.manager.internal.DefaultXWootManager</implementation>
+      <instantiation-strategy>singleton</instantiation-strategy>
+    </component>
+    <component>
+      <role>org.xwiki.velocity.VelocityContextInitializer</role>
+      <role-hint>xwootManager</role-hint>
+      <implementation>org.xwiki.xwoot.manager.internal.vcinitializer.XWootManagerVelocityContextInitializer</implementation>
+      <instantiation-strategy>singleton</instantiation-strategy>
+      <requirements>
+        <requirement>
+          <role>org.xwiki.xwoot.manager.XWootManager</role>
+        </requirement>
+      </requirements>
+    </component>
+  </components>
+</component-set>

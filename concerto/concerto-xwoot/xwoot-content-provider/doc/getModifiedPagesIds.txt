@@ -1,0 +1,56 @@
+This is the semantics of the getModifiedPagesIds.
+
+Let's suppose we start with a modification list like the following:
+
+(PageId, Timestamp, Cleared)
+(A, t1, F)
+(A, t2, F)
+(A, t3, F)
+(B, t4, F)
+(C, t5, F)
+(B, t6, F)
+
+We have the following:
+ 
+***********************
+
+getModifiedPageIds() -> [(A, t1), (B, t4), (C, t5)]
+clearModification((A, t1))
+clearModification((B, t4))
+clearModification((C, t5))
+ 
+(A, t1, T)
+(A, t2, F)
+(A, t3, F)
+(B, t4, T)
+(C, t5, T)
+(B, t6, F)
+ 
+***********************
+ 
+getModifiedPageIds() -> [(A,t2), (B, t6)]
+clearModification((A,t2))
+clearModification((B, t6))
+ 
+(A, t1, T)
+(A, t2, T)
+(A, t3, F)
+(B, t4, T)
+(C, t5, T)
+(B, t6, T)
+ 
+***********************
+ 
+getModifiedPageIds() -> [(A, t3)]
+clearModification((A, t3))
+ 
+(A, t1, T)
+(A, t2, T)
+(A, t3, T)
+(B, t4, T)
+(C, t5, T)
+(B, t6, T)
+ 
+**************************
+ 
+getModifiedPageIds() -> []

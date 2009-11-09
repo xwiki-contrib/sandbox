@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>XWiki</web>
+<name>XWootManager</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1222821095000</creationDate>
+<date>1222822046000</date>
+<contentUpdateDate>1222822046000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/1.0</syntaxId>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>XWiki.XWootManager</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<property>
+<tags/>
+</property>
+</object>
+<content>#if("$!{request.action}" != "")                                                                                               
+  #if($request.action == "connectWiki")                                                                                                
+    $xwoot.connectWiki()                                                                                                               
+  #elseif($request.action == "disconnectWiki")                                                                                         
+    $xwoot.disconnectWiki()                                                                                                            
+  #elseif($request.action == "connectP2P")                                                                                             
+    $xwoot.connectP2P()                                                                                                                
+  #elseif($request.action == "disconnectP2P")                                                                                          
+    $xwoot.disconnectP2P()                                                                                                             
+  #elseif($request.action == "manage")                                                                                                 
+    $xwoot.manageDocument($request.document)                                                                                           
+  #elseif($request.action == "unmanage")                                                                                               
+    $xwoot.unmanageDocument($request.document)                                                                                         
+  #elseif($request.action == "synchronize")                                                                                            
+    $xwoot.sychronize()                                                                                                                
+  #end                                                                                                                                 
+
+  #if("$!{request.xredirect}" != "")                                                                                                   
+    $response.sendRedirect($request.xredirect)                                                                                         
+  #end                                                                                                                                 
+#end</content>
+</xwikidoc>

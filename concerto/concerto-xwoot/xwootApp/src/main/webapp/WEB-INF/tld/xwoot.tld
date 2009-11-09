@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib version="2.0" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee web-jsptaglibrary_2_0.xsd">
+    
+  <description>XWoot Library</description>
+  <display-name>XWoot</display-name>
+  <tlib-version>1.1</tlib-version>
+  <short-name>xwoot</short-name>
+  <uri>http://potiron.loria.fr/projects/XWoot</uri>
+
+  <function>
+    <description>
+         Check if site is connected or alone.
+    </description>
+    <name>isConnected</name>
+    <function-class>xwoot.web.taglib.TagLib</function-class>
+    <function-signature>boolean isConnected()</function-signature>
+    <example>
+         ${xwoot:isconneted()}
+    </example>
+  </function>
+  
+  <function>
+    <description>
+         Return number of neighbors.
+    </description>
+    <name>neighborsCount</name>
+    <function-class>xwoot.web.taglib.TagLib</function-class>
+    <function-signature>int neighborsCount()</function-signature>
+    <example>
+         ${xwoot:neigborsCount()}
+    </example>
+  </function>
+  
+  <function>
+    <description>
+         Return the local site url
+    </description>
+    <name>serverUrl</name>
+    <function-class>xwooot.web.taglib.TagLib</function-class>
+    <function-signature>java.lang.String serverUrl()</function-signature>
+    <example>
+         ${xwoot:serverUrl()}
+    </example>
+  </function>
+  
+</taglib>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikipage id="SpaceTest.page0" href="http://localhost:8182/iwoot/pages/SpaceTest.page0">
+<entries>
+<entry>
+<key>content</key>
+<value> Content of existing page</value>
+</entry>
+ <entry>
+<key>space</key>
+<value>SpaceTest</value>
+</entry>
+<entry>
+<key>title</key>
+<value>page0</value>
+</entry>
+<entry>
+<key>id</key>
+<value>SpaceTest.page0</value>
+</entry>
+</entries>
+</xwikipage>

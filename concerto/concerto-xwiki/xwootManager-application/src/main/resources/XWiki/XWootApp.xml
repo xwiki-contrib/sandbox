@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>XWiki</web>
+<name>XWootApp</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1240237381000</creationDate>
+<date>1240240603000</date>
+<contentUpdateDate>1240240603000</contentUpdateDate>
+<version>38.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/1.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>XWiki.XWootApp</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>9b041f2a-1b82-45e0-afbc-65632cf694bf</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>#if("$!{xwoot}" == '')                                                                                                                 
+  #warning('The XWoot management component is not installed.')
+#else
+
+#set($endpoint = $xwoot.getXWootAppAddress())
+#set($connectionsInfo = $xwoot.getConnectionsInfo())
+#set($contentProviderInfo = $xwoot.getContentProviderInfo())
+
+
+1 XWoot
+
+Make sure that the endpoint correctly points to the XWoot associated to this XWiki, otherwise you will get wrong or no information at all.
+To modify the endpoint, write the new one in the following page and save: &lt;a href="$xwiki.getURL('XWiki.XWootAppEndpoint', 'edit')"&gt;XWiki.XWootAppEndpoint&lt;/a&gt;
+
+* &lt;b&gt;Endpoint&lt;/b&gt;: &lt;a href="$endpoint"&gt;$endpoint&lt;/a&gt;&lt;br/&gt; 
+
+#if($connectionsInfo.get("xwootStarted"))
+  * XWoot&lt;/a&gt; is &lt;b&gt;started&lt;/b&gt;    
+  #if($connectionsInfo.get("xwootConnectedToP2PNetwork"))
+    * &lt;b&gt;Connected&lt;/b&gt; to P2P network.
+    #if($connectionsInfo.get("xwootConnectedToP2PGroup"))
+      * &lt;b&gt;Connected&lt;/b&gt; to P2P group.
+      * &lt;b&gt;Neighbours&lt;/b&gt;: {pre}$connectionsInfo.get("xwootNeighbours"){/pre}
+    #end
+    * &lt;b&gt;Last synch&lt;/b&gt;: $connectionsInfo.get("xwootLastSynchronization")
+    * &lt;b&gt;Last synch failure&lt;/b&gt;: $connectionsInfo.get("xwootLastSynchronizationFailure")
+  #else 
+  * &lt;b&gt;Disconnected&lt;/b&gt; from P2P network.
+  #end
+#else
+   * XWoot&lt;/a&gt; is &lt;b&gt;not started&lt;/b&gt;   
+#end
+
+1 Content provider
+
+The content provider is the component that manages communication between XWoot and the associated XWiki. It retrieves modified pages from XWiki and passes them to XWoot; on the other hand it receives requests from XWoot for storing received patches and stores them as appropriate XWiki entities. The following tables shows its current state.
+
+#if($connectionsInfo.get("xwootConnectedToXWiki"))
+  * &lt;b&gt;Connected&lt;/b&gt; to XWiki at {pre}$connectionsInfo.get("xwootTargetXWiki"){/pre}
+  * &lt;b&gt;Ignore patterns&lt;/b&gt;: {pre}$connectionsInfo.get("xwootIgnorePatterns"){/pre}
+  * &lt;b&gt;Accept patterns&lt;/b&gt;: {pre}$connectionsInfo.get("xwootAcceptPatterns"){/pre}
+#else
+  * &lt;b&gt;Disconnected&lt;/b&gt; from XWiki.
+#end
+
+1.1 Modifications table
+
+The modification table contains all the pages that have been modified and that have been fetched by the content provider. The cleared flag is true if the XWoot engine has taken into account the modifications corresponding to a given entry.
+
+#set($entries = $contentProviderInfo.get("contentProviderEntries"))
+
+&lt;table&gt;
+  &lt;thead&gt;
+  &lt;tr&gt;
+     &lt;td&gt;&lt;b&gt;Page id&lt;/b&gt;&lt;/td&gt;
+     &lt;td&gt;&lt;b&gt;Timestamp&lt;/b&gt;&lt;/td&gt;
+     &lt;td&gt;&lt;b&gt;Version&lt;/b&gt;&lt;/td&gt;
+     &lt;td&gt;&lt;b&gt;Cleared&lt;/b&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+#foreach($entry in $entries)
+  &lt;tr&gt;
+     &lt;td&gt;$entry.get("pageId")&lt;/td&gt;
+     &lt;td&gt;$entry.get("timestamp")&lt;/td&gt;
+     &lt;td&gt;$entry.get("version")&lt;/td&gt;
+     &lt;td&gt;$entry.get("cleared")&lt;/td&gt;
+  &lt;/tr&gt;
+#end
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+1.1 Last cleared entries
+
+Last cleared entries represent the last page versions that have been processed or stored by the XWoot engine, i.e., that have been synchronized.
+
+#set($entries = $contentProviderInfo.get("contentProviderLastClearedEntries"))
+
+&lt;table&gt;
+  &lt;thead&gt;
+  &lt;tr&gt;
+     &lt;td&gt;&lt;b&gt;Page id&lt;/b&gt;&lt;/td&gt;
+     &lt;td&gt;&lt;b&gt;Timestamp&lt;/b&gt;&lt;/td&gt;
+     &lt;td&gt;&lt;b&gt;Version&lt;/b&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+#foreach($entry in $entries)
+  &lt;tr&gt;
+     &lt;td&gt;$entry.get("pageId")&lt;/td&gt;
+     &lt;td&gt;$entry.get("timestamp")&lt;/td&gt;
+     &lt;td&gt;$entry.get("version")&lt;/td&gt;
+  &lt;/tr&gt;
+#end
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+#end
+</content></xwikidoc>

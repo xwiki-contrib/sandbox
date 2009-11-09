@@ -1,0 +1,6 @@
+In order to debug (i.e., view table contents and perform queries) you can use the 'ij' client provided with Apache Derby.
+
+1) Go to the project directory and run the ij client.
+
+2) Enter the following command in order to connect to the DB:
+   driver 'org.apache.derby.jdbc.EmbeddedDriver'; connect 'jdbc:derby:DB';
