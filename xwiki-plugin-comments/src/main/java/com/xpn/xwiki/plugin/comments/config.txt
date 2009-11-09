@@ -1,0 +1,5 @@
+                    com.xpn.xwiki.plugin.comments.CommentsPlugin, \
+
+# Comments Manager
+xwiki.comments.commentsmanager=com.xpn.xwiki.plugin.comments.internal.SeparatePageCommentsManager
+xwiki.comments.moderation=1

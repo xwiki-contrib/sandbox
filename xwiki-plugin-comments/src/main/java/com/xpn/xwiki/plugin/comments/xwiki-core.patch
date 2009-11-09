@@ -1,0 +1,352 @@
+Index: src/main/java/com/xpn/xwiki/render/DefaultVelocityManager.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/render/DefaultVelocityManager.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/render/DefaultVelocityManager.java	(working copy)
+@@ -189,6 +189,9 @@
+                 macroList = "/templates/macros.vm" + (cacheKey.equals("default") ? "" : "," + cacheKey);
+             }
+             properties.put(RuntimeConstants.VM_LIBRARY, macroList);
++            String macroAutoReload = xcontext.getWiki().Param("xwiki.render.velocity.macroautoreload", "0");
++            if (macroAutoReload.equals("1"))
++             properties.put("velocimacro.library.autoreload", "true");
+             velocityEngine = velocityFactory.createVelocityEngine(cacheKey, properties);
+         }
+ 
+Index: src/main/java/com/xpn/xwiki/doc/XWikiDocument.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/doc/XWikiDocument.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/doc/XWikiDocument.java	(working copy)
+@@ -95,6 +95,10 @@
+ import com.xpn.xwiki.objects.classes.PropertyClass;
+ import com.xpn.xwiki.objects.classes.StaticListClass;
+ import com.xpn.xwiki.plugin.query.XWikiCriteria;
++import com.xpn.xwiki.plugin.comments.CommentsPlugin;
++import com.xpn.xwiki.plugin.comments.Container;
++import com.xpn.xwiki.plugin.comments.CommentsException;
++import com.xpn.xwiki.plugin.comments.Comment;
+ import com.xpn.xwiki.render.XWikiVelocityRenderer;
+ import com.xpn.xwiki.store.XWikiAttachmentStoreInterface;
+ import com.xpn.xwiki.store.XWikiStoreInterface;
+@@ -3732,9 +3736,8 @@
+         setMetaDataDirty(true);
+     }
+ 
+-    public Vector<BaseObject> getComments()
+-    {
+-        return getComments(true);
++    public Vector<BaseObject> getComments(XWikiContext context) throws CommentsException {
++        return getComments(true, context);
+     }
+ 
+     /**
+@@ -3763,20 +3766,44 @@
+         this.syntaxId = syntaxId;
+     }
+ 
+-    public Vector<BaseObject> getComments(boolean asc)
+-    {
+-        if (asc) {
+-            return getObjects("XWiki.XWikiComments");
++    public Vector<BaseObject> getComments(boolean asc, XWikiContext context) throws CommentsException
++    {    
++        log.debug("In comments code");
++        CommentsPlugin commentsPlugin = (CommentsPlugin) context.getWiki().getPlugin(CommentsPlugin.COMMENTS_PLUGIN_NAME, context);
++        if (commentsPlugin!=null) {
++            log.debug("Calling plugin code for comments");
++            List<Comment> commentList = commentsPlugin.getComments(this, asc, context);
++            if (commentList==null)
++                return null;
++            Vector<BaseObject> commentVector = new Vector<BaseObject>();
++            for (int i=0;i<commentList.size();i++) {
++                Comment comment = (Comment) commentList.get(i);
++                BaseObject object = new BaseObject();
++                object.setNumber(i);
++                object.setClassName("XWiki.XWikiComments");
++                object.setStringValue("author", comment.getAuthor());
++                object.setLargeStringValue("comment", comment.getContent());
++                object.setName(getFullName());
++                object.setDateValue("date", comment.getDate());
++                commentVector.add(object);
++            }
++            return commentVector;
+         } else {
+-            Vector<BaseObject> list = getObjects("XWiki.XWikiComments");
+-            if (list == null) {
+-                return list;
++            log.error("In old comments code");
++
++            if (asc) {
++                return getObjects("XWiki.XWikiComments");
++            } else {
++                Vector<BaseObject> list = getObjects("XWiki.XWikiComments");
++                if (list == null) {
++                    return list;
++                }
++                Vector<BaseObject> newlist = new Vector<BaseObject>();
++                for (int i = list.size() - 1; i >= 0; i--) {
++                    newlist.add(list.get(i));
++                }
++                return newlist;
+             }
+-            Vector<BaseObject> newlist = new Vector<BaseObject>();
+-            for (int i = list.size() - 1; i >= 0; i--) {
+-                newlist.add(list.get(i));
+-            }
+-            return newlist;
+         }
+     }
+ 
+Index: src/main/java/com/xpn/xwiki/api/Document.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/api/Document.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/api/Document.java	(working copy)
+@@ -49,6 +49,7 @@
+ import com.xpn.xwiki.objects.BaseProperty;
+ import com.xpn.xwiki.objects.classes.BaseClass;
+ import com.xpn.xwiki.plugin.fileupload.FileUploadPlugin;
++import com.xpn.xwiki.plugin.comments.CommentsException;
+ import com.xpn.xwiki.stats.impl.DocumentStats;
+ import com.xpn.xwiki.util.TOCGenerator;
+ import com.xpn.xwiki.util.Util;
+@@ -788,14 +789,13 @@
+         return apis;
+     }
+ 
+-    public Vector<Object> getComments()
+-    {
++    public Vector<Object> getComments() throws CommentsException {
+         return getComments(true);
+     }
+ 
+-    public Vector<Object> getComments(boolean asc)
++    public Vector<Object> getComments(boolean asc) throws CommentsException
+     {
+-        return getObjects(doc.getComments(asc));
++        return getObjects(doc.getComments(asc, context));
+     }
+ 
+     public void use(Object object)
+Index: src/main/java/com/xpn/xwiki/api/XWiki.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/api/XWiki.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/api/XWiki.java	(working copy)
+@@ -2472,7 +2472,23 @@
+         return xwiki.getUniquePageName(space, name, getXWikiContext());
+     }
+ 
++
+     /**
++     * Generates a unique page name based on initial page name and already existing pages
++     *
++     * @param space
++     * @param name
++     * @param postfix char to use between the name and the counter
++     * @param forcepostfix do we want to accept the page name as is or look for pagename_1 
++     * @return a unique page name
++     */
++    public String getUniquePageName(String space, String name, String postfix, boolean forcepostfix)
++    {
++        return xwiki.getUniquePageName(space, name, postfix, forcepostfix,
++                getXWikiContext());
++    }
++
++    /**
+      * Inserts a tooltip using toolTip.js
+      * 
+      * @param html HTML viewed
+Index: src/main/java/com/xpn/xwiki/XWiki.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/XWiki.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/XWiki.java	(working copy)
+@@ -5672,7 +5672,7 @@
+ 
+     public Object parseGroovyFromPage(String fullName, String jarWikiPage, XWikiContext context) throws XWikiException
+     {
+-        return parseGroovyFromString(context.getWiki().getDocument(fullName, context).getContent(), context);
++        return parseGroovyFromString(context.getWiki().getDocument(fullName, context).getContent(), jarWikiPage, context);
+     }
+ 
+     public String getMacroList(XWikiContext context)
+@@ -5847,13 +5847,18 @@
+ 
+     public String getUniquePageName(String space, String name, XWikiContext context)
+     {
++        return getUniquePageName(space, name, "_", false, context);
++    }
++
++    public String getUniquePageName(String space, String name, String postfix, boolean forcepostfix, XWikiContext context)
++    {
+         String pageName = clearName(name, context);
+-        if (exists(space + "." + pageName, context)) {
+-            int i = 0;
+-            while (exists(space + "." + pageName + "_" + i, context)) {
++        if (forcepostfix || exists(space + "." + pageName, context)) {
++            int i = 1;
++            while (exists(space + "." + pageName + postfix + i, context)) {
+                 i++;
+             }
+-            return pageName + "_" + i;
++            return pageName + postfix + i;
+         }
+         return pageName;
+     }
+Index: src/main/java/com/xpn/xwiki/web/CommentAddAction.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/web/CommentAddAction.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/web/CommentAddAction.java	(working copy)
+@@ -27,8 +27,28 @@
+ import com.xpn.xwiki.objects.BaseObject;
+ import com.xpn.xwiki.objects.classes.BaseClass;
+ import com.xpn.xwiki.plugin.captcha.CaptchaPluginApi;
++import com.xpn.xwiki.plugin.comments.CommentsPlugin;
++import org.apache.ecs.xhtml.map;
+ 
++import java.util.Map;
++import java.util.Date;
++
+ public class CommentAddAction extends XWikiAction {
++
++    private String toString(Object data) {
++        if (data==null)
++            return "";
++        else if (data instanceof String[]) {
++            String[] data1 = (String[]) data;
++            if (data1.length==0)
++             return "";
++            else
++             return data1[0];
++        } else {
++            return data.toString();
++        }
++    }
++
+     public boolean action(XWikiContext context) throws XWikiException {
+         XWiki xwiki = context.getWiki();
+         XWikiResponse response = context.getResponse();
+@@ -48,18 +68,28 @@
+             if (doc.isNew()) {
+                 return true;
+             } else {
+-                String className = baseclass.getName(); // XWiki.XWikiComments
+-                int nb = doc.createNewObject(className, context);
+-                BaseObject oldobject = doc.getObject(className, nb);
+-                BaseObject newobject = (BaseObject) baseclass.fromMap(oform.getObject(className), oldobject);
+-                newobject.setNumber(oldobject.getNumber());
+-                newobject.setName(doc.getFullName());
+-                doc.setObject(className, nb, newobject);
+-                doc.setAuthor(context.getUser());
+-                doc.setContentDirty(false); // Consider comments not being content
+-                // if we consider that it is no contentDirty so it NEED be metaDataDirty for increment version and change history.
+-                doc.setMetaDataDirty(true);
+-                xwiki.saveDocument(doc, context.getMessageTool().get("core.comment.addComment"), true, context);
++                CommentsPlugin commentPlugin = (CommentsPlugin) xwiki.getPlugin(CommentsPlugin.COMMENTS_PLUGIN_NAME, context);
++                if (commentPlugin!=null) {
++                    Map commentMap = oform.getObject(baseclass.getName());
++                    String author = context.getUser();
++                    String replyId = toString(commentMap.get("parent"));
++                    String content = toString(commentMap.get("comment"));
++                    commentPlugin.addComment(doc, author, content, replyId, context);
++                } else {
++                    // fallback to previous implementation
++                    String className = baseclass.getName(); // XWiki.XWikiComments
++                    int nb = doc.createNewObject(className, context);
++                    BaseObject oldobject = doc.getObject(className, nb);
++                    BaseObject newobject = (BaseObject) baseclass.fromMap(oform.getObject(className), oldobject);
++                    newobject.setNumber(oldobject.getNumber());
++                    newobject.setName(doc.getFullName());
++                    doc.setObject(className, nb, newobject);
++                    doc.setAuthor(context.getUser());
++                    doc.setContentDirty(false); // Consider comments not being content
++                    // if we consider that it is no contentDirty so it NEED be metaDataDirty for increment version and change history.
++                    doc.setMetaDataDirty(true);
++                    xwiki.saveDocument(doc, context.getMessageTool().get("core.comment.addComment"), true, context);
++                }
+             }
+             // forward to edit
+             String redirect = Utils.getRedirect("edit", context);
+Index: src/main/java/com/xpn/xwiki/user/impl/exo/ExoGroupServiceImpl.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/user/impl/exo/ExoGroupServiceImpl.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/user/impl/exo/ExoGroupServiceImpl.java	(working copy)
+@@ -155,6 +155,11 @@
+         }
+     }
+ 
++    public boolean isMemberOfGroup(String user, String group, XWikiContext context) throws XWikiException {
++        throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_UNKNOWN, "Not implemented");
++
++    }
++
+     public List listMemberForGroup(String group, XWikiContext context) throws XWikiException
+     {
+         UserHandler userHandler = getUserHandler();
+Index: src/main/java/com/xpn/xwiki/user/impl/xwiki/XWikiGroupServiceImpl.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/user/impl/xwiki/XWikiGroupServiceImpl.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/user/impl/xwiki/XWikiGroupServiceImpl.java	(working copy)
+@@ -219,6 +219,30 @@
+     }
+ 
+     /**
++     * Check is a user is member of a group. This also checks groups in groups
++     * @param user
++     * @param group
++     * @param context
++     * @return true if member
++     * @throws XWikiException
++     */
++    public boolean isMemberOfGroup(String user, String group, XWikiContext context) throws XWikiException {
++        Collection<String> groups = listGroupsForUser(user, context);
++        if ((groups==null)||(groups.size()==0))
++             return false;
++        for  (String usergroup : groups) {
++            if (usergroup.equals(group))
++             return true;
++        }
++        for  (String usergroup : groups) {
++            boolean result = isMemberOfGroup(usergroup, group, context);
++            if (result==true)
++             return true;
++        }
++        return false;
++    }
++
++    /**
+      * Check if provided member is equal to member name found in XWiki.XWikiGroups object.
+      * 
+      * @param currentMember the member name found in XWiki.XWikiGroups object.
+Index: src/main/java/com/xpn/xwiki/user/api/XWikiGroupService.java
+===================================================================
+--- src/main/java/com/xpn/xwiki/user/api/XWikiGroupService.java	(revision 13949)
++++ src/main/java/com/xpn/xwiki/user/api/XWikiGroupService.java	(working copy)
+@@ -49,10 +49,30 @@
+     public Collection<String> listGroupsForUser(String username, XWikiContext context)
+         throws XWikiException;
+ 
++    /**
++     * Adding a user to a group
++     * @param user
++     * @param database
++     * @param group
++     * @param context
++     * @throws XWikiException
++     */
+     public void addUserToGroup(String user, String database, String group, XWikiContext context)
+         throws XWikiException;
+ 
++
+     /**
++     * Checks if a user is member of a group. Recursive groups are checked
++     * @param user user to check for
++     * @param group group to check for
++     * @param context context
++     * @return
++     * @throws XWikiException
++     */
++    public boolean isMemberOfGroup(String user, String group, XWikiContext context)
++        throws XWikiException;
++
++    /**
+      * Remove user or group name from all groups.
+      * 
+      * @param userOrGroupWiki the name of the wiki of the member.
