@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>QACode</web>
+<name>Translations</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>QACode.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1256293153000</creationDate>
+<date>1257247654000</date>
+<contentUpdateDate>1257247654000</contentUpdateDate>
+<version>12.1</version>
+<title>QACode.Translations</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>checkbox</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>QACode.Translations</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>f747c443-52d6-4ab8-bedb-a094da67b58e</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>qa.webhome.title=Questions &amp; Answers
+qa.webhome.search.title=In order to find the information you're looking for, you can use the search feature of your browser to search for QA entries displayed on this page or use the search box below.
+qa.webhome.search.submit.button.value=Go!
+qa.webhome.add.title=If you don't find the QA you're looking for, create a new QA using the following form and fill the answer once you've found it!
+qa.webhome.add.submit.button.value=Add this QA
+qa.webhome.table.answered.title={0} Answered QAs (latest first)
+qa.webhome.table.notanswered.title={0} Unanswered QAs (latest first)
+
+qa.search.title=QA Search
+qa.search.submit.button.value=Search QAs
+
+qa.class.property.qa.question=Question
+qa.class.property.qa.answer=Answer
+qa.class.property.qa.country=Country
+qa.class.property.qa.doc.date=Last Edited
+qa.class.property.qa.doc.author=Last Author
+qa.class.property.qa.doc.name=Questions
+qa.class.property.qa.emptyvalue=-
+qa.class.property.qa._actions=Actions
+
+qa.answered.title=Answered QAs
+qa.notanswered.title=Unanswered QAs</content>
+</xwikidoc>

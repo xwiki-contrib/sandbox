@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>QACode</web>
+<name>QASheet</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>QACode.QAClass</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1256299416000</creationDate>
+<date>1257167463000</date>
+<contentUpdateDate>1257167463000</contentUpdateDate>
+<version>65.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.SheetClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultEditMode>
+<name>defaultEditMode</name>
+<number>1</number>
+<prettyName>Default Edit Mode</prettyName>
+<size>15</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultEditMode>
+</class>
+<name>QACode.QASheet</name>
+<number>0</number>
+<className>XWiki.SheetClass</className>
+<guid>7f650cdf-9144-4cd7-9797-a4694ec7d422</guid>
+<property>
+<defaultEditMode></defaultEditMode>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>onDemand=On demand|always=Always</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>QACode.QASheet</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>7f2188cf-3d31-4d81-aee9-dbad522fdbe8</guid>
+<property>
+<cache></cache>
+</property>
+<property>
+<code>.qaContainer {
+  background-color:#EFF6D7; 
+  padding:10px;
+}
+
+.qaQuestionContainer {
+  font-size:1.5em; 
+  font-weight:bold; 
+  line-height:2.5em;	
+}
+
+.qaQuestionName {
+  color:#B5C742;
+}
+
+.qaQuestionValue { }
+
+.qaMetadataContainer {
+  margin-left:40px;
+}
+
+.qaAnswerContainer {
+  border: 1px solid #D7D7D7;
+  padding:10px;
+  margin-top:10px;
+}
+
+.qaAnswerName {
+  color:#003399;
+  font-size:1.5em;
+  font-weight:bold;
+}
+
+.qaAnswerValue { }
+
+.qaUnansweredContainer { 
+  padding: 20px 40px;
+}
+
+.floatRight {
+  float: right;
+}
+
+.qaQuestionValue pre { 
+  display: inline 
+}
+</code></property><property><name></name></property><property><parse>0</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>checkbox</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>QACode.QASheet</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>4ef056d5-73a3-4eed-ad37-7180f9935d89</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>{{velocity filter="none"}}
+#set($qaSpace = "$doc.space")
+#set($qaClassName = "${qaSpace}Code.${qaSpace}Class")
+#set($qaSheet = "${qaSpace}Code.${qaSpace}Sheet")
+## CSS Stylesheet
+$xwiki.ssx.use("$qaSheet")
+##
+{{html clean="false" wiki="true"}}
+##
+#set($qaObject = $doc.getObject("$qaClassName"))
+#set($qaClass = $qaObject.xWikiClass)
+##
+## QA properties
+#set($qaQuestion = $qaObject.getProperty('question').Value)
+#set($qaAnswer = $qaObject.getProperty('answer').Value)
+= $qaQuestion =
+&lt;div class='qaContainer'&gt;
+  &lt;div class='qaQuestionContainer'&gt;
+    &lt;span class='qaQuestionName'&gt;Q:&lt;/span&gt;
+    &lt;span class='qaQuestionValue'&gt;$doc.display('question')&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class='qaMetadataContainer'&gt;
+    #foreach($prop in $qaClass.properties)
+      #set($propName = $prop.Name)
+      #if($propName != 'question' &amp;&amp; $propName != 'answer')
+        ; $prop.prettyName
+        : $doc.display($prop.getName())
+      #end
+    #end
+  &lt;/div&gt;
+&lt;/div&gt;
+#if($qaAnswer!='' || $context.action=='inline' )
+&lt;div class='qaAnswerContainer'&gt;
+  #if($context.action=='view')
+    &lt;div class='floatRight'&gt;&lt;a href="$doc.getURL('inline')"&gt;[Improve]&lt;/a&gt;&lt;/div&gt;
+  #end
+  &lt;div class='qaAnswerName'&gt;A:&lt;/div&gt;
+  &lt;div class='qaAnswerValue'&gt;$doc.display('answer')&lt;/div&gt;
+&lt;/div&gt;
+#else
+&lt;div class='qaUnansweredContainer'&gt;
+  &lt;b&gt;This question has not been answered yet.&lt;/b&gt;&lt;br /&gt; 
+  &lt;input type="button" value="A: Answer Question" onclick="window.location.href='$doc.getURL('inline')'" /&gt;
+&lt;/div&gt;
+#end
+{{/html}}
+{{/velocity}}</content>
+</xwikidoc>

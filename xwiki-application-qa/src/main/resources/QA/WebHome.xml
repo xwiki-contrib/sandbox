@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>QA</web>
+<name>WebHome</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1256292022000</creationDate>
+<date>1257175216000</date>
+<contentUpdateDate>1257175216000</contentUpdateDate>
+<version>138.1</version>
+<title>QA</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>onDemand=On demand|always=Always</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>QA.WebHome</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>176e47ed-3e5a-4400-9933-287c42645c93</guid>
+<property>
+<cache></cache>
+</property>
+<property>
+<code>.qaSearchContainer, .qaAddContainer {
+  background-color:#EFF6D7; 
+  padding:10px;
+  margin-bottom:10px;
+}
+
+.qaAddContainer {
+  background-color:#FFFACD;
+}
+
+.qaSearch, .qaAdd {
+  font-size:1.5em; 
+  font-weight:bold; 
+  line-height:2.5em;	
+}
+
+.qaSearchName, .qaAddName {
+  display: inline;
+  color:#B5C742;
+}
+
+.qaAddName {
+  color:#E78013;
+}
+
+.qaSearchValue, .qaAddValue { 
+  display: inline;
+  margin: 0;
+}
+
+.qaSearchValue form, .qaAddValue form {
+  display: inline;
+}
+
+.qaSearchValue form input[type="text"], .qaAddValue form input[type="text"] {
+  font-size:0.9em;
+  height:20px;
+}
+
+.qaSearchValue form input[type="submit"], .qaAddValue form input[type="submit"] {
+  color:#4D4D4D;
+  font-size:0.6em;
+  height:26px;
+}
+</code></property><property><name></name></property><property><parse>0</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>checkbox</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>QA.WebHome</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>647f1984-771e-4023-ab55-e27412b9246a</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>{{include document="QACode.Macros" /}}
+{{velocity filter="none"}}
+## QA variables
+#set($qaSpace = "$doc.space")
+#set($qaWebHome = "${qaSpace}.WebHome")
+#set($qaClassName = "${qaSpace}Code.${qaSpace}Class")
+#set($qaSheet = "${qaSpace}Code.${qaSpace}Sheet")
+#set($qaTemplate = "${qaSpace}Code.${qaSpace}Template")
+#set($qaSearch = "${qaSpace}.${qaSpace}Search")
+##
+$xwiki.ssx.use("$qaWebHome")
+##
+{{html clean="false" wiki="true"}}
+= $msg.get('qa.webhome.title') =
+## ---------------------------------------------------
+## Let the user search for QAs
+## ---------------------------------------------------
+&lt;div class='qaSearchContainer'&gt;
+  &lt;div class='qaSearch'&gt;
+    &lt;div class='qaSearchName'&gt;Search:&lt;/div&gt;
+    &lt;div class='qaSearchValue'&gt;
+      &lt;form action="$xwiki.getURL("${qaSearch}")"&gt;
+        &lt;input type="text" name="text" value="$!request.text" size="40"/&gt;
+        &lt;input type="submit" value="$msg.get('qa.webhome.search.submit.button.value')"/&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+## ---------------------------------------------------
+## Let the user add QAs
+## ---------------------------------------------------
+&lt;div class='qaAddContainer'&gt;
+  &lt;div class='qaAdd'&gt;
+    &lt;div class='qaAddName'&gt;Submit:&lt;/div&gt;
+    &lt;div class='qaAddValue'&gt;
+      &lt;form action="" id="newqa"&gt;
+        &lt;input type="hidden" name="parent" value="${qaWebHome}" /&gt;
+        &lt;input type="hidden" name="template" value="${qaTemplate}" /&gt;
+        &lt;input type="hidden" name="sheet" value="1" /&gt;
+        &lt;input type="hidden" name="webname" value="${qaSpace}"/&gt;
+        &lt;input type="hidden" name="name" value=""/&gt;
+        &lt;input type="text" name="qa" value="" size="40"/&gt;
+        &lt;input type="submit" value="$msg.get('qa.webhome.add.submit.button.value')" onclick='if (updateName(this.form.qa,this.form.name)) { action="../../inline/" + this.form.webname.value + "/" + this.form.name.value; this.form.submit(); }' /&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+## Display Question Class admin button only for users with admin rights on the current space
+#if($xwiki.hasAdminRights())
+Questions Class: &lt;a href='${xwiki.getURL("$qaClassName", 'edit', 'editor=class')}'&gt;Edit Question Class Properties (Metadata)&lt;/a&gt;
+#end
+##
+## ---------------------------------------------------
+## Livetable for QA entries that have answers
+## ---------------------------------------------------
+== $msg.get('qa.answered.title') ==
+#qaLiveGrid("ansqadiv" "$doc.space" true)
+##
+## ----------------------------------------------------
+## Livetable for QA entries that have no answers yet 
+## ----------------------------------------------------
+== $msg.get('qa.notanswered.title') ==
+#qaLiveGrid("notansqadiv" "$doc.space" false)
+
+{{/html}}
+{{/velocity}}</content>
+</xwikidoc>

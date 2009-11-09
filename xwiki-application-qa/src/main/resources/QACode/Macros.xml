@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>QACode</web>
+<name>Macros</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>QACode.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1256920854000</creationDate>
+<date>1257154566000</date>
+<contentUpdateDate>1257154566000</contentUpdateDate>
+<version>39.1</version>
+<title>QACode.Macros</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>checkbox</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>QACode.Macros</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>5d55ea69-2b7f-4c83-a1b2-a0500927119a</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>{{velocity}}
+## ---------------------------------------------------
+## LiveGrid for QA entries
+## ---------------------------------------------------
+#**
+ * AJAX Live table that displays Questions (QAs) from a given QA space
+ *
+ * The livetable columns will contain all the properties of the QA class from the 
+ * specified QA space: 
+ * question and any other field (metadata), except answer; 
+ * plus date of last edit, author of last edit, admin actions (for admins)
+ *
+ * @param divid - the id of the table div
+ * @param qaSpace - the space from which to display the questions
+ * @param answered - display answered or unanswered questions (true/false)
+ *#
+#macro(qaLiveGrid $divid $qaSpace $answered)
+  ##
+  ## QA variables
+  #set($qaClassName = "${qaSpace}Code.${qaSpace}Class")
+  #set($qaTemplate = "${qaSpace}Code.${qaSpace}Template")
+  #set($qaLiveTableResultsPage = "${qaSpace}Code.LiveTableResults")
+  #set($qaTranslationPrefix = "qa.class.property.${qaSpace.toLowerCase()}.")
+  ##
+  ## Livetable columns
+  #set($qaClass = $xwiki.getDocument("${qaClassName}").xWikiClass)
+  #set($collist = $util.arrayList)
+  #set($colliststr = "")
+  #set($ok = $collist.add("question"))    ## first is question
+  #foreach($qaprop in $qaClass.properties)
+    #set($p = $qaprop.Name)               ## next are all except answer
+    #if($p != 'question' &amp;&amp; $p != 'answer') #set($ok = $collist.add("$p")) #end
+    #set($colliststr = "${colliststr}${p},")
+  #end
+  #set($ok = $collist.add("doc.date"))    ## date of last edit
+  #set($ok = $collist.add("doc.author"))  ## author of last edit
+  #set($ok = $collist.add("_actions"))    ## admin actions
+  ##  #set($collist = ["question", "country", "doc.date", "doc.author", "_actions" ])
+  #set($colprops = {
+                     "question" : { "type" : "text", "link" : "view", "size" : 75, "sortable":true, "filterable":true},
+                     "doc.name" : { "type" : "text" , "link" : "view", "size" : 75, "sortable":true, "filterable":true}, 
+                     "doc.date" : { "type" : "date" },
+                     "doc.author" : { "type" : "text", "link" : "author"},
+                     "_actions" : { "actions": ["copy","delete","rename","rights"]}
+                    })
+  ## Add colum properties for question metadata
+  #foreach($qaprop in $qaClass.properties)
+    #set($p = $qaprop.Name)
+    #if($p != 'question' &amp;&amp; $p != 'answer') #set($ok = $colprops.put("$p", { "type" : "text" })) #end
+  #end
+  ## Livetable options
+  #set($rpops =  "xpage=plain&amp;outputSyntax=plain&amp;space=${qaSpace}&amp;answered=${answered}&amp;country_class=${qaClassName}&amp;question_class=${qaClassName}&amp;transprefix=${qaTranslationPrefix}&amp;qaClass=${qaClassName}&amp;qaTemplate=${qaTemplate}&amp;collist=${colliststr}")
+  #set($options = {
+                    "url" : $xwiki.getURL("${qaLiveTableResultsPage}", "view", "$rpops"),
+                    "translationPrefix" : "${qaTranslationPrefix}",
+                    "rowCount": 10 
+                   })
+  ##
+  #livetable($divid $collist $colprops $options)
+#end
+{{/velocity}}</content>
+</xwikidoc>
