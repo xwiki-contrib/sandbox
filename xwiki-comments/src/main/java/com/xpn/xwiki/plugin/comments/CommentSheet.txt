@@ -1,0 +1,19 @@
+1 Comment View
+
+$doc.use("XWiki.XWikiComments")
+$doc.display("author") $doc.display("date") $doc.display("comment")
+
+1.1 Child comments
+
+#macro(showcomments $docorcomment $level $maxlevel)
+#if($level < $maxlevel)
+#set($level = $level + 1)
+#foreach($comment in $xwiki.comments.getComments($docorcomment, 0, 0))
+#foreach($i in [1..$level])*#end $comment $comment.author $comment.date $comment.content
+#showcomments($comment $level $maxlevel)
+#end
+#set($level = $level - 1)
+#end
+#end
+
+#showcomments($doc 0 3)

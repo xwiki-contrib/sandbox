@@ -1,0 +1,4 @@
+## list comments that are moderated
+#foreach($comment in $xwiki.comments.getModeratedComments(false))
+* [$comment.author $comment.date $comment.content>$comment.getCommentId()] $comment.getCommentId()
+#end
