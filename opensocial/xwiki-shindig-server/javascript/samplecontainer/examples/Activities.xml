@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs title="Activities" >
+    <Require feature="opensocial-0.7"/>
+  </ModulePrefs> 
+  <Content type="html">
+  <![CDATA[ 
+  <div id="content_div"></div>
+  <script type="text/javascript">
+
+  var aTitle = null;
+
+  function postActivity(text) {  
+    var params = {};  
+    params[opensocial.Activity.Field.TITLE] = text;
+    params[opensocial.Activity.Field.BODY] = "example activity body";
+    params[opensocial.Activity.Field.STREAM_TITLE] = "example stream title";
+    params[opensocial.Activity.Field.URL] = "example activity url";
+
+    var activity = opensocial.newActivity(params); 
+    opensocial.requestCreateActivity(activity, opensocial.CreateActivityPriority.HIGH, callback);
+  };        
+  
+  function callback(data) {
+    var contentDiv = document.getElementById('content_div');
+    contentDiv.innerHTML = "Successfully posted activity: " + aTitle;
+  };
+  
+ function postActivityFunction(){
+  aTitle = document.getElementById("activityTitle").value;
+  postActivity(aTitle);
+ }
+
+  </script>
+
+  <div id='form_div'>
+    <br/>
+    Enter Activity Title: <input type="text"  size="50" id="activityTitle"/>
+    <br/>
+    <input type="button" value="post activity" onclick="postActivityFunction();"/>
+ </div>
+      
+
+  <div id='content_div'/>
+    
+
+  ]]> 
+  </Content>
+</Module>
+

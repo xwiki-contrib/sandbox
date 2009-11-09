@@ -1,0 +1,9 @@
+
+Simple container which uses the XWiki mock back-end data access implementation for Shindig, 
+located in the xwiki-shindig-samplesmock module.
+
+To run with Jetty on port 8080, from xwiki-shindig-server module, do:
+	  mvn jetty:run
+	  
+Access the container here:
+http://localhost:8080/gadgets/files/samplecontainer/simplecontainer.html

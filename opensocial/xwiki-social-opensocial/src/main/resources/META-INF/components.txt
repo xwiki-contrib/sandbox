@@ -1,0 +1,3 @@
+org.xwiki.opensocial.social.spi.internal.ActivityServiceXW
+org.xwiki.opensocial.social.spi.internal.AppDataServiceXW
+org.xwiki.opensocial.social.spi.internal.PersonServiceXW

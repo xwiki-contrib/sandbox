@@ -1,0 +1,35 @@
+This is the Shindig Server Sample.
+
+To run with Jetty on port 8080, from shindig-server-example module, do:
+	  mvn jetty:run
+
+For running test samples see Discovering Shindig Samples at 
+http://incubator.apache.org/shindig/getting-started.html.
+
+For example,
+Assuming your server is running on http://yourserver:yourport/gadgets/...
+      you can hit these html files in your favorite browser to see your local
+      Shindig in action:
+      
+      * http://yourserver:yourport/gadgets/files/samplecontainer/samplecontainer.html - sample container, first starting point
+      		
+      		By default, the gadget is http://yourserver:yourport/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml. 
+      		You could try to use another gadget by specifying one of following URLs in the "Displaying gadget" field and click 
+      		on "reset all":
+    			* http://yourserver:yourport/gadgets/files/samplecontainer/examples/SocialCajaWorld.xml
+    			* http://yourserver:yourport/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml
+    			* http://yourserver:yourport/gadgets/files/samplecontainer/examples/getFriendsHasApp.xml
+
+      * http://yourserver:yourport/gadgets/files/container/sample1.html - basic container
+      * http://yourserver:yourport/gadgets/files/container/sample2.html - custom rendering
+      * http://yourserver:yourport/gadgets/files/container/sample3.html - custom layouts
+      * http://yourserver:yourport/gadgets/files/container/sample4.html - set pref
+      * http://yourserver:yourport/gadgets/files/container/sample5.html - set pref
+      * http://yourserver:yourport/gadgets/files/container/sample6.html - dynamic height
+      * http://yourserver:yourport/gadgets/files/container/sample7.html - set title
+      * http://yourserver:yourport/gadgets/files/container/sample-metadata.html
+	  * http://yourserver:yourport/gadgets/files/container/rpctest_gadget.html
+	  
+	  or, to test any gadget application, use:
+	  * http://yourserver:yourport/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
+

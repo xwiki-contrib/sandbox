@@ -1,0 +1,154 @@
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+
+<!--
+  Simple page for testing gadgets.rpc performance.
+  Allows you to add a simulated "gadget" (in this case just a static
+  HTML page which loads gadgets.rpc also), and pass some
+  specified number of random messages of specified size to
+  and from it.
+
+  A simple recommended setup is to start up two instances of
+  the Shindig Gadgets Server on two separate ports to test
+  "real" cross-domain communication, since port is factored
+  into the same-domain policy enforced by browsers.
+
+  If your servers are on localhost:8080 and localhost:8081, then hit:
+  http://localhost:8080/gadgets/files/container/rpctest_container.html? \
+  http://localhost:8081/gadgets/files/container/rpctest_gadget.html& \
+  http://localhost:8081/gadgets/files/container/rpc_relay.uncompressed.html& \
+  [ http://localhost:8080/gadgets/files/container/rpc_relay.uncompressed.html ]
+
+  Append &gadget=deferred to test early-message queueing from container to
+  gadget, by preventing attachment of gadget until a button is pressed.
+
+  (Note the backslashes should be removed, as they exist for formatting only.)
+
+  There are two arguments, separated by an ampersand:
+  1. URL of the "gadget" test page.
+  2. URL of the "gadget" test page's RPC relay (for browsers requiring it).
+-->
+<html>
+  <head>
+    <title>gadgets.rpc Performance Tests: Container</title>
+    <script>
+      var useLegacy = (window.location.search.indexOf('&uselegacy=1') !== -1);
+      var gadgets = {};
+      gadgets.config = {
+        register: function(rpc, requiredConfig, callback) {
+          // rpc === "rpc", requiredConfig is ignored here.
+          // Just call the callback (function init(...) in rpc.js)
+          // with a dummy config object.
+          callback({ rpc: { parentRelayUrl: "", useLegacyProtocol: useLegacy } });
+        }
+      };
+    </script>
+    <script language="JavaScript" type="text/javascript" src="/gadgets/js/rpc.js?c=1&debug=1"></script>
+    <script language="JavaScript" type="text/javascript" src="rpctest_perf.js"></script>
+    <script>
+      function handleInitialGadgetMessage(message) {
+        var status = document.getElementById('initconsole');
+        status.innerHTML = 'gadget says: ' + message;
+      }
+      gadgets.rpc.register('initial_gadget_message', handleInitialGadgetMessage);
+    </script>
+    <script>
+      var containerRelay;
+      var gadgetUrl;
+
+      function appendGadget() {
+        var secret = Math.round(Math.random() * 10000000);
+        var container = document.getElementById("container");
+        var iframeHtml = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "&uselegacy=" + (useLegacy ? "1" : "0") + "#rpctoken=" + secret + "'></iframe>";
+        if (window.location.search.indexOf('&ua=backward') !== -1) {
+          // incorrect but likely widely used
+          gadgets.rpc.setAuthToken('gadget', secret);
+          container.innerHTML = iframeHtml;
+        } else {
+          // "correct" way.
+          container.innerHTML = iframeHtml;
+          gadgets.rpc.setAuthToken('gadget', secret);
+        }
+      }
+
+      function initTest() {
+        // query string is assumed to be the "gadget" URL as arg 1,
+        // and optionally the relay URL as arg 2
+        var pageArgs = window.location.search.substring(1).split('&');
+        gadgetUrl = pageArgs[0];
+        if (pageArgs[1]) {
+          gadgets.rpc.setRelayUrl('gadget', pageArgs[1]);
+        }
+        containerRelay = pageArgs[2] || window.location.href;
+
+        if (window.location.search.indexOf('&gadget=deferred') === -1) {
+          appendGadget();
+        } else {
+          document.getElementById('showgadget').style.display = '';
+        }
+
+        document.getElementById('relaymethod').innerHTML = gadgets.rpc.getRelayChannel();
+
+        initPerfTest();
+      };
+    </script>
+  </head>
+  <body style="background-color: #cccccc" onload="initTest();">
+    <div>gadgets.rpc Performance: Container Page (method: <span id="relaymethod"></span>)</div><hr/>
+    <div>Initial gadget render console: <span id="initconsole">Gadget hasn't commented yet.</span></div><hr/>
+    <div>Test<br/>
+      <ul>
+        <li>Number of messages to send:
+          <select name="num_msgs" id="num_msgs">
+            <option value="1">1</option>
+            <option value="10">10</option>
+            <option value="100" selected>100</option>
+            <option value="1000">1000</option>
+          </select>
+        </li>
+        <li>Message size:
+          <select name="msg_size" id="msg_size">
+            <option value="10">10 B</option>
+            <option value="100">100 B</option>
+            <option value="1024" selected>1 kB</option>
+            <option value="10240">10 kB</option>
+            <option value="102400">100 kB</option>
+            <option value="1048576">1 MB</option>
+          </select>
+        </li>
+        <li>
+          <input type="button" value="Start The Test!" onclick="runPerfTest('gadget');" />
+        </li>
+      </ul>
+    </div>
+    <div id="test_running" style="display:none;">
+      Running test...
+    </div>
+    <div id="results" style="display:none;">
+      Results: Gadget-to-Container<br/>
+      Messages: <span id="results_num_received"></span>, Bytes: <span id="results_bytes_received"></span> <span id="in_or_out"></span><br/>
+      Time elapsed for test run: <span id="results_time_used"></span><br/>
+      Messages/second: <span id="results_msgs_per_sec"></span><br/>
+      Bytes/second: <span id="results_bytes_per_sec"></span>
+    </div>
+    <hr/>
+    <div>Gadget: <span id="showgadget" style="display:none"><input type="button" onclick="appendGadget(); this.style.display='none';" value="Append Gadget Now (for delayed load testing)"/></span></div>
+    <div id="container"></div>
+  </body>
+</html>

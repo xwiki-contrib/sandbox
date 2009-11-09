@@ -1,0 +1,192 @@
+<html>
+<head>
+<title>A very simple OpenSocial Gadget testing container</title>
+<link rel="stylesheet" href="../container/gadgets.css">
+<style type="text/css">
+  body {
+    font-family: arial, sans-serif;
+  }
+
+  #headerDiv {
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #B5EDBC;
+    color: #006633;
+    font-size: larger;
+    font-weight: bold;
+  }
+
+  .subTitle {
+    font-size: smaller;
+    float: center;
+  }
+
+
+  .formElements {
+    padding: 20px;
+    font-size: smaller;
+    float: center;
+  }
+
+
+  .gadgets-gadget-chrome {
+    width: 60%;
+    float: none;
+    margin: auto;
+  }
+
+  .gadgets-gadget {
+    width: 100%;
+  }
+</style>
+<script type="text/javascript" src="../../js/rpc.js?c=1&debug=1"></script>
+<script type="text/javascript" src="../container/cookies.js"></script> 
+<script type="text/javascript" src="../container/util.js"></script> 
+<script type="text/javascript" src="../container/gadgets.js"></script>
+<script type="text/javascript" src="../container/cookiebaseduserprefstore.js"></script> 
+
+<script type="text/javascript">
+
+
+var parentUrl = document.location.href;
+var baseUrl = parentUrl.substring(0, parentUrl.indexOf('simplecontainer.html'));
+
+// Note: This is mapped to the socialdata servlet and is assumed to be running locally.
+// Edit accordingly...
+var socialDataPath = document.location.protocol + "//" + document.location.host
+    + "/gadgets/socialdata";
+
+
+var gadgetUrl = baseUrl + 'examples/ListFriends.xml';
+var gadget;
+
+var viewerOwnerList = new Array("john.doe", "george.doe", "jane.doe" , "maija.m", "mickey", "minnie", "dduck", "daffy", "porky", "bugs");
+
+var exampleGadgetList = new Array(
+"http://localhost:8080/gadgets/files/samplecontainer/examples/ListFriends.xml",
+"http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml",
+"http://localhost:8080/gadgets/files/samplecontainer/examples/Activities.xml",
+"http://localhost:8080/gadgets/files/samplecontainer/examples/Persistence.xml"
+);
+
+var viewerId = "mickey";
+var ownerId = "mickey";
+
+// UI Functions
+
+function populateSelect(id) {
+  var selectOut =  "<select id=\"" + id + "\">";
+  for (var i=0; i < viewerOwnerList.length; i++){
+    selectOut += "<option value=\"" + viewerOwnerList[i] + "\">" + viewerOwnerList[i] + "</option>";
+  }
+  selectOut += "</select>";
+  return selectOut;
+}
+
+function populateGadgetSelect() {
+  var selectOut =  "<select id=\"gadgetSelect\" onChange=\"selectGadget();\">";
+  for (var i=0; i < exampleGadgetList.length; i++){
+    selectOut += "<option value=\"" + exampleGadgetList[i] + "\">" + urlFileName(exampleGadgetList[i]) + "</option>";
+  }
+  selectOut += "</select>";
+  return selectOut;
+}
+
+function selectGadget(){
+  document.getElementById("gadgetUrlField").value = document.getElementById("gadgetSelect").value;
+}
+
+function urlFileName(url){
+  var path = url.lastIndexOf("/");
+  return url.substr(path+1);
+}
+
+function initGadget() {
+
+  // Populate selects
+  document.getElementById("viewerdiv").innerHTML = populateSelect("viewerId");
+  document.getElementById("ownerdiv").innerHTML = populateSelect("ownerId");
+  document.getElementById("examplesdiv").innerHTML = populateGadgetSelect();
+
+
+  // Render gadget
+  document.getElementById("gadgetUrlField").value = gadgetUrl;
+
+  gadget = gadgets.container.createGadget({'specUrl': gadgetUrl});;
+  gadget.setServerBase('../../');
+
+  // Viewer and Owner
+
+  gadget.secureToken = escape(generateSecureToken());
+
+  gadgets.container.addGadget(gadget);
+  gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
+  gadgets.container.renderGadgets();
+};
+
+
+
+
+function changeGadgetUrl() {
+  viewerId = document.getElementById("viewerId").value;
+  ownerId = document.getElementById("ownerId").value;
+  gadgetUrl = document.getElementById("gadgetUrlField").value;
+  gadget.secureToken = escape(generateSecureToken());
+  gadget.specUrl = gadgetUrl;
+  gadgets.container.renderGadgets();
+};
+
+
+
+function generateSecureToken() {
+  // Borrowed from SampleContainer.html
+  // Used to generate an "st" parameter to satisfy Shindig server
+  var appId = 0;
+  for (var i=0; i < gadgetUrl.length; i++) {
+    appId += gadgetUrl.charCodeAt(i);
+  }
+  var fields = [ownerId, viewerId, appId, "shindig", gadgetUrl, "0", "default"];
+  for (var i=0; i < fields.length; i++) {
+    // escape each field individually, for metachars in URL
+    fields[i] = escape(fields[i]);
+  }
+  
+  return fields.join(":");
+}
+
+
+SampleContainerGadget = function(opt_params) {
+  gadgets.IfrGadget.call(this, opt_params);
+};
+
+SampleContainerGadget.inherits(gadgets.IfrGadget);
+gadgets.container.gadgetClass = SampleContainerGadget;
+
+
+
+
+
+</script>
+</head>
+<body onLoad="initGadget();">
+  <div id="headerDiv">
+    <div >A Really Simple Gadget Testing Container</div>
+     <hr/>
+
+	
+	<div class="formElements">
+    <div >Gadget Url: <input type="text" size="75" id="gadgetUrlField"/> </div> 
+        Easy Gadgets Selector:<div id="examplesdiv" style="display:inline">Loading...</div>
+
+<br/>
+<br/>
+	Viewer id:<div id="viewerdiv" style="display:inline;">Loading...</div>
+	Owner id:<div id ="ownerdiv" style="display:inline;">Loading...</div> <input type="button" value="Re-init gadget" onClick="changeGadgetUrl();"/>
+    </div>
+  
+     <hr/>
+ 
+  <div id="gadgetState" style="font-size:smaller"></div>
+  <div id="gadget-chrome" class="gadgets-gadget-chrome"></div>
+</body>
+</html>

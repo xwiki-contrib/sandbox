@@ -1,0 +1,3 @@
+org.xwiki.opensocial.social.mock.spi.internal.MockActivityService
+org.xwiki.opensocial.social.mock.spi.internal.MockAppDataService
+org.xwiki.opensocial.social.mock.spi.internal.MockPersonService
