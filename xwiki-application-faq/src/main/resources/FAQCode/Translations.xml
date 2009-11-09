@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>FAQCode</web>
+<name>Translations</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1256036187000</creationDate>
+<date>1256036262000</date>
+<contentUpdateDate>1256036262000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>checkbox</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>FAQCode.Translations</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>295d60ac-5275-4f64-8bdb-6db2a5695304</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>faq.webhome.title=FAQ
+faq.webhome.search.title=In order to find the information you're looking for, you can use the search feature of your browser to search for FAQ entries displayed on this page or use the search box below.
+faq.webhome.search.submit.button.value=Search FAQs
+faq.webhome.add.title=If you don't find the FAQ you're looking for, create a new FAQ using the following form and fill the answer once you've found it!
+faq.webhome.add.submit.button.value=Add this FAQ
+faq.webhome.table.answered.title={0} Answered FAQs (latest first)
+faq.webhome.table.notanswered.title={0} Unanswered FAQs (latest first)
+
+faq.search.title=FAQ Search
+faq.search.submit.button.value=Search FAQs
+
+faq.class.question.property.prettyname=Question
+faq.class.answer.property.prettyname=Answer
+</content></xwikidoc>

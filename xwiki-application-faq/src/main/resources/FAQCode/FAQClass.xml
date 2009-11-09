@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>FAQCode</web>
+<name>FAQClass</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>XWiki.XWikiClasses</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1255598638000</creationDate>
+<date>1256036577000</date>
+<contentUpdateDate>1256036577000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<class>
+<name>FAQCode.FAQClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<answer>
+<editor>Wysiwyg</editor>
+<name>answer</name>
+<number>2</number>
+<picker>0</picker>
+<prettyName>Answer</prettyName>
+<rows>25</rows>
+<size>75</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</answer>
+<question>
+<name>question</name>
+<number>1</number>
+<picker>0</picker>
+<prettyName>Question</prettyName>
+<size>75</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</question>
+</class>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>checkbox</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>FAQCode.FAQClass</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>f0f6b164-e284-432c-b887-fa917183b454</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>{{velocity filter="none"}}
+{{html clean="false" wiki="true"}}
+## replace Main with the Space where you want your documents to be created
+## replace the default parent with the one of your choice
+## Save this template using the 'Save' button
+#set($class = $doc.name.substring(0,$doc.name.indexOf("Class")))
+#set($defaultparent = "XWiki.${class}Class")
+#set($defaultweb = "FAQ")
+{{include document="XWiki.ClassSheet"/}}
+{{/html}}
+{{/velocity}}
+</content></xwikidoc>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>FAQCode</web>
+<name>FAQClassSheet</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1255598832000</creationDate>
+<date>1256035107000</date>
+<contentUpdateDate>1256035107000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>checkbox</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>FAQCode.FAQClassSheet</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>f734e5bc-63cf-4e37-a136-dfbe723a5a7f</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>{{velocity filter="none"}}
+{{html clean="false" wiki="true"}}
+#set($obj = $doc.getObject("FAQCode.FAQClass"))
+#set($class = $obj.xWikiClass)
+
+&lt;table border="1" cellspacing="0" cellpadding="2"&gt;
+&lt;tr&gt;&lt;td&gt; 
+**${msg.get('faq.class.question.property.prettyname')}**
+&lt;/td&gt;
+&lt;td&gt;
+#if($context.action=="inline")
+  $doc.display("question", "edit", $obj)
+#else
+  $doc.display("question", "rendered", $obj)
+#end
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt; 
+**${msg.get('faq.class.answer.property.prettyname')}**
+&lt;/td&gt;
+&lt;td&gt;
+#if($context.action=="inline")
+  $doc.display("answer", "edit", $obj)
+#else
+  $doc.display("answer", "rendered", $obj)
+#end
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+{{/html}}
+{{/velocity}}</content>
+</xwikidoc>

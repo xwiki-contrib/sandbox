@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>FAQ</web>
+<name>WebHome</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1255595263000</creationDate>
+<date>1256035672000</date>
+<contentUpdateDate>1256035672000</contentUpdateDate>
+<version>1.1</version>
+<title>FAQ</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>checkbox</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>FAQ.WebHome</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>7c485fe5-4e2c-4b6e-86ff-628c6d6b487a</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>{{velocity filter="none"}}
+{{html clean="false" wiki="true"}}
+= $msg.get('faq.webhome.title') =
+
+$msg.get('faq.webhome.search.title')
+
+## ---------------------------------------------------
+## Let the user search for FAQs
+## ---------------------------------------------------
+&lt;p/&gt;
+&lt;form action="$xwiki.getURL("FAQ.FAQSearch")"&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;td&gt;
+        &lt;input type="text" name="text" value="$!request.text" size="30"/&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;input type="submit" value="$msg.get('faq.webhome.search.submit.button.value')"/&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/form&gt;
+
+## ---------------------------------------------------
+## Let the user add FAQs
+## ---------------------------------------------------
+&lt;p/&gt;
+$msg.get('faq.webhome.add.title')
+
+&lt;form action="" id="newfaq"&gt;
+  &lt;input type="hidden" name="parent" value="FAQ.WebHome" /&gt;
+  &lt;input type="hidden" name="template" value="FAQCode.FAQClassTemplate" /&gt;
+  &lt;input type="hidden" name="sheet" value="1" /&gt;
+  &lt;input type="hidden" name="webname" value="FAQ"/&gt;
+  &lt;input type="hidden" name="name" value=""/&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;td&gt;
+        &lt;input type="text" name="faq" value="" size="30"/&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;input type="submit" value="$msg.get('faq.webhome.add.submit.button.value')" onclick='if (updateName(this.form.faq,this.form.name)) { action="../../inline/" + this.form.webname.value + "/" + this.form.name.value; this.form.submit(); }' /&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/form&gt;
+
+## Compute number of FAQ entries
+#set ($whereClauseAnsweredFaqs = "obj.name=doc.fullName and obj.name&lt;&gt;'FAQCode.FAQClassTemplate' and obj.className='FAQCode.FAQClass' and prop.id.id = obj.id and prop.id.name='answer' and prop.value &lt;&gt; ''")
+#set ($nbAnsweredFaqs = "select count(distinct doc) from XWikiDocument doc, BaseObject as obj, LargeStringProperty as prop where $whereClauseAnsweredFaqs")
+#set ($whereClauseNotAnsweredFaqs = "obj.name=doc.fullName and obj.name&lt;&gt;'FAQCode.FAQClassTemplate' and obj.className='FAQCode.FAQClass' and prop.id.id = obj.id and prop.id.name='answer' and prop.value=''")
+#set ($nbNotAnsweredFaqs = "select count(distinct doc) from XWikiDocument doc, BaseObject as obj, LargeStringProperty as prop where $whereClauseNotAnsweredFaqs")
+#set ($orderByClauseFaqs = "order by doc.creationDate desc")
+&lt;p/&gt;
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;th align="center"&gt;$msg.get('faq.webhome.table.answered.title',["$xwiki.search($nbAnsweredFaqs).get(0)"])&lt;/th&gt;
+    &lt;th align="center"&gt;$msg.get('faq.webhome.table.notanswered.title',["$xwiki.search($nbNotAnsweredFaqs).get(0)"])&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style="border-right:1px dashed #CCC;border-bottom:1px dashed #CCC"&gt;
+## ---------------------------------------------------
+## Find the FAQ entries that have answers
+## ---------------------------------------------------
+#set ($sql = ", BaseObject as obj, LargeStringProperty as prop where ${whereClauseAnsweredFaqs} ${orderByClauseFaqs}")
+#foreach ($item in $xwiki.searchDocuments($sql))
+  #set($bentrydoc = $xwiki.getDocument($item))
+  #set($bentryobj = $bentrydoc.getObject("FAQCode.FAQClass", "language", $language, true))
+  #if ($bentryobj.getProperty("question").getValue().trim().length() == 0)
+    * [[(Empty question)&gt;&gt;$item]]
+  #else
+    * [[${bentrydoc.display("question","view", $bentryobj)}&gt;&gt;$item]]
+  #end
+#end
+    &lt;/td&gt;
+    &lt;td style="vertical-align:top;"&gt;
+
+## ----------------------------------------------------
+## Find the FAQ entries that have no answers yet 
+## ----------------------------------------------------
+#set($sql = ", BaseObject as obj, LargeStringProperty as prop where ${whereClauseNotAnsweredFaqs} ${orderByClauseFaqs}")
+#foreach ($item in $xwiki.searchDocuments($sql))
+  #set($bentrydoc = $xwiki.getDocument($item))
+  #set($bentryobj = $bentrydoc.getObject("FAQCode.FAQClass", "language", $language, true))
+  #if ($bentryobj.getProperty("question").getValue().trim().length() == 0)
+     * [[(Empty question)&gt;&gt;$item]]
+  #else
+     * [[${bentrydoc.display("question","view", $bentryobj)}&gt;&gt;$item]]
+  #end
+#end
+&lt;p/&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p/&gt;
+##$context.setCacheDuration(10000)
+{{/html}}
+{{/velocity}}</content>
+</xwikidoc>
