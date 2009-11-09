@@ -1,0 +1,190 @@
+XWikiDocument getDocument()
+long getId()
+String getName()
+String getSpace()
+String getWiki()
+String getWeb()
+String getFullName()
+String getPrefixedFullName()
+Version getRCSVersion()
+String getVersion()
+String getPreviousVersion()
+String getTitle()
+String getDisplayTitle()
+String getFormat()
+String getAuthor()
+String getContentAuthor()
+Date getDate()
+Date getContentUpdateDate()
+Date getCreationDate()
+String getParent()
+String getCreator()
+String getContent()
+String getLanguage()
+String getTemplate()
+String getRealLanguage() throws XWikiException
+String getDefaultLanguage()
+String getDefaultTemplate()
+String getComment()
+boolean isMinorEdit()
+List getTranslationList() throws XWikiException
+String getTranslatedContent() throws XWikiException
+String getTranslatedContent(String language) throws XWikiException
+Document getTranslatedDocument(String language) throws XWikiException
+Document getTranslatedDocument() throws XWikiException
+String getRenderedContent() throws XWikiException
+String getRenderedContent(String text) throws XWikiException
+String getRenderedContent(String text, String syntaxId)
+String getEscapedContent() throws XWikiException
+String getArchive() throws XWikiException
+XWikiDocumentArchive getDocumentArchive() throws XWikiException
+boolean isNew()
+String getAttachmentURL(String filename)
+String getAttachmentURL(String filename, String action)
+String getAttachmentURL(String filename, String action, String queryString)
+String getAttachmentRevisionURL(String filename, String version)
+String getAttachmentRevisionURL(String filename, String version, String querystring)
+String getURL()
+String getURL(String action)
+String getURL(String action, String querystring)
+String getExternalURL()
+String getExternalURL(String action)
+String getExternalURL(String action, String querystring)
+String getParentURL() throws XWikiException
+Class getxWikiClass()
+Class[] getxWikiClasses()
+int createNewObject(String classname) throws XWikiException
+Object newObject(String classname) throws XWikiException
+boolean isFromCache()
+int getObjectNumbers(String classname)
+Map<String, Vector<Object>> getxWikiObjects()
+Vector<Object> getObjects(String classname)
+Object getFirstObject(String fieldname)
+Object getObject(String classname, String key, String value, boolean failover)
+Vector<Object> getObjects(String classname, String key, String value)
+Object getObject(String classname, String key, String value)
+Object getObject(String classname)
+Object getObject(String classname, boolean create)
+Object getObject(String classname, int nb)
+String getXMLContent() throws XWikiException
+String toXML() throws XWikiException
+org.dom4j.Document toXMLDocument() throws XWikiException
+Version[] getRevisions() throws XWikiException
+String[] getRecentRevisions() throws XWikiException
+String[] getRecentRevisions(int nb) throws XWikiException
+List<String> getRevisions(RevisionCriteria criteria) throws XWikiException
+RevisionInfo getRevisionInfo(String version) throws XWikiException
+List<Attachment> getAttachmentList()
+Vector<Object> getComments()
+Vector<Object> getComments(boolean asc)
+void use(Object object)
+void use(String className)
+void use(String className, int nb)
+String getActiveClass()
+String displayPrettyName(String fieldname)
+String displayPrettyName(String fieldname, Object obj)
+String displayPrettyName(String fieldname, boolean showMandatory)
+String displayPrettyName(String fieldname, boolean showMandatory, Object obj)
+String displayPrettyName(String fieldname, boolean showMandatory, boolean before)
+String displayPrettyName(String fieldname, boolean showMandatory, boolean before,
+String displayTooltip(String fieldname)
+String displayTooltip(String fieldname, Object obj)
+String display(String fieldname)
+String display(String fieldname, String mode)
+String display(String fieldname, String mode, String prefix)
+String display(String fieldname, Object obj)
+String display(String fieldname, String mode, Object obj)
+String display(String fieldname, String mode, String prefix, Object obj)
+String displayForm(String className, String header, String format)
+String displayForm(String className, String header, String format, boolean linebreak)
+String displayForm(String className)
+String displayRendered(com.xpn.xwiki.api.PropertyClass pclass, String prefix,
+String displayView(com.xpn.xwiki.api.PropertyClass pclass, String prefix,
+String displayEdit(com.xpn.xwiki.api.PropertyClass pclass, String prefix,
+String displayHidden(com.xpn.xwiki.api.PropertyClass pclass, String prefix,
+List<String> getIncludedPages()
+List getIncludedMacros()
+List getLinkedPages()
+Attachment getAttachment(String filename)
+List getContentDiff(Document origdoc, Document newdoc) throws XWikiException,
+List getXMLDiff(Document origdoc, Document newdoc) throws XWikiException,
+List getRenderedContentDiff(Document origdoc, Document newdoc) throws XWikiException,
+List getMetaDataDiff(Document origdoc, Document newdoc) throws XWikiException
+List getObjectDiff(Document origdoc, Document newdoc) throws XWikiException
+List getClassDiff(Document origdoc, Document newdoc) throws XWikiException
+List getAttachmentDiff(Document origdoc, Document newdoc) throws XWikiException
+List getLastChanges() throws XWikiException, DifferentiationFailedException
+DocumentStats getCurrentMonthPageStats(String action)
+DocumentStats getCurrentMonthWebStats(String action)
+List getCurrentMonthRefStats() throws XWikiException
+boolean checkAccess(String right)
+boolean hasAccessLevel(String level)
+boolean hasAccessLevel(String level, String user)
+boolean getLocked()
+String getLockingUser()
+Date getLockingDate()
+java.lang.Object get(String classOrFieldName)
+java.lang.Object getValue(String fieldName)
+java.lang.Object getValue(String fieldName, Object object)
+String getTextArea()
+Map getTOC(int init, int max, boolean numbered)
+String getTags()
+List getTagList()
+List getTagsPossibleValues()
+void insertText(String text, String marker) throws XWikiException
+boolean equals(java.lang.Object arg0)
+List getBacklinks() throws XWikiException
+List getLinks() throws XWikiException
+String getDefaultEditURL() throws XWikiException
+String getEditURL(String action, String mode) throws XWikiException
+String getEditURL(String action, String mode, String language)
+boolean isCurrentUserCreator()
+boolean isCurrentUserPage()
+boolean isCurrentLocalUserPage()
+boolean isCreator(String username)
+void set(String fieldname, java.lang.Object value)
+void set(String fieldname, java.lang.Object value, Object obj)
+void setTitle(String title)
+void setCustomClass(String customClass)
+void setParent(String parent)
+void setContent(String content)
+void setDefaultTemplate(String dtemplate)
+void setComment(String comment)
+void setMinorEdit(boolean isMinor)
+void save() throws XWikiException
+void save(String comment) throws XWikiException
+void save(String comment, boolean minorEdit) throws XWikiException
+void saveWithProgrammingRights() throws XWikiException
+void saveWithProgrammingRights(String comment) throws XWikiException
+void saveWithProgrammingRights(String comment, boolean minorEdit)
+com.xpn.xwiki.api.Object addObjectFromRequest() throws XWikiException
+com.xpn.xwiki.api.Object addObjectFromRequest(String className) throws XWikiException
+List addObjectsFromRequest(String className) throws XWikiException
+com.xpn.xwiki.api.Object addObjectFromRequest(String className, String prefix)
+List addObjectsFromRequest(String className, String prefix) throws XWikiException
+com.xpn.xwiki.api.Object updateObjectFromRequest(String className)
+List updateObjectsFromRequest(String className) throws XWikiException
+com.xpn.xwiki.api.Object updateObjectFromRequest(String className, String prefix)
+List updateObjectsFromRequest(String className, String prefix) throws XWikiException
+boolean isAdvancedContent()
+boolean isProgrammaticContent()
+boolean removeObject(Object obj)
+boolean removeObjects(String className)
+void delete() throws XWikiException
+void deleteWithProgrammingRights() throws XWikiException
+String getVersionHashCode()
+int addAttachments() throws XWikiException
+int addAttachments(String fieldName) throws XWikiException
+boolean validate() throws XWikiException
+boolean validate(String[] classNames) throws XWikiException
+String getValidationScript()
+void setValidationScript(String validationScript)
+void renameDocument(String newDocumentName) throws XWikiException
+void rename(String newDocumentName) throws XWikiException
+void renameDocument(String newDocumentName, List backlinkDocumentNames)
+void rename(String newDocumentName, List backlinkDocumentNames) throws XWikiException
+Document getDocumentRevision(String revision) throws XWikiException
+Document getPreviousDocument() throws XWikiException
+boolean isMostRecent()
+String toString()
+String getSyntaxId()

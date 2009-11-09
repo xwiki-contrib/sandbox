@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="org.xwiki.eclipse.rcp.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.xwiki.eclipse.rcp.application"
+            name="XWiki Eclipse">
+         <property
+               name="appName"
+               value="XWiki Eclipse">
+         </property>
+         <property
+               name="aboutImage"
+               value="icons/about.png">
+         </property>
+         <property
+               name="aboutText"
+               value="XWiki Eclipse&#x0A;&#x0A;(C) 2007-2009 XWiki.com">
+         </property>
+         <property
+               name="windowImages"
+               value="icons/xwiki16.png,icons/xwiki32.png,icons/xwiki48.png,icons/xwiki64.png,icons/xwiki128.png">
+         </property>
+      </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.xwiki.xeclipse.menu.File">
+            <command
+                  commandId="org.eclipse.ui.newWizard"
+                  id="New connection...">
+            </command>
+            <command
+                  commandId="org.xwiki.eclipse.ui.commands.NewPage"
+                  id="New page...">
+            </command>
+            <command
+                  commandId="org.xwiki.eclipse.ui.commands.NewObject"
+                  id="New object...">
+            </command>
+            <separator
+                  name="separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  id="Save">
+            </command>
+            <separator
+                  name="separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.eclipse.ui.file.exit"
+                  id="Exit">
+            </command>         
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:org.xwiki.xeclipse.menu.Edit">
+            <command
+                  commandId="org.eclipse.ui.edit.cut"
+                  id="Cut">
+            </command>
+            <command
+                  commandId="org.eclipse.ui.edit.copy"
+                  id="Copy">
+            </command>
+            <command
+                  commandId="org.eclipse.ui.edit.paste"
+                  id="Paste">
+            </command>
+            <separator
+                  name="separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.xwiki.eclipse.ui.commands.OpenPage"
+                  id="Open page">
+            </command>
+            <separator
+                  name="separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.xwiki.eclipse.ui.commands.Delete"
+                  id="Delete">
+            </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:org.xwiki.xeclipse.menu.Help">
+            <command
+                  commandId="org.eclipse.ui.help.aboutAction"
+                  id="About">
+            </command>         
+      </menuContribution>
+   </extension>
+
+</plugin>

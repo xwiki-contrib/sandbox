@@ -1,0 +1,145 @@
+*Updated Renderer, for new xwiki-core-rendering
+*Created TestRenderer
+*Included xwiki-core-rendering-macro-velocity, but NOT Working
+*Changed libs for getPageSummaryAtIndex(), function rename
+
+* Updated, since Renderer depends on xwiki-core-rendering-api
+* Delete on a Large Wiki now uses IProgressMonitor
+
+* Updated log
+* Tested Lazy Retrieval functionality for Spaces. Working fine.
+* Updated CreateLargeWiki for Testing.
+
+* "New space" Creation for XEclipse
+
+* Extended 6th Objective and included DataManager's expansion also
+* Above functionality NOT tested, because xwiki server was not initializing properly [Some Context/internal error]
+* DND between 2 different DataManagers would not give error.
+* Updated Log
+* Updated Libs
+
+Working fine. Implemented Feature Lazy Retrieval of Pages
+* Retrieves pages in batches, if number of pages > 100, without obstructing the UI functionality
+* No blockage
+* Pending message displayed as the bottom node.
+* Removed all Trace messages
+* Cleaned up.
+* Objective 6's first working/implemented commit.
+
+Commit for communication purpose
+
+* Modified xmlrpc libs a bit for correct functioning of getPages() function
+* Easier Tracing
+* NOT working as expected (the same error as the previous commit)
+
+* Created Initial Lazy Retrieval-Type Viewer
+* Uses getPages(space,start,limit) and getNumberofPages xmlrpc methods to retrieve pages in batches.
+* Loosely based on J2EEContentProvider of org.eclipse.jst.j2ee.navigator.ui according to http://dev.eclipse.org/newslists/news.eclipse.platform/msg54809.html
+* NOT Working as expected.
+
+Commit for communication Purposes.
+* http://www.eclipse.org/newsportal/article.php?id=37027&group=eclipse.platform.rcp#37027
+* Overriden method in XWikiEclipseNavigator for SWT.VIRTUAL
+* Implemented updateChildCount() and updateElement() but, that does not seem to be called.
+* Does plugin.xml have to be changed for it to be activated?
+* Another newsgroup mail in this direction http://dev.eclipse.org/newslists/news.eclipse.platform/msg54562.html
+* Updated xwiki-core and xwiki-xmlrpc-* libs for getPage(spacename,index) method and getPage(spacename,start,limit) method, for future possible use in lazy tree.
+
+Changed:-
+* ATTACHMENT_COPIED Bug Removed
+* copyPage() works. New xmlrpc patched libs, and xwiki-1559 also updated.
+* Scroll position saved and restored.
+* PagePreview Rendering was broken earlier. Was fixed.
+* Log file added.
+* Updated README
+
+Minor Commit
+* Notification triggers for DND
+* Completed some FIXME's.
+* copyPage's xmlrpc still NOT corrected
+* ATTACHMENT_RENAMED is not perfect, should not do a viewer.refresh.
+* ATTACHMENT_COPIED bug exists.
+
+Added:-
+* Improved Drag and Drop Support, Error Handling
+* Status Bar, setStatusMessage() from any point, can be used further for removing other possibly annoying message dialogs.
+* Drop to Editor Area. Drag Pages/Attachments/Objects from CNF to Editor area, and open appropriately.
+* Better renamePage implementation that uses updated xmlrpc function.
+* Patched xwiki-xmlrpc-client, there was a small error because I used attachment.getId() and not attachment.getParentId() in the patch submitted.
+
+TBD:-
+* Notification triggers http://gsoc.myxwiki.org/xwiki/bin/view/XEclipse/DragDrop End of Point 1),2)
+* copyPage is erroneous. because the xmlrpc implementation is incorrect. doc.getDocument().copyDocument(newpageId,xwikiContext) does not do the job correctly.
+* xmlrpc tests.
+
+* Basic Drag and Drop Support. Incomplete. Buggy.
+* Updated README for explaining howto use DND with patched JARS.
+
+Works with patch_XWIKI-1559.patch:- http://jira.xwiki.org/jira/browse/XWIKI-1559
+
+* Rename Attachment
+* Move Attachment to another Page+Space.
+* NOT Fully Tested, esp. will have to see if attachment History is actually being saved.
+* Uses New XMLRPC Functions created in patch.
+* Newer xmlrpc-client/model Libs, created using patch.
+
+Very Minor commit.
+
+* Updated README to run the code.
+* 1 bug, fixed.
+* Dependency updated, copy-dependencies.
+
+* State Persistence of Open Editors, i.e restores State of Editors across sessions.
+* EditorHistory now saved.
+* Major Refactoring of code, XWikiEclipseNavigator.java, more developer-friendly to read code.
+
+* State Persistence across sessions (For the CNF)
+	* Saves object names of expanded elements to workbench.xml
+	* Restores  and creates objects correspondingly from it on startup.
+	* Uses Eduard Moraru's code that waits for the data manager to get expanded, and then expands the space summary, followed by page summary.
+
+* Small Change in PagePreview, for handling NullPointerExceptions in Pages which have not been opened.
+* saveState (Persistence) of CNF. restoreState implemented, but giving exception since DM is not yet initiated.
+
+Updated, better Local Rendering Support.
+A Bit Buggy version.
+
+Added missing dependencies.
+Ignored lib directory which is automatically generated by copying dependencies.
+
+Removed jars and added a script for copying dependencies using Maven dependency plugin.
+
+NotificationManager changes for automatic refresh with Delete/Add of Attachments.
+
+Standalone XWiki Rendering (Currently basic version, replacing the browser. no scripting support)
+Attachment Property Page.
+
+Functionalities added:-
+
+* Delete Attachment
+* New Attachment/Upload
+* Open Attachment (Download and to an external editor)
+
+* Removed Test ProxyXMLRpc Class
+* Added Copyright Notices
+* Attachment now shows Size in CNF.
+* Patched version of xwiki-core-xmlrpc-*.jar for XECLIPSE-106 [Client]
+
+Along with Xwiki-xmlrpc patch, gets constrained pages.
+efficient pages retrieval.
+
+Basic Attachment Display.
+No Functionality (Open/Properties)
+Unsure of LocalDataStorageFunctionalities as of yet.
+
+org.xwiki.eclipse is not required. It was the required before the xeclipse was fully restructured.
+
+README Update.
+1st working copy.
+
+1st commit. Import from 1.2rc1
+
+Test commit.
+No changes.
+
+[XEclipse] Initial commit

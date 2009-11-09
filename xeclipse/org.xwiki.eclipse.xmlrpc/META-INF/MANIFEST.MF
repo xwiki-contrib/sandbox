@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: XWiki Eclipse XmlRpc Plug-in
+Bundle-SymbolicName: org.xwiki.eclipse.xmlrpc;singleton:=true
+Bundle-Version: 1.4.0
+Bundle-ClassPath: junit-3.8.1.jar,
+ swizzle-confluence-1.2-20080419-xwiki.jar,
+ ws-commons-util-1.0.2.jar,
+ xml-apis-1.0.b2.jar,
+ xmlrpc-client-3.0.jar,
+ xmlrpc-client-3.1.jar,
+ xmlrpc-common-3.1.jar,
+ xwiki-core-xmlrpc-client-1.4.jar,
+ xwiki-core-xmlrpc-model-1.4.jar
+Bundle-Vendor: XWiki
+Export-Package: org.apache.xmlrpc,
+ org.codehaus.swizzle.confluence,
+ org.xwiki.xmlrpc,
+ org.xwiki.xmlrpc.model
+Require-Bundle: org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

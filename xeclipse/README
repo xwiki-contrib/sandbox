@@ -1,0 +1,25 @@
+This is a "work in progress" project, developed as a Google Summer of Code 2009 project.
+
+To Run from Eclipse:-
+* Import the projects contained in this folder separately.
+* In command line, Run org.xwiki.eclipse.ui->copy-dependencies.sh to download required jars (Maven Script)
+* Clean+Build All Projects (There should be no errors in Eclipse PDE (Red Error symbols :-) ) )
+* Run org.xwiki.eclipse.product [org.xwiki.eclipse.rcp->org.xwiki.eclipse.product->Run As->Eclipse Application] as an Eclipse application.
+* To test Drag and Drop and some other functionalities, You need patched lib jar files for the server side (New XMLRPC Functions). You can either apply
+  the latest patch given in JIRA XWIKI-1559 and generate JAR files, or use the patched jar files already saved in org.xwiki.eclipse.ui->tempPatchedLibs.
+  Copy the 2 JAR Files to (say) xwiki-enterprise-jetty-hsqldb-2.0/webapps/xwiki/WEB-INF/lib/ and use xeclipse to connect to this xwiki server.
+  
+What all implemented/done:-
+Pretty much `svn log http://svn.xwiki.org/svnroot/xwiki/sandbox/gsoc/xeclipse` and http://gsoc.myxwiki.org/xwiki/bin/view/XEclipse/ 
+
+Bugs/FIXME's That I know exist:-
+* if setExpandedState of spaceSummary Fails, then endless loop for expanding pageSummary. Big Bug. "page Summary waiting..." at console.
+* Rendering switch action not the smoothest.
+* Better, smoother implementation of ATTACHMENT_RENAMED
+* LocalXWikiDataStorage Integration?
+* addMergedDropListener Error
+
+Name: New XEclipse Navigator
+Author: Venkatesh Nandakumar
+Mentor: Fabio Mancinelli
+Website: http://gsoc.myxwiki.org/xwiki/bin/view/XEclipse/

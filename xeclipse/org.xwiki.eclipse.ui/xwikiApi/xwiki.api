@@ -1,0 +1,169 @@
+com.xpn.xwiki.XWiki getXWiki()
+String getVersion()
+String getRequestURL() throws XWikiException
+Document getDocument(String fullname) throws XWikiException
+List<DeletedDocument> getDeletedDocuments(String fullname, String lang) throws XWikiException
+DeletedDocument getDeletedDocument(String fullname, String lang, String index) throws XWikiException
+boolean exists(String fullname) throws XWikiException
+boolean checkAccess(String docname, String right)
+Document getDocument(String web, String fullname) throws XWikiException
+Document getDocument(Document doc, String rev) throws XWikiException
+String getFormEncoded(String content)
+String getXMLEncoded(String content)
+String getTextArea(String content)
+String getHTMLArea(String content)
+List<String> getClassList() throws XWikiException
+MetaClass getMetaclass()
+List search(String wheresql) throws XWikiException
+List search(String wheresql, int nb, int start) throws XWikiException
+List<String> searchDocuments(String wheresql) throws XWikiException
+List<String> searchDocuments(String wheresql, int nb, int start) throws XWikiException
+List<String> searchDocuments(String wheresql, int nb, int start, String selectColumns) throws XWikiException
+List<Document> searchDocuments(String wheresql, boolean distinctbylanguage) throws XWikiException
+List<Document> searchDocuments(String wheresql, boolean distinctbylanguage, int nb, int start)
+List<String> searchDocuments(String parametrizedSqlClause, int nb, int start, List< ? > parameterValues)
+List<String> searchDocuments(String parametrizedSqlClause, List< ? > parameterValues) throws XWikiException
+List<String> searchDocumentsNames(String wikiName, String parametrizedSqlClause, int nb, int start, List< ? > parameterValues) throws XWikiException
+List<Document> wrapDocs(List< ? > docs)
+String parseContent(String content)
+String parseMessage()
+String parseMessage(String id)
+String getMessage(String id)
+String parseTemplate(String template)
+String renderTemplate(String template)
+String invokeServletAndReturnAsString(String url)
+String getSkinFile(String filename)
+String getSkinFile(String filename, boolean forceSkinAction)
+String getSkin()
+String getBaseSkin()
+String getWebCopyright()
+String getXWikiPreference(String prefname)
+String getXWikiPreference(String prefname, String default_value)
+String getWebPreference(String prefname)
+String getWebPreferenceFor(String prefname, String space)
+String getWebPreference(String prefname, String default_value)
+String getSkinPreference(String prefname)
+String getSkinPreference(String prefname, String default_value)
+String getWebPreferenceFor(String prefname, String space, String default_value)
+long getXWikiPreferenceAsLong(String prefname, long default_value)
+long getXWikiPreferenceAsLong(String prefname)
+long getWebPreferenceAsLong(String prefname, long default_value)
+long getWebPreferenceAsLong(String prefname)
+int getXWikiPreferenceAsInt(String prefname, int default_value)
+int getXWikiPreferenceAsInt(String prefname)
+int getWebPreferenceAsInt(String prefname, int default_value)
+int getWebPreferenceAsInt(String prefname)
+String getUserPreference(String prefname)
+String getUserPreferenceFromCookie(String prefname)
+String getLanguagePreference()
+String getInterfaceLanguagePreference()
+boolean isVirtualMode()
+boolean isMultiLingual()
+void flushCache()
+void resetRenderingEngine()
+int createUser() throws XWikiException
+int createUser(boolean withValidation) throws XWikiException
+int createUser(boolean withValidation, String userRights) throws XWikiException
+int createNewWiki(String wikiName, String wikiUrl, String wikiAdmin, String baseWikiName, boolean failOnExist)
+int createNewWiki(String wikiName, String wikiUrl, String wikiAdmin, String baseWikiName, String wikilanguage, boolean reset) throws XWikiException
+int createNewWiki(String wikiName, String wikiUrl, String wikiAdmin, String baseWikiName, String wikilanguage, boolean reset, boolean force) throws XWikiException
+int validateUser(boolean withConfirmEmail) throws XWikiException
+void addToAllGroup(String fullwikiname) throws XWikiException
+void sendConfirmationMail(String xwikiname, String password, String email, String add_message, String contentfield) throws XWikiException
+void sendConfirmationMail(String xwikiname, String password, String email, String contentfield)
+boolean copyDocument(String docname, String targetdocname) throws XWikiException
+boolean copyDocument(String docname, String targetdocname, String wikilanguage) throws XWikiException
+boolean copyDocument(String docname, String sourceWiki, String targetWiki, String wikilanguage) throws XWikiException
+boolean copyDocument(String docname, String targetdocname, String sourceWiki, String targetWiki, String wikilanguage, boolean reset) throws XWikiException
+boolean copyDocument(String docname, String targetdocname, String sourceWiki, String targetWiki, String wikilanguage, boolean reset, boolean force) throws XWikiException
+int copyWikiWeb(String web, String sourceWiki, String targetWiki, String wikiLanguage, boolean clean) throws XWikiException
+String includeTopic(String topic) throws XWikiException
+String includeForm(String topic) throws XWikiException
+String includeTopic(String topic, boolean pre) throws XWikiException
+String includeForm(String topic, boolean pre) throws XWikiException
+boolean hasAccessLevel(String level)
+boolean hasAccessLevel(String level, String user, String docname)
+String renderText(String text, Document doc) throws XWikiException
+String renderChunk(Chunk chunk, Document doc)
+String renderChunk(Chunk chunk, boolean source, Document doc)
+List<String> getSpaces() throws XWikiException
+List<String> getSpaceDocsName(String SpaceName) throws XWikiException
+String getEncoding()
+String getAttachmentURL(String fullname, String filename) throws XWikiException
+String getURL(String fullname) throws XWikiException
+String getURL(String fullname, String action) throws XWikiException
+String getURL(String fullname, String action, String querystring) throws XWikiException
+java.lang.Object getExoService(String className) throws XWikiException
+java.lang.Object getExoPortalService(String className) throws XWikiException
+DocumentStats getCurrentMonthXWikiStats(String action)
+String getRefererText(String referer)
+String getShortRefererText(String referer, int length)
+String getFullNameSQL()
+String getUserName(String user)
+String getUserName(String user, String format)
+String getLocalUserName(String user)
+String getLocalUserName(String user, String format)
+String getUserName(String user, boolean link)
+String getUserName(String user, String format, boolean link)
+String getLocalUserName(String user, boolean link)
+String getLocalUserName(String user, String format, boolean link)
+User getUser()
+User getUser(String username)
+String formatDate(Date date)
+String formatDate(Date date, String format)
+String getUserTimeZone()
+Api get(String name)
+Api getPlugin(String name)
+String getAdType()
+String getAdClientId()
+String getURLContent(String surl, String username, String password) throws IOException
+String getURLContent(String surl) throws IOException
+String getURLContent(String surl, String username, String password, int timeout) throws IOException
+String getURLContent(String surl, int timeout) throws IOException
+byte[] getURLContentAsBytes(String surl, String username, String password) throws IOException
+byte[] getURLContentAsBytes(String surl) throws IOException
+List<String> getIncludedMacros(String defaultweb, String content)
+boolean isReadOnly()
+void setReadOnly(boolean ro)
+void refreshLinks() throws XWikiException
+boolean hasBacklinks() throws XWikiException
+boolean hasTags() throws XWikiException
+boolean hasEditComment()
+boolean isEditCommentFieldHidden()
+boolean isEditCommentSuggested()
+boolean isEditCommentMandatory()
+boolean hasMinorEdit()
+boolean hasRecycleBin()
+boolean renamePage(Document doc, String newFullName)
+String getEditorPreference()
+Object parseGroovyFromString(String script) throws XWikiException
+Object parseGroovyFromPage(String script, String jarWikiPage) throws XWikiException
+Object parseGroovyFromPage(String fullname) throws XWikiException
+String getMacroList()
+String getWysiwygToolbars()
+com.xpn.xwiki.api.Object getObjectFromRequest(String className) throws XWikiException
+Document createDocument()
+String convertUsername(String username)
+String displaySearchColumns(String className, XWikiQuery query) throws XWikiException
+String displaySearchColumns(String className, String prefix, XWikiQuery query) throws XWikiException
+String displaySearchOrder(String className, XWikiQuery query) throws XWikiException
+String displaySearchOrder(String className, String prefix, XWikiQuery query) throws XWikiException
+String displaySearch(String fieldname, String className) throws XWikiException
+String displaySearch(String fieldname, String className, XWikiCriteria criteria) throws XWikiException
+String displaySearch(String fieldname, String className, String prefix, XWikiCriteria criteria)
+List search(XWikiQuery query) throws XWikiException
+XWikiQuery createQueryFromRequest(String className) throws XWikiException
+String searchAsTable(XWikiQuery query) throws XWikiException
+com.xpn.xwiki.api.PropertyClass getPropertyClassFromName(String propPath)
+String getUniquePageName(String name)
+String getUniquePageName(String space, String name)
+String addTooltip(String html, String message, String params)
+String addTooltip(String html, String message)
+String addTooltipJS()
+String addMandatory()
+Class getClass(String documentName) throws XWikiException
+String getCounter(String name)
+XWikiUser checkAuth() throws XWikiException
+XWikiUser checkAuth(String username, String password, String rememberme) throws XWikiException
+StatsService getStatsService()
+CriteriaService getCriteriaService()

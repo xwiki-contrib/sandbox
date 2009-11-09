@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+	<extension id="org.xwiki.eclipse.XWikiEclipseNature" name="XWiki Eclipse Nature" point="org.eclipse.core.resources.natures">
+		<runtime>
+			<run class="org.xwiki.eclipse.core.XWikiEclipseNature">
+         </run>
+		</runtime>
+	</extension>
+	<extension point="org.eclipse.core.expressions.propertyTesters">
+		<propertyTester class="org.xwiki.eclipse.core.expressions.DataManagerPropertyTester" id="org.xwiki.eclipse.core.DataManagerTester" namespace="org.xwiki.eclipse.core.DataManager" properties="isConnected" type="org.xwiki.eclipse.core.DataManager">
+      </propertyTester>
+	</extension>
+</plugin>

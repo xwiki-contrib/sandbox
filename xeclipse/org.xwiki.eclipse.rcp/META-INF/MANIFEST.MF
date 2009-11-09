@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: XWiki Eclipse
+Bundle-SymbolicName: org.xwiki.eclipse.rcp;singleton:=true
+Bundle-Version: 1.2.0.RC1
+Bundle-Activator: org.xwiki.eclipse.rcp.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources;bundle-version="3.3.1",
+ org.eclipse.ui.ide;bundle-version="3.3.2",
+ org.eclipse.ui.navigator.resources;bundle-version="3.3.1",
+ org.eclipse.ui.views;bundle-version="3.2.101",
+ org.eclipse.ui.views.log;bundle-version="1.0.0",
+ org.xwiki.eclipse.ui;bundle-version="1.2.0"
+Eclipse-LazyStart: true
+Bundle-Vendor: XWiki

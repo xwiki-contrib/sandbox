@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+	<extension point="org.eclipse.ui.views">
+		<category id="org.xwiki.eclipse" name="XWiki Eclipse">
+      </category>
+		<view allowMultiple="false" category="org.xwiki.eclipse" class="org.xwiki.eclipse.ui.navigator.XWikiEclipseNavigator" icon="icons/xwiki.png" id="org.xwiki.eclipse.ui.views.Navigator" name="XWiki Eclipse Navigator" restorable="true">
+      </view>
+  <view
+        category="org.xwiki.eclipse"
+        class="org.xwiki.eclipse.ui.views.PagePreview"
+        icon="icons/xwiki.png"
+        id="org.xwiki.eclipse.ui.views.PagePreview"
+        name="XWiki Page Preview"
+        restorable="true">
+  </view>
+	</extension>
+ <extension
+       point="org.eclipse.ui.navigator.viewer">
+    <viewer
+          viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+    </viewer>
+    <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+			<includes>
+      <contentExtension
+            pattern="org.xwiki.eclipse.ui.navigator.content.XWikiEclipseDataManagers">
+      </contentExtension>
+      <contentExtension
+            pattern="org.xwiki.eclipse.ui.filters.XWikiEclipseIdFiter">
+      </contentExtension>
+			</includes>
+		</viewerContentBinding>
+		<viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+			<includes>
+      <actionExtension
+            pattern="org.xwiki.eclipse.ui.actions.DataManagerActionProvider">
+      </actionExtension>
+      <actionExtension
+            pattern="org.xwiki.eclipse.ui.actions.PropertyActionProvider">
+      </actionExtension>
+      <actionExtension
+            pattern="org.xwiki.eclipse.ui.actions.XWikiEclipseSpaceSummaryActionProvider">
+      </actionExtension>
+      <actionExtension
+            pattern="org.xwiki.eclipse.ui.actions.XWikiEclipsePageSummaryActionProvider">
+      </actionExtension>
+      <actionExtension
+            pattern="org.xwiki.eclipse.ui.actions.XWikiEclipseObjectSummaryActionProvider">
+      </actionExtension>
+      <actionExtension
+            pattern="org.xwiki.eclipse.ui.actions.DeleteActionProvider">
+      </actionExtension>
+      <actionExtension
+            pattern="org.xwiki.eclipse.ui.actions.RefreshActionProvider">
+      </actionExtension>
+			</includes>
+		</viewerActionBinding>
+ </extension>
+	<extension point="org.eclipse.ui.navigator.viewer">
+    <viewer
+          viewerId="org.xwiki.eclipse.ui.views.Navigator">
+    </viewer>
+		
+		<viewerContentBinding viewerId="org.xwiki.eclipse.ui.views.Navigator">
+			<includes>
+				<contentExtension isRoot="true" pattern="org.xwiki.eclipse.ui.navigator.content.XWikiEclipseDataManagers">
+            </contentExtension>
+			</includes>
+		</viewerContentBinding>
+		<viewerActionBinding viewerId="org.xwiki.eclipse.ui.views.Navigator">
+			<includes>
+      <actionExtension
+            pattern="org.xwiki.eclipse.ui.actions.*">
+      </actionExtension>
+			</includes>
+		</viewerActionBinding>
+	</extension>
+	<extension point="org.eclipse.ui.navigator.navigatorContent">
+		<navigatorContent contentProvider="org.xwiki.eclipse.ui.NavigatorContentProvider" icon="icons/xwiki.png" id="org.xwiki.eclipse.ui.navigator.content.XWikiEclipseDataManagers" labelProvider="org.eclipse.ui.model.WorkbenchLabelProvider" name="XWiki Eclipse Navigator Content" priority="highest">
+			<triggerPoints>
+				<adapt type="org.eclipse.core.resources.IProject">
+					<test forcePluginActivation="true" property="org.eclipse.core.resources.projectNature" value="org.xwiki.eclipse.XWikiEclipseNature">
+               </test>
+				</adapt>
+			</triggerPoints>
+			<possibleChildren>
+				<or>
+					<instanceof value="org.xwiki.eclipse.core.DataManager">
+               </instanceof>
+					<instanceof value="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary">
+               </instanceof>
+					<instanceof value="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+               </instanceof>
+					<instanceof value="org.xwiki.eclipse.core.model.XWikiEclipseObjectSummary">
+               </instanceof>
+     <instanceof
+           value="org.xwiki.eclipse.core.model.XWikiEclipseAttachmentSummary">
+     </instanceof>
+				</or>
+			</possibleChildren>
+   <dropAssistant
+         class="org.xwiki.eclipse.ui.dnd.XWikiEclipseCommonDropAdapterAssistant"
+         id="org.xwiki.eclipse.ui.XWikiEclipseDropAssistant">
+      <possibleDropTargets>
+         <or>
+            <instanceof
+                  value="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+            </instanceof>
+            <instanceof
+                  value="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary">
+            </instanceof>
+         </or></possibleDropTargets>
+   </dropAssistant>
+		</navigatorContent>
+		<actionProvider class="org.xwiki.eclipse.ui.actions.DataManagerActionProvider" id="org.xwiki.eclipse.ui.actions.DataManagerActionProvider">
+			<enablement>
+				<instanceof value="org.xwiki.eclipse.core.DataManager">
+               </instanceof>
+			</enablement>
+		</actionProvider>
+		<actionProvider class="org.xwiki.eclipse.ui.actions.PropertyActionProvider" id="org.xwiki.eclipse.ui.actions.PropertyActionProvider">
+			<enablement>
+				<or>
+					<instanceof value="org.xwiki.eclipse.core.model.ModelObject">
+               </instanceof>
+					<instanceof value="org.xwiki.eclipse.core.DataManager">
+               </instanceof>
+				</or>
+			</enablement>
+		</actionProvider>
+  <actionProvider
+        class="org.xwiki.eclipse.ui.actions.XWikiEclipseSpaceSummaryActionProvider"
+        id="org.xwiki.eclipse.ui.actions.XWikiEclipseSpaceSummaryActionProvider">
+     <enablement>
+        <instanceof
+              value="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary">
+        </instanceof>
+     </enablement>
+  </actionProvider>
+		<actionProvider class="org.xwiki.eclipse.ui.actions.XWikiEclipsePageSummaryActionProvider" id="org.xwiki.eclipse.ui.actions.XWikiEclipsePageSummaryActionProvider">
+			<enablement>
+				<instanceof value="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+               </instanceof>
+			</enablement>
+		</actionProvider>
+  <actionProvider
+        class="org.xwiki.eclipse.ui.actions.XWikiEclipseObjectSummaryActionProvider"
+        id="org.xwiki.eclipse.ui.actions.XWikiEclipseObjectSummaryActionProvider">
+     <enablement>
+        <instanceof
+              value="org.xwiki.eclipse.core.model.XWikiEclipseObjectSummary">
+        </instanceof>
+     </enablement>
+  </actionProvider>
+  <actionProvider
+        class="org.xwiki.eclipse.ui.actions.DeleteActionProvider"
+        id="org.xwiki.eclipse.ui.actions.DeleteActionProvider">
+     <enablement>
+        <or>
+           <instanceof
+                 value="org.xwiki.eclipse.core.DataManager">
+           </instanceof>
+           <instanceof
+                 value="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+           </instanceof>
+           <instanceof
+                 value="org.xwiki.eclipse.core.model.XWikiEclipseObjectSummary">
+           </instanceof>
+           <instanceof
+                 value="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary">
+           </instanceof>
+           <instanceof
+                 value="org.xwiki.eclipse.core.model.XWikiEclipseAttachmentSummary">
+           </instanceof>
+        </or>
+     </enablement>
+  </actionProvider>
+  <actionProvider
+        class="org.xwiki.eclipse.ui.actions.RefreshActionProvider"
+        id="org.xwiki.eclipse.ui.actions.RefreshActionProvider">
+     <enablement>
+        <or>
+           <instanceof
+                 value="org.xwiki.eclipse.core.DataManager">
+           </instanceof>
+           <instanceof
+                 value="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary">
+           </instanceof>
+           <instanceof
+                 value="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+           </instanceof>
+        </or>
+     </enablement>
+  </actionProvider>
+  <actionProvider
+        class="org.xwiki.eclipse.ui.actions.WorkingSetActionProvider"
+        id="org.xwiki.eclipse.ui.actions.WorkingSetActionProvider">
+     <enablement></enablement>
+  </actionProvider>
+  <commonFilter
+        activeByDefault="true"
+        class="org.xwiki.eclipse.ui.filters.XWikiEclipseIdFiter"
+        description="(This filter is only used to avoid IDs to be displayed as toplevel elements when a working set is active in the Project Explorer)"
+        id="org.xwiki.eclipse.ui.filters.XWikiEclipseIdFiter"
+        name="XWiki Eclipse ID filter">
+  </commonFilter>
+  <actionProvider
+        class="org.xwiki.eclipse.ui.actions.XWikiEclipseAttachmentSummaryActionProvider"
+        id="org.xwiki.eclipse.ui.actions.XWikiEclipseAttachmentSummaryActionProvider">
+     <enablement>
+        <instanceof
+              value="org.xwiki.eclipse.core.model.XWikiEclipseAttachmentSummary">
+        </instanceof>
+     </enablement>
+  </actionProvider>
+	</extension>
+	<extension point="org.eclipse.core.runtime.adapters">
+		<factory adaptableType="org.xwiki.eclipse.core.DataManager" class="org.xwiki.eclipse.ui.adapters.AdapterFactory">
+			<adapter type="org.eclipse.ui.model.IWorkbenchAdapter">
+         </adapter>
+			<adapter type="org.eclipse.ui.model.IWorkbenchAdapter2">
+         </adapter>
+   <adapter
+         type="org.eclipse.ui.progress.IDeferredWorkbenchAdapter">
+   </adapter>
+		</factory>
+		<factory adaptableType="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary" class="org.xwiki.eclipse.ui.adapters.AdapterFactory">
+			<adapter type="org.eclipse.ui.model.IWorkbenchAdapter">
+         </adapter>
+   <adapter
+         type="org.eclipse.ui.progress.IDeferredWorkbenchAdapter">
+   </adapter>
+		</factory>
+		<factory adaptableType="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary" class="org.xwiki.eclipse.ui.adapters.AdapterFactory">
+			<adapter type="org.eclipse.ui.model.IWorkbenchAdapter">
+         </adapter>
+   <adapter
+         type="org.eclipse.ui.progress.IDeferredWorkbenchAdapter">
+   </adapter>
+		</factory>
+  <factory
+        adaptableType="org.xwiki.eclipse.core.model.XWikiEclipseObjectSummary"
+        class="org.xwiki.eclipse.ui.adapters.AdapterFactory">
+     <adapter
+           type="org.eclipse.ui.model.IWorkbenchAdapter">
+     </adapter>
+  </factory>
+  <factory
+        adaptableType="org.xwiki.eclipse.core.model.XWikiEclipseAttachmentSummary"
+        class="org.xwiki.eclipse.ui.adapters.AdapterFactory">
+     <adapter
+           type="org.eclipse.ui.model.IWorkbenchAdapter">
+     </adapter>
+  </factory>
+	</extension>
+	<extension point="org.eclipse.ui.editors">
+		<editor class="org.xwiki.eclipse.ui.editors.PageEditor" contributorClass="org.xwiki.eclipse.ui.editors.XWikiEditorActionContributor" icon="icons/xwiki.png" id="org.xwiki.eclipse.ui.editors.PageEditor" name="Page Editor">
+      </editor>
+  <editor
+        class="org.xwiki.eclipse.ui.editors.ObjectEditor"
+        icon="icons/xwiki.png"
+        id="org.xwiki.eclipse.ui.editors.Object"
+        name="Object Editor">
+  </editor>
+	</extension>
+	<extension point="org.eclipse.ui.newWizards">
+		<category id="org.xwiki.eclipse" name="XWiki Eclipse">
+      </category>
+		<wizard
+        category="org.xwiki.eclipse"
+        class="org.xwiki.eclipse.ui.wizards.NewConnectionWizard"
+        finalPerspective="org.xwiki.eclipse.ui.perspectives.XWikiPerspective"
+        hasPages="true"
+        icon="icons/xwiki.png"
+        id="org.xwiki.eclipse.ui.wizards.NewConnection"
+        name="New connection"
+        project="true">
+      </wizard>
+	</extension>
+	<extension point="org.eclipse.ui.propertyPages">
+		<page class="org.xwiki.eclipse.ui.properties.DataManagerPropertiesPage" icon="icons/xwiki.png" id="org.xwiki.eclipse.ui.properties.DataManager" name="Data Manager" objectClass="org.xwiki.eclipse.core.DataManager">
+      </page>
+		<page class="org.xwiki.eclipse.ui.properties.XWikiEclipseSpaceSummaryPropertiesPage" icon="icons/xwiki.png" id="org.xwiki.eclipse.ui.properties.XWikiEclipseSpaceSummary" name="Space" objectClass="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary">
+      </page>
+		<page class="org.xwiki.eclipse.ui.properties.XWikiEclipsePageSummaryPropertiesPage" icon="icons/xwiki.png" id="org.xwiki.eclipse.ui.properties.XWikiEclipsePageSummary" name="Page" objectClass="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+      </page>
+  <page
+        class="org.xwiki.eclipse.ui.properties.XWikiEclipseAttachmentSummaryPropertiesPage"
+        icon="icons/xwiki.png"
+        id="org.xwiki.eclipse.ui.properties.XWikiEclipseAttachmentSummary"
+        name="Attachment"
+        objectClass="org.xwiki.eclipse.core.model.XWikiEclipseAttachmentSummary">
+  </page>
+	</extension>
+	<extension point="org.eclipse.ui.commands">
+		<command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.DataManagerConnect"
+        name="Connect">
+      </command>
+		<command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.DataManagerDisconnect"
+        name="Disconnect">
+      </command>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.NewPage"
+        name="New page">
+  </command>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.NewObject"
+        name="New object">
+  </command>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.NewSpace"
+        name="New Space">
+  </command>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.NewAttachment"
+        name="New Attachment">
+  </command>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.Delete"
+        name="Delete">
+  </command>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.Refresh"
+        name="Refresh">
+  </command>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.Rename"
+        name="Rename">
+  </command>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.OpenPage"
+        name="Open XWiki page">
+  </command>
+  <category
+        id="org.xwiki.eclipse"
+        name="XWiki Eclipse">
+  </category>
+  <command
+        categoryId="org.xwiki.eclipse"
+        id="org.xwiki.eclipse.ui.commands.GrabSpace"
+        name="Grab space">
+  </command>
+	</extension>
+	<extension point="org.eclipse.ui.handlers">
+		<handler class="org.xwiki.eclipse.ui.handlers.DataManagerConnectHandler" commandId="org.xwiki.eclipse.ui.commands.DataManagerConnect">
+			<activeWhen>
+				<iterate operator="and">
+					<test forcePluginActivation="true" property="org.xwiki.eclipse.core.DataManager.isConnected" value="false">
+               </test>
+				</iterate>
+			</activeWhen>
+		</handler>
+		<handler class="org.xwiki.eclipse.ui.handlers.DataManagerDisconnectHandler" commandId="org.xwiki.eclipse.ui.commands.DataManagerDisconnect">
+			<activeWhen>
+				<iterate operator="and">
+					<test forcePluginActivation="true" property="org.xwiki.eclipse.core.DataManager.isConnected" value="true">
+               </test>
+				</iterate>
+			</activeWhen>
+		</handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.NewPageHandler"
+        commandId="org.xwiki.eclipse.ui.commands.NewPage">
+     <activeWhen>
+        <iterate
+              operator="and">
+           <or>
+              <instanceof
+                    value="org.xwiki.eclipse.core.DataManager">
+              </instanceof>
+              <instanceof
+                    value="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary">
+              </instanceof>
+           </or>
+        </iterate>
+     </activeWhen>
+  </handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.NewSpaceHandler"
+        commandId="org.xwiki.eclipse.ui.commands.NewSpace">
+     <activeWhen>
+        <iterate
+              operator="and">
+           <or>
+              <instanceof
+                    value="org.xwiki.eclipse.core.DataManager">
+              </instanceof>
+           </or>
+        </iterate>
+     </activeWhen>
+  </handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.NewObjectHandler"
+        commandId="org.xwiki.eclipse.ui.commands.NewObject">
+     <activeWhen>
+        <iterate
+              operator="and">
+           <instanceof
+                 value="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+           </instanceof>
+        </iterate>
+     </activeWhen>
+  </handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.DeleteXWikiElementHandler"
+        commandId="org.xwiki.eclipse.ui.commands.Delete">
+  </handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.RefreshHandler"
+        commandId="org.xwiki.eclipse.ui.commands.Refresh">
+  </handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.RenameHandler"
+        commandId="org.xwiki.eclipse.ui.commands.Rename">
+     <activeWhen>
+        <iterate
+              operator="and">
+           <or>
+              <instanceof
+                    value="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+              </instanceof>
+              <instanceof
+                    value="org.xwiki.eclipse.core.model.XWikiEclipseAttachmentSummary">
+              </instanceof>
+           </or>
+        </iterate>
+     </activeWhen>
+  </handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.OpenPageHandler"
+        commandId="org.xwiki.eclipse.ui.commands.OpenPage">
+  </handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.GrabSpaceHandler"
+        commandId="org.xwiki.eclipse.ui.commands.GrabSpace">
+     <activeWhen>
+        <iterate
+              operator="and">
+           <or>
+              <instanceof
+                    value="org.xwiki.eclipse.core.model.XWikiEclipseSpaceSummary">
+              </instanceof>
+           </or>
+        </iterate>
+     </activeWhen>
+  </handler>
+  <handler
+        class="org.xwiki.eclipse.ui.handlers.NewAttachmentHandler"
+        commandId="org.xwiki.eclipse.ui.commands.NewAttachment">
+     <activeWhen>
+        <iterate
+              operator="and">
+           <instanceof
+                 value="org.xwiki.eclipse.core.model.XWikiEclipsePageSummary">
+           </instanceof>
+        </iterate>
+     </activeWhen>
+  </handler>
+	</extension>
+ <extension
+       point="org.eclipse.ui.ide.projectNatureImages">
+    <image
+          icon="icons/xwiki.nature.png"
+          id="org.xwiki.eclipse"
+          natureId="org.xwiki.eclipse.XWikiEclipseNature">
+    </image>
+ </extension>
+ <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          locationURI="popup:org.xwiki.eclipse.ui.views.Navigator?after=additions">
+       <command
+             commandId="org.eclipse.ui.newWizard"
+             style="push">
+       </command>
+    </menuContribution>
+    <menuContribution
+          locationURI="menu:navigate">
+       <command
+             commandId="org.xwiki.eclipse.ui.commands.OpenPage"
+             icon="icons/xwiki.png"
+             style="push">
+       </command>
+    </menuContribution>
+ </extension>
+ <extension
+       point="org.eclipse.ui.bindings">
+    <key
+          commandId="org.xwiki.eclipse.ui.commands.OpenPage"
+          contextId="org.eclipse.ui.contexts.window"
+          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+          sequence="M1+CTRL+P">
+    </key>
+ </extension>
+ <extension
+       point="org.eclipse.ui.workingSets">
+    <workingSet
+          icon="icons/xwiki.png"
+          id="org.xwiki.eclipse"
+          name="XWiki Eclipse"
+          pageClass="org.xwiki.eclipse.ui.workingsets.XWikiEclipseWorkingSetPage">
+    </workingSet>
+ </extension>
+ <extension
+       point="org.eclipse.ui.elementFactories">
+    <factory
+          class="org.xwiki.eclipse.ui.workingsets.XWikiEclipseElementIdFactory"
+          id="org.xwiki.eclipse.ui.workingsets.XWikiEclipseElementFactory">
+    </factory>
+ </extension>
+ <extension
+       point="org.eclipse.ui.perspectives">
+    <perspective
+          class="org.xwiki.eclipse.ui.perspectives.XWikiPerspectiveFactory"
+          icon="icons/xwiki.png"
+          id="org.xwiki.eclipse.ui.perspectives.XWikiPerspective"
+          name="XWiki Eclipse">
+    </perspective>
+ </extension>
+ <extension
+       point="org.eclipse.ui.elementFactories">
+    <factory
+          class="org.xwiki.eclipse.ui.editors.PageEditorInputFactory"
+          id="org.xwiki.eclipse.ui.editors.PageEditorInputFactory">
+    </factory>
+ </extension>
+</plugin>

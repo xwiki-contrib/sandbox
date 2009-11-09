@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: XWiki Eclipse Core Plug-in
+Bundle-SymbolicName: org.xwiki.eclipse.core;singleton:=true
+Bundle-Version: 1.2.0.RC1
+Bundle-Activator: org.xwiki.eclipse.core.CorePlugin
+Bundle-Vendor: XWiki
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.4.0",
+ org.eclipse.core.resources;bundle-version="3.4.0",
+ org.xwiki.eclipse.xmlrpc;bundle-version="1.4.0",
+ org.eclipse.core.expressions;bundle-version="3.4.0"
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Export-Package: org.xwiki.eclipse.core,
+ org.xwiki.eclipse.core.model,
+ org.xwiki.eclipse.core.notifications,
+ org.xwiki.eclipse.core.utils
+Bundle-ClassPath: lib/xstream-1.3.jar,
+ .
