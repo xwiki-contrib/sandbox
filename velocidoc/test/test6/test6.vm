@@ -1,0 +1,38 @@
+## Simple if
+#if(1==0)
+Test if 1
+#end
+
+## Simple if with if inside
+#if(1==0)
+Test if 2 with sub if
+ #if(2==2)
+  Another test
+ #end
+#end
+
+## Macro with if inside
+#*
+ * This is a comment
+ *
+ **#
+#macro(testmacro1 $test1 $test2)
+Test
+#if(1=0)
+This is an if test
+#end
+Test2
+#end
+
+## Simple macro usage
+use macro #testmacro1("" "")
+
+
+## Simple if with macro usage inside
+#if(1==0)
+Test if 3
+use macro #testmacro1("" "")
+Test if 3
+#end
+
+This is finished

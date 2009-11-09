@@ -1,0 +1,31 @@
+#*
+This file is used by Texen to determine what to build
+and when
+You have access to a $rootDoc variable which is a
+net.sourceforge.velocidoc.RootDoc
+
+*#
+rootDoc:$rootDoc
+$generator.parse("net/sourceforge/velocidoc/template/index.vm", "index.html", "rootDoc", $rootDoc)
+$generator.parse("net/sourceforge/velocidoc/template/overview-frame.vm", "overview-frame.html", "rootDoc", $rootDoc)
+$generator.parse("net/sourceforge/velocidoc/template/alltemplates.vm", "alltemplates.html", "rootDoc", $rootDoc)
+$generator.parse("net/sourceforge/velocidoc/template/allmacros.vm", "allmacros.html", "rootDoc", $rootDoc)
+$generator.parse("net/sourceforge/velocidoc/template/stylesheet.vm", "stylesheet.css", "rootDoc", $rootDoc)
+
+#foreach ($packageDoc in $rootDoc.allPackages)
+    $generator.parse("net/sourceforge/velocidoc/template/package-templatelist.vm", "package-${packageDoc.packageName}.html", "packageDoc", $packageDoc)
+#end
+
+#foreach ($packageDoc in $rootDoc.allPackages)
+    $generator.parse("net/sourceforge/velocidoc/template/package-overview.vm", "package-overview-${packageDoc.packageName}.html", "packageDoc", $packageDoc)
+#end
+
+
+#foreach ($templateDoc in $rootDoc.allTemplates)
+    $generator.parse("net/sourceforge/velocidoc/template/template.vm", "template-${templateDoc.name}.html", "templateDoc", $templateDoc)
+#end
+
+#foreach ($macroDoc in $rootDoc.allMacros)
+    $generator.parse("net/sourceforge/velocidoc/template/macro.vm", "macro-${macroDoc.name}.html", "macroDoc", $macroDoc)
+#end
+

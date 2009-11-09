@@ -1,0 +1,35 @@
+<html>
+<head>
+<LINK REL ="stylesheet" TYPE="text/css" HREF="stylesheet.css" TITLE="Style">
+</head>
+<body>
+<b>Package Name :</b> <a href="package-overview-${macroDoc.template.package.packageName}.html">${macroDoc.template.package.packageName}</a> <br>
+<b>Template Name :</b><a href="template-${macroDoc.template.name}.html"> ${macroDoc.template.name}</a> <br>
+<b>Macro Name :</b> ${macroDoc.name}<br>
+<b>Declaration : <i>macro ( ${macroDoc.name} #foreach ($argument in $macroDoc.arguments) $argument #end )</i></b><br>
+<br>
+<h2>Notes</h2><br>
+#set ($comment = $macroDoc.comment)
+${comment.content}
+<br>
+<b>Parameters</b><br>
+#foreach ($param in $comment.params)
+&nbsp;&nbsp;&nbsp;&nbsp;<i>${param.name}</i> - ${param.description}<br>
+#end
+<br>
+<h2>Macro code</h2><br>
+<pre>
+${macroDoc.body.replaceAll("&", "&amp;").replaceAll(">","&gt;").replaceAll("<","&lt;")}
+</pre>
+<br>
+<h2>Macro usages</h2><br>
+<ul>
+#foreach($template in $macroDoc.usages)
+<li> Package  <a href="package-overview-${template.package.packageName}.html">${template.package.packageName}</a>
+     <a href="template-${template.name}.html">${template.name}</a> </li>
+#end
+</ul>
+<br>
+<hr>
+</body>
+</html>

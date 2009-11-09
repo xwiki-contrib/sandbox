@@ -1,0 +1,17 @@
+This is the start
+
+## Macro with if inside
+#*
+ * This is a comment
+ *
+ **#
+#macro(testmacro1 $test1 $test2)
+First line
+#if(1=0)
+This is an if test inside a macro
+#end
+Second Line
+Last Line
+#end
+
+This is finished

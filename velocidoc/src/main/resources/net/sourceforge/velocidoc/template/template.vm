@@ -1,0 +1,68 @@
+#**
+ *	This file is responsible for generating all the template
+ *  the HTMl that shows all template information
+ *	@author	Trever M. Shick
+ *	@param templateDoc This is the TemplateDoc from which this template will pull information
+ *#
+
+#**
+ *	Test macro that serves no purpose
+ *#
+#macro (testmacro $param1)
+a;lsdkf
+#end
+
+#set ($templateComment = $templateDoc.comment)
+<html>
+<head>
+<LINK REL ="stylesheet" TYPE="text/css" HREF="stylesheet.css" TITLE="Style">
+</head>
+<body>
+<b>Package Name :</b> <a href="package-overview-${templateDoc.package.packageName}.html">${templateDoc.package.packageName}</a> <br>
+<b>Template :</b> ${templateDoc.name}<br>
+<b>Author : </b> $!{templateComment.getTag("@author").value}
+<hr>
+<b>Comments</b>
+#foreach ($com in $templateDoc.comments)
+    <i>${com.content}<br></i>
+    <b>Parameters</b><br>
+    #foreach ($param in $com.params)
+    &nbsp;&nbsp;&nbsp;&nbsp;<i>${param.name}</i> - ${param.description}<br>
+    #end
+#end
+
+<br>
+<br>
+<h2>Macros</h2>
+#foreach ($macroDoc in $templateDoc.macros)
+Macro Name : <a href="macro-${macroDoc.name}.html"><b>${macroDoc.name}</a></b><br>
+Declaration : <b>macro ( ${macroDoc.name} #foreach ($argument in $macroDoc.arguments) ${argument} #end)</b><br>
+#set ($comment = $macroDoc.comment)
+#if ($comment) <b>Notes</b><br>
+<i>
+${comment.content}
+</i><br>
+#end
+<b>Parameters</b><br>
+#foreach ($param in $comment.params)
+&nbsp;&nbsp;&nbsp;&nbsp;<i>${param.name}</i> - ${param.description}<br>
+#end
+<br>
+<b>Macro code</b><br>
+<pre>
+${macroDoc.body.replaceAll("&", "&amp;").replaceAll(">","&gt;").replaceAll("<","&lt;")}
+</pre>
+<br>
+<br>
+<br>
+<br>
+#end
+<br />
+<br />
+<h2>Macro Usages</h2>
+#foreach ($macroUsageDoc in $templateDoc.macroUsages)
+Macro Name : <a href="macro-${macroUsageDoc.name}.html"><b>${macroUsageDoc.name}</a></b><br>
+#end
+
+</body>
+</html>

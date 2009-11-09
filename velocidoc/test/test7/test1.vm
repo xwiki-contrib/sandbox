@@ -1,0 +1,12 @@
+
+#macro(m1 $param1 $param2)
+Test macro
+#end
+
+#macro(m2 $param1 $param2)
+Test macro
+#end
+
+#macro(m3 $param1 $param2)
+Test macro
+#end

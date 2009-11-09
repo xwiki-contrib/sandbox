@@ -1,0 +1,10 @@
+This is the start
+
+## Simple if with macro usage inside
+#if(1==0)
+Test if 3
+use macro #testmacro1("" "")
+Test if 3
+#end
+
+This is finished
