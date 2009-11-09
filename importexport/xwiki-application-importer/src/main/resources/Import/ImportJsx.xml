@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+	<web>Import</web>
+	<name>ImportJsx</name>
+	<language></language>
+	<defaultLanguage></defaultLanguage>
+	<translation>0</translation>
+	<parent>Import.WebHome</parent>
+	<creator>XWiki.Admin</creator>
+	<author>XWiki.Admin</author>
+	<customClass></customClass>
+	<contentAuthor>XWiki.Admin</contentAuthor>
+	<creationDate>1245938090000</creationDate>
+	<date>1246347086000</date>
+	<contentUpdateDate>1246347086000</contentUpdateDate>
+	<version>15.1</version>
+	<title></title>
+	<template></template>
+	<defaultTemplate></defaultTemplate>
+	<validationScript></validationScript>
+	<comment></comment>
+	<minorEdit>false</minorEdit>
+	<syntaxId>xwiki/2.0</syntaxId>
+	<hidden>false</hidden>
+	<object>
+		<class>
+			<name>XWiki.JavaScriptExtension</name>
+			<customClass></customClass>
+			<customMapping></customMapping>
+			<defaultViewSheet></defaultViewSheet>
+			<defaultEditSheet></defaultEditSheet>
+			<defaultWeb></defaultWeb>
+			<nameField></nameField>
+			<validationScript></validationScript>
+			<cache>
+				<cache>0</cache>
+				<displayType>select</displayType>
+				<multiSelect>0</multiSelect>
+				<name>cache</name>
+				<number>5</number>
+				<prettyName>Caching policy</prettyName>
+				<relationalStorage>0</relationalStorage>
+				<separator>
+				</separator>
+				<separators> ,|</separators>
+				<size>1</size>
+				<unmodifiable>0</unmodifiable>
+				<values>long|short|default|forbid</values>
+				<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+			</cache>
+			<code>
+				<name>code</name>
+				<number>2</number>
+				<prettyName>Code</prettyName>
+				<rows>20</rows>
+				<size>50</size>
+				<unmodifiable>0</unmodifiable>
+				<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+			</code>
+			<name>
+				<name>name</name>
+				<number>1</number>
+				<prettyName>Name</prettyName>
+				<size>30</size>
+				<unmodifiable>0</unmodifiable>
+				<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+			</name>
+			<parse>
+				<displayFormType>select</displayFormType>
+				<displayType>yesno</displayType>
+				<name>parse</name>
+				<number>4</number>
+				<prettyName>Parse content</prettyName>
+				<unmodifiable>0</unmodifiable>
+				<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+			</parse>
+			<use>
+				<cache>0</cache>
+				<displayType>select</displayType>
+				<multiSelect>0</multiSelect>
+				<name>use</name>
+				<number>3</number>
+				<prettyName>Use this extension</prettyName>
+				<relationalStorage>0</relationalStorage>
+				<separator>
+				</separator>
+				<separators> ,|</separators>
+				<size>1</size>
+				<unmodifiable>0</unmodifiable>
+				<values>onDemand=On demand|always=Always</values>
+				<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+			</use>
+		</class>
+		<name>Import.ImportJsx</name>
+		<number>0</number>
+		<className>XWiki.JavaScriptExtension
+		</className>
+		<guid>05916032-c353-47ee-9ec6-e1a193f78590
+		</guid>
+		<property>
+			<cache>default</cache>
+		</property>
+		<property>
+			<code>function test(respurl){
+				alert(respurl);
+				}
+
+				function
+				fetchHtml(respurl){
+
+				var a=new Ajax.Request(respurl,
+				{
+				method:'get',
+				onSuccess: function(transport){
+				var response = transport.responseText
+				|| "no response text";
+				alert("Success! \n\n" + response);
+				},
+				onFailure: function(){ alert('Something went wrong...') }
+				});
+
+
+
+				}
+</code>
+		</property>
+		<property>
+			<name>WikiImporter JavaScript Extension</name>
+		</property>
+		<property>
+			<parse>0</parse>
+		</property>
+		<property>
+			<use>onDemand</use>
+		</property>
+	</object>
+	<content></content>
+</xwikidoc>

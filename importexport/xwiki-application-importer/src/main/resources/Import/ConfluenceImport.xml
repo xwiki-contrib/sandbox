@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>Import</web>
+<name>ConfluenceWikiImport</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Import.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1245938014000</creationDate>
+<date>1251031919000</date>
+<contentUpdateDate>1251031919000</contentUpdateDate>
+<version>10.1</version>
+<title>MediaWikiImport</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>Import.ConfluenceWikiImport</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>b1d8dc53-d2c9-4e4b-9488-e4d2f468e251</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>
+		=Confluence Wiki Import=
+
+		{{velocity}}
+		{{html}}
+		#if($isguest)
+		#error("Not Allowed")
+		#else
+		##########################################################
+		## Velocity Code
+		##########################################################
+
+		##########################################################
+		## Skin ExtensionsConfluenceAttachment
+		##########################################################
+		$xwiki.ssx.use("Import.ImportCss")
+		$xwiki.ssx.use("Import.ImportCss")
+
+
+		##########################################################
+		## HTML Code
+		##########################################################
+
+ ##########################       Summary         #######################
+#if( $request.get('wizStatus')=="Summary")  
+
+&lt;div id="importWizard"&gt;
+&lt;div align="center" class="wizHeader"&gt;&lt;h5&gt;--Import Summary--&lt;/h5&gt;&lt;/div&gt;
+
+ #set($bolVal=$wikiImporterConfig.fileExists($request.get('filepath')))
+
+
+#if($bolVal)
+
+ #set($wikiImpConfig=$wikiImporterConfig)
+ $wikiImpConfig.setDumpPath($request.get('filepath'))
+ $wikiImpConfig.setDefaultNamespace($request.get('spaceName'))
+ #if($request.get('preserveHistory')=="true")
+    $wikiImpConfig.setPreserveHistory(true)
+ #else
+    $wikiImpConfig.setPreserveHistory(false)
+ #end
+ #set($wikiObj=$confluenceWikiXml.parse($wikiImpConfig))
+ #set($summaryList = $confluenceWikiXml.importWiki($wikiObj))
+&lt;table class="wizard" width="100%"&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th align="Left" width="50%"&gt;Page Name&lt;/th&gt;
+            &lt;th align="Left" width="20%"&gt;Status&lt;/th&gt;
+            &lt;th align="Left" width="30%"&gt;Info&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+    #foreach($summary in $summaryList)
+    &lt;tr&gt;
+        &lt;td&gt;&lt;div&gt;$summary.getPageName()&lt;/div&gt;&lt;/td&gt;
+        &lt;td&gt;&lt;div&gt;$summary.getStatus()&lt;/div&gt;&lt;/td&gt;
+        &lt;td&gt;&lt;div&gt;$summary.getErrorText()&lt;/div&gt;&lt;/td&gt;
+     &lt;/tr&gt;
+    #end
+    &lt;/table&gt;
+    
+#else
+&lt;div&gt;&lt;br/&gt;&lt;br/&gt;File Doesnt Exist.&lt;br/&gt;Click on the back button to go back to previous page.&lt;/div&gt;
+&lt;br/&gt;&lt;br/&gt;
+&lt;form method="post"&gt;
+&lt;input type="hidden" id="wizStatus" name="wizStatus" value=""/&gt;
+&lt;div align="center"&gt;&lt;input type="submit" name="submit" value="Back"/&gt;&lt;/div&gt;
+&lt;/form&gt;
+#end
+
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+
+##################################################################################
+#else
+&lt;div id="importWizard"&gt;
+&lt;div align="center" class="wizHeader"&gt;&lt;h5&gt;--Confluence Wiki Import --&lt;/h5&gt;&lt;/div&gt;
+&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+&lt;form  method="post" &gt;
+&lt;table class="wizard"&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Import Dump :&lt;/td&gt;
+      &lt;td&gt;
+          &lt;input  type="text" name="filepath" value="" size="40"/&gt;
+          &lt;div&gt;&lt;input type="hidden" name="xredirect" value="$xwiki.getFormEncoded($redirect)" /&gt;&lt;/div&gt;
+          &lt;div&gt;&lt;input id="xwikiuploadname" type="hidden" name="filename" value="" size="40"/&gt;&lt;/div&gt;
+      &lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+   &lt;td&gt;Default Space Name :&lt;/td&gt; 
+   &lt;td&gt;&lt;input  type="text" name="spaceName" value="" size="40"/&gt;&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Preserve History&lt;/td&gt;
+      &lt;td&gt;
+        &lt;select name="preserveHistory" id="preserveHistory"&gt;
+        &lt;option value="true"&gt;True&lt;/option&gt;
+        &lt;option value="false"&gt;False&lt;/option&gt;
+        &lt;/select&gt;  
+      &lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+&lt;input type="hidden" id="wizStatus" name="wizStatus" value="Summary"/&gt;
+&lt;div align="right"&gt;&lt;input type="submit" name="submit" value="Next"/&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/form&gt;
+#end
+
+
+#end 
+{{/html}}
+{{/velocity}}</content>
+</xwikidoc>

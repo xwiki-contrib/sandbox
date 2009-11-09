@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+	<web>Import</web>
+	<name>ImportCss</name>
+	<language></language>
+	<defaultLanguage></defaultLanguage>
+	<translation>0</translation>
+	<parent>Import.WebHome</parent>
+	<creator>XWiki.Admin</creator>
+	<author>XWiki.Admin</author>
+	<customClass></customClass>
+	<contentAuthor>XWiki.Admin</contentAuthor>
+	<creationDate>1245938036000</creationDate>
+	<date>1246474247000</date>
+	<contentUpdateDate>1246474247000</contentUpdateDate>
+	<version>63.1</version>
+	<title></title>
+	<template></template>
+	<defaultTemplate></defaultTemplate>
+	<validationScript></validationScript>
+	<comment></comment>
+	<minorEdit>false</minorEdit>
+	<syntaxId>xwiki/2.0</syntaxId>
+	<hidden>false</hidden>
+	<object>
+		<class>
+			<name>XWiki.StyleSheetExtension</name>
+			<customClass></customClass>
+			<customMapping></customMapping>
+			<defaultViewSheet></defaultViewSheet>
+			<defaultEditSheet></defaultEditSheet>
+			<defaultWeb></defaultWeb>
+			<nameField></nameField>
+			<validationScript></validationScript>
+			<cache>
+				<cache>0</cache>
+				<displayType>select</displayType>
+				<multiSelect>0</multiSelect>
+				<name>cache</name>
+				<number>5</number>
+				<prettyName>Caching policy</prettyName>
+				<relationalStorage>0</relationalStorage>
+				<separator>
+				</separator>
+				<separators> ,|</separators>
+				<size>1</size>
+				<unmodifiable>0</unmodifiable>
+				<values>long|short|default|forbid</values>
+				<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+			</cache>
+			<code>
+				<name>code</name>
+				<number>2</number>
+				<prettyName>Code</prettyName>
+				<rows>20</rows>
+				<size>50</size>
+				<unmodifiable>0</unmodifiable>
+				<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+			</code>
+			<name>
+				<name>name</name>
+				<number>1</number>
+				<prettyName>Name</prettyName>
+				<size>30</size>
+				<unmodifiable>0</unmodifiable>
+				<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+			</name>
+			<parse>
+				<displayFormType>select</displayFormType>
+				<displayType>yesno</displayType>
+				<name>parse</name>
+				<number>4</number>
+				<prettyName>Parse content</prettyName>
+				<unmodifiable>0</unmodifiable>
+				<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+			</parse>
+			<use>
+				<cache>0</cache>
+				<displayType>select</displayType>
+				<multiSelect>0</multiSelect>
+				<name>use</name>
+				<number>3</number>
+				<prettyName>Use this extension</prettyName>
+				<relationalStorage>0</relationalStorage>
+				<separator>
+				</separator>
+				<separators> ,|</separators>
+				<size>1</size>
+				<unmodifiable>0</unmodifiable>
+				<values>onDemand=On demand|always=Always</values>
+				<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+			</use>
+		</class>
+		<name>Import.ImportCss</name>
+		<number>0</number>
+		<className>XWiki.StyleSheetExtension
+		</className>
+		<guid>8653e519-68ec-4aa2-acdf-b81041a65312
+		</guid>
+		<property>
+			<cache>default</cache>
+		</property>
+		<property>
+			<code>table.wizard{
+				border-collapse:collapse;
+				border:1px solid #FFFFFF;
+				color:#4E6172;
+				padding:3px 4px;
+				}
+
+				#importWizard{
+				border:thick solid #f0f0ee;
+				padding :20px;
+				width: 600px;
+				}
+
+				div.wizHeader{
+				background-color:#f0f0ee;
+				font-size :16px;
+				font-weight:bolder;
+				}
+
+				div.formElements{
+				padding-top : 5px;
+				padding-bottom : 5px;
+				}
+
+				div.hrLine{
+				border-bottom:medium solid #f0f0ee;
+				margin-top: 10px;
+				margin-bottom: 10px;
+				}</code>
+		</property>
+		<property>
+			<name>WikiImporter StyleSheet</name>
+		</property>
+		<property>
+			<parse>0</parse>
+		</property>
+		<property>
+			<use>onDemand</use>
+		</property>
+	</object>
+	<content>
+	</content>
+</xwikidoc>
