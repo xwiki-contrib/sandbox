@@ -1,0 +1,2 @@
+#!/bin/bash
+java -cp target/classes:$HOME/.m2/repository/org/xwiki/platform/xwiki-core-rendering-standalone/2.1-SNAPSHOT/xwiki-core-rendering-standalone-2.1-SNAPSHOT.jar:$HOME/.m2/repository/org/xwiki/platform/xwiki-core-component-api/2.1-SNAPSHOT/xwiki-core-component-api-2.1-SNAPSHOT.jar:$HOME/.m2/repository/commons-cli/commons-cli/1.2/commons-cli-1.2.jar org.xwiki.xdomviz.Main $*
