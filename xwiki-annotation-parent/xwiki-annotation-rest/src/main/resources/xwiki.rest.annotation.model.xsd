@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.xwiki.org" xmlns:xwiki="http://www.xwiki.org"
+  elementFormDefault="qualified">
+
+  <complexType name="AnnotationRequest">
+    <annotation>
+      <documentation> Stores the information about a request for an annotation to be added, such as its
+        position in the annotated document, the annotated text and the text of the annotation.</documentation>
+    </annotation>
+    <sequence>
+      <element name="initialSelection" type="string"></element>
+      <element name="contextOffset" type="int"></element>
+      <element name="selectionContext" type="string"></element>
+      <element name="annotation" type="string"></element>
+    </sequence>
+  </complexType>
+
+  <complexType name="Annotation">
+    <annotation>
+      <documentation>Stores information about an annotation, such as the id, the page where it's added,
+        the text of the annotation and the annotated content, its state, author and date.</documentation>
+    </annotation>
+    <sequence>
+      <element name="annotationId" type="int"></element>
+      <element name="pageId" type="string"></element>
+      <element name="state"></element>
+      <element name="author" type="string"></element>
+      <element name="date" type="string"></element>
+      <element name="annotation" type="string"></element>
+
+      <element name="initialSelection" type="string"></element>
+      <element name="selectionContext" type="string"></element>
+      <element name="offset" type="int"></element>
+      <element name="length" type="int"></element>
+    </sequence>
+  </complexType>
+
+  <element name="annotations">
+    <complexType>
+      <annotation>
+        <documentation>Stores a collection of annotations together with the rendered annotated document.
+        </documentation>
+      </annotation>
+      <sequence>
+        <element name="annotation" type="xwiki:Annotation" minOccurs="0" maxOccurs="unbounded"></element>
+        <element name="source" type="string" minOccurs="1" maxOccurs="1"></element>
+      </sequence>
+    </complexType>
+  </element>
+
+  <element name="annotationRequest" type="xwiki:AnnotationRequest"></element>
+
+  <complexType name="AnnotationRequestResponse">
+    <annotation>
+      <documentation>Stores the server response for an annotation request, containing the annotation
+        that was
+        requested, a response code and the newly annotated source.</documentation>
+    </annotation>
+    <sequence>
+      <element name="annotation" type="xwiki:Annotation" minOccurs="0" maxOccurs="unbounded"></element>
+      <element name="responseCode" type="int"></element>
+      <element name="source" type="string" minOccurs="1" maxOccurs="1"></element>
+    </sequence>
+  </complexType>
+
+  <element name="annotationRequestResponse" type="xwiki:AnnotationRequestResponse"></element>
+</schema>

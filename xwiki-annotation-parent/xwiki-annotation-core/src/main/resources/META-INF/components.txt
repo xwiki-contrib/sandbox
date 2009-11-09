@@ -1,0 +1,14 @@
+org.xwiki.annotation.internal.DefaultAnnotationService
+org.xwiki.annotation.internal.alterer.DocumentContentAlterer
+org.xwiki.annotation.internal.alterer.DocumentSourceAlterer
+org.xwiki.annotation.internal.alterer.FeedEntryContentAlterer
+org.xwiki.annotation.internal.alterer.FeedEntrySourceAlterer
+org.xwiki.annotation.internal.alterer.HTMLContentAlterer
+org.xwiki.annotation.internal.alterer.HTMLSourceAlterer
+org.xwiki.annotation.internal.alterer.PlainTextContentAlterer
+org.xwiki.annotation.internal.alterer.PlainTextSourceAlterer
+org.xwiki.annotation.internal.filter.XWiki20SyntaxFilter
+org.xwiki.annotation.internal.target.DefaultTargetResolver
+org.xwiki.annotation.internal.target.DefaultDocumentContentTarget
+org.xwiki.annotation.internal.target.DefaultFeedEntryTarget
+org.xwiki.annotation.internal.selection.DefaultSelectionService

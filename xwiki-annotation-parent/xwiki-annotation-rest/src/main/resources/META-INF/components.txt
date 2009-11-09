@@ -1,0 +1,2 @@
+org.xwiki.annotation.rest.internal.AnnotationsRESTService
+org.xwiki.annotation.rest.internal.SingleAnnotationRESTResource

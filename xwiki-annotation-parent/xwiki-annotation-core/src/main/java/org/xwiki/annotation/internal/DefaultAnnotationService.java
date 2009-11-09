@@ -1,0 +1,63 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+
+package org.xwiki.annotation.internal;
+
+import org.xwiki.annotation.IOService;
+import org.xwiki.annotation.TargetResolver;
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+
+/**
+ * This is the default annotation service. It uses the default IOService and the default target resolver.
+ * 
+ * @version $Id$
+ */
+@Component()
+public class DefaultAnnotationService extends AbstractAnnotationService
+{
+    @Requirement
+    private static IOService ioService;
+
+    @Requirement
+    private static TargetResolver targetSelector;
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.internal.AbstractAnnotationService#getIOService()
+     */
+    @Override
+    protected IOService getIOService()
+    {
+        return ioService;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.internal.AbstractAnnotationService#getTargetSelector()
+     */
+    @Override
+    protected TargetResolver getTargetSelector()
+    {
+        return targetSelector;
+    }
+}
