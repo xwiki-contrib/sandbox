@@ -25,158 +25,111 @@ import java.io.IOException;
 import junit.framework.Assert;
 
 import org.jmock.Expectations;
-import org.jmock.Mockery;
 import org.junit.Test;
 import org.xwiki.annotation.AnnotationTarget;
-import org.xwiki.annotation.Documents;
-import org.xwiki.annotation.IOService;
-import org.xwiki.annotation.IOTargetService;
+import org.xwiki.annotation.TestDocumentFactory;
 import org.xwiki.annotation.internal.annotation.Annotation;
 import org.xwiki.annotation.internal.context.Source;
+import org.xwiki.annotation.internal.context.SourceImpl;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
-import org.xwiki.component.descriptor.DefaultComponentDescriptor;
-import org.xwiki.context.ExecutionContext;
-import org.xwiki.context.ExecutionContextManager;
-import org.xwiki.test.AbstractComponentTestCase;
+import org.xwiki.annotation.internal.exception.IOServiceException;
+import org.xwiki.annotation.internal.maintainment.AnnotationState;
+import org.xwiki.annotation.utils.TestPurposeAnnotationImpl;
 
 import com.xpn.xwiki.XWikiContext;
 
 /**
  * @version $Id$
  */
-public class DocumentContentTargetTest extends AbstractComponentTestCase
+public class DocumentContentTargetTest extends AbstractTargetTest
 {
-    private final Mockery mockery = new Mockery();
-
-    private static IOTargetService ioTargetService;
-
-    private static IOService ioService;
-
-    private static AnnotationTarget documentContentAnnotationTarget;
-
-    private static ExecutionContextManager executionContextManager;
-
-    private static final CharSequence document01 = "LePrinceChapitre15";
-
-    private static final XWikiContext deprecatedContext = null;
-
-    private static final String user = "XWiki.Scribo";
-
-    private static final int offset = 0;
-
-    private static final CharSequence metadata = "Byte FM is a great web radio.";
-
-    private static final CharSequence selection = "Mais, dans le dessein que";
-
-    private static final CharSequence context = selection;
-
+    /**
+     * Default constructor.
+     */
+    public DocumentContentTargetTest()
     {
-        // IOTargetService mockup
-        ioTargetService = mockery.mock(IOTargetService.class);
-
-        ioService = mockery.mock(IOService.class);
-
-        // ExecutionContextManager mockup
-        executionContextManager = mockery.mock(ExecutionContextManager.class);
+        // setup tested document name
+        docName = "LePrince.Chapitre15";
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.test.AbstractComponentTestCase#registerComponents()
+     */
     @Override
-    public void setUp() throws Exception
+    protected void registerComponents() throws Exception
     {
-        // Setting up IOTargetService
-        DefaultComponentDescriptor<IOTargetService> iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        iotsDesc.setRoleHint("FEEDENTRY");
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-        iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
+        super.registerComponents();
 
-        // Setting up WritableIOService
-        DefaultComponentDescriptor<IOService> ioDesc = new DefaultComponentDescriptor<IOService>();
-        ioDesc.setRole(IOService.class);
-        getComponentManager().registerComponent(ioDesc, ioService);
+        annotationTarget = getComponentManager().lookup(AnnotationTarget.class, "documentContent");
+    }
 
-        // Setting up ExecutionContextManager
-        DefaultComponentDescriptor<ExecutionContextManager> ecmDesc =
-            new DefaultComponentDescriptor<ExecutionContextManager>();
-        ecmDesc.setRole(ExecutionContextManager.class);
-        getComponentManager().registerComponent(ecmDesc, executionContextManager);
-
+    /**
+     * Test getting the annotated HTML for a document with a few added annotations.
+     * 
+     * @throws IOServiceException in case something goes wrong mocking the {@link org.xwiki.annotation.IOService}
+     * @throws IOException in case something goes wrong mocking documents from corpus files
+     */
+    @Test
+    public void getAnnotatedHTML() throws IOServiceException, IOException
+    {
+        // context used by the annotation target service
+        final XWikiContext deprecatedContext = null;
         mockery.checking(new Expectations()
         {
             {
-                /* IOService configuration */
-                oneOf(ioService).getSafeAnnotations(with(document01), with(any(XWikiContext.class)));
-                will(returnValue(Documents.valueOf(document01.toString()).getSafeAnnotations()));
-                oneOf(ioService).addAnnotation(with(document01), with(any(Annotation.class)),
-                    with(any(XWikiContext.class)));
+                oneOf(ioService).getSafeAnnotations(with(docName), with(any(XWikiContext.class)));
+                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getSafeAnnotations()));
 
-                /* IOTargetService configuration */
-                exactly(2).of(ioTargetService).getSource(with(document01), with(any(XWikiContext.class)));
-                will(returnValue(new Source()
-                {
-                    public CharSequence getSource()
-                    {
-                        try {
-                            return Documents.valueOf(document01.toString()).getSource();
-                        } catch (IOException e) {
-                            return "";
-                        }
-                    }
-                }));
-                exactly(2).of(ioTargetService).getRenderedContent(with(document01), with(equal(new Source()
-                {
-                    public CharSequence getSource()
-                    {
-                        try {
-                            return Documents.valueOf(document01.toString()).getTaggedContent();
-                        } catch (IOException e) {
-                            return "";
-                        }
-                    }
-
-                    public boolean equals(Object obj)
-                    {
-                        if (!(obj instanceof Source)) {
-                            return false;
-                        }
-                        Source other = (Source) obj;
-                        return other.getSource().toString().equals(getSource().toString());
-                    };
-                })), with(deprecatedContext));
-                will(returnValue(Documents.valueOf(document01.toString()).getMixContent()));
-
-                /* ExecutionContextManager configuration */
-                oneOf(executionContextManager).initialize(with(any(ExecutionContext.class)));
+                exactly(2).of(ioTargetService).getSource(with(docName), with(any(XWikiContext.class)));
+                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getSource()));
+                Source expectedSource =
+                    new SourceImpl(TestDocumentFactory.getDocument(docName.toString()).getSourceWithMarkers());
+                oneOf(ioTargetService).getRenderedContent(docName, expectedSource, deprecatedContext);
+                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getRenderedContentWithMarkers()));
             }
         });
 
-        documentContentAnnotationTarget = getComponentManager().lookup(AnnotationTarget.class, "documentContent");
-
-        super.setUp();
-    }
-
-    @Test
-    public void getAnnotatedHTML()
-    {
         try {
-            CharSequence html = documentContentAnnotationTarget.getAnnotatedHTML(document01, deprecatedContext);
-            CharSequence expected = Documents.valueOf(document01.toString()).getExpectedAnnotatedContent();
+            CharSequence html = annotationTarget.getAnnotatedHTML(docName, deprecatedContext);
+            CharSequence expected = TestDocumentFactory.getDocument(docName.toString()).getAnnotatedContent();
             Assert.assertEquals(expected, html);
         } catch (AnnotationServiceException e) {
-            Assert.fail(getExceptionFailureMessage(e));
-        } catch (IOException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }
     }
 
+    /**
+     * Test that adding an annotation works as expected.
+     * 
+     * @throws IOServiceException in case something goes wrong mocking the {@link org.xwiki.annotation.IOService}
+     * @throws IOException in case something goes wrong mocking documents from corpus files
+     */
     @Test
-    public void addAnnotation()
+    public void addAnnotation() throws IOServiceException, IOException
     {
+        String user = "XWiki.Scribo";
+        String metadata = "Metadata #4";
+        String selection = "Mais, dans le dessein que";
+        String context = selection;
+
+        // date is not tested on annotation equality so we can always use null
+        final Annotation expectedAnnotation =
+            new TestPurposeAnnotationImpl(docName.toString(), user, null, AnnotationState.SAFE, metadata, selection,
+                context, 0, 411, selection.length());
+
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(ioService).addAnnotation(with(docName), with(expectedAnnotation), with(any(XWikiContext.class)));
+                oneOf(ioTargetService).getSource(with(docName), with(any(XWikiContext.class)));
+                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getSource()));
+            }
+        });
+
         try {
-            documentContentAnnotationTarget.addAnnotation(metadata, selection, context, offset, document01, user,
-                deprecatedContext);
+            annotationTarget.addAnnotation(metadata, selection, context, 0, docName, user, null);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }

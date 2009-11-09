@@ -22,13 +22,9 @@ package org.xwiki.annotation.alterer;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.jmock.Mockery;
 import org.junit.Test;
 import org.xwiki.annotation.ContentAlterer;
-import org.xwiki.annotation.IOService;
-import org.xwiki.annotation.IOTargetService;
 import org.xwiki.annotation.internal.content.AlteredContent;
-import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.test.AbstractComponentTestCase;
 
 /**
@@ -38,48 +34,34 @@ import org.xwiki.test.AbstractComponentTestCase;
  */
 public class FeedEntryAltererTest extends AbstractComponentTestCase
 {
-    private final Mockery mockery = new Mockery();
+    /**
+     * Content alterer tested by this suite.
+     */
+    private ContentAlterer compositeAlterer;
 
-    private static ContentAlterer compositeAlterer;
-
-    private static IOTargetService ioTargetService;
-
-    private static IOService ioService;
-
-    {
-
-        ioService = mockery.mock(IOService.class);
-    }
-
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.test.AbstractComponentTestCase#setUp()
+     */
     @Override
     public void setUp() throws Exception
     {
-        // Setting up IOTargetService
-        DefaultComponentDescriptor<IOTargetService> iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        iotsDesc.setRoleHint("FEEDENTRY");
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-        iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-
-        // Setting up IOService
-        DefaultComponentDescriptor<IOService> ioDesc = new DefaultComponentDescriptor<IOService>();
-        ioDesc.setRole(IOService.class);
-        getComponentManager().registerComponent(ioDesc, ioService);
+        super.setUp();
 
         compositeAlterer = getComponentManager().lookup(ContentAlterer.class, "FEEDENTRY");
-        super.setUp();
     }
 
+    /**
+     * Basic test for feed entry alterer, composing HTML and plain text altering.
+     */
     @Test
     public void testAlter()
     {
         /*
-         * 012345678901234567890123456789012345678 <a>luc_ien</a>df
-         * dsf<b>sd<c>qs@d</c>s-q</b> luc_ien df dsf sd qs@d s-q 0123456 789012
-         * 34 5678 901 luc ien df dsf sd qs d s q 012 345 67 890 12 34 5 6 7
-         */        
+         * 012345678901234567890123456789012345678 <a>luc_ien</a>df dsf<b>sd<c>qs@d</c>s-q</b> luc_ien df dsf sd qs@d
+         * s-q 0123456 789012 34 5678 901 luc ien df dsf sd qs d s q 012 345 67 890 12 34 5 6 7
+         */
         String input = "<a>luc_ien</a>df dsf<b>sd<c>qs@d</c>s-q</b>";
         AlteredContent ac2 = compositeAlterer.alter(input);
 

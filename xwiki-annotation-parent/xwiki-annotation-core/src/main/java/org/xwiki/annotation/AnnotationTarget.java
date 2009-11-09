@@ -42,6 +42,7 @@ public interface AnnotationTarget
      * @param offset offset of the selection in context
      * @param documentName the name of the document containing annotation
      * @param user the author of the annotation
+     * @param context the XWiki context to manipulate XWiki objects
      * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
      */
     void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
@@ -49,7 +50,7 @@ public interface AnnotationTarget
 
     /**
      * @param documentName refers document to render
-     * @param context
+     * @param context the XWiki context to manipulate XWiki objects
      * @return annotated and rendered document
      * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
      */

@@ -50,6 +50,12 @@ public class HTMLContentAlterer extends AbstractContentAlterer
         Map<Integer, Integer> initialToAltered = new HashMap<Integer, Integer>();
         Map<Integer, Integer> alteredToInitial = new HashMap<Integer, Integer>();
 
+        // FIXME: this lexer is wrong. it's not CDATA sections aware apparently, it interprets CDATA sections as start
+        // tags, and any HTML content in it triggers a start tag. This messes up recognition of text in CDATA sections,
+        // which is only found if there are any HTML tags in that CDATA so that the parser signals a start tag and the
+        // text in between becomes "TextNode" and therefore is stored in the filtered result.
+        // See Feeds.FeedEntry in the test resources: it will read the CDATA content of <description> as a node, while
+        // it will parse the content in <content:encoded>, since it encounters those HTML inner tags
         Lexer lexer = new Lexer(sequence.toString());
         Node node;
         int start;

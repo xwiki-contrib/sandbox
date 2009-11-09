@@ -51,7 +51,7 @@ public interface IOService
 
     /**
      * @param documentName the name of the document to get annotations for
-     * @param deprecatedContext tthe XWiki context needed to operate with XWiki objects
+     * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @return safe annotations of a given document
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */

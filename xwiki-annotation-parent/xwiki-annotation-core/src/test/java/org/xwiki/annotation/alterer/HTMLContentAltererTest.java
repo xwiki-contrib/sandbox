@@ -25,13 +25,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jmock.Mockery;
 import org.junit.Test;
 import org.xwiki.annotation.ContentAlterer;
-import org.xwiki.annotation.IOService;
-import org.xwiki.annotation.IOTargetService;
 import org.xwiki.annotation.internal.content.AlteredContent;
-import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.test.AbstractComponentTestCase;
 
 /**
@@ -41,19 +37,15 @@ import org.xwiki.test.AbstractComponentTestCase;
  */
 public class HTMLContentAltererTest extends AbstractComponentTestCase
 {
-    private final Mockery mockery = new Mockery();
+    /**
+     * Content alterer tested by this suite.
+     */
+    private ContentAlterer contentAlterer;
 
-    private static ContentAlterer contentAlterer;
-
-    private static IOTargetService ioTargetService;
-
-    private static IOService ioService;
-
-    {
-        ioTargetService = mockery.mock(IOTargetService.class);
-
-        ioService = mockery.mock(IOService.class);
-    }
+    /**
+     * Content used for tests in this suite.
+     */
+    private String testContent = "<a>lucien</a>dfdsf<b>sd<c>qsd</c>sq</b>";
 
     /**
      * {@inheritDoc}
@@ -63,42 +55,32 @@ public class HTMLContentAltererTest extends AbstractComponentTestCase
     @Override
     public void setUp() throws Exception
     {
-        // Setting up IOTargetService
-        DefaultComponentDescriptor<IOTargetService> iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        iotsDesc.setRoleHint("FEEDENTRY");
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-        iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-
-        // Setting up IOService
-        DefaultComponentDescriptor<IOService> ioDesc = new DefaultComponentDescriptor<IOService>();
-        ioDesc.setRole(IOService.class);
-        getComponentManager().registerComponent(ioDesc, ioService);
-
         contentAlterer = getComponentManager().lookup(ContentAlterer.class, "HTML");
+
         super.setUp();
     }
 
+    /**
+     * Tests that the input is being removed all tags, spaces, etc.
+     */
     @Test
     public void testContent()
     {
-        String input = "<a>lucien</a>dfdsf<b>sd<c>qsd</c>sq</b>";
         String output = "luciendfdsfsdqsdsq";
-        AlteredContent ac = contentAlterer.alter(input);
+        AlteredContent ac = contentAlterer.alter(testContent);
         assertEquals(ac.getContent(), output);
     }
 
+    /**
+     * Tests that the offsets are correctly mapped for the altered HTML input.
+     */
     @Test
     public void testOffset()
     {
         /*
-         * 012345678901234567890123456789012345678
-         * <a>lucien</a>dfdsf<b>sd<c>qsd</c>sq</b> lucien dfdsf sd qsd sq 012345
+         * 012345678901234567890123456789012345678 <a>lucien</a>dfdsf<b>sd<c>qsd</c>sq</b> lucien dfdsf sd qsd sq 012345
          * 67890 12 345 67
-         */        
-        String input = "<a>lucien</a>dfdsf<b>sd<c>qsd</c>sq</b>";
+         */
         Map<Integer, Integer> initialToAltered = new HashMap<Integer, Integer>();
         Map<Integer, Integer> alteredToInitial = new HashMap<Integer, Integer>();
         /*
@@ -202,8 +184,8 @@ public class HTMLContentAltererTest extends AbstractComponentTestCase
         initialToAltered.put(37, 17);
         initialToAltered.put(38, 17);
 
-        AlteredContent ac = contentAlterer.alter(input);
-        for (int a = 0; a < input.length(); ++a) {
+        AlteredContent ac = contentAlterer.alter(testContent);
+        for (int a = 0; a < testContent.length(); ++a) {
             assertEquals(initialToAltered.get(a), Integer.valueOf(ac.getAlteredOffset(a)));
         }
         for (int a = 0; a < ac.getContent().length(); ++a) {

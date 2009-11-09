@@ -34,6 +34,7 @@ import org.xwiki.component.annotation.Requirement;
 @Component()
 public class DefaultTargetResolver implements TargetResolver
 {
+    // FIXME: this invalidates all the flexibility brought by components. Runtime lookup should be done by hint
     @Requirement("documentContent")
     private static AnnotationTarget documentContent;
 

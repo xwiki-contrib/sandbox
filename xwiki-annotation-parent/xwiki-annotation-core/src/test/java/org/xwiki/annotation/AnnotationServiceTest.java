@@ -22,6 +22,7 @@ package org.xwiki.annotation;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 
 import junit.framework.Assert;
 
@@ -31,7 +32,11 @@ import org.junit.Test;
 import org.xwiki.annotation.AnnotationService.Target;
 import org.xwiki.annotation.internal.annotation.Annotation;
 import org.xwiki.annotation.internal.context.Source;
+import org.xwiki.annotation.internal.context.SourceImpl;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
+import org.xwiki.annotation.internal.exception.IOServiceException;
+import org.xwiki.annotation.internal.maintainment.AnnotationState;
+import org.xwiki.annotation.utils.TestPurposeAnnotationImpl;
 import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.test.AbstractComponentTestCase;
 
@@ -42,37 +47,83 @@ import com.xpn.xwiki.XWikiContext;
  */
 public class AnnotationServiceTest extends AbstractComponentTestCase
 {
-    private final Mockery mockery = new Mockery();
+    /**
+     * Mockery to setup IO services in this test.
+     */
+    private Mockery mockery = new Mockery();
 
-    private CharSequence annotationID = "-1";
+    /**
+     * IOTargetService used by this test.
+     */
+    private IOTargetService ioTargetService;
 
-    private static int offset = 0;
+    /**
+     * IOService used in this test.
+     */
+    private IOService ioService;
 
-    private static CharSequence documentName = "DocumentO1";
+    /**
+     * The tested annotation service.
+     */
+    private AnnotationService annotationService;
 
-    private static CharSequence selection = "Three Laws of Robotics A robot may";
+    /**
+     * The document name to test.
+     */
+    private String docName = "Robots.Laws";
 
-    private static CharSequence selectionContext = selection;
+    /**
+     * The XWikiContext used to invoke the AnnotationService.
+     */
+    private XWikiContext deprecatedContext;
 
-    private static CharSequence metadata;
+    /**
+     * The selection of the annotation to add.
+     */
+    private String selection = "Three Laws of Robotics A robot may";
 
-    private static Target target = Target.documentContent;
+    /**
+     * The context of the selection.
+     */
+    private String selectionContext = selection;
 
-    private static XWikiContext deprecatedContext = null;
+    /**
+     * The annotation text of the annotation.
+     */
+    private String metadata = "Metadata #1";
 
-    private static CharSequence user = "XWiki.Scribo";
+    /**
+     * The user adding the annotation.
+     */
+    private String user = "XWiki.Guest";
 
-    private static IOTargetService ioTargetService;
-
-    private static IOService ioService;
-
-    private static AnnotationService annotationService;
-
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.test.AbstractComponentTestCase#registerComponents()
+     */
+    @Override
+    protected void registerComponents() throws Exception
     {
-        // IOTargetService mockup
+        super.registerComponents();
+
+        // register mock IOService and mock IOTargetService
         ioTargetService = mockery.mock(IOTargetService.class);
+        DefaultComponentDescriptor<IOTargetService> iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
+        iotsDesc.setRole(IOTargetService.class);
+        iotsDesc.setRoleHint("FEEDENTRY");
+        getComponentManager().registerComponent(iotsDesc, ioTargetService);
+        iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
+        iotsDesc.setRole(IOTargetService.class);
+        getComponentManager().registerComponent(iotsDesc, ioTargetService);
 
         ioService = mockery.mock(IOService.class);
+        DefaultComponentDescriptor<IOService> ioDesc = new DefaultComponentDescriptor<IOService>();
+        ioDesc.setRole(IOService.class);
+        getComponentManager().registerComponent(ioDesc, ioService);
+        
+        // lookup the annotation service to test
+        annotationService = getComponentManager().lookup(AnnotationService.class);        
     }
 
     /**
@@ -83,63 +134,8 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     @Override
     public void setUp() throws Exception
     {
-        // Setting up IOTargetService
-        DefaultComponentDescriptor<IOTargetService> iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        iotsDesc.setRoleHint("FEEDENTRY");
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-        iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-
-        // Setting up IOService
-        DefaultComponentDescriptor<IOService> ioDesc = new DefaultComponentDescriptor<IOService>();
-        ioDesc.setRole(IOService.class);
-        getComponentManager().registerComponent(ioDesc, ioService);
-
-        mockery.checking(new Expectations()
-        {
-            {
-                exactly(2).of(ioTargetService).getSource(documentName, deprecatedContext);
-                will(returnValue(new Source()
-                {
-                    public CharSequence getSource()
-                    {
-                        try {
-                            return Documents.valueOf(documentName.toString()).getSource();
-                        } catch (IOException e) {
-                            return "";
-                        }
-                    }
-
-                    public boolean equals(Object obj)
-                    {
-                        if (!(obj instanceof Source)) {
-                            System.err.println(false);
-                            return false;
-                        }
-                        Source other = (Source) obj;
-                        System.err.println(other.getSource().toString().equals(getSource().toString()));
-                        return other.getSource().toString().equals(getSource().toString());
-                    }
-                }));
-
-                oneOf(ioService).addAnnotation(with(documentName), with(any(Annotation.class)),
-                    with(any(XWikiContext.class)));
-                oneOf(ioService).removeAnnotation(documentName, annotationID, deprecatedContext);
-
-                oneOf(ioService).getSafeAnnotations(documentName, deprecatedContext);
-                will(returnValue(Documents.valueOf(documentName.toString()).getSafeAnnotations()));
-
-                oneOf(ioTargetService).getRenderedContent(with(documentName), with(any(Source.class)),
-                    with(deprecatedContext));
-                will(returnValue(Documents.valueOf(documentName.toString()).getRenderedContent()));
-            }
-        });
-
-        annotationService = getComponentManager().lookup(AnnotationService.class);
-
         super.setUp();
+        TestDocumentFactory.reset();
     }
 
     /**
@@ -151,23 +147,63 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
         return "An exception was thrown: " + e.getMessage();
     }
 
+    /**
+     * Test adding an annotation to a document.
+     * 
+     * @throws IOServiceException in case the {@link IOService} mock cannot return the source of a document
+     * @throws IOException in case the mock document cannot be read correctly
+     */
     @Test
-    public void addAnnotation()
+    public void addAnnotation() throws IOServiceException, IOException
     {
+        final Annotation expectedAnnotation =
+            new TestPurposeAnnotationImpl(docName, user, new Date().toString(), AnnotationState.SAFE, metadata,
+                selection, selectionContext, 1, 2, 39);
+        // expect the addAnnotation method of the IOService to be called with an annotation parameter
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(ioTargetService).getSource(docName, deprecatedContext);
+                will(returnValue(TestDocumentFactory.getDocument(docName).getSource()));
+                oneOf(ioService).addAnnotation(with(docName), with(expectedAnnotation), with(any(XWikiContext.class)));
+            }
+        });
+
         try {
-            annotationService.addAnnotation(metadata, selection, selectionContext, offset, documentName, user,
-                deprecatedContext, target);
+            annotationService.addAnnotation(metadata, selection, selectionContext, 0, docName, user, deprecatedContext,
+                Target.documentContent);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }
     }
 
+    /**
+     * Test that rendering a document with no annotation doesn't change the HTML of that document.
+     * 
+     * @throws IOServiceException in case any exception occurs returning the source of a document
+     * @throws IOException in case the mock document cannot be read correctly
+     */
     @Test
-    public void getAnnotatedHTML()
+    public void getAnnotatedHTML() throws IOServiceException, IOException
     {
+        // expect the source of the doc with no modification whatsoever because there's no annotation to be rendered
+        final Source expectedSource = new SourceImpl(TestDocumentFactory.getDocument(docName).getTextSource());
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(ioTargetService).getSource(docName, deprecatedContext);
+                will(returnValue(TestDocumentFactory.getDocument(docName).getSource()));
+
+                oneOf(ioTargetService).getRenderedContent(docName, expectedSource, deprecatedContext);
+                will(returnValue(TestDocumentFactory.getDocument(docName).getRenderedContent()));
+
+                oneOf(ioService).getSafeAnnotations(docName, deprecatedContext);
+                will(returnValue(TestDocumentFactory.getDocument(docName).getSafeAnnotations()));
+            }
+        });
         try {
-            CharSequence html = annotationService.getAnnotatedHTML(documentName, deprecatedContext, target);
-            Assert.assertEquals(Documents.valueOf(documentName.toString()).getRenderedContent(), html);
+            CharSequence html = annotationService.getAnnotatedHTML(docName, deprecatedContext, Target.documentContent);
+            Assert.assertEquals(TestDocumentFactory.getDocument(docName).getRenderedContent(), html);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         } catch (IOException e) {
@@ -175,24 +211,49 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
         }
     }
 
+    /**
+     * Test that the annotation set is returned by the annotation service with no modification from the actual IOService
+     * response of the annotations.
+     * 
+     * @throws IOServiceException in case anything goes wrong in the mock retrieving the annotations
+     * @throws IOException in case anything goes wrong mocking the document from file
+     */
     @Test
-    public void getSafeAnnotations()
+    public void getSafeAnnotations() throws IOServiceException, IOException
     {
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(ioService).getSafeAnnotations(docName, deprecatedContext);
+                will(returnValue(TestDocumentFactory.getDocument(docName).getSafeAnnotations()));
+            }
+        });
         try {
             Collection<Annotation> actual =
-                annotationService.getSafeAnnotations(documentName, deprecatedContext, target);
-            Collection<Annotation> expected = Documents.valueOf(documentName.toString()).getSafeAnnotations();
+                annotationService.getSafeAnnotations(docName, deprecatedContext, Target.documentContent);
+            Collection<Annotation> expected = TestDocumentFactory.getDocument(docName).getSafeAnnotations();
             Assert.assertEquals(expected, actual);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }
     }
 
+    /**
+     * Test that requesting the remove of an annotation calls correctly the remove method in the IOService.
+     * 
+     * @throws IOServiceException if there is an exception mocking the IOService remove method.
+     */
     @Test
-    public void removeAnnotation()
+    public void removeAnnotation() throws IOServiceException
     {
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(ioService).removeAnnotation(docName, "1", deprecatedContext);
+            }
+        });
         try {
-            annotationService.removeAnnotation(documentName, annotationID, deprecatedContext, target);
+            annotationService.removeAnnotation(docName, "1", deprecatedContext, Target.documentContent);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }

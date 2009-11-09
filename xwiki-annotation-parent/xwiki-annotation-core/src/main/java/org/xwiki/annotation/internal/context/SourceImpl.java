@@ -46,4 +46,18 @@ public class SourceImpl implements Source
     {
         return content;
     }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof Source) || obj == null) {
+            return false;
+        }
+
+        if (getSource() == null && ((Source) obj).getSource() != null) {
+            return false;
+        }
+
+        return getSource().toString().equals(((Source) obj).getSource().toString());
+    }
 }
