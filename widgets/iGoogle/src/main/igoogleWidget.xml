@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="XWiki gadget" height="340" scrolling="true" >
+        <Require feature="tabs" />
+    </ModulePrefs>
+    <UserPref name="wikiRestUrl" display_name="Wiki Rest URL" default_value="http://myxwiki.org/xwiki/rest/wikis/gsoc/"/>
+    <UserPref name="wikiMainUrl" display_name="Wiki Main URL" default_value="http://gsoc.myxwiki.org/xwiki/bin/view/"/>
+    <UserPref name="username" display_name="Username" default_value="alexmaru"/>
+    <UserPref name="show_date" display_name="Show Dates?" datatype="bool" default_value="true"/>
+    <UserPref name="show_summ" display_name="Show Summaries?" datatype="bool" default_value="true"/>
+    <UserPref name="num_entries" display_name="Number of Entries:" default_value="5" />
+    <Content type="html">
+<![CDATA[
+    <div id="content_div"></div>
+    <style> #recent_id, #spaces_id, #tags_id, #watch_id, #search_id { font-size: 80%; margin: 5px; background-color: #FFFFBF;} </style>
+    <script type="text/javascript">
+
+    // Initialize tabs, designate the tab named "Spaces" as
+// the tab selected by default.
+
+var tabs = new _IG_Tabs(__MODULE_ID__, "Spaces");
+
+// user preferences
+var prefs = new _IG_Prefs(__MODULE_ID__);
+
+//the url used for rest calls
+var wikiRestUrl= prefs.getString("wikiRestUrl");
+
+//the url used for returning feeds
+var wikiMainUrl= prefs.getString("wikiMainUrl");
+
+//user prefs for feeds
+var showdate = prefs.getBool("show_date");
+var summary = prefs.getBool("show_summ");
+var entries = prefs.getInt("num_entries");
+
+//username is used for retrieving info in the watchlist tab
+var username = prefs.getString("username");
+
+var spaces;
+
+
+function init() {
+    //adding all the tabs and displaying the information
+    tabs.addTab("Spaces", "spaces_id", Generalcallback);
+    tabs.addTab("Tags", "tags_id", Generalcallback);
+    tabs.addTab("Recent changes", "recent_id", Generalcallback);
+    tabs.addTab("Watchlist", "watch_id", Generalcallback);
+    tabs.addTab("Search", "search_id", Generalcallback);
+    displaySpaces();
+    displayTags();
+    displayRecentChanges();
+    displayWatchlist();
+    displaySearch();
+}
+
+// currently, not using this callback for anything
+function Generalcallback(tabId) {
+    var p = document.createElement("p");
+    // Get selected tab
+
+    var selectedTab = tabs.getSelectedTab();
+    p.innerHTML = "";
+    _gel(tabId).appendChild(p);
+}
+
+// getting all the spaces from the wiki
+function displaySpaces() {
+    // getting and parsing XML data
+
+    // building the spaces url for the rest call
+    var spacesUrl = wikiRestUrl + "spaces";
+
+    _IG_FetchXmlContent(spacesUrl, function (response) {
+        if (response == null || typeof(response) != "object" || response.firstChild == null) {
+            _gel("spaces_id").innerHTML = "<i>Invalid data.</i>";
+            return;
+        }
+
+        // Start building HTML string that will be displayed in <div>.
+        // Set the style for the <div>.
+        spaces = "<div style='padding: 5px;font-family:Arial, Helvetica;" +
+            "text-align:left;font-size:90%'>";
+        spaces += "<div style='text-align:center; font-size: 120%; color: black; " +
+            "font-weight: 700;'>";
+        spaces += "Spaces:";
+        spaces += "</div><br>";
+
+        // Get a list of the <space> element nodes in the file
+        var itemList = response.getElementsByTagName("space");
+        // Loop through all <space> nodes
+        for (var i = 0; i < itemList.length ; i++) {
+            // For each <space> node, get child nodes.
+            var nodeList = itemList.item(i).childNodes;
+            // Loop through child nodes. Extract data from the text nodes that are
+            // the children of the associated name and url element nodes.
+            for (var j = 0; j < nodeList.length ; j++) {
+                var node = nodeList.item(j);
+                if (node.nodeName == "name") {
+                    var name = node.firstChild.nodeValue;
+                }
+                else if (node.nodeName == "xwikiAbsoluteUrl") {
+                    var url = node.firstChild.nodeValue;
+                }
+            }
+
+            // Append extracted data to the HTML string.
+            spaces += "<i><b>";
+            spaces += "<a href='";
+            spaces += url;
+            spaces += "'>";
+            spaces += name;
+            spaces += "</a>";
+            spaces += "</b></i><br>";
+
+        }
+
+        spaces += "</div>";
+        _gel('spaces_id').innerHTML = spaces;
+
+
+    });
+
+}
+
+
+// getting all the tags from the wiki
+function displayTags() {
+
+    // building the tags url for the rest call
+    var tagsUrl = wikiRestUrl + "tags";
+
+
+    _IG_FetchXmlContent(tagsUrl, function (response) {
+        if (response == null || typeof(response) != "object" || response.firstChild == null) {
+            _gel("tags_id").innerHTML = "<i>Invalid data.</i>";
+            return;
+        }
+
+        // Start building HTML string that will be displayed in <div>.
+        // Set the style for the <div>.
+        tags = "<div style='padding: 5px;font-family:Arial, Helvetica;" +
+            "text-align:left;font-size:90%'>";
+        tags += "<div style='text-align:center; font-size: 120%; color: black; " +
+            "font-weight: 700;'>";
+        tags += "Tags:";
+        tags += "</div><br>";
+
+        // Get a list of the <tag> element nodes in the file
+        var itemList = response.getElementsByTagName("tag");
+        // Loop through all <tag> nodes, extract names and urls
+        for (var i = 0; i < itemList.length ; i++) {
+            var name = itemList.item(i).getAttribute("name");
+            var url = itemList.item(i).childNodes.item(0).getAttribute("href");
+
+            // Append extracted data to the HTML string.
+            tags += "<i><b>";
+            tags += "<a href='";
+            tags += url;
+            tags += "'>";
+            tags += name;
+            tags += "</a>";
+            tags += "</b></i><br>";
+
+        }
+
+        tags += "</div>";
+        _gel('tags_id').innerHTML = tags ;
+
+    });
+
+}
+
+function displayRecentChanges(){
+
+    // creating the feed url for recent changes in the wiki
+    var url = wikiMainUrl + "Main/WebRss?xpage=plain";
+
+    _IG_FetchFeedAsJSON(
+    url,
+    function(feed) {
+        if (feed == null){
+            alert("There is no data.");
+            return;
+        }
+
+        // Start building HTML string that will be displayed in gadget.
+        var html = "";
+        // Access the fields in the feed
+        html += "<div><b>" + feed.Title + "</b></div>";
+        html += "<div>" + feed.Description + "</div><br>";
+
+        // Access the data for a given entry
+        if (feed.Entry) {
+            for (var i = 0; i < feed.Entry.length; i++) {
+                html += "<div>"
+                    + "<a target='_blank' href='" + feed.Entry[i].Link + "'>"
+                    + feed.Entry[i].Title
+                    + "</a> ";
+                if (showdate==true)
+                {
+                    var milliseconds = (feed.Entry[i].Date) * 1000;
+                    var date = new Date(milliseconds);
+                    html += date.toLocaleDateString();
+                    html += " ";
+                    html += date.toLocaleTimeString();
+                }
+                if (summary==true) {
+                    html += "<br><i>" + feed.Entry[i].Summary + "</i>";
+                }
+                html += "</div>";
+            }
+        }
+
+        _gel('recent_id').innerHTML = html;
+        // The rest of the function parameters, which are optional: the number
+        // of entries to return, and whether to return summaries.
+    }, entries, summary);
+}
+
+function displayWatchlist(){
+
+    // creating the feed url for watchlist
+    var url = wikiMainUrl + "XWiki/" + username + "?xpage=watchlistrss";
+
+
+    _IG_FetchFeedAsJSON(
+    url,
+    function(feed) {
+        if (feed == null){
+            alert("There is no data.");
+            return;
+        }
+
+        // Start building HTML string that will be displayed in gadget.
+        var html = "";
+        // Access the fields in the feed
+        html += "<div><b>" + feed.Title + "</b></div>";
+        html += "<div>" + feed.Description + "</div><br>";
+
+        // Access the data for a given entry
+        if (feed.Entry) {
+            for (var i = 0; i < feed.Entry.length; i++) {
+                html += "<div>"
+                    + "<a target='_blank' href='" + feed.Entry[i].Link + "'>"
+                    + feed.Entry[i].Title
+                    + "</a> ";
+                if (showdate==true)
+                {
+                    var milliseconds = (feed.Entry[i].Date) * 1000;
+                    var date = new Date(milliseconds);
+                    html += date.toLocaleDateString();
+                    html += " ";
+                    html += date.toLocaleTimeString();
+                }
+                if (summary==true) {
+                    html += "<br><i>" + feed.Entry[i].Summary + "</i>";
+                }
+                html += "</div>";
+            }
+        }
+
+        _gel('watch_id').innerHTML = html;
+        // The rest of the function parameters, which are optional: the number
+        // of entries to return, and whether to return summaries.
+    }, entries, summary);
+}
+
+function search(form){
+    //getting the search string
+    var searchString = form.inputbox.value;
+    // alert ("You typed: " + searchString );
+
+    // creating the search url
+    var searchUrl = wikiRestUrl + "search?q=" + searchString;
+
+    _IG_FetchXmlContent(searchUrl, function (response) {
+        if (response == null || typeof(response) != "object" || response.firstChild == null) {
+            _gel("search_id").innerHTML = "<i>Invalid data.</i>";
+            return;
+        }
+
+        // Start building HTML string that will be displayed in <div>.
+        // Set the style for the <div>.
+        search = "<div style='padding: 5px;font-family:Arial, Helvetica;" +
+            "text-align:left;font-size:90%'>";
+        search += "<div style='text-align:center; font-size: 120%; color: black; " +
+            "font-weight: 700;'>";
+        search += "Results:";
+        search += "</div><br>";
+
+        // Get a list of the <searchResult> element nodes in the file
+        var itemList = response.getElementsByTagName("searchResult");
+
+        // Loop through all <searchResult> nodes
+        for (var i = 0; i < itemList.length ; i++) {
+            // For each <searchResult> node, get child nodes.
+            var nodeList = itemList.item(i).childNodes;
+            // Loop through child nodes. Extract data from the text nodes that are
+            // the children of the associated name and url element nodes.
+            for (var j = 0; j < nodeList.length ; j++) {
+                var node = nodeList.item(j);
+                if (node.nodeName == "link") {
+                    var url = node.getAttribute("href");
+
+                }
+                else if (node.nodeName == "pageFullName") {
+                    var name = node.firstChild.nodeValue;
+                }
+            }
+
+            // Append extracted data to the HTML string.
+            search += "<i><b>";
+            search += "<a href='";
+            search += url;
+            search += "'>";
+            search += name;
+            search += "</a>";
+            search += "</b></i><br>";
+
+        }
+        alert(search)
+        _gel('results_id').innerHTML = search;
+
+    });
+
+
+}
+
+// Call init function to initialize and display tabs.
+_IG_RegisterOnloadHandler(init);
+
+    </script>
+
+    <div id="spaces_id" style="display:none"></div>
+    <div id="tags_id" style="display:none"></div>
+    <div id="recent_id" style="display:none"></div>
+    <div id="watch_id" style="display:none"></div>
+    <div id="search_id" style="display:none">
+    <FORM NAME="myform" ACTION="" METHOD="GET">
+    <INPUT TYPE="text" NAME="inputbox" VALUE="">
+    <INPUT TYPE="button" NAME="button" Value="Search" onClick="search(this.form)">
+    </FORM>
+    <div id="results_id" ></div>
+    </div>
+
+]]>
+    </Content>
+</Module>

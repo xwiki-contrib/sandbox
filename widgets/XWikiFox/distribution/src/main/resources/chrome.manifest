@@ -1,0 +1,4 @@
+content	xwikifox	jar:chrome/xwikifox-core-${pom.version}.jar!/content/
+overlay	chrome://browser/content/browser.xul	chrome://xwikifox/content/xwikifox.xul
+
+locale	xwikifox	en-US	jar:chrome/xwikifox-core-${pom.version}.jar!/locale/en-US/

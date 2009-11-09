@@ -1,0 +1,12 @@
+<!ENTITY xwikifox.title "Preferences">
+<!ENTITY xwikifox.wikis "Wikis">
+<!ENTITY xwikifox.restUrl "Wiki Rest Url">
+<!ENTITY xwikifox.mainUrl "Wiki Main Url">
+<!ENTITY xwikifox.username "Username">
+<!ENTITY xwikifox.addWiki "Add wiki">
+<!ENTITY xwikifox.editWiki "Edit wiki">
+<!ENTITY xwikifox.removeWiki "Remove wiki">
+<!ENTITY xwikifox.showDates "Show Dates?">
+<!ENTITY xwikifox.showSummaries "Show Summaries?">
+<!ENTITY xwikifox.numberFeeds "Number of Feed Entries">
+<!ENTITY xwikifox.wikisPref "Number of Feed Entries">

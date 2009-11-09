@@ -1,0 +1,44 @@
+<?xml version="1.0"?> 
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://mozapps/content/preferences/preferences.css"?>
+<?xml-stylesheet href="chrome://xwikifox/content/xwikifox.css" type="text/css"?>
+
+<!DOCTYPE dialog SYSTEM "chrome://xwikifox/locale/xwikifox.pref.dtd">
+
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml"
+        id="xwikifox-wiki"
+        ondialogaccept="return XWikiFoxPref.submitWiki();"
+        title="&xwikifox.title;"
+        persist="screenX screenY">
+        
+  <script type="application/x-javascript" src="chrome://xwikifox/content/preference.js"/>
+
+  <groupbox flex="1">
+    <caption label="&xwikifox.addWiki;"/>
+    <vbox>
+      <hbox align="center">
+        <label control="xwikifox-wikiRestUrl" value="&xwikifox.restUrl;" />
+        <label class="mandatory-label" value="*"/>
+      </hbox>
+      <label value="(For example: http://myxwiki.org/xwiki/rest/wikis/incubator/)"/>
+	  <textbox id="xwikifox-wikiRestUrl" width="250" flex="1"/>
+    </vbox>
+    <vbox>
+      <hbox align="center">         
+        <label control="xwikifox-wikiMainUrl" value="&xwikifox.mainUrl;" />
+        <label class="mandatory-label" value="*"/> 
+      </hbox>
+      <label value="(For example: http://incubator.myxwiki.org/xwiki/bin/view/)"/>
+	  <textbox id="xwikifox-wikiMainUrl" width="250" flex="1"/>
+    </vbox>
+    <vbox>
+      <hbox align="center">
+        <label control="xwikifox-username" value="&xwikifox.username;" />
+      </hbox>
+	  <textbox id="xwikifox-username" width="250" flex="1"/>
+    </vbox>     
+  </groupbox>
+</dialog>
+

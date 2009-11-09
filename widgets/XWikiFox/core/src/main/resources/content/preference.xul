@@ -1,0 +1,59 @@
+<?xml version="1.0"?> 
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://mozapps/content/preferences/preferences.css"?>
+
+<!DOCTYPE dialog SYSTEM "chrome://xwikifox/locale/xwikifox.pref.dtd">
+
+<prefwindow
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml" id="xwikifox-pref"
+	onload="return XWikiFoxPref.onLoad();"
+	ondialogaccept="XWikiFoxPref.onSubmit();" title="&xwikifox.title;"
+	persist="screenX screenY">
+
+	<script type="application/x-javascript" src="chrome://xwikifox/content/preference.js" />
+
+	<prefpane id="pref-panel" style="margin-bottom: 24px">
+		<preferences>			
+			<preference id="_number-feeds" name="extensions.xwikifox.numberfeeds"
+				type="int" />
+		</preferences>
+
+		<groupbox flex="1">
+			<caption label="&xwikifox.wikis;" />
+			<hbox align="center">
+				<vbox flex="1">
+					<listbox id="wikis" rows="5" />
+				</vbox>
+				<vbox>
+					<button id="add-wiki" label="&xwikifox.addWiki;" oncommand="XWikiFoxPref.addWiki()()" />
+					<button id="remove-wiki" label="&xwikifox.removeWiki;"
+						oncommand="XWikiFoxPref.removeWiki()" />
+				</vbox>
+			</hbox>
+		</groupbox>
+
+		<groupbox flex="1">
+			<caption label="Feeds" />
+			<hbox align="center">
+				<hbox align="center">
+					<label control="numberFeeds" value="&xwikifox.numberFeeds;" />
+				</hbox>
+				<hbox>
+					<menulist id="numberFeeds" preference="_number-feeds">
+						<menupopup>
+							<menuitem label="3" value="3" />
+							<menuitem label="4" value="4" />
+							<menuitem label="5" value="5" />
+							<menuitem label="6" value="6" />
+							<menuitem label="7" value="7" />
+							<menuitem label="8" value="8" />
+						</menupopup>
+					</menulist>
+				</hbox>
+			</hbox>
+		</groupbox>
+	</prefpane>
+</prefwindow>
+

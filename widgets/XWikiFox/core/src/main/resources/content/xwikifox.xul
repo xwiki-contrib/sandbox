@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?xml-stylesheet href="chrome://xwikifox/content/xwikifox.css" type="text/css"?>
+
+<!DOCTYPE overlay SYSTEM "chrome://xwikifox/locale/xwikifox.dtd">
+<overlay id="xwikifox-overlay"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+
+
+	<statusbar id="status-bar">
+		<statusbarpanel id="xwikifox-statusbar"
+			image="chrome://xwikifox/content/images/xwiki.png" class="statusbarpanel-menu-iconic"
+			context="xwikifox-main-menupopup" ondblclick="xwikiFox.openUrl('http://xwiki.org/')"
+			onclick="xwikiFox.openWindow(event)" tooltiptext="XWikiFox - relevant info from your wikis">
+
+
+			<label id="xwikifox-statusbar-text" style="margin: 1px" />
+		</statusbarpanel>
+
+		<popupset id="menu-popupset">
+			<menupopup id="xwikifox-main-menupopup">
+				<menuitem id="xwikifox-menuitem-update" label="&xwikifox.update;"
+					oncommand="xwikiFox.loadWikiData()" />
+				<menu id="xwikifox-menuitem-wiki" label="&xwikifox.wikis;">
+					<menupopup id="xwikifox-wiki" sortDirection="ascending"
+						onpopupshowing="xwikiFox.showWikisMenu(this)" />
+				</menu>
+				<menuitem id="xwikifox-menuitem-preference" label="&xwikifox.preference;"
+					oncommand="xwikiFox.openPrefWindow()" />
+			</menupopup>
+		</popupset>
+
+		<popupset id="mainPopupSet2">
+			<panel id="xwikifox-main-window" noautofocus="true" noautohide="true">
+				<vbox>
+					<hbox id="xwikifox-top-container">
+						<hbox id="xwikifox-logo-box">
+							<vbox>
+								<image src="chrome://xwikifox/content/images/xwiki.png"
+									tooltiptext="" />
+								<spacer flex="1" />
+							</vbox>
+							<vbox>
+								<label id="xwikifox-wikititle" class="xwikifox-wikititle" />
+								<label id="xwikifox-wikiurl" class="xwikifox-wikiurl text-link"
+									onclick="var win = Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow('navigator:browser'); win.gBrowser.selectedTab = win.gBrowser.addTab(this.href); return false;" />
+							</vbox>
+						</hbox>
+						<spacer flex="1" />
+
+						<vbox>
+							<image id="xwikifox-close-button" src="chrome://xwikifox/content/images/close.png"
+								width='11px' height='10px' onclick="xwikiFox.closeWindow();"
+								tooltiptext="" />
+							<spacer flex="1" />
+						</vbox>
+					</hbox>
+					<hbox>
+						<vbox id="xwikifox-tabs-container">
+							<tabs orient="vertical" id="xwikifox-tabs">
+								<tab id="spaces-tab" label="Spaces" class="xwikifox-tab"
+									image="chrome://xwikifox/content/images/folder_page.png"
+									onclick="xwikiFox.getSpaces(true)" />
+								<tab id="tags-tab" label="Tags" class="xwikifox-tab"
+									image="chrome://xwikifox/content/images/tag_blue.png" onclick="xwikiFox.getTags(true)" />
+								<tab id="recent-tab" label="Recent" class="xwikifox-tab"
+									image="chrome://xwikifox/content/images/feed.png" onclick="xwikiFox.getRss('recent', true)" />
+								<tab id="watchlist-tab" label="Watchlist" class="xwikifox-tab"
+									image="chrome://xwikifox/content/images/star.png" onclick="xwikiFox.getRss('watchlist', true)" />
+								<tab id="search-tab" label="Search" class="xwikifox-tab"
+									image="chrome://xwikifox/content/images/magnifier.png" onclick="xwikiFox.showSearch()" />
+							</tabs>
+							<spacer flex="1" />
+						</vbox>
+						<vbox class="xwikifox-scrollbox-container" flex="1">
+							<vbox id="xwikifox-scrollbox-spaces" class="scrollbox" flex="1">
+								<tree id="xwikifox-spaces-tree" seltype="single" onselect="xwikiFox.openTreeUrl(event)"
+									width="250" rows="10" flex="1" hidecolumnpicker="true">
+									<treecols>
+										<treecol label="Browse the wiki" primary="true" width="250" />
+									</treecols>
+									<treechildren id="xwikifox-spaces-tree-children">
+
+									</treechildren>
+
+								</tree>
+
+							</vbox>
+							<vbox id="xwikifox-scrollbox-tags" class="scrollbox" flex="1">
+
+							</vbox>
+							<vbox id="xwikifox-scrollbox-recent" class="scrollbox" flex="1">
+
+							</vbox>
+							<vbox id="xwikifox-scrollbox-watchlist" class="scrollbox"
+								flex="1">
+
+							</vbox>
+
+							<vbox id="xwikifox-scrollbox-search" class="scrollbox" flex="1">
+								<textbox id="xwikifox-search-input" onkeypress="if (event.keyCode == 13) xwikiFox.searchNew();"  />
+								<vbox id="xwikifox-search-tree-container" flex="1">
+									<tree id="xwikifox-search-tree" open="true" width="250"
+										rows="10" flex="1" hidecolumnpicker="true">
+										<treecols>
+											<treecol label="Search Results" primary="true" width="250" />
+										</treecols>
+										<treechildren id="xwikifox-search-tree-children">
+
+										</treechildren>
+
+									</tree>
+								</vbox>
+							</vbox>
+
+						</vbox>
+					</hbox>
+				</vbox>
+
+			</panel>
+		</popupset>
+	</statusbar>
+
+
+	<!-- include javascript -->
+	<script src="xwikifox.js" />
+</overlay>

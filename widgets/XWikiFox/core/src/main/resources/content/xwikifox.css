@@ -1,0 +1,155 @@
+#xwikifox-main-window{
+	background-color: #4c4b46;	
+}
+
+.xwikifox-scrollbox-container {
+	height: 355px;
+	width: 300px;
+/*	min-height: 355px; */
+	background-color: white;
+}
+
+.xwikifox-scrollbox {
+	margin-left: 2px;
+	margin-right: 1px;
+	-moz-border-radius: 4px;
+}
+
+.xwikifox-tab {
+	padding: 4px;
+	margin: 0px;
+	text-align: center;
+	cursor: pointer;
+	font-size: 10px;
+	background-color: #e8eff9;
+}
+
+#xwikifox-tabs-container{
+  background-color: #4c4b46;
+}
+
+.xwikifox-wikititle {
+  font-size: 16px;
+}
+
+.xwikifox-wikiurl {
+  color: #8AC8D7 !important;
+  text-decoration: none;
+  font-size: 80%;
+}
+.xwikifox-wikiurl:active {
+  color: #FFF !important;
+}
+
+.xwikifox-wikiurl:hover {
+  text-decoration: underline;
+}
+
+#xwikifox-close-button {
+	cursor: pointer;
+	margin-left: 4px;
+	margin-right: 4px;
+	margin-top: 4px
+}
+
+.mandatory-label {
+	color: red;
+}
+
+.scrollbox {
+	display: none;
+	overflow: auto;
+}
+
+#xwikifox-top-container {
+	min-height: 30px;
+	background-color: #4c4b46;
+}
+
+#xwikifox-tabs{
+	margin-top: 5px;
+}
+
+#xwikifox-logo-box{
+	margin-left: 5px;
+	margin-top: 5px;
+	color: white;
+}
+
+#xwikifox-change-row{
+	background-color: #e8eff9;
+ 	margin: 3px;
+ 	padding: 2px;
+ 	
+}
+
+#xwikifox-summary-container{
+	width: 250px;
+}
+
+#xwikifox-scrollbox-recent{
+	overflow: auto;
+}
+
+#xwikifox-search-tree{
+	/*display: none; */
+}
+
+.xwikifox-link{
+	color: blue;
+	  font-size: 110%;
+}
+
+.xwikifox-link:hover{
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.xwikifox-link:active {
+	color: #FFF !important;
+}
+
+#xwikifox-recent-version{
+	font-weight: bold;
+	padding: 0px;
+	margin: 0px;
+}
+
+#xwikifox-recent-user{
+	font-weight: bold;
+	padding: 0px;
+	margin: 0px;
+}
+
+#xwikifox-recent-date{
+	color: gray;
+	padding: 0px;
+	margin: 0px;
+}
+
+#xwikifox-search-input{
+	color: #102132;
+	background-color: #D7E5F2;
+ 	border: 1px solid #284279; 
+	-moz-appearance: none;
+}
+
+.xwikifox-popularity-1
+{
+  font-size: 80%;
+}
+ 
+.xwikifox-popularity-2
+{
+  font-size: 130%;
+}
+ 
+.xwikifox-popularity-3
+{
+  font-size: 160%;
+}
+ 
+.xwikifox-popularity-4
+{
+  font-size: 190%;
+}
