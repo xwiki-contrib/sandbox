@@ -27,7 +27,6 @@ import java.util.Date;
 import junit.framework.Assert;
 
 import org.jmock.Expectations;
-import org.jmock.Mockery;
 import org.junit.Test;
 import org.xwiki.annotation.AnnotationService.Target;
 import org.xwiki.annotation.internal.annotation.Annotation;
@@ -37,7 +36,6 @@ import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
 import org.xwiki.annotation.utils.TestPurposeAnnotationImpl;
-import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.test.AbstractComponentTestCase;
 
 import com.xpn.xwiki.XWikiContext;
@@ -48,19 +46,9 @@ import com.xpn.xwiki.XWikiContext;
 public class AnnotationServiceTest extends AbstractComponentTestCase
 {
     /**
-     * Mockery to setup IO services in this test.
+     * The mocks setup.
      */
-    private Mockery mockery = new Mockery();
-
-    /**
-     * IOTargetService used by this test.
-     */
-    private IOTargetService ioTargetService;
-
-    /**
-     * IOService used in this test.
-     */
-    private IOService ioService;
+    private AnnotationsMockSetup setup;
 
     /**
      * The tested annotation service.
@@ -107,35 +95,9 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     {
         super.registerComponents();
 
-        // register mock IOService and mock IOTargetService
-        ioTargetService = mockery.mock(IOTargetService.class);
-        DefaultComponentDescriptor<IOTargetService> iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        iotsDesc.setRoleHint("FEEDENTRY");
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-        iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
-        getComponentManager().registerComponent(iotsDesc, ioTargetService);
-
-        ioService = mockery.mock(IOService.class);
-        DefaultComponentDescriptor<IOService> ioDesc = new DefaultComponentDescriptor<IOService>();
-        ioDesc.setRole(IOService.class);
-        getComponentManager().registerComponent(ioDesc, ioService);
-        
+        setup = new AnnotationsMockSetup(getComponentManager());
         // lookup the annotation service to test
-        annotationService = getComponentManager().lookup(AnnotationService.class);        
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.test.AbstractComponentTestCase#setUp()
-     */
-    @Override
-    public void setUp() throws Exception
-    {
-        super.setUp();
-        TestDocumentFactory.reset();
+        annotationService = getComponentManager().lookup(AnnotationService.class);
     }
 
     /**
@@ -160,12 +122,11 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
             new TestPurposeAnnotationImpl(docName, user, new Date().toString(), AnnotationState.SAFE, metadata,
                 selection, selectionContext, 1, 2, 39);
         // expect the addAnnotation method of the IOService to be called with an annotation parameter
-        mockery.checking(new Expectations()
+        setup.getMockery().checking(new Expectations()
         {
             {
-                oneOf(ioTargetService).getSource(docName, deprecatedContext);
-                will(returnValue(TestDocumentFactory.getDocument(docName).getSource()));
-                oneOf(ioService).addAnnotation(with(docName), with(expectedAnnotation), with(any(XWikiContext.class)));
+                oneOf(setup.getIoService()).addAnnotation(with(docName), with(expectedAnnotation),
+                    with(any(XWikiContext.class)));
             }
         });
 
@@ -188,19 +149,6 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     {
         // expect the source of the doc with no modification whatsoever because there's no annotation to be rendered
         final Source expectedSource = new SourceImpl(TestDocumentFactory.getDocument(docName).getTextSource());
-        mockery.checking(new Expectations()
-        {
-            {
-                oneOf(ioTargetService).getSource(docName, deprecatedContext);
-                will(returnValue(TestDocumentFactory.getDocument(docName).getSource()));
-
-                oneOf(ioTargetService).getRenderedContent(docName, expectedSource, deprecatedContext);
-                will(returnValue(TestDocumentFactory.getDocument(docName).getRenderedContent()));
-
-                oneOf(ioService).getSafeAnnotations(docName, deprecatedContext);
-                will(returnValue(TestDocumentFactory.getDocument(docName).getSafeAnnotations()));
-            }
-        });
         try {
             CharSequence html = annotationService.getAnnotatedHTML(docName, deprecatedContext, Target.documentContent);
             Assert.assertEquals(TestDocumentFactory.getDocument(docName).getRenderedContent(), html);
@@ -221,13 +169,6 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     @Test
     public void getSafeAnnotations() throws IOServiceException, IOException
     {
-        mockery.checking(new Expectations()
-        {
-            {
-                oneOf(ioService).getSafeAnnotations(docName, deprecatedContext);
-                will(returnValue(TestDocumentFactory.getDocument(docName).getSafeAnnotations()));
-            }
-        });
         try {
             Collection<Annotation> actual =
                 annotationService.getSafeAnnotations(docName, deprecatedContext, Target.documentContent);
@@ -246,10 +187,10 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     @Test
     public void removeAnnotation() throws IOServiceException
     {
-        mockery.checking(new Expectations()
+        setup.getMockery().checking(new Expectations()
         {
             {
-                oneOf(ioService).removeAnnotation(docName, "1", deprecatedContext);
+                oneOf(setup.getIoService()).removeAnnotation(docName, "1", deprecatedContext);
             }
         });
         try {

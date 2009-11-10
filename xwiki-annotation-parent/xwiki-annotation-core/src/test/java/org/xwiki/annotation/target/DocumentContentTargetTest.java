@@ -27,30 +27,36 @@ import junit.framework.Assert;
 import org.jmock.Expectations;
 import org.junit.Test;
 import org.xwiki.annotation.AnnotationTarget;
+import org.xwiki.annotation.AnnotationsMockSetup;
 import org.xwiki.annotation.TestDocumentFactory;
 import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.context.Source;
-import org.xwiki.annotation.internal.context.SourceImpl;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
 import org.xwiki.annotation.utils.TestPurposeAnnotationImpl;
+import org.xwiki.test.AbstractComponentTestCase;
 
 import com.xpn.xwiki.XWikiContext;
 
 /**
  * @version $Id$
  */
-public class DocumentContentTargetTest extends AbstractTargetTest
+public class DocumentContentTargetTest extends AbstractComponentTestCase
 {
     /**
-     * Default constructor.
+     * The mocks setup.
      */
-    public DocumentContentTargetTest()
-    {
-        // setup tested document name
-        docName = "LePrince.Chapitre15";
-    }
+    protected AnnotationsMockSetup setup;
+
+    /**
+     * Annotation target component tested by this suite.
+     */
+    protected AnnotationTarget annotationTarget;
+
+    /**
+     * Mock document tested in this suite.
+     */
+    protected String docName = "LePrince.Chapitre15";
 
     /**
      * {@inheritDoc}
@@ -62,6 +68,7 @@ public class DocumentContentTargetTest extends AbstractTargetTest
     {
         super.registerComponents();
 
+        setup = new AnnotationsMockSetup(getComponentManager());
         annotationTarget = getComponentManager().lookup(AnnotationTarget.class, "documentContent");
     }
 
@@ -76,20 +83,6 @@ public class DocumentContentTargetTest extends AbstractTargetTest
     {
         // context used by the annotation target service
         final XWikiContext deprecatedContext = null;
-        mockery.checking(new Expectations()
-        {
-            {
-                oneOf(ioService).getSafeAnnotations(with(docName), with(any(XWikiContext.class)));
-                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getSafeAnnotations()));
-
-                exactly(2).of(ioTargetService).getSource(with(docName), with(any(XWikiContext.class)));
-                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getSource()));
-                Source expectedSource =
-                    new SourceImpl(TestDocumentFactory.getDocument(docName.toString()).getSourceWithMarkers());
-                oneOf(ioTargetService).getRenderedContent(docName, expectedSource, deprecatedContext);
-                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getRenderedContentWithMarkers()));
-            }
-        });
 
         try {
             CharSequence html = annotationTarget.getAnnotatedHTML(docName, deprecatedContext);
@@ -119,12 +112,11 @@ public class DocumentContentTargetTest extends AbstractTargetTest
             new TestPurposeAnnotationImpl(docName.toString(), user, null, AnnotationState.SAFE, metadata, selection,
                 context, 0, 411, selection.length());
 
-        mockery.checking(new Expectations()
+        setup.getMockery().checking(new Expectations()
         {
             {
-                oneOf(ioService).addAnnotation(with(docName), with(expectedAnnotation), with(any(XWikiContext.class)));
-                oneOf(ioTargetService).getSource(with(docName), with(any(XWikiContext.class)));
-                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getSource()));
+                oneOf(setup.getIoService()).addAnnotation(with(docName), with(expectedAnnotation),
+                    with(any(XWikiContext.class)));
             }
         });
 

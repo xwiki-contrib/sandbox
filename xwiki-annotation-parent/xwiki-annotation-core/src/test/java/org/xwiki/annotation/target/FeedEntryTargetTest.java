@@ -28,27 +28,36 @@ import org.jmock.Expectations;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xwiki.annotation.AnnotationTarget;
+import org.xwiki.annotation.AnnotationsMockSetup;
 import org.xwiki.annotation.TestDocumentFactory;
 import org.xwiki.annotation.internal.annotation.Annotation;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
 import org.xwiki.annotation.utils.TestPurposeAnnotationImpl;
+import org.xwiki.test.AbstractComponentTestCase;
 
 import com.xpn.xwiki.XWikiContext;
 
 /**
  * @version $Id$
  */
-public class FeedEntryTargetTest extends AbstractTargetTest
+public class FeedEntryTargetTest extends AbstractComponentTestCase
 {
     /**
-     * Default constructor.
+     * The mocks setup.
      */
-    public FeedEntryTargetTest()
-    {
-        docName = "Feeds.FeedEntry";
-    }
+    protected AnnotationsMockSetup setup;
+
+    /**
+     * Annotation target component tested by this suite.
+     */
+    protected AnnotationTarget annotationTarget;
+
+    /**
+     * Mock document tested in this suite.
+     */
+    protected String docName = "Feeds.FeedEntry";
 
     /**
      * {@inheritDoc}
@@ -59,6 +68,8 @@ public class FeedEntryTargetTest extends AbstractTargetTest
     protected void registerComponents() throws Exception
     {
         super.registerComponents();
+
+        setup = new AnnotationsMockSetup(getComponentManager());
         annotationTarget = getComponentManager().lookup(AnnotationTarget.class, "feedEntry");
     }
 
@@ -71,20 +82,6 @@ public class FeedEntryTargetTest extends AbstractTargetTest
     @Test
     public void getAnnotatedHTML() throws IOException, IOServiceException
     {
-        mockery.checking(new Expectations()
-        {
-            {
-                oneOf(ioTargetService).getSource(with(docName), with(any(XWikiContext.class)));
-                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getSource()));
-                oneOf(ioTargetService).getRenderedContent(with(docName),
-                    with(TestDocumentFactory.getDocument(docName.toString()).getSource()),
-                    with(any(XWikiContext.class)));
-                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getRenderedContent()));
-
-                oneOf(ioService).getSafeAnnotations(with(docName), with(any(XWikiContext.class)));
-                will(returnValue(TestDocumentFactory.getDocument(docName).getSafeAnnotations()));
-            }
-        });
         try {
             CharSequence html = annotationTarget.getAnnotatedHTML(docName, null);
             Assert.assertEquals(TestDocumentFactory.getDocument(docName.toString()).getAnnotatedContent(), html);
@@ -120,13 +117,11 @@ public class FeedEntryTargetTest extends AbstractTargetTest
         final Annotation expectedAnnotation =
             new TestPurposeAnnotationImpl(docName, user, null, AnnotationState.SAFE, metadata, selection, context, 0,
                 649, selection.length());
-        mockery.checking(new Expectations()
+        setup.getMockery().checking(new Expectations()
         {
             {
-                oneOf(ioTargetService).getSource(with(docName), with(any(XWikiContext.class)));
-                will(returnValue(TestDocumentFactory.getDocument(docName.toString()).getSource()));
-
-                oneOf(ioService).addAnnotation(with(docName), with(expectedAnnotation), with(any(XWikiContext.class)));
+                oneOf(setup.getIoService()).addAnnotation(with(docName), with(expectedAnnotation),
+                    with(any(XWikiContext.class)));
             }
         });
         try {

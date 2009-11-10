@@ -20,7 +20,6 @@
 
 package org.xwiki.annotation;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,18 +37,34 @@ import org.xwiki.annotation.internal.context.SourceImpl;
  */
 public class MockDocument
 {
+    /**
+     * Properties map for this test document.
+     */
     private Map<String, Object> properties = new HashMap<String, Object>();
 
+    /**
+     * @return the text of the source for this document
+     */
     public String getTextSource()
     {
         return (String) properties.get("source");
     }
 
+    /**
+     * Sets the properties of this document.
+     * 
+     * @param key the key of the property
+     * @param value the value of the property to set
+     */
     public void set(String key, Object value)
     {
         properties.put(key, value);
     }
 
+    /**
+     * @return the rendered content of this document, corresponding to the source as returned by
+     *         {@link #getTextSource()}
+     */
     public String getRenderedContent()
     {
         // if not otherwise specified, the source is also the rendered content
@@ -57,30 +72,49 @@ public class MockDocument
         return renderedContent != null ? renderedContent : getTextSource();
     }
 
+    /**
+     * @return the source of this document with the annotation markers inserted. Used for verification purposes, for
+     *         identifying the calls to render content after the markers have been inserted, for which
+     *         {@link #getRenderedContentWithMarkers()} should be returned.
+     */
     public String getSourceWithMarkers()
     {
         String sourceWithMarkers = (String) properties.get("sourceWithMarkers");
         return sourceWithMarkers != null ? sourceWithMarkers : getTextSource();
     }
 
+    /**
+     * @return the annotated HTML of this document. Used for verification purposes.
+     */
     public String getAnnotatedContent()
     {
         String annotatedContent = (String) properties.get("annotated");
         return annotatedContent != null ? annotatedContent : getRenderedContent();
     }
 
+    /**
+     * @return the rendered HTML of this document, with the annotation markers inserted. This should be the result of
+     *         rendering the source returned by {@link #getSourceWithMarkers()}.
+     */
     public String getRenderedContentWithMarkers()
     {
         String renderedWithMarkers = (String) properties.get("renderedWithMarkers");
         return renderedWithMarkers != null ? renderedWithMarkers : getRenderedContent();
     }
 
+    /**
+     * @return the annotations of this document, as specified in the corpus file. Note that no filtering on the state of
+     *         the annotation is made.
+     */
     public List<Annotation> getSafeAnnotations()
     {
         return (List<Annotation>) properties.get("annotations");
     }
 
-    public Source getSource() throws IOException
+    /**
+     * @return the {@link Source} of this document, corresponding to the {@link #getTextSource()} content.
+     */
+    public Source getSource()
     {
         return new SourceImpl(getTextSource());
     }
