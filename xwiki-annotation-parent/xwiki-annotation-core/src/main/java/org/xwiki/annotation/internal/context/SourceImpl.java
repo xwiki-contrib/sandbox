@@ -27,10 +27,15 @@ package org.xwiki.annotation.internal.context;
  */
 public class SourceImpl implements Source
 {
+    /**
+     * The content of this source.
+     */
     private final CharSequence content;
 
     /**
-     * @param content
+     * Builds a source to provide the passed content.
+     * 
+     * @param content the content of this source
      */
     public SourceImpl(CharSequence content)
     {
@@ -47,6 +52,11 @@ public class SourceImpl implements Source
         return content;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj)
     {
@@ -59,5 +69,27 @@ public class SourceImpl implements Source
         }
 
         return getSource().toString().equals(((Source) obj).getSource().toString());
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        return content.hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return content.toString();
     }
 }

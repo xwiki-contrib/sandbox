@@ -21,12 +21,9 @@ package org.xwiki.annotation;
 
 import java.io.IOException;
 
-import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.api.Action;
-import org.jmock.api.Invocation;
-import org.xwiki.annotation.internal.context.Source;
+import org.jmock.integration.junit4.JUnit4Mockery;
 import org.xwiki.annotation.internal.context.SourceImpl;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.component.descriptor.DefaultComponentDescriptor;
@@ -36,18 +33,18 @@ import org.xwiki.component.manager.ComponentRepositoryException;
 import com.xpn.xwiki.XWikiContext;
 
 /**
- * Mock setup for the annotations tests, mocking the {@link IOService} and {@link IOTargetService} for documents related
- * functions, with documents loaded from file descriptions. If a file with the same name as the passed {@code docName}
- * of these functions, an {@link IOException} will be thrown.
+ * Mock setup for the annotations tests, mocking the {@link IOService} and {@link IOTargetService} to provide documents
+ * functions for the data in the test files.
  * 
  * @version $Id$
  */
 public class AnnotationsMockSetup
 {
     /**
-     * Mockery to setup IO services in this test.
+     * Mockery to setup IO services in this test, setup as a JUnit4 mockery so that tests fail when expectations are not
+     * met so that we test components through invocation expectations.
      */
-    protected Mockery mockery = new Mockery();
+    protected Mockery mockery = new JUnit4Mockery();
 
     /**
      * IOTargetService used by this test.
@@ -65,10 +62,8 @@ public class AnnotationsMockSetup
      * 
      * @param componentManager the component manager to register the services with
      * @throws ComponentRepositoryException if the components cannot be registered
-     * @throws IOServiceException if something happens while mocking the documents
      */
-    public AnnotationsMockSetup(ComponentManager componentManager) throws ComponentRepositoryException,
-        IOServiceException
+    public AnnotationsMockSetup(ComponentManager componentManager) throws ComponentRepositoryException
     {
         // IOTargetService mockup
         ioTargetService = mockery.mock(IOTargetService.class);
@@ -88,88 +83,40 @@ public class AnnotationsMockSetup
 
         // reset the document factory, to start with a clean factory every time this mock is setup
         TestDocumentFactory.reset();
+    }
 
-        // and now a little setup for these mocks, to allow all actions on documents and mock them correctly according
-        // to their descriptions in files
+    /**
+     * Sets up the expectations for the {@link IOService} and {@link IOTargetService} to return correctly the values in
+     * the test files for {@code docName}. Call this function when operating with mocked documents to provide all the
+     * information in the test file (document source, rendered contents, annotations).
+     * 
+     * @param docName the name of the document to setup expectations for
+     * @throws IOServiceException if something wrong happens while mocking the documents access
+     * @throws IOException if something wrong happens while mocking the documents access
+     */
+    public void setupExpectations(final String docName) throws IOServiceException, IOException
+    {
         mockery.checking(new Expectations()
         {
             {
-                allowing(ioService).getSafeAnnotations(with(aNonNull(CharSequence.class)),
+                MockDocument mDoc = TestDocumentFactory.getDocument(docName);
+                allowing(ioService).getSafeAnnotations(with(docName), with(any(XWikiContext.class)));
+                will(returnValue(mDoc.getSafeAnnotations()));
+
+                allowing(ioTargetService).getSource(with(docName), with(any(XWikiContext.class)));
+                will(returnValue(mDoc.getSource()));
+
+                // return the rendered content of the doc if the input is the unchanged source
+                allowing(ioTargetService).getRenderedContent(with(docName), with(mDoc.getSource()),
                     with(any(XWikiContext.class)));
-                will(returnDocumentProperty());
+                will(returnValue(mDoc.getRenderedContent()));
 
-                allowing(ioTargetService).getSource(with(aNonNull(CharSequence.class)), with(any(XWikiContext.class)));
-                will(returnDocumentProperty());
-
-                allowing(ioTargetService).getRenderedContent(with(aNonNull(CharSequence.class)),
-                    with(any(Source.class)), with(any(XWikiContext.class)));
-                will(returnDocumentProperty());
+                // return the rendered content with annotation markers if the input is the source with markers inserted
+                allowing(ioTargetService).getRenderedContent(with(docName),
+                    with(new SourceImpl(mDoc.getSourceWithMarkers())), with(any(XWikiContext.class)));
+                will(returnValue(mDoc.getRenderedContentWithMarkers()));
             }
         });
-    }
-
-    /**
-     * Factory method for the {@link ReturnDocPropertyAction}.
-     * 
-     * @return an action to return the requested document property from the passed parameters.
-     */
-    public static Action returnDocumentProperty()
-    {
-        return new AnnotationsMockSetup.ReturnDocPropertyAction();
-    }
-
-    /**
-     * JMock action to mock functions on documents from the description files, according to the document requested, the
-     * function called on the document and its parameters.
-     * 
-     * @version $Id$
-     */
-    public static class ReturnDocPropertyAction implements Action
-    {
-        /**
-         * {@inheritDoc}
-         * 
-         * @see org.hamcrest.SelfDescribing#describeTo(org.hamcrest.Description)
-         */
-        public void describeTo(Description description)
-        {
-            description
-                .appendText("returns the corresponding values for test documents described in files for document "
-                    + "aware calls in mocked services");
-        }
-
-        /**
-         * {@inheritDoc}
-         * 
-         * @see org.jmock.api.Invokable#invoke(org.jmock.api.Invocation)
-         */
-        public Object invoke(Invocation invocation) throws IOServiceException, IOException
-        {
-            if (invocation.getInvokedMethod().getName().equals("getSafeAnnotations")) {
-                return TestDocumentFactory.getDocument(invocation.getParameter(0).toString()).getSafeAnnotations();
-            }
-            if (invocation.getInvokedMethod().getName().equals("getSource")) {
-                return TestDocumentFactory.getDocument(invocation.getParameter(0).toString()).getSource();
-            }
-            if (invocation.getInvokedMethod().getName().equals("getRenderedContent")) {
-                Source rawSource = TestDocumentFactory.getDocument(invocation.getParameter(0).toString()).getSource();
-                Source taggedSource =
-                    new SourceImpl(TestDocumentFactory.getDocument(invocation.getParameter(0).toString())
-                        .getSourceWithMarkers());
-                Source paramSource = (Source) invocation.getParameter(1);
-                // if this function is called for the raw source, the raw rendered content is to be returned
-                if (rawSource.equals(paramSource)) {
-                    return TestDocumentFactory.getDocument(invocation.getParameter(0).toString()).getRenderedContent();
-                }
-                // if this function is called for the source with inserted annotation markers, then the markers should
-                // be rendered as well
-                if (taggedSource.equals(paramSource)) {
-                    return TestDocumentFactory.getDocument(invocation.getParameter(0).toString())
-                        .getRenderedContentWithMarkers();
-                }
-            }
-            return null;
-        }
     }
 
     /**

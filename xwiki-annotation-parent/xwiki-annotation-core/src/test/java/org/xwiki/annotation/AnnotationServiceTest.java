@@ -30,8 +30,6 @@ import org.jmock.Expectations;
 import org.junit.Test;
 import org.xwiki.annotation.AnnotationService.Target;
 import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.context.Source;
-import org.xwiki.annotation.internal.context.SourceImpl;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
@@ -96,6 +94,8 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
         super.registerComponents();
 
         setup = new AnnotationsMockSetup(getComponentManager());
+        // setup the expectations here, might as well write a setUp
+        setup.setupExpectations(docName);
         // lookup the annotation service to test
         annotationService = getComponentManager().lookup(AnnotationService.class);
     }
@@ -147,8 +147,6 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     @Test
     public void getAnnotatedHTML() throws IOServiceException, IOException
     {
-        // expect the source of the doc with no modification whatsoever because there's no annotation to be rendered
-        final Source expectedSource = new SourceImpl(TestDocumentFactory.getDocument(docName).getTextSource());
         try {
             CharSequence html = annotationService.getAnnotatedHTML(docName, deprecatedContext, Target.documentContent);
             Assert.assertEquals(TestDocumentFactory.getDocument(docName).getRenderedContent(), html);

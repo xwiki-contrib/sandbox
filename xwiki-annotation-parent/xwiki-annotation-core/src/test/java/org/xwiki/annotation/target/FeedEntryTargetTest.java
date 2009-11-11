@@ -70,6 +70,8 @@ public class FeedEntryTargetTest extends AbstractComponentTestCase
         super.registerComponents();
 
         setup = new AnnotationsMockSetup(getComponentManager());
+        // setup the expectations here, might as well override a setUp
+        setup.setupExpectations(docName);
         annotationTarget = getComponentManager().lookup(AnnotationTarget.class, "feedEntry");
     }
 
