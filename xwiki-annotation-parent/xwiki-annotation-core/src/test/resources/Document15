@@ -1,0 +1,26 @@
+##################################################
+# Ambiguous annotation, where selection starts at some offset inside context, and context contains some formatting before the selection
+##################################################
+.source
+As of some one gently rapping, rapping at my chamber door.
+"'Tis some visitor," I muttered, "tapp**ing** at my chamber door —
+Only this, and nothing more."
+.rendered
+<p>As of some one gently rapping, rapping at my chamber door.<br />"'Tis some visitor," I muttered, "tapp<strong>ing</strong> at my chamber door —<br/>Only this, and nothing more."</p>
+.annotation
+0
+XWiki.XWikiGuest
+The door of EA Poe's chamber
+# selection index in the context will be computed at test time as the indexOf selection in context
+at my chamber door
+tapping at my chamber door
+105
+18
+.annotated
+<p>As of some one gently rapping, rapping at my chamber door.<br />"'Tis some visitor," I muttered, "tapp<strong>ing</strong> <span class="annotation ID0" title="The door of EA Poe's chamber">at my chamber door</span> —<br/>Only this, and nothing more."</p>
+.sourceWithMarkers
+As of some one gently rapping, rapping at my chamber door.
+"'Tis some visitor," I muttered, "tapp**ing** @@@annotation@@@0@@@at my chamber door@@@0@@@annotation@@@ —
+Only this, and nothing more."
+.renderedWithMarkers
+<p>As of some one gently rapping, rapping at my chamber door.<br />"'Tis some visitor," I muttered, "tapp<strong>ing</strong> @@@annotation@@@0@@@at my chamber door@@@0@@@annotation@@@ —<br/>Only this, and nothing more."</p>

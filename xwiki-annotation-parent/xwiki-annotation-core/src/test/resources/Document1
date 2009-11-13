@@ -1,0 +1,21 @@
+##################################################
+# Regular paragraph, with an annotation inside it
+##################################################
+.source
+To be, or not to be, that is the question:
+.rendered
+<p>To be, or not to be, that is the question:</p>
+.annotation
+0
+XWiki.XWikiGuest
+Alternative to being
+or not to be
+or not to be
+7
+12
+.annotated
+<p>To be, <span class="annotation ID0" title="Alternative to being">or not to be</span>, that is the question:</p>
+.sourceWithMarkers
+To be, @@@annotation@@@0@@@or not to be@@@0@@@annotation@@@, that is the question:
+.renderedWithMarkers
+<p>To be, @@@annotation@@@0@@@or not to be@@@0@@@annotation@@@, that is the question:</p>

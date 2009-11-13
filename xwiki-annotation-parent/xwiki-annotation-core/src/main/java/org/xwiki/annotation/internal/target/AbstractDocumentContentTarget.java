@@ -52,8 +52,9 @@ public abstract class AbstractDocumentContentTarget extends AbstractAnnotationTa
     public void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
         CharSequence documentName, CharSequence user, XWikiContext context) throws AnnotationServiceException
     {
+        Source source = null;
         try {
-            Source source = getIOTargetService().getSource(documentName, context);
+            source = getIOTargetService().getSource(documentName, context);
             AlteredSource alteredContext = getSourceAlterer().alter(source);
             AlteredHTMLSelection sel =
                 getSelectionService().getAlteredHTMLSelection(getContentAlterer(), selection, selectionContext, offset);
@@ -64,9 +65,11 @@ public abstract class AbstractDocumentContentTarget extends AbstractAnnotationTa
                     AnnotationState.SAFE, metadata, selection, selectionContext, 0, location.offset, location.length);
             getIOService().addAnnotation(documentName, annotation, context);
         } catch (IOServiceException e) {
-            throw new AnnotationServiceException(e.getMessage());
+            throw new AnnotationServiceException("An exception occurred when accessing the storage services: "
+                + e.getMessage());
         } catch (SelectionMappingException e) {
-            throw new AnnotationServiceException(e.getMessage());
+            throw new AnnotationServiceException("Selection \"" + selection + "\" could not be mapped on source \""
+                + source.getSource() + "\". \nCaused by: " + e.getMessage());
         }
     }
 }

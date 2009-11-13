@@ -24,9 +24,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 
-import junit.framework.Assert;
-
 import org.jmock.Expectations;
+import org.junit.Assert;
 import org.junit.Test;
 import org.xwiki.annotation.AnnotationService.Target;
 import org.xwiki.annotation.internal.annotation.Annotation;

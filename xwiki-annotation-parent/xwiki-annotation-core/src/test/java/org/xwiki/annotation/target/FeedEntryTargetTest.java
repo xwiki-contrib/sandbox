@@ -22,9 +22,8 @@ package org.xwiki.annotation.target;
 
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.jmock.Expectations;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xwiki.annotation.AnnotationTarget;

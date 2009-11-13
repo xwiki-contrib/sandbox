@@ -25,9 +25,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.jmock.Expectations;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -75,8 +74,24 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
 
     static {
         // FIXME: checkstyle is so gonna shout when this will be longer than 30 files
-        addFileToTest("LePrince.Chapitre15");
-        addFileToTest("Robots.Laws");
+        addFileToTest("Document1");
+        addFileToTest("Document2");
+        addFileToTest("Document3");
+        addFileToTest("Document4");
+        addFileToTest("Document5");
+        addFileToTest("Document6");
+        addFileToTest("Document7");
+        addFileToTest("Document8");
+        addFileToTest("Document9");
+        addFileToTest("Document10");
+        addFileToTest("Document11");
+        addFileToTest("Document12");
+        addFileToTest("Document13");
+        addFileToTest("Document14");
+        addFileToTest("Document15");
+        addFileToTest("Document16");
+        addFileToTest("Document17");
+        addFileToTest("Document18");
     }
 
     /**
@@ -150,9 +165,10 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
             });
 
             try {
+                int index = ann.getSelectionContext().toString().indexOf(ann.getInitialSelection().toString());
                 // add the annotation for the specification read from the test file
                 annotationTarget.addAnnotation(ann.getAnnotation(), ann.getInitialSelection(), ann
-                    .getSelectionContext(), 0, docName, ann.getAuthor(), null);
+                    .getSelectionContext(), index, docName, ann.getAuthor(), null);
             } catch (AnnotationServiceException e) {
                 Assert.fail(getExceptionFailureMessage(e));
             }

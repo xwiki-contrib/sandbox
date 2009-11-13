@@ -58,27 +58,29 @@ public class AlteredHTMLSelectionImpl implements AlteredHTMLSelection
      */
     public SourceSegment mapToSource(AlteredSource source) throws SelectionMappingException
     {
-        int j = source.getContent().toString().indexOf(alteredSelection.getContent().toString());
-        int k = source.getContent().toString().indexOf(alteredSelection.getContent().toString(), j + 1);
-        // We don't need context
-        if (j != -1 && k == -1) {
+        int firstOcurrence = source.getContent().toString().indexOf(alteredSelection.getContent().toString());
+        int secondOcurrence =
+            source.getContent().toString().indexOf(alteredSelection.getContent().toString(), firstOcurrence + 1);
+        if (firstOcurrence != -1 && secondOcurrence == -1) {
+            // We don't need context, selection appears only once in the source            
             int intraOffset = source.getContent().toString().indexOf(alteredSelection.getContent().toString());
             int initialOffset = source.getInitialOffset(intraOffset);
             int finalOffset = source.getInitialOffset(intraOffset + alteredSelection.getContent().length() - 1);
             int length = finalOffset - initialOffset + 1;
             return new SourceSegment(initialOffset, length);
         } else {
-            int extraOffset = source.getContent().toString().indexOf(alteredSelectionContext.getContent().toString());
-            k =
+            firstOcurrence = source.getContent().toString().indexOf(alteredSelectionContext.getContent().toString());
+            secondOcurrence =
                 source.getContent().toString()
-                    .indexOf(alteredSelectionContext.getContent().toString(), extraOffset + 1);
-            if (extraOffset != -1 && k == -1) {
-                int initialOffset = source.getInitialOffset(extraOffset + alteredOffset);
+                    .indexOf(alteredSelectionContext.getContent().toString(), firstOcurrence + 1);
+            if (firstOcurrence != -1 && secondOcurrence == -1) {
+                // Context appears only once in the source
+                int initialOffset = source.getInitialOffset(firstOcurrence + alteredOffset);
                 int finalOffset;
                 int length;
                 try {
                     finalOffset =
-                        source.getInitialOffset(extraOffset + alteredOffset + alteredSelection.getContent().length()
+                        source.getInitialOffset(firstOcurrence + alteredOffset + alteredSelection.getContent().length()
                             - 1);
                     length = finalOffset - initialOffset + 1;
                 } catch (IllegalArgumentException e) {
@@ -87,6 +89,7 @@ public class AlteredHTMLSelectionImpl implements AlteredHTMLSelection
                 }
                 return new SourceSegment(initialOffset, length);
             } else {
+                // neither selection or context appears in the source or the context is ambiguous
                 throw new SelectionMappingException();
             }
         }
