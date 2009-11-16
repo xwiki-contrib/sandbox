@@ -28,7 +28,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import org.xwiki.annotation.AnnotationService;
-import org.xwiki.annotation.AnnotationService.Target;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequest;
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
@@ -61,8 +60,8 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         try {
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
-            return getAnnotations(annotationService.getAnnotations(documentName, xwikiContext, Target.documentContent),
-                annotationService.getAnnotatedHTML(documentName, xwikiContext, Target.documentContent));
+            return getAnnotations(annotationService.getAnnotations(documentName, xwikiContext), annotationService
+                .getAnnotatedHTML(documentName, xwikiContext));
         } catch (XWikiException e) {
             logger.log(Level.SEVERE, e.getMessage());
             return null;
@@ -89,13 +88,12 @@ public class AnnotationsRESTService extends AbstractAnnotationService
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
             annotationService.addAnnotation(t.getAnnotation(), t.getInitialSelection(), t.getSelectionContext(), t
-                .getContextOffset(), documentName, xwikiUser, xwikiContext, Target.documentContent);
+                .getContextOffset(), documentName, xwikiUser, xwikiContext);
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
-            result.setSource(annotationService.getAnnotatedHTML(documentName, xwikiContext, Target.documentContent)
-                .toString());
+            result.setSource(annotationService.getAnnotatedHTML(documentName, xwikiContext).toString());
             result.getAnnotations().addAll(
-                getAnnotationSet(annotationService.getAnnotations(documentName, xwikiContext, Target.documentContent)));
+                getAnnotationSet(annotationService.getAnnotations(documentName, xwikiContext)));
             return result;
         } catch (XWikiException e) {
             logger.log(Level.SEVERE, e.getMessage());

@@ -27,7 +27,6 @@ import java.util.Date;
 import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.Test;
-import org.xwiki.annotation.AnnotationService.Target;
 import org.xwiki.annotation.internal.annotation.Annotation;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
@@ -130,8 +129,7 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
         });
 
         try {
-            annotationService.addAnnotation(metadata, selection, selectionContext, 0, docName, user, deprecatedContext,
-                Target.documentContent);
+            annotationService.addAnnotation(metadata, selection, selectionContext, 0, docName, user, deprecatedContext);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }
@@ -147,7 +145,7 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     public void getAnnotatedHTML() throws IOServiceException, IOException
     {
         try {
-            CharSequence html = annotationService.getAnnotatedHTML(docName, deprecatedContext, Target.documentContent);
+            CharSequence html = annotationService.getAnnotatedHTML(docName, deprecatedContext);
             Assert.assertEquals(TestDocumentFactory.getDocument(docName).getRenderedContent(), html);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
@@ -167,8 +165,7 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     public void getSafeAnnotations() throws IOServiceException, IOException
     {
         try {
-            Collection<Annotation> actual =
-                annotationService.getSafeAnnotations(docName, deprecatedContext, Target.documentContent);
+            Collection<Annotation> actual = annotationService.getSafeAnnotations(docName, deprecatedContext);
             Collection<Annotation> expected = TestDocumentFactory.getDocument(docName).getSafeAnnotations();
             Assert.assertEquals(expected, actual);
         } catch (AnnotationServiceException e) {
@@ -191,7 +188,7 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
             }
         });
         try {
-            annotationService.removeAnnotation(docName, "1", deprecatedContext, Target.documentContent);
+            annotationService.removeAnnotation(docName, "1", deprecatedContext);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }

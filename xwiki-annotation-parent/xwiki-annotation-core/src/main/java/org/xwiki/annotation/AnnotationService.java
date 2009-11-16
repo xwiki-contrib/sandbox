@@ -29,28 +29,17 @@ import org.xwiki.component.annotation.ComponentRole;
 import com.xpn.xwiki.XWikiContext;
 
 /**
- * This component is responsive for providing services related to annotation management and annotated document
- * rendering.
+ * Component responsible for providing annotations related services: the management of annotations (adding, removing,
+ * updating) and with rendering them on the xwiki documents. <br />
+ * TODO: this interface shouldn't depend in any way of XWikiContext, it's an implementation detail.
  * 
  * @version $Id$
  */
 @ComponentRole
 public interface AnnotationService
 {
-
     /**
-     * This enumeration defines what kind of media are supported by the system of annotation.
-     * 
-     * @version $Id$
-     */
-    public enum Target
-    {
-        feedEntry,
-        documentContent;
-    }
-
-    /**
-     * Request insertion of new annotation in a given page.
+     * Request insertion of new annotation in a specified document.
      * 
      * @param metadata annotation content
      * @param selection HTML selection concerned by annotations
@@ -58,53 +47,54 @@ public interface AnnotationService
      * @param offset offset of the selection in context
      * @param documentName the name of the document containing annotation
      * @param user the author of the annotation
-     * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
+     * @param context the XWiki context needed to operate with XWiki objects
+     * @throws AnnotationServiceException if selection resolution fail or if an XWikiException occurred
      */
     void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
-        CharSequence documentName, CharSequence user, XWikiContext context, Target target)
-        throws AnnotationServiceException;
+        CharSequence documentName, CharSequence user, XWikiContext context) throws AnnotationServiceException;
 
     /**
-     * @param documentName
-     * @param context
-     * @param target kind of document
+     * Returns the HTML of the requested document, along with annotations inserted as {@code span} elements inside it.
+     * 
+     * @param documentName the name of the document to render with annotations
+     * @param context the XWiki context needed to operate with XWiki objects
      * @return rendered and annotated document
-     * @throws AnnotationServiceException
+     * @throws AnnotationServiceException if anything goes wrong retrieving or rendering the requested document
      */
-    CharSequence getAnnotatedHTML(CharSequence documentName, XWikiContext context, Target target)
-        throws AnnotationServiceException;
+    CharSequence getAnnotatedHTML(CharSequence documentName, XWikiContext context) throws AnnotationServiceException;
 
     /**
-     * remove annotation which has a given id.
+     * Removes the annotation with the specified ID.
      * 
      * @param documentName containing document
      * @param annotationID id of the annotation
-     * @param context
-     * @param target
-     * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
+     * @param context the XWiki context needed to operate with XWiki objects
+     * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      */
-    void removeAnnotation(CharSequence documentName, CharSequence annotationID, XWikiContext context, Target target)
+    void removeAnnotation(CharSequence documentName, CharSequence annotationID, XWikiContext context)
         throws AnnotationServiceException;
 
     /**
-     * @param documentName name of concerned document
-     * @param context
-     * @param target define the kind of document
-     * @return all annotations present in given document.
-     * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
-     */
-    Collection<Annotation> getAnnotations(CharSequence documentName, XWikiContext context, Target target)
-        throws AnnotationServiceException;
-
-    /**
-     * NOTE: a safe annotation is an annotation which content hasn't been altered after annotation creation.
+     * Returns all the annotations on the passed document.
      * 
-     * @param documentName
-     * @param context
-     * @param target define the kind of document
-     * @return all safe annotations in the document
-     * @throws AnnotationServiceException
+     * @param documentName name of the document to return annotations for
+     * @param context the XWiki context needed to operate with XWiki objects
+     * @return all annotations present in the specified document
+     * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      */
-    Collection<Annotation> getSafeAnnotations(CharSequence documentName, XWikiContext context, Target target)
+    Collection<Annotation> getAnnotations(CharSequence documentName, XWikiContext context)
+        throws AnnotationServiceException;
+
+    /**
+     * Returns all annotations marked as safe, i.e. which are still valid on the document, regardless of the edits the
+     * document suffered from creation.
+     * 
+     * @param documentName name of the document to return annotations for
+     * @param context the XWiki context needed to operate with XWiki objects
+     * @return all safe annotations in the document
+     * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
+     * @see {@link org.xwiki.annotation.internal.maintainment.AnnotationState#SAFE}
+     */
+    Collection<Annotation> getSafeAnnotations(CharSequence documentName, XWikiContext context)
         throws AnnotationServiceException;
 }

@@ -27,7 +27,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import org.xwiki.annotation.AnnotationService;
-import org.xwiki.annotation.AnnotationService.Target;
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -60,14 +59,13 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
         try {
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
-            annotationService.removeAnnotation(documentName, id, xwikiContext, Target.documentContent);
+            annotationService.removeAnnotation(documentName, id, xwikiContext);
 
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
-            result.setSource(annotationService.getAnnotatedHTML(documentName, xwikiContext, Target.documentContent)
-                .toString());
+            result.setSource(annotationService.getAnnotatedHTML(documentName, xwikiContext).toString());
             result.getAnnotations().addAll(
-                getAnnotationSet(annotationService.getAnnotations(documentName, xwikiContext, Target.documentContent)));
+                getAnnotationSet(annotationService.getAnnotations(documentName, xwikiContext)));
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());

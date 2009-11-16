@@ -26,7 +26,7 @@ import org.xwiki.component.annotation.ComponentRole;
 import com.xpn.xwiki.XWikiContext;
 
 /**
- * This interface defines services relative to a kind of annotation target.
+ * This interface defines services relative to the target of an annotation (the document on which it is added).
  * 
  * @version $Id$
  */

@@ -8,7 +8,6 @@ org.xwiki.annotation.internal.alterer.HTMLSourceAlterer
 org.xwiki.annotation.internal.alterer.PlainTextContentAlterer
 org.xwiki.annotation.internal.alterer.PlainTextSourceAlterer
 org.xwiki.annotation.internal.filter.XWiki20SyntaxFilter
-org.xwiki.annotation.internal.target.DefaultTargetResolver
 org.xwiki.annotation.internal.target.DefaultDocumentContentTarget
 org.xwiki.annotation.internal.target.DefaultFeedEntryTarget
 org.xwiki.annotation.internal.selection.DefaultSelectionService

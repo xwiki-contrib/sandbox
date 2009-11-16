@@ -33,7 +33,7 @@ import org.xwiki.component.annotation.Requirement;
  * 
  * @version $Id$
  */
-@Component("documentContent")
+@Component(hints = { "documentContent", "default" })
 public class DefaultDocumentContentTarget extends AbstractDocumentContentTarget
 {
     @Requirement
