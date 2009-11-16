@@ -26,19 +26,20 @@ import java.util.Map;
 import org.xwiki.annotation.SyntaxFilter;
 import org.xwiki.annotation.internal.content.AlteredContent;
 import org.xwiki.annotation.internal.content.AlteredContentImpl;
-import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Requirement;
 
 /**
- * Plain text alterer from content. It uses synthaxFilter in order to remove forbidden characters.
+ * Content alterer to filter out characters which are part of a wiki syntax. This class should be extended to provide
+ * the {@link SyntaxFilter} used to determine which characters are not meaningful text and should be preserved (not
+ * syntax characters).
  * 
  * @version $Id$
  */
-@Component("PLAINTEXT")
-public class PlainTextContentAlterer extends AbstractContentAlterer
+public abstract class AbstractWikiSyntaxContentAlterer extends AbstractContentAlterer
 {
-    @Requirement
-    private SyntaxFilter syntaxFilter;
+    /**
+     * @return Syntax filter used to determine the accepted characters in the content altered by this alterer.
+     */
+    protected abstract SyntaxFilter getSyntaxFilter();
 
     /**
      * {@inheritDoc}
@@ -58,7 +59,7 @@ public class PlainTextContentAlterer extends AbstractContentAlterer
         Character c;
         for (int i = 0; i < sequence.length(); ++i) {
             c = sequence.charAt(i);
-            if (syntaxFilter.accept(c)) {
+            if (getSyntaxFilter().accept(c)) {
                 buffer.append(c);
                 for (int t = 0; t <= z; ++t) {
                     // 1+0;1 // 1+1;1

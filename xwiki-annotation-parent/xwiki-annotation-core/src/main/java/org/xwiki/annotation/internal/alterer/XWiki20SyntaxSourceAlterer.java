@@ -21,7 +21,6 @@
 package org.xwiki.annotation.internal.alterer;
 
 import org.xwiki.annotation.ContentAlterer;
-
 import org.xwiki.annotation.SourceAlterer;
 import org.xwiki.annotation.internal.context.AlteredSource;
 import org.xwiki.annotation.internal.context.AlteredSourceImpl;
@@ -30,14 +29,18 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
 /**
- * HTML alterer from source. This alterer removes HTML markup, it only keeps text nodes content.
+ * XWiki 2.0 syntax source alterer. It uses a content alterer for the XWiki 2.0 syntax to eliminate the syntax
+ * characters from its content.
  * 
  * @version $Id$
  */
-@Component("HTML")
-public class HTMLSourceAlterer implements SourceAlterer
+@Component("xwiki/2.0")
+public class XWiki20SyntaxSourceAlterer implements SourceAlterer
 {
-    @Requirement("HTML")
+    /**
+     * Content alterer used by this source alterer.
+     */
+    @Requirement("xwiki/2.0")
     private static ContentAlterer contentAlterer;
 
     /**

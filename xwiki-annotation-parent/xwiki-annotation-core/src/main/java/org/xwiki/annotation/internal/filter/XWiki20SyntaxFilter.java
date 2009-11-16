@@ -24,11 +24,11 @@ import org.xwiki.annotation.SyntaxFilter;
 import org.xwiki.component.annotation.Component;
 
 /**
- * Refuse all characters used to specify formating information in XWiki 2.0 syntax.
+ * Refuse all characters used to specify formatting information in XWiki 2.0 syntax.
  * 
  * @version $Id$
  */
-@Component
+@Component("xwiki/2.0")
 public class XWiki20SyntaxFilter implements SyntaxFilter
 {
     /**

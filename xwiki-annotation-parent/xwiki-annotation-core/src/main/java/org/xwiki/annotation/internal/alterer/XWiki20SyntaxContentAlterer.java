@@ -17,35 +17,35 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.xwiki.annotation.internal.alterer;
 
-import org.xwiki.annotation.ContentAlterer;
-import org.xwiki.annotation.SourceAlterer;
-import org.xwiki.annotation.internal.context.AlteredSource;
-import org.xwiki.annotation.internal.context.AlteredSourceImpl;
-import org.xwiki.annotation.internal.context.Source;
+import org.xwiki.annotation.SyntaxFilter;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
 /**
- * Plain text alterer from source. It uses synthaxFilter in order to remove forbidden characters.
+ * Content alterer for the XWiki 2.0 syntax.
  * 
  * @version $Id$
  */
-@Component("PLAINTEXT")
-public class PlainTextSourceAlterer implements SourceAlterer
+@Component("xwiki/2.0")
+public class XWiki20SyntaxContentAlterer extends AbstractWikiSyntaxContentAlterer
 {
-    @Requirement("PLAINTEXT")
-    private static ContentAlterer contentAlterer;
+    /**
+     * The syntax filter used by this alterer.
+     */
+    @Requirement("xwiki/2.0")
+    private SyntaxFilter syntaxFilter;
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.SourceAlterer#alter(org.xwiki.annotation.internal.context.Source)
+     * @see org.xwiki.annotation.internal.alterer.AbstractWikiSyntaxContentAlterer#getSyntaxFilter()
      */
-    public AlteredSource alter(Source context)
+    @Override
+    protected SyntaxFilter getSyntaxFilter()
     {
-        return new AlteredSourceImpl(contentAlterer.alter(context.getSource()));
+        return syntaxFilter;
     }
+
 }

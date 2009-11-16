@@ -36,7 +36,7 @@ public class CompositeContentAlterer extends AbstractContentAlterer
     @Requirement("HTML")
     ContentAlterer htmlAlterer;
 
-    @Requirement("PLAINTEXT")
+    @Requirement("xwiki/2.0")
     ContentAlterer plainAlterer;
 
     /**

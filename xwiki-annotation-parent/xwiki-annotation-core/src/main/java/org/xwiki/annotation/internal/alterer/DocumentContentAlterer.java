@@ -33,8 +33,11 @@ import org.xwiki.component.annotation.Requirement;
 @Component("DOCUMENTCONTENT")
 public class DocumentContentAlterer extends AbstractContentAlterer
 {
-    @Requirement("PLAINTEXT")
-    private ContentAlterer plainalterer;
+    /**
+     * Document content is filtered with a wiki syntax filter.
+     */
+    @Requirement("xwiki/2.0")
+    private ContentAlterer contentAlterer;
 
     /**
      * {@inheritDoc}
@@ -43,6 +46,6 @@ public class DocumentContentAlterer extends AbstractContentAlterer
      */
     public AlteredContent alter(CharSequence sequence)
     {
-        return plainalterer.alter(sequence);
+        return contentAlterer.alter(sequence);
     }
 }

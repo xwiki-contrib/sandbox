@@ -3,9 +3,8 @@ org.xwiki.annotation.internal.alterer.DocumentContentAlterer
 org.xwiki.annotation.internal.alterer.DocumentSourceAlterer
 org.xwiki.annotation.internal.alterer.CompositeContentAlterer
 org.xwiki.annotation.internal.alterer.HTMLContentAlterer
-org.xwiki.annotation.internal.alterer.HTMLSourceAlterer
-org.xwiki.annotation.internal.alterer.PlainTextContentAlterer
-org.xwiki.annotation.internal.alterer.PlainTextSourceAlterer
+org.xwiki.annotation.internal.alterer.XWiki20SyntaxContentAlterer
+org.xwiki.annotation.internal.alterer.XWiki20SyntaxSourceAlterer
 org.xwiki.annotation.internal.filter.XWiki20SyntaxFilter
 org.xwiki.annotation.internal.target.DefaultDocumentContentTarget
 org.xwiki.annotation.internal.selection.DefaultSelectionService
