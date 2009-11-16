@@ -26,12 +26,12 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
 /**
- * XWiki Watch feed entry alter from content. Both use plain text and html alterers.
+ * Composite alterer chaining the HTML alterer and the plain text alterer.
  * 
  * @version $Id$
  */
-@Component("FEEDENTRY")
-public class FeedEntryContentAlterer extends AbstractContentAlterer
+@Component("COMPOSITE")
+public class CompositeContentAlterer extends AbstractContentAlterer
 {
     @Requirement("HTML")
     ContentAlterer htmlAlterer;
@@ -42,9 +42,8 @@ public class FeedEntryContentAlterer extends AbstractContentAlterer
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.alterer.AbstractContentAlterer#alter(java.lang.CharSequence)
+     * @see org.xwiki.annotation.ContentAlterer#alter(java.lang.CharSequence)
      */
-    @Override
     public AlteredContent alter(CharSequence sequence)
     {
         return plainAlterer.alter(htmlAlterer.alter(sequence));

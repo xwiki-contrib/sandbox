@@ -38,39 +38,81 @@ public abstract class AbstractContentAlterer implements ContentAlterer
     public AlteredContent alter(final AlteredContent alteredContent)
     {
         final AlteredContent ac = alter(alteredContent.getContent().toString());
-        return new AlteredContent()
-        {
-
-            public int getInitialOffset(int i)
-            {
-                int tmp = ac.getInitialOffset(i);
-                int rez = alteredContent.getInitialOffset(tmp);
-                return rez;
-            }
-
-            public int getInitialLength()
-            {
-                return alteredContent.getInitialLength();
-            }
-
-            public CharSequence getContent()
-            {
-                return ac.getContent();
-            }
-
-            public int getAlteredOffset(int i)
-            {
-                int tmp = alteredContent.getAlteredOffset(i);
-                int rez = ac.getAlteredOffset(tmp);
-                return rez;
-            }
-        };
+        return new ComposedAlteredContent(alteredContent, ac);
     }
 
     /**
-     * {@inheritDoc}
+     * Composes two altered contents, by composing the offsets provided by the two alterers, applying first the {@code
+     * initial} altered content offsets and then the {@code altered} altered content offsets.
      * 
-     * @see org.xwiki.annotation.ContentAlterer#alter(java.lang.CharSequence)
+     * @version $Id$
      */
-    public abstract AlteredContent alter(CharSequence sequence);
+    static class ComposedAlteredContent implements AlteredContent
+    {
+        /**
+         * The initial altered content.
+         */
+        private AlteredContent initial;
+
+        /**
+         * The altered content.
+         */
+        private AlteredContent altered;
+
+        /**
+         * Builds a composed content alterer for the passed initial altered content and the passed altered content.
+         * 
+         * @param initial the initial altered content
+         * @param altered the altering of the initial altered content
+         */
+        public ComposedAlteredContent(AlteredContent initial, AlteredContent altered)
+        {
+            this.initial = initial;
+            this.altered = altered;
+        }
+
+        /**
+         * {@inheritDoc}
+         * 
+         * @see org.xwiki.annotation.internal.content.AlteredContent#getInitialOffset(int)
+         */
+        public int getInitialOffset(int i)
+        {
+            int tmp = altered.getInitialOffset(i);
+            int rez = initial.getInitialOffset(tmp);
+            return rez;
+        }
+
+        /**
+         * {@inheritDoc}
+         * 
+         * @see org.xwiki.annotation.internal.content.AlteredContent#getInitialLength()
+         */
+        public int getInitialLength()
+        {
+            return initial.getInitialLength();
+        }
+
+        /**
+         * {@inheritDoc}
+         * 
+         * @see org.xwiki.annotation.internal.content.AlteredContent#getContent()
+         */
+        public CharSequence getContent()
+        {
+            return altered.getContent();
+        }
+
+        /**
+         * {@inheritDoc}
+         * 
+         * @see org.xwiki.annotation.internal.content.AlteredContent#getAlteredOffset(int)
+         */
+        public int getAlteredOffset(int i)
+        {
+            int tmp = initial.getAlteredOffset(i);
+            int rez = altered.getAlteredOffset(tmp);
+            return rez;
+        }
+    }
 }

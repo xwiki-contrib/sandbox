@@ -39,9 +39,8 @@ public class DocumentContentAlterer extends AbstractContentAlterer
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.alterer.AbstractContentAlterer#alter(java.lang.CharSequence)
+     * @see org.xwiki.annotation.ContentAlterer#alter(java.lang.CharSequence)
      */
-    @Override
     public AlteredContent alter(CharSequence sequence)
     {
         return plainalterer.alter(sequence);

@@ -69,10 +69,6 @@ public class AnnotationsMockSetup
         ioTargetService = mockery.mock(IOTargetService.class);
         DefaultComponentDescriptor<IOTargetService> iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
         iotsDesc.setRole(IOTargetService.class);
-        iotsDesc.setRoleHint("FEEDENTRY");
-        componentManager.registerComponent(iotsDesc, ioTargetService);
-        iotsDesc = new DefaultComponentDescriptor<IOTargetService>();
-        iotsDesc.setRole(IOTargetService.class);
         componentManager.registerComponent(iotsDesc, ioTargetService);
 
         // IOService mockup

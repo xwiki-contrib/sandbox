@@ -32,7 +32,7 @@ import org.xwiki.test.AbstractComponentTestCase;
  * 
  * @version $Id$
  */
-public class FeedEntryAltererTest extends AbstractComponentTestCase
+public class CompositeAltererTest extends AbstractComponentTestCase
 {
     /**
      * Content alterer tested by this suite.
@@ -49,7 +49,7 @@ public class FeedEntryAltererTest extends AbstractComponentTestCase
     {
         super.setUp();
 
-        compositeAlterer = getComponentManager().lookup(ContentAlterer.class, "FEEDENTRY");
+        compositeAlterer = getComponentManager().lookup(ContentAlterer.class, "COMPOSITE");
     }
 
     /**

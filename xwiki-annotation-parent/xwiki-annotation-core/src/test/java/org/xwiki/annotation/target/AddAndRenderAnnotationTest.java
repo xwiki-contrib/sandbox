@@ -136,7 +136,7 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
         setup = new AnnotationsMockSetup(getComponentManager());
         // setup the expectations here. might as well write a setUp(), there's no difference
         setup.setupExpectations(docName);
-        annotationTarget = getComponentManager().lookup(AnnotationTarget.class, "documentContent");
+        annotationTarget = getComponentManager().lookup(AnnotationTarget.class);
     }
 
     /**
