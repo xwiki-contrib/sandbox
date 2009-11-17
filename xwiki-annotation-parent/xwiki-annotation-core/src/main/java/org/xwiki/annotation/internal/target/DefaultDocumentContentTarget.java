@@ -39,7 +39,7 @@ import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.annotation.internal.exception.SelectionMappingException;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
-import org.xwiki.annotation.internal.selection.AlteredHTMLSelection;
+import org.xwiki.annotation.internal.selection.AlteredSelection;
 import org.xwiki.annotation.internal.selection.SourceSegment;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -93,11 +93,16 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
         String source = null;
         try {
             source = documentContentTargetService.getSource(documentName, context);
-            AlteredContent alteredContext = documentContentAlterer.alter(source);
-            AlteredHTMLSelection sel =
-                selectionService.getAlteredHTMLSelection(documentContentAlterer, selection, selectionContext, offset);
+            // leave only relevant content in the document source
+            AlteredContent alteredDocSource = documentContentAlterer.alter(source);
+            // leave only relevant content in the selection
+            AlteredSelection sel =
+                new AlteredSelection(documentContentAlterer.alter(selection), documentContentAlterer
+                    .alter(selectionContext), offset);
+            // find the location of the selection in the source of the document
+            SourceSegment location = selectionService.mapToSource(sel, alteredDocSource);
 
-            SourceSegment location = sel.mapToSource(alteredContext);
+            // create the annotation with this data and send it to the storage service
             AnnotationImpl annotation =
                 new AnnotationImpl(documentName, user, new SimpleDateFormat(IOService.DATE_FORMAT).format(new Date()),
                     AnnotationState.SAFE, metadata, selection, selectionContext, 0, location.offset, location.length);

@@ -20,7 +20,10 @@
 
 package org.xwiki.annotation;
 
-import org.xwiki.annotation.internal.selection.AlteredHTMLSelection;
+import org.xwiki.annotation.internal.content.AlteredContent;
+import org.xwiki.annotation.internal.exception.SelectionMappingException;
+import org.xwiki.annotation.internal.selection.AlteredSelection;
+import org.xwiki.annotation.internal.selection.SourceSegment;
 import org.xwiki.component.annotation.ComponentRole;
 
 /**
@@ -33,8 +36,6 @@ public interface SelectionService
 {
     /**
      * This component alters and wrap selection informations in a single object. <br />
-     * FIXME: shouldn't the selection alterer be injected in this class' implementations rather than passed from the one
-     * injected in the annotation target subclasses?
      * 
      * @param alterer the content alterer to clean up the selection
      * @param selection selection on HTML rendered page
@@ -42,6 +43,16 @@ public interface SelectionService
      * @param offset offset of selection in context
      * @return altered selection
      */
-    AlteredHTMLSelection getAlteredHTMLSelection(ContentAlterer alterer, CharSequence selection, CharSequence context,
+    AlteredSelection getAlteredHTMLSelection(ContentAlterer alterer, CharSequence selection, CharSequence context,
         int offset);
+
+    /**
+     * Computes the source segment where the passed selection maps on the passed source.
+     * 
+     * @param selection the selection to map on the source
+     * @param source the content on which the selection is made
+     * @return the segment of source that generates selection
+     * @throws SelectionMappingException if the selection cannot be mapped on the passed source
+     */
+    SourceSegment mapToSource(AlteredSelection selection, AlteredContent source) throws SelectionMappingException;
 }

@@ -22,6 +22,8 @@ package org.xwiki.annotation.internal.selection;
 
 import org.xwiki.annotation.ContentAlterer;
 import org.xwiki.annotation.SelectionService;
+import org.xwiki.annotation.internal.content.AlteredContent;
+import org.xwiki.annotation.internal.exception.SelectionMappingException;
 import org.xwiki.component.annotation.Component;
 
 /**
@@ -38,9 +40,60 @@ public class DefaultSelectionService implements SelectionService
      * @see org.xwiki.annotation.SelectionService#getAlteredHTMLSelection(java.lang.CharSequence,
      *      java.lang.CharSequence, int)
      */
-    public AlteredHTMLSelection getAlteredHTMLSelection(ContentAlterer alterer, CharSequence selection,
+    public AlteredSelection getAlteredHTMLSelection(ContentAlterer alterer, CharSequence selection,
         CharSequence context, int offset)
     {
-        return new AlteredHTMLSelectionImpl(alterer.alter(selection), alterer.alter(context), offset);
+        return new AlteredSelection(alterer.alter(selection), alterer.alter(context), offset);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.SelectionService#mapToSource(org.xwiki.annotation.internal.selection.AlteredSelection,
+     *      org.xwiki.annotation.internal.content.AlteredContent)
+     */
+    public SourceSegment mapToSource(AlteredSelection selection, AlteredContent source)
+        throws SelectionMappingException
+    {
+        int firstOcurrence =
+            source.getContent().toString().indexOf(selection.getAlteredSelection().getContent().toString());
+        int secondOcurrence =
+            source.getContent().toString().indexOf(selection.getAlteredSelection().getContent().toString(),
+                firstOcurrence + 1);
+        if (firstOcurrence != -1 && secondOcurrence == -1) {
+            // We don't need context, selection appears only once in the source
+            int intraOffset =
+                source.getContent().toString().indexOf(selection.getAlteredSelection().getContent().toString());
+            int initialOffset = source.getInitialOffset(intraOffset);
+            int finalOffset =
+                source.getInitialOffset(intraOffset + selection.getAlteredSelection().getContent().length() - 1);
+            int length = finalOffset - initialOffset + 1;
+            return new SourceSegment(initialOffset, length);
+        } else {
+            firstOcurrence =
+                source.getContent().toString().indexOf(selection.getAlteredSelectionContext().getContent().toString());
+            secondOcurrence =
+                source.getContent().toString().indexOf(selection.getAlteredSelectionContext().getContent().toString(),
+                    firstOcurrence + 1);
+            if (firstOcurrence != -1 && secondOcurrence == -1) {
+                // Context appears only once in the source
+                int initialOffset = source.getInitialOffset(firstOcurrence + selection.getAlteredOffset());
+                int finalOffset;
+                int length;
+                try {
+                    finalOffset =
+                        source.getInitialOffset(firstOcurrence + selection.getAlteredOffset()
+                            + selection.getAlteredSelection().getContent().length() - 1);
+                    length = finalOffset - initialOffset + 1;
+                } catch (IllegalArgumentException e) {
+                    finalOffset = source.getInitialLength();
+                    length = finalOffset - initialOffset;
+                }
+                return new SourceSegment(initialOffset, length);
+            } else {
+                // neither selection or context appears in the source or the context is ambiguous
+                throw new SelectionMappingException();
+            }
+        }
     }
 }
