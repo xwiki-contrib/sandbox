@@ -20,12 +20,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.htmlparser</groupId>
-      <artifactId>htmlparser</artifactId>
-      <version>${htmlparser.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-observation-local</artifactId>
       <version>${platform.core.version}</version>
