@@ -78,7 +78,7 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     /**
      * The alterer for the source of the annotation target, to perform cleanup before mapping.
      */
-    @Requirement("DOCUMENTCONTENT")
+    @Requirement("xwiki/2.0")
     private SourceAlterer documentSourceAlterer;
 
     /**
@@ -86,7 +86,7 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
      * FIXME: this should be injected in the SelectionService implementation, as the selection cleanup does not depend
      * on the target of the annotation, but on the nature of the selection.
      */
-    @Requirement("DOCUMENTCONTENT")
+    @Requirement("xwiki/2.0")
     private ContentAlterer documentContentAlterer;
 
     /**
