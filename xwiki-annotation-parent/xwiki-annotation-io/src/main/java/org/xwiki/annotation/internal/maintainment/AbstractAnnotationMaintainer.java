@@ -21,7 +21,9 @@
 package org.xwiki.annotation.internal.maintainment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.xwiki.annotation.AnnotationMaintainer;
@@ -44,25 +46,19 @@ import com.xpn.xwiki.doc.XWikiDocument;
 public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled implements AnnotationMaintainer
 {
     @Requirement
-    protected static Execution execution;
+    protected Execution execution;
 
     @Requirement
-    protected static IOService ioService;
+    protected IOService ioService;
 
     protected volatile boolean recursionFlag;
 
     protected static final String LISTENER_NAME = "AnnotationMaintainer";
 
-    // FIXME: why is this static? More, why is the initializer block not static? And why is this stored? Normally what
-    // happens here is that a new DocumentUpdateEvent is added to the list every time an instance of the maintainer is
-    // created and when the list is returned in the getter it contains as many update events as instances of this class.
-    // I don't think this is what is needed. It might currently work because the annotation maintainer is a component
-    // initialized as singleton...
-    protected static final List<Event> eventsList = new ArrayList<Event>();
-
-    {
-        eventsList.add(new DocumentUpdateEvent());
-    }
+    /**
+     * The events observed by this observation manager.
+     */
+    protected final List<Event> eventsList = new ArrayList<Event>(Arrays.asList(new DocumentUpdateEvent()));
 
     protected String content;
 
