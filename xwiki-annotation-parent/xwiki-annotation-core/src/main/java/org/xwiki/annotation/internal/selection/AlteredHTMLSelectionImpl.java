@@ -21,7 +21,6 @@
 package org.xwiki.annotation.internal.selection;
 
 import org.xwiki.annotation.internal.content.AlteredContent;
-import org.xwiki.annotation.internal.context.AlteredSource;
 import org.xwiki.annotation.internal.exception.SelectionMappingException;
 
 /**
@@ -31,10 +30,19 @@ import org.xwiki.annotation.internal.exception.SelectionMappingException;
  */
 public class AlteredHTMLSelectionImpl implements AlteredHTMLSelection
 {
+    /**
+     * The altered selection.
+     */
     private final AlteredContent alteredSelection;
 
+    /**
+     * The altered offset of the selection in its context.
+     */
     private final int alteredOffset;
 
+    /**
+     * The altered context of this selection.
+     */
     private AlteredContent alteredSelectionContext;
 
     /**
@@ -52,17 +60,16 @@ public class AlteredHTMLSelectionImpl implements AlteredHTMLSelection
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.selection.AlteredHTMLSelection
-     *      #mapToSource(org.xwiki.annotation.internal.context.AlteredSource)
+     * @see org.xwiki.annotation.internal.selection.AlteredHTMLSelection #mapToSource(AlteredContent)
      * @throws SelectionMappingException can be thrown if mapping fails
      */
-    public SourceSegment mapToSource(AlteredSource source) throws SelectionMappingException
+    public SourceSegment mapToSource(AlteredContent source) throws SelectionMappingException
     {
         int firstOcurrence = source.getContent().toString().indexOf(alteredSelection.getContent().toString());
         int secondOcurrence =
             source.getContent().toString().indexOf(alteredSelection.getContent().toString(), firstOcurrence + 1);
         if (firstOcurrence != -1 && secondOcurrence == -1) {
-            // We don't need context, selection appears only once in the source            
+            // We don't need context, selection appears only once in the source
             int intraOffset = source.getContent().toString().indexOf(alteredSelection.getContent().toString());
             int initialOffset = source.getInitialOffset(intraOffset);
             int finalOffset = source.getInitialOffset(intraOffset + alteredSelection.getContent().length() - 1);
@@ -71,8 +78,8 @@ public class AlteredHTMLSelectionImpl implements AlteredHTMLSelection
         } else {
             firstOcurrence = source.getContent().toString().indexOf(alteredSelectionContext.getContent().toString());
             secondOcurrence =
-                source.getContent().toString()
-                    .indexOf(alteredSelectionContext.getContent().toString(), firstOcurrence + 1);
+                source.getContent().toString().indexOf(alteredSelectionContext.getContent().toString(),
+                    firstOcurrence + 1);
             if (firstOcurrence != -1 && secondOcurrence == -1) {
                 // Context appears only once in the source
                 int initialOffset = source.getInitialOffset(firstOcurrence + alteredOffset);

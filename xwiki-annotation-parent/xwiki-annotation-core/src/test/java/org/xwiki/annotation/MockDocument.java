@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.context.Source;
-import org.xwiki.annotation.internal.context.SourceImpl;
 
 /**
  * Stores data and provides functions for manipulating mock documents loaded from test files. Use the
@@ -41,14 +39,6 @@ public class MockDocument
      * Properties map for this test document.
      */
     private Map<String, Object> properties = new HashMap<String, Object>();
-
-    /**
-     * @return the text of the source for this document
-     */
-    public String getTextSource()
-    {
-        return (String) properties.get("source");
-    }
 
     /**
      * Sets the properties of this document.
@@ -69,7 +59,7 @@ public class MockDocument
     {
         // if not otherwise specified, the source is also the rendered content
         String renderedContent = (String) properties.get("rendered");
-        return renderedContent != null ? renderedContent : getTextSource();
+        return renderedContent != null ? renderedContent : getSource();
     }
 
     /**
@@ -80,7 +70,7 @@ public class MockDocument
     public String getSourceWithMarkers()
     {
         String sourceWithMarkers = (String) properties.get("sourceWithMarkers");
-        return sourceWithMarkers != null ? sourceWithMarkers : getTextSource();
+        return sourceWithMarkers != null ? sourceWithMarkers : getSource();
     }
 
     /**
@@ -114,8 +104,8 @@ public class MockDocument
     /**
      * @return the {@link Source} of this document, corresponding to the {@link #getTextSource()} content.
      */
-    public Source getSource()
+    public String getSource()
     {
-        return new SourceImpl(getTextSource());
+        return (String) properties.get("source");
     }
 }

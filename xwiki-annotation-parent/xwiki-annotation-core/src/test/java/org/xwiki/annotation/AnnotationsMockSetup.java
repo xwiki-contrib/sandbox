@@ -24,7 +24,6 @@ import java.io.IOException;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
-import org.xwiki.annotation.internal.context.SourceImpl;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.component.manager.ComponentManager;
@@ -109,7 +108,7 @@ public class AnnotationsMockSetup
 
                 // return the rendered content with annotation markers if the input is the source with markers inserted
                 allowing(ioTargetService).getRenderedContent(with(docName),
-                    with(new SourceImpl(mDoc.getSourceWithMarkers())), with(any(XWikiContext.class)));
+                    with(mDoc.getSourceWithMarkers()), with(any(XWikiContext.class)));
                 will(returnValue(mDoc.getRenderedContentWithMarkers()));
             }
         });

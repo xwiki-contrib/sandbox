@@ -20,7 +20,6 @@
 
 package org.xwiki.annotation;
 
-import org.xwiki.annotation.internal.context.Source;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.component.annotation.ComponentRole;
 
@@ -41,7 +40,7 @@ public interface IOTargetService
      * @return html content corresponding to given source
      * @throws IOServiceException can be thrown if any exception occurs when manipulating documents
      */
-    CharSequence getRenderedContent(CharSequence documentName, Source source, XWikiContext deprecatedContext)
+    CharSequence getRenderedContent(CharSequence documentName, String source, XWikiContext deprecatedContext)
         throws IOServiceException;
 
     /**
@@ -50,5 +49,5 @@ public interface IOTargetService
      * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @throws IOServiceException can be thrown if any exception occurs when manipulating documents
      */
-    Source getSource(CharSequence documentName, XWikiContext deprecatedContext) throws IOServiceException;
+    String getSource(CharSequence documentName, XWikiContext deprecatedContext) throws IOServiceException;
 }

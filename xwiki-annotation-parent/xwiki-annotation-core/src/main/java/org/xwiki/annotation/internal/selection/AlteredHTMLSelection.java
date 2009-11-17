@@ -20,7 +20,7 @@
 
 package org.xwiki.annotation.internal.selection;
 
-import org.xwiki.annotation.internal.context.AlteredSource;
+import org.xwiki.annotation.internal.content.AlteredContent;
 import org.xwiki.annotation.internal.exception.SelectionMappingException;
 
 /**
@@ -37,5 +37,5 @@ public interface AlteredHTMLSelection
      * @return the segment of source that generates selection
      * @throws SelectionMappingException if the selection cannot be mapped on the passed source
      */
-    SourceSegment mapToSource(AlteredSource source) throws SelectionMappingException;
+    SourceSegment mapToSource(AlteredContent source) throws SelectionMappingException;
 }

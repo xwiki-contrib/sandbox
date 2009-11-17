@@ -32,12 +32,9 @@ import org.xwiki.annotation.ContentAlterer;
 import org.xwiki.annotation.IOService;
 import org.xwiki.annotation.IOTargetService;
 import org.xwiki.annotation.SelectionService;
-import org.xwiki.annotation.SourceAlterer;
 import org.xwiki.annotation.internal.annotation.Annotation;
 import org.xwiki.annotation.internal.annotation.AnnotationImpl;
-import org.xwiki.annotation.internal.context.AlteredSource;
-import org.xwiki.annotation.internal.context.Source;
-import org.xwiki.annotation.internal.context.SourceImpl;
+import org.xwiki.annotation.internal.content.AlteredContent;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.annotation.internal.exception.SelectionMappingException;
@@ -76,15 +73,10 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     private IOTargetService documentContentTargetService;
 
     /**
-     * The alterer for the source of the annotation target, to perform cleanup before mapping.
-     */
-    @Requirement("xwiki/2.0")
-    private SourceAlterer documentSourceAlterer;
-
-    /**
-     * The alterer for the annotation selection, to perform cleanup before mapping. <br />
-     * FIXME: this should be injected in the SelectionService implementation, as the selection cleanup does not depend
-     * on the target of the annotation, but on the nature of the selection.
+     * The alterer used for the annotated content, both for the document content and the selection. <br />
+     * FIXME: a HTML content alterer should probably be used for the selection, but right now the selection is expected
+     * to be "what the user sees" on the client, so there will be no wiki syntax but there will be all the other ignored
+     * characters so an xwiki/2.0 alterer will do the job. <br />
      */
     @Requirement("xwiki/2.0")
     private ContentAlterer documentContentAlterer;
@@ -98,10 +90,10 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     public void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
         CharSequence documentName, CharSequence user, XWikiContext context) throws AnnotationServiceException
     {
-        Source source = null;
+        String source = null;
         try {
             source = documentContentTargetService.getSource(documentName, context);
-            AlteredSource alteredContext = documentSourceAlterer.alter(source);
+            AlteredContent alteredContext = documentContentAlterer.alter(source);
             AlteredHTMLSelection sel =
                 selectionService.getAlteredHTMLSelection(documentContentAlterer, selection, selectionContext, offset);
 
@@ -115,7 +107,7 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
                 + e.getMessage());
         } catch (SelectionMappingException e) {
             throw new AnnotationServiceException("Selection \"" + selection + "\" could not be mapped on source \""
-                + source.getSource() + "\". \nCaused by: " + e.getMessage());
+                + source + "\". \nCaused by: " + e.getMessage());
         }
     }
 
@@ -128,15 +120,15 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
         throws AnnotationServiceException
     {
         try {
-            Source source = documentContentTargetService.getSource(documentName, context);
+            String source = documentContentTargetService.getSource(documentName, context);
             Collection<Annotation> annotations = ioService.getSafeAnnotations(documentName, context);
 
             if (annotations.isEmpty()) {
                 return documentContentTargetService.getRenderedContent(documentName, source, context);
             }
 
-            StringBuilder wikiSource =
-                new StringBuilder(documentContentTargetService.getSource(documentName, context).getSource());
+            StringBuilder markedSource =
+                new StringBuilder(documentContentTargetService.getSource(documentName, context));
             Map<Integer, Integer> offsets = new TreeMap<Integer, Integer>();
 
             for (Annotation it : annotations) {
@@ -167,16 +159,16 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
                 }
 
                 // Insertion
-                wikiSource.insert(it.getOffset() + startOffset, getAnnotationBeginTag(it.getId()));
-                wikiSource.insert(it.getOffset() + (getAnnotationBeginTag(it.getId()).length()) + (it.getLength())
+                markedSource.insert(it.getOffset() + startOffset, getAnnotationBeginTag(it.getId()));
+                markedSource.insert(it.getOffset() + (getAnnotationBeginTag(it.getId()).length()) + (it.getLength())
                     + endOffset, getAnnotationEndTag(it.getId()));
 
             }
 
-            Source annotatedSource = new SourceImpl(wikiSource);
             // Rendering
             String htmlContent =
-                documentContentTargetService.getRenderedContent(documentName, annotatedSource, context).toString();
+                documentContentTargetService.getRenderedContent(documentName, markedSource.toString(), context)
+                    .toString();
             int fromIndex;
             int toIndex;
             String oldSelection;

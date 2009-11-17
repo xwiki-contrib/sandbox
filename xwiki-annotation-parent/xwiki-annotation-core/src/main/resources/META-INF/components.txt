@@ -1,6 +1,5 @@
 org.xwiki.annotation.internal.DefaultAnnotationService
 org.xwiki.annotation.internal.alterer.XWiki20SyntaxContentAlterer
-org.xwiki.annotation.internal.alterer.XWiki20SyntaxSourceAlterer
 org.xwiki.annotation.internal.filter.XWiki20SyntaxFilter
 org.xwiki.annotation.internal.target.DefaultDocumentContentTarget
 org.xwiki.annotation.internal.selection.DefaultSelectionService
