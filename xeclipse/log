@@ -1,3 +1,9 @@
+* Bugfixes:
+	XECLIPSE-138
+	XECLIPSE-139
+	XECLIPSE-141
+* Updated Maven Dependencies, xwiki-libs
+
 *Updated Renderer, for new xwiki-core-rendering
 *Created TestRenderer
 *Included xwiki-core-rendering-macro-velocity, but NOT Working

@@ -24,6 +24,11 @@
       <artifactId>xwiki-core-rendering-parser-wikimodel</artifactId>
       <version>2.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-configuration-default</artifactId>
+      <version>2.0-SNAPSHOT</version>
+    </dependency>
 	<dependency>
 		<groupId>org.xwiki.platform</groupId>
 		<artifactId>xwiki-core-properties</artifactId>

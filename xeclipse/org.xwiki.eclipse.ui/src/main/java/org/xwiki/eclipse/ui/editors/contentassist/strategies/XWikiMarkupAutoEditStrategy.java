@@ -57,7 +57,7 @@ public class XWikiMarkupAutoEditStrategy implements IAutoEditStrategy
                 configureCommand(command, "[]", 1);
             } else if (command.text.equals(">")) {
                 String tag = getTag(document, '<', command.offset - 1);
-                if (tag != null) {
+                if (tag != null && !tag.matches("</.*")) {
                     String closingTag = String.format("></%s>", tag.substring(1));
 
                     configureCommand(command, closingTag, 1);
@@ -121,17 +121,26 @@ public class XWikiMarkupAutoEditStrategy implements IAutoEditStrategy
         try {
             int startOffset = endOffset;
             int character;
-
+            int lastSpaceOffset  = -1;
             while (startOffset >= 0) {
                 character = document.getChar(startOffset);
+                if(character == ' ') {
+                	lastSpaceOffset = startOffset;
+                }
                 if (character == '\n') {
                     return null;
                 }
 
                 if (character == openingChar) {
-                    return document.get(startOffset, endOffset - startOffset + 1);
+                	int length;
+                	if(lastSpaceOffset > 0) {
+                		length = lastSpaceOffset - startOffset;
+                	} else {
+                		length = endOffset - startOffset + 1;
+                	}
+                    return document.get(startOffset, length);
                 }
-
+                
                 startOffset--;
             }
         } catch (BadLocationException e) {

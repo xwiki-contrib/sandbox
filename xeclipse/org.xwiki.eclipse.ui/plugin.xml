@@ -501,7 +501,7 @@
           commandId="org.xwiki.eclipse.ui.commands.OpenPage"
           contextId="org.eclipse.ui.contexts.window"
           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-          sequence="M1+CTRL+P">
+          sequence="M1+CTRL+O">
     </key>
  </extension>
  <extension
