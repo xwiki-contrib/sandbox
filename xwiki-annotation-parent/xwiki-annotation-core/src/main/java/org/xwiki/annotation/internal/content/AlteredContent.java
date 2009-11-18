@@ -21,7 +21,8 @@
 package org.xwiki.annotation.internal.content;
 
 /**
- * This class models an altered content.
+ * This class models an altered content, by providing the translations of offsets from the original content to the
+ * altered content.
  * 
  * @version $Id$
  */
@@ -40,12 +41,12 @@ public interface AlteredContent
     int getAlteredOffset(int i);
 
     /**
-     * @return content
+     * @return the char sequence representing the altered content
      */
     CharSequence getContent();
 
     /**
-     * @return initial length of content.
+     * @return initial length of content
      */
     int getInitialLength();
 }

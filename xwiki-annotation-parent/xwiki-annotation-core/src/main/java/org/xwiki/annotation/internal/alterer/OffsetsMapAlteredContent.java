@@ -18,32 +18,48 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.internal.content;
+package org.xwiki.annotation.internal.alterer;
 
 import java.util.Map;
 
+import org.xwiki.annotation.internal.content.AlteredContent;
+
 /**
- * Default implementation for {@link AlteredContent}.
+ * Offsets maps based implementation of the {@link AlteredContent}.
  * 
  * @version $Id$
  */
-public class AlteredContentImpl implements AlteredContent
+public class OffsetsMapAlteredContent implements AlteredContent
 {
+    /**
+     * The actual character sequence representing the altered content.
+     */
     private final CharSequence content;
 
+    /**
+     * The offsets map for translating initial offsets to altered offsets.
+     */
     private final Map<Integer, Integer> initialToAltered;
 
+    /**
+     * The offsets map for translating the altered offsets to the initial offsets.
+     */
     private final Map<Integer, Integer> alteredToInitial;
 
+    /**
+     * The initial size of the content.
+     */
     private final int size;
 
     /**
-     * @param content
-     * @param size
-     * @param initialToAltered
-     * @param alteredToInitial
+     * Builds an altered content from the passed maps.
+     * 
+     * @param content actual character sequence representing the altered content
+     * @param size initial size of the content
+     * @param initialToAltered offsets map for translating initial offsets to altered offsets
+     * @param alteredToInitial offsets map for translating the altered offsets to the initial offsets
      */
-    public AlteredContentImpl(CharSequence content, int size, Map<Integer, Integer> initialToAltered,
+    public OffsetsMapAlteredContent(CharSequence content, int size, Map<Integer, Integer> initialToAltered,
         Map<Integer, Integer> alteredToInitial)
     {
         this.content = content;

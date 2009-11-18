@@ -24,7 +24,8 @@ import org.xwiki.annotation.internal.content.AlteredContent;
 import org.xwiki.component.annotation.ComponentRole;
 
 /**
- * This component alters a given charsequence.
+ * Service that provides functionality for filtering a sequence of characters and producing an altered content from an
+ * original content.
  * 
  * @version $Id$
  */
@@ -32,14 +33,16 @@ import org.xwiki.component.annotation.ComponentRole;
 public interface ContentAlterer
 {
     /**
-     * @param sequence sequence to be altered
-     * @return AlteredContent instance
+     * @param sequence the characters sequence to alter
+     * @return the altered content resulted from altering the passed sequence
      */
     AlteredContent alter(CharSequence sequence);
 
     /**
-     * @param alteredContent to be altered
-     * @return AlteredContent instance
+     * Provides altering of an already altered content, such allowing for multiple alterers to be composed.
+     * 
+     * @param alteredContent the already altered content to apply filtering on
+     * @return AlteredContent the composed altered content
      */
     AlteredContent alter(AlteredContent alteredContent);
 }

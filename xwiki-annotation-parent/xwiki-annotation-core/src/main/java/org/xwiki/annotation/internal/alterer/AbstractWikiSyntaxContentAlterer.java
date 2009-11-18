@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.xwiki.annotation.SyntaxFilter;
 import org.xwiki.annotation.internal.content.AlteredContent;
-import org.xwiki.annotation.internal.content.AlteredContentImpl;
 
 /**
  * Content alterer to filter out characters which are part of a wiki syntax. This class should be extended to provide
@@ -77,6 +76,6 @@ public abstract class AbstractWikiSyntaxContentAlterer extends AbstractContentAl
                 initialToAltered.put(sequence.length() - 1 - t, j - 1);
             }
         }
-        return new AlteredContentImpl(buffer.toString(), sequence.length(), initialToAltered, alteredToInitial);
+        return new OffsetsMapAlteredContent(buffer.toString(), sequence.length(), initialToAltered, alteredToInitial);
     }
 }

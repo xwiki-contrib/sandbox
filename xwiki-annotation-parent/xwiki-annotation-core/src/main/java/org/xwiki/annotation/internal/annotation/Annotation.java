@@ -202,4 +202,16 @@ public class Annotation
         return (other.getAnnotation() == getAnnotation() && other.getAuthor() == getAuthor()
             && other.getOffset() == getOffset() && other.getLength() == getLength());
     }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        return (getAnnotation().toString() + getAuthor().toString() + Integer.toString(getOffset()) + Integer
+            .toString(getLength())).hashCode();
+    }
 }
