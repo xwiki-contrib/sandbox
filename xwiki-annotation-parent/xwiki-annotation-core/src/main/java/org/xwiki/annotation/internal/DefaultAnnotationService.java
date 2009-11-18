@@ -22,12 +22,12 @@ package org.xwiki.annotation.internal;
 
 import java.util.Collection;
 
+import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationService;
-import org.xwiki.annotation.AnnotationTarget;
-import org.xwiki.annotation.IOService;
-import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.exception.AnnotationServiceException;
-import org.xwiki.annotation.internal.exception.IOServiceException;
+import org.xwiki.annotation.AnnotationServiceException;
+import org.xwiki.annotation.io.IOService;
+import org.xwiki.annotation.io.IOServiceException;
+import org.xwiki.annotation.target.AnnotationTarget;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 

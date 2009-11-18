@@ -25,11 +25,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.xwiki.annotation.AnnotationMaintainer;
-import org.xwiki.annotation.IOService;
-import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.exception.IOServiceException;
-import org.xwiki.annotation.internal.maintainment.diff.XDelta;
+import org.xwiki.annotation.Annotation;
+import org.xwiki.annotation.io.IOService;
+import org.xwiki.annotation.io.IOServiceException;
+import org.xwiki.annotation.maintainment.AnnotationMaintainer;
+import org.xwiki.annotation.maintainment.AnnotationState;
+import org.xwiki.annotation.maintainment.XDelta;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.context.Execution;
@@ -111,7 +112,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationMaintainer#updateOffset(int)
+     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer#updateOffset(int)
      */
     public void updateOffset(int offset)
     {
@@ -121,8 +122,8 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationMaintainer
-     *      #onAnnotationModification(org.xwiki.annotation.internal.maintainment.diff.XDelta)
+     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer
+     *      #onAnnotationModification(org.xwiki.annotation.maintainment.XDelta)
      */
     public void onAnnotationModification(XDelta delta)
     {
@@ -132,8 +133,8 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationMaintainer
-     *      #onSpecialCase(org.xwiki.annotation.internal.maintainment.diff.XDelta)
+     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer
+     *      #onSpecialCase(org.xwiki.annotation.maintainment.XDelta)
      */
     public void onSpecialCaseDeletion(XDelta delta, int offset, int length)
     {
@@ -148,8 +149,8 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationMaintainer
-     *      #onSpecialCaseAddition(org.xwiki.annotation.internal.maintainment.diff.XDelta, int, int)
+     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer
+     *      #onSpecialCaseAddition(org.xwiki.annotation.maintainment.XDelta, int, int)
      */
     public void onSpecialCaseAddition(XDelta delta, int offset, int length)
     {

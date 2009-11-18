@@ -20,10 +20,11 @@
 
 package org.xwiki.annotation.internal.selection;
 
-import org.xwiki.annotation.ContentAlterer;
-import org.xwiki.annotation.SelectionService;
-import org.xwiki.annotation.internal.content.AlteredContent;
-import org.xwiki.annotation.internal.exception.SelectionMappingException;
+import org.xwiki.annotation.content.AlteredContent;
+import org.xwiki.annotation.selection.AlteredSelection;
+import org.xwiki.annotation.selection.SelectionMappingException;
+import org.xwiki.annotation.selection.SelectionService;
+import org.xwiki.annotation.selection.SourceSegment;
 import org.xwiki.component.annotation.Component;
 
 /**
@@ -37,20 +38,8 @@ public class DefaultSelectionService implements SelectionService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.SelectionService#getAlteredHTMLSelection(java.lang.CharSequence,
-     *      java.lang.CharSequence, int)
-     */
-    public AlteredSelection getAlteredHTMLSelection(ContentAlterer alterer, CharSequence selection,
-        CharSequence context, int offset)
-    {
-        return new AlteredSelection(alterer.alter(selection), alterer.alter(context), offset);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.SelectionService#mapToSource(org.xwiki.annotation.internal.selection.AlteredSelection,
-     *      org.xwiki.annotation.internal.content.AlteredContent)
+     * @see org.xwiki.annotation.selection.SelectionService#mapToSource(org.xwiki.annotation.selection.AlteredSelection,
+     *      org.xwiki.annotation.content.AlteredContent)
      */
     public SourceSegment mapToSource(AlteredSelection selection, AlteredContent source)
         throws SelectionMappingException

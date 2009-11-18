@@ -22,8 +22,6 @@ package org.xwiki.annotation;
 
 import java.util.Collection;
 
-import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.component.annotation.ComponentRole;
 
 import com.xpn.xwiki.XWikiContext;
@@ -93,7 +91,7 @@ public interface AnnotationService
      * @param context the XWiki context needed to operate with XWiki objects
      * @return all safe annotations in the document
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
-     * @see {@link org.xwiki.annotation.internal.maintainment.AnnotationState#SAFE}
+     * @see {@link org.xwiki.annotation.maintainment.AnnotationState#SAFE}
      */
     Collection<Annotation> getSafeAnnotations(CharSequence documentName, XWikiContext context)
         throws AnnotationServiceException;

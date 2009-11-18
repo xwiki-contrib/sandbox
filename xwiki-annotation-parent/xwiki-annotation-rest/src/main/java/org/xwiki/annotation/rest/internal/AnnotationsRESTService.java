@@ -28,7 +28,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import org.xwiki.annotation.AnnotationService;
-import org.xwiki.annotation.internal.exception.AnnotationServiceException;
+import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequest;
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;

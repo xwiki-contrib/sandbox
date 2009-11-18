@@ -26,9 +26,7 @@ import java.util.List;
 
 import org.incava.util.diff.Diff;
 import org.incava.util.diff.Difference;
-import org.xwiki.annotation.internal.maintainment.diff.XAddition;
-import org.xwiki.annotation.internal.maintainment.diff.XDeletion;
-import org.xwiki.annotation.internal.maintainment.diff.XDelta;
+import org.xwiki.annotation.maintainment.XDelta;
 import org.xwiki.component.annotation.Component;
 
 

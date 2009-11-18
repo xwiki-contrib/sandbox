@@ -31,12 +31,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.xwiki.annotation.AnnotationTarget;
+import org.xwiki.annotation.Annotation;
+import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.AnnotationsMockSetup;
 import org.xwiki.annotation.TestDocumentFactory;
-import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.exception.AnnotationServiceException;
-import org.xwiki.annotation.internal.exception.IOServiceException;
+import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.test.AbstractComponentTestCase;
 
 import com.xpn.xwiki.XWikiContext;
@@ -145,7 +144,7 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
      * Test that adding each of the annotations in the document description file works as expected: the offset & length
      * are correctly computed.
      * 
-     * @throws IOServiceException in case something goes wrong mocking the {@link org.xwiki.annotation.IOService}
+     * @throws IOServiceException in case something goes wrong mocking the {@link org.xwiki.annotation.io.IOService}
      * @throws IOException in case something goes wrong mocking documents from corpus files
      */
     @Test
@@ -180,7 +179,7 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
     /**
      * Test rendering the annotations in the document description file results in the annotated html.
      * 
-     * @throws IOServiceException in case something goes wrong mocking the {@link org.xwiki.annotation.IOService}
+     * @throws IOServiceException in case something goes wrong mocking the {@link org.xwiki.annotation.io.IOService}
      * @throws IOException in case something goes wrong mocking documents from corpus files
      */
     @Test

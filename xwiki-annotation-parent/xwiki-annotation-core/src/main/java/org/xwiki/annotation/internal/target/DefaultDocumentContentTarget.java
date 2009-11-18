@@ -27,21 +27,23 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import org.xwiki.annotation.AnnotationTarget;
-import org.xwiki.annotation.ContentAlterer;
-import org.xwiki.annotation.IOService;
-import org.xwiki.annotation.IOTargetService;
-import org.xwiki.annotation.SelectionService;
-import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.content.AlteredContent;
-import org.xwiki.annotation.internal.exception.AnnotationServiceException;
-import org.xwiki.annotation.internal.exception.IOServiceException;
-import org.xwiki.annotation.internal.exception.SelectionMappingException;
-import org.xwiki.annotation.internal.maintainment.AnnotationState;
-import org.xwiki.annotation.internal.selection.AlteredSelection;
-import org.xwiki.annotation.internal.selection.SourceSegment;
+import org.xwiki.annotation.Annotation;
+import org.xwiki.annotation.AnnotationServiceException;
+import org.xwiki.annotation.content.AlteredContent;
+import org.xwiki.annotation.content.ContentAlterer;
+import org.xwiki.annotation.io.IOService;
+import org.xwiki.annotation.io.IOServiceException;
+import org.xwiki.annotation.io.IOTargetService;
+import org.xwiki.annotation.maintainment.AnnotationState;
+import org.xwiki.annotation.selection.AlteredSelection;
+import org.xwiki.annotation.selection.SelectionMappingException;
+import org.xwiki.annotation.selection.SelectionService;
+import org.xwiki.annotation.selection.SourceSegment;
+import org.xwiki.annotation.target.AnnotationTarget;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
 
 import com.xpn.xwiki.XWikiContext;
 
@@ -66,24 +68,21 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     private SelectionService selectionService;
 
     /**
+     * Component manager used to lookup the content alterer needed for the specific document.
+     */
+    @Requirement
+    private ComponentManager componentManager;
+
+    /**
      * The storage service for annotation targets (documents).
      */
     @Requirement
     private IOTargetService documentContentTargetService;
 
     /**
-     * The alterer used for the annotated content, both for the document content and the selection. <br />
-     * FIXME: a HTML content alterer should probably be used for the selection, but right now the selection is expected
-     * to be "what the user sees" on the client, so there will be no wiki syntax but there will be all the other ignored
-     * characters so an xwiki/2.0 alterer will do the job. <br />
-     */
-    @Requirement("xwiki/2.0")
-    private ContentAlterer documentContentAlterer;
-
-    /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationTarget#addAnnotation(java.lang.CharSequence, java.lang.CharSequence,
+     * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(java.lang.CharSequence, java.lang.CharSequence,
      *      java.lang.CharSequence, int, java.lang.CharSequence, java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
      */
     public void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
@@ -91,6 +90,11 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     {
         String source = null;
         try {
+            // get the documentContentAlterer to use for the document to add annotation on. And for the selection
+            // TODO: this should be looked up depending on the document syntax
+            // FIXME: a HTML filter could be used for the selection but since the selection is plain text we use the
+            // same filtering as for document content
+            ContentAlterer documentContentAlterer = componentManager.lookup(ContentAlterer.class, "xwiki/2.0");
             source = documentContentTargetService.getSource(documentName, context);
             // leave only relevant content in the document source
             AlteredContent alteredDocSource = documentContentAlterer.alter(source);
@@ -112,13 +116,16 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
         } catch (SelectionMappingException e) {
             throw new AnnotationServiceException("Selection \"" + selection + "\" could not be mapped on source \""
                 + source + "\". \nCaused by: " + e.getMessage());
+        } catch (ComponentLookupException e) {
+            throw new AnnotationServiceException(
+                "No suitable filter was found for mapping the selection on the source document");
         }
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationTarget#getAnnotatedHTML(java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.target.AnnotationTarget#getAnnotatedHTML(java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
      */
     public CharSequence getAnnotatedHTML(CharSequence documentName, XWikiContext context)
         throws AnnotationServiceException

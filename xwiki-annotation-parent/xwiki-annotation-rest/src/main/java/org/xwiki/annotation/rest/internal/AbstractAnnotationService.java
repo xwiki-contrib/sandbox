@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.xwiki.annotation.AnnotationMaintainer;
+import org.xwiki.annotation.maintainment.AnnotationMaintainer;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotation;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;
 import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
@@ -53,11 +53,11 @@ public abstract class AbstractAnnotationService extends XWikiResource implements
      *         org.xwiki.annotation.internal.annotation.Annotation
      */
     protected Collection<Annotation> getAnnotationSet(
-        Collection<org.xwiki.annotation.internal.annotation.Annotation> annotations)
+        Collection<org.xwiki.annotation.Annotation> annotations)
     {
         ObjectFactory factory = new ObjectFactory();
         List<Annotation> set = new ArrayList<Annotation>();
-        for (org.xwiki.annotation.internal.annotation.Annotation xwikiAnnotation : annotations) {
+        for (org.xwiki.annotation.Annotation xwikiAnnotation : annotations) {
             Annotation annotation = factory.createAnnotation();
             annotation.setAnnotation(xwikiAnnotation.getAnnotation().toString());
             annotation.setAnnotationId(xwikiAnnotation.getId());
@@ -94,7 +94,7 @@ public abstract class AbstractAnnotationService extends XWikiResource implements
      * @param htmlContent
      * @return wrapped set of annotation, annotated and rendered content
      */
-    protected Annotations getAnnotations(Collection<org.xwiki.annotation.internal.annotation.Annotation> annotations,
+    protected Annotations getAnnotations(Collection<org.xwiki.annotation.Annotation> annotations,
         CharSequence htmlContent)
     {
         ObjectFactory factory = new ObjectFactory();

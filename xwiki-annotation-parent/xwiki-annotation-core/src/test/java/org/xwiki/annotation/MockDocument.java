@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.xwiki.annotation.internal.annotation.Annotation;
 
 /**
  * Stores data and provides functions for manipulating mock documents loaded from test files. Use the

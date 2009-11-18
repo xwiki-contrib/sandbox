@@ -27,8 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.maintainment.AnnotationState;
+import org.xwiki.annotation.maintainment.AnnotationState;
 
 /**
  * Factory to create test documents from corpus files.

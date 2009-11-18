@@ -27,10 +27,9 @@ import java.util.Date;
 import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.Test;
-import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.exception.AnnotationServiceException;
-import org.xwiki.annotation.internal.exception.IOServiceException;
-import org.xwiki.annotation.internal.maintainment.AnnotationState;
+import org.xwiki.annotation.io.IOService;
+import org.xwiki.annotation.io.IOServiceException;
+import org.xwiki.annotation.maintainment.AnnotationState;
 import org.xwiki.test.AbstractComponentTestCase;
 
 import com.xpn.xwiki.XWikiContext;

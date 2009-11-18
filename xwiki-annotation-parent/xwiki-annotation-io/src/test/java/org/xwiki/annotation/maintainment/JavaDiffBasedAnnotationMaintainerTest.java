@@ -3,8 +3,7 @@ package org.xwiki.annotation.maintainment;
 import static junit.framework.Assert.assertEquals;
 
 import org.junit.Test;
-import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.maintainment.AnnotationState;
+import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.internal.maintainment.JavaDiffBasedAnnotationMaintainer;
 
 /**
