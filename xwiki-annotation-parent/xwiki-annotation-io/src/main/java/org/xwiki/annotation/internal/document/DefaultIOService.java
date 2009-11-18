@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.xwiki.annotation.IOService;
 import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.annotation.AnnotationImpl;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
 import org.xwiki.component.annotation.Component;
@@ -102,12 +101,11 @@ public class DefaultIOService implements IOService
                 if (it == null) {
                     continue;
                 }
-                AnnotationImpl annotation =
-                    new AnnotationImpl(it.get("pageID").toString(), it.getStringValue("author"), it
-                        .getStringValue("date"), AnnotationState.forName(it.getStringValue("state")), it
-                        .getStringValue("annotation"), it.getStringValue("initialSelection"), it
-                        .getStringValue("selectionContext"), it.getIntValue("annotationID"), it.getIntValue("offset"),
-                        it.getIntValue("length"));
+                Annotation annotation =
+                    new Annotation(it.get("pageID").toString(), it.getStringValue("author"), it.getStringValue("date"),
+                        AnnotationState.forName(it.getStringValue("state")), it.getStringValue("annotation"), it
+                            .getStringValue("initialSelection"), it.getStringValue("selectionContext"), it
+                            .getIntValue("annotationID"), it.getIntValue("offset"), it.getIntValue("length"));
                 result.add(annotation);
             }
             return result;

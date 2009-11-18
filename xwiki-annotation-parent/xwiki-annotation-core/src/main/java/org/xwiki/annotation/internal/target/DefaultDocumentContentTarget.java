@@ -33,7 +33,6 @@ import org.xwiki.annotation.IOService;
 import org.xwiki.annotation.IOTargetService;
 import org.xwiki.annotation.SelectionService;
 import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.annotation.AnnotationImpl;
 import org.xwiki.annotation.internal.content.AlteredContent;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
@@ -103,8 +102,8 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
             SourceSegment location = selectionService.mapToSource(sel, alteredDocSource);
 
             // create the annotation with this data and send it to the storage service
-            AnnotationImpl annotation =
-                new AnnotationImpl(documentName, user, new SimpleDateFormat(IOService.DATE_FORMAT).format(new Date()),
+            Annotation annotation =
+                new Annotation(documentName, user, new SimpleDateFormat(IOService.DATE_FORMAT).format(new Date()),
                     AnnotationState.SAFE, metadata, selection, selectionContext, 0, location.offset, location.length);
             ioService.addAnnotation(documentName, annotation, context);
         } catch (IOServiceException e) {

@@ -4,7 +4,6 @@ import static junit.framework.Assert.assertEquals;
 
 import org.junit.Test;
 import org.xwiki.annotation.internal.annotation.Annotation;
-import org.xwiki.annotation.internal.annotation.AnnotationImpl;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
 import org.xwiki.annotation.internal.maintainment.JavaDiffBasedAnnotationMaintainer;
 
@@ -24,7 +23,7 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
      */
     public Annotation getFakeAnnotation(AnnotationState state, int id, int offset, int length)
     {
-        return new AnnotationImpl(null, null, null, state, null, null, null, id, offset, length);
+        return new Annotation(null, null, null, state, null, null, null, id, offset, length);
     }
 
     /**

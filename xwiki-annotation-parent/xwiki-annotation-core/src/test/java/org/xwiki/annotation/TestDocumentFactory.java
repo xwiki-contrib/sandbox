@@ -29,7 +29,6 @@ import java.util.Map;
 
 import org.xwiki.annotation.internal.annotation.Annotation;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
-import org.xwiki.annotation.utils.TestPurposeAnnotationImpl;
 
 /**
  * Factory to create test documents from corpus files.
@@ -160,8 +159,8 @@ public final class TestDocumentFactory
             propIndex++;
         }
         try {
-            return new TestPurposeAnnotationImpl(docName, properties[1], null, AnnotationState.SAFE, properties[2],
-                properties[3], properties[4], Integer.parseInt(properties[0]), Integer.parseInt(properties[5]), Integer
+            return new Annotation(docName, properties[1], null, AnnotationState.SAFE, properties[2], properties[3],
+                properties[4], Integer.parseInt(properties[0]), Integer.parseInt(properties[5]), Integer
                     .parseInt(properties[6]));
         } catch (NumberFormatException e) {
             // if something goes wrong parsing the string properties read for an annotation

@@ -31,7 +31,6 @@ import org.xwiki.annotation.internal.annotation.Annotation;
 import org.xwiki.annotation.internal.exception.AnnotationServiceException;
 import org.xwiki.annotation.internal.exception.IOServiceException;
 import org.xwiki.annotation.internal.maintainment.AnnotationState;
-import org.xwiki.annotation.utils.TestPurposeAnnotationImpl;
 import org.xwiki.test.AbstractComponentTestCase;
 
 import com.xpn.xwiki.XWikiContext;
@@ -117,8 +116,8 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     public void addAnnotation() throws IOServiceException, IOException
     {
         final Annotation expectedAnnotation =
-            new TestPurposeAnnotationImpl(docName, user, new Date().toString(), AnnotationState.SAFE, metadata,
-                selection, selectionContext, 1, 2, 39);
+            new Annotation(docName, user, new Date().toString(), AnnotationState.SAFE, metadata, selection,
+                selectionContext, 1, 2, 39);
         // expect the addAnnotation method of the IOService to be called with an annotation parameter
         setup.getMockery().checking(new Expectations()
         {
