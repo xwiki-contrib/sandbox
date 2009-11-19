@@ -44,7 +44,6 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 
-import com.xpn.xwiki.XWikiContext;
 
 /**
  * Defines components used for XWiki document target.
@@ -82,10 +81,10 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
      * {@inheritDoc}
      * 
      * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(java.lang.CharSequence, java.lang.CharSequence,
-     *      java.lang.CharSequence, int, java.lang.CharSequence, java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
+     *      java.lang.CharSequence, int, java.lang.CharSequence, java.lang.CharSequence)
      */
     public void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
-        CharSequence documentName, CharSequence user, XWikiContext context) throws AnnotationServiceException
+        CharSequence documentName, CharSequence user) throws AnnotationServiceException
     {
         String source = null;
         try {
@@ -94,7 +93,7 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
             // FIXME: a HTML filter could be used for the selection but since the selection is plain text we use the
             // same filtering as for document content
             ContentAlterer documentContentAlterer = componentManager.lookup(ContentAlterer.class, "xwiki/2.0");
-            source = documentContentTargetService.getSource(documentName, context);
+            source = documentContentTargetService.getSource(documentName);
             // leave only relevant content in the document source
             AlteredContent alteredDocSource = documentContentAlterer.alter(source);
             // leave only relevant content in the selection
@@ -110,7 +109,7 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
             Annotation annotation =
                 new Annotation(documentName, user, new Date().toString(), AnnotationState.SAFE, metadata, selection,
                     selectionContext, 0, location.offset, location.length);
-            ioService.addAnnotation(documentName, annotation, context);
+            ioService.addAnnotation(documentName, annotation);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException("An exception occurred when accessing the storage services", e);
         } catch (SelectionMappingException e) {
@@ -125,22 +124,21 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.target.AnnotationTarget#getAnnotatedHTML(java.lang.CharSequence,
-     *      com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.target.AnnotationTarget#getAnnotatedHTML(java.lang.CharSequence)
      */
-    public CharSequence getAnnotatedHTML(CharSequence documentName, XWikiContext context)
+    public CharSequence getAnnotatedHTML(CharSequence documentName)
         throws AnnotationServiceException
     {
         try {
-            String source = documentContentTargetService.getSource(documentName, context);
-            Collection<Annotation> annotations = ioService.getSafeAnnotations(documentName, context);
+            String source = documentContentTargetService.getSource(documentName);
+            Collection<Annotation> annotations = ioService.getSafeAnnotations(documentName);
 
             if (annotations.isEmpty()) {
-                return documentContentTargetService.getRenderedContent(documentName, source, context);
+                return documentContentTargetService.getRenderedContent(documentName, source);
             }
 
             StringBuilder markedSource =
-                new StringBuilder(documentContentTargetService.getSource(documentName, context));
+                new StringBuilder(documentContentTargetService.getSource(documentName));
             Map<Integer, Integer> offsets = new TreeMap<Integer, Integer>();
 
             for (Annotation it : annotations) {
@@ -179,7 +177,7 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
 
             // Rendering
             String htmlContent =
-                documentContentTargetService.getRenderedContent(documentName, markedSource.toString(), context)
+                documentContentTargetService.getRenderedContent(documentName, markedSource.toString())
                     .toString();
             int fromIndex;
             int toIndex;

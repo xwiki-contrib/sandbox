@@ -25,11 +25,8 @@ import java.util.Collection;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.component.annotation.ComponentRole;
 
-import com.xpn.xwiki.XWikiContext;
-
 /**
- * This component provides services related to annotations storage and retrieval. <br />
- * TODO: this service definition should NOT depend on XWikiContext
+ * This component provides services related to annotations storage and retrieval.
  * 
  * @version $Id$
  */
@@ -38,52 +35,42 @@ public interface IOService
 {
     /**
      * @param documentName name of concerned document
-     * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @return annotations concerning given document
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    Collection<Annotation> getAnnotations(CharSequence documentName, XWikiContext deprecatedContext)
-        throws IOServiceException;
+    Collection<Annotation> getAnnotations(CharSequence documentName) throws IOServiceException;
 
     /**
      * @param documentName the name of the document to get annotations for
-     * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @return safe annotations of a given document
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    Collection<Annotation> getSafeAnnotations(CharSequence documentName, XWikiContext deprecatedContext)
-        throws IOServiceException;
+    Collection<Annotation> getSafeAnnotations(CharSequence documentName) throws IOServiceException;
 
     /**
      * Add annotation to a given document.
      * 
      * @param documentName concerned document name
      * @param annotation concerned annotation
-     * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void addAnnotation(CharSequence documentName, Annotation annotation, XWikiContext deprecatedContext)
-        throws IOServiceException;
+    void addAnnotation(CharSequence documentName, Annotation annotation) throws IOServiceException;
 
     /**
      * Remove a given annotation.
      * 
      * @param documentName concerned document
      * @param annotationID concerned annotation
-     * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void removeAnnotation(CharSequence documentName, CharSequence annotationID, XWikiContext deprecatedContext)
-        throws IOServiceException;
+    void removeAnnotation(CharSequence documentName, CharSequence annotationID) throws IOServiceException;
 
     /**
      * Update given annotations information in database.
      * 
      * @param documentName concerned document
      * @param annotations annotations to update
-     * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void updateAnnotations(CharSequence documentName, Collection<Annotation> annotations, 
-        XWikiContext deprecatedContext) throws IOServiceException;
+    void updateAnnotations(CharSequence documentName, Collection<Annotation> annotations) throws IOServiceException;
 }

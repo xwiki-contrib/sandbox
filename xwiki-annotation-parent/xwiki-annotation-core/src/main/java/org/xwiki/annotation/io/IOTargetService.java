@@ -22,8 +22,6 @@ package org.xwiki.annotation.io;
 
 import org.xwiki.component.annotation.ComponentRole;
 
-import com.xpn.xwiki.XWikiContext;
-
 /**
  * This service provides functions to operate with annotations targets (wiki documents or objects).
  * 
@@ -35,18 +33,15 @@ public interface IOTargetService
     /**
      * @param documentName concerned document
      * @param source to be rendered
-     * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @return html content corresponding to given source
      * @throws IOServiceException can be thrown if any exception occurs when manipulating documents
      */
-    CharSequence getRenderedContent(CharSequence documentName, String source, XWikiContext deprecatedContext)
-        throws IOServiceException;
+    CharSequence getRenderedContent(CharSequence documentName, String source) throws IOServiceException;
 
     /**
      * @param documentName concerned document
      * @return source of given document
-     * @param deprecatedContext the XWiki context needed to operate with XWiki objects
      * @throws IOServiceException can be thrown if any exception occurs when manipulating documents
      */
-    String getSource(CharSequence documentName, XWikiContext deprecatedContext) throws IOServiceException;
+    String getSource(CharSequence documentName) throws IOServiceException;
 }

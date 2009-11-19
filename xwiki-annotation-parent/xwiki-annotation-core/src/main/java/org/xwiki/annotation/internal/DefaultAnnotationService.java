@@ -31,7 +31,6 @@ import org.xwiki.annotation.target.AnnotationTarget;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
-import com.xpn.xwiki.XWikiContext;
 
 /**
  * Default annotation service, using the default IOService and annotation target.
@@ -57,13 +56,13 @@ public class DefaultAnnotationService implements AnnotationService
      * {@inheritDoc}
      * 
      * @see org.xwiki.annotation.AnnotationService#addAnnotation(java.lang.CharSequence, java.lang.CharSequence,
-     *      java.lang.CharSequence, int, java.lang.CharSequence, java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
+     *      java.lang.CharSequence, int, java.lang.CharSequence, java.lang.CharSequence)
      */
     public void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
-        CharSequence documentName, CharSequence user, XWikiContext context) throws AnnotationServiceException
+        CharSequence documentName, CharSequence user) throws AnnotationServiceException
     {
         try {
-            annotationTarget.addAnnotation(metadata, selection, selectionContext, offset, documentName, user, context);
+            annotationTarget.addAnnotation(metadata, selection, selectionContext, offset, documentName, user);
         } catch (AnnotationServiceException e) {
             throw new AnnotationServiceException(e);
         }
@@ -72,13 +71,13 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#getAnnotatedHTML(java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.AnnotationService#getAnnotatedHTML(java.lang.CharSequence)
      */
-    public CharSequence getAnnotatedHTML(CharSequence documentName, XWikiContext context)
+    public CharSequence getAnnotatedHTML(CharSequence documentName)
         throws AnnotationServiceException
     {
         try {
-            return annotationTarget.getAnnotatedHTML(documentName, context);
+            return annotationTarget.getAnnotatedHTML(documentName);
         } catch (AnnotationServiceException e) {
             throw new AnnotationServiceException(e);
         }
@@ -87,13 +86,13 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#getAnnotations(java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.AnnotationService#getAnnotations(java.lang.CharSequence)
      */
-    public Collection<Annotation> getAnnotations(CharSequence documentName, XWikiContext context)
+    public Collection<Annotation> getAnnotations(CharSequence documentName)
         throws AnnotationServiceException
     {
         try {
-            return ioService.getAnnotations(documentName, context);
+            return ioService.getAnnotations(documentName);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e);
         }
@@ -102,14 +101,13 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#getSafeAnnotations(java.lang.CharSequence,
-     *      com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.AnnotationService#getSafeAnnotations(java.lang.CharSequence)
      */
-    public Collection<Annotation> getSafeAnnotations(CharSequence documentName, XWikiContext context)
+    public Collection<Annotation> getSafeAnnotations(CharSequence documentName)
         throws AnnotationServiceException
     {
         try {
-            return ioService.getSafeAnnotations(documentName, context);
+            return ioService.getSafeAnnotations(documentName);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e);
         }
@@ -118,14 +116,13 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#removeAnnotation(java.lang.CharSequence, java.lang.CharSequence,
-     *      com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.AnnotationService#removeAnnotation(java.lang.CharSequence, java.lang.CharSequence)
      */
-    public void removeAnnotation(CharSequence documentName, CharSequence annotationID, XWikiContext context)
+    public void removeAnnotation(CharSequence documentName, CharSequence annotationID)
         throws AnnotationServiceException
     {
         try {
-            ioService.removeAnnotation(documentName, annotationID, context);
+            ioService.removeAnnotation(documentName, annotationID);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e.getMessage());
         }

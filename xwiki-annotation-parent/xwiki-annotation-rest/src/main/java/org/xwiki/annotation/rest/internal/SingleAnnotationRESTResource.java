@@ -59,13 +59,13 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
         try {
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
-            annotationService.removeAnnotation(documentName, id, xwikiContext);
+            annotationService.removeAnnotation(documentName, id);
 
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
-            result.setSource(annotationService.getAnnotatedHTML(documentName, xwikiContext).toString());
+            result.setSource(annotationService.getAnnotatedHTML(documentName).toString());
             result.getAnnotations().addAll(
-                getAnnotationSet(annotationService.getAnnotations(documentName, xwikiContext)));
+                getAnnotationSet(annotationService.getAnnotations(documentName)));
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());

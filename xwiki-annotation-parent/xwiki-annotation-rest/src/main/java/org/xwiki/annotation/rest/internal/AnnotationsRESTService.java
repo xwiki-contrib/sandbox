@@ -60,8 +60,8 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         try {
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
-            return getAnnotations(annotationService.getAnnotations(documentName, xwikiContext), annotationService
-                .getAnnotatedHTML(documentName, xwikiContext));
+            return getAnnotations(annotationService.getAnnotations(documentName), annotationService
+                .getAnnotatedHTML(documentName));
         } catch (XWikiException e) {
             logger.log(Level.SEVERE, e.getMessage());
             return null;
@@ -88,12 +88,11 @@ public class AnnotationsRESTService extends AbstractAnnotationService
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
             annotationService.addAnnotation(t.getAnnotation(), t.getInitialSelection(), t.getSelectionContext(), t
-                .getContextOffset(), documentName, xwikiUser, xwikiContext);
+                .getContextOffset(), documentName, xwikiUser);
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
-            result.setSource(annotationService.getAnnotatedHTML(documentName, xwikiContext).toString());
-            result.getAnnotations().addAll(
-                getAnnotationSet(annotationService.getAnnotations(documentName, xwikiContext)));
+            result.setSource(annotationService.getAnnotatedHTML(documentName).toString());
+            result.getAnnotations().addAll(getAnnotationSet(annotationService.getAnnotations(documentName)));
             return result;
         } catch (XWikiException e) {
             logger.log(Level.SEVERE, e.getMessage());

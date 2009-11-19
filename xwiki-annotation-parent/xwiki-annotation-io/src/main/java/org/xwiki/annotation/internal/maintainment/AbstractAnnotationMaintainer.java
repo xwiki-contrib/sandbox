@@ -98,12 +98,12 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     {
         Collection<Annotation> annotations;
         try {
-            annotations = ioService.getSafeAnnotations(documentName, deprecatedContext);
+            annotations = ioService.getSafeAnnotations(documentName);
             for (Annotation annotation : annotations) {
                 currentAnnotation = annotation;
                 recomputeProperties();
             }
-            ioService.updateAnnotations(documentName, annotations, deprecatedContext);
+            ioService.updateAnnotations(documentName, annotations);
         } catch (IOServiceException e) {
             getLogger().error(e.getMessage());
         }

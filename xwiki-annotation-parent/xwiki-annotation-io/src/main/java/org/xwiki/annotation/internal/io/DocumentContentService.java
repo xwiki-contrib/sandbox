@@ -23,6 +23,8 @@ package org.xwiki.annotation.internal.io;
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.io.IOTargetService;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+import org.xwiki.context.Execution;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -37,14 +39,20 @@ import com.xpn.xwiki.doc.XWikiDocument;
 public class DocumentContentService implements IOTargetService
 {
     /**
+     * The execution used to get the deprecated XWikiContext.
+     */
+    @Requirement
+    private Execution execution;
+
+    /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.io.DefaultIOService#getSource(java.lang.CharSequence,
-     *      com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.internal.io.DefaultIOService#getSource(java.lang.CharSequence)
      */
-    public String getSource(CharSequence documentName, XWikiContext deprecatedContext) throws IOServiceException
+    public String getSource(CharSequence documentName) throws IOServiceException
     {
         try {
+            XWikiContext deprecatedContext = getXWikiContext();
             XWikiDocument document =
                 deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
             String t = document.getContent().replace("\r", "");
@@ -58,13 +66,12 @@ public class DocumentContentService implements IOTargetService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.io.DefaultIOService#getRenderedContent(java.lang.CharSequence, String,
-     *      com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.internal.io.DefaultIOService#getRenderedContent(java.lang.CharSequence, String)
      */
-    public CharSequence getRenderedContent(CharSequence documentName, String context, XWikiContext deprecatedContext)
-        throws IOServiceException
+    public CharSequence getRenderedContent(CharSequence documentName, String context) throws IOServiceException
     {
         try {
+            XWikiContext deprecatedContext = getXWikiContext();
             // TODO FIX XWikiMessageTool
             // deprecatedContext.getMessageTool();
             // This is required in order to have message tool initialized
@@ -77,5 +84,13 @@ public class DocumentContentService implements IOTargetService
             throw new IOServiceException("An exception has occurred while getting the rendered content for document "
                 + documentName.toString(), e);
         }
+    }
+
+    /**
+     * @return the deprecated xwiki context used to manipulate xwiki objects
+     */
+    private XWikiContext getXWikiContext()
+    {
+        return (XWikiContext) execution.getContext().getProperty("xwikicontext");
     }
 }

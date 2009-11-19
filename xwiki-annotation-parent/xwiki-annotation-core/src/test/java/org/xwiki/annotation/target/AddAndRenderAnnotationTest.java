@@ -161,7 +161,7 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
             setup.getMockery().checking(new Expectations()
             {
                 {
-                    oneOf(setup.getIoService()).addAnnotation(with(docName), with(ann), with(any(XWikiContext.class)));
+                    oneOf(setup.getIoService()).addAnnotation(with(docName), with(ann));
                 }
             });
 
@@ -169,7 +169,7 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
                 int index = ann.getSelectionContext().toString().indexOf(ann.getInitialSelection().toString());
                 // add the annotation for the specification read from the test file
                 annotationTarget.addAnnotation(ann.getAnnotation(), ann.getInitialSelection(), ann
-                    .getSelectionContext(), index, docName, ann.getAuthor(), null);
+                    .getSelectionContext(), index, docName, ann.getAuthor());
             } catch (AnnotationServiceException e) {
                 Assert.fail(getExceptionFailureMessage(e));
             }
@@ -189,7 +189,7 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
         final XWikiContext deprecatedContext = null;
 
         try {
-            CharSequence html = annotationTarget.getAnnotatedHTML(docName, deprecatedContext);
+            CharSequence html = annotationTarget.getAnnotatedHTML(docName);
             CharSequence expected = TestDocumentFactory.getDocument(docName.toString()).getAnnotatedContent();
             Assert.assertEquals(expected, html);
         } catch (AnnotationServiceException e) {

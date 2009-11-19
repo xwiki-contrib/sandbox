@@ -121,13 +121,12 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
         setup.getMockery().checking(new Expectations()
         {
             {
-                oneOf(setup.getIoService()).addAnnotation(with(docName), with(expectedAnnotation),
-                    with(any(XWikiContext.class)));
+                oneOf(setup.getIoService()).addAnnotation(with(docName), with(expectedAnnotation));
             }
         });
 
         try {
-            annotationService.addAnnotation(metadata, selection, selectionContext, 0, docName, user, deprecatedContext);
+            annotationService.addAnnotation(metadata, selection, selectionContext, 0, docName, user);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }
@@ -143,7 +142,7 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     public void getAnnotatedHTML() throws IOServiceException, IOException
     {
         try {
-            CharSequence html = annotationService.getAnnotatedHTML(docName, deprecatedContext);
+            CharSequence html = annotationService.getAnnotatedHTML(docName);
             Assert.assertEquals(TestDocumentFactory.getDocument(docName).getRenderedContent(), html);
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
@@ -163,7 +162,7 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     public void getSafeAnnotations() throws IOServiceException, IOException
     {
         try {
-            Collection<Annotation> actual = annotationService.getSafeAnnotations(docName, deprecatedContext);
+            Collection<Annotation> actual = annotationService.getSafeAnnotations(docName);
             Collection<Annotation> expected = TestDocumentFactory.getDocument(docName).getSafeAnnotations();
             Assert.assertEquals(expected, actual);
         } catch (AnnotationServiceException e) {
@@ -182,11 +181,11 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
         setup.getMockery().checking(new Expectations()
         {
             {
-                oneOf(setup.getIoService()).removeAnnotation(docName, "1", deprecatedContext);
+                oneOf(setup.getIoService()).removeAnnotation(docName, "1");
             }
         });
         try {
-            annotationService.removeAnnotation(docName, "1", deprecatedContext);
+            annotationService.removeAnnotation(docName, "1");
         } catch (AnnotationServiceException e) {
             Assert.fail(getExceptionFailureMessage(e));
         }

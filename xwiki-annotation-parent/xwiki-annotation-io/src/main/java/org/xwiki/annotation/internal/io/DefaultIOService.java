@@ -32,6 +32,8 @@ import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.maintainment.AnnotationState;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+import org.xwiki.context.Execution;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -57,17 +59,23 @@ public class DefaultIOService implements IOService
     static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
     /**
+     * The execution used to get the deprecated XWikiContext.
+     */
+    @Requirement
+    private Execution execution;
+
+    /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#addAnnotation(java.lang.CharSequence, org.xwiki.annotation.Annotation,
-     *      com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.io.IOService#addAnnotation(java.lang.CharSequence, org.xwiki.annotation.Annotation)
      */
-    public void addAnnotation(CharSequence documentName, Annotation annotation, XWikiContext deprecatedContext)
-        throws IOServiceException
+    public void addAnnotation(CharSequence documentName, Annotation annotation) throws IOServiceException
     {
         try {
+            XWikiContext deprecatedContext = (XWikiContext) execution.getContext().getProperty("xwikicontext");
             XWikiDocument document =
                 deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
+            // TODO: why is this synchronized?
             synchronized (documentName) {
                 int id = document.createNewObject(ANNOTATION_CLASS_NAME, deprecatedContext);
                 BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, id);
@@ -91,12 +99,12 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#getAnnotations(java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.io.IOService#getAnnotations(java.lang.CharSequence)
      */
-    public Collection<Annotation> getAnnotations(CharSequence documentName, XWikiContext deprecatedContext)
-        throws IOServiceException
+    public Collection<Annotation> getAnnotations(CharSequence documentName) throws IOServiceException
     {
         try {
+            XWikiContext deprecatedContext = getXWikiContext();
             XWikiDocument document =
                 deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
             List<BaseObject> objects = document.getObjects(ANNOTATION_CLASS_NAME);
@@ -125,13 +133,12 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#getSafeAnnotations(java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.io.IOService#getSafeAnnotations(java.lang.CharSequence)
      */
-    public Collection<Annotation> getSafeAnnotations(CharSequence documentName, XWikiContext deprecatedContext)
-        throws IOServiceException
+    public Collection<Annotation> getSafeAnnotations(CharSequence documentName) throws IOServiceException
     {
         List<Annotation> result = new ArrayList<Annotation>();
-        for (Annotation it : getAnnotations(documentName, deprecatedContext)) {
+        for (Annotation it : getAnnotations(documentName)) {
             if (it.getState().equals(AnnotationState.SAFE)) {
                 result.add(it);
             }
@@ -142,13 +149,13 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#removeAnnotation(java.lang.CharSequence, java.lang.CharSequence,
-     *      com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.io.IOService#removeAnnotation(java.lang.CharSequence, java.lang.CharSequence)
      */
-    public void removeAnnotation(CharSequence documentName, CharSequence annotationID, XWikiContext deprecatedContext)
-        throws IOServiceException
+    public void removeAnnotation(CharSequence documentName, CharSequence annotationID) throws IOServiceException
     {
         try {
+            XWikiContext deprecatedContext = getXWikiContext();
+            // TODO: why is this synchronized?
             synchronized (documentName) {
                 XWikiDocument document =
                     deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
@@ -166,13 +173,14 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#updateAnnotations(java.lang.CharSequence, java.util.Collection,
-     *      com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.io.IOService#updateAnnotations(java.lang.CharSequence, java.util.Collection)
      */
-    public void updateAnnotations(CharSequence documentName, Collection<Annotation> annotations,
-        XWikiContext deprecatedContext) throws IOServiceException
+    public void updateAnnotations(CharSequence documentName, Collection<Annotation> annotations)
+        throws IOServiceException
     {
         try {
+            XWikiContext deprecatedContext = getXWikiContext();
+            // TODO: this too, why are they synchronized? on the documentName?
             synchronized (documentName) {
                 XWikiDocument document =
                     deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
@@ -194,5 +202,13 @@ public class DefaultIOService implements IOService
         } catch (XWikiException e) {
             throw new IOServiceException("An exception has occurred while updating the annotation", e);
         }
+    }
+
+    /**
+     * @return the deprecated xwiki context used to manipulate xwiki objects
+     */
+    private XWikiContext getXWikiContext()
+    {
+        return (XWikiContext) execution.getContext().getProperty("xwikicontext");
     }
 }

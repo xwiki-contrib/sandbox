@@ -31,7 +31,6 @@ import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.manager.ComponentRepositoryException;
 
-import com.xpn.xwiki.XWikiContext;
 
 /**
  * Mock setup for the annotations tests, mocking the {@link IOService} and {@link IOTargetService} to provide documents
@@ -97,20 +96,19 @@ public class AnnotationsMockSetup
         {
             {
                 MockDocument mDoc = TestDocumentFactory.getDocument(docName);
-                allowing(ioService).getSafeAnnotations(with(docName), with(any(XWikiContext.class)));
+                allowing(ioService).getSafeAnnotations(with(docName));
                 will(returnValue(mDoc.getSafeAnnotations()));
 
-                allowing(ioTargetService).getSource(with(docName), with(any(XWikiContext.class)));
+                allowing(ioTargetService).getSource(with(docName));
                 will(returnValue(mDoc.getSource()));
 
                 // return the rendered content of the doc if the input is the unchanged source
-                allowing(ioTargetService).getRenderedContent(with(docName), with(mDoc.getSource()),
-                    with(any(XWikiContext.class)));
+                allowing(ioTargetService).getRenderedContent(with(docName), with(mDoc.getSource()));
                 will(returnValue(mDoc.getRenderedContent()));
 
                 // return the rendered content with annotation markers if the input is the source with markers inserted
                 allowing(ioTargetService).getRenderedContent(with(docName),
-                    with(mDoc.getSourceWithMarkers()), with(any(XWikiContext.class)));
+                    with(mDoc.getSourceWithMarkers()));
                 will(returnValue(mDoc.getRenderedContentWithMarkers()));
             }
         });

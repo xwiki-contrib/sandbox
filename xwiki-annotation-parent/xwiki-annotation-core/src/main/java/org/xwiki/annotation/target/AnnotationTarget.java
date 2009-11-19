@@ -23,7 +23,6 @@ package org.xwiki.annotation.target;
 import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.component.annotation.ComponentRole;
 
-import com.xpn.xwiki.XWikiContext;
 
 /**
  * This interface defines services relative to the target of an annotation (the document on which it is added).
@@ -42,17 +41,15 @@ public interface AnnotationTarget
      * @param offset offset of the selection in context
      * @param documentName the name of the document containing annotation
      * @param user the author of the annotation
-     * @param context the XWiki context to manipulate XWiki objects
      * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
      */
     void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
-        CharSequence documentName, CharSequence user, XWikiContext context) throws AnnotationServiceException;
+        CharSequence documentName, CharSequence user) throws AnnotationServiceException;
 
     /**
      * @param documentName refers document to render
-     * @param context the XWiki context to manipulate XWiki objects
      * @return annotated and rendered document
      * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
      */
-    CharSequence getAnnotatedHTML(CharSequence documentName, XWikiContext context) throws AnnotationServiceException;
+    CharSequence getAnnotatedHTML(CharSequence documentName) throws AnnotationServiceException;
 }
