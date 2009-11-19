@@ -1,10 +1,11 @@
-package org.xwiki.annotation.maintainment;
+package org.xwiki.annotation.internal.maintainment;
 
 import static junit.framework.Assert.assertEquals;
 
 import org.junit.Test;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.internal.maintainment.JavaDiffBasedAnnotationMaintainer;
+import org.xwiki.annotation.maintainment.AnnotationState;
 
 /**
  * Test class for Java Diff based annotation Maintainer.

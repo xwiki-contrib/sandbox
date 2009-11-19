@@ -40,17 +40,20 @@ import org.xwiki.component.annotation.Requirement;
 @Path("/wikis/{wikiName}/spaces/{spaceName}/pages/{pageName}/annotation/{id}")
 public class SingleAnnotationRESTResource extends AbstractAnnotationService
 {
+    /**
+     * The annotation service to be used by this REST interface.
+     */
     @Requirement
     protected AnnotationService annotationService;
 
     /**
-     * proceed to deletion of annotation.
+     * Deletes the specified annotation.
      * 
-     * @param space of document
-     * @param page is the document name
-     * @param wiki concerned wiki
-     * @param id of annotation
-     * @return AnnotationRequestResponse, responseCode = 0 if no error
+     * @param space the space of the document to delete the annotation from
+     * @param page the name of the document to delete the annotation from
+     * @param wiki the wiki of the document to delete the annotation from
+     * @param id the id of the annotation to delete
+     * @return a annotation response for which the response code will be 0 in case of success and non-zero otherwise
      */
     @DELETE
     public AnnotationRequestResponse doDelete(@PathParam("spaceName") String space, @PathParam("pageName") String page,
@@ -64,8 +67,7 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
             result.setSource(annotationService.getAnnotatedHTML(documentName).toString());
-            result.getAnnotations().addAll(
-                getAnnotationSet(annotationService.getAnnotations(documentName)));
+            result.getAnnotations().addAll(getAnnotationSet(annotationService.getAnnotations(documentName)));
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());

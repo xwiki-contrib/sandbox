@@ -24,7 +24,7 @@ import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.observation.EventListener;
 
 /**
- * Component responsive for updating annotation location when an annotated document is modified.
+ * Component responsible for updating annotation location when an annotated document is modified.
  * 
  * @version $Id$
  */
@@ -46,22 +46,22 @@ public interface AnnotationMaintainer extends EventListener
     void onAnnotationModification(XDelta delta);
 
     /**
-     * Triggered when we need to determine if we have a "regular" deletion. see tests for explanations about "regular"
+     * Triggered when we need to determine if we have a "regular" deletion. See tests for explanations about "regular"
      * deletion
      * 
-     * @param delta
-     * @param offset of annotation
-     * @param length length of annotation
+     * @param delta the source difference to test
+     * @param offset the offset the annotation
+     * @param length the length of the annotation
      */
     void onSpecialCaseDeletion(XDelta delta, int offset, int length);
 
     /**
-     * Triggered when we need to determine if we have a "regular" addition. see tests for explanations about "regular"
+     * Triggered when we need to determine if we have a "regular" addition. See tests for explanations about "regular"
      * addition
      * 
-     * @param delta
-     * @param offset
-     * @param length
+     * @param delta the source difference to test
+     * @param offset the offset the annotation
+     * @param length the length of the annotation
      */
     void onSpecialCaseAddition(XDelta delta, int offset, int length);
 }

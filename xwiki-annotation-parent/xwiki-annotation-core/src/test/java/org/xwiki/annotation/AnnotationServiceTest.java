@@ -27,12 +27,9 @@ import java.util.Date;
 import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.Test;
-import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.maintainment.AnnotationState;
 import org.xwiki.test.AbstractComponentTestCase;
-
-import com.xpn.xwiki.XWikiContext;
 
 /**
  * @version $Id$
@@ -53,11 +50,6 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
      * The document name to test.
      */
     private String docName = "Robots.Laws";
-
-    /**
-     * The XWikiContext used to invoke the AnnotationService.
-     */
-    private XWikiContext deprecatedContext;
 
     /**
      * The selection of the annotation to add.
@@ -108,7 +100,7 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     /**
      * Test adding an annotation to a document.
      * 
-     * @throws IOServiceException in case the {@link IOService} mock cannot return the source of a document
+     * @throws IOServiceException in case the IOService mock cannot return the source of a document
      * @throws IOException in case the mock document cannot be read correctly
      */
     @Test

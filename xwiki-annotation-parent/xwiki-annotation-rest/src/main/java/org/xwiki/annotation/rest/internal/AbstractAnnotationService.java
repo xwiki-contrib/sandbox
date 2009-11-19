@@ -35,7 +35,10 @@ import org.xwiki.rest.XWikiResource;
 public abstract class AbstractAnnotationService extends XWikiResource
 {
     /**
-     * @param annotations
+     * Helper function to translate a collection of annotations from the {@link org.xwiki.annotation.Annotation} model
+     * to the JAXB model to be serialized for REST communication.
+     * 
+     * @param annotations the annotations collection to be translated
      * @return translate set of org.xwiki.annotation.internal.annotation.Annotation to set of
      *         org.xwiki.annotation.internal.annotation.Annotation
      */
@@ -61,8 +64,12 @@ public abstract class AbstractAnnotationService extends XWikiResource
     }
 
     /**
-     * @param annotations
-     * @param htmlContent
+     * Helper function to build an {@link Annotations} object from a collection of annotations of type
+     * {@link org.xwiki.annotation.Annotation} and the rendered html, to the JAXB model to be serialized for REST
+     * communication.
+     * 
+     * @param annotations the list of annotations to be transformed for serialization
+     * @param htmlContent the rendered content of the document to be packed with the collection of annotations
      * @return wrapped set of annotation, annotated and rendered content
      */
     protected Annotations getAnnotations(Collection<org.xwiki.annotation.Annotation> annotations,

@@ -44,6 +44,9 @@ import com.xpn.xwiki.XWikiException;
 @Path("/wikis/{wikiName}/spaces/{spaceName}/pages/{pageName}/annotation")
 public class AnnotationsRESTService extends AbstractAnnotationService
 {
+    /**
+     * The annotations service to be used by this REST interface.
+     */
     @Requirement
     private AnnotationService annotationService;
 

@@ -75,6 +75,15 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <excludes>
+            org/xwiki/annotation/rest/internal/model/jaxb/**/*
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <repositories>
