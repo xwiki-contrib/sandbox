@@ -20,7 +20,6 @@
 
 package org.xwiki.annotation.internal.io;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,14 +109,8 @@ public class DefaultIOService implements IOService
                 if (it == null) {
                     continue;
                 }
-                Date parsedAnnotationDate;
-                try {
-                    parsedAnnotationDate = new SimpleDateFormat(DATE_FORMAT).parse(it.getStringValue("date"));
-                } catch (ParseException e) {
-                    parsedAnnotationDate = null;
-                }
                 Annotation annotation =
-                    new Annotation(it.get("pageID").toString(), it.getStringValue("author"), parsedAnnotationDate,
+                    new Annotation(it.get("pageID").toString(), it.getStringValue("author"), it.getStringValue("date"),
                         AnnotationState.forName(it.getStringValue("state")), it.getStringValue("annotation"), it
                             .getStringValue("initialSelection"), it.getStringValue("selectionContext"), it
                             .getIntValue("annotationID"), it.getIntValue("offset"), it.getIntValue("length"));

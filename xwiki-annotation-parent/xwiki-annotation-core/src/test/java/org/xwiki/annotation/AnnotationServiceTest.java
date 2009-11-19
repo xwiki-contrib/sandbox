@@ -115,8 +115,8 @@ public class AnnotationServiceTest extends AbstractComponentTestCase
     public void addAnnotation() throws IOServiceException, IOException
     {
         final Annotation expectedAnnotation =
-            new Annotation(docName, user, new Date(), AnnotationState.SAFE, metadata, selection, selectionContext, 1,
-                2, 39);
+            new Annotation(docName, user, new Date().toString(), AnnotationState.SAFE, metadata, selection,
+                selectionContext, 1, 2, 39);
         // expect the addAnnotation method of the IOService to be called with an annotation parameter
         setup.getMockery().checking(new Expectations()
         {

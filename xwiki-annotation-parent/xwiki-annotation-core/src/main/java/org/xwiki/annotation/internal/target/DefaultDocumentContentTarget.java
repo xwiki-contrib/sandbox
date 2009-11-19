@@ -105,8 +105,10 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
             SourceSegment location = selectionService.mapToSource(sel, alteredDocSource);
 
             // create the annotation with this data and send it to the storage service
+            // FIXME: annotation date is not sure to be parsable back because there is no format for it, but it doesn't
+            // matter as ftm it's not used at that level
             Annotation annotation =
-                new Annotation(documentName, user, new Date(), AnnotationState.SAFE, metadata, selection,
+                new Annotation(documentName, user, new Date().toString(), AnnotationState.SAFE, metadata, selection,
                     selectionContext, 0, location.offset, location.length);
             ioService.addAnnotation(documentName, annotation, context);
         } catch (IOServiceException e) {
