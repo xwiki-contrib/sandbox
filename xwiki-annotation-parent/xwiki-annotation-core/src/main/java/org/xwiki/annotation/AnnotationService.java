@@ -81,7 +81,7 @@ public interface AnnotationService
      * @param documentName name of the document to return annotations for
      * @return all safe annotations in the document
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
-     * @see {@link org.xwiki.annotation.maintainment.AnnotationState#SAFE}
+     * @see {@link org.xwiki.annotation.maintainer.AnnotationState#SAFE}
      */
     Collection<Annotation> getSafeAnnotations(CharSequence documentName) throws AnnotationServiceException;
 }

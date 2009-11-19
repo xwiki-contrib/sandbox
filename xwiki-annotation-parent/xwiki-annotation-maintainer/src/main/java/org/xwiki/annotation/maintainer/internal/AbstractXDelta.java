@@ -18,52 +18,61 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.internal.maintainment;
+package org.xwiki.annotation.maintainer.internal;
 
-import org.xwiki.annotation.maintainment.AnnotationMaintainer;
+import org.xwiki.annotation.maintainer.AnnotationMaintainer;
+import org.xwiki.annotation.maintainer.XDelta;
 
 /**
  * @version $Id$
  */
-public class XDeletion extends AbstractXDelta
+public abstract class AbstractXDelta implements XDelta
 {
+    protected final int offset;
+
+    protected final int length;
+
     /**
      * @param offset
      * @param length
      */
-    public XDeletion(int offset, int length)
+    public AbstractXDelta(int offset, int length)
     {
-        super(offset, length);
+        this.offset = offset;
+        this.length = length;
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.maintainment.AbstractXDelta#getSignedDelta()
+     * @see org.xwiki.annotation.maintainment.XDelta#getLength()
      */
-    @Override
-    public int getSignedDelta()
+    public int getLength()
     {
-        return -length;
+        return length;
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.maintainment.AbstractXDelta#update(org.xwiki.annotation.AnnotationMaintainer,
-     *      int, int)
+     * @see org.xwiki.annotation.maintainment.XDelta#getOffset()
      */
-    @Override
-    public void update(AnnotationMaintainer maintainer, int offset, int length)
+    public int getOffset()
     {
-        // deletion before
-        if (this.getOffset() + this.getLength() <= offset) {
-            maintainer.updateOffset(offset + getSignedDelta());
-        } else if (this.getOffset() >= offset + length) {
-            // deletion after
-        } else {
-            // NOP
-            maintainer.onSpecialCaseDeletion(this, offset, length);
-        }
+        return offset;
     }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.maintainment.XDelta#update(org.xwiki.annotation.AnnotationMaintainer, int, int)
+     */
+    public abstract void update(AnnotationMaintainer maintainer, int offset, int length);
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.maintainment.XDelta#getSignedDelta()
+     */
+    public abstract int getSignedDelta();
 }

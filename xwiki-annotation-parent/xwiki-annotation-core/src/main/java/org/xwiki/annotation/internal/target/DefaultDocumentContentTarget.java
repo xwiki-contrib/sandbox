@@ -33,7 +33,7 @@ import org.xwiki.annotation.content.ContentAlterer;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.io.IOTargetService;
-import org.xwiki.annotation.maintainment.AnnotationState;
+import org.xwiki.annotation.maintainer.AnnotationState;
 import org.xwiki.annotation.selection.AlteredSelection;
 import org.xwiki.annotation.selection.SelectionMappingException;
 import org.xwiki.annotation.selection.SelectionService;

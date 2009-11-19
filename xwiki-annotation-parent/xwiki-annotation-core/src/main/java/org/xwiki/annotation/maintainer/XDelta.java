@@ -18,35 +18,38 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.maintainment;
+package org.xwiki.annotation.maintainer;
+
 
 /**
- * Used to specify if an annotation target has been altered by a document modification.
+ * This interface models a source difference.
  * 
  * @version $Id$
  */
-public enum AnnotationState
+public interface XDelta
 {
     /**
-     * An annotation is safe when it is valid and can be rendered on the document it has been added.
+     * @return start offset off difference
      */
-    SAFE,
-    /**
-     * An annotation is altered when the document on which it has been added changed and the annotation position could
-     * not be correctly found on the updated document.
-     */
-    ALTERED;
+    int getOffset();
 
     /**
-     * @param name of state
-     * @return AnnotationState instance
+     * @return length of difference
      */
-    public static AnnotationState forName(String name)
-    {
-        AnnotationState result = valueOf(name);
-        if (result != null) {
-            return result;
-        }
-        throw new IllegalArgumentException();
-    }
+    int getLength();
+
+    /**
+     * @return signed offset delta update
+     */
+    int getSignedDelta();
+
+    /**
+     * This method should be called by annotation maintainer in order to let XDelta instance decide which is the new
+     * offset of annotation.
+     * 
+     * @param maintainer maintainer to use
+     * @param offset of annotation
+     * @param length of annotation
+     */
+    void update(AnnotationMaintainer maintainer, int offset, int length);
 }

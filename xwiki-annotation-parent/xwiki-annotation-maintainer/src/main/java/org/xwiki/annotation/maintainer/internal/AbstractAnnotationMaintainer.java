@@ -18,7 +18,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.internal.maintainment;
+package org.xwiki.annotation.maintainer.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,9 +28,9 @@ import java.util.List;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
-import org.xwiki.annotation.maintainment.AnnotationMaintainer;
-import org.xwiki.annotation.maintainment.AnnotationState;
-import org.xwiki.annotation.maintainment.XDelta;
+import org.xwiki.annotation.maintainer.AnnotationMaintainer;
+import org.xwiki.annotation.maintainer.AnnotationState;
+import org.xwiki.annotation.maintainer.XDelta;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.context.Execution;

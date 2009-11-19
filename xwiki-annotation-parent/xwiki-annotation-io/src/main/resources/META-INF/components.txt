@@ -1,3 +1,2 @@
-org.xwiki.annotation.internal.io.DefaultIOService
-org.xwiki.annotation.internal.io.DocumentContentService
-org.xwiki.annotation.internal.maintainment.JavaDiffBasedAnnotationMaintainer
+org.xwiki.annotation.io.internal.DefaultIOService
+org.xwiki.annotation.io.internal.DocumentContentService

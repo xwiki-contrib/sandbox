@@ -18,7 +18,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.internal.maintainment;
+package org.xwiki.annotation.maintainer.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.incava.util.diff.Diff;
 import org.incava.util.diff.Difference;
-import org.xwiki.annotation.maintainment.XDelta;
+import org.xwiki.annotation.maintainer.XDelta;
 import org.xwiki.component.annotation.Component;
 
 /**

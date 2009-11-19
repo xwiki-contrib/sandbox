@@ -20,7 +20,7 @@
 
 package org.xwiki.annotation;
 
-import org.xwiki.annotation.maintainment.AnnotationState;
+import org.xwiki.annotation.maintainer.AnnotationState;
 
 /**
  * This class wraps together the data needed to describe an annotation.

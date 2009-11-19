@@ -21,5 +21,6 @@
     <module>xwiki-annotation-rest</module>
     <module>xwiki-annotation-application</module>
     <module>xwiki-annotation-io</module>
+    <module>xwiki-annotation-maintainer</module>
   </modules>
 </project>

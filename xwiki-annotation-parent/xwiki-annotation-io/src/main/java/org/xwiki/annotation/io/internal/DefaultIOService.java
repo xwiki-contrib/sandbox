@@ -18,7 +18,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.internal.io;
+package org.xwiki.annotation.io.internal;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import java.util.List;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
-import org.xwiki.annotation.maintainment.AnnotationState;
+import org.xwiki.annotation.maintainer.AnnotationState;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;

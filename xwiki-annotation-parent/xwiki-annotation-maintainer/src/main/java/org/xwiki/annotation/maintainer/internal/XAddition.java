@@ -18,36 +18,31 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.internal.maintainment;
+package org.xwiki.annotation.maintainer.internal;
 
-import org.xwiki.annotation.maintainment.AnnotationMaintainer;
-import org.xwiki.annotation.maintainment.XDelta;
+import org.xwiki.annotation.maintainer.AnnotationMaintainer;
 
 /**
  * @version $Id$
  */
-public abstract class AbstractXDelta implements XDelta
+public class XAddition extends AbstractXDelta
 {
-    protected final int offset;
-
-    protected final int length;
-
     /**
      * @param offset
      * @param length
      */
-    public AbstractXDelta(int offset, int length)
+    public XAddition(int offset, int length)
     {
-        this.offset = offset;
-        this.length = length;
+        super(offset, length);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.maintainment.XDelta#getLength()
+     * @see org.xwiki.annotation.internal.maintainment.AbstractXDelta#getSignedDelta()
      */
-    public int getLength()
+    @Override
+    public int getSignedDelta()
     {
         return length;
     }
@@ -55,25 +50,21 @@ public abstract class AbstractXDelta implements XDelta
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.maintainment.XDelta#getOffset()
-     */
-    public int getOffset()
-    {
-        return offset;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.maintainment.XDelta#update(org.xwiki.annotation.AnnotationMaintainer,
+     * @see org.xwiki.annotation.internal.maintainment.AbstractXDelta#update(org.xwiki.annotation.AnnotationMaintainer,
      *      int, int)
      */
-    public abstract void update(AnnotationMaintainer maintainer, int offset, int length);
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.maintainment.XDelta#getSignedDelta()
-     */
-    public abstract int getSignedDelta();
+    @Override
+    public void update(AnnotationMaintainer maintainer, int offset, int length)
+    {
+        // addition before
+        if (this.getOffset() <= offset) {
+            maintainer.updateOffset(offset + getSignedDelta());
+        }
+        // addition after
+        else if (this.getOffset() >= offset + length) {
+            // NOP
+        } else {
+            maintainer.onSpecialCaseAddition(this, offset, length);
+        }
+    }
 }

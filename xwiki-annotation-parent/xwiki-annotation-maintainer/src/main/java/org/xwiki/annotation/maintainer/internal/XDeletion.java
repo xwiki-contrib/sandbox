@@ -18,20 +18,20 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.internal.maintainment;
+package org.xwiki.annotation.maintainer.internal;
 
-import org.xwiki.annotation.maintainment.AnnotationMaintainer;
+import org.xwiki.annotation.maintainer.AnnotationMaintainer;
 
 /**
  * @version $Id$
  */
-public class XAddition extends AbstractXDelta
+public class XDeletion extends AbstractXDelta
 {
     /**
      * @param offset
      * @param length
      */
-    public XAddition(int offset, int length)
+    public XDeletion(int offset, int length)
     {
         super(offset, length);
     }
@@ -44,7 +44,7 @@ public class XAddition extends AbstractXDelta
     @Override
     public int getSignedDelta()
     {
-        return length;
+        return -length;
     }
 
     /**
@@ -56,15 +56,14 @@ public class XAddition extends AbstractXDelta
     @Override
     public void update(AnnotationMaintainer maintainer, int offset, int length)
     {
-        // addition before
-        if (this.getOffset() <= offset) {
+        // deletion before
+        if (this.getOffset() + this.getLength() <= offset) {
             maintainer.updateOffset(offset + getSignedDelta());
-        }
-        // addition after
-        else if (this.getOffset() >= offset + length) {
-            // NOP
+        } else if (this.getOffset() >= offset + length) {
+            // deletion after
         } else {
-            maintainer.onSpecialCaseAddition(this, offset, length);
+            // NOP
+            maintainer.onSpecialCaseDeletion(this, offset, length);
         }
     }
 }

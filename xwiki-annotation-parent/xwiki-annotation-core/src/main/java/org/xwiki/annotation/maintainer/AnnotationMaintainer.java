@@ -18,7 +18,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.maintainment;
+package org.xwiki.annotation.maintainer;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.observation.EventListener;

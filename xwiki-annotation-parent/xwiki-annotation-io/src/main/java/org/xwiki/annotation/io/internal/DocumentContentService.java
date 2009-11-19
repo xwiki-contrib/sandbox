@@ -18,7 +18,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xwiki.annotation.internal.io;
+package org.xwiki.annotation.io.internal;
 
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.io.IOTargetService;
@@ -47,7 +47,7 @@ public class DocumentContentService implements IOTargetService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.io.DefaultIOService#getSource(java.lang.CharSequence)
+     * @see org.xwiki.annotation.io.internal.DefaultIOService#getSource(java.lang.CharSequence)
      */
     public String getSource(CharSequence documentName) throws IOServiceException
     {
@@ -66,7 +66,7 @@ public class DocumentContentService implements IOTargetService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.io.DefaultIOService#getRenderedContent(java.lang.CharSequence, String)
+     * @see org.xwiki.annotation.io.internal.DefaultIOService#getRenderedContent(java.lang.CharSequence, String)
      */
     public CharSequence getRenderedContent(CharSequence documentName, String context) throws IOServiceException
     {
