@@ -29,11 +29,10 @@ import org.incava.util.diff.Difference;
 import org.xwiki.annotation.maintainment.XDelta;
 import org.xwiki.component.annotation.Component;
 
-
 /**
  * @version $Id$
  */
-@Component("1d7dde8b-3480-4eca-ab68-12f3fd4b4ab3")
+@Component()
 public class JavaDiffBasedAnnotationMaintainer extends AbstractAnnotationMaintainer
 {
     private Collection<XDelta> deltas = null;

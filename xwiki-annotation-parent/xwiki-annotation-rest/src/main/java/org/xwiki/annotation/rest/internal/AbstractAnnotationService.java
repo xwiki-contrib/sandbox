@@ -24,36 +24,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.xwiki.annotation.maintainment.AnnotationMaintainer;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotation;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;
 import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
-import org.xwiki.component.annotation.Requirement;
-import org.xwiki.component.phase.Initializable;
-import org.xwiki.component.phase.InitializationException;
-import org.xwiki.observation.ObservationManager;
 import org.xwiki.rest.XWikiResource;
 
 /**
  * @version $Id$
  */
-public abstract class AbstractAnnotationService extends XWikiResource implements Initializable
+public abstract class AbstractAnnotationService extends XWikiResource
 {
-    private static boolean maintainerRegistered;
-
-    @Requirement("1d7dde8b-3480-4eca-ab68-12f3fd4b4ab3")
-    private static AnnotationMaintainer annotationMaintainer;
-
-    @Requirement
-    private static ObservationManager observationManager;
-
     /**
      * @param annotations
      * @return translate set of org.xwiki.annotation.internal.annotation.Annotation to set of
      *         org.xwiki.annotation.internal.annotation.Annotation
      */
-    protected Collection<Annotation> getAnnotationSet(
-        Collection<org.xwiki.annotation.Annotation> annotations)
+    protected Collection<Annotation> getAnnotationSet(Collection<org.xwiki.annotation.Annotation> annotations)
     {
         ObjectFactory factory = new ObjectFactory();
         List<Annotation> set = new ArrayList<Annotation>();
@@ -72,21 +58,6 @@ public abstract class AbstractAnnotationService extends XWikiResource implements
             set.add(annotation);
         }
         return set;
-    }
-
-    /**
-     * AnnotationManager component must listen document updates. <br />
-     * TODO: delete it and test.
-     * 
-     * @see org.xwiki.component.phase.Initializable#initialize()
-     */
-    public synchronized void initialize() throws InitializationException
-    {
-        super.initialize();
-        if (!maintainerRegistered) {
-            observationManager.addListener(annotationMaintainer);
-            maintainerRegistered = !maintainerRegistered;
-        }
     }
 
     /**
