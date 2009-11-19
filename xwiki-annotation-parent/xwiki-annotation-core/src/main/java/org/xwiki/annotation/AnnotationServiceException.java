@@ -27,13 +27,39 @@ package org.xwiki.annotation;
  */
 public class AnnotationServiceException extends Exception
 {
-    private static final long serialVersionUID = 3856169545666798382L;
-    
     /**
-     * @param message
+     * Serial version number for this type.
+     */
+    private static final long serialVersionUID = 3856169545666798382L;
+
+    /**
+     * Builds an annotation exception with the specified message.
+     * 
+     * @param message the message of this exception
      */
     public AnnotationServiceException(String message)
     {
         super(message);
+    }
+
+    /**
+     * Builds an annotation exception for the specified cause.
+     * 
+     * @param cause the cause of this exception
+     */
+    public AnnotationServiceException(Throwable cause)
+    {
+        super(cause);
+    }
+
+    /**
+     * Builds an annotation exception for the specified cause with the specified message.
+     * 
+     * @param message the message of this exception
+     * @param cause the cause of the exception
+     */
+    public AnnotationServiceException(String message, Throwable cause)
+    {
+        super(message, cause);
     }
 }

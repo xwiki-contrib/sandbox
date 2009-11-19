@@ -21,12 +21,24 @@
 package org.xwiki.annotation.selection;
 
 /**
- * Thrown when we can't match altered selection in altered document source. <br />
- * FIXME: should have constructors for this class, at least from message
+ * Thrown when we can't match altered selection in altered document source.
  * 
  * @version $Id$
  */
 public class SelectionMappingException extends Exception
 {
+    /**
+     * Serial version number for this type.
+     */
     private static final long serialVersionUID = -8811533030070926444L;
+
+    /**
+     * Builds a selection mapping exception with the specified message.
+     * 
+     * @param message the message of this exception
+     */
+    public SelectionMappingException(String message)
+    {
+        super(message);
+    }
 }

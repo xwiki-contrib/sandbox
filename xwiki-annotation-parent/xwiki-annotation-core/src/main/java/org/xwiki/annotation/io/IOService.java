@@ -36,9 +36,6 @@ import com.xpn.xwiki.XWikiContext;
 @ComponentRole
 public interface IOService
 {
-    // FIXME: remove this, format has nothing to do here, it's an XWiki implementation detail
-    static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
-
     /**
      * @param documentName name of concerned document
      * @param deprecatedContext the XWiki context needed to operate with XWiki objects

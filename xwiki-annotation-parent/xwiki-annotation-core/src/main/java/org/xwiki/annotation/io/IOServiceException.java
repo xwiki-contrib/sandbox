@@ -27,13 +27,29 @@ package org.xwiki.annotation.io;
  */
 public class IOServiceException extends Exception
 {
+    /**
+     * Serial version number for this type.
+     */
     private static final long serialVersionUID = -3005369712366887271L;
 
     /**
-     * @param message
+     * Builds an IOService exception with the specified message.
+     * 
+     * @param message the message of this exception
      */
     public IOServiceException(String message)
     {
         super(message);
+    }
+
+    /**
+     * Builds an IOService exception for the specified cause with the specified message.
+     * 
+     * @param message the message of this exception
+     * @param cause the cause of the exception
+     */
+    public IOServiceException(String message, Throwable cause)
+    {
+        super(message, cause);
     }
 }

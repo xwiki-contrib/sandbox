@@ -20,6 +20,8 @@
 
 package org.xwiki.annotation;
 
+import java.util.Date;
+
 import org.xwiki.annotation.maintainment.AnnotationState;
 
 /**
@@ -33,7 +35,7 @@ public class Annotation
 
     protected final CharSequence author;
 
-    protected final CharSequence date;
+    protected final Date date;
 
     protected AnnotationState state;
 
@@ -61,7 +63,7 @@ public class Annotation
      * @param offset the offset of the annotation inside the context
      * @param length the length of the selection of this annotation
      */
-    public Annotation(CharSequence page, CharSequence author, CharSequence date, AnnotationState state,
+    public Annotation(CharSequence page, CharSequence author, Date date, AnnotationState state,
         CharSequence annotation, CharSequence initialSelection, CharSequence selectionContext, int id, int offset,
         int length)
     {
@@ -96,7 +98,7 @@ public class Annotation
     /**
      * @return date of annotation
      */
-    public CharSequence getDate()
+    public Date getDate()
     {
         return date;
     }

@@ -81,7 +81,8 @@ public class DefaultSelectionService implements SelectionService
                 return new SourceSegment(initialOffset, length);
             } else {
                 // neither selection or context appears in the source or the context is ambiguous
-                throw new SelectionMappingException();
+                throw new SelectionMappingException("The selection \"" + selection.getAlteredSelection().getContent()
+                    + "\" could not be mapped on source \"" + source.getContent() + "\"");
             }
         }
     }

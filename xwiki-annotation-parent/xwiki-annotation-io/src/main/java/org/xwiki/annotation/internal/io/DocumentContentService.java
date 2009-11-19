@@ -50,7 +50,8 @@ public class DocumentContentService implements IOTargetService
             String t = document.getContent().replace("\r", "");
             return t;
         } catch (XWikiException e) {
-            throw new IOServiceException(e.getMessage());
+            throw new IOServiceException("An exception message has occurred while getting the source of the document "
+                + documentName, e);
         }
     }
 
@@ -73,7 +74,8 @@ public class DocumentContentService implements IOTargetService
                 deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
             return document.getRenderedContent(context, document.getSyntaxId(), deprecatedContext);
         } catch (XWikiException e) {
-            throw new IOServiceException(e.getMessage());
+            throw new IOServiceException("An exception has occurred while getting the rendered content for document "
+                + documentName.toString(), e);
         }
     }
 }

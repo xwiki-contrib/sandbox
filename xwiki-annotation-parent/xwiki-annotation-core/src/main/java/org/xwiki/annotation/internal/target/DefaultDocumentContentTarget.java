@@ -20,7 +20,6 @@
 
 package org.xwiki.annotation.internal.target;
 
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -107,25 +106,25 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
 
             // create the annotation with this data and send it to the storage service
             Annotation annotation =
-                new Annotation(documentName, user, new SimpleDateFormat(IOService.DATE_FORMAT).format(new Date()),
-                    AnnotationState.SAFE, metadata, selection, selectionContext, 0, location.offset, location.length);
+                new Annotation(documentName, user, new Date(), AnnotationState.SAFE, metadata, selection,
+                    selectionContext, 0, location.offset, location.length);
             ioService.addAnnotation(documentName, annotation, context);
         } catch (IOServiceException e) {
-            throw new AnnotationServiceException("An exception occurred when accessing the storage services: "
-                + e.getMessage());
+            throw new AnnotationServiceException("An exception occurred when accessing the storage services", e);
         } catch (SelectionMappingException e) {
             throw new AnnotationServiceException("Selection \"" + selection + "\" could not be mapped on source \""
-                + source + "\". \nCaused by: " + e.getMessage());
+                + source + "\".", e);
         } catch (ComponentLookupException e) {
             throw new AnnotationServiceException(
-                "No suitable filter was found for mapping the selection on the source document");
+                "No suitable filter was found for mapping the selection on the source document", e);
         }
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.target.AnnotationTarget#getAnnotatedHTML(java.lang.CharSequence, com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.target.AnnotationTarget#getAnnotatedHTML(java.lang.CharSequence,
+     *      com.xpn.xwiki.XWikiContext)
      */
     public CharSequence getAnnotatedHTML(CharSequence documentName, XWikiContext context)
         throws AnnotationServiceException
@@ -200,7 +199,7 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
             }
             return htmlContent;
         } catch (IOServiceException e) {
-            throw new AnnotationServiceException(e.getMessage());
+            throw new AnnotationServiceException(e);
         }
     }
 

@@ -65,7 +65,7 @@ public class DefaultAnnotationService implements AnnotationService
         try {
             annotationTarget.addAnnotation(metadata, selection, selectionContext, offset, documentName, user, context);
         } catch (AnnotationServiceException e) {
-            throw new AnnotationServiceException(e.getMessage());
+            throw new AnnotationServiceException(e);
         }
     }
 
@@ -80,7 +80,7 @@ public class DefaultAnnotationService implements AnnotationService
         try {
             return annotationTarget.getAnnotatedHTML(documentName, context);
         } catch (AnnotationServiceException e) {
-            throw new AnnotationServiceException(e.getMessage());
+            throw new AnnotationServiceException(e);
         }
     }
 
@@ -95,7 +95,7 @@ public class DefaultAnnotationService implements AnnotationService
         try {
             return ioService.getAnnotations(documentName, context);
         } catch (IOServiceException e) {
-            throw new AnnotationServiceException(e.getMessage());
+            throw new AnnotationServiceException(e);
         }
     }
 
@@ -111,7 +111,7 @@ public class DefaultAnnotationService implements AnnotationService
         try {
             return ioService.getSafeAnnotations(documentName, context);
         } catch (IOServiceException e) {
-            throw new AnnotationServiceException(e.getMessage());
+            throw new AnnotationServiceException(e);
         }
     }
 

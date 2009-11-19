@@ -20,6 +20,7 @@
 
 package org.xwiki.annotation.internal.io;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,13 +47,21 @@ import com.xpn.xwiki.objects.BaseObject;
 @Component
 public class DefaultIOService implements IOService
 {
-    public static final String ANNOTATION_CLASS_NAME = "XWiki.AnnotationClass";
+    /**
+     * The XWiki class of the stored annotation objects.
+     */
+    static final String ANNOTATION_CLASS_NAME = "XWiki.AnnotationClass";
+
+    /**
+     * The date format used to store the annotation date in the XWiki objects.
+     */
+    static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#addAnnotation(java.lang.CharSequence,
-     *      org.xwiki.annotation.Annotation, com.xpn.xwiki.XWikiContext)
+     * @see org.xwiki.annotation.io.IOService#addAnnotation(java.lang.CharSequence, org.xwiki.annotation.Annotation,
+     *      com.xpn.xwiki.XWikiContext)
      */
     public void addAnnotation(CharSequence documentName, Annotation annotation, XWikiContext deprecatedContext)
         throws IOServiceException
@@ -76,7 +85,7 @@ public class DefaultIOService implements IOService
                 deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
             }
         } catch (XWikiException e) {
-            throw new IOServiceException(e.getMessage());
+            throw new IOServiceException("An exception message has occurred while saving the annotation", e);
         }
     }
 
@@ -101,8 +110,14 @@ public class DefaultIOService implements IOService
                 if (it == null) {
                     continue;
                 }
+                Date parsedAnnotationDate;
+                try {
+                    parsedAnnotationDate = new SimpleDateFormat(DATE_FORMAT).parse(it.getStringValue("date"));
+                } catch (ParseException e) {
+                    parsedAnnotationDate = null;
+                }
                 Annotation annotation =
-                    new Annotation(it.get("pageID").toString(), it.getStringValue("author"), it.getStringValue("date"),
+                    new Annotation(it.get("pageID").toString(), it.getStringValue("author"), parsedAnnotationDate,
                         AnnotationState.forName(it.getStringValue("state")), it.getStringValue("annotation"), it
                             .getStringValue("initialSelection"), it.getStringValue("selectionContext"), it
                             .getIntValue("annotationID"), it.getIntValue("offset"), it.getIntValue("length"));
@@ -110,7 +125,7 @@ public class DefaultIOService implements IOService
             }
             return result;
         } catch (XWikiException e) {
-            throw new IOServiceException(e.getMessage());
+            throw new IOServiceException("An exception has occurred while loading the annotations", e);
         }
     }
 
@@ -149,9 +164,9 @@ public class DefaultIOService implements IOService
                 deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
             }
         } catch (NumberFormatException e) {
-            throw new IOServiceException(e.getMessage());
+            throw new IOServiceException("An exception has occurred while parsing the annotation to remove", e);
         } catch (XWikiException e) {
-            throw new IOServiceException(e.getMessage());
+            throw new IOServiceException("An exception has occurred while removing the annotation", e);
         }
     }
 
@@ -184,7 +199,7 @@ public class DefaultIOService implements IOService
                 deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
             }
         } catch (XWikiException e) {
-            throw new IOServiceException(e.getMessage());
+            throw new IOServiceException("An exception has occurred while updating the annotation", e);
         }
     }
 }
