@@ -60,8 +60,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <excludes>
-            org/xwiki/annotation/maintainer/internal/**/*,
-            org/xwiki/annotation/maintainer/internal/JavaDiffBasedAnnotationMaintainerTest.java
+            org/xwiki/annotation/maintainer/internal/**/*
           </excludes>
         </configuration>
       </plugin>
