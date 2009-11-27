@@ -72,11 +72,8 @@ public class DocumentContentService implements IOTargetService
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
-            // TODO FIX XWikiMessageTool
-            // deprecatedContext.getMessageTool();
-            // This is required in order to have message tool initialized
-            // quite weird isn't it ?
-            deprecatedContext.getMessageTool();
+            // set up messaging tools to have all velocity scripts well executed when document renders
+            deprecatedContext.getWiki().prepareResources(deprecatedContext);
             XWikiDocument document =
                 deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
             return document.getRenderedContent(context, document.getSyntaxId(), deprecatedContext);
