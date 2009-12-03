@@ -33,7 +33,7 @@ import org.xwiki.annotation.content.filter.Filter;
  * 
  * @version $Id$
  */
-public abstract class AbstractWikiSyntaxContentAlterer extends AbstractContentAlterer
+public abstract class AbstractFilterContentAlterer extends AbstractContentAlterer
 {
     /**
      * @return Syntax filter used to determine the accepted characters in the content altered by this alterer.

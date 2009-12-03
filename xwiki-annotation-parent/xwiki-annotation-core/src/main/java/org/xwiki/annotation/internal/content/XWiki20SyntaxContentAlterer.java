@@ -29,7 +29,7 @@ import org.xwiki.component.annotation.Requirement;
  * @version $Id$
  */
 @Component("xwiki/2.0")
-public class XWiki20SyntaxContentAlterer extends AbstractWikiSyntaxContentAlterer
+public class XWiki20SyntaxContentAlterer extends AbstractFilterContentAlterer
 {
     /**
      * The syntax filter used by this alterer.
@@ -40,7 +40,7 @@ public class XWiki20SyntaxContentAlterer extends AbstractWikiSyntaxContentAltere
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.content.AbstractWikiSyntaxContentAlterer#getSyntaxFilter()
+     * @see org.xwiki.annotation.internal.content.AbstractFilterContentAlterer#getSyntaxFilter()
      */
     @Override
     protected Filter getSyntaxFilter()
