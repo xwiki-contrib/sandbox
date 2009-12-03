@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>XWiki</web>
+<name>RssAggregatorMacro</name>
+<language></language>
+<defaultLanguage></defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.JeromeVelociter</creator>
+<author>XWiki.JeromeVelociter</author>
+<customClass></customClass>
+<contentAuthor>XWiki.JeromeVelociter</contentAuthor>
+<creationDate>1252763692000</creationDate>
+<date>1253207805000</date>
+<contentUpdateDate>1253207805000</contentUpdateDate>
+<version>9.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>XWiki.RssAggregatorMacro</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>39fd9299-0555-4c5c-abde-56171de56786</guid>
+<property>
+<tags/>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<code>
+<editor>---</editor>
+<name>code</name>
+<number>8</number>
+<picker>0</picker>
+<prettyName>Macro code</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<contentDescription>
+<editor>---</editor>
+<name>contentDescription</name>
+<number>7</number>
+<picker>0</picker>
+<prettyName>Content description (Not applicable for "No content" type)</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</contentDescription>
+<contentType>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>contentType</name>
+<number>6</number>
+<picker>0</picker>
+<prettyName>Macro content type</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator></separator>
+<separators>|</separators>
+<size>1</size>
+<sort>none</sort>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<values>Mandatory|Optional|No content</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</contentType>
+<defaultCategory>
+<name>defaultCategory</name>
+<number>4</number>
+<picker>0</picker>
+<prettyName>Default category</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultCategory>
+<description>
+<editor>PureText</editor>
+<name>description</name>
+<number>3</number>
+<picker>0</picker>
+<prettyName>Macro description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<id>
+<name>id</name>
+<number>1</number>
+<picker>0</picker>
+<prettyName>Macro id</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</id>
+<name>
+<name>name</name>
+<number>2</number>
+<picker>0</picker>
+<prettyName>Macro name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<supportsInlineMode>
+<defaultValue>1</defaultValue>
+<displayFormType>select</displayFormType>
+<displayType></displayType>
+<name>supportsInlineMode</name>
+<number>5</number>
+<prettyName>Supports inline mode</prettyName>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</supportsInlineMode>
+</class>
+<name>XWiki.RssAggregatorMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroClass</className>
+<guid>ec3e3f05-b4c5-4102-bf93-6ee940f178d5</guid>
+<property>
+<code>{{groovy}}
+import java.util.TreeMap;
+import com.sun.syndication.feed.synd.SyndEntry;
+import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.io.SyndFeedInput;
+import com.sun.syndication.io.XmlReader;
+
+def urls = [];
+def entries = new TreeMap();
+
+xcontext.macro.content.eachLine() {	urls.add(it.trim()); }
+
+urls.each() { rssUrl -&gt;
+  def feed = new SyndFeedInput().build(new XmlReader(new URL(rssUrl)));
+  feed.entries.each() {  entries.put(it.publishedDate, ["entry":it, "feed": feed]); }
+}
+println """|=Title|=Date|=Author|=Feed"""
+(entries.keySet() as List).reverse()[0..10].each() { 
+   def e = entries.get(it).entry, f = entries.get(it).feed;
+   print """|[[{{{${e.title}}}}&gt;&gt;${e.link}]]|{{{${xwiki.formatDate(e.publishedDate)}}}}|"""
+   println """{{{${e.author}}}}|[[{{{${f.title}}}}&gt;&gt;${f.link}]]"""
+}
+
+{{/groovy}}</code>
+</property>
+<property>
+<contentDescription>RSS feeds to aggregate, seperated by new lines.</contentDescription>
+</property>
+<property>
+<contentType>mandatory</contentType>
+</property>
+<property>
+<defaultCategory></defaultCategory>
+</property>
+<property>
+<description>An RSS aggregator that display entries from several RSS feeds.</description>
+</property>
+<property>
+<id>rssaggregator</id>
+</property>
+<property>
+<name>RSS Aggregator</name>
+</property>
+<property>
+<supportsInlineMode>0</supportsInlineMode>
+</property>
+</object>
+<content>{{rssaggregator}}
+http://www.xwiki.org/xwiki/bin/view/Blog/GlobalBlogRss?xpage=plain
+http://feeds.feedburner.com/xwikicomblogen
+{{/rssaggregator}}
+</content></xwikidoc>
