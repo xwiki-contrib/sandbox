@@ -34,7 +34,9 @@ import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.context.Execution;
 
+import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 
 /**
@@ -49,6 +51,12 @@ public class AnnotationsRESTService extends AbstractAnnotationService
      */
     @Requirement
     private AnnotationService annotationService;
+
+    /**
+     * The execution needed to get the annotation author from the context user.
+     */
+    @Requirement
+    private Execution execution;
 
     /**
      * @param space concerned
@@ -91,7 +99,7 @@ public class AnnotationsRESTService extends AbstractAnnotationService
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
             annotationService.addAnnotation(t.getAnnotation(), t.getInitialSelection(), t.getSelectionContext(), t
-                .getContextOffset(), documentName, xwikiUser);
+                .getContextOffset(), documentName, getXWikiUser());
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
             result.setSource(annotationService.getAnnotatedHTML(documentName).toString());
@@ -108,5 +116,13 @@ public class AnnotationsRESTService extends AbstractAnnotationService
             result.setResponseCode(1);
             return result;
         }
+    }
+
+    /**
+     * @return the xwiki user in the context.
+     */
+    protected String getXWikiUser()
+    {
+        return ((XWikiContext) execution.getContext().getProperty("xwikicontext")).getUser();
     }
 }
