@@ -38,7 +38,7 @@ public abstract class AbstractFilterContentAlterer extends AbstractContentAltere
     /**
      * @return Syntax filter used to determine the accepted characters in the content altered by this alterer.
      */
-    protected abstract Filter getSyntaxFilter();
+    protected abstract Filter getFilter();
 
     /**
      * {@inheritDoc}
@@ -58,7 +58,7 @@ public abstract class AbstractFilterContentAlterer extends AbstractContentAltere
         Character c;
         for (int i = 0; i < sequence.length(); ++i) {
             c = sequence.charAt(i);
-            if (getSyntaxFilter().accept(c)) {
+            if (getFilter().accept(c)) {
                 buffer.append(c);
                 for (int t = 0; t <= z; ++t) {
                     // 1+0;1 // 1+1;1

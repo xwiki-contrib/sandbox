@@ -40,10 +40,10 @@ public class XWiki20SyntaxContentAlterer extends AbstractFilterContentAlterer
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.content.AbstractFilterContentAlterer#getSyntaxFilter()
+     * @see org.xwiki.annotation.internal.content.AbstractFilterContentAlterer#getFilter()
      */
     @Override
-    protected Filter getSyntaxFilter()
+    protected Filter getFilter()
     {
         return syntaxFilter;
     }
