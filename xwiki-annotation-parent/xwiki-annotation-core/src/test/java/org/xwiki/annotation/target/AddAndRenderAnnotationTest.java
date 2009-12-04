@@ -38,8 +38,6 @@ import org.xwiki.annotation.TestDocumentFactory;
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.test.AbstractComponentTestCase;
 
-import com.xpn.xwiki.XWikiContext;
-
 /**
  * Parameterized test to perform all annotations add and display tests described in test files. <br />
  * TODO: this class could be split in a getAnnotatedHTML test and an addAnnotation test, considering that we'd have
@@ -189,9 +187,6 @@ public class AddAndRenderAnnotationTest extends AbstractComponentTestCase
     @Test
     public void getAnnotatedHTML() throws IOServiceException, IOException
     {
-        // context used by the annotation target service
-        final XWikiContext deprecatedContext = null;
-
         try {
             CharSequence html = annotationTarget.getAnnotatedHTML(docName);
             CharSequence expected = TestDocumentFactory.getDocument(docName.toString()).getAnnotatedContent();

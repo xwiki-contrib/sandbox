@@ -41,12 +41,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-rendering-api</artifactId>
-      <version>${platform.core.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.incava</groupId>
       <artifactId>java-diff</artifactId>
       <version>${javadiff.version}</version>
