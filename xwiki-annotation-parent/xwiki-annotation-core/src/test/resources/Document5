@@ -15,7 +15,7 @@ or not to be
 16
 #seems that annotated html breaks the span inside the strong even if it could contain it since it's inline element 
 .annotated
-<p>To be, <span class="annotation ID0" title="Alternative to being">or </span><strong><span class="annotation ID0" title="Alternative to being">not</span></strong><span class="annotation ID0" title="Alternative to being"> to be</span>, that is the question:</p>
+<p>To be, <span class="annotation ID0" title="Alternative to being">or <strong>not</strong> to be</span>, that is the question:</p>
 .sourceWithMarkers
 To be, @@@annotation@@@0@@@or **not** to be@@@0@@@annotation@@@, that is the question:
 .renderedWithMarkers

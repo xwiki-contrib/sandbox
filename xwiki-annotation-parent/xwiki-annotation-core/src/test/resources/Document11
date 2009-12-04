@@ -4,7 +4,7 @@
 .source
 To be, //**or not**// to be, that is the question:
 .rendered
-<p>To be, <emph><strong>or not</strong></emph> to be, that is the question:</p>
+<p>To be, <em><strong>or not</strong></em> to be, that is the question:</p>
 .annotation
 0
 XWiki.XWikiGuest
@@ -13,10 +13,10 @@ not to be
 not to be
 14
 13
-# another empty span is added between the end of the strong and the end of emph, but it's ok for visual representation
+# another empty span is added between the end of the strong and the end of em, but it's ok for visual representation
 .annotated
-<p>To be, <emph><strong>or <span class="annotation ID0" title="Alternative to being">not</span></strong><span class="annotation ID0" title="Alternative to being"></span></emph><span class="annotation ID0" title="Alternative to being"> to be</span>, that is the question:</p>
+<p>To be, <em><strong>or <span class="annotation ID0" title="Alternative to being">not</span></strong><span class="annotation ID0" title="Alternative to being"></span></em><span class="annotation ID0" title="Alternative to being"> to be</span>, that is the question:</p>
 .sourceWithMarkers
 To be, //**or @@@annotation@@@0@@@not**// to be@@@0@@@annotation@@@, that is the question:
 .renderedWithMarkers
-<p>To be, <emph><strong>or @@@annotation@@@0@@@not</strong></emph> to be@@@0@@@annotation@@@, that is the question:</p>
+<p>To be, <em><strong>or @@@annotation@@@0@@@not</strong></em> to be@@@0@@@annotation@@@, that is the question:</p>
