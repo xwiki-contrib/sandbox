@@ -34,9 +34,11 @@
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Even if this is already included by the xwiki-core dependency, we include it again here to make sure that, 
+         if xwiki-core stops using observation, we still have it.-->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-component-api</artifactId>
+      <artifactId>xwiki-core-observation-local</artifactId>
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
