@@ -21,7 +21,13 @@
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-observation-local</artifactId>
+      <artifactId>xwiki-core-rendering-api</artifactId>
+      <version>${platform.core.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-core-rendering-syntax-wikimodel</artifactId>
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -52,7 +58,8 @@
         <configuration>
           <excludes>
             org/xwiki/annotation/Annotation.java,
-            org/xwiki/annotation/internal/target/DefaultDocumentContentTarget.java
+            org/xwiki/annotation/internal/target/DefaultDocumentContentTarget.java,
+            org/xwiki/annotation/internal/renderer/AnnotationGeneratorChainingListener.java
           </excludes>
         </configuration>
       </plugin>
