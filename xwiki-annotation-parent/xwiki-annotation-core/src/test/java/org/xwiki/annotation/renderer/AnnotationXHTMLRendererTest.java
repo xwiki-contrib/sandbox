@@ -44,7 +44,7 @@ import org.xwiki.test.AbstractComponentTestCase;
  * @version $Id$
  */
 @RunWith(Parameterized.class)
-public class XHTMLAnnotationRendererTest extends AbstractComponentTestCase
+public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
 {
     /**
      * Document description files to run this test for.
@@ -54,7 +54,7 @@ public class XHTMLAnnotationRendererTest extends AbstractComponentTestCase
     /**
      * The annotations renderer hint.
      */
-    private static final String ANNOTATIONS_RENDERER_HINT = "annotations/xhtml/1.0";
+    private static final String ANNOTATIONS_RENDERER_HINT = "annotations-xhtml/1.0";
 
     /**
      * Mock document to run tests for.
@@ -63,24 +63,25 @@ public class XHTMLAnnotationRendererTest extends AbstractComponentTestCase
 
     static {
         // FIXME: checkstyle is so gonna shout when this will be longer than 30 files
-        addFileToTest("Document1");
-        addFileToTest("Document2");
-        addFileToTest("Document3");
-        addFileToTest("Document4");
-        addFileToTest("Document5");
-        addFileToTest("Document6");
-        addFileToTest("Document7");
-        addFileToTest("Document8");
-        addFileToTest("Document9");
-        addFileToTest("Document10");
-        addFileToTest("Document11");
-        addFileToTest("Document12");
-        addFileToTest("Document13");
-        addFileToTest("Document14");
-        addFileToTest("Document15");
-        addFileToTest("Document16");
-        addFileToTest("Document17");
-        addFileToTest("Document18");
+        addFileToTest("renderer/Document1");
+        addFileToTest("renderer/Document2");
+        addFileToTest("renderer/Document3");
+        addFileToTest("renderer/Document4");
+        addFileToTest("renderer/Document5");
+        addFileToTest("renderer/Document6");
+        addFileToTest("renderer/Document7");
+        addFileToTest("renderer/Document8");
+        addFileToTest("renderer/Document9");
+        addFileToTest("renderer/Document10");
+        addFileToTest("renderer/Document11");
+        addFileToTest("renderer/Document12");
+        addFileToTest("renderer/Document13");
+        addFileToTest("renderer/Document14");
+        addFileToTest("renderer/Document15");
+        addFileToTest("renderer/Document16");
+        addFileToTest("renderer/Document17");
+        addFileToTest("renderer/Document18");
+        addFileToTest("renderer/Document19");
     }
 
     /**
@@ -88,7 +89,7 @@ public class XHTMLAnnotationRendererTest extends AbstractComponentTestCase
      * 
      * @param docName the document (and corpus filename) to run tests for
      */
-    public XHTMLAnnotationRendererTest(String docName)
+    public AnnotationXHTMLRendererTest(String docName)
     {
         this.docName = docName;
     }

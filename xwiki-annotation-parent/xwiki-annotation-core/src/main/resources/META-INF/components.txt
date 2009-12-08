@@ -5,4 +5,4 @@ org.xwiki.annotation.internal.content.filter.XWiki20SyntaxFilter
 org.xwiki.annotation.internal.content.filter.WhiteSpaceFilter
 org.xwiki.annotation.internal.target.DefaultDocumentContentTarget
 org.xwiki.annotation.internal.selection.DefaultSelectionService
-org.xwiki.annotation.internal.renderer.XHTMLAnnotationRenderer
+org.xwiki.annotation.internal.renderer.AnnotationXHTMLRenderer

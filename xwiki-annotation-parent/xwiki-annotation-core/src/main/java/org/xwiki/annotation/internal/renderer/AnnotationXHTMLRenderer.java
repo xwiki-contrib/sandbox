@@ -34,9 +34,9 @@ import org.xwiki.rendering.renderer.xhtml.XHTMLLinkRenderer;
  * 
  * @version $Id$
  */
-@Component("annotations/xhtml/1.0")
+@Component("annotations-xhtml/1.0")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
-public class XHTMLAnnotationRenderer extends AbstractAnnotationRenderer
+public class AnnotationXHTMLRenderer extends AbstractAnnotationRenderer
 {
     /**
      * To render link events into XHTML. This is done so that it's pluggable because link rendering depends on how the
@@ -62,7 +62,7 @@ public class XHTMLAnnotationRenderer extends AbstractAnnotationRenderer
     @Override
     public AnnotationChainingPrintRenderer getAnnotationPrintRenderer(ListenerChain chain)
     {
-        return new XHTMLAnnotationChainingPrintRenderer(linkRenderer, imageRenderer, chain);
+        return new AnnotationXHTMLChainingRenderer(linkRenderer, imageRenderer, chain);
     }
 
 }
