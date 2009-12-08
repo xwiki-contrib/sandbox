@@ -157,13 +157,18 @@ public final class TestDocumentFactory
             properties[propIndex] = line;
             propIndex++;
         }
+        // last two properties (annotation position in the source) can be missing so parse them separately and default
+        // to 0 if they're not set
+        int annotationOffset = 0;
+        int annotationLength = 0;
         try {
-            return new Annotation(docName, properties[1], null, AnnotationState.SAFE, properties[2], properties[3],
-                properties[4], Integer.parseInt(properties[0]), Integer.parseInt(properties[5]), Integer
-                    .parseInt(properties[6]));
+            annotationOffset = Integer.parseInt(properties[5]);
+            annotationLength = Integer.parseInt(properties[6]);
         } catch (NumberFormatException e) {
-            // if something goes wrong parsing the string properties read for an annotation
-            throw new IOException("Could not parse an annotation from the passed reader");
+            // nothing leave them on zero
         }
+        return new Annotation(docName, properties[1], null, AnnotationState.SAFE, properties[2], properties[3],
+            properties[4], Integer.parseInt(properties[0]), annotationOffset, annotationLength);
+
     }
 }
