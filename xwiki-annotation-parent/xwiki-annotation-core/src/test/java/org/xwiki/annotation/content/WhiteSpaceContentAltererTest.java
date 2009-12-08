@@ -81,7 +81,7 @@ public class WhiteSpaceContentAltererTest extends AbstractComponentTestCase
     {
         Collection<String[]> params = new ArrayList<String[]>();
         // unbreakable space
-        params.add(new String[] {"not to be", "nottobe"});
+        params.add(new String[] {"not\u00A0to be", "nottobe"});
         // tabs
         params.add(new String[] {"to be or not\tto be", "tobeornottobe"});
         // commas, signs with regular spaces

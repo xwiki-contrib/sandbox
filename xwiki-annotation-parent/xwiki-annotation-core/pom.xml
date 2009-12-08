@@ -26,8 +26,8 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.xwiki.platform</groupId>
-        <artifactId>xwiki-core-rendering-syntax-wikimodel</artifactId>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-rendering-syntax-wikimodel</artifactId>
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -61,6 +61,13 @@
             org/xwiki/annotation/internal/target/DefaultDocumentContentTarget.java,
             org/xwiki/annotation/internal/renderer/AnnotationGeneratorChainingListener.java
           </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-Dfile.encoding=UTF-8</argLine>
         </configuration>
       </plugin>
     </plugins>
