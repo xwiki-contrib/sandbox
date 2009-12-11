@@ -281,7 +281,7 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
      */
     private void addEventMapping(Event event, Annotation annotation, Map<Event, Collection<Annotation>> map)
     {
-        Collection<Annotation> mappedCollection = endEvents.get(event);
+        Collection<Annotation> mappedCollection = map.get(event);
         if (mappedCollection == null) {
             mappedCollection = new ArrayList<Annotation>();
             map.put(event, mappedCollection);

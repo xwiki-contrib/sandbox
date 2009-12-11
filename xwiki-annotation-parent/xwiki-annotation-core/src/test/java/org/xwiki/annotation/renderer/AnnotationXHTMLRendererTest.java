@@ -83,6 +83,8 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         addFileToTest("renderer/Document17");
         addFileToTest("renderer/Document18");
         addFileToTest("renderer/Document19");
+        addFileToTest("renderer/Document20");
+        addFileToTest("renderer/Document21");
 
         addFileToTest("renderer/links/Links1");
         addFileToTest("renderer/links/Links2");
