@@ -34,6 +34,7 @@ import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
+import org.xwiki.rendering.scaffolding.MockWikiModel;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.transformation.TransformationManager;
 import org.xwiki.test.AbstractComponentTestCase;
@@ -82,6 +83,19 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         addFileToTest("renderer/Document17");
         addFileToTest("renderer/Document18");
         addFileToTest("renderer/Document19");
+
+        addFileToTest("renderer/links/Links1");
+        addFileToTest("renderer/links/Links2");
+        addFileToTest("renderer/links/Links3");
+        // addFileToTest("renderer/links/Links4");
+        // addFileToTest("renderer/links/Links5");
+
+        addFileToTest("renderer/macros/Macros1");
+        addFileToTest("renderer/macros/Macros2");
+        addFileToTest("renderer/macros/Macros3");
+
+        addFileToTest("renderer/tables/Tables1");
+        addFileToTest("renderer/tables/Tables2");
     }
 
     /**
@@ -111,6 +125,19 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     public static Collection<String[]> data()
     {
         return files;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.test.AbstractComponentTestCase#registerComponents()
+     */
+    @Override
+    protected void registerComponents() throws Exception
+    {
+        super.registerComponents();
+        // register wiki model mock so that we can use documents / attachments information
+        getComponentManager().registerComponent(MockWikiModel.getComponentDescriptor());
     }
 
     /**

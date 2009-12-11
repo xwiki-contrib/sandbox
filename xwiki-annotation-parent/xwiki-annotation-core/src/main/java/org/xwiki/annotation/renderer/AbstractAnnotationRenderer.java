@@ -27,6 +27,7 @@ import org.xwiki.annotation.internal.renderer.AnnotationGeneratorChainingListene
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
+import org.xwiki.rendering.listener.chaining.BlockStateChainingListener;
 import org.xwiki.rendering.listener.chaining.EmptyBlockChainingListener;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.renderer.AbstractChainingPrintRenderer;
@@ -73,6 +74,7 @@ public abstract class AbstractAnnotationRenderer extends AbstractChainingPrintRe
         // Construct the listener chain in the right order. Listeners early in the chain are called before listeners
         // placed later in the chain.
         chain.addListener(this);
+        chain.addListener(new BlockStateChainingListener(chain));
         chain.addListener(new EmptyBlockChainingListener(chain));
         // will generate annotation events to the next listener in chain
 

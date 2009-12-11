@@ -1,0 +1,16 @@
+##################################################
+# Annotation that encloses an URI with a generated label
+# Failing for the moment because the renderer does not correctly pass set the empty block listeners before rendering the HTML.
+##################################################
+.source
+Some link [[Space.ExistingPage]] with generated label
+.rendered
+<p>Some link<span class="wikilink"><a href="/xwiki/bin/view/Space/ExistingPage">Space.ExistingPage</a></span> with generated label</p>
+.annotation
+0
+XWiki.XWikiGuest
+Link with label
+link Space.ExistingPage with
+link Space.ExistingPage with
+.annotated
+<p>Some <span class="annotation ID0" title="Link with label">link&nbsp;</span><span class="wikilink"><a href="/xwiki/bin/view/Space/ExistingPage"><span class="annotation ID0" title="Link with label">Space.ExistingPage</span></a></span><span class="annotation ID0" title="Link with label">&nbsp;with</span> generated label</p>

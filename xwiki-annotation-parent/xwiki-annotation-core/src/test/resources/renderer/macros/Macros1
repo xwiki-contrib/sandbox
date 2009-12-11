@@ -1,0 +1,15 @@
+##################################################
+# Annotation completely contained in a macro 
+##################################################
+.source
+Macro test with {{testgeneratedcontent/}} to annotate
+.rendered
+<p>Macro test with some content which is generated to annotate</p>
+.annotation
+0
+XWiki.XWikiGuest
+Macro content
+generated
+generated
+.annotated
+<p>Macro test with some content which is <span class="annotation ID0" title="Macro content">generated</span> to annotate</p>

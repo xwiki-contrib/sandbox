@@ -377,19 +377,6 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.listener.chaining.AbstractChainingListener#endMacroMarker(java.lang.String,
-     *      java.util.Map, java.lang.String, boolean)
-     */
-    @Override
-    public void endMacroMarker(String name, Map<String, String> parameters, String content, boolean isInline)
-    {
-        closeAllAnnotations();
-        super.endMacroMarker(name, parameters, content, isInline);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
      * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#endParagraph(java.util.Map)
      */
     @Override
@@ -593,19 +580,6 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     {
         closeAllAnnotations();
         super.beginListItem();
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.rendering.listener.chaining.AbstractChainingListener#beginMacroMarker(java.lang.String,
-     *      java.util.Map, java.lang.String, boolean)
-     */
-    @Override
-    public void beginMacroMarker(String name, Map<String, String> parameters, String content, boolean isInline)
-    {
-        closeAllAnnotations();
-        super.beginMacroMarker(name, parameters, content, isInline);
     }
 
     /**

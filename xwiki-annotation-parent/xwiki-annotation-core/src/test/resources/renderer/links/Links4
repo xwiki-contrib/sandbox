@@ -1,0 +1,16 @@
+##################################################
+# Annotation that encloses a freestanding URI
+# Failing for the moment because the renderer does not correctly pass set the empty block listeners before rendering the HTML.
+##################################################
+.source
+XWiki, available at http://www.xwiki.org rox
+.rendered
+<p>XWiki, available at <span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://www.xwiki.org">http://www.xwiki.org</a></span> rox</p>
+.annotation
+0
+XWiki.XWikiGuest
+XWiki address
+at http://www.xwiki.org
+at http://www.xwiki.org
+.annotated
+<p>XWiki, available <span class="annotation ID0" title="XWiki address">at&nbsp;</span><span class="wikiexternallink"><a class="wikimodel-freestanding" href="http://www.xwiki.org"><span class="annotation ID0" title="XWiki address">http://www.xwiki.org</span></a></span> rox</p>
