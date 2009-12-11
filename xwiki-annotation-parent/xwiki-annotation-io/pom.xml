@@ -12,9 +12,6 @@
   <name>XWiki Annotation: XWiki Storage Implementation</name>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <properties>
-    <javadiff.version>1.1.0</javadiff.version>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
@@ -38,12 +35,6 @@
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-component-api</artifactId>
       <version>${platform.core.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.incava</groupId>
-      <artifactId>java-diff</artifactId>
-      <version>${javadiff.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
