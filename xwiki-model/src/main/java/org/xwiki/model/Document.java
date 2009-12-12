@@ -30,6 +30,7 @@ public interface Document extends Persistable
 
     // Q: Should we have this or should we force users to use a Parser for a given syntax, ie make Document
     // independent of the Syntax?
+    // Note: If we make them independent then we have a pb of converting existing docs in the DB.
     //String setContent(String content);
 
     boolean hasObject(String objectName);
