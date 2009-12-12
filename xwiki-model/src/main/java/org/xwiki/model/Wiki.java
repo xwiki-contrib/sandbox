@@ -2,17 +2,17 @@ package org.xwiki.model;
 
 import java.util.List;
 
-import javax.jcr.Workspace;
-
-import org.xwiki.model.Space;
-
-public interface Wiki extends Workspace
+public interface Wiki extends Persistable
 {
     /**
-     * @return the list of all space names of this wiki including nested spaces
+     * @return the list of all space names in this wiki including nested spaces
      */
     List<String> getSpaceNames();
 
+    /**
+     * @param spaceName the name of the space
+     * @return the object representing the space whose  name is passed in parameter
+     */
     Space getSpace(String spaceName);
 
     Space createSpace(String spaceName);
@@ -20,4 +20,6 @@ public interface Wiki extends Workspace
     void addSpace(Space space);
 
     void removeSpace(String spaceName);
+
+    boolean hasSpace(String spaceName);
 }
