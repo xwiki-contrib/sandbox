@@ -11,9 +11,13 @@ public interface Document extends Persistable
     /**
      * @return the list of object definitions defined inside this document
      */
-    List<ObjectDefinition> getObjectDefinitions();
+    List<String> getObjectDefinitionNames();
 
-    List<Object> getObjects();
+    ObjectDefinition getObjectDefinition(String objectDefinitionName);
+
+    List<String> getObjectNames();
+
+    Object getObject(String objectName);
 
     List<Attachment> getAttachments();
 

@@ -11,9 +11,9 @@ public interface Space extends Persistable
     String getDescription();
 
     /**
-     * @return the full list of all nested spaces
+     * @return the names of all nested spaces
      */
-    List<Space> getSpaces();
+    List<String> getSpaceNames();
 
     /**
      * @param spaceName the name of the nested space to look for
@@ -36,7 +36,7 @@ public interface Space extends Persistable
      */
     void removeSpace(String spaceName);
 
-    List<Document> getDocuments();
+    List<String> getDocumentNames();
 
     boolean hasSpace(String spaceName);
 
