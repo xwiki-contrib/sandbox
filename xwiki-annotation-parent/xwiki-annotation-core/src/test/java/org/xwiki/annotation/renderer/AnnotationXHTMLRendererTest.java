@@ -32,7 +32,6 @@ import org.junit.runners.Parameterized.Parameters;
 import org.xwiki.annotation.TestDocumentFactory;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
-import org.xwiki.rendering.renderer.PrintRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
 import org.xwiki.rendering.scaffolding.MockWikiModel;
@@ -64,33 +63,52 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     protected String docName;
 
     static {
-        // FIXME: checkstyle is so gonna shout when this will be longer than 30 files
-        // FIXME: organize these test files in folders
-        addFileToTest("renderer/Document1");
-        addFileToTest("renderer/Document2");
-        addFileToTest("renderer/Document3");
-        addFileToTest("renderer/Document4");
-        addFileToTest("renderer/Document5");
-        addFileToTest("renderer/Document6");
-        addFileToTest("renderer/Document7");
-        addFileToTest("renderer/Document8");
-        addFileToTest("renderer/Document9");
-        addFileToTest("renderer/Document10");
-        addFileToTest("renderer/Document11");
-        addFileToTest("renderer/Document12");
-        addFileToTest("renderer/Document13");
-        addFileToTest("renderer/Document14");
-        addFileToTest("renderer/Document15");
-        addFileToTest("renderer/Document16");
-        addFileToTest("renderer/Document17");
-        addFileToTest("renderer/Document18");
-        addFileToTest("renderer/Document19");
-        addFileToTest("renderer/Document20");
-        addFileToTest("renderer/Document21");
-        
-        addLinksTests();
-        addMacroTests();
-        addTablesTests();
+        // tests containing only plain text content
+        addFileToTest("renderer/plain/Plain1");
+        addFileToTest("renderer/plain/Plain2");
+        addFileToTest("renderer/plain/Plain3");
+        addFileToTest("renderer/plain/Plain4");
+        addFileToTest("renderer/plain/Plain5");
+
+        // tests containing formatting
+        addFileToTest("renderer/format/Format1");
+        addFileToTest("renderer/format/Format2");
+        addFileToTest("renderer/format/Format3");
+        addFileToTest("renderer/format/Format4");
+        addFileToTest("renderer/format/Format5");
+
+        // tests containing special characters in the annotated content
+        addFileToTest("renderer/specialchars/SpecialChars1");
+        addFileToTest("renderer/specialchars/SpecialChars2");
+
+        // tests for which the selection of the annotation appears more than once in the document content
+        addFileToTest("renderer/ambiguous/Ambiguous1");
+        addFileToTest("renderer/ambiguous/Ambiguous2");
+        addFileToTest("renderer/ambiguous/Ambiguous3");
+        addFileToTest("renderer/ambiguous/Ambiguous4");
+
+        // tests in which more than one annotation needs to be rendered in the content
+        addFileToTest("renderer/multiple/Multiple1");
+        addFileToTest("renderer/multiple/Multiple2");
+        addFileToTest("renderer/multiple/Multiple3");
+        addFileToTest("renderer/multiple/Multiple4");
+        addFileToTest("renderer/multiple/Multiple5");
+
+        // tests containing links in the annotated content
+        addFileToTest("renderer/links/Links1");
+        addFileToTest("renderer/links/Links2");
+        addFileToTest("renderer/links/Links3");
+        addFileToTest("renderer/links/Links4");
+        addFileToTest("renderer/links/Links5");
+
+        // tests containing macros generating content in the annotated content
+        addFileToTest("renderer/macros/Macros1");
+        addFileToTest("renderer/macros/Macros2");
+        addFileToTest("renderer/macros/Macros3");
+
+        // tests where the annotated content is in a table
+        addFileToTest("renderer/tables/Tables1");
+        addFileToTest("renderer/tables/Tables2");
     }
 
     /**
@@ -102,37 +120,6 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     {
         this.docName = docName;
     }
-    
-    /**
-     * Sets up the tests with links in rendered content to be executed.
-     */
-    private static void addLinksTests()
-    {
-        addFileToTest("renderer/links/Links1");
-        addFileToTest("renderer/links/Links2");
-        addFileToTest("renderer/links/Links3");
-        addFileToTest("renderer/links/Links4");
-        addFileToTest("renderer/links/Links5");
-    }
-
-    /**
-     * Sets up the tests with macros in rendered content to be executed.
-     */
-    private static void addMacroTests()
-    {
-        addFileToTest("renderer/macros/Macros1");
-        addFileToTest("renderer/macros/Macros2");
-        addFileToTest("renderer/macros/Macros3");
-    }
-
-    /**
-     * Sets up the tests with macros in rendered content to be executed.
-     */
-    private static void addTablesTests()
-    {
-        addFileToTest("renderer/tables/Tables1");
-        addFileToTest("renderer/tables/Tables2");
-    }    
 
     /**
      * Adds a file to the list of files to run tests for.
