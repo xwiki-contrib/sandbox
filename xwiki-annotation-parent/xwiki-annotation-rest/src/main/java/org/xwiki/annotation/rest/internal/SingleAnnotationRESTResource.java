@@ -58,7 +58,8 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
 
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
-            String renderedHTML = renderDocumentWithAnnotations(documentName, null);
+            // TODO: action should be obtained from the calling client in the parameters
+            String renderedHTML = renderDocumentWithAnnotations(documentName, null, "view");
             result.setSource(renderedHTML);
             result.getAnnotations().addAll(getAnnotationSet(annotationService.getAnnotations(documentName)));
             return result;

@@ -45,6 +45,12 @@ import com.xpn.xwiki.XWikiContext;
 public class AnnotationsRESTService extends AbstractAnnotationService
 {
     /**
+     * The default action to render the document for. <br />
+     * TODO: action should be obtained from the calling client in the parameters
+     */
+    private static final String DEFAULT_ACTION = "view";
+
+    /**
      * The execution needed to get the annotation author from the context user.
      */
     @Requirement
@@ -63,7 +69,8 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         try {
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
-            String renderedHTML = renderDocumentWithAnnotations(documentName, null);
+            // TODO: action should be obtained from the calling client in the parameters
+            String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
             // TODO: return AnnotationRequestResponse so that we can return an error here somehow
             return getAnnotations(annotationService.getAnnotations(documentName), renderedHTML);
         } catch (AnnotationServiceException e) {
@@ -95,7 +102,7 @@ public class AnnotationsRESTService extends AbstractAnnotationService
                 .getContextOffset(), documentName, getXWikiUser());
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
-            String renderedHTML = renderDocumentWithAnnotations(documentName, null);
+            String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
             result.setSource(renderedHTML);
             result.getAnnotations().addAll(getAnnotationSet(annotationService.getAnnotations(documentName)));
             return result;

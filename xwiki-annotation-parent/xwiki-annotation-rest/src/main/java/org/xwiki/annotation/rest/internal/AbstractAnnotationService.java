@@ -128,10 +128,11 @@ public abstract class AbstractAnnotationService extends XWikiResource
      * 
      * @param docName the name of the document to render
      * @param language the language in which to render the document
+     * @param action the context action to render the document for
      * @return the HTML rendered content of the document
      * @throws Exception in case anything wrong happens while rendering the document
      */
-    protected String renderDocumentWithAnnotations(String docName, String language) throws Exception
+    protected String renderDocumentWithAnnotations(String docName, String language, String action) throws Exception
     {
         String isInRenderingEngineKey = "isInRenderingEngine";
         XWikiContext context = org.xwiki.rest.Utils.getXWikiContext(componentManager);
@@ -139,6 +140,8 @@ public abstract class AbstractAnnotationService extends XWikiResource
         String result = null;
         try {
             setUpDocuments(docName, language);
+            // set the current action on the context
+            context.setAction(action);
             context.put(isInRenderingEngineKey, true);
             result = annotationService.getAnnotatedHTML(docName).toString();
         } finally {
