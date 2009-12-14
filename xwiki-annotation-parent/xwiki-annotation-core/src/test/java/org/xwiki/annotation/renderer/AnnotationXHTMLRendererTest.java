@@ -32,6 +32,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.xwiki.annotation.TestDocumentFactory;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
+import org.xwiki.rendering.renderer.PrintRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
 import org.xwiki.rendering.scaffolding.MockWikiModel;
@@ -64,6 +65,7 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
 
     static {
         // FIXME: checkstyle is so gonna shout when this will be longer than 30 files
+        // FIXME: organize these test files in folders
         addFileToTest("renderer/Document1");
         addFileToTest("renderer/Document2");
         addFileToTest("renderer/Document3");
@@ -85,19 +87,10 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         addFileToTest("renderer/Document19");
         addFileToTest("renderer/Document20");
         addFileToTest("renderer/Document21");
-
-        addFileToTest("renderer/links/Links1");
-        addFileToTest("renderer/links/Links2");
-        addFileToTest("renderer/links/Links3");
-        addFileToTest("renderer/links/Links4");
-        addFileToTest("renderer/links/Links5");
-
-        addFileToTest("renderer/macros/Macros1");
-        addFileToTest("renderer/macros/Macros2");
-        addFileToTest("renderer/macros/Macros3");
-
-        addFileToTest("renderer/tables/Tables1");
-        addFileToTest("renderer/tables/Tables2");
+        
+        addLinksTests();
+        addMacroTests();
+        addTablesTests();
     }
 
     /**
@@ -109,6 +102,37 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     {
         this.docName = docName;
     }
+    
+    /**
+     * Sets up the tests with links in rendered content to be executed.
+     */
+    private static void addLinksTests()
+    {
+        addFileToTest("renderer/links/Links1");
+        addFileToTest("renderer/links/Links2");
+        addFileToTest("renderer/links/Links3");
+        addFileToTest("renderer/links/Links4");
+        addFileToTest("renderer/links/Links5");
+    }
+
+    /**
+     * Sets up the tests with macros in rendered content to be executed.
+     */
+    private static void addMacroTests()
+    {
+        addFileToTest("renderer/macros/Macros1");
+        addFileToTest("renderer/macros/Macros2");
+        addFileToTest("renderer/macros/Macros3");
+    }
+
+    /**
+     * Sets up the tests with macros in rendered content to be executed.
+     */
+    private static void addTablesTests()
+    {
+        addFileToTest("renderer/tables/Tables1");
+        addFileToTest("renderer/tables/Tables2");
+    }    
 
     /**
      * Adds a file to the list of files to run tests for.

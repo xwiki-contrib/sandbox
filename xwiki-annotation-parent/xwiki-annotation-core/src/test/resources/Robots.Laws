@@ -1,8 +1,0 @@
-.source
-= Three Laws of Robotics =
-
-* A robot may not injure a human being or, through inaction, allow a human being to come to harm.
-* A robot must obey any orders given to it by human beings, except where such orders would conflict with the First Law.
-* A robot must protect its own existence as long as such protection does not conflict with the First or Second Law.
-.renderedContent
-<h1 id=\"HThreeLawsofRobotics\"><span>Three Laws of Robotics</span></h1><ul><li>A robot may not injure a human being or, through inaction, allow a human being to come to harm.</li><li>A robot must obey any orders given to it by human beings, except where such orders would conflict with the First Law.</li><li>A robot must protect its own existence as long as such protection does not conflict with the First or Second Law.</li></ul>

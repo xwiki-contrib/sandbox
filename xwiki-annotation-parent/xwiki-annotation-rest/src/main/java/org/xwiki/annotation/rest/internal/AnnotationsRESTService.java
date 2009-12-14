@@ -27,7 +27,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import org.xwiki.annotation.AnnotationService;
 import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequest;
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
@@ -37,7 +36,6 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 
 import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
 
 /**
  * @version $Id$
@@ -46,12 +44,6 @@ import com.xpn.xwiki.XWikiException;
 @Path("/wikis/{wikiName}/spaces/{spaceName}/pages/{pageName}/annotation")
 public class AnnotationsRESTService extends AbstractAnnotationService
 {
-    /**
-     * The annotations service to be used by this REST interface.
-     */
-    @Requirement
-    private AnnotationService annotationService;
-
     /**
      * The execution needed to get the annotation author from the context user.
      */
@@ -71,12 +63,12 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         try {
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
-            return getAnnotations(annotationService.getAnnotations(documentName), annotationService
-                .getAnnotatedHTML(documentName));
-        } catch (XWikiException e) {
+            String renderedHTML = renderDocumentWithAnnotations(documentName, null);
+            return getAnnotations(annotationService.getAnnotations(documentName), renderedHTML);
+        } catch (AnnotationServiceException e) {
             logger.log(Level.SEVERE, e.getMessage());
             return null;
-        } catch (AnnotationServiceException e) {
+        } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
             return null;
         }
@@ -102,15 +94,16 @@ public class AnnotationsRESTService extends AbstractAnnotationService
                 .getContextOffset(), documentName, getXWikiUser());
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
-            result.setSource(annotationService.getAnnotatedHTML(documentName).toString());
+            String renderedHTML = renderDocumentWithAnnotations(documentName, null);
+            result.setSource(renderedHTML);
             result.getAnnotations().addAll(getAnnotationSet(annotationService.getAnnotations(documentName)));
             return result;
-        } catch (XWikiException e) {
+        } catch (AnnotationServiceException e) {
             logger.log(Level.SEVERE, e.getMessage());
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(1);
             return result;
-        } catch (AnnotationServiceException e) {
+        } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(1);

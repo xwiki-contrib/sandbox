@@ -26,10 +26,8 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import org.xwiki.annotation.AnnotationService;
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Requirement;
 
 /**
  * This class allow to do delete a single annotation.
@@ -40,12 +38,6 @@ import org.xwiki.component.annotation.Requirement;
 @Path("/wikis/{wikiName}/spaces/{spaceName}/pages/{pageName}/annotation/{id}")
 public class SingleAnnotationRESTResource extends AbstractAnnotationService
 {
-    /**
-     * The annotation service to be used by this REST interface.
-     */
-    @Requirement
-    protected AnnotationService annotationService;
-
     /**
      * Deletes the specified annotation.
      * 
@@ -66,7 +58,8 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
 
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
-            result.setSource(annotationService.getAnnotatedHTML(documentName).toString());
+            String renderedHTML = renderDocumentWithAnnotations(documentName, null);
+            result.setSource(renderedHTML);
             result.getAnnotations().addAll(getAnnotationSet(annotationService.getAnnotations(documentName)));
             return result;
         } catch (Exception e) {

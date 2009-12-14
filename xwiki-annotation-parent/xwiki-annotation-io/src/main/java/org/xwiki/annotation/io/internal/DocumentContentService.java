@@ -22,6 +22,7 @@ package org.xwiki.annotation.io.internal;
 
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.io.IOTargetService;
+import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -45,21 +46,42 @@ public class DocumentContentService implements IOTargetService
     private Execution execution;
 
     /**
+     * Document access bridge to manipulate xwiki documents.
+     */
+    @Requirement
+    private DocumentAccessBridge dab;
+
+    /**
      * {@inheritDoc}
      * 
      * @see org.xwiki.annotation.io.internal.DefaultIOService#getSource(java.lang.CharSequence)
      */
     public String getSource(CharSequence documentName) throws IOServiceException
     {
+
         try {
-            XWikiContext deprecatedContext = getXWikiContext();
-            XWikiDocument document =
-                deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
-            String t = document.getContent().replace("\r", "");
+            String documentContent = dab.getDocumentContent(documentName.toString());
+            // why are we removing carriage returns?
+            String t = documentContent.replace("\r", "");
             return t;
-        } catch (XWikiException e) {
+        } catch (Exception e) {
             throw new IOServiceException("An exception message has occurred while getting the source of the document "
                 + documentName, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.io.IOTargetService#getSourceSyntax(java.lang.String)
+     */
+    public String getSourceSyntax(String documentName) throws IOServiceException
+    {
+        try {
+            return dab.getDocumentSyntaxId(documentName);
+        } catch (Exception e) {
+            throw new IOServiceException(
+                "An exception has occurred while getting the syntax of the source for document " + documentName, e);
         }
     }
 

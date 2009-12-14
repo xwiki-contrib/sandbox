@@ -24,16 +24,30 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.velocity.VelocityContext;
+import org.xwiki.annotation.AnnotationService;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotation;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;
 import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
+import org.xwiki.component.annotation.Requirement;
 import org.xwiki.rest.XWikiResource;
+import org.xwiki.velocity.VelocityManager;
+
+import com.xpn.xwiki.XWiki;
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
  * @version $Id$
  */
 public abstract class AbstractAnnotationService extends XWikiResource
 {
+    /**
+     * The annotations service to be used by this REST interface.
+     */
+    @Requirement
+    protected AnnotationService annotationService;
+
     /**
      * Helper function to translate a collection of annotations from the {@link org.xwiki.annotation.Annotation} model
      * to the JAXB model to be serialized for REST communication.
@@ -80,5 +94,66 @@ public abstract class AbstractAnnotationService extends XWikiResource
         result.getAnnotations().addAll(getAnnotationSet(annotations));
         result.setSource(htmlContent.toString());
         return result;
+    }
+
+    /**
+     * Helper function to get the rendered content of the document with annotations. All setup of context for rendering
+     * content similar to the rendering on standard view will be done in this function. <br />
+     * FIXME: find out if this whole context setup code has to be here or in the annotations service
+     * 
+     * @param docName the name of the document to render
+     * @param language the language in which to render the document
+     * @return the HTML rendered content of the document
+     * @throws Exception in case anything wrong happens while rendering the document
+     */
+    protected String renderDocumentWithAnnotations(String docName, String language) throws Exception
+    {
+        String isInRenderingEngineKey = "isInRenderingEngine";
+        XWikiContext context = org.xwiki.rest.Utils.getXWikiContext(componentManager);
+        Object isInRenderingEngine = context.get(isInRenderingEngineKey);
+        String result = null;
+        try {
+            setUpDocuments(docName, language);
+            context.put(isInRenderingEngineKey, true);
+            result = annotationService.getAnnotatedHTML(docName).toString();
+        } finally {
+            if (isInRenderingEngine != null) {
+                context.put(isInRenderingEngineKey, isInRenderingEngine);
+            } else {
+                context.remove(isInRenderingEngineKey);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Helper function to prepare the XWiki documents and translations on the context and velocity context. <br />
+     * TODO: check how this code could be written only once (not duplicate the prepareDocuments function in XWiki)
+     * 
+     * @param docName the full name of the document to prepare context for
+     * @param language the language of the document
+     * @throws Exception if anything goes wrong accessing documents
+     */
+    protected void setUpDocuments(String docName, String language) throws Exception
+    {
+        VelocityManager velocityManager = componentManager.lookup(VelocityManager.class);
+        VelocityContext vcontext = velocityManager.getVelocityContext();
+
+        XWikiContext context = org.xwiki.rest.Utils.getXWikiContext(componentManager);
+        XWiki xwiki = context.getWiki();
+
+        // prepare the messaging tools and set them on context
+        xwiki.prepareResources(context);
+
+        XWikiDocument doc = xwiki.getDocument(docName, context);
+        // setup the xwiki context and the velocity context
+        String docKey = "doc";
+        context.put(docKey, doc);
+        vcontext.put(docKey, doc.newDocument(context));
+        vcontext.put("cdoc", vcontext.get(docKey));
+        XWikiDocument tdoc = doc.getTranslatedDocument(language, context);
+        String translatedDocKey = "tdoc";
+        context.put(translatedDocKey, tdoc);
+        vcontext.put(translatedDocKey, tdoc.newDocument(context));
     }
 }
