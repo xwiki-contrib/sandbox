@@ -64,6 +64,7 @@ public class AnnotationsRESTService extends AbstractAnnotationService
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
             String renderedHTML = renderDocumentWithAnnotations(documentName, null);
+            // TODO: return AnnotationRequestResponse so that we can return an error here somehow
             return getAnnotations(annotationService.getAnnotations(documentName), renderedHTML);
         } catch (AnnotationServiceException e) {
             logger.log(Level.SEVERE, e.getMessage());
@@ -100,14 +101,10 @@ public class AnnotationsRESTService extends AbstractAnnotationService
             return result;
         } catch (AnnotationServiceException e) {
             logger.log(Level.SEVERE, e.getMessage());
-            AnnotationRequestResponse result = new AnnotationRequestResponse();
-            result.setResponseCode(1);
-            return result;
+            return getErrorResponse(e);
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
-            AnnotationRequestResponse result = new AnnotationRequestResponse();
-            result.setResponseCode(1);
-            return result;
+            return getErrorResponse(e);
         }
     }
 

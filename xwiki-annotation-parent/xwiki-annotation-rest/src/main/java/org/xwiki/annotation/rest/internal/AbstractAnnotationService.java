@@ -20,6 +20,8 @@
 
 package org.xwiki.annotation.rest.internal;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.List;
 import org.apache.velocity.VelocityContext;
 import org.xwiki.annotation.AnnotationService;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotation;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
 import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;
 import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Requirement;
@@ -93,6 +96,28 @@ public abstract class AbstractAnnotationService extends XWikiResource
         Annotations result = factory.createAnnotations();
         result.getAnnotations().addAll(getAnnotationSet(annotations));
         result.setSource(htmlContent.toString());
+        return result;
+    }
+
+    /**
+     * Helper function to create an error response from a passed exception. <br />
+     * 
+     * @param exception the exception that was encountered during regular execution of service
+     * @return an error response
+     */
+    protected AnnotationRequestResponse getErrorResponse(Throwable exception)
+    {
+        AnnotationRequestResponse result = new AnnotationRequestResponse();
+        result.setResponseCode(1);
+        String responseMessage = exception.getMessage();
+        if (responseMessage == null) {
+            // serialize the stack trace and send it as an error response
+            StringWriter stackTraceWriter = new StringWriter();
+            exception.printStackTrace(new PrintWriter(stackTraceWriter));
+            responseMessage = stackTraceWriter.toString();
+        }
+        result.setResponseMessage(responseMessage);
+        result.setSource(null);
         return result;
     }
 

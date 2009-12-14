@@ -64,9 +64,7 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
-            AnnotationRequestResponse result = new AnnotationRequestResponse();
-            result.setResponseCode(1);
-            return result;
+            return getErrorResponse(e);
         }
     }
 }

@@ -59,6 +59,7 @@
     <sequence>
       <element name="annotation" type="xwiki:Annotation" minOccurs="0" maxOccurs="unbounded"></element>
       <element name="responseCode" type="int"></element>
+      <element name="responseMessage" type="string"></element>
       <element name="source" type="string" minOccurs="1" maxOccurs="1"></element>
     </sequence>
   </complexType>
