@@ -64,7 +64,6 @@
         <configuration>
           <excludes>
             org/xwiki/annotation/Annotation.java,
-            org/xwiki/annotation/internal/target/DefaultDocumentContentTarget.java,
             org/xwiki/annotation/internal/renderer/AnnotationGeneratorChainingListener.java
           </excludes>
         </configuration>

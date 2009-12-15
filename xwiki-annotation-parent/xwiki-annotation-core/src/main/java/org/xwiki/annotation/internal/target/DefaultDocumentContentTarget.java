@@ -80,6 +80,8 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
         try {
             // nothing. FTM send invalid positions for annotation offset&length since they won't be used
             // create the annotation with this data and send it to the storage service
+            // TODO: also think of mapping the annotation on the document at add time and fail it if it's not mappable,
+            // for extra security
             // FIXME: annotation date is not sure to be parsable back because there is no format for it, but it doesn't
             // matter as ftm it's not used at that level
             Annotation annotation =
