@@ -170,7 +170,9 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
     public void onVerbatim(String protectedString, boolean isInline, Map<String, String> parameters)
     {
         super.onVerbatim(protectedString, isInline, parameters);
-        plainTextContent.append(protectedString);
+        // normalize the protected string before adding it to the plain text version
+        String cleanedProtectedString = selectionAlterer.alter(protectedString).getContent().toString();
+        plainTextContent.append(cleanedProtectedString);
         eventsMapping.put(plainTextContent.length() - 1, getLast());
     }
 

@@ -69,6 +69,7 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         addFileToTest("renderer/plain/Plain3");
         addFileToTest("renderer/plain/Plain4");
         addFileToTest("renderer/plain/Plain5");
+        addFileToTest("renderer/plain/Plain6");
 
         // tests containing formatting
         addFileToTest("renderer/format/Format1");
@@ -109,6 +110,14 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         // tests where the annotated content is in a table
         addFileToTest("renderer/tables/Tables1");
         addFileToTest("renderer/tables/Tables2");
+
+        // tests where the annotated content is inside some verbatim blocks
+        addFileToTest("renderer/verbatim/Verbatim1");
+        addFileToTest("renderer/verbatim/Verbatim2");
+        addFileToTest("renderer/verbatim/Verbatim3");
+        addFileToTest("renderer/verbatim/Verbatim4");
+        addFileToTest("renderer/verbatim/Verbatim5");
+        addFileToTest("renderer/verbatim/Verbatim6");
     }
 
     /**
