@@ -1,2 +1,0 @@
-org.xwiki.rendering.internal.macro.column.ColumnMacro
-org.xwiki.rendering.internal.macro.column.SectionMacro
