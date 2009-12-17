@@ -19,16 +19,19 @@
  */
 package org.xwiki.annotation.renderer;
 
-import org.xwiki.rendering.listener.chaining.ChainingListener;
-import org.xwiki.rendering.renderer.PrintRenderer;
+import org.xwiki.rendering.renderer.Renderer;
 
 /**
- * Define the chaining annotation print renderer. To be implemented by extending a ChainingPrintRenderer and
- * implementing the functions in the {@link AnnotationRenderer} interface.
+ * An annotation renderer is a renderer that can render an extra layer of annotations on the rendered content.
  * 
  * @version $Id$
  */
-public interface AnnotationChainingPrintRenderer extends AnnotationRenderer, ChainingListener, PrintRenderer
+public interface AnnotationRenderer extends Renderer
 {
-
+    /**
+     * Sets the annotation bookmarks for this renderer to use to render the annotations on top of the rendered content.
+     * 
+     * @param bookmarks the bookmarks of the annotations to be rendered by this renderer
+     */
+    void setAnnotationsBookmarks(AnnotationBookmarks bookmarks);
 }

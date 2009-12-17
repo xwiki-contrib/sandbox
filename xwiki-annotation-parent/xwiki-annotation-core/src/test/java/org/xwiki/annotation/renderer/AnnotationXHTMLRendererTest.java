@@ -81,6 +81,7 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         // tests containing special characters in the annotated content
         addFileToTest("renderer/specialchars/SpecialChars1");
         addFileToTest("renderer/specialchars/SpecialChars2");
+        addFileToTest("renderer/specialchars/SpecialChars3");
 
         // tests for which the selection of the annotation appears more than once in the document content
         addFileToTest("renderer/ambiguous/Ambiguous1");
@@ -118,6 +119,13 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         addFileToTest("renderer/verbatim/Verbatim4");
         addFileToTest("renderer/verbatim/Verbatim5");
         addFileToTest("renderer/verbatim/Verbatim6");
+
+        addFileToTest("renderer/partialwords/PartialWords1");
+        addFileToTest("renderer/partialwords/PartialWords2");
+        addFileToTest("renderer/partialwords/PartialWords3");
+        addFileToTest("renderer/partialwords/PartialWords4");
+        addFileToTest("renderer/partialwords/PartialWords5");
+        addFileToTest("renderer/partialwords/PartialWords6");
     }
 
     /**

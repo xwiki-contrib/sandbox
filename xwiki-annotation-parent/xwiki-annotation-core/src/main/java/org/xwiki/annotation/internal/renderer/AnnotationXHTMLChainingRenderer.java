@@ -19,18 +19,24 @@
  */
 package org.xwiki.annotation.internal.renderer;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.xwiki.annotation.Annotation;
+import org.xwiki.annotation.renderer.AnnotationBookmarks;
 import org.xwiki.annotation.renderer.AnnotationChainingPrintRenderer;
+import org.xwiki.annotation.renderer.AnnotationEvent;
+import org.xwiki.annotation.renderer.EventReference;
+import org.xwiki.annotation.renderer.AnnotationEvent.AnnotationEventType;
 import org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer;
 import org.xwiki.rendering.listener.Format;
 import org.xwiki.rendering.listener.HeaderLevel;
 import org.xwiki.rendering.listener.Link;
 import org.xwiki.rendering.listener.ListType;
+import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.renderer.xhtml.XHTMLImageRenderer;
 import org.xwiki.rendering.renderer.xhtml.XHTMLLinkRenderer;
@@ -38,8 +44,7 @@ import org.xwiki.rendering.syntax.Syntax;
 
 /**
  * Extends the default XHTML renderer to add handling of annotations.<br />
- * FIXME: this implementation is a very simple handling of annotation events, it should handle annotation markers
- * splitting & nesting in other elements.
+ * FIXME: FTM don't consider offsets, just to see how it works with bookmarks.
  * 
  * @version $Id$
  */
@@ -49,6 +54,16 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
      * The annotation marker element in HTML.
      */
     private static final String ANNOTATION_MARKER = "span";
+
+    /**
+     * The bookmarks of the annotations to render on this content.
+     */
+    private AnnotationBookmarks bookmarks = new AnnotationBookmarks();
+
+    /**
+     * Map to store the events count to be able to identify an event in the emitted events.
+     */
+    private Map<EventType, Integer> eventsCount = new HashMap<EventType, Integer>();
 
     /**
      * Flag to signal if the annotations in the openAnnotations stack are actually opened in the printed XHTML. Namely
@@ -78,9 +93,9 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     }
 
     /**
-     * {@inheritDoc}
+     * Handles the beginning of a new annotation.
      * 
-     * @see org.xwiki.annotation.renderer.AnnotationListener#beginAnnotation(Annotation)
+     * @param annotation the annotation that begins
      */
     public void beginAnnotation(Annotation annotation)
     {
@@ -94,9 +109,9 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     }
 
     /**
-     * {@inheritDoc}
+     * Handles the end of an annotation.
      * 
-     * @see org.xwiki.annotation.renderer.AnnotationListener#endAnnotation(Annotation)
+     * @param annotation the annotation that ends
      */
     public void endAnnotation(Annotation annotation)
     {
@@ -185,8 +200,60 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void onWord(String word)
     {
+        // if there is a begin annotation bookmark in this event (regardless of the offset ftm, call begin annotation
+        // for all of them)
+        // build an event that would allow to search in the bookmarks
+        EventReference currentEvt = new EventReference(EventType.ON_WORD, getAndIncrement(EventType.ON_WORD));
+        // and go, for all events which are start events, begin them before
+        beginAllAnnotations(currentEvt);
         openAllAnnotations();
         super.onWord(word);
+        // for all the events which are end events, end them after
+        endAllAnnotations(currentEvt);
+    }
+
+    /**
+     * Helper function to begin all the annotations that start in the passed event, regardless of the offset. <br />
+     * FIXME: start annotations at the right offsets and remove this function
+     * 
+     * @param currentEvent the event to begin all annotations for
+     */
+    private void beginAllAnnotations(EventReference currentEvent)
+    {
+        if (bookmarks.get(currentEvent) == null) {
+            // nothing to do if there is no bookmark on this event
+            return;
+        }
+
+        for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : bookmarks.get(currentEvent).entrySet()) {
+            for (AnnotationEvent annEvt : bookmark.getValue()) {
+                if (annEvt.getType() == AnnotationEventType.START) {
+                    beginAnnotation(annEvt.getAnnotation());
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper function to end all the annotations that end in the passed event, regardless of the offset. <br />
+     * FIXME: start annotations at the right offsets and remove this function
+     * 
+     * @param currentEvent the event end all annotations for
+     */
+    private void endAllAnnotations(EventReference currentEvent)
+    {
+        if (bookmarks.get(currentEvent) == null) {
+            // nothing to do if there is no bookmark on this event
+            return;
+        }
+
+        for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : bookmarks.get(currentEvent).entrySet()) {
+            for (AnnotationEvent annEvt : bookmark.getValue()) {
+                if (annEvt.getType() == AnnotationEventType.END) {
+                    endAnnotation(annEvt.getAnnotation());
+                }
+            }
+        }
     }
 
     /**
@@ -209,8 +276,14 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void onSpecialSymbol(char symbol)
     {
+        EventReference currentEvt =
+            new EventReference(EventType.ON_SPECIAL_SYMBOL, getAndIncrement(EventType.ON_SPECIAL_SYMBOL));
+        beginAllAnnotations(currentEvt);
+
         openAllAnnotations();
         super.onSpecialSymbol(symbol);
+
+        endAllAnnotations(currentEvt);
     }
 
     /**
@@ -221,9 +294,15 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void onVerbatim(String protectedString, boolean isInline, Map<String, String> parameters)
     {
-        // FIXME: really?
+        // FIXME: need to handle the dirty case when verbatim block is block, in which case adding a span around it is
+        // not such a good idea
+        EventReference currentEvt = new EventReference(EventType.ON_VERBATIM, getAndIncrement(EventType.ON_VERBATIM));
+        beginAllAnnotations(currentEvt);
+
         openAllAnnotations();
         super.onVerbatim(protectedString, isInline, parameters);
+
+        endAllAnnotations(currentEvt);
     }
 
     /**
@@ -236,9 +315,14 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     {
         // FIXME: this is going to be messy, messy because of the raw block syntax which can be HTML and produce very
         // invalid html.
+        EventReference currentEvt = new EventReference(EventType.ON_RAW_TEXT, getAndIncrement(EventType.ON_RAW_TEXT));
+        beginAllAnnotations(currentEvt);
+
         openAllAnnotations();
         // Store the raw text as it is ftm. Should handle syntax in the future
         super.onRawText(text, syntax);
+
+        endAllAnnotations(currentEvt);
     }
 
     /**
@@ -253,9 +337,14 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
         if (getEmptyBlockState().isCurrentContainerBlockEmpty()) {
             // special handling only if the link is empty, in which case we wrap all annotations around it
             // FIXME: This will generate a whole mess of html
+            EventReference currentEvt = new EventReference(EventType.END_LINK, getAndIncrement(EventType.END_LINK));
+            beginAllAnnotations(currentEvt);
+
             openAllAnnotations();
             super.endLink(link, isFreeStandingURI, parameters);
             closeAllAnnotations();
+
+            endAllAnnotations(currentEvt);
         } else {
             // otherwise, if the link has content and it was rendered as words, handle the end and then call the super
             closeAllAnnotations();
@@ -676,5 +765,33 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     {
         closeAllAnnotations();
         super.beginTableRow(parameters);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.renderer.AnnotationRenderer
+     *      #setAnnotationsBookmarks(org.xwiki.annotation.renderer.AnnotationBookmarks)
+     */
+    public void setAnnotationsBookmarks(AnnotationBookmarks bookmarks)
+    {
+        this.bookmarks = bookmarks;
+    }
+
+    /**
+     * Helper function to get the current event count of the specified type, and increment it. Similar to a ++ operation
+     * on the Integer mapped to the passed event type.
+     * 
+     * @param type the event type
+     * @return the current event count for the passed type.
+     */
+    protected int getAndIncrement(EventType type)
+    {
+        Integer currentCount = eventsCount.get(type);
+        if (currentCount == null) {
+            currentCount = 0;
+        }
+        eventsCount.put(type, currentCount + 1);
+        return currentCount;
     }
 }

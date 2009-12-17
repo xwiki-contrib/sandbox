@@ -19,31 +19,30 @@
  */
 package org.xwiki.annotation.renderer;
 
+import java.util.Collection;
+
 import org.xwiki.annotation.Annotation;
 import org.xwiki.rendering.listener.Listener;
 
 /**
- * Extends the standard XWiki events listener by adding a set of events for start and end of an annotation.
+ * An annotations generator listener is a listener that produces a list of annotation bookmarks for a list of
+ * annotations with respect to the events it listens to.
  * 
  * @version $Id$
  */
-public interface AnnotationListener extends Listener
+public interface AnnotationGeneratorListener extends Listener
 {
     /**
-     * Signals the start of an annotation. Note that this event will only be fired once, splitting the annotation
-     * markers in multiple pieces and correctly imbricating them in the rendered syntax (such as multiple spans across
-     * multiple block elements in the XHTML renderer) is the responsibility of the renderer.
+     * Returns the list of annotation bookmarks for the passed annotations. The bookmarks returned by this function have
+     * to be valid after the listening has ended (after endDocument was called), there is no restriction about their
+     * validity before this moment.
      * 
-     * @param annotation the annotation whose selected text starts
+     * @return the annotation bookmarks computed for the passed list of annotations
      */
-    void beginAnnotation(Annotation annotation);
+    AnnotationBookmarks getAnnotationBookmarks();
 
     /**
-     * Signals the end of an annotation. Note that this event will only be fired once, splitting the annotation markers
-     * in multiple pieces and correctly imbricating them in the rendered syntax (such as multiple spans across multiple
-     * block elements in the XHTML renderer) is the responsibility of the renderer.
-     * 
-     * @param annotation the annotation whose selected text ends
+     * @param annotations the annotations to produce bookmarks for
      */
-    void endAnnotation(Annotation annotation);
+    void setAnnotations(Collection<Annotation> annotations);
 }

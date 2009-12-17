@@ -59,7 +59,7 @@ public abstract class AbstractAnnotationRenderer extends AbstractChainingPrintRe
     /**
      * The annotations generator listener to use in this renderer.
      */
-    private AnnotationGeneratorChainingListener annotationsGenerator;
+    protected AnnotationGeneratorListener annotationsGenerator;
 
     /**
      * {@inheritDoc}
@@ -71,23 +71,27 @@ public abstract class AbstractAnnotationRenderer extends AbstractChainingPrintRe
         ListenerChain chain = new ListenerChain();
         setListenerChain(chain);
 
+        // the annotation bookmarks to generate by the listener and pass to the renderer
+        // FIXME: hack to be able to have the generator listener create the bookmarks and the next listener in chain
+        // consume them, create an instance and pass it to both (instead of getting the results from first and passing
+        // to second), using the hacky generator constructor
+        AnnotationBookmarks bookmarks = new AnnotationBookmarks();
+        annotationsGenerator =
+            new AnnotationGeneratorChainingListener(linkLabelGenerator, selectionAlterer, bookmarks, chain);
+        // get the annotations print renderer and set its bookmarks
+        AnnotationChainingPrintRenderer annotationsPrintRenderer = getAnnotationPrintRenderer(chain);
+        annotationsPrintRenderer.setAnnotationsBookmarks(bookmarks);
+
+        // chain'em all
+
         // Construct the listener chain in the right order. Listeners early in the chain are called before listeners
         // placed later in the chain.
         chain.addListener(this);
         chain.addListener(new BlockStateChainingListener(chain));
         chain.addListener(new EmptyBlockChainingListener(chain));
-        // will generate annotation events to the next listener in chain
-
-        // TODO: could also have the annotation listener passed to the annotationgenerator chaininglistener (which would
-        // become a print renderer and delegate all printing functions to the aggregated annotation print renderer).
-        // All buffered events will be consumed to this aggregated listener. This way the next element in chain is
-        // better coupled in the listener that knows how to send such events and we don't need to test in the annotation
-        // generator that the next listener in the chain can receive annotation events. However I like the chaining idea
-        // more (because one could add any number of other annotation listeners after this generator in the chain).
-        annotationsGenerator = new AnnotationGeneratorChainingListener(linkLabelGenerator, selectionAlterer, chain);
-        chain.addListener(annotationsGenerator);
+        chain.addListener((AnnotationGeneratorChainingListener) annotationsGenerator);
         // the actual annotations renderer
-        chain.addListener(getAnnotationPrintRenderer(chain));
+        chain.addListener(annotationsPrintRenderer);
     }
 
     /**

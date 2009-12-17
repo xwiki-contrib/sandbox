@@ -1,0 +1,21 @@
+##################################################
+# Two plain text annotations, overlapping inside a word
+##################################################
+.source
+My mistress' eyes are nothing like the sun;
+.rendered
+<p>My mistress' eyes are nothing like the sun;</p>
+.annotation
+0
+XWiki.XWikiGuest
+Comparison
+thing like
+thing like
+.annotation
+1
+XWiki.XWikiGuest
+Eyes
+eyes are nothin
+eyes are nothin
+.annotated
+<p>My mistress' <span class="annotation ID1" title="Eyes">eyes are no<span class="annotation ID0" title="Comparison">thin</span></span><span class="annotation ID0" title="Comparison">g like</span> the sun;</p>
