@@ -26,6 +26,7 @@ import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
+import org.xwiki.rendering.renderer.LinkLabelGenerator;
 import org.xwiki.rendering.renderer.xhtml.XHTMLImageRenderer;
 import org.xwiki.rendering.renderer.xhtml.XHTMLLinkRenderer;
 
@@ -55,6 +56,14 @@ public class AnnotationXHTMLRenderer extends AbstractAnnotationRenderer
     private XHTMLImageRenderer imageRenderer;
 
     /**
+     * Link label generator, used to generate labels for links with no label in this renderer. <br />
+     * TODO: it would be nice if we could somehow get the very same link generator that the XHTML default renderer is
+     * using, since we need the two to be fully synchronized and generate the same content.
+     */
+    @Requirement
+    private LinkLabelGenerator linkLabelGenerator;
+
+    /**
      * {@inheritDoc}
      * 
      * @see org.xwiki.annotation.renderer.AbstractAnnotationRenderer#getAnnotationPrintRenderer(ListenerChain)
@@ -65,4 +74,14 @@ public class AnnotationXHTMLRenderer extends AbstractAnnotationRenderer
         return new AnnotationXHTMLChainingRenderer(linkRenderer, imageRenderer, chain);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.renderer.AbstractAnnotationRenderer#getLinkLabelGenerator()
+     */
+    @Override
+    public LinkLabelGenerator getLinkLabelGenerator()
+    {
+        return linkLabelGenerator;
+    }
 }

@@ -19,19 +19,25 @@
  */
 package org.xwiki.annotation.renderer;
 
-import org.xwiki.rendering.renderer.Renderer;
+import org.xwiki.rendering.listener.chaining.EmptyBlockChainingListener;
+import org.xwiki.rendering.listener.chaining.ListenerChain;
 
 /**
- * An annotation renderer is a renderer that can render an extra layer of annotations on the rendered content.
+ * Empty block chaining listener to push in the chain before the generator listener. It adds no special functionality to
+ * the {@link EmptyBlockChainingListener}, it's just a new type so that we can add two such listeners, for different
+ * purposes at different positions in the chain.
  * 
  * @version $Id$
  */
-public interface AnnotationRenderer extends Renderer
+public class GeneratorEmptyBlockChainingListener extends EmptyBlockChainingListener
 {
     /**
-     * Sets the annotation bookmarks for this renderer to use to render the annotations on top of the rendered content.
+     * Builds a new empty block chaining listener to push in the passed chain.
      * 
-     * @param bookmarks the bookmarks of the annotations to be rendered by this renderer
+     * @param listenerChain the chain to push the listener in
      */
-    void setAnnotationBookmarks(AnnotationBookmarks bookmarks);
+    public GeneratorEmptyBlockChainingListener(ListenerChain listenerChain)
+    {
+        super(listenerChain);
+    }
 }

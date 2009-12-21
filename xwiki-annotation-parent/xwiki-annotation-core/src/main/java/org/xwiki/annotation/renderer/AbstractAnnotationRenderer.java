@@ -30,6 +30,7 @@ import org.xwiki.component.phase.InitializationException;
 import org.xwiki.rendering.listener.chaining.BlockStateChainingListener;
 import org.xwiki.rendering.listener.chaining.EmptyBlockChainingListener;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
+import org.xwiki.rendering.parser.StreamParser;
 import org.xwiki.rendering.renderer.AbstractChainingPrintRenderer;
 import org.xwiki.rendering.renderer.LinkLabelGenerator;
 
@@ -43,18 +44,18 @@ public abstract class AbstractAnnotationRenderer extends AbstractChainingPrintRe
     AnnotationPrintRenderer
 {
     /**
-     * The link label generator for this renderer.
-     */
-    @Requirement
-    protected LinkLabelGenerator linkLabelGenerator;
-
-    /**
      * Selection cleaner so that the selection can be mapped on the content. <br />
      * TODO: not really sure if this is the right place for this pull, but the annotations generator is not a component
      * so it cannot 'require' it.
      */
     @Requirement("whitespace")
     protected ContentAlterer selectionAlterer;
+
+    /**
+     * Plain text parser used to parse generated link labels.
+     */
+    @Requirement("plain/1.0")
+    protected StreamParser plainTextParser;
 
     /**
      * The annotations generator listener to use in this renderer.
@@ -77,19 +78,25 @@ public abstract class AbstractAnnotationRenderer extends AbstractChainingPrintRe
         // to second), using the hacky generator constructor
         AnnotationBookmarks bookmarks = new AnnotationBookmarks();
         annotationsGenerator =
-            new AnnotationGeneratorChainingListener(linkLabelGenerator, selectionAlterer, bookmarks, chain);
+            new AnnotationGeneratorChainingListener(getLinkLabelGenerator(), selectionAlterer, bookmarks, chain);
         // get the annotations print renderer and set its bookmarks
         AnnotationChainingPrintRenderer annotationsPrintRenderer = getAnnotationPrintRenderer(chain);
-        annotationsPrintRenderer.setAnnotationsBookmarks(bookmarks);
+        annotationsPrintRenderer.setAnnotationBookmarks(bookmarks);
 
         // chain'em all
-
         // Construct the listener chain in the right order. Listeners early in the chain are called before listeners
         // placed later in the chain.
         chain.addListener(this);
+
+        // empty block listener is needed by the label generator
+        chain.addListener(new GeneratorEmptyBlockChainingListener(chain));
+        // link label generator generates events for link labels automatically generated for empty links
+        chain.addListener(new LinkLabelGeneratorChainingListener(getLinkLabelGenerator(), plainTextParser, chain));
+        // annotations generator, chained to create the annotations events bookmarks
+        chain.addListener((AnnotationGeneratorChainingListener) annotationsGenerator);
+        // block state listener and empty block listeners needed by the XHTML renderer
         chain.addListener(new BlockStateChainingListener(chain));
         chain.addListener(new EmptyBlockChainingListener(chain));
-        chain.addListener((AnnotationGeneratorChainingListener) annotationsGenerator);
         // the actual annotations renderer
         chain.addListener(annotationsPrintRenderer);
     }
@@ -100,6 +107,13 @@ public abstract class AbstractAnnotationRenderer extends AbstractChainingPrintRe
      *         actual renderer of annotated content)
      */
     public abstract AnnotationChainingPrintRenderer getAnnotationPrintRenderer(ListenerChain chain);
+
+    /**
+     * Getter for the link label generator to be used for generating link labels by this renderer.
+     * 
+     * @return the {@link LinkLabelGenerator} used to generate labels for links without labels by this renderer
+     */
+    public abstract LinkLabelGenerator getLinkLabelGenerator();
 
     /**
      * {@inheritDoc}

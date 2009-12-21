@@ -37,11 +37,8 @@ import org.xwiki.annotation.renderer.AnnotationGeneratorListener;
 import org.xwiki.annotation.renderer.EventReference;
 import org.xwiki.annotation.renderer.AnnotationEvent.AnnotationEventType;
 import org.xwiki.rendering.internal.renderer.BasicLinkRenderer;
-import org.xwiki.rendering.listener.Link;
-import org.xwiki.rendering.listener.LinkType;
 import org.xwiki.rendering.listener.QueueListener;
 import org.xwiki.rendering.listener.chaining.ChainingListener;
-import org.xwiki.rendering.listener.chaining.EmptyBlockChainingListener;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.renderer.LinkLabelGenerator;
@@ -151,14 +148,6 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
     }
 
     /**
-     * @return the state of the current empty block.
-     */
-    protected EmptyBlockChainingListener getEmptyBlockState()
-    {
-        return (EmptyBlockChainingListener) getListenerChain().getListener(EmptyBlockChainingListener.class);
-    }
-
-    /**
      * {@inheritDoc}
      * 
      * @see org.xwiki.rendering.listener.QueueListener#onWord(java.lang.String)
@@ -226,35 +215,6 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
         eventsMapping.put(plainTextContent.length() - 1, currentEvt);
         // also store this event in the list of events with altered content
         alteredEventsContent.put(currentEvt, cleanedContent);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.rendering.listener.chaining.AbstractChainingListener#endLink(org.xwiki.rendering.listener.Link,
-     *      boolean, java.util.Map)
-     */
-    @Override
-    public void endLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
-    {
-        super.endLink(link, isFreeStandingURI, parameters);
-        // special handling only if the link is empty
-        if (getEmptyBlockState().isCurrentContainerBlockEmpty()) {
-            String linkPlainText = "";
-            if (link.getType() == LinkType.DOCUMENT && this.linkLabelGenerator != null) {
-                linkPlainText = this.linkLabelGenerator.generate(link);
-            } else {
-                linkPlainText = this.linkRenderer.renderLinkReference(link);
-            }
-
-            // normalize the protected string before adding it to the plain text version
-            AlteredContent cleanedContent = selectionAlterer.alter(linkPlainText);
-            plainTextContent.append(cleanedContent.getContent().toString());
-            EventReference currentEvt = new EventReference(getLast().eventType, getAndIncrement(EventType.END_LINK));
-            eventsMapping.put(plainTextContent.length() - 1, currentEvt);
-            // also store this event in the list of events with altered content
-            alteredEventsContent.put(currentEvt, cleanedContent);
-        }
     }
 
     /**

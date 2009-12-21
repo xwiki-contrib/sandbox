@@ -334,22 +334,8 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
     {
-        if (getEmptyBlockState().isCurrentContainerBlockEmpty()) {
-            // special handling only if the link is empty, in which case we wrap all annotations around it
-            // FIXME: This will generate a whole mess of html
-            EventReference currentEvt = new EventReference(EventType.END_LINK, getAndIncrement(EventType.END_LINK));
-            beginAllAnnotations(currentEvt);
-
-            openAllAnnotations();
-            super.endLink(link, isFreeStandingURI, parameters);
-            closeAllAnnotations();
-
-            endAllAnnotations(currentEvt);
-        } else {
-            // otherwise, if the link has content and it was rendered as words, handle the end and then call the super
-            closeAllAnnotations();
-            super.endLink(link, isFreeStandingURI, parameters);
-        }
+        closeAllAnnotations();
+        super.endLink(link, isFreeStandingURI, parameters);
     }
 
     /**
@@ -773,7 +759,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
      * @see org.xwiki.annotation.renderer.AnnotationRenderer
      *      #setAnnotationsBookmarks(org.xwiki.annotation.renderer.AnnotationBookmarks)
      */
-    public void setAnnotationsBookmarks(AnnotationBookmarks bookmarks)
+    public void setAnnotationBookmarks(AnnotationBookmarks bookmarks)
     {
         this.bookmarks = bookmarks;
     }
