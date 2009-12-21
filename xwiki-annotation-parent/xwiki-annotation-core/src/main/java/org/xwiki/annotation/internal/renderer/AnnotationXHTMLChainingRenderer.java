@@ -20,12 +20,10 @@
 package org.xwiki.annotation.internal.renderer;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
-import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.renderer.AnnotationBookmarks;
 import org.xwiki.annotation.renderer.AnnotationChainingPrintRenderer;
 import org.xwiki.annotation.renderer.AnnotationEvent;
@@ -38,23 +36,18 @@ import org.xwiki.rendering.listener.Link;
 import org.xwiki.rendering.listener.ListType;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
+import org.xwiki.rendering.renderer.printer.XHTMLWikiPrinter;
 import org.xwiki.rendering.renderer.xhtml.XHTMLImageRenderer;
 import org.xwiki.rendering.renderer.xhtml.XHTMLLinkRenderer;
 import org.xwiki.rendering.syntax.Syntax;
 
 /**
  * Extends the default XHTML renderer to add handling of annotations.<br />
- * FIXME: FTM don't consider offsets, just to see how it works with bookmarks.
  * 
  * @version $Id$
  */
 public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer implements AnnotationChainingPrintRenderer
 {
-    /**
-     * The annotation marker element in HTML.
-     */
-    private static final String ANNOTATION_MARKER = "span";
-
     /**
      * The bookmarks of the annotations to render on this content.
      */
@@ -66,18 +59,9 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     private Map<EventType, Integer> eventsCount = new HashMap<EventType, Integer>();
 
     /**
-     * Flag to signal if the annotations in the openAnnotations stack are actually opened in the printed XHTML. Namely
-     * this will become true when a text event will occur (like a word or space or ...) and will become false when and
-     * end event will occur.
+     * The annotations XHTML markers printer, used to handle annotations markers rendering and nesting.
      */
-    private boolean open;
-
-    /**
-     * The current opened annotations but not closed (i.e. for which beginAnnotation was signaled but not
-     * endAnnotation). Used for correctly nesting the annotations markers with other XHTML elements. <br />
-     * TODO: find a better name, which would mean "all annotations which are currently being rendered"
-     */
-    private List<Annotation> openAnnotations = new LinkedList<Annotation>();
+    private AnnotationMarkersXHTMLPrinter annotationsMarkerPrinter;
 
     /**
      * Constructor from super class.
@@ -93,103 +77,25 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     }
 
     /**
-     * Handles the beginning of a new annotation.
+     * @return the annotations printer for this print renderer, used to handle annotations markers rendering and nesting
+     */
+    public AnnotationMarkersXHTMLPrinter getAnnotationsMarkerPrinter()
+    {
+        if (annotationsMarkerPrinter == null) {
+            annotationsMarkerPrinter = new AnnotationMarkersXHTMLPrinter(getPrinter());
+        }
+        return annotationsMarkerPrinter;
+    }
+
+    /**
+     * {@inheritDoc}
      * 
-     * @param annotation the annotation that begins
+     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#getXHTMLWikiPrinter()
      */
-    public void beginAnnotation(Annotation annotation)
+    @Override
+    protected XHTMLWikiPrinter getXHTMLWikiPrinter()
     {
-        // and put it in the stack of open annotations
-        openAnnotations.add(annotation);
-        // if all other annotations are opened, open this one too. Otherwise it will be opened whenever all the others
-        // are opened.
-        if (open) {
-            printAnnotationStartMarker(annotation);
-        }
-    }
-
-    /**
-     * Handles the end of an annotation.
-     * 
-     * @param annotation the annotation that ends
-     */
-    public void endAnnotation(Annotation annotation)
-    {
-        // all annotations which are opened after this one must be closed before this close and reopened after
-        int annIndex = openAnnotations.indexOf(annotation);
-        // close all annotations opened after this one, in reverse order
-        for (int i = openAnnotations.size() - 1; i > annIndex; i--) {
-            printAnnotationEndMarker(openAnnotations.get(i));
-        }
-        // close this annotation
-        printAnnotationEndMarker(annotation);
-        // open all previously closed annotations in the order they were initially opened
-        for (int i = annIndex + 1; i < openAnnotations.size(); i++) {
-            printAnnotationStartMarker(openAnnotations.get(i));
-        }
-        // and remove it from the list of open annotations
-        openAnnotations.remove(annotation);
-    }
-
-    /**
-     * Prints the start marker for the passed annotation.
-     * 
-     * @param annotation the annotation to print the start marker for
-     */
-    private void printAnnotationStartMarker(Annotation annotation)
-    {
-        Map<String, String> attributes = new LinkedHashMap<String, String>();
-
-        attributes.put("class", "annotation ID" + annotation.getId());
-        attributes.put("title", annotation.getAnnotation().toString());
-        getXHTMLWikiPrinter().printXMLStartElement(ANNOTATION_MARKER, attributes);
-    }
-
-    /**
-     * Prints the end marker for the passed annotation.
-     * 
-     * @param annotation the annotation to print end marker for
-     */
-    private void printAnnotationEndMarker(Annotation annotation)
-    {
-        getXHTMLWikiPrinter().printXMLEndElement(ANNOTATION_MARKER);
-    }
-
-    /**
-     * Helper function to handle closing all annotations. To be called either when elements close or when an element
-     * opens (all annotation spans will only wrap text, not inner elements). It will close all opened annotations
-     * markers and set the flag to specify that annotations are closed and they should be opened at next text element.
-     */
-    private void closeAllAnnotations()
-    {
-        // if the annotations are opened
-        if (open) {
-            // for each annotation from the last opened to the first opened
-            for (int i = openAnnotations.size() - 1; i >= 0; i--) {
-                // close it
-                printAnnotationEndMarker(openAnnotations.get(i));
-            }
-            // set the flag so that next end event doesn't close them as well
-            open = false;
-        }
-    }
-
-    /**
-     * Helper function to handle opening all annotations. If the annotations are not already opened, it should open them
-     * all and set the flag to opened so that next text event doesn't do the same.
-     */
-    private void openAllAnnotations()
-    {
-        // if annotations are not opened
-        if (!open) {
-            // for each annotation in the order in which they were opened
-            for (int i = 0; i < openAnnotations.size(); i++) {
-                // re-open it
-                printAnnotationStartMarker(openAnnotations.get(i));
-            }
-            // and mark the annotations as opened
-            open = true;
-        }
+        return this.getAnnotationsMarkerPrinter();
     }
 
     /**
@@ -200,59 +106,15 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void onWord(String word)
     {
-        // if there is a begin annotation bookmark in this event (regardless of the offset ftm, call begin annotation
-        // for all of them)
+        // open all annotation markers which are closed and need to be opened
+        getAnnotationsMarkerPrinter().openAllAnnotationMarkers();
         // build an event that would allow to search in the bookmarks
         EventReference currentEvt = new EventReference(EventType.ON_WORD, getAndIncrement(EventType.ON_WORD));
-        // and go, for all events which are start events, begin them before
-        beginAllAnnotations(currentEvt);
-        openAllAnnotations();
-        super.onWord(word);
-        // for all the events which are end events, end them after
-        endAllAnnotations(currentEvt);
-    }
-
-    /**
-     * Helper function to begin all the annotations that start in the passed event, regardless of the offset. <br />
-     * FIXME: start annotations at the right offsets and remove this function
-     * 
-     * @param currentEvent the event to begin all annotations for
-     */
-    private void beginAllAnnotations(EventReference currentEvent)
-    {
-        if (bookmarks.get(currentEvent) == null) {
-            // nothing to do if there is no bookmark on this event
-            return;
-        }
-
-        for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : bookmarks.get(currentEvent).entrySet()) {
-            for (AnnotationEvent annEvt : bookmark.getValue()) {
-                if (annEvt.getType() == AnnotationEventType.START) {
-                    beginAnnotation(annEvt.getAnnotation());
-                }
-            }
-        }
-    }
-
-    /**
-     * Helper function to end all the annotations that end in the passed event, regardless of the offset. <br />
-     * FIXME: start annotations at the right offsets and remove this function
-     * 
-     * @param currentEvent the event end all annotations for
-     */
-    private void endAllAnnotations(EventReference currentEvent)
-    {
-        if (bookmarks.get(currentEvent) == null) {
-            // nothing to do if there is no bookmark on this event
-            return;
-        }
-
-        for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : bookmarks.get(currentEvent).entrySet()) {
-            for (AnnotationEvent annEvt : bookmark.getValue()) {
-                if (annEvt.getType() == AnnotationEventType.END) {
-                    endAnnotation(annEvt.getAnnotation());
-                }
-            }
+        SortedMap<Integer, List<AnnotationEvent>> annEvts = bookmarks.get(currentEvt);
+        if (annEvts != null && !annEvts.isEmpty()) {
+            getAnnotationsMarkerPrinter().printXMLWithAnnotations(word, annEvts);
+        } else {
+            getXHTMLWikiPrinter().printXML(word);
         }
     }
 
@@ -264,7 +126,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void onSpace()
     {
-        openAllAnnotations();
+        getAnnotationsMarkerPrinter().openAllAnnotationMarkers();
         super.onSpace();
     }
 
@@ -276,14 +138,17 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void onSpecialSymbol(char symbol)
     {
+        // open all annotation markers which are closed and need to be opened
+        getAnnotationsMarkerPrinter().openAllAnnotationMarkers();
+        // build an event that would allow to search in the bookmarks
         EventReference currentEvt =
             new EventReference(EventType.ON_SPECIAL_SYMBOL, getAndIncrement(EventType.ON_SPECIAL_SYMBOL));
-        beginAllAnnotations(currentEvt);
-
-        openAllAnnotations();
-        super.onSpecialSymbol(symbol);
-
-        endAllAnnotations(currentEvt);
+        SortedMap<Integer, List<AnnotationEvent>> annEvts = bookmarks.get(currentEvt);
+        if (annEvts != null && !annEvts.isEmpty()) {
+            getAnnotationsMarkerPrinter().printXMLWithAnnotations("" + symbol, annEvts);
+        } else {
+            getXHTMLWikiPrinter().printXML("" + symbol);
+        }
     }
 
     /**
@@ -294,15 +159,33 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void onVerbatim(String protectedString, boolean isInline, Map<String, String> parameters)
     {
-        // FIXME: need to handle the dirty case when verbatim block is block, in which case adding a span around it is
-        // not such a good idea
         EventReference currentEvt = new EventReference(EventType.ON_VERBATIM, getAndIncrement(EventType.ON_VERBATIM));
-        beginAllAnnotations(currentEvt);
-
-        openAllAnnotations();
-        super.onVerbatim(protectedString, isInline, parameters);
-
-        endAllAnnotations(currentEvt);
+        SortedMap<Integer, List<AnnotationEvent>> annEvts = bookmarks.get(currentEvt);
+        if (isInline) {
+            String ttEltName = "tt";
+            getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
+            getXHTMLWikiPrinter().printXMLStartElement(ttEltName, new String[][] {{"class", "wikimodel-verbatim"}});
+            getAnnotationsMarkerPrinter().openAllAnnotationMarkers();
+            if (annEvts != null && annEvts.size() > 0) {
+                getAnnotationsMarkerPrinter().printXMLWithAnnotations(protectedString, annEvts);
+            } else {
+                getXHTMLWikiPrinter().printXML(protectedString);
+            }
+            getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
+            getXHTMLWikiPrinter().printXMLEndElement(ttEltName);
+        } else {
+            String preEltName = "pre";
+            getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
+            getXHTMLWikiPrinter().printXMLStartElement(preEltName, parameters);
+            getAnnotationsMarkerPrinter().openAllAnnotationMarkers();
+            if (annEvts != null && annEvts.size() > 0) {
+                getAnnotationsMarkerPrinter().printXMLWithAnnotations(protectedString, annEvts);
+            } else {
+                getXHTMLWikiPrinter().printXML(protectedString);
+            }
+            getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
+            getXHTMLWikiPrinter().printXMLEndElement(preEltName);
+        }
     }
 
     /**
@@ -315,14 +198,32 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     {
         // FIXME: this is going to be messy, messy because of the raw block syntax which can be HTML and produce very
         // invalid html.
-        EventReference currentEvt = new EventReference(EventType.ON_RAW_TEXT, getAndIncrement(EventType.ON_RAW_TEXT));
-        beginAllAnnotations(currentEvt);
 
-        openAllAnnotations();
+        EventReference currentEvt = new EventReference(EventType.ON_RAW_TEXT, getAndIncrement(EventType.ON_RAW_TEXT));
+        SortedMap<Integer, List<AnnotationEvent>> currentBookmarks = bookmarks.get(currentEvt);
+
+        // open all annotations that start in this event
+        for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : currentBookmarks.entrySet()) {
+            for (AnnotationEvent annEvt : bookmark.getValue()) {
+                if (annEvt.getType() == AnnotationEventType.START) {
+                    getAnnotationsMarkerPrinter().beginAnnotation(annEvt.getAnnotation());
+                }
+            }
+        }
+
+        // open all annotation markers in case there was any annotation enclosing this block
+        getAnnotationsMarkerPrinter().openAllAnnotationMarkers();
         // Store the raw text as it is ftm. Should handle syntax in the future
         super.onRawText(text, syntax);
 
-        endAllAnnotations(currentEvt);
+        // close all annotations that start in this event.
+        for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : currentBookmarks.entrySet()) {
+            for (AnnotationEvent annEvt : bookmark.getValue()) {
+                if (annEvt.getType() == AnnotationEventType.END) {
+                    getAnnotationsMarkerPrinter().endAnnotation(annEvt.getAnnotation());
+                }
+            }
+        }
     }
 
     /**
@@ -334,7 +235,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endLink(link, isFreeStandingURI, parameters);
     }
 
@@ -346,7 +247,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endDefinitionDescription()
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endDefinitionDescription();
     }
 
@@ -358,7 +259,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endDefinitionList(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endDefinitionList(parameters);
     }
 
@@ -370,7 +271,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endDefinitionTerm()
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endDefinitionTerm();
     }
 
@@ -382,20 +283,20 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endDocument(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endDocument(parameters);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#endFormat(org.xwiki.rendering.listener.Format,
-     *      java.util.Map)
+     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer
+     *      #endFormat(org.xwiki.rendering.listener.Format, java.util.Map)
      */
     @Override
     public void endFormat(Format format, Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endFormat(format, parameters);
     }
 
@@ -407,33 +308,33 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endGroup(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endGroup(parameters);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#endHeader(org.xwiki.rendering.listener.HeaderLevel,
-     *      java.lang.String, java.util.Map)
+     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer
+     *      #endHeader(org.xwiki.rendering.listener.HeaderLevel, java.lang.String, java.util.Map)
      */
     @Override
     public void endHeader(HeaderLevel level, String id, Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endHeader(level, id, parameters);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#endList(org.xwiki.rendering.listener.ListType,
-     *      java.util.Map)
+     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer
+     *      #endList(org.xwiki.rendering.listener.ListType, java.util.Map)
      */
     @Override
     public void endList(ListType listType, Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endList(listType, parameters);
     }
 
@@ -445,7 +346,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endListItem()
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endListItem();
     }
 
@@ -457,7 +358,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endParagraph(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endParagraph(parameters);
     }
 
@@ -469,7 +370,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endQuotation(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endQuotation(parameters);
     }
 
@@ -481,7 +382,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endQuotationLine()
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endQuotationLine();
     }
 
@@ -493,7 +394,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endSection(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endSection(parameters);
     }
 
@@ -505,7 +406,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endTable(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endTable(parameters);
     }
 
@@ -517,7 +418,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endTableCell(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endTableCell(parameters);
     }
 
@@ -529,7 +430,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endTableHeadCell(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endTableHeadCell(parameters);
     }
 
@@ -541,7 +442,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void endTableRow(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.endTableRow(parameters);
     }
 
@@ -553,7 +454,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginDefinitionDescription()
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginDefinitionDescription();
     }
 
@@ -565,7 +466,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginDefinitionList(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginDefinitionList(parameters);
     }
 
@@ -577,20 +478,20 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginDefinitionTerm()
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginDefinitionTerm();
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#beginFormat(org.xwiki.rendering.listener.Format,
-     *      java.util.Map)
+     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer
+     *      #beginFormat(org.xwiki.rendering.listener.Format, java.util.Map)
      */
     @Override
     public void beginFormat(Format format, Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginFormat(format, parameters);
     }
 
@@ -602,46 +503,46 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginGroup(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginGroup(parameters);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#beginHeader(org.xwiki.rendering.listener.HeaderLevel,
-     *      java.lang.String, java.util.Map)
+     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer
+     *      #beginHeader(org.xwiki.rendering.listener.HeaderLevel, java.lang.String, java.util.Map)
      */
     @Override
     public void beginHeader(HeaderLevel level, String id, Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginHeader(level, id, parameters);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#beginLink(org.xwiki.rendering.listener.Link,
-     *      boolean, java.util.Map)
+     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer
+     *      #beginLink(org.xwiki.rendering.listener.Link, boolean, java.util.Map)
      */
     @Override
     public void beginLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginLink(link, isFreeStandingURI, parameters);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer#beginList(org.xwiki.rendering.listener.ListType,
-     *      java.util.Map)
+     * @see org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer
+     *      #beginList(org.xwiki.rendering.listener.ListType, java.util.Map)
      */
     @Override
     public void beginList(ListType listType, Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginList(listType, parameters);
     }
 
@@ -653,7 +554,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginListItem()
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginListItem();
     }
 
@@ -665,7 +566,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginParagraph(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginParagraph(parameters);
     }
 
@@ -677,7 +578,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginQuotation(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginQuotation(parameters);
     }
 
@@ -689,7 +590,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginQuotationLine()
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginQuotationLine();
     }
 
@@ -701,7 +602,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginSection(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginSection(parameters);
     }
 
@@ -713,7 +614,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginTable(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginTable(parameters);
     }
 
@@ -725,7 +626,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginTableCell(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginTableCell(parameters);
     }
 
@@ -737,7 +638,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginTableHeadCell(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginTableHeadCell(parameters);
     }
 
@@ -749,7 +650,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void beginTableRow(Map<String, String> parameters)
     {
-        closeAllAnnotations();
+        getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginTableRow(parameters);
     }
 

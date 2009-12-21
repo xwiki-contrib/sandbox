@@ -22,9 +22,7 @@ package org.xwiki.annotation.internal.renderer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -255,19 +253,16 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
                 // compute annotation index in the plain text repr
                 int annotationIndex = contextIndex + selectionIndexInContext;
                 // get the start and end events for the annotation
-                Map.Entry<Integer, EventReference> startEvt = getEventForIndex(annotationIndex);
-                Map.Entry<Integer, EventReference> endEvt =
-                    getEventForIndex(annotationIndex + alteredSelection.length() - 1);
+                // annotation starts before char at annotationIndex and ends after char at annotationIndex +
+                // alteredSelection.length() - 1
+                Object[] startEvt = getEventAndOffset(annotationIndex, false);
+                Object[] endEvt = getEventAndOffset(annotationIndex + alteredSelection.length() - 1, true);
                 if (startEvt != null & endEvt != null) {
-                    // compute the start event offset
-                    int startOffset = getOffset(startEvt.getValue(), startEvt.getKey(), annotationIndex);
-                    int endOffset =
-                        getOffset(endEvt.getValue(), endEvt.getKey(), annotationIndex + alteredSelection.length() - 1);
                     // store the bookmarks
-                    bookmarks.addBookmark(startEvt.getValue(), new AnnotationEvent(AnnotationEventType.START, ann),
-                        startOffset);
-                    bookmarks.addBookmark(endEvt.getValue(), new AnnotationEvent(AnnotationEventType.END, ann),
-                        endOffset);
+                    bookmarks.addBookmark((EventReference) startEvt[0], new AnnotationEvent(AnnotationEventType.START,
+                        ann), (Integer) startEvt[1]);
+                    bookmarks.addBookmark((EventReference) endEvt[0],
+                        new AnnotationEvent(AnnotationEventType.END, ann), (Integer) endEvt[1]);
                 } else {
                     // cannot find the events for the start and / or end of annotation, ignore it
                     // TODO: mark it somehow...
@@ -283,52 +278,47 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
     }
 
     /**
-     * Finds and returns the event in whose range (generated text in the plainTextRepresentation) the passed index is
-     * falling.
+     * Helper function to get the event where the passed index falls in, based on the isEnd setting to know if the
+     * offset should be given before the character at the index position or after it.
      * 
-     * @param index the index to find event for
-     * @return the pair of startIndex, Event in whose range index falls
+     * @param index the index to get the event for
+     * @param isEnd {@code true} if the index should be considered as an end index, {@code false} otherwise
+     * @return an array of objects to hold the event reference, on the first position, and the offset inside this event
+     *         on the second
      */
-    private Map.Entry<Integer, EventReference> getEventForIndex(int index)
+    private Object[] getEventAndOffset(int index, boolean isEnd)
     {
-        // iterate through all the mappings, for start index and event
-        Iterator<Map.Entry<Integer, EventReference>> rangeIt = eventsMapping.entrySet().iterator();
-        Map.Entry<Integer, EventReference> range = rangeIt.next();
-        while (rangeIt.hasNext() && range.getKey() < index) {
-            // while there is a next event and the index to find is after behind the end position, try the next range
-            range = rangeIt.next();
-        }
-        return range;
-    }
+        Map.Entry<Integer, EventReference> previous = null;
+        for (Map.Entry<Integer, EventReference> range : eventsMapping.entrySet()) {
+            // <= because end index is included
+            // if we have reached the first point where the end index is to the left of the index, it means we're in the
+            // first event that contains the index
+            if (index <= range.getKey()) {
+                // get this event
+                EventReference evt = range.getValue();
+                // compute the start index wrt to the end index of the previous event
+                int startIndex = 0;
+                if (previous != null) {
+                    startIndex = previous.getKey() + 1;
+                }
+                // compute the offset inside this event wrt the start index of this event and whether this is a left
+                // bound or right bound search
+                int offset = isEnd ? index - startIndex + 1 : index - startIndex;
 
-    /**
-     * Returns the offset of the index inside the passed rendering event, ending at the specified index in the plain
-     * text representation.
-     * 
-     * @param evt the rendering event in which the index needs to be mapped
-     * @param eventEndIndex the end index of the event
-     * @param index the index to map to an offset inside the passed event
-     * @return the offset of the index with respect to the event {@code evt}
-     */
-    private int getOffset(EventReference evt, int eventEndIndex, int index)
-    {
-        // get the previous end index in the events mapping map
-        // FIXME: this is an issue, creating so many submaps that big might be problematic
-        int previousIndex = -1;
-        try {
-            previousIndex = eventsMapping.subMap(0, index).lastKey();
-        } catch (NoSuchElementException e) {
-            // nothing, stay -1
+                // adjust this offset the content of this event was altered
+                AlteredContent alteredEventContent = alteredEventsContent.get(evt);
+                if (alteredEventContent != null) {
+                    offset = alteredEventContent.getInitialOffset(offset);
+                }
+
+                // return the result
+                return new Object[] {evt, offset};
+            }
+            // else advance one more step, storing the previous event
+            previous = range;
         }
-        // compute the difference previousIndex + 1 is the start index of the current event
-        int offset = index - (previousIndex + 1);
-        // check if the content of this event is altered
-        AlteredContent alteredContent = alteredEventsContent.get(evt);
-        if (alteredContent != null) {
-            // get the original offset of the computed offset
-            offset = alteredContent.getInitialOffset(offset);
-        }
-        return offset;
+        // nothing was found, return null. However this shouldn't happen :)
+        return null;
     }
 
     /**
