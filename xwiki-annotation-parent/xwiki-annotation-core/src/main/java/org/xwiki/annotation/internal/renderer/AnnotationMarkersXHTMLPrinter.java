@@ -35,7 +35,7 @@ import org.xwiki.rendering.renderer.printer.XHTMLWikiPrinter;
  * start marker and end marker and to store information about the annotations state: which ones are being currently
  * rendered, which markers are opened, etc. To be used by the XHTML renderers to render annotations on the XHTML. <br />
  * Note that, although this class could aggregate a XHTMLWikiPrinter, and be used to wrap the default XHTMLWikiPrinter
- * in a XHTML Renderer, it extends it so that it can replace. TODO: in a future improved implementation, this should
+ * in a XHTML Renderer, it extends it so that it can replace. TODO: in a future improved implementation, this could
  * handle annotations rendering alone, just using state information from the renderer.
  * 
  * @version $Id$

@@ -22,6 +22,8 @@ package org.xwiki.annotation.internal.renderer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -29,44 +31,28 @@ import java.util.TreeMap;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.content.AlteredContent;
 import org.xwiki.annotation.content.ContentAlterer;
-import org.xwiki.annotation.renderer.AnnotationBookmarks;
 import org.xwiki.annotation.renderer.AnnotationEvent;
-import org.xwiki.annotation.renderer.AnnotationGeneratorListener;
-import org.xwiki.annotation.renderer.EventReference;
 import org.xwiki.annotation.renderer.AnnotationEvent.AnnotationEventType;
-import org.xwiki.rendering.internal.renderer.BasicLinkRenderer;
+import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.listener.QueueListener;
 import org.xwiki.rendering.listener.chaining.ChainingListener;
-import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
-import org.xwiki.rendering.renderer.LinkLabelGenerator;
 import org.xwiki.rendering.syntax.Syntax;
 
 /**
- * Chaining default implementation of the {@link AnnotationGeneratorListener}. It operates by buffering all events,
- * creating the plain text representation of the listened content, mapping the annotations on this content and
- * identifying the events in the stream that hold the start and end of the annotations.
+ * Chaining listener that maps the annotations on the events that it receives, holds the state of annotations on these
+ * events and exposes it to the subsequent listeners in the chain through {@link #getAnnotationEvents()}. It operates by
+ * buffering all events, creating the plain text representation of the listened content, mapping the annotations on this
+ * content and identifying the events in the stream that hold the start and end of the annotations.
  * 
  * @version $Id$
  */
-public class AnnotationGeneratorChainingListener extends QueueListener implements ChainingListener,
-    AnnotationGeneratorListener
+public class AnnotationGeneratorChainingListener extends QueueListener implements ChainingListener
 {
     /**
      * Version number of this class.
      */
     private static final long serialVersionUID = -2790330640900288463L;
-
-    /**
-     * To generate a string representation of a link that we output when no link label generator exist or when the link
-     * is an external link (ie not a document link).
-     */
-    private BasicLinkRenderer linkRenderer = new BasicLinkRenderer();
-
-    /**
-     * Generate link label.
-     */
-    private LinkLabelGenerator linkLabelGenerator;
 
     /**
      * The chain listener from which this listener is part of.
@@ -82,18 +68,13 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
      * Map to store the ranges in the plainTextContent and their corresponding events. The ranges will be stored by
      * their end index (inclusive) and ordered from smallest to biggest.
      */
-    private SortedMap<Integer, EventReference> eventsMapping = new TreeMap<Integer, EventReference>();
+    private SortedMap<Integer, Event> eventsMapping = new TreeMap<Integer, Event>();
 
     /**
      * Map to store the events whose content has been altered upon append to the plain text representation, along with
      * the altered content objects to allow translation of offsets back to the original offsets.
      */
-    private Map<EventReference, AlteredContent> alteredEventsContent = new HashMap<EventReference, AlteredContent>();
-
-    /**
-     * Map to store the events count to be able to identify an event in the emitted events.
-     */
-    private Map<EventType, Integer> eventsCount = new HashMap<EventType, Integer>();
+    private Map<Event, AlteredContent> alteredEventsContent = new HashMap<Event, AlteredContent>();
 
     /**
      * The collection of annotations to generate annotation events for, by default the empty list.
@@ -106,43 +87,22 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
     private ContentAlterer selectionAlterer;
 
     /**
-     * The list of generated annotation bookmarks by this mapper.
+     * The list of bookmarks where annotation events take place. The map holds a correspondence between the event in the
+     * stream of wiki events and the annotation events that take place inside it, at the specified offset.
      */
-    private AnnotationBookmarks bookmarks = new AnnotationBookmarks();
+    private Map<Event, SortedMap<Integer, List<AnnotationEvent>>> bookmarks =
+        new HashMap<Event, SortedMap<Integer, List<AnnotationEvent>>>();
 
     /**
      * Builds an annotation generator listener from the passed link generator in the passed chain.
      * 
-     * @param linkLabelGenerator the generator for link labels so that the annotation text can be recognized.
      * @param selectionAlterer cleaner for the annotation selection text, so that it can be mapped on the content
      * @param listenerChain the chain in which this listener is part of
      */
-    public AnnotationGeneratorChainingListener(LinkLabelGenerator linkLabelGenerator, ContentAlterer selectionAlterer,
-        ListenerChain listenerChain)
+    public AnnotationGeneratorChainingListener(ContentAlterer selectionAlterer, ListenerChain listenerChain)
     {
-        this.linkLabelGenerator = linkLabelGenerator;
         this.chain = listenerChain;
         this.selectionAlterer = selectionAlterer;
-    }
-
-    /**
-     * Builds an annotation generator listener from the passed link generator in the passed chain. Also, this
-     * constructor takes the bookmarks to fill in as a parameter so that the same object can be used to be filled by
-     * this generator and read by an {@link org.xwiki.annotation.renderer.AnnotationRenderer} further in the chain.
-     * Normally the bookmarks should be passed by this generator to the next listener in the chain, but we want to allow
-     * the {@link org.xwiki.annotation.renderer.AnnotationRenderer} to be placed further in the chain, not immediately
-     * after.
-     * 
-     * @param linkLabelGenerator the generator for link labels so that the annotation text can be recognized.
-     * @param selectionAlterer cleaner for the annotation selection text, so that it can be mapped on the content
-     * @param bookmarks the bookmarks to be filled by this generator
-     * @param listenerChain the chain in which this listener is part of
-     */
-    public AnnotationGeneratorChainingListener(LinkLabelGenerator linkLabelGenerator, ContentAlterer selectionAlterer,
-        AnnotationBookmarks bookmarks, ListenerChain listenerChain)
-    {
-        this(linkLabelGenerator, selectionAlterer, listenerChain);
-        this.bookmarks = bookmarks;
     }
 
     /**
@@ -158,8 +118,7 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
         // put it in the buffer
         plainTextContent.append(word);
         // store the mapping of the range to the just added event
-        eventsMapping.put(plainTextContent.length() - 1, new EventReference(getLast().eventType,
-            getAndIncrement(EventType.ON_WORD)));
+        eventsMapping.put(plainTextContent.length() - 1, getLast());
     }
 
     /**
@@ -172,8 +131,7 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
     {
         super.onSpecialSymbol(symbol);
         plainTextContent.append("" + symbol);
-        eventsMapping.put(plainTextContent.length() - 1, new EventReference(getLast().eventType,
-            getAndIncrement(EventType.ON_SPECIAL_SYMBOL)));
+        eventsMapping.put(plainTextContent.length() - 1, getLast());
     }
 
     /**
@@ -188,10 +146,9 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
         // normalize the protected string before adding it to the plain text version
         AlteredContent cleanedContent = selectionAlterer.alter(protectedString);
         plainTextContent.append(cleanedContent.getContent().toString());
-        EventReference currentEvt = new EventReference(getLast().eventType, getAndIncrement(EventType.ON_VERBATIM));
-        eventsMapping.put(plainTextContent.length() - 1, currentEvt);
+        eventsMapping.put(plainTextContent.length() - 1, getLast());
         // also store this event in the list of events with altered content
-        alteredEventsContent.put(currentEvt, cleanedContent);
+        alteredEventsContent.put(getLast(), cleanedContent);
     }
 
     /**
@@ -209,10 +166,9 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
         // normalize the protected string before adding it to the plain text version
         AlteredContent cleanedContent = selectionAlterer.alter(text);
         plainTextContent.append(cleanedContent.getContent().toString());
-        EventReference currentEvt = new EventReference(getLast().eventType, getAndIncrement(EventType.ON_RAW_TEXT));
-        eventsMapping.put(plainTextContent.length() - 1, currentEvt);
+        eventsMapping.put(plainTextContent.length() - 1, getLast());
         // also store this event in the list of events with altered content
-        alteredEventsContent.put(currentEvt, cleanedContent);
+        alteredEventsContent.put(getLast(), cleanedContent);
     }
 
     /**
@@ -259,10 +215,10 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
                 Object[] endEvt = getEventAndOffset(annotationIndex + alteredSelection.length() - 1, true);
                 if (startEvt != null & endEvt != null) {
                     // store the bookmarks
-                    bookmarks.addBookmark((EventReference) startEvt[0], new AnnotationEvent(AnnotationEventType.START,
-                        ann), (Integer) startEvt[1]);
-                    bookmarks.addBookmark((EventReference) endEvt[0],
-                        new AnnotationEvent(AnnotationEventType.END, ann), (Integer) endEvt[1]);
+                    addBookmark((Event) startEvt[0], new AnnotationEvent(AnnotationEventType.START, ann),
+                        (Integer) startEvt[1]);
+                    addBookmark((Event) endEvt[0], new AnnotationEvent(AnnotationEventType.END, ann),
+                        (Integer) endEvt[1]);
                 } else {
                     // cannot find the events for the start and / or end of annotation, ignore it
                     // TODO: mark it somehow...
@@ -288,14 +244,14 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
      */
     private Object[] getEventAndOffset(int index, boolean isEnd)
     {
-        Map.Entry<Integer, EventReference> previous = null;
-        for (Map.Entry<Integer, EventReference> range : eventsMapping.entrySet()) {
+        Map.Entry<Integer, Event> previous = null;
+        for (Map.Entry<Integer, Event> range : eventsMapping.entrySet()) {
             // <= because end index is included
             // if we have reached the first point where the end index is to the left of the index, it means we're in the
             // first event that contains the index
             if (index <= range.getKey()) {
                 // get this event
-                EventReference evt = range.getValue();
+                Event evt = range.getValue();
                 // compute the start index wrt to the end index of the previous event
                 int startIndex = 0;
                 if (previous != null) {
@@ -322,20 +278,70 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
     }
 
     /**
-     * Helper function to get the current event count of the specified type, and increment it. Similar to a ++ operation
-     * on the Integer mapped to the passed event type.
+     * Adds an annotation bookmark in this list of bookmarks.
      * 
-     * @param type the event type
-     * @return the current event count for the passed type.
+     * @param renderingEvent the rendering event where the annotation should be bookmarked
+     * @param offset the offset of the annotation event inside this rendering event
+     * @param annotationEvent the annotation event to bookmark
      */
-    private int getAndIncrement(EventType type)
+    protected void addBookmark(Event renderingEvent, AnnotationEvent annotationEvent, int offset)
     {
-        Integer currentCount = eventsCount.get(type);
-        if (currentCount == null) {
-            currentCount = 0;
+        SortedMap<Integer, List<AnnotationEvent>> mappings = bookmarks.get(renderingEvent);
+        if (mappings == null) {
+            mappings = new TreeMap<Integer, List<AnnotationEvent>>();
+            bookmarks.put(renderingEvent, mappings);
         }
-        eventsCount.put(type, currentCount + 1);
-        return currentCount;
+        List<AnnotationEvent> events = mappings.get(offset);
+        if (events == null) {
+            events = new LinkedList<AnnotationEvent>();
+            mappings.put(offset, events);
+        }
+
+        addAnnotationEvent(annotationEvent, events);
+    }
+
+    /**
+     * Helper function to help add an annotation event to the list of events, and keep the restriction that end events
+     * are stored before start events. Otherwise put, for the same offset, annotations end first and open after.
+     * 
+     * @param evt the annotation event to add to the list
+     * @param list the annotation events list to add the event to
+     */
+    protected void addAnnotationEvent(AnnotationEvent evt, List<AnnotationEvent> list)
+    {
+        // if there is no event in the list, or the event is a start event or there is no start event in the list, just
+        // append the event to the end of the list
+        if (list.size() == 0 || evt.getType() == AnnotationEventType.START
+            || list.get(list.size() - 1).getType() == AnnotationEventType.END) {
+            list.add(evt);
+        } else {
+            // find the first start event and add before it
+            int index = 0;
+            for (index = 0; index < list.size() && list.get(index).getType() != AnnotationEventType.START; index++) {
+                // nothing, it will stop at first start event
+            }
+            list.add(index, evt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.rendering.listener.QueueListener#consumeEvents(org.xwiki.rendering.listener.Listener)
+     */
+    @Override
+    public void consumeEvents(Listener listener)
+    {
+        // same function basically, except that we need to leave the event at the top of the queue when firing so that
+        // we can get the correct state
+        while (!isEmpty()) {
+            // peek the queue
+            Event event = getFirst();
+            // fire the event with the event as the top of the queue still so that we can give the correct bookmarks
+            event.eventType.fireEvent(listener, event.eventParameters);
+            // and remove the event so that we can go to next
+            remove();
+        }
     }
 
     /**
@@ -361,10 +367,10 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.renderer.AnnotationGeneratorListener#getAnnotationBookmarks()
+     * @see org.xwiki.annotation.renderer.AnnotationGeneratorListener#getAnnotationEvents()
      */
-    public AnnotationBookmarks getAnnotationBookmarks()
+    public SortedMap<Integer, List<AnnotationEvent>> getAnnotationEvents()
     {
-        return bookmarks;
+        return bookmarks.get(getFirst());
     }
 }

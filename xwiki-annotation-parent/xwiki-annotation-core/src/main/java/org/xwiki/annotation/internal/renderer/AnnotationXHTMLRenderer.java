@@ -20,7 +20,7 @@
 package org.xwiki.annotation.internal.renderer;
 
 import org.xwiki.annotation.renderer.AbstractAnnotationRenderer;
-import org.xwiki.annotation.renderer.AnnotationChainingPrintRenderer;
+import org.xwiki.annotation.renderer.ChainingPrintRenderer;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
@@ -69,7 +69,7 @@ public class AnnotationXHTMLRenderer extends AbstractAnnotationRenderer
      * @see org.xwiki.annotation.renderer.AbstractAnnotationRenderer#getAnnotationPrintRenderer(ListenerChain)
      */
     @Override
-    public AnnotationChainingPrintRenderer getAnnotationPrintRenderer(ListenerChain chain)
+    public ChainingPrintRenderer getAnnotationPrintRenderer(ListenerChain chain)
     {
         return new AnnotationXHTMLChainingRenderer(linkRenderer, imageRenderer, chain);
     }

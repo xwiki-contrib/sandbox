@@ -24,10 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.xwiki.annotation.renderer.AnnotationBookmarks;
-import org.xwiki.annotation.renderer.AnnotationChainingPrintRenderer;
 import org.xwiki.annotation.renderer.AnnotationEvent;
-import org.xwiki.annotation.renderer.EventReference;
+import org.xwiki.annotation.renderer.ChainingPrintRenderer;
 import org.xwiki.annotation.renderer.AnnotationEvent.AnnotationEventType;
 import org.xwiki.rendering.internal.renderer.xhtml.XHTMLChainingRenderer;
 import org.xwiki.rendering.listener.Format;
@@ -46,13 +44,8 @@ import org.xwiki.rendering.syntax.Syntax;
  * 
  * @version $Id$
  */
-public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer implements AnnotationChainingPrintRenderer
+public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer implements ChainingPrintRenderer
 {
-    /**
-     * The bookmarks of the annotations to render on this content.
-     */
-    private AnnotationBookmarks bookmarks = new AnnotationBookmarks();
-
     /**
      * Map to store the events count to be able to identify an event in the emitted events.
      */
@@ -99,6 +92,15 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     }
 
     /**
+     * @return the annotation generator listener in this chain, holding the annotations state in the current rendering
+     */
+    protected AnnotationGeneratorChainingListener getAnnotationGenerator()
+    {
+        return (AnnotationGeneratorChainingListener) getListenerChain().getListener(
+            AnnotationGeneratorChainingListener.class);
+    }
+
+    /**
      * {@inheritDoc}
      * 
      * @see org.xwiki.rendering.listener.QueueListener#onWord(java.lang.String)
@@ -108,9 +110,8 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     {
         // open all annotation markers which are closed and need to be opened
         getAnnotationsMarkerPrinter().openAllAnnotationMarkers();
-        // build an event that would allow to search in the bookmarks
-        EventReference currentEvt = new EventReference(EventType.ON_WORD, getAndIncrement(EventType.ON_WORD));
-        SortedMap<Integer, List<AnnotationEvent>> annEvts = bookmarks.get(currentEvt);
+        // get the current annotation events
+        SortedMap<Integer, List<AnnotationEvent>> annEvts = getAnnotationGenerator().getAnnotationEvents();
         if (annEvts != null && !annEvts.isEmpty()) {
             getAnnotationsMarkerPrinter().printXMLWithAnnotations(word, annEvts);
         } else {
@@ -140,10 +141,8 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     {
         // open all annotation markers which are closed and need to be opened
         getAnnotationsMarkerPrinter().openAllAnnotationMarkers();
-        // build an event that would allow to search in the bookmarks
-        EventReference currentEvt =
-            new EventReference(EventType.ON_SPECIAL_SYMBOL, getAndIncrement(EventType.ON_SPECIAL_SYMBOL));
-        SortedMap<Integer, List<AnnotationEvent>> annEvts = bookmarks.get(currentEvt);
+        // get the annotations state at this point
+        SortedMap<Integer, List<AnnotationEvent>> annEvts = getAnnotationGenerator().getAnnotationEvents();
         if (annEvts != null && !annEvts.isEmpty()) {
             getAnnotationsMarkerPrinter().printXMLWithAnnotations("" + symbol, annEvts);
         } else {
@@ -159,8 +158,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     @Override
     public void onVerbatim(String protectedString, boolean isInline, Map<String, String> parameters)
     {
-        EventReference currentEvt = new EventReference(EventType.ON_VERBATIM, getAndIncrement(EventType.ON_VERBATIM));
-        SortedMap<Integer, List<AnnotationEvent>> annEvts = bookmarks.get(currentEvt);
+        SortedMap<Integer, List<AnnotationEvent>> annEvts = getAnnotationGenerator().getAnnotationEvents();
         if (isInline) {
             String ttEltName = "tt";
             getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
@@ -199,8 +197,7 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
         // FIXME: this is going to be messy, messy because of the raw block syntax which can be HTML and produce very
         // invalid html.
 
-        EventReference currentEvt = new EventReference(EventType.ON_RAW_TEXT, getAndIncrement(EventType.ON_RAW_TEXT));
-        SortedMap<Integer, List<AnnotationEvent>> currentBookmarks = bookmarks.get(currentEvt);
+        SortedMap<Integer, List<AnnotationEvent>> currentBookmarks = getAnnotationGenerator().getAnnotationEvents();
 
         // open all annotations that start in this event
         for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : currentBookmarks.entrySet()) {
@@ -652,17 +649,6 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
     {
         getAnnotationsMarkerPrinter().closeAllAnnotationMarkers();
         super.beginTableRow(parameters);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.renderer.AnnotationRenderer
-     *      #setAnnotationsBookmarks(org.xwiki.annotation.renderer.AnnotationBookmarks)
-     */
-    public void setAnnotationBookmarks(AnnotationBookmarks bookmarks)
-    {
-        this.bookmarks = bookmarks;
     }
 
     /**
