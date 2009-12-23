@@ -19,7 +19,7 @@
  *
  */
 
-package com.xpn.xwiki.user.impl.NTLM;
+package com.xwiki.authentication.ntlm;
 
 import com.xpn.xwiki.XWikiContext;
 

@@ -19,7 +19,7 @@
  *
  */
 
-package com.xpn.xwiki.user.impl.NTLM;
+package com.xwiki.authentication.ntlm;
 
 import java.security.Principal;
 import java.util.List;
