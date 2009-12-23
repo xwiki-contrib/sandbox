@@ -52,12 +52,13 @@ import javax.servlet.http.Cookie;
 
 public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 {
-    /** LogFactory <code>LOGGER</code>.*/
-    private static final Log LOGGER = LogFactory.getLog(NTLMAuthServiceImpl.class);
+    /** LogFactory <code>LOGGER</code>. */
+    private static final Log LOG = LogFactory.getLog(NTLMAuthServiceImpl.class);
 
     private NTLMConfig config = null;
 
-    protected String encryptText(String text, XWikiContext context) {
+    protected String encryptText(String text, XWikiContext context)
+    {
         try {
             String secretKey = null;
             secretKey = context.getWiki().Param("xwiki.authentication.encryptionKey");
@@ -70,18 +71,18 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                 byte[] encrypted = cipher.doFinal(text.getBytes());
                 String encoded = Base64.encode(encrypted);
                 return encoded.replaceAll("=", "_");
+            } else {
+                LOG.error("Encryption key not defined");
             }
-            else {
-                LOGGER.error("Encryption key not defined");
-            }
-        } 
-        catch (Exception e) {
-            LOGGER.error("Failed to encrypt text", e);
+        } catch (Exception e) {
+            LOG.error("Failed to encrypt text", e);
         }
+
         return null;
     }
 
-    protected String decryptText(String text, XWikiContext context) {
+    protected String decryptText(String text, XWikiContext context)
+    {
         try {
             String secretKey = null;
             secretKey = context.getWiki().Param("xwiki.authentication.encryptionKey");
@@ -94,19 +95,20 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                 byte[] encrypted = Base64.decode(text.replaceAll("_", "="));
                 String decoded = new String(cipher.doFinal(encrypted));
                 return decoded;
+            } else {
+                LOG.error("Encryption key not defined");
             }
-            else {
-                LOGGER.error("Encryption key not defined");
-            }
-        } 
-        catch (Exception e) {
-            LOGGER.error("Failed to decrypt text", e);
+        } catch (Exception e) {
+            LOG.error("Failed to decrypt text", e);
         }
+
         return null;
     }
 
-    public XWikiUser checkAuth(String a, String b , String c, XWikiContext context) throws XWikiException {
-        LOGGER.debug("checkAuth2");
+    public XWikiUser checkAuth(String a, String b, String c, XWikiContext context) throws XWikiException
+    {
+        LOG.debug("checkAuth2");
+
         return checkAuth(context);
     }
 
@@ -117,37 +119,44 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
     public NTLMConfig getConfig()
     {
-        if (config == null)
-            config = new NTLMConfig();
-        return config;
+        if (this.config == null) {
+            this.config = new NTLMConfig();
+        }
+
+        return this.config;
     }
-    
-    protected Cookie getCookie(String cookieName, XWikiContext context) {
+
+    protected Cookie getCookie(String cookieName, XWikiContext context)
+    {
         Cookie[] cookies = context.getRequest().getCookies();
 
-        if (cookies == null)
+        if (cookies == null) {
             return null;
+        }
 
-        for (Cookie cookie: cookies) {
+        for (Cookie cookie : cookies) {
             if (cookieName.equals(cookie.getName())) {
                 return cookie;
             }
         }
+
         return null;
     }
 
-    public XWikiUser checkAuth(XWikiContext context) throws XWikiException {
+    public XWikiUser checkAuth(XWikiContext context) throws XWikiException
+    {
         Cookie cookie;
 
-        LOGGER.debug("checkAuth");
-        
-        LOGGER.debug("Action: " + context.getAction());
+        LOG.debug("checkAuth");
+
+        LOG.debug("Action: " + context.getAction());
         if (context.getAction().startsWith("logout")) {
             cookie = getCookie("XWIKINTLMAUTHINFO", context);
             if (cookie != null) {
                 cookie.setMaxAge(0);
                 context.getResponse().addCookie(cookie);
             }
+
             return null;
         }
 
@@ -155,14 +164,14 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         Cookie[] cookies = context.getRequest().getCookies();
         if (cookies != null) {
-            for (Cookie c: cookies) {
-                LOGGER.debug("CookieList: " + c.getName() + " => " + c.getValue());
+            for (Cookie c : cookies) {
+                LOG.debug("CookieList: " + c.getName() + " => " + c.getValue());
             }
         }
 
         cookie = getCookie("XWIKINTLMAUTHINFO", context);
         if (cookie != null) {
-            LOGGER.debug("Found Cookie");
+            LOG.debug("Found Cookie");
             String uname = decryptText(cookie.getValue(), context);
             if (uname != null) {
                 principal = new SimplePrincipal(uname);
@@ -171,9 +180,9 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         String msg = context.getRequest().getHeader("Authorization");
         if (msg != null) {
-            LOGGER.debug("Found NTLM Auth Cookie, this could be an IE6 bug (#831167)");
+            LOG.debug("Found NTLM Auth Cookie, this could be an IE6 bug (#831167)");
             if (msg.startsWith("NTLM ")) {
-                LOGGER.debug("Removing principal because of NTLM header");
+                LOG.debug("Removing principal because of NTLM header");
                 principal = null;
             }
         }
@@ -182,101 +191,100 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         if (principal == null) {
             principal = authenticate(null, null, context);
             if (principal == null) {
-                LOGGER.debug("Can't get principal");
+                LOG.debug("Can't get principal");
                 return null;
             }
-            LOGGER.debug("Saving auth cookie");
+
+            LOG.debug("Saving auth cookie");
             String encuname = encryptText(principal.getName(), context);
             Cookie usernameCookie = new Cookie("XWIKINTLMAUTHINFO", encuname);
             usernameCookie.setMaxAge(-1);
             context.getResponse().addCookie(usernameCookie);
         }
 
-        return (new XWikiUser(principal.getName()));
+        return new XWikiUser(principal.getName());
     }
 
-
-    public Principal authenticate(String username, String password, XWikiContext context) throws XWikiException {
+    public Principal authenticate(String username, String password, XWikiContext context) throws XWikiException
+    {
         NtlmPasswordAuthentication ntlm;
         UniAddress dc;
         String domainController = getConfig().getParam("domainController", context);
         String defaultDomain = getConfig().getParam("defaultDomain", context);
 
-        LOGGER.debug("authenticate");
+        LOG.debug("authenticate");
         ntlm = null;
-        if (ntlm == null)
-            {
-                LOGGER.debug("no NTLM attr");
+        if (ntlm == null) {
+            LOG.debug("no NTLM attr");
 
-                String msg = context.getRequest().getHeader("Authorization");
-                try {
-                    if (msg != null && (msg.startsWith("NTLM ") || msg.startsWith("Basic ")))
-                        {
-                            LOGGER.debug("Auth type: " + msg);
-                            LOGGER.debug("domainController: " + domainController);
-                            dc = UniAddress.getByName(domainController, true);
-                            if (msg.startsWith("NTLM ")) {
-                                byte[] challenge = SmbSession.getChallenge(dc);
-                                byte[] src = Base64.decode(msg.substring(5));
-                                if (src[8] == 1) {
-                                    LOGGER.debug("phase 1");
-                                    Type1Message type1 = new Type1Message(src);
-                                    Type2Message type2 = new Type2Message(type1, challenge, null);
-                                    msg = Base64.encode(type2.toByteArray());
-                                    context.getResponse().setHeader("WWW-Authenticate", "NTLM " + msg);
-                                    context.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                                    context.getResponse().flushBuffer();
-                                    return null;
-                                } else if (src[8] == 3) {
-                                    LOGGER.debug("phase 2");
-                                    Type3Message type3 = new Type3Message(src);
-                                    byte[] lmResponse = type3.getLMResponse();
-                                    if (lmResponse == null) lmResponse = new byte[0];
-                                    byte[] ntResponse = type3.getNTResponse();
-                                    if (ntResponse == null) ntResponse = new byte[0];
-                                    ntlm = new NtlmPasswordAuthentication(type3.getDomain(),
-                                                                          type3.getUser(), challenge, lmResponse, ntResponse);
-                                }
-                            }
-                            else {
-                                LOGGER.debug("Basic session");
-                                String auth = new String(Base64.decode(msg.substring(6)),
-                                                         "US-ASCII");
-                                int index = auth.indexOf(':');
-                                String user = (index != -1) ? auth.substring(0, index) : auth;
-                                String pass = (index != -1) ? auth.substring(index + 1) :
-                                    "";
-                                index = user.indexOf('\\');
-                                if (index == -1) index = user.indexOf('/');
-                                String domain = (index != -1) ? user.substring(0, index) : defaultDomain;
-                                user = (index != -1) ? user.substring(index + 1) : user;
-                                ntlm = new NtlmPasswordAuthentication(domain, user, pass);
-                            }
-                            
-                            try {
-                                SmbSession.logon(dc, ntlm);
-                            } catch (SmbAuthException sae) {
-                                LOGGER.debug("Can't logon");
-                                return null;
-                            }
-                        }
-                    else
-                        {
-                            LOGGER.debug("No auth type");
-                            showLogin(context);
+            String msg = context.getRequest().getHeader("Authorization");
+            try {
+                if (msg != null && (msg.startsWith("NTLM ") || msg.startsWith("Basic "))) {
+                    LOG.debug("Auth type: " + msg);
+                    LOG.debug("domainController: " + domainController);
+                    dc = UniAddress.getByName(domainController, true);
+                    if (msg.startsWith("NTLM ")) {
+                        byte[] challenge = SmbSession.getChallenge(dc);
+                        byte[] src = Base64.decode(msg.substring(5));
+                        if (src[8] == 1) {
+                            LOG.debug("phase 1");
+                            Type1Message type1 = new Type1Message(src);
+                            Type2Message type2 = new Type2Message(type1, challenge, null);
+                            msg = Base64.encode(type2.toByteArray());
+                            context.getResponse().setHeader("WWW-Authenticate", "NTLM " + msg);
+                            context.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            context.getResponse().flushBuffer();
+
                             return null;
+                        } else if (src[8] == 3) {
+                            LOG.debug("phase 2");
+                            Type3Message type3 = new Type3Message(src);
+                            byte[] lmResponse = type3.getLMResponse();
+                            if (lmResponse == null)
+                                lmResponse = new byte[0];
+                            byte[] ntResponse = type3.getNTResponse();
+                            if (ntResponse == null)
+                                ntResponse = new byte[0];
+                            ntlm =
+                                    new NtlmPasswordAuthentication(type3.getDomain(), type3.getUser(), challenge,
+                                        lmResponse, ntResponse);
                         }
-                }
-                catch (Exception e) {
-                    LOGGER.debug("Got exception: " + e.getMessage());
-                    e.printStackTrace();
+                    } else {
+                        LOG.debug("Basic session");
+                        String auth = new String(Base64.decode(msg.substring(6)), "US-ASCII");
+                        int index = auth.indexOf(':');
+                        String user = (index != -1) ? auth.substring(0, index) : auth;
+                        String pass = (index != -1) ? auth.substring(index + 1) : "";
+                        index = user.indexOf('\\');
+                        if (index == -1)
+                            index = user.indexOf('/');
+                        String domain = (index != -1) ? user.substring(0, index) : defaultDomain;
+                        user = (index != -1) ? user.substring(index + 1) : user;
+                        ntlm = new NtlmPasswordAuthentication(domain, user, pass);
+                    }
+
+                    try {
+                        SmbSession.logon(dc, ntlm);
+                    } catch (SmbAuthException sae) {
+                        LOG.debug("Can't logon");
+                        
+                        return null;
+                    }
+                } else {
+                    LOG.debug("No auth type");
+                    showLogin(context);
+                    
                     return null;
                 }
+            } catch (Exception e) {
+                LOG.debug("Got exception: ", e);
+
+                return null;
             }
+        }
 
         String ldapUid = ntlm.getUsername();
         String validXWikiUserName = ntlm.getUsername();
-
 
         XWikiLDAPConnection connector = new XWikiLDAPConnection();
         XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector);
@@ -290,18 +298,18 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         if (!connector.open(ldapUid, password, context)) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                                     "Bind to LDAP server failed.");
+                "Bind to LDAP server failed.");
         }
 
         LDAPProfileXClass ldapProfileClass = new LDAPProfileXClass(context);
         XWikiDocument userProfile = getUserProfileByUid(validXWikiUserName, ldapUid, context);
         // get DN from existing XWiki user
         String ldapDn = ldapProfileClass.getDn(userProfile);
-        
-        if (LOGGER.isDebugEnabled() && ldapDn != null) {
-            LOGGER.debug("Found user dn with the user object: " + ldapDn);
+
+        if (LOG.isDebugEnabled() && ldapDn != null) {
+            LOG.debug("Found user dn with the user object: " + ldapDn);
         }
-        
+
         List<XWikiLDAPSearchAttribute> searchAttributes = null;
 
         // if we still don't have a dn, search for it. Also get the attributes, we might need
@@ -332,26 +340,27 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         // from now on we can enter the application
         Principal principal = new SimplePrincipal(context.getDatabase() + ":" + userProfile.getFullName());
 
-        LOGGER.debug("Principal: " + principal.toString());
+        LOG.debug("Principal: " + principal.toString());
 
         // 9. sync groups membership
 
         try {
             syncGroupsMembership(userProfile.getFullName(), ldapDn, isNewUser, ldapUtils, context);
         } catch (XWikiException e) {
-            LOGGER.error("Failed to synchronise user's groups membership", e);
+            LOG.error("Failed to synchronise user's groups membership", e);
         }
 
         return principal;
     }
 
-    public void showLogin(XWikiContext context) throws XWikiException {
+    public void showLogin(XWikiContext context) throws XWikiException
+    {
         String realm = getConfig().getParam("realm", "XWiki NTLM", context);
 
-        LOGGER.debug("showLogin");
+        LOG.debug("showLogin");
         context.getResponse().setHeader("WWW-Authenticate", "NTLM");
         context.getResponse().addHeader("WWW-Authenticate", "Basic realm=\"" + realm + "\"");
-        
+
         context.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 

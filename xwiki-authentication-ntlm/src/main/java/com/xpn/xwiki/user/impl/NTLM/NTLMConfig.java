@@ -23,28 +23,34 @@ package com.xpn.xwiki.user.impl.NTLM;
 
 import com.xpn.xwiki.XWikiContext;
 
-public class NTLMConfig {
-
+public class NTLMConfig
+{
     protected static final String CONF_KEY = "xwiki.authentication.ntlm";
 
-    public String getParam(String name, XWikiContext context) {
+    public String getParam(String name, XWikiContext context)
+    {
         return getParam(name, "", context);
     }
 
-    public String getParam(String name, String def, XWikiContext context) {
+    public String getParam(String name, String def, XWikiContext context)
+    {
         String param = null;
         try {
             param = context.getWiki().getXWikiPreference(name, context);
         } catch (Exception e) {
         }
+
         if (param == null || param.length() == 0) {
             try {
                 param = context.getWiki().Param(CONF_KEY + "." + name);
             } catch (Exception e) {
             }
         }
-        if (param == null)
+
+        if (param == null) {
             return def;
+        }
+
         return param;
     }
 }
