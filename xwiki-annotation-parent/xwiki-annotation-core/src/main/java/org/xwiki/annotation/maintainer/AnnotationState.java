@@ -36,17 +36,4 @@ public enum AnnotationState
      * not be correctly found on the updated document.
      */
     ALTERED;
-
-    /**
-     * @param name of state
-     * @return AnnotationState instance
-     */
-    public static AnnotationState forName(String name)
-    {
-        AnnotationState result = valueOf(name);
-        if (result != null) {
-            return result;
-        }
-        throw new IllegalArgumentException();
-    }
 }

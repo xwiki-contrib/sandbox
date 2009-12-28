@@ -119,7 +119,7 @@ public class DefaultIOService implements IOService
                 }
                 Annotation annotation =
                     new Annotation(it.get("pageID").toString(), it.getStringValue("author"), it.getStringValue("date"),
-                        AnnotationState.forName(it.getStringValue("state")), it.getStringValue("annotation"), it
+                        AnnotationState.valueOf(it.getStringValue("state")), it.getStringValue("annotation"), it
                             .getStringValue("initialSelection"), it.getStringValue("selectionContext"), it
                             .getIntValue("annotationID"), it.getIntValue("offset"), it.getIntValue("length"));
                 result.add(annotation);
