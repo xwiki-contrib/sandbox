@@ -54,9 +54,9 @@ public class DocumentContentService implements IOTargetService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.internal.DefaultIOService#getSource(java.lang.CharSequence)
+     * @see org.xwiki.annotation.io.internal.DefaultIOService#getSource(String)
      */
-    public String getSource(CharSequence documentName) throws IOServiceException
+    public String getSource(String documentName) throws IOServiceException
     {
 
         try {
@@ -88,9 +88,9 @@ public class DocumentContentService implements IOTargetService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.internal.DefaultIOService#getRenderedContent(java.lang.CharSequence, String)
+     * @see org.xwiki.annotation.io.internal.DefaultIOService#getRenderedContent(String, String)
      */
-    public CharSequence getRenderedContent(CharSequence documentName, String context) throws IOServiceException
+    public String getRenderedContent(String documentName, String context) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();

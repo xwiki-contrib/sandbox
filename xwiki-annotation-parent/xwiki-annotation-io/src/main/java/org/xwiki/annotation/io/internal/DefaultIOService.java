@@ -122,9 +122,9 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#addAnnotation(java.lang.CharSequence, org.xwiki.annotation.Annotation)
+     * @see org.xwiki.annotation.io.IOService#addAnnotation(String, org.xwiki.annotation.Annotation)
      */
-    public void addAnnotation(CharSequence documentName, Annotation annotation) throws IOServiceException
+    public void addAnnotation(String documentName, Annotation annotation) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
@@ -151,9 +151,9 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#getAnnotations(java.lang.CharSequence)
+     * @see org.xwiki.annotation.io.IOService#getAnnotations(String)
      */
-    public Collection<Annotation> getAnnotations(CharSequence documentName) throws IOServiceException
+    public Collection<Annotation> getAnnotations(String documentName) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
@@ -185,9 +185,9 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#getSafeAnnotations(java.lang.CharSequence)
+     * @see org.xwiki.annotation.io.IOService#getSafeAnnotations(String)
      */
-    public Collection<Annotation> getSafeAnnotations(CharSequence documentName) throws IOServiceException
+    public Collection<Annotation> getSafeAnnotations(String documentName) throws IOServiceException
     {
         List<Annotation> result = new ArrayList<Annotation>();
         for (Annotation it : getAnnotations(documentName)) {
@@ -201,9 +201,9 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#removeAnnotation(java.lang.CharSequence, java.lang.CharSequence)
+     * @see org.xwiki.annotation.io.IOService#removeAnnotation(String, String)
      */
-    public void removeAnnotation(CharSequence documentName, CharSequence annotationID) throws IOServiceException
+    public void removeAnnotation(String documentName, String annotationID) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
@@ -221,9 +221,9 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#updateAnnotations(java.lang.CharSequence, java.util.Collection)
+     * @see org.xwiki.annotation.io.IOService#updateAnnotations(String, java.util.Collection)
      */
-    public void updateAnnotations(CharSequence documentName, Collection<Annotation> annotations)
+    public void updateAnnotations(String documentName, Collection<Annotation> annotations)
         throws IOServiceException
     {
         try {

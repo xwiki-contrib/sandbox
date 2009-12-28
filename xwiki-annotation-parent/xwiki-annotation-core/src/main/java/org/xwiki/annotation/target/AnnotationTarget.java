@@ -43,13 +43,13 @@ public interface AnnotationTarget
      * @param user the author of the annotation
      * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
      */
-    void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
-        CharSequence documentName, CharSequence user) throws AnnotationServiceException;
+    void addAnnotation(String metadata, String selection, String selectionContext, int offset,
+        String documentName, String user) throws AnnotationServiceException;
 
     /**
      * @param documentName refers document to render
      * @return annotated and rendered document
      * @throws AnnotationServiceException can be thrown if selection resolution fail or if an XWikiException occurred
      */
-    CharSequence getAnnotatedHTML(CharSequence documentName) throws AnnotationServiceException;
+    String getAnnotatedHTML(String documentName) throws AnnotationServiceException;
 }

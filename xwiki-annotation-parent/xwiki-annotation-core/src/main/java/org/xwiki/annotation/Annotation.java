@@ -29,19 +29,19 @@ import org.xwiki.annotation.maintainer.AnnotationState;
  */
 public class Annotation
 {
-    protected final CharSequence page;
+    protected final String page;
 
-    protected final CharSequence author;
+    protected final String author;
 
-    protected final CharSequence date;
+    protected final String displayDate;
 
     protected AnnotationState state;
 
-    protected final CharSequence annotation;
+    protected final String annotation;
 
-    protected final CharSequence initialSelection;
+    protected final String initialSelection;
 
-    protected final CharSequence selectionContext;
+    protected final String selectionContext;
 
     protected final int id;
 
@@ -61,13 +61,12 @@ public class Annotation
      * @param offset the offset of the annotation inside the context
      * @param length the length of the selection of this annotation
      */
-    public Annotation(CharSequence page, CharSequence author, CharSequence date, AnnotationState state,
-        CharSequence annotation, CharSequence initialSelection, CharSequence selectionContext, int id, int offset,
-        int length)
+    public Annotation(String page, String author, String date, AnnotationState state, String annotation,
+        String initialSelection, String selectionContext, int id, int offset, int length)
     {
         this.page = page;
         this.author = author;
-        this.date = date;
+        this.displayDate = date;
         this.state = state;
         this.annotation = annotation;
         this.initialSelection = initialSelection;
@@ -80,7 +79,7 @@ public class Annotation
     /**
      * @return page of annotation.
      */
-    public CharSequence getPage()
+    public String getPage()
     {
         return page;
     }
@@ -88,7 +87,7 @@ public class Annotation
     /**
      * @return author of annotation.
      */
-    public CharSequence getAuthor()
+    public String getAuthor()
     {
         return author;
     }
@@ -96,9 +95,9 @@ public class Annotation
     /**
      * @return date of annotation
      */
-    public CharSequence getDate()
+    public String getDisplayDate()
     {
-        return date;
+        return displayDate;
     }
 
     /**
@@ -120,7 +119,7 @@ public class Annotation
     /**
      * @return annotation content.
      */
-    public CharSequence getAnnotation()
+    public String getAnnotation()
     {
         return annotation;
     }
@@ -128,7 +127,7 @@ public class Annotation
     /**
      * @return initial selection of selection
      */
-    public CharSequence getInitialSelection()
+    public String getInitialSelection()
     {
         return initialSelection;
     }
@@ -136,7 +135,7 @@ public class Annotation
     /**
      * @return selection context of annotation
      */
-    public CharSequence getSelectionContext()
+    public String getSelectionContext()
     {
         return selectionContext;
     }
@@ -188,7 +187,9 @@ public class Annotation
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc} <br />
+     * TODO: fix the implementation of the equals function, it should test id, author, target and selection or smth, not
+     * the offsets since they are totally irrelevant now.
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -211,7 +212,7 @@ public class Annotation
     @Override
     public int hashCode()
     {
-        return (getAnnotation().toString() + getAuthor().toString() + Integer.toString(getOffset()) + Integer
+        return (getAnnotation() + getAuthor() + Integer.toString(getOffset()) + Integer
             .toString(getLength())).hashCode();
     }
 }

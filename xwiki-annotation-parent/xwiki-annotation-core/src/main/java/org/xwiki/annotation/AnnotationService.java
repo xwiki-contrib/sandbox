@@ -44,8 +44,8 @@ public interface AnnotationService
      * @param user the author of the annotation
      * @throws AnnotationServiceException if selection resolution fail or if an XWikiException occurred
      */
-    void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
-        CharSequence documentName, CharSequence user) throws AnnotationServiceException;
+    void addAnnotation(String metadata, String selection, String selectionContext, int offset,
+        String documentName, String user) throws AnnotationServiceException;
 
     /**
      * Returns the HTML of the requested document, along with annotations inserted as {@code span} elements inside it.
@@ -54,7 +54,7 @@ public interface AnnotationService
      * @return rendered and annotated document
      * @throws AnnotationServiceException if anything goes wrong retrieving or rendering the requested document
      */
-    CharSequence getAnnotatedHTML(CharSequence documentName) throws AnnotationServiceException;
+    String getAnnotatedHTML(String documentName) throws AnnotationServiceException;
 
     /**
      * Removes the annotation with the specified ID.
@@ -63,7 +63,7 @@ public interface AnnotationService
      * @param annotationID id of the annotation
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      */
-    void removeAnnotation(CharSequence documentName, CharSequence annotationID) throws AnnotationServiceException;
+    void removeAnnotation(String documentName, String annotationID) throws AnnotationServiceException;
 
     /**
      * Returns all the annotations on the passed document.
@@ -72,7 +72,7 @@ public interface AnnotationService
      * @return all annotations present in the specified document
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      */
-    Collection<Annotation> getAnnotations(CharSequence documentName) throws AnnotationServiceException;
+    Collection<Annotation> getAnnotations(String documentName) throws AnnotationServiceException;
 
     /**
      * Returns all annotations marked as safe, i.e. which are still valid on the document, regardless of the edits the
@@ -83,5 +83,5 @@ public interface AnnotationService
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      * @see {@link org.xwiki.annotation.maintainer.AnnotationState#SAFE}
      */
-    Collection<Annotation> getSafeAnnotations(CharSequence documentName) throws AnnotationServiceException;
+    Collection<Annotation> getSafeAnnotations(String documentName) throws AnnotationServiceException;
 }

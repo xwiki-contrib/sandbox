@@ -55,11 +55,11 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#addAnnotation(java.lang.CharSequence, java.lang.CharSequence,
-     *      java.lang.CharSequence, int, java.lang.CharSequence, java.lang.CharSequence)
+     * @see org.xwiki.annotation.AnnotationService#addAnnotation(String, String,
+     *      String, int, String, String)
      */
-    public void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
-        CharSequence documentName, CharSequence user) throws AnnotationServiceException
+    public void addAnnotation(String metadata, String selection, String selectionContext, int offset,
+        String documentName, String user) throws AnnotationServiceException
     {
         try {
             annotationTarget.addAnnotation(metadata, selection, selectionContext, offset, documentName, user);
@@ -71,9 +71,9 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#getAnnotatedHTML(java.lang.CharSequence)
+     * @see org.xwiki.annotation.AnnotationService#getAnnotatedHTML(String)
      */
-    public CharSequence getAnnotatedHTML(CharSequence documentName)
+    public String getAnnotatedHTML(String documentName)
         throws AnnotationServiceException
     {
         try {
@@ -86,9 +86,9 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#getAnnotations(java.lang.CharSequence)
+     * @see org.xwiki.annotation.AnnotationService#getAnnotations(String)
      */
-    public Collection<Annotation> getAnnotations(CharSequence documentName)
+    public Collection<Annotation> getAnnotations(String documentName)
         throws AnnotationServiceException
     {
         try {
@@ -101,9 +101,9 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#getSafeAnnotations(java.lang.CharSequence)
+     * @see org.xwiki.annotation.AnnotationService#getSafeAnnotations(String)
      */
-    public Collection<Annotation> getSafeAnnotations(CharSequence documentName)
+    public Collection<Annotation> getSafeAnnotations(String documentName)
         throws AnnotationServiceException
     {
         try {
@@ -116,9 +116,9 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#removeAnnotation(java.lang.CharSequence, java.lang.CharSequence)
+     * @see org.xwiki.annotation.AnnotationService#removeAnnotation(String, String)
      */
-    public void removeAnnotation(CharSequence documentName, CharSequence annotationID)
+    public void removeAnnotation(String documentName, String annotationID)
         throws AnnotationServiceException
     {
         try {

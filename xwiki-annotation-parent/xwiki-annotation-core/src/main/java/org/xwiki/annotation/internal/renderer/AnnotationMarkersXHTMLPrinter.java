@@ -121,7 +121,7 @@ public class AnnotationMarkersXHTMLPrinter extends XHTMLWikiPrinter
         Map<String, String> attributes = new LinkedHashMap<String, String>();
 
         attributes.put("class", "annotation ID" + annotation.getId());
-        attributes.put("title", annotation.getAnnotation().toString());
+        attributes.put("title", annotation.getAnnotation());
         printXMLStartElement(ANNOTATION_MARKER, attributes);
     }
 

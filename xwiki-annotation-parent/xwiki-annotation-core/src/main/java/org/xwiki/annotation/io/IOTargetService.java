@@ -36,14 +36,14 @@ public interface IOTargetService
      * @return html content corresponding to given source
      * @throws IOServiceException if any exception occurs when manipulating documents
      */
-    CharSequence getRenderedContent(CharSequence documentName, String source) throws IOServiceException;
+    String getRenderedContent(String documentName, String source) throws IOServiceException;
 
     /**
      * @param documentName concerned document
      * @return source of given document
      * @throws IOServiceException if any exception occurs when manipulating documents
      */
-    String getSource(CharSequence documentName) throws IOServiceException;
+    String getSource(String documentName) throws IOServiceException;
 
     /**
      * @param documentName the name of the document whose source syntax to return

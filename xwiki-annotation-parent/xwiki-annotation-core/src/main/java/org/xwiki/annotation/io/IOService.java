@@ -38,14 +38,14 @@ public interface IOService
      * @return annotations concerning given document
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    Collection<Annotation> getAnnotations(CharSequence documentName) throws IOServiceException;
+    Collection<Annotation> getAnnotations(String documentName) throws IOServiceException;
 
     /**
      * @param documentName the name of the document to get annotations for
      * @return safe annotations of a given document
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    Collection<Annotation> getSafeAnnotations(CharSequence documentName) throws IOServiceException;
+    Collection<Annotation> getSafeAnnotations(String documentName) throws IOServiceException;
 
     /**
      * Add annotation to a given document.
@@ -54,7 +54,7 @@ public interface IOService
      * @param annotation concerned annotation
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void addAnnotation(CharSequence documentName, Annotation annotation) throws IOServiceException;
+    void addAnnotation(String documentName, Annotation annotation) throws IOServiceException;
 
     /**
      * Remove a given annotation.
@@ -63,7 +63,7 @@ public interface IOService
      * @param annotationID concerned annotation
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void removeAnnotation(CharSequence documentName, CharSequence annotationID) throws IOServiceException;
+    void removeAnnotation(String documentName, String annotationID) throws IOServiceException;
 
     /**
      * Update given annotations information in database.
@@ -72,5 +72,5 @@ public interface IOService
      * @param annotations annotations to update
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void updateAnnotations(CharSequence documentName, Collection<Annotation> annotations) throws IOServiceException;
+    void updateAnnotations(String documentName, Collection<Annotation> annotations) throws IOServiceException;
 }

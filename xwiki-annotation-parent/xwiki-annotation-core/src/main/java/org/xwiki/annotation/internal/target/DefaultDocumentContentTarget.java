@@ -70,11 +70,11 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(java.lang.CharSequence, java.lang.CharSequence,
-     *      java.lang.CharSequence, int, java.lang.CharSequence, java.lang.CharSequence)
+     * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(String, String,
+     *      String, int, String, String)
      */
-    public void addAnnotation(CharSequence metadata, CharSequence selection, CharSequence selectionContext, int offset,
-        CharSequence documentName, CharSequence user) throws AnnotationServiceException
+    public void addAnnotation(String metadata, String selection, String selectionContext, int offset,
+        String documentName, String user) throws AnnotationServiceException
     {
         try {
             // nothing. FTM send invalid positions for annotation offset&length since they won't be used
@@ -93,13 +93,13 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.target.AnnotationTarget#getAnnotatedHTML(java.lang.CharSequence)
+     * @see org.xwiki.annotation.target.AnnotationTarget#getAnnotatedHTML(String)
      */
-    public CharSequence getAnnotatedHTML(CharSequence documentName) throws AnnotationServiceException
+    public String getAnnotatedHTML(String documentName) throws AnnotationServiceException
     {
         try {
             String source = documentContentTargetService.getSource(documentName);
-            String sourceSyntaxId = documentContentTargetService.getSourceSyntax(documentName.toString());
+            String sourceSyntaxId = documentContentTargetService.getSourceSyntax(documentName);
 
             Parser parser = componentManager.lookup(Parser.class, sourceSyntaxId);
             XDOM xdom = parser.parse(new StringReader(source));

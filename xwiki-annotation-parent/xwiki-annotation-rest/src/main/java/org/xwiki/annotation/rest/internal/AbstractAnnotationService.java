@@ -65,15 +65,15 @@ public abstract class AbstractAnnotationService extends XWikiResource
         List<Annotation> set = new ArrayList<Annotation>();
         for (org.xwiki.annotation.Annotation xwikiAnnotation : annotations) {
             Annotation annotation = factory.createAnnotation();
-            annotation.setAnnotation(xwikiAnnotation.getAnnotation().toString());
+            annotation.setAnnotation(xwikiAnnotation.getAnnotation());
             annotation.setAnnotationId(xwikiAnnotation.getId());
-            annotation.setAuthor(xwikiAnnotation.getAuthor().toString());
-            annotation.setDate(xwikiAnnotation.getDate().toString());
-            annotation.setInitialSelection(xwikiAnnotation.getInitialSelection().toString());
+            annotation.setAuthor(xwikiAnnotation.getAuthor());
+            annotation.setDate(xwikiAnnotation.getDisplayDate());
+            annotation.setInitialSelection(xwikiAnnotation.getInitialSelection());
             annotation.setLength(xwikiAnnotation.getLength());
             annotation.setOffset(xwikiAnnotation.getOffset());
-            annotation.setPageId(xwikiAnnotation.getPage().toString());
-            annotation.setSelectionContext(xwikiAnnotation.getSelectionContext().toString());
+            annotation.setPageId(xwikiAnnotation.getPage());
+            annotation.setSelectionContext(xwikiAnnotation.getSelectionContext());
             annotation.setState(xwikiAnnotation.getState().toString());
             set.add(annotation);
         }
@@ -143,7 +143,7 @@ public abstract class AbstractAnnotationService extends XWikiResource
             // set the current action on the context
             context.setAction(action);
             context.put(isInRenderingEngineKey, true);
-            result = annotationService.getAnnotatedHTML(docName).toString();
+            result = annotationService.getAnnotatedHTML(docName);
         } finally {
             if (isInRenderingEngine != null) {
                 context.put(isInRenderingEngineKey, isInRenderingEngine);
