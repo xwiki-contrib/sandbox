@@ -94,7 +94,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      * @param documentName is name of document concerned by update
      * @param deprecatedContext the XWiki context used to manipulate XWiki objects
      */
-    protected void maintainDocumentAnnotations(CharSequence documentName, XWikiContext deprecatedContext)
+    protected void maintainDocumentAnnotations(String documentName, XWikiContext deprecatedContext)
     {
         Collection<Annotation> annotations;
         try {
