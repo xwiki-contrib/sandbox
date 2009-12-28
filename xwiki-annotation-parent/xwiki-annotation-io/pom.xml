@@ -49,11 +49,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <excludes>
-            org/xwiki/annotation/io/internal/DefaultIOService.java,
-          </excludes>
-        </configuration>
       </plugin>
     </plugins>
   </build>

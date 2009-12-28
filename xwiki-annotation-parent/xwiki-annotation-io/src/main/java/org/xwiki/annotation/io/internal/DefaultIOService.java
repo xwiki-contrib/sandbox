@@ -51,12 +51,67 @@ public class DefaultIOService implements IOService
     /**
      * The XWiki class of the stored annotation objects.
      */
-    static final String ANNOTATION_CLASS_NAME = "XWiki.AnnotationClass";
+    private static final String ANNOTATION_CLASS_NAME = "XWiki.AnnotationClass";
+
+    /**
+     * The name of the field of the annotation object containing the length of the annotation.
+     */
+    private static final String LENGTH = "length";
+
+    /**
+     * The name of the field of the annotation object containing the offset of the annotation in the source.
+     */
+    private static final String OFFSET = "offset";
+
+    /**
+     * The name of the field of the annotation object containing the id of the annotation.
+     */
+    private static final String ANNOTATION_ID = "annotationID";
+
+    /**
+     * The name of the field of the annotation object containing the length of the annotation.
+     */
+    private static final String DATE = "date";
+
+    /**
+     * The name of the field of the annotation object containing the reference of the content on which the annotation is
+     * added.
+     */
+    private static final String TARGET_ID = "pageID";
+
+    /**
+     * The name of the field of the annotation object containing the author of the annotation.
+     */
+    private static final String AUTHOR = "author";
+
+    /**
+     * The name of the field of the annotation object containing the state of the annotation.
+     * 
+     * @see AnnotationState
+     */
+    private static final String STATE = "state";
+
+    /**
+     * The name of the field of the annotation object containing the text of the annotation, the actual user inserted
+     * text to annotate the selected content.
+     */
+    private static final String ANNOTATION_TEXT = "annotation";
+
+    /**
+     * The name of the field of the annotation object containing the selected text of the annotation.
+     */
+    private static final String SELECTION = "initialSelection";
+
+    /**
+     * The name of the field of the annotation object containing the context of selected text of the annotation, that
+     * makes it unique inside the document.
+     */
+    private static final String CONTEXT = "selectionContext";
 
     /**
      * The date format used to store the annotation date in the XWiki objects.
      */
-    static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
+    private static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
     /**
      * The execution used to get the deprecated XWikiContext.
@@ -72,25 +127,22 @@ public class DefaultIOService implements IOService
     public void addAnnotation(CharSequence documentName, Annotation annotation) throws IOServiceException
     {
         try {
-            XWikiContext deprecatedContext = (XWikiContext) execution.getContext().getProperty("xwikicontext");
+            XWikiContext deprecatedContext = getXWikiContext();
             XWikiDocument document =
                 deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
-            // TODO: why is this synchronized?
-            synchronized (documentName) {
-                int id = document.createNewObject(ANNOTATION_CLASS_NAME, deprecatedContext);
-                BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, id);
-                object.set("length", annotation.getLength(), deprecatedContext);
-                object.set("offset", annotation.getOffset(), deprecatedContext);
-                object.set("annotationID", Integer.valueOf(id), deprecatedContext);
-                object.set("date", new SimpleDateFormat(DATE_FORMAT).format(new Date()), deprecatedContext);
-                object.set("pageID", document.getName(), deprecatedContext);
-                object.set("author", annotation.getAuthor(), deprecatedContext);
-                object.set("state", AnnotationState.SAFE.name(), deprecatedContext);
-                object.set("annotation", annotation.getAnnotation(), deprecatedContext);
-                object.set("initialSelection", annotation.getInitialSelection(), deprecatedContext);
-                object.set("selectionContext", annotation.getSelectionContext(), deprecatedContext);
-                deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
-            }
+            int id = document.createNewObject(ANNOTATION_CLASS_NAME, deprecatedContext);
+            BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, id);
+            object.set(LENGTH, annotation.getLength(), deprecatedContext);
+            object.set(OFFSET, annotation.getOffset(), deprecatedContext);
+            object.set(ANNOTATION_ID, Integer.valueOf(id), deprecatedContext);
+            object.set(DATE, new SimpleDateFormat(DATE_FORMAT).format(new Date()), deprecatedContext);
+            object.set(TARGET_ID, document.getName(), deprecatedContext);
+            object.set(AUTHOR, annotation.getAuthor(), deprecatedContext);
+            object.set(STATE, AnnotationState.SAFE.name(), deprecatedContext);
+            object.set(ANNOTATION_TEXT, annotation.getAnnotation(), deprecatedContext);
+            object.set(SELECTION, annotation.getInitialSelection(), deprecatedContext);
+            object.set(CONTEXT, annotation.getSelectionContext(), deprecatedContext);
+            deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
         } catch (XWikiException e) {
             throw new IOServiceException("An exception message has occurred while saving the annotation", e);
         }
@@ -118,10 +170,10 @@ public class DefaultIOService implements IOService
                     continue;
                 }
                 Annotation annotation =
-                    new Annotation(it.get("pageID").toString(), it.getStringValue("author"), it.getStringValue("date"),
-                        AnnotationState.valueOf(it.getStringValue("state")), it.getStringValue("annotation"), it
-                            .getStringValue("initialSelection"), it.getStringValue("selectionContext"), it
-                            .getIntValue("annotationID"), it.getIntValue("offset"), it.getIntValue("length"));
+                    new Annotation(it.get(TARGET_ID).toString(), it.getStringValue(AUTHOR), it.getStringValue(DATE),
+                        AnnotationState.valueOf(it.getStringValue(STATE)), it.getStringValue(ANNOTATION_TEXT), it
+                            .getStringValue(SELECTION), it.getStringValue(CONTEXT), it.getIntValue(ANNOTATION_ID), it
+                            .getIntValue(OFFSET), it.getIntValue(LENGTH));
                 result.add(annotation);
             }
             return result;
@@ -155,14 +207,10 @@ public class DefaultIOService implements IOService
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
-            // TODO: why is this synchronized?
-            synchronized (documentName) {
-                XWikiDocument document =
-                    deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
-                document.removeObject(document.getObject(ANNOTATION_CLASS_NAME, Integer
-                    .valueOf(annotationID.toString())));
-                deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
-            }
+            XWikiDocument document =
+                deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
+            document.removeObject(document.getObject(ANNOTATION_CLASS_NAME, Integer.valueOf(annotationID.toString())));
+            deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
         } catch (NumberFormatException e) {
             throw new IOServiceException("An exception has occurred while parsing the annotation to remove", e);
         } catch (XWikiException e) {
@@ -180,25 +228,22 @@ public class DefaultIOService implements IOService
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
-            // TODO: this too, why are they synchronized? on the documentName?
-            synchronized (documentName) {
-                XWikiDocument document =
-                    deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
-                for (Annotation it : annotations) {
-                    BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, it.getId());
-                    object.set("length", Integer.valueOf(it.getLength()), deprecatedContext);
-                    object.set("offset", Integer.valueOf(it.getOffset()), deprecatedContext);
-                    object.set("annotationID", Integer.valueOf(it.getId()), deprecatedContext);
-                    object.set("date", new SimpleDateFormat(DATE_FORMAT).format(new Date()), deprecatedContext);
-                    object.set("pageID", document.getName(), deprecatedContext);
-                    object.set("author", it.getAuthor(), deprecatedContext);
-                    object.set("state", it.getState().name(), deprecatedContext);
-                    object.set("annotation", it.getAnnotation(), deprecatedContext);
-                    object.set("initialSelection", it.getInitialSelection(), deprecatedContext);
-                    object.set("selectionContext", it.getSelectionContext(), deprecatedContext);
-                }
-                deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
+            XWikiDocument document =
+                deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
+            for (Annotation it : annotations) {
+                BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, it.getId());
+                object.set(LENGTH, Integer.valueOf(it.getLength()), deprecatedContext);
+                object.set(OFFSET, Integer.valueOf(it.getOffset()), deprecatedContext);
+                object.set(ANNOTATION_ID, Integer.valueOf(it.getId()), deprecatedContext);
+                object.set(DATE, new SimpleDateFormat(DATE_FORMAT).format(new Date()), deprecatedContext);
+                object.set(TARGET_ID, document.getName(), deprecatedContext);
+                object.set(AUTHOR, it.getAuthor(), deprecatedContext);
+                object.set(STATE, it.getState().name(), deprecatedContext);
+                object.set(ANNOTATION_TEXT, it.getAnnotation(), deprecatedContext);
+                object.set(SELECTION, it.getInitialSelection(), deprecatedContext);
+                object.set(CONTEXT, it.getSelectionContext(), deprecatedContext);
             }
+            deprecatedContext.getWiki().saveDocument(document, deprecatedContext);
         } catch (XWikiException e) {
             throw new IOServiceException("An exception has occurred while updating the annotation", e);
         }

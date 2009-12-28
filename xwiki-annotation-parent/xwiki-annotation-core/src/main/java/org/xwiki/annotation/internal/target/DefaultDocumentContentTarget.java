@@ -21,7 +21,6 @@
 package org.xwiki.annotation.internal.target;
 
 import java.io.StringReader;
-import java.util.Date;
 
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationServiceException;
@@ -82,11 +81,9 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
             // create the annotation with this data and send it to the storage service
             // TODO: also think of mapping the annotation on the document at add time and fail it if it's not mappable,
             // for extra security
-            // FIXME: annotation date is not sure to be parsable back because there is no format for it, but it doesn't
-            // matter as ftm it's not used at that level
             Annotation annotation =
-                new Annotation(documentName, user, new Date().toString(), AnnotationState.SAFE, metadata, selection,
-                    selectionContext, 0, -1, -1);
+                new Annotation(documentName, user, null, AnnotationState.SAFE, metadata, selection, selectionContext,
+                    0, -1, -1);
             ioService.addAnnotation(documentName, annotation);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException("An exception occurred when accessing the storage services", e);
