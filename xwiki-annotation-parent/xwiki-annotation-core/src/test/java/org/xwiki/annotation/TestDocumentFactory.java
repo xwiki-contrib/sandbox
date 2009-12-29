@@ -133,6 +133,13 @@ public final class TestDocumentFactory
             // parse the annotation value
             Annotation ann = parseAnnotation(currentValue, docName);
             doc.getSafeAnnotations().add(ann);
+        } else if (currentKey.indexOf(':') > 0) {
+            // the key contains a key and a syntax, parse the syntax and set it
+            int separatorIndex = currentKey.indexOf(':');
+            String key = currentKey.substring(0, separatorIndex);
+            String syntax = currentKey.substring(separatorIndex + 1);
+            doc.set(key, currentValue);
+            doc.set(key + "Syntax", syntax);
         } else {
             doc.set(currentKey, currentValue.toString());
         }

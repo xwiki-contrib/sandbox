@@ -35,7 +35,7 @@ import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
 import org.xwiki.rendering.scaffolding.MockWikiModel;
-import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.rendering.syntax.SyntaxFactory;
 import org.xwiki.rendering.transformation.TransformationManager;
 import org.xwiki.test.AbstractComponentTestCase;
 
@@ -182,12 +182,15 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     @Test
     public void getAnnotatedHTML() throws Exception
     {
-        Parser parser = getComponentManager().lookup(Parser.class, Syntax.XWIKI_2_0.toIdString());
+        Parser parser =
+            getComponentManager().lookup(Parser.class, TestDocumentFactory.getDocument(docName).getSyntax());
         XDOM xdom = parser.parse(new StringReader(TestDocumentFactory.getDocument(docName).getSource()));
+        SyntaxFactory syntaxFactory = getComponentManager().lookup(SyntaxFactory.class);
 
         // run transformations
         TransformationManager transformationManager = getComponentManager().lookup(TransformationManager.class);
-        transformationManager.performTransformations(xdom, Syntax.XWIKI_2_0);
+        transformationManager.performTransformations(xdom, syntaxFactory.createSyntaxFromIdString(TestDocumentFactory
+            .getDocument(docName).getSyntax()));
 
         AnnotationPrintRenderer renderer =
             getComponentManager().lookup(AnnotationPrintRenderer.class, ANNOTATIONS_RENDERER_HINT);
@@ -209,12 +212,15 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     @Test
     public void getAnnotatedHTMLWithoutAnnotations() throws Exception
     {
-        Parser parser = getComponentManager().lookup(Parser.class, Syntax.XWIKI_2_0.toIdString());
+        Parser parser =
+            getComponentManager().lookup(Parser.class, TestDocumentFactory.getDocument(docName).getSyntax());
         XDOM xdom = parser.parse(new StringReader(TestDocumentFactory.getDocument(docName).getSource()));
+        SyntaxFactory syntaxFactory = getComponentManager().lookup(SyntaxFactory.class);
 
         // run transformations
         TransformationManager transformationManager = getComponentManager().lookup(TransformationManager.class);
-        transformationManager.performTransformations(xdom, Syntax.XWIKI_2_0);
+        transformationManager.performTransformations(xdom, syntaxFactory.createSyntaxFromIdString(TestDocumentFactory
+            .getDocument(docName).getSyntax()));
 
         AnnotationPrintRenderer renderer =
             getComponentManager().lookup(AnnotationPrintRenderer.class, ANNOTATIONS_RENDERER_HINT);

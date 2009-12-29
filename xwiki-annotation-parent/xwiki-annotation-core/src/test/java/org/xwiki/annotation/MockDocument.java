@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Stores data and provides functions for manipulating mock documents loaded from test files. Use the
  * {@link TestDocumentFactory} to load such documents from files.
@@ -95,16 +94,26 @@ public class MockDocument
      * @return the annotations of this document, as specified in the corpus file. Note that no filtering on the state of
      *         the annotation is made.
      */
+    @SuppressWarnings("unchecked")
     public List<Annotation> getSafeAnnotations()
     {
         return (List<Annotation>) properties.get("annotations");
     }
 
     /**
-     * @return the {@link Source} of this document, corresponding to the {@link #getTextSource()} content.
+     * @return the source of this document, corresponding to the {@link #getTextSource()} content.
      */
     public String getSource()
     {
         return (String) properties.get("source");
+    }
+
+    /**
+     * @return the syntax of this document's content
+     */
+    public String getSyntax()
+    {
+        String sourceSyntax = (String) properties.get("sourceSyntax");
+        return sourceSyntax == null || sourceSyntax.length() == 0 ? "xwiki/2.0" : sourceSyntax;
     }
 }
