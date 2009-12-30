@@ -33,6 +33,7 @@ import jxl.Hyperlink;
 import jxl.Range;
 import jxl.Sheet;
 import jxl.Workbook;
+import jxl.WorkbookSettings;
 import jxl.biff.EmptyCell;
 import jxl.format.RGB;
 import jxl.write.WritableWorkbook;
@@ -115,8 +116,11 @@ public class ExcelPlugin extends XWikiDefaultPlugin
     {
         InputStream stream = new ByteArrayInputStream(array);
         Workbook workbook;
+        WorkbookSettings ws = new WorkbookSettings();
+        ws.setEncoding("windows-1252");
+
         try {
-            workbook = Workbook.getWorkbook(stream);
+            workbook = Workbook.getWorkbook(stream, ws);
         } catch (Exception e1) {
             throw new ExcelPluginException(ExcelPluginException.ERROR_EXCELPLUGIN_INVALID_SPREADSHEET,
                 "Couldn't load the spreadsheet: " + spreadsheetname, e1);
