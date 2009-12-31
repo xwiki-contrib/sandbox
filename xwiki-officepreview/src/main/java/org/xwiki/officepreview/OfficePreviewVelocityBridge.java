@@ -23,15 +23,16 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.xwiki.bridge.AttachmentName;
+import org.xwiki.bridge.AttachmentNameFactory;
 import org.xwiki.bridge.DocumentAccessBridge;
+import org.xwiki.bridge.DocumentName;
+import org.xwiki.bridge.DocumentNameSerializer;
 import org.xwiki.cache.Cache;
 import org.xwiki.component.logging.Logger;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
-import org.xwiki.model.AttachmentName;
-import org.xwiki.model.AttachmentNameFactory;
-import org.xwiki.model.DocumentName;
-import org.xwiki.model.DocumentNameSerializer;
 import org.xwiki.officeimporter.OfficeImporterException;
 import org.xwiki.officeimporter.builder.PresentationBuilder;
 import org.xwiki.officeimporter.builder.XDOMOfficeDocumentBuilder;
@@ -52,7 +53,6 @@ import com.xpn.xwiki.doc.XWikiDocument;
  * Exposes office preview utility methods to velocity scripts.
  * 
  * @version $Id$
- * @since 2.2M1
  */
 public class OfficePreviewVelocityBridge
 {
@@ -153,7 +153,6 @@ public class OfficePreviewVelocityBridge
     {
         AttachmentName attachmentName = attachmentNameFactory.createAttachmentName(attachmentNameString);
         DocumentName reference = attachmentName.getDocumentName();                       
-        String officeFileName = attachmentName.getFileName();
 
         try {
             // Formulate the preview cache key.
@@ -169,12 +168,13 @@ public class OfficePreviewVelocityBridge
                 connect();
                 
                 // Build preview.
-                InputStream officeFileStream = docBridge.getAttachmentContent(attachmentName);                
+                InputStream officeFileStream = docBridge.getAttachmentContent(attachmentName);
+                byte [] officeFileData = IOUtils.toByteArray(officeFileStream);
                 XDOMOfficeDocument xdomOfficeDoc;
                 if (isPresentation(attachmentNameString)) {
-                    xdomOfficeDoc = presentationBuilder.build(officeFileStream, attachmentName.getFileName());
+                    xdomOfficeDoc = presentationBuilder.build(officeFileData);
                 } else {
-                    xdomOfficeDoc = xdomOfficeDocumentBuilder.build(officeFileStream, officeFileName, reference, true);
+                    xdomOfficeDoc = xdomOfficeDocumentBuilder.build(officeFileData, reference, true);
                 }
                 preview = buildPreview(xdomOfficeDoc, reference);
                 

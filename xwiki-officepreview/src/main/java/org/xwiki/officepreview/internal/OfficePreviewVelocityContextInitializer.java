@@ -39,7 +39,6 @@ import org.xwiki.velocity.VelocityContextInitializer;
  * Initializes velocity contexts with a reference to {@link OfficePreviewVelocityBridge}.
  * 
  * @version $Id$
- * @since 2.2M1
  */
 @Component("officepreview")
 public class OfficePreviewVelocityContextInitializer extends AbstractLogEnabled implements Initializable,
