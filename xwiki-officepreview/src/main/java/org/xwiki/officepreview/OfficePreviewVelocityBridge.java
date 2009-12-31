@@ -176,7 +176,7 @@ public class OfficePreviewVelocityBridge
                 } else {
                     xdomOfficeDoc = xdomOfficeDocumentBuilder.build(officeFileData, reference, true);
                 }
-                preview = buildPreview(xdomOfficeDoc, reference);
+                preview = buildPreview(xdomOfficeDoc, attachmentName);
                 
                 // Cache the preview.
                 previewsCache.set(previewKey, preview);
@@ -240,12 +240,12 @@ public class OfficePreviewVelocityBridge
      * Prepares a preview {@link XDOM} from the given office document.
      * 
      * @param xdomOfficeDoc office document.
-     * @param reference reference document (to be used for handling images).
+     * @param attachmentName name of the attachment which is to be previewed.
      * @return an {@link XDOM} holding a preview of the given office document.
      * @throws Exception if an error occurs while preparing the preview.
      */
-    private XDOM buildPreview(XDOMOfficeDocument xdomOfficeDoc, DocumentName reference) throws Exception
-    {
+    private XDOM buildPreview(XDOMOfficeDocument xdomOfficeDoc, AttachmentName attachmentName) throws Exception
+    {        
         // Dummy implementation.
         return xdomOfficeDoc.getContentDocument();
     }
@@ -280,5 +280,5 @@ public class OfficePreviewVelocityBridge
         XWikiDocument doc = xcontext.getWiki().getDocument(documentName, xcontext);
         XWikiAttachment attach = doc.getAttachment(attachmentName.getFileName());
         return attach.getVersion();
-    }
+    }        
 }
