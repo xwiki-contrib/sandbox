@@ -89,11 +89,11 @@
         <configuration>
           <!--
             Notes:
-          	- OfficePreviewVelocityBridge class has a fan-out of 24 (max 20) - hard to fix with the dependency on
+          	- DefaultOfficePreviewBuilder class has a fan-out of 22 (max 20) - hard to fix with the dependency on
           	  xwiki-core.          
            -->          
           <excludes>
-              org/xwiki/officepreview/OfficePreviewVelocityBridge.java
+              org/xwiki/officepreview/internal/DefaultOfficePreviewBuilder.java
           </excludes>
         </configuration>
       </plugin>

@@ -20,19 +20,11 @@
 package org.xwiki.officepreview.internal;
 
 import org.apache.velocity.VelocityContext;
-import org.xwiki.cache.Cache;
-import org.xwiki.cache.CacheException;
-import org.xwiki.cache.CacheManager;
-import org.xwiki.cache.config.CacheConfiguration;
-import org.xwiki.cache.eviction.LRUEvictionConfiguration;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.component.phase.Initializable;
-import org.xwiki.component.phase.InitializationException;
 import org.xwiki.officepreview.OfficePreviewVelocityBridge;
-import org.xwiki.rendering.block.XDOM;
 import org.xwiki.velocity.VelocityContextInitializer;
 
 /**
@@ -41,8 +33,7 @@ import org.xwiki.velocity.VelocityContextInitializer;
  * @version $Id$
  */
 @Component("officepreview")
-public class OfficePreviewVelocityContextInitializer extends AbstractLogEnabled implements Initializable,
-    VelocityContextInitializer
+public class OfficePreviewVelocityContextInitializer extends AbstractLogEnabled implements VelocityContextInitializer
 {
     /**
      * Key used to access the corresponding {@link OfficePreviewVelocityBridge} instance from velocity scripts.
@@ -56,40 +47,12 @@ public class OfficePreviewVelocityContextInitializer extends AbstractLogEnabled 
     private ComponentManager componentManager;
 
     /**
-     * Used to initialize the previews cache.
-     */
-    @Requirement
-    private CacheManager cacheManager;
-
-    /**
-     * Cache of office file previews.
-     */
-    private Cache<XDOM> cache;
-
-    /**
-     * {@inheritDoc}
-     */
-    public void initialize() throws InitializationException
-    {
-        CacheConfiguration config = new CacheConfiguration();
-        LRUEvictionConfiguration lec = new LRUEvictionConfiguration();
-        // TODO: Make this configurable.
-        lec.setMaxEntries(10);
-        config.put(LRUEvictionConfiguration.CONFIGURATIONID, lec);
-        try {
-            cache = cacheManager.createNewCache(config);
-        } catch (CacheException ex) {
-            throw new InitializationException("Error while initializing previews cache.", ex);
-        }
-    }
-
-    /**
      * {@inheritDoc}
      */
     public void initialize(VelocityContext context)
     {
         try {
-            context.put(VELOCITY_CONTEXT_KEY, new OfficePreviewVelocityBridge(componentManager, cache, getLogger()));
+            context.put(VELOCITY_CONTEXT_KEY, new OfficePreviewVelocityBridge(componentManager, getLogger()));
         } catch (Exception ex) {
             getLogger().error("Could not initialize office-preview support.", ex);
         }

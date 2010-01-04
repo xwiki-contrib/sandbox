@@ -19,35 +19,16 @@
  */
 package org.xwiki.officepreview;
 
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
 import org.xwiki.bridge.AttachmentName;
 import org.xwiki.bridge.AttachmentNameFactory;
-import org.xwiki.bridge.DocumentAccessBridge;
-import org.xwiki.bridge.DocumentName;
-import org.xwiki.bridge.DocumentNameSerializer;
-import org.xwiki.cache.Cache;
 import org.xwiki.component.logging.Logger;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
-import org.xwiki.officeimporter.OfficeImporterException;
-import org.xwiki.officeimporter.builder.PresentationBuilder;
-import org.xwiki.officeimporter.builder.XDOMOfficeDocumentBuilder;
-import org.xwiki.officeimporter.document.XDOMOfficeDocument;
-import org.xwiki.officeimporter.openoffice.OpenOfficeManager;
-import org.xwiki.officeimporter.openoffice.OpenOfficeManager.ManagerState;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
-
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.doc.XWikiAttachment;
-import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
  * Exposes office preview utility methods to velocity scripts.
@@ -56,11 +37,6 @@ import com.xpn.xwiki.doc.XWikiDocument;
  */
 public class OfficePreviewVelocityBridge
 {
-    /**
-     * File extensions corresponding to slide presentations.
-     */
-    private static final List<String> PRESENTATION_FORMAT_EXTENSIONS = Arrays.asList("ppt", "pptx", "odp");
-
     /**
      * The key used to place any error messages while previewing office documents.
      */
@@ -82,64 +58,32 @@ public class OfficePreviewVelocityBridge
     private Execution execution;
 
     /**
-     * Used to query openoffice server state.
-     */
-    private OpenOfficeManager officeManager;
-
-    /**
-     * Used to access attachment content.
-     */
-    private DocumentAccessBridge docBridge;
-
-    /**
-     * Office document previews cache.
-     */
-    private Cache<XDOM> previewsCache;
-
-    /**
-     * Used for serializing {@link DocumentName} instances into strings.
-     */
-    private DocumentNameSerializer documentNameSerializer;
-
-    /**
      * Used to create {@link AttachmentName} instances from string formed attachment names.
      */
     private AttachmentNameFactory attachmentNameFactory;
 
     /**
-     * Used to build xdom documents from office documents.
+     * For building the actual office preview.
      */
-    private XDOMOfficeDocumentBuilder xdomOfficeDocumentBuilder;
-
-    /**
-     * Used to build xdom presentations from office slide shows.
-     */
-    private PresentationBuilder presentationBuilder;
+    private OfficePreviewBuilder officePreviewBuilder;
 
     /**
      * Constructs a new bridge instance.
      * 
      * @param componentManager used to lookup for other required components.
-     * @param previewsCache cache of office attachment previews.
      * @param logger for logging support.
      * @throws Exception if an error occurs while initializing bridge.
      */
-    public OfficePreviewVelocityBridge(ComponentManager componentManager, Cache<XDOM> previewsCache, Logger logger)
-        throws Exception
+    public OfficePreviewVelocityBridge(ComponentManager componentManager, Logger logger) throws Exception
     {
         // Base components.
         this.componentManager = componentManager;
-        this.previewsCache = previewsCache;
         this.logger = logger;
 
-        // Other dependent components.
+        // Lookup other required components.
         this.execution = componentManager.lookup(Execution.class);
-        this.officeManager = componentManager.lookup(OpenOfficeManager.class);
-        this.docBridge = componentManager.lookup(DocumentAccessBridge.class);
-        this.documentNameSerializer = componentManager.lookup(DocumentNameSerializer.class);
         this.attachmentNameFactory = componentManager.lookup(AttachmentNameFactory.class);
-        this.xdomOfficeDocumentBuilder = componentManager.lookup(XDOMOfficeDocumentBuilder.class);
-        this.presentationBuilder = componentManager.lookup(PresentationBuilder.class);
+        this.officePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class);
     }
 
     /**
@@ -152,37 +96,8 @@ public class OfficePreviewVelocityBridge
     public String preview(String attachmentNameString, String outputSyntaxId)
     {
         AttachmentName attachmentName = attachmentNameFactory.createAttachmentName(attachmentNameString);
-        DocumentName reference = attachmentName.getDocumentName();                       
-
         try {
-            // Formulate the preview cache key.
-            String attachmentVersion = getAttachmentVersion(attachmentName);
-            String previewKey = String.format("%s_%s", attachmentNameString, attachmentVersion);
-
-            // Search the cache.
-            XDOM preview = previewsCache.get(previewKey);
-
-            // If a cached result is not available, build a preview.
-            if (null == preview) {
-                // Make sure an openoffice server is available.
-                connect();
-                
-                // Build preview.
-                InputStream officeFileStream = docBridge.getAttachmentContent(attachmentName);
-                byte [] officeFileData = IOUtils.toByteArray(officeFileStream);
-                XDOMOfficeDocument xdomOfficeDoc;
-                if (isPresentation(attachmentNameString)) {
-                    xdomOfficeDoc = presentationBuilder.build(officeFileData);
-                } else {
-                    xdomOfficeDoc = xdomOfficeDocumentBuilder.build(officeFileData, reference, true);
-                }
-                preview = buildPreview(xdomOfficeDoc, attachmentName);
-                
-                // Cache the preview.
-                previewsCache.set(previewKey, preview);
-            }
-            
-            // Done.
+            XDOM preview = officePreviewBuilder.build(attachmentName);
             return render(preview, outputSyntaxId);
         } catch (Exception ex) {
             String message = "Could not preview office document [%s] - [%s]";
@@ -190,7 +105,6 @@ public class OfficePreviewVelocityBridge
             setErrorMessage(message);
             logger.error(message, ex);
         }
-
         return null;
     }
 
@@ -213,44 +127,6 @@ public class OfficePreviewVelocityBridge
     }
 
     /**
-     * Attempts to connect to an openoffice server for conversions.
-     * 
-     * @throws Exception if an openoffice server is not available.
-     */
-    private void connect() throws Exception
-    {
-        if (!officeManager.getState().equals(ManagerState.CONNECTED)) {
-            throw new OfficeImporterException("OpenOffice server unavailable.");
-        }
-    }
-
-    /**
-     * Utility method for checking if a file name corresponds to an office presentation.
-     * 
-     * @param officeFileName office file name.
-     * @return true if the file name / extension represents an office presentation format.
-     */
-    private boolean isPresentation(String officeFileName)
-    {
-        String extension = officeFileName.substring(officeFileName.lastIndexOf('.') + 1);
-        return PRESENTATION_FORMAT_EXTENSIONS.contains(extension);
-    }
-
-    /**
-     * Prepares a preview {@link XDOM} from the given office document.
-     * 
-     * @param xdomOfficeDoc office document.
-     * @param attachmentName name of the attachment which is to be previewed.
-     * @return an {@link XDOM} holding a preview of the given office document.
-     * @throws Exception if an error occurs while preparing the preview.
-     */
-    private XDOM buildPreview(XDOMOfficeDocument xdomOfficeDoc, AttachmentName attachmentName) throws Exception
-    {        
-        // Dummy implementation.
-        return xdomOfficeDoc.getContentDocument();
-    }
-
-    /**
      * Renders the given block into specified syntax.
      * 
      * @param block {@link Block} to be rendered.
@@ -265,20 +141,4 @@ public class OfficePreviewVelocityBridge
         renderer.render(block, printer);
         return printer.toString();
     }
-
-    /**
-     * Utility method for finding the current version of the specified attachment.
-     * 
-     * @param attachmentName name of the office attachment.
-     * @return current version of the specified attachment.
-     * @throws Exception if an error occurs while accessing attachment details.
-     */
-    private String getAttachmentVersion(AttachmentName attachmentName) throws Exception
-    {
-        XWikiContext xcontext = (XWikiContext) this.execution.getContext().getProperty("xwikicontext");
-        String documentName = documentNameSerializer.serialize(attachmentName.getDocumentName());
-        XWikiDocument doc = xcontext.getWiki().getDocument(documentName, xcontext);
-        XWikiAttachment attach = doc.getAttachment(attachmentName.getFileName());
-        return attach.getVersion();
-    }        
 }
