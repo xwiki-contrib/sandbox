@@ -22,6 +22,7 @@ package org.xwiki.officepreview.internal;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.xwiki.bridge.AttachmentName;
@@ -33,6 +34,8 @@ import org.xwiki.cache.Cache;
 import org.xwiki.cache.CacheException;
 import org.xwiki.cache.CacheManager;
 import org.xwiki.cache.config.CacheConfiguration;
+import org.xwiki.cache.event.CacheEntryEvent;
+import org.xwiki.cache.event.CacheEntryListener;
 import org.xwiki.cache.eviction.LRUEvictionConfiguration;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -58,7 +61,8 @@ import com.xpn.xwiki.doc.XWikiDocument;
  * @version $Id$
  */
 @Component
-public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements OfficePreviewBuilder, Initializable
+public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements OfficePreviewBuilder, Initializable,
+    CacheEntryListener<OfficeDocumentPreview>
 {
     /**
      * File extensions corresponding to slide presentations.
@@ -88,7 +92,7 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
      */
     @Requirement
     private AttachmentNameSerializer attachmentNameSerializer;
-    
+
     /**
      * Used to query openoffice server state.
      */
@@ -116,7 +120,7 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
     /**
      * Office document previews cache.
      */
-    private Cache<XDOM> previewsCache;
+    private Cache<OfficeDocumentPreview> previewsCache;
 
     /**
      * {@inheritDoc}
@@ -125,11 +129,11 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
     {
         CacheConfiguration config = new CacheConfiguration();
         LRUEvictionConfiguration lec = new LRUEvictionConfiguration();
-        
+
         // TODO: Make this configurable.
         lec.setMaxEntries(10);
-        
-        config.put(LRUEvictionConfiguration.CONFIGURATIONID, lec);        
+
+        config.put(LRUEvictionConfiguration.CONFIGURATIONID, lec);
         try {
             previewsCache = cacheManager.createNewCache(config);
         } catch (CacheException ex) {
@@ -142,20 +146,27 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
      */
     public XDOM build(AttachmentName attachmentName) throws Exception
     {
-        DocumentName reference = attachmentName.getDocumentName();
         String strAttachmentName = attachmentNameSerializer.serialize(attachmentName);
-
-        // Formulate the preview cache key.
-        String previewKey = String.format("%s_%s", strAttachmentName, getAttachmentVersion(attachmentName));
+        String currentVersion = getAttachmentVersion(attachmentName);
+        DocumentName reference = attachmentName.getDocumentName();
 
         // Search the cache.
-        XDOM preview = previewsCache.get(previewKey);
+        OfficeDocumentPreview preview = previewsCache.get(strAttachmentName);
 
-        // If a cached result is not available, build a preview.
+        if (null != preview) {
+            // Check if the preview has been expired.
+            if (!currentVersion.equals(preview.getAttachmentVersion())) {
+                // Remove the cache entry. This will trigger the cleanup code.
+                previewsCache.remove(strAttachmentName);
+                preview = null;
+            }
+        }
+
+        // If a preview in not available in cache, build one.
         if (null == preview) {
             // Make sure an openoffice server is available.
             connect();
-            
+
             // Build preview.
             InputStream officeFileStream = docBridge.getAttachmentContent(attachmentName);
             byte[] officeFileData = IOUtils.toByteArray(officeFileStream);
@@ -165,30 +176,58 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
             } else {
                 xdomOfficeDoc = xdomOfficeDocumentBuilder.build(officeFileData, reference, true);
             }
-            preview = build(xdomOfficeDoc, attachmentName);
+            preview = build(attachmentName, currentVersion, xdomOfficeDoc);
 
             // Cache the preview.
-            previewsCache.set(previewKey, preview);
+            previewsCache.set(strAttachmentName, preview);
         }
 
         // Done.
-        return preview;
+        return preview.getXdom();
     }
 
     /**
-     * Prepares a preview {@link XDOM} from the given office document.
+     * Builds an {@link OfficeDocumentPreview} instance corresponding to the given {@link XDOMOfficeDocument}.
      * 
-     * @param xdomOfficeDoc office document.
-     * @param attachmentName name of the attachment which is to be previewed.
-     * @return an {@link XDOM} holding a preview of the given office document.
-     * @throws Exception if an error occurs while preparing the preview.
+     * @param attachmentName name of the attachment being previewed.
+     * @param attachmentVersion current version of the attachment.
+     * @param xdomOfficeDoc {@link XDOMOfficeDocument} corresponding to the attachment.
+     * @return {@link OfficeDocumentPreview} corresponding to the specified attachment.
+     * @throws Exception if an error occurs while building the preview.
      */
-    private XDOM build(XDOMOfficeDocument xdomOfficeDoc, AttachmentName attachmentName) throws Exception
+    private OfficeDocumentPreview build(AttachmentName attachmentName, String attachmentVersion,
+        XDOMOfficeDocument xdomOfficeDoc) throws Exception
     {
-        // Dummy implementation.
-        return xdomOfficeDoc.getContentDocument();
+        XDOM xdom = xdomOfficeDoc.getContentDocument();
+        Map<String, byte[]> artifacts = xdomOfficeDoc.getArtifacts();
+
+        return new OfficeDocumentPreview(attachmentName, attachmentVersion, xdom, artifacts.keySet());
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    public void cacheEntryAdded(CacheEntryEvent<OfficeDocumentPreview> event)
+    {
+        // Not interested.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void cacheEntryModified(CacheEntryEvent<OfficeDocumentPreview> event)
+    {
+        // Not interested.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void cacheEntryRemoved(CacheEntryEvent<OfficeDocumentPreview> event)
+    {
+        // TODO cleanup temporary files.
+    }
+
     /**
      * Attempts to connect to an openoffice server for conversions.
      * 
@@ -200,7 +239,7 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
             throw new Exception("OpenOffice server unavailable.");
         }
     }
-    
+
     /**
      * Utility method for checking if a file name corresponds to an office presentation.
      * 
@@ -211,7 +250,7 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
     {
         String extension = officeFileName.substring(officeFileName.lastIndexOf('.') + 1);
         return PRESENTATION_FORMAT_EXTENSIONS.contains(extension);
-    }    
+    }
 
     /**
      * Utility method for finding the current version of the specified attachment.
