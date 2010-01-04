@@ -37,7 +37,6 @@ import org.xwiki.context.Execution;
 import org.xwiki.observation.event.DocumentUpdateEvent;
 import org.xwiki.observation.event.Event;
 
-import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
@@ -45,28 +44,39 @@ import com.xpn.xwiki.doc.XWikiDocument;
  */
 public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled implements AnnotationMaintainer
 {
+    /**
+     * Execution object to get data about the current execution context.
+     */
     @Requirement
     protected Execution execution;
 
+    /**
+     * Annotations storage service.
+     */
     @Requirement
     protected IOService ioService;
 
-    protected volatile boolean recursionFlag;
-
-    protected static final String LISTENER_NAME = "AnnotationMaintainer";
+    /**
+     * Marks that there is currently an annotations update in progress so all the saves should not trigger a new update.
+     * All document edits that take place because of updating the annotations for the current document shouldn't be
+     * considered.
+     */
+    protected volatile boolean isUpdating;
 
     /**
      * The events observed by this observation manager.
      */
     protected final List<Event> eventsList = new ArrayList<Event>(Arrays.asList(new DocumentUpdateEvent()));
 
-    protected String content;
-
-    protected String previousContent;
-
-    protected Annotation currentAnnotation;
-
-    protected abstract Collection<XDelta> getDifferences(CharSequence previous, CharSequence current);
+    /**
+     * Returns the differences between the previous content and the current content, to be implemented by the subclasses
+     * with the specific diff implementation.
+     * 
+     * @param previous the previous content
+     * @param current the current content
+     * @return the collection of differences between the old content and the new content
+     */
+    protected abstract Collection<XDelta> getDifferences(String previous, String current);
 
     /**
      * {@inheritDoc}
@@ -85,24 +95,25 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      */
     public String getName()
     {
-        return LISTENER_NAME;
+        return "AnnotationMaintainer";
     }
 
     /**
      * Proceed to update of annotations location.
      * 
      * @param documentName is name of document concerned by update
-     * @param deprecatedContext the XWiki context used to manipulate XWiki objects
+     * @param previousContent the previous content of the document (before the update)
+     * @param currentContent the current content of the document (after the update)
      */
-    protected void maintainDocumentAnnotations(String documentName, XWikiContext deprecatedContext)
+    protected void maintainDocumentAnnotations(String documentName, String previousContent, String currentContent)
     {
         Collection<Annotation> annotations;
         try {
             annotations = ioService.getSafeAnnotations(documentName);
             for (Annotation annotation : annotations) {
-                currentAnnotation = annotation;
-                recomputeProperties();
+                recomputeProperties(annotation, previousContent, currentContent);
             }
+
             ioService.updateAnnotations(documentName, annotations);
         } catch (IOServiceException e) {
             getLogger().error(e.getMessage());
@@ -112,22 +123,22 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer#updateOffset(int)
+     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer#updateOffset(Annotation, int)
      */
-    public void updateOffset(int offset)
+    public void updateOffset(Annotation annotation, int offset)
     {
-        currentAnnotation.setOffset(offset);
+        annotation.setOffset(offset);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer
-     *      #onAnnotationModification(org.xwiki.annotation.maintainment.XDelta)
+     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer #onAnnotationModification(Annotation,
+     *      org.xwiki.annotation.maintainment.XDelta)
      */
-    public void onAnnotationModification(XDelta delta)
+    public void onAnnotationModification(Annotation annotation, XDelta delta)
     {
-        currentAnnotation.setState(AnnotationState.ALTERED);
+        annotation.setState(AnnotationState.ALTERED);
     }
 
     /**
@@ -136,52 +147,60 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      * @see org.xwiki.annotation.maintainment.AnnotationMaintainer
      *      #onSpecialCase(org.xwiki.annotation.maintainment.XDelta)
      */
-    public void onSpecialCaseDeletion(XDelta delta, int offset, int length)
+    public void onSpecialCaseDeletion(Annotation annotation, XDelta delta, String previousContent, 
+        String currentContent)
     {
         if (previousContent.substring(0, delta.getOffset()).endsWith(
-            previousContent.substring(offset, delta.getOffset() + delta.getLength()))) {
-            updateOffset(offset + delta.getSignedDelta());
+            previousContent.substring(annotation.getOffset(), delta.getOffset() + delta.getLength()))) {
+            updateOffset(annotation, annotation.getOffset() + delta.getSignedDelta());
         } else {
-            onAnnotationModification(delta);
+            onAnnotationModification(annotation, delta);
         }
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer
-     *      #onSpecialCaseAddition(org.xwiki.annotation.maintainment.XDelta, int, int)
+     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer #onSpecialCaseAddition(Annotation,
+     *      org.xwiki.annotation.maintainment.XDelta, String, String)
      */
-    public void onSpecialCaseAddition(XDelta delta, int offset, int length)
+    public void onSpecialCaseAddition(Annotation annotation, XDelta delta, String previousContent, 
+        String currentContent)
     {
-        if (content.substring(delta.getOffset(), delta.getOffset() + delta.getLength()).endsWith(
-            content.substring(offset, delta.getOffset()))) {
-            updateOffset(offset + delta.getSignedDelta());
+        if (currentContent.substring(delta.getOffset(), delta.getOffset() + delta.getLength()).endsWith(
+            currentContent.substring(annotation.getOffset(), delta.getOffset()))) {
+            updateOffset(annotation, annotation.getOffset() + delta.getSignedDelta());
         } else {
-            onAnnotationModification(delta);
+            onAnnotationModification(annotation, delta);
         }
     }
 
     /**
      * For each safe annotation, recompute location.
+     * 
+     * @param annotation the annotation to update properties for
+     * @param previousContent the previous content of the updated document
+     * @param currentContent the current content of the updated document
      */
-    protected void recomputeProperties()
+    protected void recomputeProperties(Annotation annotation, String previousContent, String currentContent)
     {
-        if (currentAnnotation.getState().equals(AnnotationState.ALTERED)) {
+        if (annotation.getState().equals(AnnotationState.ALTERED)) {
             return;
         }
-        for (XDelta diff : getDifferences(previousContent, content)) {
-            diff.update(this, currentAnnotation.getOffset(), currentAnnotation.getLength());
+        for (XDelta diff : getDifferences(previousContent, currentContent)) {
+            diff.update(annotation, this, previousContent, currentContent);
         }
     }
 
     /**
      * Since previous content and current content use indifferently \r\n and \n we have to make content homogeneous.
+     * 
+     * @param content the content to normalize
+     * @return the normalized content, with cleaned content
      */
-    protected void clearContent()
+    protected String normalizeContent(String content)
     {
-        previousContent = previousContent.replace("\r", "");
-        content = content.replace("\r", "");
+        return content.replace("\r", "");
     }
 
     /**
@@ -192,18 +211,20 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      */
     public void onEvent(Event event, Object source, Object data)
     {
-        XWikiContext deprecatedContext = (XWikiContext) execution.getContext().getProperty("xwikicontext");
         XWikiDocument currentDocument = (XWikiDocument) source;
 
         XWikiDocument previousDocument = currentDocument.getOriginalDocument();
 
-        if (!recursionFlag && !previousDocument.getContent().equals(currentDocument.getContent())) {
-            recursionFlag = true;
-            content = currentDocument.getContent();
-            previousContent = previousDocument.getContent();
-            clearContent();
-            maintainDocumentAnnotations(currentDocument.getFullName(), deprecatedContext);
-            recursionFlag = false;
+        // if it's not a modification triggered by the updates of the annotations while running the same annotation
+        // maintainer, and the difference is in the content of the document
+        if (!isUpdating && !previousDocument.getContent().equals(currentDocument.getContent())) {
+            isUpdating = true;
+            String content = currentDocument.getContent();
+            String previousContent = previousDocument.getContent();
+            content = normalizeContent(content);
+            previousContent = normalizeContent(previousContent);
+            maintainDocumentAnnotations(currentDocument.getFullName(), previousContent, content);
+            isUpdating = false;
         }
     }
 }

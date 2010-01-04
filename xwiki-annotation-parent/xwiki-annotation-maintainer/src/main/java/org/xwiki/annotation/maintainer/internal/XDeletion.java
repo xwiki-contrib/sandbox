@@ -20,6 +20,7 @@
 
 package org.xwiki.annotation.maintainer.internal;
 
+import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.maintainer.AnnotationMaintainer;
 
 /**
@@ -28,8 +29,8 @@ import org.xwiki.annotation.maintainer.AnnotationMaintainer;
 public class XDeletion extends AbstractXDelta
 {
     /**
-     * @param offset
-     * @param length
+     * @param offset the offset of the current deletion
+     * @param length the length of the current deletion
      */
     public XDeletion(int offset, int length)
     {
@@ -39,31 +40,33 @@ public class XDeletion extends AbstractXDelta
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.maintainment.AbstractXDelta#getSignedDelta()
+     * @see org.xwiki.annotation.maintainer.XDelta#getSignedDelta()
      */
-    @Override
     public int getSignedDelta()
     {
-        return -length;
+        return -getLength();
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.maintainment.AbstractXDelta#update(org.xwiki.annotation.AnnotationMaintainer,
-     *      int, int)
+     * @see org.xwiki.annotation.maintainer.XDelta#update(Annotation,
+     *      org.xwiki.annotation.maintainer.AnnotationMaintainer, String, String)
      */
-    @Override
-    public void update(AnnotationMaintainer maintainer, int offset, int length)
+    public void update(Annotation annotation, AnnotationMaintainer maintainer, String previousContent,
+        String currentContent)
     {
-        // deletion before
+        int offset = annotation.getOffset();
+        int length = annotation.getLength();
+
         if (this.getOffset() + this.getLength() <= offset) {
-            maintainer.updateOffset(offset + getSignedDelta());
+            // deletion before
+            maintainer.updateOffset(annotation, offset + getSignedDelta());
         } else if (this.getOffset() >= offset + length) {
             // deletion after
         } else {
             // NOP
-            maintainer.onSpecialCaseDeletion(this, offset, length);
+            maintainer.onSpecialCaseDeletion(annotation, this, previousContent, currentContent);
         }
     }
 }

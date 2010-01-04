@@ -20,6 +20,7 @@
 
 package org.xwiki.annotation.maintainer.internal;
 
+import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.maintainer.AnnotationMaintainer;
 
 /**
@@ -28,8 +29,8 @@ import org.xwiki.annotation.maintainer.AnnotationMaintainer;
 public class XAddition extends AbstractXDelta
 {
     /**
-     * @param offset
-     * @param length
+     * @param offset the offset of the current addition
+     * @param length the length of the current addition
      */
     public XAddition(int offset, int length)
     {
@@ -39,32 +40,33 @@ public class XAddition extends AbstractXDelta
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.maintainment.AbstractXDelta#getSignedDelta()
+     * @see org.xwiki.annotation.maintainer.XDelta#getSignedDelta()
      */
-    @Override
     public int getSignedDelta()
     {
-        return length;
+        return getLength();
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.maintainment.AbstractXDelta#update(org.xwiki.annotation.AnnotationMaintainer,
-     *      int, int)
+     * @see org.xwiki.annotation.maintainer.XDelta#update(Annotation,
+     *      org.xwiki.annotation.maintainer.AnnotationMaintainer, String, String)
      */
-    @Override
-    public void update(AnnotationMaintainer maintainer, int offset, int length)
+    public void update(Annotation annotation, AnnotationMaintainer maintainer, String previousContent,
+        String currentContent)
     {
-        // addition before
+        int offset = annotation.getOffset();
+        int length = annotation.getLength();
+
         if (this.getOffset() <= offset) {
-            maintainer.updateOffset(offset + getSignedDelta());
-        }
-        // addition after
-        else if (this.getOffset() >= offset + length) {
-            // NOP
+            // addition before
+            maintainer.updateOffset(annotation, offset + getSignedDelta());
+        } else if (this.getOffset() >= offset + length) {
+            // addition after
         } else {
-            maintainer.onSpecialCaseAddition(this, offset, length);
+            // NOP
+            maintainer.onSpecialCaseAddition(annotation, this, previousContent, currentContent);
         }
     }
 }

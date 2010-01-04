@@ -14,11 +14,11 @@ import org.xwiki.annotation.maintainer.AnnotationState;
 public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotationMaintainer
 {
     /**
-     * @param state
-     * @param id
-     * @param offset
-     * @param length
-     * @return
+     * @param state the state of the annotation
+     * @param id the id of the annotation
+     * @param offset the offset of the annotation
+     * @param length the length of the annotation
+     * @return an annotation with only the specified fields filled in
      */
     public Annotation getFakeAnnotation(AnnotationState state, int id, int offset, int length)
     {
@@ -31,10 +31,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void deletionAfter01()
     {
-        previousContent = "This is not a simple sentence.";
-        content = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 14, 6);
-        recomputeProperties();
+        String previousContent = "This is not a simple sentence.";
+        String content = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 14, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
@@ -44,10 +44,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void additionAfter01()
     {
-        content = "This is not a simple sentence.";
-        previousContent = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 14, 6);
-        recomputeProperties();
+        String content = "This is not a simple sentence.";
+        String previousContent = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 14, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
@@ -57,10 +57,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void deletionAfter02()
     {
-        previousContent = "This is not a simple sentence.";
-        content = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 12, 6);
-        recomputeProperties();
+        String previousContent = "This is not a simple sentence.";
+        String content = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 12, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
@@ -70,10 +70,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void additionAfter02()
     {
-        content = "This is not a simple sentence.";
-        previousContent = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 12, 6);
-        recomputeProperties();
+        String content = "This is not a simple sentence.";
+        String previousContent = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 12, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
@@ -83,10 +83,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void deletionIn01()
     {
-        previousContent = "This is not a simple sentence.";
-        content = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 10, 6);
-        recomputeProperties();
+        String previousContent = "This is not a simple sentence.";
+        String content = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 10, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.ALTERED, currentAnnotation.getState());
     }
 
@@ -96,10 +96,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void additionIn01()
     {
-        content = "This is not a simple sentence.";
-        previousContent = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 6, 6);
-        recomputeProperties();
+        String content = "This is not a simple sentence.";
+        String previousContent = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 6, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.ALTERED, currentAnnotation.getState());
     }
 
@@ -109,10 +109,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void deletionIn02()
     {
-        previousContent = "This is not a simple sentence.";
-        content = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 8, 6);
-        recomputeProperties();
+        String previousContent = "This is not a simple sentence.";
+        String content = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 8, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.ALTERED, currentAnnotation.getState());
     }
 
@@ -122,10 +122,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void additionIn02()
     {
-        content = "This is not a simple sentence.";
-        previousContent = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 6, 6);
-        recomputeProperties();
+        String content = "This is not a simple sentence.";
+        String previousContent = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 6, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.ALTERED, currentAnnotation.getState());
     }
 
@@ -135,10 +135,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void deletionIn03()
     {
-        previousContent = "This is not a simple sentence.";
-        content = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 7, 2);
-        recomputeProperties();
+        String previousContent = "This is not a simple sentence.";
+        String content = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 7, 2);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.ALTERED, currentAnnotation.getState());
     }
 
@@ -148,10 +148,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void additionIn03()
     {
-        content = "This is not a simple sentence.";
-        previousContent = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 6, 2);
-        recomputeProperties();
+        String content = "This is not a simple sentence.";
+        String previousContent = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 6, 2);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
@@ -161,10 +161,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void deletionBefore01()
     {
-        previousContent = "This is not a simple sentence.";
-        content = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 7, 1);
-        recomputeProperties();
+        String previousContent = "This is not a simple sentence.";
+        String content = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 7, 1);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
@@ -174,10 +174,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void additionBefore01()
     {
-        content = "This is not a simple sentence.";
-        previousContent = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 7, 1);
-        recomputeProperties();
+        String content = "This is not a simple sentence.";
+        String previousContent = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 7, 1);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
@@ -187,10 +187,10 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void deletionBefore02()
     {
-        previousContent = "This is not a simple sentence.";
-        content = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 5, 3);
-        recomputeProperties();
+        String previousContent = "This is not a simple sentence.";
+        String content = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 5, 3);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
@@ -200,50 +200,50 @@ public class JavaDiffBasedAnnotationMaintainerTest extends JavaDiffBasedAnnotati
     @Test
     public void additionBefore02()
     {
-        content = "This is not a simple sentence.";
-        previousContent = "This is a simple sentence.";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 5, 3);
-        recomputeProperties();
+        String content = "This is not a simple sentence.";
+        String previousContent = "This is a simple sentence.";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 5, 3);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
     @Test
     public void regularDeletion01()
     {
-        previousContent = "block2 block1 block1 block2";
-        content = "block2 block1 block2";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 19, 7);
-        recomputeProperties();
+        String previousContent = "block2 block1 block1 block2";
+        String content = "block2 block1 block2";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 19, 7);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
     @Test
     public void regularDeletion02()
     {
-        previousContent = "another, limping, mimics the cripple who flew.__TEST__The Poet";
-        content = "another, limping, mimics the cripple who flew.__The Poet bears a";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 54, 8);
-        recomputeProperties();
+        String previousContent = "another, limping, mimics the cripple who flew.__TEST__The Poet";
+        String content = "another, limping, mimics the cripple who flew.__The Poet bears a";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 54, 8);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
     @Test
     public void regularAddition01()
     {
-        previousContent = "block2 block1 block2";
-        content = "block2 block1 block1 block2";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 12, 7);
-        recomputeProperties();
+        String previousContent = "block2 block1 block2";
+        String content = "block2 block1 block1 block2";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 12, 7);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 
     @Test
     public void regularAddition02()
     {
-        previousContent = "another, limping, mimics the cripple who flew.__The Poet bears a";
-        content = "another, limping, mimics the cripple who flew.__TEST__The Poet bears a";
-        currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 48, 6);
-        recomputeProperties();
+        String previousContent = "another, limping, mimics the cripple who flew.__The Poet bears a";
+        String content = "another, limping, mimics the cripple who flew.__TEST__The Poet bears a";
+        Annotation currentAnnotation = getFakeAnnotation(AnnotationState.SAFE, 0, 48, 6);
+        recomputeProperties(currentAnnotation, previousContent, content);
         assertEquals(AnnotationState.SAFE, currentAnnotation.getState());
     }
 }

@@ -20,6 +20,7 @@
 
 package org.xwiki.annotation.maintainer;
 
+import org.xwiki.annotation.Annotation;
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.observation.EventListener;
 
@@ -34,34 +35,38 @@ public interface AnnotationMaintainer extends EventListener
     /**
      * Method triggered by XDelta instance when an annotation is moved.
      * 
+     * @param annotation the annotation to update offset for
      * @param offset new annotation location
      */
-    void updateOffset(int offset);
+    void updateOffset(Annotation annotation, int offset);
 
     /**
      * Method triggered by XDelta instance when an annotation is altered.
      * 
+     * @param annotation the annotation which was altered
      * @param delta XDelta instance which modified annotation
      */
-    void onAnnotationModification(XDelta delta);
+    void onAnnotationModification(Annotation annotation, XDelta delta);
 
     /**
      * Triggered when we need to determine if we have a "regular" deletion. See tests for explanations about "regular"
      * deletion
      * 
+     * @param annotation the annotation for which to detect the type of deletion
      * @param delta the source difference to test
-     * @param offset the offset the annotation
-     * @param length the length of the annotation
+     * @param previousContent the previous content of the changed entity
+     * @param currentContent the current content of the changed entity
      */
-    void onSpecialCaseDeletion(XDelta delta, int offset, int length);
+    void onSpecialCaseDeletion(Annotation annotation, XDelta delta, String previousContent, String currentContent);
 
     /**
      * Triggered when we need to determine if we have a "regular" addition. See tests for explanations about "regular"
      * addition
      * 
+     * @param annotation the annotation for which to detect the type of deletion
      * @param delta the source difference to test
-     * @param offset the offset the annotation
-     * @param length the length of the annotation
+     * @param previousContent the previous content of the changed entity
+     * @param currentContent the current content of the changed entity
      */
-    void onSpecialCaseAddition(XDelta delta, int offset, int length);
+    void onSpecialCaseAddition(Annotation annotation, XDelta delta, String previousContent, String currentContent);
 }

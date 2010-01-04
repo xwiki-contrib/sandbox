@@ -20,6 +20,7 @@
 
 package org.xwiki.annotation.maintainer;
 
+import org.xwiki.annotation.Annotation;
 
 /**
  * This interface models a source difference.
@@ -29,12 +30,12 @@ package org.xwiki.annotation.maintainer;
 public interface XDelta
 {
     /**
-     * @return start offset off difference
+     * @return start offset of the difference
      */
     int getOffset();
 
     /**
-     * @return length of difference
+     * @return length of the difference
      */
     int getLength();
 
@@ -47,9 +48,10 @@ public interface XDelta
      * This method should be called by annotation maintainer in order to let XDelta instance decide which is the new
      * offset of annotation.
      * 
+     * @param annotation the annotation to update
      * @param maintainer maintainer to use
-     * @param offset of annotation
-     * @param length of annotation
+     * @param previousContent the previous content of the changed entity
+     * @param currentContent the current content of the changed entity
      */
-    void update(AnnotationMaintainer maintainer, int offset, int length);
+    void update(Annotation annotation, AnnotationMaintainer maintainer, String previousContent, String currentContent);
 }

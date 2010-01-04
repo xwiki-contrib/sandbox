@@ -20,7 +20,6 @@
 
 package org.xwiki.annotation.maintainer.internal;
 
-import org.xwiki.annotation.maintainer.AnnotationMaintainer;
 import org.xwiki.annotation.maintainer.XDelta;
 
 /**
@@ -28,13 +27,19 @@ import org.xwiki.annotation.maintainer.XDelta;
  */
 public abstract class AbstractXDelta implements XDelta
 {
-    protected final int offset;
-
-    protected final int length;
+    /**
+     * The offset of the current difference.
+     */
+    private final int offset;
 
     /**
-     * @param offset
-     * @param length
+     * The length of the current difference.
+     */
+    private final int length;
+
+    /**
+     * @param offset the offset of the current difference
+     * @param length the length of the current difference
      */
     public AbstractXDelta(int offset, int length)
     {
@@ -61,18 +66,4 @@ public abstract class AbstractXDelta implements XDelta
     {
         return offset;
     }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.maintainment.XDelta#update(org.xwiki.annotation.AnnotationMaintainer, int, int)
-     */
-    public abstract void update(AnnotationMaintainer maintainer, int offset, int length);
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.maintainment.XDelta#getSignedDelta()
-     */
-    public abstract int getSignedDelta();
 }

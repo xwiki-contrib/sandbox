@@ -30,23 +30,22 @@ import org.xwiki.annotation.maintainer.XDelta;
 import org.xwiki.component.annotation.Component;
 
 /**
+ * Annotation maintainer implementation based on getting the content differences using the java diff implementation.
+ * 
  * @version $Id$
  */
 @Component()
 public class JavaDiffBasedAnnotationMaintainer extends AbstractAnnotationMaintainer
 {
-    private Collection<XDelta> deltas = null;
-
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.maintainment.AbstractAnnotationMaintainer
-     *      #getDifferences(java.lang.CharSequence, java.lang.CharSequence)
+     * @see org.xwiki.annotation.internal.maintainment.AbstractAnnotationMaintainer#getDifferences(String, String)
      */
     @Override
-    protected Collection<XDelta> getDifferences(CharSequence previous, CharSequence current)
+    protected Collection<XDelta> getDifferences(String previous, String current)
     {
-        deltas = new ArrayList<XDelta>();
+        Collection<XDelta> deltas = new ArrayList<XDelta>();
         List<Character> previousContent = new ArrayList<Character>();
         for (int i = 0; i < previous.length(); ++i) {
             previousContent.add(previous.charAt(i));
