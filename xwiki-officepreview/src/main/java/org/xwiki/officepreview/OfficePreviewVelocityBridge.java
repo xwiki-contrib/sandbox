@@ -100,8 +100,8 @@ public class OfficePreviewVelocityBridge
             XDOM preview = officePreviewBuilder.build(attachmentName);
             return render(preview, outputSyntaxId);
         } catch (Exception ex) {
-            String message = "Could not preview office document [%s] - [%s]";
-            message = String.format(message, attachmentNameString, ex.getMessage());
+            String message = "Could not preview office document [%s].";
+            message = String.format(message, attachmentNameString);
             setErrorMessage(message);
             logger.error(message, ex);
         }

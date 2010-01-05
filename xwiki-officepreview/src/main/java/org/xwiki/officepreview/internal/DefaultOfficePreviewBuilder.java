@@ -19,10 +19,16 @@
  */
 package org.xwiki.officepreview.internal;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.xwiki.bridge.AttachmentName;
@@ -34,14 +40,13 @@ import org.xwiki.cache.Cache;
 import org.xwiki.cache.CacheException;
 import org.xwiki.cache.CacheManager;
 import org.xwiki.cache.config.CacheConfiguration;
-import org.xwiki.cache.event.CacheEntryEvent;
-import org.xwiki.cache.event.CacheEntryListener;
 import org.xwiki.cache.eviction.LRUEvictionConfiguration;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
+import org.xwiki.container.Container;
 import org.xwiki.context.Execution;
 import org.xwiki.officeimporter.builder.PresentationBuilder;
 import org.xwiki.officeimporter.builder.XDOMOfficeDocumentBuilder;
@@ -49,7 +54,10 @@ import org.xwiki.officeimporter.document.XDOMOfficeDocument;
 import org.xwiki.officeimporter.openoffice.OpenOfficeManager;
 import org.xwiki.officeimporter.openoffice.OpenOfficeManager.ManagerState;
 import org.xwiki.officepreview.OfficePreviewBuilder;
+import org.xwiki.rendering.block.Block;
+import org.xwiki.rendering.block.ImageBlock;
 import org.xwiki.rendering.block.XDOM;
+import org.xwiki.rendering.listener.URLImage;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiAttachment;
@@ -61,13 +69,18 @@ import com.xpn.xwiki.doc.XWikiDocument;
  * @version $Id$
  */
 @Component
-public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements OfficePreviewBuilder, Initializable,
-    CacheEntryListener<OfficeDocumentPreview>
+public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements OfficePreviewBuilder, Initializable
 {
     /**
      * File extensions corresponding to slide presentations.
      */
     private static final List<String> PRESENTATION_FORMAT_EXTENSIONS = Arrays.asList("ppt", "pptx", "odp");
+
+    /**
+     * Used to access the temporary directory.
+     */
+    @Requirement
+    private Container container;
 
     /**
      * Reference to current execution.
@@ -147,22 +160,33 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
     public XDOM build(AttachmentName attachmentName) throws Exception
     {
         String strAttachmentName = attachmentNameSerializer.serialize(attachmentName);
-        String currentVersion = getAttachmentVersion(attachmentName);
         DocumentName reference = attachmentName.getDocumentName();
 
         // Search the cache.
         OfficeDocumentPreview preview = previewsCache.get(strAttachmentName);
 
-        if (null != preview) {
-            // Check if the preview has been expired.
-            if (!currentVersion.equals(preview.getAttachmentVersion())) {
-                // Remove the cache entry. This will trigger the cleanup code.
+        // It's possible that the attachment has been deleted. We need to catch such events and cleanup the cache.
+        if (!docBridge.getAttachments(reference).contains(attachmentName)) {
+            // If a cached preview exists, flush it.
+            if (null != preview) {
                 previewsCache.remove(strAttachmentName);
-                preview = null;
+                preview.dispose();
             }
+            throw new Exception(String.format("Attachment [%s] does not exist.", strAttachmentName));
         }
 
-        // If a preview in not available in cache, build one.
+        // Query the current version of the attachment.
+        String currentVersion = getAttachmentVersion(attachmentName);
+
+        // Check if the preview has been expired.
+        if (null != preview && !currentVersion.equals(preview.getAttachmentVersion())) {
+            // Flush the cached preview.
+            previewsCache.remove(strAttachmentName);
+            preview.dispose();
+            preview = null;
+        }
+
+        // If a preview in not available, build one.
         if (null == preview) {
             // Make sure an openoffice server is available.
             connect();
@@ -196,36 +220,82 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
      * @throws Exception if an error occurs while building the preview.
      */
     private OfficeDocumentPreview build(AttachmentName attachmentName, String attachmentVersion,
-        XDOMOfficeDocument xdomOfficeDoc) throws Exception
+        XDOMOfficeDocument xdomOfficeDoc)
     {
         XDOM xdom = xdomOfficeDoc.getContentDocument();
         Map<String, byte[]> artifacts = xdomOfficeDoc.getArtifacts();
+        Set<File> tempFiles = new HashSet<File>();
 
-        return new OfficeDocumentPreview(attachmentName, attachmentVersion, xdom, artifacts.keySet());
+        // Process all image blocks.
+        List<ImageBlock> imgBlocks = xdom.getChildrenByType(ImageBlock.class, true);
+        for (ImageBlock imgBlock : imgBlocks) {
+            String imageName = imgBlock.getImage().getName();
+
+            // Check whether there is a corresponding artifact.
+            if (artifacts.containsKey(imageName)) {
+                // Prepare a suitable file for holding the temporary image.
+                String extension = imageName.substring(imageName.lastIndexOf('.') + 1);
+                String tempFileName = String.format("%s.%s", UUID.randomUUID().toString(), extension);
+                File tempFile = new File(getTempDir(attachmentName), tempFileName);
+                
+                FileOutputStream fos = null;
+                try {
+                    // Write the temporary image file.
+                    fos = new FileOutputStream(tempFile);
+                    IOUtils.write(artifacts.get(imageName), fos);
+                    
+                    // Build a URLImage which links to the temporary image file.
+                    URLImage urlImage = new URLImage(getURL(attachmentName, tempFileName));
+                    
+                    // Replace the old image block with new one backed by URLImage.
+                    Block newImgBlock = new ImageBlock(urlImage, false, imgBlock.getParameters());                                        
+                    imgBlock.getParent().replaceChild(Arrays.asList(newImgBlock), imgBlock);
+                    
+                    // Collect the temporary file so that it can be cleaned up when the preview is disposed.
+                    tempFiles.add(tempFile);
+                } catch (IOException ex) {
+                    String message = "Error while writing temporary image file [%s].";
+                    getLogger().error(String.format(message, tempFileName), ex);
+                } finally {
+                    IOUtils.closeQuietly(fos);
+                }
+            }
+        }
+
+        return new OfficeDocumentPreview(attachmentName, attachmentVersion, xdom, tempFiles);
     }
 
     /**
-     * {@inheritDoc}
+     * @return directory used to hold temporary files belonging to the office preview of the specified attachment.
      */
-    public void cacheEntryAdded(CacheEntryEvent<OfficeDocumentPreview> event)
+    private File getTempDir(AttachmentName attachmentName)
     {
-        // Not interested.
+        // TODO: For the moment we're using the charting directory to store office preview images. We need to change
+        // this when a generic temporary-resource action becomes available.
+        File tempDir = container.getApplicationContext().getTemporaryDirectory();
+        return new File(tempDir, "charts");
     }
 
     /**
-     * {@inheritDoc}
+     * Utility method for building a URL for the specified temporary file belonging to the office preview of the given
+     * attachment.
+     * 
+     * @param attachmentName name of the attachment being previewed.
+     * @param fileName name of the temporary file.
+     * @return URL string that refers the specified temporary file.
      */
-    public void cacheEntryModified(CacheEntryEvent<OfficeDocumentPreview> event)
+    private String getURL(AttachmentName attachmentName, String fileName)
     {
-        // Not interested.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void cacheEntryRemoved(CacheEntryEvent<OfficeDocumentPreview> event)
-    {
-        // TODO cleanup temporary files.
+        // TODO: Since we are using the charting directory for holding temporary image files, here also we have to use
+        // the charting action so that we have valid URL references. This needs to be updated when a temporary-resource
+        // action becomes available.
+        XWikiContext xcontext = getContext();
+        try {
+            return xcontext.getWiki().getExternalURL(null, "charting", xcontext) + "/" + fileName;
+        } catch (Exception ex) {
+            getLogger().error("Unexpected error.", ex);
+        }
+        return null;
     }
 
     /**
@@ -261,10 +331,18 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
      */
     private String getAttachmentVersion(AttachmentName attachmentName) throws Exception
     {
-        XWikiContext xcontext = (XWikiContext) this.execution.getContext().getProperty("xwikicontext");
+        XWikiContext xcontext = getContext();
         String documentName = documentNameSerializer.serialize(attachmentName.getDocumentName());
         XWikiDocument doc = xcontext.getWiki().getDocument(documentName, xcontext);
         XWikiAttachment attach = doc.getAttachment(attachmentName.getFileName());
         return attach.getVersion();
+    }
+
+    /**
+     * @return {@link XWikiContext} instance.
+     */
+    private XWikiContext getContext()
+    {
+        return (XWikiContext) this.execution.getContext().getProperty("xwikicontext");
     }
 }

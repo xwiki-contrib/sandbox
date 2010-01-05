@@ -19,10 +19,11 @@
  */
 package org.xwiki.officepreview.internal;
 
-import java.util.Collections;
+import java.io.File;
 import java.util.Set;
 
 import org.xwiki.bridge.AttachmentName;
+import org.xwiki.cache.DisposableCacheValue;
 import org.xwiki.rendering.block.XDOM;
 
 /**
@@ -30,7 +31,7 @@ import org.xwiki.rendering.block.XDOM;
  * 
  * @version $Id$
  */
-public class OfficeDocumentPreview
+public class OfficeDocumentPreview implements DisposableCacheValue
 {
     /**
      * Name of the attachment to which this preview belongs.
@@ -48,9 +49,9 @@ public class OfficeDocumentPreview
     private XDOM xdom;
 
     /**
-     * Names of the artifacts (files) that belongs to this preview.
+     * Temporary files used by this preview.
      */
-    private Set<String> artifactNames;
+    private Set<File> tempFiles;
 
     /**
      * Creates a new {@link OfficeDocumentPreview} instance.
@@ -58,15 +59,26 @@ public class OfficeDocumentPreview
      * @param attachmentName name of the attachment to which this preview belongs.
      * @param attachmentVersion version of the attachment to which this preview corresponds.
      * @param xdom {@link XDOM} holding the preview document syntax.
-     * @param artifactNames names of the artifacts (files) that belongs to this preview.
+     * @param tempFiles temporary files that belongs to this preview.
      */
     public OfficeDocumentPreview(AttachmentName attachmentName, String attachmentVersion, XDOM xdom,
-        Set<String> artifactNames)
+        Set<File> tempFiles)
     {
         this.attachmentName = attachmentName;
         this.attachmentVersion = attachmentVersion;
         this.xdom = xdom;
-        this.artifactNames = artifactNames;
+        this.tempFiles = tempFiles;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void dispose() throws Exception
+    {
+        // Cleanup all the temporary files.
+        for (File tempFile : tempFiles) {
+            tempFile.delete();
+        }
     }
 
     /**
@@ -92,12 +104,4 @@ public class OfficeDocumentPreview
     {
         return this.xdom;
     }
-
-    /**
-     * @return names of the artifacts (files) that belongs to this preview.
-     */
-    public Set<String> getArtifactNames()
-    {
-        return Collections.unmodifiableSet(this.artifactNames);
-    }        
 }
