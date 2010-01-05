@@ -1,0 +1,2 @@
+org.xwiki.wikiimporter.internal.WikiImporterVelocityContextInitializer
+org.xwiki.wikiimporter.internal.type.DefaultWikiImporterTypeFactory
