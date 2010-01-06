@@ -170,7 +170,6 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
             // If a cached preview exists, flush it.
             if (null != preview) {
                 previewsCache.remove(strAttachmentName);
-                preview.dispose();
             }
             throw new Exception(String.format("Attachment [%s] does not exist.", strAttachmentName));
         }
@@ -182,7 +181,6 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
         if (null != preview && !currentVersion.equals(preview.getAttachmentVersion())) {
             // Flush the cached preview.
             previewsCache.remove(strAttachmentName);
-            preview.dispose();
             preview = null;
         }
 
@@ -247,7 +245,7 @@ public class DefaultOfficePreviewBuilder extends AbstractLogEnabled implements O
                     // Build a URLImage which links to the temporary image file.
                     URLImage urlImage = new URLImage(getURL(attachmentName, tempFileName));
                     
-                    // Replace the old image block with new one backed by URLImage.
+                    // Replace the old image block with new one backed by the URLImage.
                     Block newImgBlock = new ImageBlock(urlImage, false, imgBlock.getParameters());                                        
                     imgBlock.getParent().replaceChild(Arrays.asList(newImgBlock), imgBlock);
                     
