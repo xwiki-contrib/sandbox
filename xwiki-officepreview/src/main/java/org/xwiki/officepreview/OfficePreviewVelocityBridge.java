@@ -21,11 +21,12 @@ package org.xwiki.officepreview;
 
 import org.xwiki.bridge.AttachmentName;
 import org.xwiki.bridge.AttachmentNameFactory;
+import org.xwiki.bridge.DocumentAccessBridge;
+import org.xwiki.bridge.DocumentNameSerializer;
 import org.xwiki.component.logging.Logger;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
 import org.xwiki.rendering.block.Block;
-import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
@@ -68,6 +69,16 @@ public class OfficePreviewVelocityBridge
     private OfficePreviewBuilder officePreviewBuilder;
 
     /**
+     * Used to query current document syntax.
+     */
+    private DocumentAccessBridge docBridge;
+
+    /**
+     * Used to serialize document names into strings.
+     */
+    private DocumentNameSerializer documentNameSerializer;
+
+    /**
      * Constructs a new bridge instance.
      * 
      * @param componentManager used to lookup for other required components.
@@ -84,28 +95,68 @@ public class OfficePreviewVelocityBridge
         this.execution = componentManager.lookup(Execution.class);
         this.attachmentNameFactory = componentManager.lookup(AttachmentNameFactory.class);
         this.officePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class);
+        this.docBridge = componentManager.lookup(DocumentAccessBridge.class);
+        this.documentNameSerializer = componentManager.lookup(DocumentNameSerializer.class);
+    }
+
+    /**
+     * Builds a preview of the specified office attachment and renders the result in default document syntax.
+     * 
+     * @param attachmentNameString string identifying the office attachment.
+     * @return preview of the specified office attachment rendered in default document syntax or null if an error
+     *         occurs.
+     */
+    public String preview(String attachmentNameString)
+    {
+        return preview(attachmentNameString, null);
     }
 
     /**
      * Builds a preview of the specified office attachment and renders the result in specified syntax.
      * 
      * @param attachmentNameString string identifying the office attachment.
-     * @param outputSyntaxId output syntax identifier (e.g. xhtml/1.0).
-     * @return preview of the specified office attachment rendered in output syntax or null if an error occurs.
+     * @param outputSyntaxId output syntax identifier or null if default document syntax should be used.
+     * @return preview of the specified office attachment rendered in specified output syntax (defaulting to document
+     *         syntax if output syntax is not specified) or null if an error occurs.
      */
     public String preview(String attachmentNameString, String outputSyntaxId)
     {
         AttachmentName attachmentName = attachmentNameFactory.createAttachmentName(attachmentNameString);
         try {
-            XDOM preview = officePreviewBuilder.build(attachmentName);
-            return render(preview, outputSyntaxId);
+            return preview(attachmentName, outputSyntaxId);
         } catch (Exception ex) {
-            String message = "Could not preview office document [%s].";
-            message = String.format(message, attachmentNameString);
+            String message = "Could not preview office document [%s] - %s";
+            message = String.format(message, attachmentNameString, ex.getMessage());
             setErrorMessage(message);
             logger.error(message, ex);
         }
         return null;
+    }
+
+    /**
+     * Builds a preview of the specified office attachment and renders the result in specified syntax.
+     * 
+     * @param attachmentName name of the attachment to be previewed.
+     * @param outputSyntaxId output syntax identifier or null if default document syntax should be used.
+     * @return preview of the specified office attachment rendered in specified output syntax or default document
+     *         syntax.
+     * @throws Exception if current user does not have enough privileges to view the requested attachment or if an error
+     *             occurs while generating the preview.
+     */
+    private String preview(AttachmentName attachmentName, String outputSyntaxId) throws Exception
+    {
+        String strDocumentName = documentNameSerializer.serialize(attachmentName.getDocumentName());
+
+        // Check whether current user has view rights on the document containing the attachment.
+        if (!docBridge.isDocumentViewable(strDocumentName)) {
+            throw new Exception("Inadequate privileges.");
+        }
+
+        // If output syntax is not specified, use the default document syntax.
+        String syntaxId = (outputSyntaxId == null) ? docBridge.getDocumentSyntaxId(strDocumentName) : outputSyntaxId;
+
+        // Build the preview and render the result.
+        return render(officePreviewBuilder.build(attachmentName), syntaxId);
     }
 
     /**
