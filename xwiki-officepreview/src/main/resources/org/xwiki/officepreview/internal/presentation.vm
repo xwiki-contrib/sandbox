@@ -22,7 +22,7 @@ XWiki.officePreview.flipSlide = function(direction) {
     case "first":
       this.currentSlide = 0;
       break;    
-    case "back":
+    case "prev":
       if (this.currentSlide > 0) {
         this.currentSlide -= 1;    
       }
@@ -38,21 +38,21 @@ XWiki.officePreview.flipSlide = function(direction) {
     default:
       this.currentSlide = 0;
   }
-  $("presentation").src = this.slides[this.currentSlide];
+  $("presentation_preview_image").src = this.slides[this.currentSlide];
   return false;
 }
 /* ]]> */
 </script>
 
-<div id="presentation_box">
+<div id="presentation_preview_box">
   <p style="text-align:center;">
-    <span><input type="submit" onclick="javascript:XWiki.officePreview.flipSlide('first');" value="First"/></span>
-    <span><input type="submit" onclick="javascript:XWiki.officePreview.flipSlide('back');" value="Back"/></span>
-    <span><input type="submit" onclick="javascript:XWiki.officePreview.flipSlide('next');" value="Next"/></span>    
-    <span><input type="submit" onclick="javascript:XWiki.officePreview.flipSlide('last');" value="Last"/></span>
-  </p>
+    <span><input class="button" type="submit" onclick="javascript:XWiki.officePreview.flipSlide('first');" value="First"/></span>
+    <span><input class="button" type="submit" onclick="javascript:XWiki.officePreview.flipSlide('prev');" value="Prev"/></span>
+    <span><input class="button" type="submit" onclick="javascript:XWiki.officePreview.flipSlide('next');" value="Next"/></span>    
+    <span><input class="button" type="submit" onclick="javascript:XWiki.officePreview.flipSlide('last');" value="Last"/></span>
+  </p> 
   <p style="text-align:center;">
-    <img id="presentation" src="$slides.get(0)" onclick="javascript:foo();"/>
-  </p>
+    <img id="presentation_preview_image" src="$slides.get(0)" onclick="javascript:XWiki.officePreview.flipSlide('next');"/>
+  </p>  
 </div>
 {{/html}}
