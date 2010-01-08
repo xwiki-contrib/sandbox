@@ -19,6 +19,9 @@
  */
 package org.xwiki.officepreview;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.xwiki.bridge.AttachmentName;
 import org.xwiki.bridge.AttachmentNameFactory;
 import org.xwiki.bridge.DocumentAccessBridge;
@@ -27,6 +30,7 @@ import org.xwiki.component.logging.Logger;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
 import org.xwiki.rendering.block.Block;
+import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
@@ -38,6 +42,11 @@ import org.xwiki.rendering.renderer.printer.WikiPrinter;
  */
 public class OfficePreviewVelocityBridge
 {
+    /**
+     * File extensions corresponding to slide presentations.
+     */
+    private static final List<String> PRESENTATION_FORMAT_EXTENSIONS = Arrays.asList("ppt", "pptx", "odp");
+
     /**
      * The key used to place any error messages while previewing office documents.
      */
@@ -64,9 +73,14 @@ public class OfficePreviewVelocityBridge
     private AttachmentNameFactory attachmentNameFactory;
 
     /**
-     * For building the actual office preview.
+     * For building previews of non-presentation office documents.
      */
-    private OfficePreviewBuilder officePreviewBuilder;
+    private OfficePreviewBuilder defaultOfficePreviewBuilder;
+
+    /**
+     * For building previews of presentation office documents.
+     */
+    private OfficePreviewBuilder presentationOfficePreviewBuilder;
 
     /**
      * Used to query current document syntax.
@@ -94,7 +108,8 @@ public class OfficePreviewVelocityBridge
         // Lookup other required components.
         this.execution = componentManager.lookup(Execution.class);
         this.attachmentNameFactory = componentManager.lookup(AttachmentNameFactory.class);
-        this.officePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class);
+        this.defaultOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class);
+        this.presentationOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class, "presentation");
         this.docBridge = componentManager.lookup(DocumentAccessBridge.class);
         this.documentNameSerializer = componentManager.lookup(DocumentNameSerializer.class);
     }
@@ -155,8 +170,15 @@ public class OfficePreviewVelocityBridge
         // If output syntax is not specified, use the default document syntax.
         String syntaxId = (outputSyntaxId == null) ? docBridge.getDocumentSyntaxId(strDocumentName) : outputSyntaxId;
 
+        XDOM preview;
+        if (isPresentation(attachmentName.getFileName())) {
+            preview = presentationOfficePreviewBuilder.build(attachmentName);
+        } else {
+            preview = defaultOfficePreviewBuilder.build(attachmentName);
+        }
+
         // Build the preview and render the result.
-        return render(officePreviewBuilder.build(attachmentName), syntaxId);
+        return render(preview, syntaxId);
     }
 
     /**
@@ -175,6 +197,18 @@ public class OfficePreviewVelocityBridge
     private void setErrorMessage(String message)
     {
         execution.getContext().setProperty(OFFICE_PREVIEW_ERROR, message);
+    }
+
+    /**
+     * Utility method for checking if a file name corresponds to an office presentation.
+     * 
+     * @param officeFileName office file name.
+     * @return true if the file name / extension represents an office presentation format.
+     */
+    private boolean isPresentation(String officeFileName)
+    {
+        String extension = officeFileName.substring(officeFileName.lastIndexOf('.') + 1);
+        return PRESENTATION_FORMAT_EXTENSIONS.contains(extension);
     }
 
     /**

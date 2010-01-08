@@ -1,0 +1,47 @@
+{{html}}
+<script type="text/javascript">
+var slides = [
+#foreach($slide in $slides)
+  "$slide",
+#end
+];
+
+var index = 0;
+
+function filp_slide(direction) {
+  switch (direction) {
+    case "first":
+      index = 0;
+      break;
+    case "back":
+      if (index > 0) {
+        index = index - 1;    
+      }
+      break;
+    case "next":
+      if (index < slides.length - 1) {
+        index = index + 1;
+      }
+      break;
+    case "last":
+      index = slides.length - 1;
+      break;
+    default:
+      index = 0;
+  }
+  $("presentation").src = slides[index];
+  return false;
+}
+</script>
+<div id="presentation_box">
+<p style="text-align:center;">
+<span><input type="submit" onclick="javascript:filp_slide('first');" value="First"/></span>
+<span><input type="submit" onclick="javascript:filp_slide('back');" value="Back"/></span>
+<span><input type="submit" onclick="javascript:filp_slide('next');" value="Next"/></span>    
+<span><input type="submit" onclick="javascript:filp_slide('last');" value="Last"/></span>
+</p>
+<p style="text-align:center;">
+<img id="presentation" src="$slides.get(0)" onclick="javascript:filp_slide('next');"/>
+</p>
+</div>
+{{/html}}

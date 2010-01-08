@@ -1,2 +1,3 @@
 org.xwiki.officepreview.internal.OfficePreviewVelocityContextInitializer
 org.xwiki.officepreview.internal.DefaultOfficePreviewBuilder
+org.xwiki.officepreview.internal.PresentationOfficePreviewBuilder
