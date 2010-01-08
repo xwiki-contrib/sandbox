@@ -1,47 +1,58 @@
 {{html}}
 <script type="text/javascript">
-var slides = [
-#foreach($slide in $slides)
-  "$slide",
-#end
+/* <![CDATA[ */
+if (typeof(XWiki) == "undefined") {
+  XWiki = new Object();
+}
+
+if (typeof(XWiki.officePreview) == 'undefined') {
+  XWiki.officePreview = new Object();
+}
+
+XWiki.officePreview.slides = [
+  #foreach($slide in $slides)
+    "$slide",
+  #end
 ];
 
-var index = 0;
+XWiki.officePreview.currentSlide = 0;
 
-function filp_slide(direction) {
+XWiki.officePreview.flipSlide = function(direction) {
   switch (direction) {
     case "first":
-      index = 0;
-      break;
+      this.currentSlide = 0;
+      break;    
     case "back":
-      if (index > 0) {
-        index = index - 1;    
+      if (this.currentSlide > 0) {
+        this.currentSlide -= 1;    
       }
-      break;
+      break;    
     case "next":
-      if (index < slides.length - 1) {
-        index = index + 1;
+      if (this.currentSlide < this.slides.length - 1) {
+        this.currentSlide += 1;
       }
-      break;
+      break;    
     case "last":
-      index = slides.length - 1;
-      break;
+      this.currentSlide = this.slides.length - 1;
+      break;    
     default:
-      index = 0;
+      this.currentSlide = 0;
   }
-  $("presentation").src = slides[index];
+  $("presentation").src = this.slides[this.currentSlide];
   return false;
 }
+/* ]]> */
 </script>
+
 <div id="presentation_box">
-<p style="text-align:center;">
-<span><input type="submit" onclick="javascript:filp_slide('first');" value="First"/></span>
-<span><input type="submit" onclick="javascript:filp_slide('back');" value="Back"/></span>
-<span><input type="submit" onclick="javascript:filp_slide('next');" value="Next"/></span>    
-<span><input type="submit" onclick="javascript:filp_slide('last');" value="Last"/></span>
-</p>
-<p style="text-align:center;">
-<img id="presentation" src="$slides.get(0)" onclick="javascript:filp_slide('next');"/>
-</p>
+  <p style="text-align:center;">
+    <span><input type="submit" onclick="javascript:XWiki.officePreview.flipSlide('first');" value="First"/></span>
+    <span><input type="submit" onclick="javascript:XWiki.officePreview.flipSlide('back');" value="Back"/></span>
+    <span><input type="submit" onclick="javascript:XWiki.officePreview.flipSlide('next');" value="Next"/></span>    
+    <span><input type="submit" onclick="javascript:XWiki.officePreview.flipSlide('last');" value="Last"/></span>
+  </p>
+  <p style="text-align:center;">
+    <img id="presentation" src="$slides.get(0)" onclick="javascript:foo();"/>
+  </p>
 </div>
 {{/html}}
