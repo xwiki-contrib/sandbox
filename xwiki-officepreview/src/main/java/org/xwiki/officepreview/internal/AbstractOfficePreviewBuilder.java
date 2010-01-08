@@ -44,6 +44,7 @@ import org.xwiki.context.Execution;
 import org.xwiki.officeimporter.openoffice.OpenOfficeManager;
 import org.xwiki.officeimporter.openoffice.OpenOfficeManager.ManagerState;
 import org.xwiki.officepreview.OfficePreviewBuilder;
+import org.xwiki.officepreview.OfficePreviewConfiguration;
 import org.xwiki.rendering.block.XDOM;
 
 import com.xpn.xwiki.XWikiContext;
@@ -93,6 +94,12 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
      */
     @Requirement
     private OpenOfficeManager officeManager;
+    
+    /**
+     * Used to read configuration details.
+     */
+    @Requirement
+    protected OfficePreviewConfiguration conf;
 
     /**
      * Used to initialize the previews cache.
@@ -112,10 +119,9 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     {
         CacheConfiguration config = new CacheConfiguration();
         LRUEvictionConfiguration lec = new LRUEvictionConfiguration();
-
-        // TODO: Make this configurable.
-        lec.setMaxEntries(10);
-
+        
+        lec.setMaxEntries(conf.getMaxCachedPreviewsCount());
+        
         config.put(LRUEvictionConfiguration.CONFIGURATIONID, lec);
         try {
             previewsCache = cacheManager.createNewCache(config);
