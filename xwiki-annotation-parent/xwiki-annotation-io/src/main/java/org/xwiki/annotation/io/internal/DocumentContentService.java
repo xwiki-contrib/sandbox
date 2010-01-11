@@ -60,10 +60,7 @@ public class DocumentContentService implements IOTargetService
     {
 
         try {
-            String documentContent = dab.getDocumentContent(documentName.toString());
-            // why are we removing carriage returns?
-            String t = documentContent.replace("\r", "");
-            return t;
+            return dab.getDocumentContent(documentName.toString());
         } catch (Exception e) {
             throw new IOServiceException("An exception message has occurred while getting the source of the document "
                 + documentName, e);

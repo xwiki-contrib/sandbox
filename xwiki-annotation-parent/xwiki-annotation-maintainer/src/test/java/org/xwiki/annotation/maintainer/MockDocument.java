@@ -17,28 +17,39 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.xwiki.annotation.maintainer;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.xwiki.annotation.Annotation;
+
 /**
- * Used to specify if an annotation target has been altered by a document modification.
+ * Mock document loaded from test files with that handles updates and updated annotations.
  * 
  * @version $Id$
  */
-public enum AnnotationState
+public class MockDocument extends org.xwiki.annotation.MockDocument
 {
     /**
-     * An annotation is safe when it is valid and can be rendered on the document it has been added.
+     * The modified annotations.
      */
-    SAFE,
+    protected List<Annotation> updatedAnnotations = new ArrayList<Annotation>();
+
     /**
-     * An annotation is altered when the document on which it has been added changed and the annotation position could
-     * not be correctly found on the updated document.
+     * @return the modified source of this document
      */
-    ALTERED,
+    public String getModifiedSource()
+    {
+        String updated = (String) properties.get("sourceUpdated");
+        return updated != null ? updated : getSource();
+    }
+
     /**
-     * An annotation is updated if its selected text has suffered a modification and it could be detected and recovered
-     * during the maintaining process.
+     * @return the list of updated annotations
      */
-    UPDATED;
+    public List<Annotation> getUpdatedAnnotations()
+    {
+        return updatedAnnotations;
+    }
 }

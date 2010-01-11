@@ -20,9 +20,13 @@
 package org.xwiki.annotation;
 
 import java.io.IOException;
+import java.util.Collection;
 
+import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.api.Action;
+import org.jmock.api.Invocation;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
@@ -30,7 +34,6 @@ import org.xwiki.annotation.io.IOTargetService;
 import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.manager.ComponentRepositoryException;
-
 
 /**
  * Mock setup for the annotations tests, mocking the {@link IOService} and {@link IOTargetService} to provide documents
@@ -57,13 +60,20 @@ public class AnnotationsMockSetup
     protected IOService ioService;
 
     /**
+     * The document factory used to load documents from the test files.
+     */
+    protected TestDocumentFactory docFactory;
+
+    /**
      * Builds an annotation mock setup registering mocked {@link IOService} and {@link IOTargetService} to manipulate
      * documents from the test description files.
      * 
      * @param componentManager the component manager to register the services with
+     * @param docFactory the document factory used to load documents from the test files
      * @throws ComponentRepositoryException if the components cannot be registered
      */
-    public AnnotationsMockSetup(ComponentManager componentManager) throws ComponentRepositoryException
+    public AnnotationsMockSetup(ComponentManager componentManager, TestDocumentFactory docFactory)
+        throws ComponentRepositoryException
     {
         // IOTargetService mockup
         ioTargetService = mockery.mock(IOTargetService.class);
@@ -77,8 +87,7 @@ public class AnnotationsMockSetup
         ioDesc.setRole(IOService.class);
         componentManager.registerComponent(ioDesc, ioService);
 
-        // reset the document factory, to start with a clean factory every time this mock is setup
-        TestDocumentFactory.reset();
+        this.docFactory = docFactory;
     }
 
     /**
@@ -95,21 +104,60 @@ public class AnnotationsMockSetup
         mockery.checking(new Expectations()
         {
             {
-                MockDocument mDoc = TestDocumentFactory.getDocument(docName);
+                MockDocument mDoc = docFactory.getDocument(docName);
+
                 allowing(ioService).getSafeAnnotations(with(docName));
                 will(returnValue(mDoc.getSafeAnnotations()));
+
+                allowing(ioService).getAnnotations(with(docName));
+                will(returnValue(mDoc.getAnnotations()));
+
+                allowing(ioService).updateAnnotations(with(docName), with(any(Collection.class)));
+                // update the list of document annotations
+                will(new Action()
+                {
+                    public void describeTo(Description description)
+                    {
+                        description.appendText("Updates the annotations");
+                    }
+
+                    public Object invoke(Invocation invocation) throws Throwable
+                    {
+                        String documentName = (String) invocation.getParameter(0);
+                        MockDocument document = docFactory.getDocument(documentName);
+                        Collection<Annotation> annList = (Collection<Annotation>) invocation.getParameter(1);
+                        for (Annotation ann : annList) {
+                            Annotation toUpdate = getAnnotation(ann.getId(), document.getAnnotations());
+                            // remove toUpdate and add ann
+                            if (toUpdate != null) {
+                                document.getAnnotations().remove(toUpdate);
+                            }
+                            document.getAnnotations().add(ann);
+                        }
+                        return null;
+                    }
+
+                    private Annotation getAnnotation(int annId, Collection<Annotation> list)
+                    {
+                        for (Annotation ann : list) {
+                            if (ann.getId() == annId) {
+                                return ann;
+                            }
+                        }
+
+                        return null;
+                    }
+                });
 
                 allowing(ioTargetService).getSource(with(docName));
                 will(returnValue(mDoc.getSource()));
 
+                allowing(ioTargetService).getSourceSyntax(with(docName));
+                will(returnValue(mDoc.getSyntax()));
+
                 // return the rendered content of the doc if the input is the unchanged source
                 allowing(ioTargetService).getRenderedContent(with(docName), with(mDoc.getSource()));
                 will(returnValue(mDoc.getRenderedContent()));
-
-                // return the rendered content with annotation markers if the input is the source with markers inserted
-                allowing(ioTargetService).getRenderedContent(with(docName),
-                    with(mDoc.getSourceWithMarkers()));
-                will(returnValue(mDoc.getRenderedContentWithMarkers()));
             }
         });
     }
@@ -136,5 +184,13 @@ public class AnnotationsMockSetup
     public IOService getIoService()
     {
         return ioService;
+    }
+
+    /**
+     * @return the docFactory
+     */
+    public TestDocumentFactory getDocFactory()
+    {
+        return docFactory;
     }
 }

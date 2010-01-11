@@ -20,38 +20,38 @@
 
 package org.xwiki.annotation.maintainer;
 
-import org.xwiki.annotation.Annotation;
-
 /**
- * This interface models a source difference.
+ * This interface models a difference between two pieces of content.
  * 
  * @version $Id$
  */
 public interface XDelta
 {
     /**
-     * @return start offset of the difference
+     * @return the position in the original content where the edit takes place
      */
     int getOffset();
 
     /**
-     * @return length of the difference
-     */
-    int getLength();
-
-    /**
-     * @return signed offset delta update
+     * @return the length difference between the old content and the new content
      */
     int getSignedDelta();
 
     /**
-     * This method should be called by annotation maintainer in order to let XDelta instance decide which is the new
-     * offset of annotation.
+     * Returns the original string at the position returned by {@link #getOffset()}. If this string is void and the one
+     * returned by {@link #getChanged()} is not, it means that this difference is an addition at position
+     * {@link #getOffset()}.
      * 
-     * @param annotation the annotation to update
-     * @param maintainer maintainer to use
-     * @param previousContent the previous content of the changed entity
-     * @param currentContent the current content of the changed entity
+     * @return the original string at the position returned by {@link #getOffset()}
      */
-    void update(Annotation annotation, AnnotationMaintainer maintainer, String previousContent, String currentContent);
+    String getOriginal();
+
+    /**
+     * Returns the modified string at the position returned by {@link #getOffset()}. If this string is void and the one
+     * returned by {@link #getOriginal()} is not, it means that this difference is a deletion at position
+     * {@link #getOffset()}.
+     * 
+     * @return the modified string at the position returned by {@link #getOffset()}
+     */
+    String getChanged();
 }

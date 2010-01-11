@@ -34,27 +34,19 @@ import org.xwiki.annotation.maintainer.AnnotationState;
  * 
  * @version $Id$
  */
-public final class TestDocumentFactory
+public class TestDocumentFactory
 {
     /**
      * Loaded documents map.
      */
-    private static Map<String, MockDocument> docs = new HashMap<String, MockDocument>();
+    protected Map<String, MockDocument> docs = new HashMap<String, MockDocument>();
 
     /**
-     * Private constructor for utility classes.
+     * Default constructor.
      */
-    private TestDocumentFactory()
+    public TestDocumentFactory()
     {
 
-    }
-
-    /**
-     * Resets the loaded documents map, to call for clean up at each test setup.
-     */
-    public static void reset()
-    {
-        docs.clear();
     }
 
     /**
@@ -63,11 +55,12 @@ public final class TestDocumentFactory
      * @return the test document loaded from the corpus file
      * @throws IOException if something goes wrong parsing the document file
      */
-    public static MockDocument getDocument(String docName) throws IOException
+    public MockDocument getDocument(String docName) throws IOException
     {
         MockDocument loadedDoc = docs.get(docName);
         if (loadedDoc == null) {
-            loadedDoc = loadDocument(docName);
+            loadedDoc = new MockDocument();
+            loadDocument(loadedDoc, docName);
             docs.put(docName, loadedDoc);
         }
         return loadedDoc;
@@ -76,14 +69,13 @@ public final class TestDocumentFactory
     /**
      * Helper method to load a document from the corpus file with the same name.
      * 
+     * @param doc the document to load the file in
      * @param docName the name of the document to load from the corpus file
-     * @return a {@link MockDocument} instance for the test document loaded from the corpus file
      * @throws IOException if something goes wrong parsing the file
      */
-    private static MockDocument loadDocument(String docName) throws IOException
+    protected void loadDocument(MockDocument doc, String docName) throws IOException
     {
         // FIXME: this is pretty dirty, but it should work
-        MockDocument doc = new MockDocument();
         doc.set("annotations", new ArrayList<Annotation>());
         // get the file
         BufferedReader reader =
@@ -114,7 +106,6 @@ public final class TestDocumentFactory
         }
         // process last key + value as well
         saveKeyToDoc(currentKey, currentValue.toString(), doc, docName);
-        return doc;
     }
 
     /**
@@ -126,13 +117,13 @@ public final class TestDocumentFactory
      * @param docName the name of the document where the annotation is contained
      * @throws IOException if there is any problem reading the annotation representation
      */
-    private static void saveKeyToDoc(String currentKey, String currentValue, MockDocument doc, String docName)
+    protected void saveKeyToDoc(String currentKey, String currentValue, MockDocument doc, String docName)
         throws IOException
     {
         if (currentKey.equals("annotation")) {
             // parse the annotation value
             Annotation ann = parseAnnotation(currentValue, docName);
-            doc.getSafeAnnotations().add(ann);
+            doc.getAnnotations().add(ann);
         } else if (currentKey.indexOf(':') > 0) {
             // the key contains a key and a syntax, parse the syntax and set it
             int separatorIndex = currentKey.indexOf(':');
@@ -153,7 +144,7 @@ public final class TestDocumentFactory
      * @return an {@link Annotation} object corresponding to the data in the {@code annotation} string
      * @throws IOException if there is any problem reading the annotation representation
      */
-    private static Annotation parseAnnotation(String annotation, String docName) throws IOException
+    protected Annotation parseAnnotation(String annotation, String docName) throws IOException
     {
         BufferedReader stringReader = new BufferedReader(new StringReader(annotation));
         // FIXME: pretty dirty to parse by lines
@@ -164,18 +155,29 @@ public final class TestDocumentFactory
             properties[propIndex] = line;
             propIndex++;
         }
-        // last two properties (annotation position in the source) can be missing so parse them separately and default
-        // to 0 if they're not set
+        // last three properties (annotation state and annotation position in the source) can be missing so parse them
+        // separately and default to 0 if they're not set
+        // current position of the index, to increment only if the state can be parsed
+        int index = 5;
+
+        AnnotationState state = AnnotationState.SAFE;
+        try {
+            state = AnnotationState.valueOf(properties[index] != null ? properties[index] : "");
+            index++;
+        } catch (IllegalArgumentException e) {
+            // nothing, leave it to SAFE
+        }
+
         int annotationOffset = 0;
         int annotationLength = 0;
         try {
-            annotationOffset = Integer.parseInt(properties[5]);
-            annotationLength = Integer.parseInt(properties[6]);
+            annotationOffset = Integer.parseInt(properties[index++]);
+            annotationLength = Integer.parseInt(properties[index++]);
         } catch (NumberFormatException e) {
             // nothing leave them on zero
         }
-        return new Annotation(docName, properties[1], null, AnnotationState.SAFE, properties[2], properties[3],
-            properties[4], Integer.parseInt(properties[0]), annotationOffset, annotationLength);
+        return new Annotation(docName, properties[1], null, state, properties[2], properties[3], properties[4], Integer
+            .parseInt(properties[0]), annotationOffset, annotationLength);
 
     }
 }

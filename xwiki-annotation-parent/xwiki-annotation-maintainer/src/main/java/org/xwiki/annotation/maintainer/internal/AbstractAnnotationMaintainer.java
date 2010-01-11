@@ -20,29 +20,40 @@
 
 package org.xwiki.annotation.maintainer.internal;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.xwiki.annotation.Annotation;
+import org.xwiki.annotation.content.ContentAlterer;
 import org.xwiki.annotation.io.IOService;
-import org.xwiki.annotation.io.IOServiceException;
-import org.xwiki.annotation.maintainer.AnnotationMaintainer;
+import org.xwiki.annotation.io.IOTargetService;
 import org.xwiki.annotation.maintainer.AnnotationState;
 import org.xwiki.annotation.maintainer.XDelta;
+import org.xwiki.bridge.DocumentModelBridge;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
+import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.DocumentUpdateEvent;
 import org.xwiki.observation.event.Event;
-
-import com.xpn.xwiki.doc.XWikiDocument;
+import org.xwiki.rendering.block.XDOM;
+import org.xwiki.rendering.parser.Parser;
+import org.xwiki.rendering.renderer.PrintRenderer;
+import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
+import org.xwiki.rendering.renderer.printer.WikiPrinter;
+import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.rendering.syntax.SyntaxFactory;
+import org.xwiki.rendering.transformation.TransformationManager;
 
 /**
  * @version $Id$
  */
-public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled implements AnnotationMaintainer
+public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled implements EventListener
 {
     /**
      * Execution object to get data about the current execution context.
@@ -55,6 +66,18 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      */
     @Requirement
     protected IOService ioService;
+
+    /**
+     * Content storage and manipulation service.
+     */
+    @Requirement
+    protected IOTargetService ioContentService;
+
+    /**
+     * The component manager, used to grab the plain text renderer.
+     */
+    @Requirement
+    protected ComponentManager componentManager;
 
     /**
      * Marks that there is currently an annotations update in progress so all the saves should not trigger a new update.
@@ -99,7 +122,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     }
 
     /**
-     * Proceed to update of annotations location.
+     * Update the annotations on the passed content.
      * 
      * @param documentName is name of document concerned by update
      * @param previousContent the previous content of the document (before the update)
@@ -109,98 +132,170 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     {
         Collection<Annotation> annotations;
         try {
-            annotations = ioService.getSafeAnnotations(documentName);
-            for (Annotation annotation : annotations) {
-                recomputeProperties(annotation, previousContent, currentContent);
+            annotations = ioService.getAnnotations(documentName);
+
+            if (annotations.size() == 0) {
+                // no annotations, nothing to do
+                return;
             }
 
+            // produce the ptr of the previous and current, wrt to syntax
+            String syntaxId = ioContentService.getSourceSyntax(documentName);
+            String renderedPreviousContent = renderPlainText(previousContent, syntaxId);
+            String renderedCurrentContent = renderPlainText(currentContent, syntaxId);
+
+            // create the diffs
+            Collection<XDelta> differences = getDifferences(renderedPreviousContent, renderedCurrentContent);
+            // if any differences: note that there can be updates on the content that have no influence on the plain
+            // text space normalized version
+            if (differences.size() > 0) {
+                // recompute properties for all annotations
+                for (Annotation annotation : annotations) {
+                    recomputeProperties(annotation, differences, renderedPreviousContent, renderedCurrentContent);
+                }
+            }
+
+            // finally store the updates
             ioService.updateAnnotations(documentName, annotations);
-        } catch (IOServiceException e) {
-            getLogger().error(e.getMessage());
+        } catch (Exception e) {
+            getLogger().error("An exception occurred while updating annotations for content at " + documentName, e);
         }
     }
 
     /**
-     * {@inheritDoc}
+     * Helper method to render the plain text version of the passed content.
      * 
-     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer#updateOffset(Annotation, int)
+     * @param content the content to render in plain text
+     * @param syntaxId the source syntax of the content to render
+     * @throws Exception if anything goes wrong while rendering the content
+     * @return the normalized plain text rendered content
      */
-    public void updateOffset(Annotation annotation, int offset)
+    private String renderPlainText(String content, String syntaxId) throws Exception
     {
-        annotation.setOffset(offset);
+        PrintRenderer renderer = componentManager.lookup(PrintRenderer.class, "annotations-maintainer-plain/1.0");
+
+        // parse
+        Parser parser = componentManager.lookup(Parser.class, syntaxId);
+        XDOM xdom = parser.parse(new StringReader(content));
+
+        // run transformations -> although it's going to be at least strange to handle rendered content since there
+        // is no context
+        SyntaxFactory syntaxFactory = componentManager.lookup(SyntaxFactory.class);
+        Syntax sourceSyntax = syntaxFactory.createSyntaxFromIdString(syntaxId);
+        TransformationManager transformationManager = componentManager.lookup(TransformationManager.class);
+        transformationManager.performTransformations(xdom, sourceSyntax);
+
+        // render
+        WikiPrinter printer = new DefaultWikiPrinter();
+        renderer.setPrinter(printer);
+
+        xdom.traverse(renderer);
+
+        return printer.toString();
     }
 
     /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer #onAnnotationModification(Annotation,
-     *      org.xwiki.annotation.maintainment.XDelta)
-     */
-    public void onAnnotationModification(Annotation annotation, XDelta delta)
-    {
-        annotation.setState(AnnotationState.ALTERED);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer
-     *      #onSpecialCase(org.xwiki.annotation.maintainment.XDelta)
-     */
-    public void onSpecialCaseDeletion(Annotation annotation, XDelta delta, String previousContent, 
-        String currentContent)
-    {
-        if (previousContent.substring(0, delta.getOffset()).endsWith(
-            previousContent.substring(annotation.getOffset(), delta.getOffset() + delta.getLength()))) {
-            updateOffset(annotation, annotation.getOffset() + delta.getSignedDelta());
-        } else {
-            onAnnotationModification(annotation, delta);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.maintainment.AnnotationMaintainer #onSpecialCaseAddition(Annotation,
-     *      org.xwiki.annotation.maintainment.XDelta, String, String)
-     */
-    public void onSpecialCaseAddition(Annotation annotation, XDelta delta, String previousContent, 
-        String currentContent)
-    {
-        if (currentContent.substring(delta.getOffset(), delta.getOffset() + delta.getLength()).endsWith(
-            currentContent.substring(annotation.getOffset(), delta.getOffset()))) {
-            updateOffset(annotation, annotation.getOffset() + delta.getSignedDelta());
-        } else {
-            onAnnotationModification(annotation, delta);
-        }
-    }
-
-    /**
-     * For each safe annotation, recompute location.
+     * For each annotation, recompute its properties wrt the differences in the document.
      * 
      * @param annotation the annotation to update properties for
-     * @param previousContent the previous content of the updated document
-     * @param currentContent the current content of the updated document
+     * @param differences the differences between {@code renderedPreviousContent} and {@code renderedCurrentContent}
+     * @param renderedPreviousContent the plain text space normalized rendered previous content
+     * @param renderedCurrentContent the plain text space normalized rendered current content
      */
-    protected void recomputeProperties(Annotation annotation, String previousContent, String currentContent)
+    protected void recomputeProperties(Annotation annotation, Collection<XDelta> differences,
+        String renderedPreviousContent, String renderedCurrentContent)
     {
+        // TODO: do we still want this here? Does altered make sense any more?
         if (annotation.getState().equals(AnnotationState.ALTERED)) {
             return;
         }
-        for (XDelta diff : getDifferences(previousContent, currentContent)) {
-            diff.update(annotation, this, previousContent, currentContent);
+
+        // FIXME: remove this from here if ever selection & context normalization of annotation will be done on add
+        String normalizedSelection = normalizeContent(annotation.getInitialSelection());
+        String normalizedContext = normalizeContent(annotation.getSelectionContext());
+        int cStart = renderedPreviousContent.indexOf(normalizedContext);
+
+        if (cStart < 0) {
+            // annotation context could not be found in the previous rendered content, it must be somewhere in the
+            // generated content or something like that, skip it
+            return;
+        }
+
+        // assume at this point that selection appears only once in the context
+        int cLeftSize = normalizedContext.indexOf(normalizedSelection);
+        int sStart = cStart + cLeftSize;
+        int sEnd = sStart + normalizedSelection.length();
+        int cRightSize = cStart + normalizedContext.length() - sEnd;
+
+        int alteredCStart = cStart;
+        int alteredSLenth = sEnd - sStart;
+
+        for (XDelta diff : differences) {
+            int dStart = diff.getOffset();
+            int dEnd = diff.getOffset() + diff.getOriginal().length();
+            // 1/ if the diff is before the selection, update the position of the context, to preserve the selection
+            // offset
+            if (dEnd < sStart) {
+                alteredCStart += diff.getSignedDelta();
+            }
+            // 2/ diff is inside the selection
+            if (dStart >= sStart && dEnd < sEnd) {
+                // update the selection length
+                alteredSLenth += diff.getSignedDelta();
+                // FIXME: not yet, this is not recognized properly by the client, nor used
+                // annotation.setState(AnnotationState.UPDATED);
+            }
+
+            // 3/ the edit overlaps the annotation selection completely
+            if (dStart <= sStart && dEnd >= sEnd) {
+                // mark annotation as altered and drop it
+                annotation.setState(AnnotationState.ALTERED);
+                break;
+            }
+
+            // 4/ the edit overlaps the start of the annotation
+            if (dStart < dStart && dEnd >= sStart && dEnd <= sEnd) {
+                // FIXME: ftm mark as altered
+                annotation.setState(AnnotationState.ALTERED);
+                break;
+            }
+
+            // 5/ the edit overlaps the end of the annotation
+            if (dStart < sEnd && dEnd >= sEnd) {
+                // FIXME: ftm mark as altered
+                annotation.setState(AnnotationState.ALTERED);
+                break;
+            }
+        }
+
+        // recompute the annotation context and all
+        String newContext =
+            renderedCurrentContent.substring(alteredCStart, alteredCStart + cLeftSize + alteredSLenth + cRightSize);
+        annotation.setSelection(newContext, cLeftSize, alteredSLenth);
+
+        if (annotation.getState() != AnnotationState.ALTERED) {
+            // TODO: ensure uniqueness
         }
     }
 
     /**
-     * Since previous content and current content use indifferently \r\n and \n we have to make content homogeneous.
+     * Helper function to clean the passed content. To be used to generate the normalized spaces version of the
+     * selection and its context.
      * 
      * @param content the content to normalize
-     * @return the normalized content, with cleaned content
+     * @return the content with normalized-spaces
      */
     protected String normalizeContent(String content)
     {
-        return content.replace("\r", "");
+        ContentAlterer normalizerContentAlterer;
+        try {
+            normalizerContentAlterer = componentManager.lookup(ContentAlterer.class, "space-normalizer");
+            return normalizerContentAlterer.alter(content).getContent().toString();
+        } catch (ComponentLookupException e) {
+            getLogger().error(e.getMessage(), e);
+        }
+        // if something went wrong fetching the alterer, return original version, assume it's ok
+        return content;
     }
 
     /**
@@ -211,18 +306,18 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      */
     public void onEvent(Event event, Object source, Object data)
     {
-        XWikiDocument currentDocument = (XWikiDocument) source;
+        DocumentModelBridge currentDocument = (DocumentModelBridge) source;
 
-        XWikiDocument previousDocument = currentDocument.getOriginalDocument();
+        DocumentModelBridge previousDocument = currentDocument.getOriginalDocument();
 
         // if it's not a modification triggered by the updates of the annotations while running the same annotation
         // maintainer, and the difference is in the content of the document
+        // FIXME: should update also if an object is modified as the content of the object could be used in the
+        // rendering of the document. But for this the transformations need to be run
         if (!isUpdating && !previousDocument.getContent().equals(currentDocument.getContent())) {
             isUpdating = true;
             String content = currentDocument.getContent();
             String previousContent = previousDocument.getContent();
-            content = normalizeContent(content);
-            previousContent = normalizeContent(previousContent);
             maintainDocumentAnnotations(currentDocument.getFullName(), previousContent, content);
             isUpdating = false;
         }

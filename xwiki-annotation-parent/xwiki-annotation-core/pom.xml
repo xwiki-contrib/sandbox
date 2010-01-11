@@ -42,7 +42,7 @@
       <artifactId>xwiki-core-rendering-tests</artifactId>
       <version>${platform.core.version}</version>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.jmock</groupId>
       <artifactId>jmock</artifactId>
@@ -73,6 +73,18 @@
         <configuration>
           <argLine>-Dfile.encoding=UTF-8</argLine>
         </configuration>
+      </plugin>
+      <!-- create a test jar to use the tests code in other projects -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -20,9 +20,12 @@
 
 package org.xwiki.annotation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.xwiki.annotation.maintainer.AnnotationState;
 
 /**
  * Stores data and provides functions for manipulating mock documents loaded from test files. Use the
@@ -36,7 +39,7 @@ public class MockDocument
     /**
      * Properties map for this test document.
      */
-    private Map<String, Object> properties = new HashMap<String, Object>();
+    protected Map<String, Object> properties = new HashMap<String, Object>();
 
     /**
      * Sets the properties of this document.
@@ -61,17 +64,6 @@ public class MockDocument
     }
 
     /**
-     * @return the source of this document with the annotation markers inserted. Used for verification purposes, for
-     *         identifying the calls to render content after the markers have been inserted, for which
-     *         {@link #getRenderedContentWithMarkers()} should be returned.
-     */
-    public String getSourceWithMarkers()
-    {
-        String sourceWithMarkers = (String) properties.get("sourceWithMarkers");
-        return sourceWithMarkers != null ? sourceWithMarkers : getSource();
-    }
-
-    /**
      * @return the annotated HTML of this document. Used for verification purposes.
      */
     public String getAnnotatedContent()
@@ -81,13 +73,18 @@ public class MockDocument
     }
 
     /**
-     * @return the rendered HTML of this document, with the annotation markers inserted. This should be the result of
-     *         rendering the source returned by {@link #getSourceWithMarkers()}.
+     * @return the list of annotations, as specified in the corpus file, which have the safe state. For the moment, the
+     *         UPDATE too.
      */
-    public String getRenderedContentWithMarkers()
+    public List<Annotation> getSafeAnnotations()
     {
-        String renderedWithMarkers = (String) properties.get("renderedWithMarkers");
-        return renderedWithMarkers != null ? renderedWithMarkers : getRenderedContent();
+        List<Annotation> safe = new ArrayList<Annotation>();
+        for (Annotation ann : getAnnotations()) {
+            if (ann.getState() == AnnotationState.SAFE || ann.getState() == AnnotationState.UPDATED) {
+                safe.add(ann);
+            }
+        }
+        return safe;
     }
 
     /**
@@ -95,7 +92,7 @@ public class MockDocument
      *         the annotation is made.
      */
     @SuppressWarnings("unchecked")
-    public List<Annotation> getSafeAnnotations()
+    public List<Annotation> getAnnotations()
     {
         return (List<Annotation>) properties.get("annotations");
     }

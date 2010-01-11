@@ -28,42 +28,12 @@ import org.xwiki.annotation.maintainer.XDelta;
 public abstract class AbstractXDelta implements XDelta
 {
     /**
-     * The offset of the current difference.
-     */
-    private final int offset;
-
-    /**
-     * The length of the current difference.
-     */
-    private final int length;
-
-    /**
-     * @param offset the offset of the current difference
-     * @param length the length of the current difference
-     */
-    public AbstractXDelta(int offset, int length)
-    {
-        this.offset = offset;
-        this.length = length;
-    }
-
-    /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.maintainment.XDelta#getLength()
+     * @see org.xwiki.annotation.maintainer.XDelta#getSignedDelta()
      */
-    public int getLength()
+    public int getSignedDelta()
     {
-        return length;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.maintainment.XDelta#getOffset()
-     */
-    public int getOffset()
-    {
-        return offset;
+        return getChanged().length() - getOriginal().length();
     }
 }

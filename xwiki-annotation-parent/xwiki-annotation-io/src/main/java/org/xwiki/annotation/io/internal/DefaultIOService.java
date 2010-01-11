@@ -191,7 +191,7 @@ public class DefaultIOService implements IOService
     {
         List<Annotation> result = new ArrayList<Annotation>();
         for (Annotation it : getAnnotations(documentName)) {
-            if (it.getState().equals(AnnotationState.SAFE)) {
+            if (it.getState() == AnnotationState.SAFE || it.getState() == AnnotationState.UPDATED) {
                 result.add(it);
             }
         }
@@ -223,8 +223,7 @@ public class DefaultIOService implements IOService
      * 
      * @see org.xwiki.annotation.io.IOService#updateAnnotations(String, java.util.Collection)
      */
-    public void updateAnnotations(String documentName, Collection<Annotation> annotations)
-        throws IOServiceException
+    public void updateAnnotations(String documentName, Collection<Annotation> annotations) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();

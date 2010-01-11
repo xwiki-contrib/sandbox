@@ -39,9 +39,9 @@ public class Annotation
 
     protected final String annotation;
 
-    protected final String initialSelection;
+    protected String initialSelection;
 
-    protected final String selectionContext;
+    protected String selectionContext;
 
     protected final int id;
 
@@ -133,6 +133,30 @@ public class Annotation
     }
 
     /**
+     * Sets the selection of this annotation through its context, the offset of the selection inside the context and its
+     * length. Setting this value is done in this manner to make sure it's kept consistent.
+     * 
+     * @param selectionContext the context of the selection
+     * @param selectionOffset the offset of the actual selection in the context
+     * @param selectionLength the length of the selection in the context. Note that context must be at least offset +
+     *            length in size, otherwise the selection will be set to the rest of the context starting from the
+     *            specified offset
+     */
+    public void setSelection(String selectionContext, int selectionOffset, int selectionLength)
+    {
+        String selection;
+        if (selectionOffset < 0 || selectionOffset > selectionContext.length()) {
+            selection = selectionContext;
+        } else if (selectionLength < 0 || selectionOffset + selectionLength > selectionContext.length()) {
+            selection = selectionContext.substring(selectionOffset);
+        } else {
+            selection = selectionContext.substring(selectionOffset, selectionOffset + selectionLength);
+        }
+        this.selectionContext = selectionContext;
+        this.initialSelection = selection;
+    }
+
+    /**
      * @return selection context of annotation
      */
     public String getSelectionContext()
@@ -212,7 +236,7 @@ public class Annotation
     @Override
     public int hashCode()
     {
-        return (getAnnotation() + getAuthor() + Integer.toString(getOffset()) + Integer
-            .toString(getLength())).hashCode();
+        return (getAnnotation() + getAuthor() + Integer.toString(getOffset()) + Integer.toString(getLength()))
+            .hashCode();
     }
 }

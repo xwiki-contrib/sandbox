@@ -23,6 +23,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-annotation-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.xpn.xwiki.platform</groupId>
       <artifactId>xwiki-core</artifactId>
       <version>${platform.core.version}</version>
@@ -34,8 +41,10 @@
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
-    <!-- Even if this is already included by the xwiki-core dependency, we include it again here to make sure that, 
-         if xwiki-core stops using observation, we still have it.-->
+    <!--
+      Even if this is already included by the xwiki-core dependency, we include it again here to make sure that, if
+      xwiki-core stops using observation, we still have it.
+    -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-observation-local</artifactId>
@@ -49,9 +58,33 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-rendering-api</artifactId>
+      <version>${platform.core.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-shared-tests</artifactId>
+      <version>${platform.core.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmock</groupId>
+      <artifactId>jmock</artifactId>
+      <version>2.5.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmock</groupId>
+      <artifactId>jmock-junit4</artifactId>
+      <version>2.5.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -60,6 +93,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <excludes>
+            org/xwiki/annotation/maintainer/internal/AbstractAnnotationMaintainer.java
+          </excludes>
+        </configuration>
       </plugin>
     </plugins>
   </build>

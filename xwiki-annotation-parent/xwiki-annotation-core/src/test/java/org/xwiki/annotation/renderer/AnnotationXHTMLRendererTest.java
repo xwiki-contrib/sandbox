@@ -62,6 +62,11 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
      */
     protected String docName;
 
+    /**
+     * Factory to load test documents.
+     */
+    protected TestDocumentFactory docFactory;
+
     static {
         // tests containing only plain text content
         addFileToTest("renderer/plain/Plain1");
@@ -175,6 +180,19 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     }
 
     /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.test.AbstractComponentTestCase#setUp()
+     */
+    @Override
+    public void setUp() throws Exception
+    {
+        super.setUp();
+
+        docFactory = new TestDocumentFactory();
+    }
+
+    /**
      * Test rendering the annotations in the document description file results in the annotated html.
      * 
      * @throws Exception in case something goes wrong looking up components and rendering
@@ -182,14 +200,13 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     @Test
     public void getAnnotatedHTML() throws Exception
     {
-        Parser parser =
-            getComponentManager().lookup(Parser.class, TestDocumentFactory.getDocument(docName).getSyntax());
-        XDOM xdom = parser.parse(new StringReader(TestDocumentFactory.getDocument(docName).getSource()));
+        Parser parser = getComponentManager().lookup(Parser.class, docFactory.getDocument(docName).getSyntax());
+        XDOM xdom = parser.parse(new StringReader(docFactory.getDocument(docName).getSource()));
         SyntaxFactory syntaxFactory = getComponentManager().lookup(SyntaxFactory.class);
 
         // run transformations
         TransformationManager transformationManager = getComponentManager().lookup(TransformationManager.class);
-        transformationManager.performTransformations(xdom, syntaxFactory.createSyntaxFromIdString(TestDocumentFactory
+        transformationManager.performTransformations(xdom, syntaxFactory.createSyntaxFromIdString(docFactory
             .getDocument(docName).getSyntax()));
 
         AnnotationPrintRenderer renderer =
@@ -197,11 +214,11 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         WikiPrinter printer = new DefaultWikiPrinter();
         renderer.setPrinter(printer);
         // set the annotations for this renderer
-        renderer.setAnnotations(TestDocumentFactory.getDocument(docName).getSafeAnnotations());
+        renderer.setAnnotations(docFactory.getDocument(docName).getAnnotations());
 
         xdom.traverse(renderer);
 
-        assertEquals(TestDocumentFactory.getDocument(docName).getAnnotatedContent(), printer.toString());
+        assertEquals(docFactory.getDocument(docName).getAnnotatedContent(), printer.toString());
     }
 
     /**
@@ -212,14 +229,13 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
     @Test
     public void getAnnotatedHTMLWithoutAnnotations() throws Exception
     {
-        Parser parser =
-            getComponentManager().lookup(Parser.class, TestDocumentFactory.getDocument(docName).getSyntax());
-        XDOM xdom = parser.parse(new StringReader(TestDocumentFactory.getDocument(docName).getSource()));
+        Parser parser = getComponentManager().lookup(Parser.class, docFactory.getDocument(docName).getSyntax());
+        XDOM xdom = parser.parse(new StringReader(docFactory.getDocument(docName).getSource()));
         SyntaxFactory syntaxFactory = getComponentManager().lookup(SyntaxFactory.class);
 
         // run transformations
         TransformationManager transformationManager = getComponentManager().lookup(TransformationManager.class);
-        transformationManager.performTransformations(xdom, syntaxFactory.createSyntaxFromIdString(TestDocumentFactory
+        transformationManager.performTransformations(xdom, syntaxFactory.createSyntaxFromIdString(docFactory
             .getDocument(docName).getSyntax()));
 
         AnnotationPrintRenderer renderer =
@@ -229,6 +245,6 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
 
         xdom.traverse(renderer);
 
-        assertEquals(TestDocumentFactory.getDocument(docName).getRenderedContent(), printer.toString());
+        assertEquals(docFactory.getDocument(docName).getRenderedContent(), printer.toString());
     }
 }
