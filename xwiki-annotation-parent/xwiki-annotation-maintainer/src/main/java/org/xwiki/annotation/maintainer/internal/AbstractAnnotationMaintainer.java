@@ -159,6 +159,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             ioService.updateAnnotations(documentName, annotations);
         } catch (Exception e) {
             getLogger().error("An exception occurred while updating annotations for content at " + documentName, e);
+            throw new RuntimeException(e);
         }
     }
 

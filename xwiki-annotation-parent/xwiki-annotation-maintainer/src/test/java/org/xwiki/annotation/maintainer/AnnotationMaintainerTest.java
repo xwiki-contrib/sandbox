@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.annotation.maintainer.internal;
+package org.xwiki.annotation.maintainer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -35,8 +35,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationsMockSetup;
-import org.xwiki.annotation.maintainer.MockDocument;
-import org.xwiki.annotation.maintainer.TestDocumentFactory;
 import org.xwiki.bridge.DocumentModelBridge;
 import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.DocumentUpdateEvent;
@@ -143,7 +141,7 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         // ignore the docName ftm, just test the marvelous setup
         Event documentUpdateEvt = new DocumentUpdateEvent();
         MockDocument doc = ((TestDocumentFactory) setup.getDocFactory()).getDocument(docName);
-        DocumentModelBridge mock = getDocumentModelBridgeMock(docName, doc.getSource(), doc.getModifiedSource());
+        DocumentModelBridge mock = getDocumentModelBridgeMock(docName, doc.getModifiedSource(), doc.getSource());
 
         annotationMaintainer.onEvent(documentUpdateEvt, mock, null);
 
