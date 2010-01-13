@@ -82,12 +82,29 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
 
         addFileToTest("maintainer/endpoint/Beginning1");
         addFileToTest("maintainer/endpoint/Beginning2");
+        addFileToTest("maintainer/endpoint/Beginning3");
+        addFileToTest("maintainer/endpoint/Beginning4");
+        addFileToTest("maintainer/endpoint/Beginning5");
 
         addFileToTest("maintainer/endpoint/End1");
         addFileToTest("maintainer/endpoint/End2");
         addFileToTest("maintainer/endpoint/End3");
-        
+        addFileToTest("maintainer/endpoint/End4");
+        addFileToTest("maintainer/endpoint/End5");
+
+        addFileToTest("maintainer/endpoint/Endpoints1");
+        addFileToTest("maintainer/endpoint/Endpoints2");
+        addFileToTest("maintainer/endpoint/Endpoints3");
+        addFileToTest("maintainer/endpoint/Endpoints4");
+
+        // TODO: the following tests, paragraph and altered, need to be reviewed since there are multiple issues with
+        // character based diff that cause them to yield different results for a difference of a single letter which can
+        // cause a matching point.
         addFileToTest("maintainer/paragraph/Paragraph1");
+        addFileToTest("maintainer/alter/Altered1");
+        addFileToTest("maintainer/alter/Altered2");
+        addFileToTest("maintainer/alter/Altered3");
+        addFileToTest("maintainer/alter/Altered4");
     }
 
     /**

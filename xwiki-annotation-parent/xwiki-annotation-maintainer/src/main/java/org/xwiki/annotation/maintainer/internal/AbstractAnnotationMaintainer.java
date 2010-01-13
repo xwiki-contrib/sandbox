@@ -254,26 +254,30 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             }
 
             // 4/ the edit overlaps the start of the annotation
-            if (dStart < dStart && dEnd >= sStart && dEnd <= sEnd) {
-                // FIXME: ftm mark as altered
-                annotation.setState(AnnotationState.ALTERED);
-                break;
+            if (dStart < sStart && dEnd > sStart && dEnd <= sEnd) {
+                // shift with the signed delta to the right, assume that the edit took place before the annotation and
+                // keep its size. This way it will be mapped at the position as if the edit would have taken place
+                // before it and will contain the new content at the start of the annotation
+                alteredCStart += diff.getSignedDelta();
+                // FIXME: not yet, this is not recognized properly by the client, nor used
+                // annotation.setState(AnnotationState.UPDATED);
             }
 
             // 5/ the edit overlaps the end of the annotation
             if (dStart < sEnd && dEnd > sEnd) {
-                // FIXME: ftm mark as altered
-                annotation.setState(AnnotationState.ALTERED);
-                break;
+                // nothing, behave as if the edit would have taken place after the annotation
+                // FIXME: not yet, this is not recognized properly by the client, nor used
+                // annotation.setState(AnnotationState.UPDATED);
             }
         }
 
-        // recompute the annotation context and all
-        String newContext =
-            renderedCurrentContent.substring(alteredCStart, alteredCStart + cLeftSize + alteredSLength + cRightSize);
-        annotation.setSelection(newContext, cLeftSize, alteredSLength);
-
         if (annotation.getState() != AnnotationState.ALTERED) {
+            // recompute the annotation context and all
+            String newContext =
+                renderedCurrentContent
+                    .substring(alteredCStart, alteredCStart + cLeftSize + alteredSLength + cRightSize);
+            annotation.setSelection(newContext, cLeftSize, alteredSLength);
+
             // TODO: ensure uniqueness
         }
     }
