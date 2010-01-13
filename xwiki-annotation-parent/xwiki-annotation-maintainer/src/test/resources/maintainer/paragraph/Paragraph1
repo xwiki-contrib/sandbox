@@ -1,0 +1,28 @@
+##################################################
+# Editing a full annotated paragraph. I.e. modification of the whole annotation selected text.
+##################################################
+.source
+Text
+
+Paragraph 
+
+Word
+.sourceUpdated
+Text
+
+Modification 
+
+Word
+.annotation
+0
+XWiki.XWikiGuest
+Annotation 1
+Paragraph
+Paragraph
+.annotationUpdated
+0
+XWiki.XWikiGuest
+Annotation 1
+Modification
+Modification
+SAFE

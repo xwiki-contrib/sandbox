@@ -82,28 +82,25 @@ public class JavaDiffBasedAnnotationMaintainer extends AbstractAnnotationMaintai
         String original = "";
         String modified = "";
 
-        // a bit forced here since normally there's no way a start can be none. Something is wrong with that diff
+        // deleted is from previous, added is in current
+
+        if (diff.getDeletedStart() == Difference.NONE || diff.getAddedStart() == Difference.NONE) {
+            // this diff doesn't make sense, ignore it
+            return null;
+        }
+
+        position = diff.getDeletedStart();
 
         // the content that was deleted
-        if (diff.getDeletedStart() != Difference.NONE && diff.getDeletedEnd() != Difference.NONE) {
-            // say position is where it was deleted
-            position = diff.getAddedStart();
+        if (diff.getDeletedEnd() != Difference.NONE) {
             original = previous.substring(diff.getDeletedStart(), diff.getDeletedEnd() + 1);
         }
 
         // the content that was added
-        if (diff.getAddedStart() != Difference.NONE && diff.getAddedEnd() != Difference.NONE) {
-            // say position is where it was added. Normally this shouldn't override the value set at deleted, they
-            // should start in the same position
-            position = diff.getAddedStart();
+        if (diff.getAddedEnd() != Difference.NONE) {
             modified = current.substring(diff.getAddedStart(), diff.getAddedEnd() + 1);
         }
 
-        if (position == -1) {
-            // none of the two pieces, delete or add didn't make sense, it means something is wrong with the diff
-            // therefore discard it
-            return null;
-        }
         // else return the built chunk
         return new ChunksXDelta(position, original, modified);
     }

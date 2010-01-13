@@ -70,7 +70,24 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
     protected AnnotationsMockSetup setup;
 
     static {
-        addFileToTest("maintainer/plaintext/Plain1");
+        addFileToTest("maintainer/correction/Correction1");
+        addFileToTest("maintainer/correction/Correction2");
+        addFileToTest("maintainer/correction/Correction3");
+
+        addFileToTest("maintainer/correction/multiple/CorrectionMultiple1");
+        addFileToTest("maintainer/correction/multiple/CorrectionMultiple2");
+        addFileToTest("maintainer/correction/multiple/CorrectionMultiple3");
+        addFileToTest("maintainer/correction/multiple/CorrectionMultiple4");
+        addFileToTest("maintainer/correction/multiple/CorrectionMultiple5");
+
+        addFileToTest("maintainer/endpoint/Beginning1");
+        addFileToTest("maintainer/endpoint/Beginning2");
+
+        addFileToTest("maintainer/endpoint/End1");
+        addFileToTest("maintainer/endpoint/End2");
+        addFileToTest("maintainer/endpoint/End3");
+        
+        addFileToTest("maintainer/paragraph/Paragraph1");
     }
 
     /**

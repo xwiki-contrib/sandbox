@@ -159,7 +159,6 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             ioService.updateAnnotations(documentName, annotations);
         } catch (Exception e) {
             getLogger().error("An exception occurred while updating annotations for content at " + documentName, e);
-            throw new RuntimeException(e);
         }
     }
 
@@ -229,20 +228,20 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         int cRightSize = cStart + normalizedContext.length() - sEnd;
 
         int alteredCStart = cStart;
-        int alteredSLenth = sEnd - sStart;
+        int alteredSLength = sEnd - sStart;
 
         for (XDelta diff : differences) {
             int dStart = diff.getOffset();
             int dEnd = diff.getOffset() + diff.getOriginal().length();
-            // 1/ if the diff is before the selection, update the position of the context, to preserve the selection
-            // offset
-            if (dEnd < sStart) {
+            // 1/ if the diff is before the selection, or ends exactly where selection starts, update the position of
+            // the context, to preserve the selection offset
+            if (dEnd <= sStart) {
                 alteredCStart += diff.getSignedDelta();
             }
-            // 2/ diff is inside the selection
-            if (dStart >= sStart && dEnd < sEnd) {
+            // 2/ diff is inside the selection (and not the previous condition)
+            if (dEnd > sStart && dStart >= sStart && dStart < sEnd && dEnd <= sEnd) {
                 // update the selection length
-                alteredSLenth += diff.getSignedDelta();
+                alteredSLength += diff.getSignedDelta();
                 // FIXME: not yet, this is not recognized properly by the client, nor used
                 // annotation.setState(AnnotationState.UPDATED);
             }
@@ -262,7 +261,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             }
 
             // 5/ the edit overlaps the end of the annotation
-            if (dStart < sEnd && dEnd >= sEnd) {
+            if (dStart < sEnd && dEnd > sEnd) {
                 // FIXME: ftm mark as altered
                 annotation.setState(AnnotationState.ALTERED);
                 break;
@@ -271,8 +270,8 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
 
         // recompute the annotation context and all
         String newContext =
-            renderedCurrentContent.substring(alteredCStart, alteredCStart + cLeftSize + alteredSLenth + cRightSize);
-        annotation.setSelection(newContext, cLeftSize, alteredSLenth);
+            renderedCurrentContent.substring(alteredCStart, alteredCStart + cLeftSize + alteredSLength + cRightSize);
+        annotation.setSelection(newContext, cLeftSize, alteredSLength);
 
         if (annotation.getState() != AnnotationState.ALTERED) {
             // TODO: ensure uniqueness
