@@ -234,10 +234,10 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
      * @param list the list of annotations where to search for the passed annotation
      * @return the found annotation
      */
-    private Annotation getAnnotation(int annId, Collection<Annotation> list)
+    private Annotation getAnnotation(String annId, Collection<Annotation> list)
     {
         for (Annotation ann : list) {
-            if (ann.getId() == annId) {
+            if (ann.getId().equals(annId)) {
                 return ann;
             }
         }

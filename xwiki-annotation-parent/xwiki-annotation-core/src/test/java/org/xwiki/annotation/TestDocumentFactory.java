@@ -176,8 +176,8 @@ public class TestDocumentFactory
         } catch (NumberFormatException e) {
             // nothing leave them on zero
         }
-        return new Annotation(docName, properties[1], null, state, properties[2], properties[3], properties[4], Integer
-            .parseInt(properties[0]), annotationOffset, annotationLength);
+        return new Annotation(docName, properties[1], null, state, properties[2], properties[3], properties[4],
+            properties[0], annotationOffset, annotationLength);
 
     }
 }

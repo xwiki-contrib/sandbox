@@ -137,10 +137,10 @@ public class AnnotationsMockSetup
                         return null;
                     }
 
-                    private Annotation getAnnotation(int annId, Collection<Annotation> list)
+                    private Annotation getAnnotation(String annId, Collection<Annotation> list)
                     {
                         for (Annotation ann : list) {
-                            if (ann.getId() == annId) {
+                            if (ann.getId().equals(annId)) {
                                 return ann;
                             }
                         }

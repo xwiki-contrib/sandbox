@@ -27,7 +27,6 @@ import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.io.IOTargetService;
-import org.xwiki.annotation.maintainer.AnnotationState;
 import org.xwiki.annotation.renderer.AnnotationPrintRenderer;
 import org.xwiki.annotation.target.AnnotationTarget;
 import org.xwiki.component.annotation.Component;
@@ -70,20 +69,16 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(String, String,
-     *      String, int, String, String)
+     * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(String, String, String, int, String, String)
      */
     public void addAnnotation(String metadata, String selection, String selectionContext, int offset,
         String documentName, String user) throws AnnotationServiceException
     {
         try {
-            // nothing. FTM send invalid positions for annotation offset&length since they won't be used
             // create the annotation with this data and send it to the storage service
             // TODO: also think of mapping the annotation on the document at add time and fail it if it's not mappable,
             // for extra security
-            Annotation annotation =
-                new Annotation(documentName, user, null, AnnotationState.SAFE, metadata, selection, selectionContext,
-                    0, -1, -1);
+            Annotation annotation = new Annotation(documentName, user, metadata, selection, selectionContext, "");
             ioService.addAnnotation(documentName, annotation);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException("An exception occurred when accessing the storage services", e);

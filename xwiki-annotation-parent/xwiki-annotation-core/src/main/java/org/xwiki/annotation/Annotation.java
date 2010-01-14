@@ -33,17 +33,17 @@ public class Annotation
 
     protected final String author;
 
-    protected final String displayDate;
+    protected String displayDate;
 
     protected AnnotationState state;
 
-    protected final String annotation;
+    protected String annotation;
 
     protected String initialSelection;
 
     protected String selectionContext;
 
-    protected final int id;
+    protected final String id;
 
     protected int offset;
 
@@ -60,9 +60,10 @@ public class Annotation
      * @param id the id of the annotation
      * @param offset the offset of the annotation inside the context
      * @param length the length of the selection of this annotation
+     * @deprecated use the {@link Annotation#Annotation(String, String, String, String, String, String)} constructor
      */
     public Annotation(String page, String author, String date, AnnotationState state, String annotation,
-        String initialSelection, String selectionContext, int id, int offset, int length)
+        String initialSelection, String selectionContext, String id, int offset, int length)
     {
         this.page = page;
         this.author = author;
@@ -74,6 +75,32 @@ public class Annotation
         this.id = id;
         this.offset = offset;
         this.length = length;
+    }
+
+    /**
+     * Build an annotation from the selection and selection context with invalid values for the offset and length which
+     * are deprecated.
+     * 
+     * @param page the document where the annotation is added
+     * @param author the author of the annotation
+     * @param annotation the text of the annotation
+     * @param initialSelection the initial selection of the annotation
+     * @param selectionContext the context of the annotation selection
+     * @param id the id of the annotation
+     */
+    public Annotation(String page, String author, String annotation, String initialSelection, String selectionContext,
+        String id)
+    {
+        this.page = page;
+        this.author = author;
+        this.annotation = annotation;
+        this.initialSelection = initialSelection;
+        this.selectionContext = selectionContext;
+        this.id = id;
+        this.offset = -1;
+        this.length = -1;
+        this.state = AnnotationState.SAFE;
+        this.displayDate = "";
     }
 
     /**
@@ -167,7 +194,7 @@ public class Annotation
     /**
      * @return id of annotation
      */
-    public int getId()
+    public String getId()
     {
         return id;
     }
@@ -238,5 +265,13 @@ public class Annotation
     {
         return (getAnnotation() + getAuthor() + Integer.toString(getOffset()) + Integer.toString(getLength()))
             .hashCode();
+    }
+
+    /**
+     * @param displayDate the displayDate to set
+     */
+    public void setDisplayDate(String displayDate)
+    {
+        this.displayDate = displayDate;
     }
 }

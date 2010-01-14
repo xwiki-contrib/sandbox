@@ -21,7 +21,7 @@
         the text of the annotation and the annotated content, its state, author and date.</documentation>
     </annotation>
     <sequence>
-      <element name="annotationId" type="int"></element>
+      <element name="annotationId" type="string"></element>
       <element name="pageId" type="string"></element>
       <element name="state"></element>
       <element name="author" type="string"></element>
