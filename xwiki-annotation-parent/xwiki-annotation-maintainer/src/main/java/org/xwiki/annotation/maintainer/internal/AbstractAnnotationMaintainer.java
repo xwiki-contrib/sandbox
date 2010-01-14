@@ -51,6 +51,11 @@ import org.xwiki.rendering.syntax.SyntaxFactory;
 import org.xwiki.rendering.transformation.TransformationManager;
 
 /**
+ * Event listener to listen to documents update events and update the annotations that are impacted by the document
+ * change, to update the selection and context to match the new document content. <br />
+ * FIXME: fix me: sky high complexity of the functions & fan-out. Split to be able to potentially test on
+ * small pieces, and decouple event handling logic & actual update logic.
+ * 
  * @version $Id$
  */
 public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled implements EventListener
@@ -278,7 +283,151 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
                     .substring(alteredCStart, alteredCStart + cLeftSize + alteredSLength + cRightSize);
             annotation.setSelection(newContext, cLeftSize, alteredSLength);
 
-            // TODO: ensure uniqueness
+            // make sure annotation stays unique
+            ensureUnique(annotation, renderedCurrentContent, alteredCStart, cLeftSize, alteredSLength, cRightSize);
+        }
+    }
+
+    /**
+     * Helper function to adjust passed annotation to make sure it is unique in the content.
+     * 
+     * @param annotation the annotation to ensure uniqueness for
+     * @param content the content in which the annotation must be unique
+     * @param cStart precomputed position where the annotation starts, passed here for cache reasons
+     * @param cLeftSize precomputed length of the context to the left side of the selection inside the annotation
+     *            context, passed here for cache reasons
+     * @param sLength precomputed length of the annotation selection, passed here for cache reasons
+     * @param cRightSize precomputed length of the context to the right side of the selection inside the annotation,
+     *            passed here for cache reasons
+     */
+    private void ensureUnique(Annotation annotation, String content, int cStart, int cLeftSize, int sLength,
+        int cRightSize)
+    {
+        String newContext = annotation.getSelectionContext();
+        // find out if there is another encounter of the selection text & context than the one at cStart
+        List<Integer> occurrences = getOccurrences(content, newContext, cStart);
+        if (occurrences.size() == 0) {
+            // it appears only once, it's done
+            return;
+        }
+
+        // enlarge the context to the left and right with one character, until it is unique
+        boolean isUnique = false;
+        int cLength = cLeftSize + sLength + cRightSize;
+        int expansionLeft = 0;
+        int expansionRight = 0;
+        char charLeft = content.charAt(cStart - expansionLeft);
+        char charRight = content.charAt(cStart + cLength + expansionRight - 1);
+        while (!isUnique) {
+            boolean updated = false;
+            if (cStart - expansionLeft - 1 > 0) {
+                expansionLeft++;
+                charLeft = content.charAt(cStart - expansionLeft);
+                updated = true;
+            }
+            if (cStart + cLength + expansionRight + 1 <= content.length()) {
+                expansionRight++;
+                charRight = content.charAt(cStart + cLength + expansionRight - 1);
+                updated = true;
+            }
+            if (!updated) {
+                // couldn't update the context to the left nor to the right
+                break;
+            }
+            if (charLeft == ' ' || charRight == ' ') {
+                // don't consider uniqueness from space chars
+                continue;
+            }
+            // assume it's unique
+            isUnique = true;
+            // and check again all occurences
+            for (int occurence : occurrences) {
+                Character occurenceCharLeft = getSafeCharacter(content, occurence - expansionLeft);
+                Character occurenceCharRight = getSafeCharacter(content, occurence + cLength + expansionRight - 1);
+                if ((occurenceCharLeft != null && occurenceCharLeft.charValue() == charLeft)
+                    && (occurenceCharRight != null && occurenceCharRight.charValue() == charRight)) {
+                    isUnique = false;
+                    break;
+                }
+            }
+        }
+        if (isUnique) {
+            // update the context with the new indexes
+            expansionLeft = expansionLeft + toNextWord(content, cStart - expansionLeft, true);
+            expansionRight = expansionRight + toNextWord(content, cStart + cLength + expansionRight, false);
+            newContext = content.substring(cStart - expansionLeft, cStart + cLength + expansionRight);
+            annotation.setSelection(newContext, cLeftSize + expansionLeft, sLength);
+        } else {
+            // left the loop for other reasons: for example couldn't expand context
+            // leave it unchanged there's not much we could do anyway
+        }
+    }
+
+    /**
+     * Helper function to get all occurrences of {@code pattern} in {@code subject}.
+     * 
+     * @param subject the subject of the search
+     * @param pattern the pattern of the search
+     * @param exclude value to exclude from the results set
+     * @return the list of all occurrences of {@code pattern} in {@code subject}
+     */
+    private List<Integer> getOccurrences(String subject, String pattern, int exclude)
+    {
+        List<Integer> indexes = new ArrayList<Integer>();
+        int lastIndex = subject.indexOf(pattern);
+        while (lastIndex != -1) {
+            if (lastIndex != exclude) {
+                indexes.add(lastIndex);
+            }
+            lastIndex = subject.indexOf(pattern, lastIndex + 1);
+        }
+
+        return indexes;
+    }
+
+    /**
+     * Helper function to advance to the next word in the subject, until the first space is encountered, starting from
+     * {@code position} and going to the left or to the right, as {@code toLeft} specifies. The returned value is the
+     * length of the offset from position to where the space was found.
+     * 
+     * @param subject the string to search for spaces in
+     * @param position the position to start the search from
+     * @param toLeft {@code true} if the search should be done to the left of the string, {@code false} otherwise
+     * @return the offset starting from position, to the left or to the right, until the next word starts (or the
+     *         document ends)
+     */
+    private int toNextWord(String subject, int position, boolean toLeft)
+    {
+        int expansion = 1;
+        // advance until the next space is encountered in subject, from position, to the right by default and left if
+        // it's specified otherwise
+        boolean isSpaceOrEnd =
+            toLeft ? position - expansion < 0 || subject.charAt(position - expansion) == ' '
+                : position + expansion > subject.length() || subject.charAt(position + expansion - 1) == ' ';
+        while (!isSpaceOrEnd) {
+            expansion++;
+            isSpaceOrEnd =
+                toLeft ? position - expansion < 0 || subject.charAt(position - expansion) == ' '
+                    : position + expansion > subject.length() || subject.charAt(position + expansion - 1) == ' ';
+        }
+
+        return expansion - 1;
+    }
+
+    /**
+     * Helper function to safely get the character at position {@code position} in the passed content, or null
+     * otherwise.
+     * 
+     * @param content the content to get the character from
+     * @param position the position to get character at
+     * @return the character at position {@code position} or {@code null} otherwise.
+     */
+    private Character getSafeCharacter(String content, int position)
+    {
+        if (position >= 0 && position < content.length()) {
+            return content.charAt(position);
+        } else {
+            return null;
         }
     }
 

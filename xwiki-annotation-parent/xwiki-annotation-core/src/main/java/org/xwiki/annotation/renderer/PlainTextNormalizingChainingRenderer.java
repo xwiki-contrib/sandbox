@@ -44,9 +44,15 @@ public class PlainTextNormalizingChainingRenderer extends AbstractChainingPrintR
 
     /**
      * Flag to signal that the renderer is currently rendering whitespaces (has rendered the first one) and should not
-     * append more.
+     * append more. Starting true because we don't want to print beginning spaces.
      */
-    private boolean isInWhitespace;
+    private boolean isInWhitespace = true;
+
+    /**
+     * Flag to signal that this renderer has currently printed something. Cache for checking that serializing the
+     * printer would return non zero characters, since serializing the printer at each step can be a bit too much.
+     */
+    private boolean hasPrinted;
 
     /**
      * Builds an abstract plain text normalizing renderer with the passed text cleaner.
@@ -146,10 +152,8 @@ public class PlainTextNormalizingChainingRenderer extends AbstractChainingPrintR
      */
     protected void printSpace()
     {
-        if (!isInWhitespace) {
-            getPrinter().print(" ");
-            isInWhitespace = true;
-        }
+        // start printing whitespaces
+        isInWhitespace = true;
     }
 
     /**
@@ -159,7 +163,13 @@ public class PlainTextNormalizingChainingRenderer extends AbstractChainingPrintR
      */
     protected void printText(String text)
     {
+        // if it's in whitespace and there was something printed before, print the remaining space, and then handle the
+        // current text
+        if (isInWhitespace && hasPrinted) {
+            getPrinter().print(" ");
+        }
         getPrinter().print(text);
+        hasPrinted = true;
         isInWhitespace = false;
     }
 
