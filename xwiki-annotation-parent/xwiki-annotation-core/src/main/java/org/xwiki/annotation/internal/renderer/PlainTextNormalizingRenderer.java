@@ -17,12 +17,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.annotation.maintainer.internal.renderer;
+package org.xwiki.annotation.internal.renderer;
 
 import org.xwiki.annotation.content.ContentAlterer;
 import org.xwiki.annotation.renderer.GeneratorEmptyBlockChainingListener;
 import org.xwiki.annotation.renderer.LinkLabelGeneratorChainingListener;
-import org.xwiki.annotation.renderer.PlainTextNormalizingChainingRenderer;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
@@ -35,14 +34,13 @@ import org.xwiki.rendering.renderer.AbstractChainingPrintRenderer;
 import org.xwiki.rendering.renderer.LinkLabelGenerator;
 
 /**
- * Plain text renderer used by the annotations maintainer to render the document content and compare the previous with
- * the current one in order to update the annotations and their context.
+ * Plain text renderer that renders the current document with normalized spaces.
  * 
  * @version $Id$
  */
-@Component("annotations-maintainer-plain/1.0")
+@Component("normalizer-plain/1.0")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
-public class AnnotationMaintainerPlainTextRenderer extends AbstractChainingPrintRenderer implements Initializable
+public class PlainTextNormalizingRenderer extends AbstractChainingPrintRenderer implements Initializable
 {
     /**
      * Space normalizer content alterer to clean the rendered texts.

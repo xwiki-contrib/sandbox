@@ -1,2 +1,1 @@
 org.xwiki.annotation.maintainer.internal.JavaDiffBasedAnnotationMaintainer
-org.xwiki.annotation.maintainer.internal.renderer.AnnotationMaintainerPlainTextRenderer

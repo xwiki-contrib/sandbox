@@ -53,8 +53,8 @@ import org.xwiki.rendering.transformation.TransformationManager;
 /**
  * Event listener to listen to documents update events and update the annotations that are impacted by the document
  * change, to update the selection and context to match the new document content. <br />
- * FIXME: fix me: sky high complexity of the functions & fan-out. Split to be able to potentially test on
- * small pieces, and decouple event handling logic & actual update logic.
+ * FIXME: fix me: sky high complexity of the functions & fan-out. Split to be able to potentially test on small pieces,
+ * and decouple event handling logic & actual update logic.
  * 
  * @version $Id$
  */
@@ -177,7 +177,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      */
     private String renderPlainText(String content, String syntaxId) throws Exception
     {
-        PrintRenderer renderer = componentManager.lookup(PrintRenderer.class, "annotations-maintainer-plain/1.0");
+        PrintRenderer renderer = componentManager.lookup(PrintRenderer.class, "normalizer-plain/1.0");
 
         // parse
         Parser parser = componentManager.lookup(Parser.class, syntaxId);

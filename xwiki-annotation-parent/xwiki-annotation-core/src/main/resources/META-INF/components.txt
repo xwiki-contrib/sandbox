@@ -7,3 +7,4 @@ org.xwiki.annotation.internal.content.filter.WhiteSpaceFilter
 org.xwiki.annotation.internal.target.DefaultDocumentContentTarget
 org.xwiki.annotation.internal.selection.DefaultSelectionService
 org.xwiki.annotation.internal.renderer.AnnotationXHTMLRenderer
+org.xwiki.annotation.internal.renderer.PlainTextNormalizingRenderer
