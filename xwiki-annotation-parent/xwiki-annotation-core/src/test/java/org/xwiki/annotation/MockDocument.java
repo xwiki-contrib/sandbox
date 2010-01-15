@@ -76,7 +76,7 @@ public class MockDocument
      * @return the list of annotations, as specified in the corpus file, which have the safe state. For the moment, the
      *         UPDATE too.
      */
-    public List<Annotation> getSafeAnnotations()
+    public List<Annotation> getValidAnnotations()
     {
         List<Annotation> safe = new ArrayList<Annotation>();
         for (Annotation ann : getAnnotations()) {

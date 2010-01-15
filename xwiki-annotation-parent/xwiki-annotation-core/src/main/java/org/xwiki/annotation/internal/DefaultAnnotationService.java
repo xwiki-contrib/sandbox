@@ -101,13 +101,13 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#getSafeAnnotations(String)
+     * @see org.xwiki.annotation.AnnotationService#getValidAnnotations(String)
      */
-    public Collection<Annotation> getSafeAnnotations(String documentName)
+    public Collection<Annotation> getValidAnnotations(String documentName)
         throws AnnotationServiceException
     {
         try {
-            return ioService.getSafeAnnotations(documentName);
+            return ioService.getValidAnnotations(documentName);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e);
         }

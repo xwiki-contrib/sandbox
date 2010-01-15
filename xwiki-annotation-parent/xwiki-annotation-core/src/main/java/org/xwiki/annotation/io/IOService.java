@@ -41,11 +41,16 @@ public interface IOService
     Collection<Annotation> getAnnotations(String documentName) throws IOServiceException;
 
     /**
+     * Shortcut function to get all annotations which are valid on the document, regardless of the updates the document
+     * and its annotations suffered from creation. <br />
+     * TODO: do we want this function here or it's better to only leave it in the annotation service, and any users of
+     * this component would use {@link #getAnnotations(String)} and do their own filtering?
+     * 
      * @param documentName the name of the document to get annotations for
      * @return safe annotations of a given document
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    Collection<Annotation> getSafeAnnotations(String documentName) throws IOServiceException;
+    Collection<Annotation> getValidAnnotations(String documentName) throws IOServiceException;
 
     /**
      * Add annotation to a given document.

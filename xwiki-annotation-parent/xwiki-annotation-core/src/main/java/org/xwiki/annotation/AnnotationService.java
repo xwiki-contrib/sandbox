@@ -44,8 +44,8 @@ public interface AnnotationService
      * @param user the author of the annotation
      * @throws AnnotationServiceException if selection resolution fail or if an XWikiException occurred
      */
-    void addAnnotation(String metadata, String selection, String selectionContext, int offset,
-        String documentName, String user) throws AnnotationServiceException;
+    void addAnnotation(String metadata, String selection, String selectionContext, int offset, String documentName,
+        String user) throws AnnotationServiceException;
 
     /**
      * Returns the HTML of the requested document, along with annotations inserted as {@code span} elements inside it.
@@ -75,13 +75,13 @@ public interface AnnotationService
     Collection<Annotation> getAnnotations(String documentName) throws AnnotationServiceException;
 
     /**
-     * Returns all annotations marked as safe, i.e. which are still valid on the document, regardless of the edits the
-     * document suffered from creation.
+     * Shortcut function to get all annotations which are valid on the document, regardless of the updates the document
+     * and its annotations suffered from creation.
      * 
      * @param documentName name of the document to return annotations for
      * @return all safe annotations in the document
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      * @see {@link org.xwiki.annotation.maintainer.AnnotationState#SAFE}
      */
-    Collection<Annotation> getSafeAnnotations(String documentName) throws AnnotationServiceException;
+    Collection<Annotation> getValidAnnotations(String documentName) throws AnnotationServiceException;
 }

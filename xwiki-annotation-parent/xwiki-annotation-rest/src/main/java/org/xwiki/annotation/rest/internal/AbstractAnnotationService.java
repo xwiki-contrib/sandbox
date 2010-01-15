@@ -69,7 +69,7 @@ public abstract class AbstractAnnotationService extends XWikiResource
             annotation.setAnnotationId(xwikiAnnotation.getId());
             annotation.setAuthor(xwikiAnnotation.getAuthor());
             annotation.setDate(xwikiAnnotation.getDisplayDate());
-            annotation.setInitialSelection(xwikiAnnotation.getInitialSelection());
+            annotation.setInitialSelection(xwikiAnnotation.getSelection());
             annotation.setLength(xwikiAnnotation.getLength());
             annotation.setOffset(xwikiAnnotation.getOffset());
             annotation.setPageId(xwikiAnnotation.getPage());

@@ -204,7 +204,7 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
             int contextIndex = plainTextContent.indexOf(cleanedContext.getContent().toString());
             // find the selection inside the context in the plainTextContent
             // assume at this point that the selection appears only once in the context
-            String alteredSelection = selectionAlterer.alter(ann.getInitialSelection()).getContent().toString();
+            String alteredSelection = selectionAlterer.alter(ann.getSelection()).getContent().toString();
             int selectionIndexInContext = cleanedContext.getContent().toString().indexOf(alteredSelection);
             // check that the context is in the plainText representation and selection was found inside it
             if (contextIndex >= 0 && selectionIndexInContext >= 0) {

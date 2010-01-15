@@ -210,13 +210,13 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     protected void recomputeProperties(Annotation annotation, Collection<XDelta> differences,
         String renderedPreviousContent, String renderedCurrentContent)
     {
-        // TODO: do we still want this here? Does altered make sense any more?
+        // TODO: do we still want this here? Do we want to try to recover altered annotations?
         if (annotation.getState().equals(AnnotationState.ALTERED)) {
             return;
         }
 
-        // FIXME: remove this from here if ever selection & context normalization of annotation will be done on add
-        String normalizedSelection = normalizeContent(annotation.getInitialSelection());
+        // TODO: remove this from here if ever selection & context normalization of annotation will be done on add
+        String normalizedSelection = normalizeContent(annotation.getSelection());
         String normalizedContext = normalizeContent(annotation.getSelectionContext());
         int cStart = renderedPreviousContent.indexOf(normalizedContext);
 
@@ -225,6 +225,9 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             // generated content or something like that, skip it
             return;
         }
+
+        // save initial annotation state, to check how it needs to be updated afterwards
+        AnnotationState initialState = annotation.getState();
 
         // assume at this point that selection appears only once in the context
         int cLeftSize = normalizedContext.indexOf(normalizedSelection);
@@ -247,8 +250,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             if (dEnd > sStart && dStart >= sStart && dStart < sEnd && dEnd <= sEnd) {
                 // update the selection length
                 alteredSLength += diff.getSignedDelta();
-                // FIXME: not yet, this is not recognized properly by the client, nor used
-                // annotation.setState(AnnotationState.UPDATED);
+                annotation.setState(AnnotationState.UPDATED);
             }
 
             // 3/ the edit overlaps the annotation selection completely
@@ -264,15 +266,13 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
                 // keep its size. This way it will be mapped at the position as if the edit would have taken place
                 // before it and will contain the new content at the start of the annotation
                 alteredCStart += diff.getSignedDelta();
-                // FIXME: not yet, this is not recognized properly by the client, nor used
-                // annotation.setState(AnnotationState.UPDATED);
+                annotation.setState(AnnotationState.UPDATED);
             }
 
             // 5/ the edit overlaps the end of the annotation
             if (dStart < sEnd && dEnd > sEnd) {
                 // nothing, behave as if the edit would have taken place after the annotation
-                // FIXME: not yet, this is not recognized properly by the client, nor used
-                // annotation.setState(AnnotationState.UPDATED);
+                annotation.setState(AnnotationState.UPDATED);
             }
         }
 
@@ -281,6 +281,11 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             String newContext =
                 renderedCurrentContent
                     .substring(alteredCStart, alteredCStart + cLeftSize + alteredSLength + cRightSize);
+            // if this annotation was updated first time during this update, set its original selection
+            if (annotation.getState() == AnnotationState.UPDATED && initialState == AnnotationState.SAFE) {
+                annotation.setOriginalSelection(annotation.getSelection());
+            }
+            // and finally update the context & selection
             annotation.setSelection(newContext, cLeftSize, alteredSLength);
 
             // make sure annotation stays unique
@@ -303,9 +308,8 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     private void ensureUnique(Annotation annotation, String content, int cStart, int cLeftSize, int sLength,
         int cRightSize)
     {
-        String newContext = annotation.getSelectionContext();
         // find out if there is another encounter of the selection text & context than the one at cStart
-        List<Integer> occurrences = getOccurrences(content, newContext, cStart);
+        List<Integer> occurrences = getOccurrences(content, annotation.getSelectionContext(), cStart);
         if (occurrences.size() == 0) {
             // it appears only once, it's done
             return;
@@ -314,12 +318,20 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         // enlarge the context to the left and right with one character, until it is unique
         boolean isUnique = false;
         int cLength = cLeftSize + sLength + cRightSize;
+        // size expansion of the context of the annotation such as it becomes unique
         int expansionLeft = 0;
         int expansionRight = 0;
+        // the characters corresponding to the ends of the expanded context, to compare with all other occurrences and
+        // check if they're unique
+        // TODO: an odd situation can happen by comparing characters: at each expansion position there's another
+        // occurrence that matches, therefore an unique context is never found although it exists
+        // TODO: maybe expansion should be considered by words?
         char charLeft = content.charAt(cStart - expansionLeft);
         char charRight = content.charAt(cStart + cLength + expansionRight - 1);
         while (!isUnique) {
             boolean updated = false;
+            // get the characters at left and right and expand, but only if the positions are valid. If one stops being
+            // valid, only the other direction will be expanded in search of a new context
             if (cStart - expansionLeft - 1 > 0) {
                 expansionLeft++;
                 charLeft = content.charAt(cStart - expansionLeft);
@@ -340,8 +352,10 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             }
             // assume it's unique
             isUnique = true;
-            // and check again all occurences
+            // and check again all occurrences
             for (int occurence : occurrences) {
+                // get the chars relative to the current occurrence at the respective expansion positions to the right
+                // and left
                 Character occurenceCharLeft = getSafeCharacter(content, occurence - expansionLeft);
                 Character occurenceCharRight = getSafeCharacter(content, occurence + cLength + expansionRight - 1);
                 if ((occurenceCharLeft != null && occurenceCharLeft.charValue() == charLeft)
@@ -353,9 +367,12 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         }
         if (isUnique) {
             // update the context with the new indexes
+            // expand the context to the entire word that it touches (just to make more sense and not depend with only
+            // one letter)
             expansionLeft = expansionLeft + toNextWord(content, cStart - expansionLeft, true);
             expansionRight = expansionRight + toNextWord(content, cStart + cLength + expansionRight, false);
-            newContext = content.substring(cStart - expansionLeft, cStart + cLength + expansionRight);
+            String newContext = content.substring(cStart - expansionLeft, cStart + cLength + expansionRight);
+            // normally selection is not updated here, only the context therefore we don't set original selection
             annotation.setSelection(newContext, cLeftSize + expansionLeft, sLength);
         } else {
             // left the loop for other reasons: for example couldn't expand context

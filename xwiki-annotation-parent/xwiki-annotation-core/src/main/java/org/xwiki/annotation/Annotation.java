@@ -29,24 +29,72 @@ import org.xwiki.annotation.maintainer.AnnotationState;
  */
 public class Annotation
 {
+    /**
+     * The page on which this annotation is added, the target content of the annotation. <br />
+     * TODO: refactor this to mean a reference of some content, not a particular page. Also, think if this is needed in
+     * the default annotation class or only in the xwiki storage of annotation.
+     */
     protected final String page;
 
+    /**
+     * The username of the author of this annotation, e.g. xwiki:XWiki.Admin.
+     */
     protected final String author;
 
+    /**
+     * The addition date to display for this annotation.
+     */
     protected String displayDate;
 
-    protected AnnotationState state;
-
+    /**
+     * The metadata associated with this annotation.
+     */
     protected String annotation;
 
-    protected String initialSelection;
+    /**
+     * The text on which this annotation is added.
+     */
+    protected String selection;
 
+    /**
+     * The context of the selection of this annotation. Should be used to uniquely localize an annotation on the content
+     * where is added. Or, if the context appears twice, semantically speaking it shouldn't make any difference if the
+     * annotation is displayed & handled in one or other of the occurrences.
+     */
     protected String selectionContext;
 
+    /**
+     * The state of this annotation, with respect to the content evolution. <br />
+     * TODO: find out if it's the right place to put this, as it's a maintainer particular information.
+     */
+    protected AnnotationState state;
+
+    /**
+     * The original selection of this annotation, if it's an automatically updated annotation (its state is
+     * {@link AnnotationState#UPDATED}). <br />
+     * TODO: find out if it's the right place to put this, as it's a maintainer particular information.
+     */
+    protected String originalSelection;
+
+    /**
+     * The unique identifier of this annotation.
+     */
     protected final String id;
 
+    /**
+     * The offset of this annotation in the content on which it is added.
+     * 
+     * @deprecated this field doesn't hold correct information any longer, selection and selectionContext should be used
+     *             to map the annotation on the source if needed
+     */
     protected int offset;
 
+    /**
+     * The length of this annotation in the content on which it is added.
+     * 
+     * @deprecated this field doesn't hold correct information any longer, selection and selectionContext should be used
+     *             to map the annotation on the source if needed
+     */
     protected int length;
 
     /**
@@ -70,7 +118,7 @@ public class Annotation
         this.displayDate = date;
         this.state = state;
         this.annotation = annotation;
-        this.initialSelection = initialSelection;
+        this.selection = initialSelection;
         this.selectionContext = selectionContext;
         this.id = id;
         this.offset = offset;
@@ -94,7 +142,7 @@ public class Annotation
         this.page = page;
         this.author = author;
         this.annotation = annotation;
-        this.initialSelection = initialSelection;
+        this.selection = initialSelection;
         this.selectionContext = selectionContext;
         this.id = id;
         this.offset = -1;
@@ -154,9 +202,9 @@ public class Annotation
     /**
      * @return initial selection of selection
      */
-    public String getInitialSelection()
+    public String getSelection()
     {
-        return initialSelection;
+        return selection;
     }
 
     /**
@@ -171,16 +219,16 @@ public class Annotation
      */
     public void setSelection(String selectionContext, int selectionOffset, int selectionLength)
     {
-        String selection;
+        String newSelection;
         if (selectionOffset < 0 || selectionOffset > selectionContext.length()) {
-            selection = selectionContext;
+            newSelection = selectionContext;
         } else if (selectionLength < 0 || selectionOffset + selectionLength > selectionContext.length()) {
-            selection = selectionContext.substring(selectionOffset);
+            newSelection = selectionContext.substring(selectionOffset);
         } else {
-            selection = selectionContext.substring(selectionOffset, selectionOffset + selectionLength);
+            newSelection = selectionContext.substring(selectionOffset, selectionOffset + selectionLength);
         }
         this.selectionContext = selectionContext;
-        this.initialSelection = selection;
+        this.selection = newSelection;
     }
 
     /**
@@ -201,6 +249,8 @@ public class Annotation
 
     /**
      * @return offset of annotation's selection
+     * @deprecated this will be removed, don't use it. Use the selection and selection context of the annotation to
+     *             compute offset if needed
      */
     public int getOffset()
     {
@@ -211,6 +261,8 @@ public class Annotation
      * modify offset of annotation's selection.
      * 
      * @param offset to set
+     * @deprecated this will be removed, don't use it. Use the selection and selection context of the annotation to
+     *             compute offset if needed
      */
     public void setOffset(int offset)
     {
@@ -219,6 +271,8 @@ public class Annotation
 
     /**
      * @return length of annotation's selection.
+     * @deprecated this will be removed, don't use it. Use the selection and selection context of the annotation to
+     *             compute length if needed
      */
     public int getLength()
     {
@@ -233,8 +287,8 @@ public class Annotation
     @Override
     public String toString()
     {
-        return "annotation : " + getAnnotation() + " | author : " + getAuthor() + " | offset : " + getOffset()
-            + " | length : " + getLength();
+        return "annotation: " + getAnnotation() + " | author: " + getAuthor() + " | selection: " + getSelection()
+            + " | selection context: " + getSelectionContext();
     }
 
     /**
@@ -251,8 +305,9 @@ public class Annotation
             return false;
         }
         Annotation other = (Annotation) obj;
-        return (other.getAnnotation() == getAnnotation() && other.getAuthor() == getAuthor()
-            && other.getOffset() == getOffset() && other.getLength() == getLength());
+        // compare serializations, it's easier to test nulls
+        return ("" + getAnnotation() + " " + getAuthor() + " " + getSelectionContext()).equals(""
+            + other.getAnnotation() + " " + other.getAuthor() + " " + other.getSelectionContext());
     }
 
     /**
@@ -263,8 +318,7 @@ public class Annotation
     @Override
     public int hashCode()
     {
-        return (getAnnotation() + getAuthor() + Integer.toString(getOffset()) + Integer.toString(getLength()))
-            .hashCode();
+        return (getAnnotation() + getAuthor() + getSelectionContext()).hashCode();
     }
 
     /**
@@ -273,5 +327,21 @@ public class Annotation
     public void setDisplayDate(String displayDate)
     {
         this.displayDate = displayDate;
+    }
+
+    /**
+     * @return the originalSelection
+     */
+    public String getOriginalSelection()
+    {
+        return originalSelection;
+    }
+
+    /**
+     * @param originalSelection the originalSelection to set
+     */
+    public void setOriginalSelection(String originalSelection)
+    {
+        this.originalSelection = originalSelection;
     }
 }

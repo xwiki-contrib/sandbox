@@ -110,7 +110,7 @@ public class DefaultDocumentContentTarget implements AnnotationTarget
             WikiPrinter printer = new DefaultWikiPrinter();
             annotationsRenderer.setPrinter(printer);
             // set the annotations for this renderer
-            annotationsRenderer.setAnnotations(ioService.getSafeAnnotations(documentName));
+            annotationsRenderer.setAnnotations(ioService.getValidAnnotations(documentName));
 
             xdom.traverse(annotationsRenderer);
 

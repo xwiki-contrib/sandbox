@@ -129,7 +129,7 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         addFileToTest("maintainer/unchanged/Unchanged3");
         addFileToTest("maintainer/unchanged/Unchanged4");
         addFileToTest("maintainer/unchanged/Unchanged5");
-        
+
         // TODO: add tests for the case of multiple annotations which are being changed
     }
 
@@ -202,9 +202,13 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         Event documentUpdateEvt = new DocumentUpdateEvent();
         MockDocument doc = ((TestDocumentFactory) setup.getDocFactory()).getDocument(docName);
         DocumentModelBridge mock = getDocumentModelBridgeMock(docName, doc.getModifiedSource(), doc.getSource());
+        // TODO: this is not the place to put this code, but it's the most comfortable
+        copyOriginalSelections(doc);
 
+        // and launch the event
         annotationMaintainer.onEvent(documentUpdateEvt, mock, null);
 
+        // test the result
         assertSameAnnotations(doc.getUpdatedAnnotations(), doc.getAnnotations());
     }
 
@@ -221,9 +225,10 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         for (Annotation actualAnn : actual) {
             Annotation expectedAnn = getAnnotation(actualAnn.getId(), expected);
             assertNotNull(expectedAnn);
-            assertEquals(expectedAnn.getInitialSelection(), actualAnn.getInitialSelection());
+            assertEquals(expectedAnn.getSelection(), actualAnn.getSelection());
             assertEquals(expectedAnn.getSelectionContext(), actualAnn.getSelectionContext());
             assertEquals(expectedAnn.getState(), actualAnn.getState());
+            assertEquals(expectedAnn.getOriginalSelection(), actualAnn.getOriginalSelection());
         }
     }
 
@@ -243,6 +248,24 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         }
 
         return null;
+    }
+
+    /**
+     * Helper function to set the original selected contents in the updated annotations of this document from the
+     * original list of annotations.
+     * 
+     * @param doc the document for which to set the updated annotations original selected contents
+     */
+    private void copyOriginalSelections(MockDocument doc)
+    {
+        // set the original selections of updated annotations from the original annotations of the document
+        for (Annotation updatedAnn : doc.getUpdatedAnnotations()) {
+            if (updatedAnn.getState() != AnnotationState.UPDATED) {
+                continue;
+            }
+            Annotation originalAnn = getAnnotation(updatedAnn.getId(), doc.getAnnotations());
+            updatedAnn.setOriginalSelection(originalAnn.getSelection());
+        }
     }
 
     /**
