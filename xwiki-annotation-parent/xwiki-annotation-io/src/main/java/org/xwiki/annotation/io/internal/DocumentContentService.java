@@ -25,11 +25,6 @@ import org.xwiki.annotation.io.IOTargetService;
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.context.Execution;
-
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
  * XWiki document source retrieval and rendering function.
@@ -39,12 +34,6 @@ import com.xpn.xwiki.doc.XWikiDocument;
 @Component
 public class DocumentContentService implements IOTargetService
 {
-    /**
-     * The execution used to get the deprecated XWikiContext.
-     */
-    @Requirement
-    private Execution execution;
-
     /**
      * Document access bridge to manipulate xwiki documents.
      */
@@ -80,33 +69,5 @@ public class DocumentContentService implements IOTargetService
             throw new IOServiceException(
                 "An exception has occurred while getting the syntax of the source for document " + documentName, e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.annotation.io.internal.DefaultIOService#getRenderedContent(String, String)
-     */
-    public String getRenderedContent(String documentName, String context) throws IOServiceException
-    {
-        try {
-            XWikiContext deprecatedContext = getXWikiContext();
-            // set up messaging tools to have all velocity scripts well executed when document renders
-            deprecatedContext.getWiki().prepareResources(deprecatedContext);
-            XWikiDocument document =
-                deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
-            return document.getRenderedContent(context, document.getSyntaxId(), deprecatedContext);
-        } catch (XWikiException e) {
-            throw new IOServiceException("An exception has occurred while getting the rendered content for document "
-                + documentName.toString(), e);
-        }
-    }
-
-    /**
-     * @return the deprecated xwiki context used to manipulate xwiki objects
-     */
-    private XWikiContext getXWikiContext()
-    {
-        return (XWikiContext) execution.getContext().getProperty("xwikicontext");
     }
 }

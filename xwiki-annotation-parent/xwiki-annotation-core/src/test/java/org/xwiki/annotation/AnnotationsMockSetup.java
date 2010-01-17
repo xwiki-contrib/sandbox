@@ -154,10 +154,6 @@ public class AnnotationsMockSetup
 
                 allowing(ioTargetService).getSourceSyntax(with(docName));
                 will(returnValue(mDoc.getSyntax()));
-
-                // return the rendered content of the doc if the input is the unchanged source
-                allowing(ioTargetService).getRenderedContent(with(docName), with(mDoc.getSource()));
-                will(returnValue(mDoc.getRenderedContent()));
             }
         });
     }

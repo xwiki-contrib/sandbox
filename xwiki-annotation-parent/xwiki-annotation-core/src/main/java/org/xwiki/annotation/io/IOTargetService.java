@@ -32,14 +32,6 @@ public interface IOTargetService
 {
     /**
      * @param documentName concerned document
-     * @param source to be rendered
-     * @return html content corresponding to given source
-     * @throws IOServiceException if any exception occurs when manipulating documents
-     */
-    String getRenderedContent(String documentName, String source) throws IOServiceException;
-
-    /**
-     * @param documentName concerned document
      * @return source of given document
      * @throws IOServiceException if any exception occurs when manipulating documents
      */
