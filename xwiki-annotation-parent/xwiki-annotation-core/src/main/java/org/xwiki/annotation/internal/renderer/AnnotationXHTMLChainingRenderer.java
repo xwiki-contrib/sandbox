@@ -199,11 +199,13 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
 
         SortedMap<Integer, List<AnnotationEvent>> currentBookmarks = getAnnotationGenerator().getAnnotationEvents();
 
-        // open all annotations that start in this event
-        for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : currentBookmarks.entrySet()) {
-            for (AnnotationEvent annEvt : bookmark.getValue()) {
-                if (annEvt.getType() == AnnotationEventType.START) {
-                    getAnnotationsMarkerPrinter().beginAnnotation(annEvt.getAnnotation());
+        if (currentBookmarks != null) {
+            // open all annotations that start in this event
+            for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : currentBookmarks.entrySet()) {
+                for (AnnotationEvent annEvt : bookmark.getValue()) {
+                    if (annEvt.getType() == AnnotationEventType.START) {
+                        getAnnotationsMarkerPrinter().beginAnnotation(annEvt.getAnnotation());
+                    }
                 }
             }
         }
@@ -213,11 +215,13 @@ public class AnnotationXHTMLChainingRenderer extends XHTMLChainingRenderer imple
         // Store the raw text as it is ftm. Should handle syntax in the future
         super.onRawText(text, syntax);
 
-        // close all annotations that start in this event.
-        for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : currentBookmarks.entrySet()) {
-            for (AnnotationEvent annEvt : bookmark.getValue()) {
-                if (annEvt.getType() == AnnotationEventType.END) {
-                    getAnnotationsMarkerPrinter().endAnnotation(annEvt.getAnnotation());
+        if (currentBookmarks != null) {
+            // close all annotations that start in this event.
+            for (Map.Entry<Integer, List<AnnotationEvent>> bookmark : currentBookmarks.entrySet()) {
+                for (AnnotationEvent annEvt : bookmark.getValue()) {
+                    if (annEvt.getType() == AnnotationEventType.END) {
+                        getAnnotationsMarkerPrinter().endAnnotation(annEvt.getAnnotation());
+                    }
                 }
             }
         }

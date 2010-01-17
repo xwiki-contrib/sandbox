@@ -115,6 +115,7 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         addFileToTest("renderer/macros/Macros1");
         addFileToTest("renderer/macros/Macros2");
         addFileToTest("renderer/macros/Macros3");
+        // TODO: add a raw block macro test, just to see how it goes
 
         // tests where the annotated content is in a table
         addFileToTest("renderer/tables/Tables1");
