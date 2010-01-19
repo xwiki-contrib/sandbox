@@ -1,5 +1,7 @@
 package org.xwiki.model;
 
+import org.xwiki.model.reference.SpaceReference;
+
 import java.util.List;
 
 public interface Space extends Persistable
@@ -36,17 +38,19 @@ public interface Space extends Persistable
      */
     void removeSpace(String spaceName);
 
-    List<String> getDocumentNames();
-
     boolean hasSpace(String spaceName);
 
-    boolean hasDocument(String shortDocumentName);
+    List<String> getDocumentNames();
 
-    Document getDocument(String shortDocumentName);
+    boolean hasDocument(String documentName);
+
+    Document getDocument(String documentName);
 
     void addDocument(Document document);
 
-    void removeDocument(String shortDocumentName);
+    void removeDocument(String documentName);
 
-    Document createDocument(String shortDocumentName);
+    Document createDocument(String documentName);
+
+    SpaceReference getSpaceReference();
 }

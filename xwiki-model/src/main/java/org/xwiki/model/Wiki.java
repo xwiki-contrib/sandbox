@@ -1,5 +1,7 @@
 package org.xwiki.model;
 
+import org.xwiki.model.reference.WikiReference;
+
 import java.util.List;
 
 public interface Wiki extends Persistable
@@ -22,4 +24,6 @@ public interface Wiki extends Persistable
     void removeSpace(String spaceName);
 
     boolean hasSpace(String spaceName);
+
+    WikiReference getWikiReference();
 }

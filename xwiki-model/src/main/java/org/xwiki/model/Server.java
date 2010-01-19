@@ -1,6 +1,6 @@
 package org.xwiki.model;
 
-import org.xwiki.bridge.DocumentName;
+import org.xwiki.model.reference.DocumentReference;
 
 import java.util.List;
 
@@ -29,10 +29,10 @@ public interface Server extends Persistable
     // be less generic than using the Query Manager?
 
     // Q: Is this ok?
-    Document getDocument(DocumentName documentName);
+    Document getDocument(DocumentReference documentReference);
 
     // Should we also have getSpace(SpaceName spaceName)?
 
     // Q: Is this ok?
-    boolean hasDocument(DocumentName documentName);
+    boolean hasDocument(DocumentReference documentReference);
 }

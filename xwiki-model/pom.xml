@@ -30,7 +30,7 @@
     <version>2.2-SNAPSHOT</version>
   </parent>
   <groupId>org.xwiki.platform</groupId>
-  <artifactId>xwiki-core-model</artifactId>
+  <artifactId>xwiki-core-newmodel</artifactId>
   <name>XWiki Platform - Core - Model</name>
   <packaging>jar</packaging>
   <description>XWiki Platform - Core - Model</description>
@@ -43,6 +43,11 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-bridge</artifactId>
+      <version>2.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-model</artifactId>
       <version>2.2-SNAPSHOT</version>
     </dependency>
     <dependency>

@@ -1,6 +1,6 @@
 package org.xwiki.model;
 
-import org.xwiki.bridge.DocumentName;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.block.XDOM;
 
 import java.util.List;
@@ -15,14 +15,34 @@ public interface Document extends Persistable
 
     ObjectDefinition getObjectDefinition(String objectDefinitionName);
 
+    ObjectDefinition createObjectDefinition(String objectDefinitionName);
+
+    void addObjectDefinition(ObjectDefinition objectDefinition);
+
+    void removeObjectDefinition(String objectDefinitionName);
+
     List<String> getObjectNames();
 
     Object getObject(String objectName);
 
-    List<Attachment> getAttachments();
+    Object createObject(String objectName);
 
+    void addObject(Object object);
+
+    void removeObject(String objectName);
+
+    List<String> getAttachmentNames();
+
+    Attachment getAttachment(String attachmentName);
+
+    Attachment createAttachment(String attachmentName);
+
+    void addAttachment(Attachment attachment);
+
+    void removeAttachment(String attachmentName);
+
+    // TODO: I think we also need the notion of parent to get to the parent space (same as for References)
     void setParent(Document document);
-
     Document getParent();
 
     // Note: In order to make modifications to the document's content, modify the returned XDOM
@@ -39,6 +59,9 @@ public interface Document extends Persistable
 
     boolean hasObject(String objectName);
 
-    // Q: Is this ok?
-    DocumentName getDocumentName();
+    boolean hasObjectDefinition(String objectDefinitionName);
+
+    boolean hasAttachment(String attachmentName);
+    
+    DocumentReference getDocumentReference();
 }
