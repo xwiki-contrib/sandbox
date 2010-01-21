@@ -98,8 +98,8 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         try {
             DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
             String documentName = docInfo.getDocument().getFullName();
-            annotationService.addAnnotation(t.getAnnotation(), t.getInitialSelection(), t.getSelectionContext(), t
-                .getContextOffset(), documentName, getXWikiUser());
+            annotationService.addAnnotation(documentName, t.getInitialSelection(), t.getSelectionContext(), t
+                .getContextOffset(), getXWikiUser(), t.getAnnotation());
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);

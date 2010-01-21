@@ -25,63 +25,84 @@ import java.util.Collection;
 import org.xwiki.component.annotation.ComponentRole;
 
 /**
- * Component responsible for providing annotations related services: the management of annotations (adding, removing,
- * updating) and with rendering them on the xwiki documents.
+ * Component responsible for providing annotations related services: the management of annotations (retrieving, adding,
+ * removing, updating) and rendering them on their respective targets. <br />
+ * This service does not parse or interpret the references of targets its operating with, caller is responsible to be
+ * consistent in calls and use references which are interpreted by the used implementations for
+ * {@link org.xwiki.annotation.io.IOService and org.xwiki.annotation.io.IOTargetService}. <br />
  * 
  * @version $Id$
+ * @see {@link org.xwiki.annotation.io.IOTargetService}, {@link org.xwiki.annotation.io.IOTargetService}
  */
 @ComponentRole
 public interface AnnotationService
 {
     /**
-     * Request insertion of new annotation in a specified document.
+     * Returns the XHTML of the requested source, along with annotations inserted as {@code span} elements inside it.
+     * It's a particular case of {@link #getAnnotatedRenderedContent(String, String, String)} for unspecified input
+     * syntax and {@code xhtml/1.0} output syntax.
      * 
-     * @param metadata annotation content
+     * @param sourceReference reference to the source to be rendered in XHTML with annotations
+     * @return rendered and annotated document
+     * @throws AnnotationServiceException if anything goes wrong retrieving or rendering the requested source
+     * @see #getAnnotatedRenderedContent(String, String, String)
+     */
+    String getAnnotatedHTML(String sourceReference) throws AnnotationServiceException;
+
+    /**
+     * Returns result obtained by rendering with annotations the source referenced by the {@code sourceReference},
+     * parsed in {@code sourceSyntax}.
+     * 
+     * @param sourceReference the reference to the source to be rendered in XHTML with annotations
+     * @param sourceSyntax the syntax to parse the source in. If this parameter is null, the default source syntax will
+     *            be used, as returned by the target IO service.
+     * @param outputSyntax the syntax to render in (e.g. "xhtml/1.0")
+     * @return the annotated rendered source
+     * @throws AnnotationServiceException if anything goes wrong retrieving or rendering the requested source
+     */
+    String getAnnotatedRenderedContent(String sourceReference, String sourceSyntax, String outputSyntax)
+        throws AnnotationServiceException;
+
+    /**
+     * Adds an the specified annotation for the specified target.
+     * 
+     * @param target serialized reference of the target of the annotation
      * @param selection HTML selection concerned by annotations
      * @param selectionContext HTML selection context
      * @param offset offset of the selection in context
-     * @param documentName the name of the document containing annotation
      * @param user the author of the annotation
+     * @param metadata annotation content
      * @throws AnnotationServiceException if selection resolution fail or if an XWikiException occurred
      */
-    void addAnnotation(String metadata, String selection, String selectionContext, int offset, String documentName,
-        String user) throws AnnotationServiceException;
+    void addAnnotation(String target, String selection, String selectionContext, int offset, String user,
+        String metadata) throws AnnotationServiceException;
 
     /**
-     * Returns the HTML of the requested document, along with annotations inserted as {@code span} elements inside it.
+     * Remove an annotation given by its identifier, which should be unique among all annotations on the same target.
      * 
-     * @param documentName the name of the document to render with annotations
-     * @return rendered and annotated document
-     * @throws AnnotationServiceException if anything goes wrong retrieving or rendering the requested document
-     */
-    String getAnnotatedHTML(String documentName) throws AnnotationServiceException;
-
-    /**
-     * Removes the annotation with the specified ID.
-     * 
-     * @param documentName containing document
-     * @param annotationID id of the annotation
+     * @param target the string serialized reference to the content on which the annotation is added
+     * @param annotationID annotation identifier
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      */
-    void removeAnnotation(String documentName, String annotationID) throws AnnotationServiceException;
+    void removeAnnotation(String target, String annotationID) throws AnnotationServiceException;
 
     /**
-     * Returns all the annotations on the passed document.
+     * Returns all the annotations on the passed content.
      * 
-     * @param documentName name of the document to return annotations for
-     * @return all annotations present in the specified document
+     * @param target the string serialized reference to the content for which to get the annotations
+     * @return all annotations which target the specified content
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      */
-    Collection<Annotation> getAnnotations(String documentName) throws AnnotationServiceException;
+    Collection<Annotation> getAnnotations(String target) throws AnnotationServiceException;
 
     /**
-     * Shortcut function to get all annotations which are valid on the document, regardless of the updates the document
-     * and its annotations suffered from creation.
+     * Shortcut function to get all annotations which are valid on the specified target, regardless of the updates the
+     * document and its annotations suffered from creation ('safe' or 'updated' state).
      * 
-     * @param documentName name of the document to return annotations for
-     * @return all safe annotations in the document
+     * @param target the string serialized reference to the content for which to get the annotations
+     * @return all annotations which are valid on the specified content
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
-     * @see {@link org.xwiki.annotation.maintainer.AnnotationState#SAFE}
+     * @see {@link org.xwiki.annotation.maintainer.AnnotationState}
      */
-    Collection<Annotation> getValidAnnotations(String documentName) throws AnnotationServiceException;
+    Collection<Annotation> getValidAnnotations(String target) throws AnnotationServiceException;
 }

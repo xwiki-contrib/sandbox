@@ -77,7 +77,7 @@ public class Annotation
     protected String originalSelection;
 
     /**
-     * The unique identifier of this annotation.
+     * The unique identifier of this annotation, which should be unique among all the annotations on the same target.
      */
     protected final String id;
 

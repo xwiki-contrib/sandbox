@@ -26,7 +26,9 @@ import org.xwiki.annotation.Annotation;
 import org.xwiki.component.annotation.ComponentRole;
 
 /**
- * This component provides services related to annotations storage and retrieval.
+ * This component provides services related to annotations storage and retrieval. It operates with string serialized
+ * references for the targets of annotations. This interface does not restrict the implementation of the annotation
+ * targets, they can be anything referencable through a string.
  * 
  * @version $Id$
  */
@@ -34,48 +36,51 @@ import org.xwiki.component.annotation.ComponentRole;
 public interface IOService
 {
     /**
-     * @param documentName name of concerned document
-     * @return annotations concerning given document
-     * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
+     * Returns all the annotations on the passed content.
+     * 
+     * @param target the string serialized reference to the content for which to get the annotations
+     * @return all annotations which target the specified content
+     * @throws IOServiceException if any exception occurs while manipulating annotations store
      */
-    Collection<Annotation> getAnnotations(String documentName) throws IOServiceException;
+    Collection<Annotation> getAnnotations(String target) throws IOServiceException;
 
     /**
-     * Shortcut function to get all annotations which are valid on the document, regardless of the updates the document
-     * and its annotations suffered from creation. <br />
+     * Shortcut function to get all annotations which are valid on the specified target, regardless of the updates the
+     * document and its annotations suffered from creation. <br />
      * TODO: do we want this function here or it's better to only leave it in the annotation service, and any users of
      * this component would use {@link #getAnnotations(String)} and do their own filtering?
      * 
-     * @param documentName the name of the document to get annotations for
+     * @param target the string serialized reference to the content for which to get the annotations
      * @return safe annotations of a given document
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    Collection<Annotation> getValidAnnotations(String documentName) throws IOServiceException;
+    Collection<Annotation> getValidAnnotations(String target) throws IOServiceException;
 
     /**
-     * Add annotation to a given document.
+     * Adds annotation on the specified target.
      * 
-     * @param documentName concerned document name
-     * @param annotation concerned annotation
+     * @param target serialized reference of the target of the annotation
+     * @param annotation annotation to add on the target
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void addAnnotation(String documentName, Annotation annotation) throws IOServiceException;
+    void addAnnotation(String target, Annotation annotation) throws IOServiceException;
 
     /**
-     * Remove a given annotation.
+     * Removes an annotation given by its identifier, which should be unique among all annotations on the same target.
      * 
-     * @param documentName concerned document
-     * @param annotationID concerned annotation
+     * @param target serialized reference of the target of the annotation
+     * @param annotationID annotation identifier
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void removeAnnotation(String documentName, String annotationID) throws IOServiceException;
+    void removeAnnotation(String target, String annotationID) throws IOServiceException;
 
     /**
-     * Update given annotations information in database.
+     * Updates the set of annotations in the annotations store. They will be identified by their identifiers as returned
+     * by {@link Annotation#getId()}, and updated each to match the fields in the Annotation objects.
      * 
-     * @param documentName concerned document
-     * @param annotations annotations to update
+     * @param target serialized reference of the target of the annotation
+     * @param annotations collection of annotations to update
      * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
      */
-    void updateAnnotations(String documentName, Collection<Annotation> annotations) throws IOServiceException;
+    void updateAnnotations(String target, Collection<Annotation> annotations) throws IOServiceException;
 }

@@ -27,12 +27,16 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
 /**
- * XWiki document source retrieval and rendering function.
+ * Default {@link IOTargetService} implementation, based on resolving XWiki documents and object properties as
+ * annotations targets. The references manipulated by this implementation are XWiki references, such as xwiki:Space.Page
+ * for documents or with an object and property reference if the target is an object property. Use the reference module
+ * to generate the references passed to this module, so that they can be resolved to XWiki content back by this
+ * implementation.
  * 
  * @version $Id$
  */
 @Component
-public class DocumentContentService implements IOTargetService
+public class DefaultIOTargetService implements IOTargetService
 {
     /**
      * Document access bridge to manipulate xwiki documents.
@@ -45,14 +49,14 @@ public class DocumentContentService implements IOTargetService
      * 
      * @see org.xwiki.annotation.io.internal.DefaultIOService#getSource(String)
      */
-    public String getSource(String documentName) throws IOServiceException
+    public String getSource(String reference) throws IOServiceException
     {
 
         try {
-            return dab.getDocumentContent(documentName.toString());
+            return dab.getDocumentContent(reference);
         } catch (Exception e) {
-            throw new IOServiceException("An exception message has occurred while getting the source of the document "
-                + documentName, e);
+            throw new IOServiceException("An exception message has occurred while getting the source for " + reference,
+                e);
         }
     }
 
@@ -61,13 +65,13 @@ public class DocumentContentService implements IOTargetService
      * 
      * @see org.xwiki.annotation.io.IOTargetService#getSourceSyntax(java.lang.String)
      */
-    public String getSourceSyntax(String documentName) throws IOServiceException
+    public String getSourceSyntax(String reference) throws IOServiceException
     {
         try {
-            return dab.getDocumentSyntaxId(documentName);
+            return dab.getDocumentSyntaxId(reference);
         } catch (Exception e) {
-            throw new IOServiceException(
-                "An exception has occurred while getting the syntax of the source for document " + documentName, e);
+            throw new IOServiceException("An exception has occurred while getting the syntax of the source for "
+                + reference, e);
         }
     }
 }

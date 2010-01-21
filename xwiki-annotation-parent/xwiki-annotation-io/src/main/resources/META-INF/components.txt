@@ -1,2 +1,2 @@
 org.xwiki.annotation.io.internal.DefaultIOService
-org.xwiki.annotation.io.internal.DocumentContentService
+org.xwiki.annotation.io.internal.DefaultIOTargetService

@@ -20,6 +20,7 @@
 
 package org.xwiki.annotation.internal;
 
+import java.io.StringReader;
 import java.util.Collection;
 
 import org.xwiki.annotation.Annotation;
@@ -27,13 +28,22 @@ import org.xwiki.annotation.AnnotationService;
 import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
-import org.xwiki.annotation.target.AnnotationTarget;
+import org.xwiki.annotation.io.IOTargetService;
+import org.xwiki.annotation.renderer.AnnotationPrintRenderer;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-
+import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.rendering.block.XDOM;
+import org.xwiki.rendering.parser.Parser;
+import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
+import org.xwiki.rendering.renderer.printer.WikiPrinter;
+import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.rendering.syntax.SyntaxFactory;
+import org.xwiki.rendering.transformation.TransformationManager;
 
 /**
- * Default annotation service, using the default IOService and annotation target.
+ * Default annotation service, using the default {@link IOTargetService} and and {@link IOTargetService}, dispatching
+ * calls and implementing the rendering of the content based on these data from the 2 services.
  * 
  * @version $Id$
  */
@@ -47,24 +57,76 @@ public class DefaultAnnotationService implements AnnotationService
     private IOService ioService;
 
     /**
-     * The service managing functions for the target of an annotation (a document).
+     * Component manager used to lookup the content alterer needed for the specific document.
      */
     @Requirement
-    private AnnotationTarget annotationTarget;
+    private ComponentManager componentManager;
+
+    /**
+     * The storage service for annotation targets (documents).
+     */
+    @Requirement
+    private IOTargetService targetIoService;
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.AnnotationService#addAnnotation(String, String,
-     *      String, int, String, String)
+     * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(String, String, String, int, String, String)
      */
-    public void addAnnotation(String metadata, String selection, String selectionContext, int offset,
-        String documentName, String user) throws AnnotationServiceException
+    public void addAnnotation(String target, String selection, String selectionContext, int offset, String user,
+        String metadata) throws AnnotationServiceException
     {
         try {
-            annotationTarget.addAnnotation(metadata, selection, selectionContext, offset, documentName, user);
-        } catch (AnnotationServiceException e) {
-            throw new AnnotationServiceException(e);
+            // create the annotation with this data and send it to the storage service
+            // TODO: also think of mapping the annotation on the document at add time and fail it if it's not mappable,
+            // for extra security
+            Annotation annotation = new Annotation(target, user, metadata, selection, selectionContext, "");
+            ioService.addAnnotation(target, annotation);
+        } catch (IOServiceException e) {
+            throw new AnnotationServiceException("An exception occurred when accessing the storage services", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.AnnotationService#getAnnotatedRenderedContent(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
+    public String getAnnotatedRenderedContent(String sourceReference, String sourceSyntax, String outputSyntax)
+        throws AnnotationServiceException
+    {
+        try {
+            String source = targetIoService.getSource(sourceReference);
+            String sourceSyntaxId = sourceSyntax;
+            // get if unspecified, get the source from the io service
+            if (sourceSyntaxId == null) {
+                sourceSyntaxId = targetIoService.getSourceSyntax(sourceReference);
+            }
+
+            Parser parser = componentManager.lookup(Parser.class, sourceSyntaxId);
+            XDOM xdom = parser.parse(new StringReader(source));
+
+            // run transformations
+            SyntaxFactory syntaxFactory = componentManager.lookup(SyntaxFactory.class);
+            Syntax sSyntax = syntaxFactory.createSyntaxFromIdString(sourceSyntaxId);
+            TransformationManager transformationManager = componentManager.lookup(TransformationManager.class);
+            transformationManager.performTransformations(xdom, sSyntax);
+
+            // build the annotations renderer hint for the specified output syntax
+            String outputSyntaxId = "annotations-" + outputSyntax;
+            AnnotationPrintRenderer annotationsRenderer =
+                componentManager.lookup(AnnotationPrintRenderer.class, outputSyntaxId);
+            WikiPrinter printer = new DefaultWikiPrinter();
+            annotationsRenderer.setPrinter(printer);
+            // set the annotations for this renderer
+            annotationsRenderer.setAnnotations(ioService.getValidAnnotations(sourceReference));
+
+            xdom.traverse(annotationsRenderer);
+
+            return printer.toString();
+        } catch (Exception exc) {
+            throw new AnnotationServiceException(exc);
         }
     }
 
@@ -73,14 +135,9 @@ public class DefaultAnnotationService implements AnnotationService
      * 
      * @see org.xwiki.annotation.AnnotationService#getAnnotatedHTML(String)
      */
-    public String getAnnotatedHTML(String documentName)
-        throws AnnotationServiceException
+    public String getAnnotatedHTML(String sourceReference) throws AnnotationServiceException
     {
-        try {
-            return annotationTarget.getAnnotatedHTML(documentName);
-        } catch (AnnotationServiceException e) {
-            throw new AnnotationServiceException(e);
-        }
+        return getAnnotatedRenderedContent(sourceReference, null, "xhtml/1.0");
     }
 
     /**
@@ -88,11 +145,10 @@ public class DefaultAnnotationService implements AnnotationService
      * 
      * @see org.xwiki.annotation.AnnotationService#getAnnotations(String)
      */
-    public Collection<Annotation> getAnnotations(String documentName)
-        throws AnnotationServiceException
+    public Collection<Annotation> getAnnotations(String target) throws AnnotationServiceException
     {
         try {
-            return ioService.getAnnotations(documentName);
+            return ioService.getAnnotations(target);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e);
         }
@@ -103,11 +159,10 @@ public class DefaultAnnotationService implements AnnotationService
      * 
      * @see org.xwiki.annotation.AnnotationService#getValidAnnotations(String)
      */
-    public Collection<Annotation> getValidAnnotations(String documentName)
-        throws AnnotationServiceException
+    public Collection<Annotation> getValidAnnotations(String target) throws AnnotationServiceException
     {
         try {
-            return ioService.getValidAnnotations(documentName);
+            return ioService.getValidAnnotations(target);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e);
         }
@@ -118,11 +173,10 @@ public class DefaultAnnotationService implements AnnotationService
      * 
      * @see org.xwiki.annotation.AnnotationService#removeAnnotation(String, String)
      */
-    public void removeAnnotation(String documentName, String annotationID)
-        throws AnnotationServiceException
+    public void removeAnnotation(String target, String annotationID) throws AnnotationServiceException
     {
         try {
-            ioService.removeAnnotation(documentName, annotationID);
+            ioService.removeAnnotation(target, annotationID);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e.getMessage());
         }

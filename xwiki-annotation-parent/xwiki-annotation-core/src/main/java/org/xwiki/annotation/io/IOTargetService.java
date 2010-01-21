@@ -23,7 +23,9 @@ package org.xwiki.annotation.io;
 import org.xwiki.component.annotation.ComponentRole;
 
 /**
- * This service provides functions to operate with annotations targets (wiki documents or objects).
+ * This service provides functions to operate with annotations targets. It operates with string serialized references to
+ * such targets. This interface does not restrict the implementation of the annotation targets, they can be anything
+ * referencable through a string.
  * 
  * @version $Id$
  */
@@ -31,16 +33,16 @@ import org.xwiki.component.annotation.ComponentRole;
 public interface IOTargetService
 {
     /**
-     * @param documentName concerned document
-     * @return source of given document
-     * @throws IOServiceException if any exception occurs when manipulating documents
+     * @param reference serialized string reference of the content to get the source for
+     * @return the source of the referenced content
+     * @throws IOServiceException if any exception occurs when manipulating sources
      */
-    String getSource(String documentName) throws IOServiceException;
+    String getSource(String reference) throws IOServiceException;
 
     /**
-     * @param documentName the name of the document whose source syntax to return
-     * @return the syntax of the source of the given document
-     * @throws IOServiceException if any exception occurs when manipulating documents
+     * @param reference serialized string reference of the content whose syntax to return
+     * @return the syntax of the source of the referenced content
+     * @throws IOServiceException if any exception occurs when manipulating sources
      */
-    String getSourceSyntax(String documentName) throws IOServiceException;
+    String getSourceSyntax(String reference) throws IOServiceException;
 }

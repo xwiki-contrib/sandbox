@@ -41,7 +41,10 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
 /**
- * Default {@link IOService} implementation.
+ * Default {@link IOService} implementation, based on storing annotations in XWiki Objects in XWiki documents. The
+ * targets manipulated by this implementation are XWiki references, such as xwiki:Space.Page for documents or with an
+ * object and property reference if the target is an object property. Use the reference module to generate the
+ * references passed to this module, so that they can be resolved to XWiki content back by this implementation.
  * 
  * @version $Id$
  */
@@ -120,12 +123,11 @@ public class DefaultIOService implements IOService
      * 
      * @see org.xwiki.annotation.io.IOService#addAnnotation(String, org.xwiki.annotation.Annotation)
      */
-    public void addAnnotation(String documentName, Annotation annotation) throws IOServiceException
+    public void addAnnotation(String target, Annotation annotation) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
-            XWikiDocument document =
-                deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
+            XWikiDocument document = deprecatedContext.getWiki().getDocument(target, deprecatedContext);
             int id = document.createNewObject(ANNOTATION_CLASS_NAME, deprecatedContext);
             BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, id);
             // FIXME: why exactly are we storing the ID since the ID is the object index?, and we interpret it as such
@@ -152,12 +154,11 @@ public class DefaultIOService implements IOService
      * 
      * @see org.xwiki.annotation.io.IOService#getAnnotations(String)
      */
-    public Collection<Annotation> getAnnotations(String documentName) throws IOServiceException
+    public Collection<Annotation> getAnnotations(String target) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
-            XWikiDocument document =
-                deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
+            XWikiDocument document = deprecatedContext.getWiki().getDocument(target, deprecatedContext);
             List<BaseObject> objects = document.getObjects(ANNOTATION_CLASS_NAME);
 
             List<Annotation> result = new ArrayList<Annotation>();
@@ -191,10 +192,10 @@ public class DefaultIOService implements IOService
      * 
      * @see org.xwiki.annotation.io.IOService#getValidAnnotations(String)
      */
-    public Collection<Annotation> getValidAnnotations(String documentName) throws IOServiceException
+    public Collection<Annotation> getValidAnnotations(String target) throws IOServiceException
     {
         List<Annotation> result = new ArrayList<Annotation>();
-        for (Annotation it : getAnnotations(documentName)) {
+        for (Annotation it : getAnnotations(target)) {
             if (it.getState() == AnnotationState.SAFE || it.getState() == AnnotationState.UPDATED) {
                 result.add(it);
             }
@@ -207,12 +208,11 @@ public class DefaultIOService implements IOService
      * 
      * @see org.xwiki.annotation.io.IOService#removeAnnotation(String, String)
      */
-    public void removeAnnotation(String documentName, String annotationID) throws IOServiceException
+    public void removeAnnotation(String target, String annotationID) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
-            XWikiDocument document =
-                deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
+            XWikiDocument document = deprecatedContext.getWiki().getDocument(target, deprecatedContext);
             document.removeObject(document.getObject(ANNOTATION_CLASS_NAME, Integer.valueOf(annotationID.toString())));
             deprecatedContext.getWiki().saveDocument(document, "Deleted annotation " + annotationID, deprecatedContext);
         } catch (NumberFormatException e) {
@@ -227,12 +227,11 @@ public class DefaultIOService implements IOService
      * 
      * @see org.xwiki.annotation.io.IOService#updateAnnotations(String, java.util.Collection)
      */
-    public void updateAnnotations(String documentName, Collection<Annotation> annotations) throws IOServiceException
+    public void updateAnnotations(String target, Collection<Annotation> annotations) throws IOServiceException
     {
         try {
             XWikiContext deprecatedContext = getXWikiContext();
-            XWikiDocument document =
-                deprecatedContext.getWiki().getDocument(documentName.toString(), deprecatedContext);
+            XWikiDocument document = deprecatedContext.getWiki().getDocument(target, deprecatedContext);
             for (Annotation annotation : annotations) {
                 // parse annotation id as string. If cannot parse, then ignore it
                 // TODO: add a decent unique identifier. Potentially look it up with a query?
