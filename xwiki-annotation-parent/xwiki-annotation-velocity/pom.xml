@@ -32,7 +32,6 @@
   <artifactId>xwiki-annotation-velocity</artifactId>
   <name>XWiki Annotation: Annotations Service Velocity Bridge</name>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>

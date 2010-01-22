@@ -32,7 +32,6 @@
   <artifactId>xwiki-annotation-maintainer</artifactId>
   <name>XWiki Annotation: Annotations Maintainer</name>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
   <properties>
     <javadiff.version>1.1.0</javadiff.version>
   </properties>
