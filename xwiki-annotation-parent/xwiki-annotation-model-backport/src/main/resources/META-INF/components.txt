@@ -1,0 +1,5 @@
+org.xwiki.model.internal.reference.DefaultStringEntityReferenceResolver
+org.xwiki.model.internal.reference.DefaultStringEntityReferenceSerializer
+org.xwiki.model.internal.reference.LocalStringEntityReferenceSerializer
+org.xwiki.model.internal.DefaultModelConfiguration
+com.xpn.xwiki.internal.model.reference.CurrentStringEntityReferenceResolver

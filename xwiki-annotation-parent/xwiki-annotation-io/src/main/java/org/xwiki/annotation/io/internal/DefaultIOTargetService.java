@@ -22,9 +22,13 @@ package org.xwiki.annotation.io.internal;
 
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.io.IOTargetService;
+import org.xwiki.annotation.reference.TypedStringEntityReferenceResolver;
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.model.EntityType;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 
 /**
  * Default {@link IOTargetService} implementation, based on resolving XWiki documents and object properties as
@@ -45,6 +49,18 @@ public class DefaultIOTargetService implements IOTargetService
     private DocumentAccessBridge dab;
 
     /**
+     * Entity reference handler to resolve the reference.
+     */
+    @Requirement
+    private TypedStringEntityReferenceResolver referenceResolver;
+
+    /**
+     * Default entity reference serializer.
+     */
+    @Requirement
+    private EntityReferenceSerializer<String> serializer;
+
+    /**
      * {@inheritDoc}
      * 
      * @see org.xwiki.annotation.io.internal.DefaultIOService#getSource(String)
@@ -52,7 +68,18 @@ public class DefaultIOTargetService implements IOTargetService
     public String getSource(String reference) throws IOServiceException
     {
         try {
-            return dab.getDocumentContent(reference);
+            EntityReference ref = referenceResolver.resolve(reference, EntityType.DOCUMENT);
+            if (ref.getType() == EntityType.OBJECT_PROPERTY) {
+                // handle this as a reference to an object
+                // TODO: implement me
+                return "";
+            } else if (ref.getType() == EntityType.DOCUMENT) {
+                return dab.getDocumentContent(serializer.serialize(ref));
+            } else {
+                // it was parsed as something else, just ignore the parsing and get the document content as its initial
+                // name was
+                return dab.getDocumentContent(reference);
+            }
         } catch (Exception e) {
             throw new IOServiceException("An exception message has occurred while getting the source for " + reference,
                 e);
@@ -67,7 +94,15 @@ public class DefaultIOTargetService implements IOTargetService
     public String getSourceSyntax(String reference) throws IOServiceException
     {
         try {
-            return dab.getDocumentSyntaxId(reference);
+            EntityReference ref = referenceResolver.resolve(reference, EntityType.DOCUMENT);
+            EntityReference docRef = ref.extractReference(EntityType.DOCUMENT);
+            if (docRef != null) {
+                // return the syntax of the document in this reference, regardless of the type of reference, obj prop or
+                // doc
+                return dab.getDocumentSyntaxId(serializer.serialize(docRef));
+            } else {
+                return dab.getDocumentSyntaxId(reference);
+            }
         } catch (Exception e) {
             throw new IOServiceException("An exception has occurred while getting the syntax of the source for "
                 + reference, e);

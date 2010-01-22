@@ -22,36 +22,43 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>xwiki-annotation-parent</artifactId>
     <groupId>org.xwiki.platform</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
+  <!-- Should move this out of annotations, in a sandbox independent project -->
   <groupId>org.xwiki.platform</groupId>
-  <artifactId>xwiki-annotation-io</artifactId>
-  <name>XWiki Annotation: XWiki Storage Implementation</name>
+  <artifactId>xwiki-annotation-model-backport</artifactId>
+  <name>XWiki Annotation: XWiki Model Backport</name>
+  <description>
+    Backport of the main parts of the XWiki Core Model module, to be able to use entity references on versions smaller 
+    than 2.2 (with http://jira.xwiki.org/jira/browse/XWIKI-4775 fixed). Add this jar to classpath only when running 
+    versions smaller than 2.2. 
+  </description>
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-annotation-core</artifactId>
-      <version>${pom.version}</version>
-      <scope>provided</scope>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-annotation-reference</artifactId>
-      <version>${pom.version}</version>
-      <scope>provided</scope>
+      <artifactId>xwiki-core-component-api</artifactId>
+      <version>${platform.core.version}</version>
     </dependency>
-    <!-- Remove this dependency when moving to 2.2 with http://jira.xwiki.org/jira/browse/XWIKI-4775 fixed -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-annotation-model-backport</artifactId>
-      <version>${pom.version}</version>
-      <scope>provided</scope>
-    </dependency>    
+      <artifactId>xwiki-core-configuration-api</artifactId>
+      <version>${platform.core.version}</version>
+    </dependency>
     <dependency>
       <groupId>com.xpn.xwiki.platform</groupId>
       <artifactId>xwiki-core</artifactId>
@@ -64,43 +71,5 @@
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-component-api</artifactId>
-      <version>${platform.core.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jmock</groupId>
-      <artifactId>jmock</artifactId>
-      <version>2.5.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jmock</groupId>
-      <artifactId>jmock-junit4</artifactId>
-      <version>2.5.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-shared-tests</artifactId>
-      <version>${platform.core.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>

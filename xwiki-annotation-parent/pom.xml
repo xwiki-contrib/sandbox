@@ -24,9 +24,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.xpn.xwiki.platform</groupId>
+    <groupId>org.xwiki.platform</groupId>
     <artifactId>xwiki</artifactId>
-    <version>27-SNAPSHOT</version>
+    <version>28</version>
   </parent>
   <groupId>org.xwiki.platform</groupId>
   <artifactId>xwiki-annotation-parent</artifactId>
@@ -34,13 +34,15 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <properties>
-    <platform.core.version>2.2-SNAPSHOT</platform.core.version>
+    <platform.core.version>2.1.1</platform.core.version>
     <junit.version>4.6</junit.version>
   </properties>
   <modules>
     <module>xwiki-annotation-core</module>
     <module>xwiki-annotation-rest</module>
     <module>xwiki-annotation-application</module>
+    <module>xwiki-annotation-model-backport</module>
+    <module>xwiki-annotation-reference</module>
     <module>xwiki-annotation-io</module>
     <module>xwiki-annotation-maintainer</module>
     <module>xwiki-annotation-velocity</module>
