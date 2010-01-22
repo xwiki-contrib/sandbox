@@ -106,9 +106,6 @@ public class AnnotationsMockSetup
             {
                 MockDocument mDoc = docFactory.getDocument(docName);
 
-                allowing(ioService).getValidAnnotations(with(docName));
-                will(returnValue(mDoc.getValidAnnotations()));
-
                 allowing(ioService).getAnnotations(with(docName));
                 will(returnValue(mDoc.getAnnotations()));
 

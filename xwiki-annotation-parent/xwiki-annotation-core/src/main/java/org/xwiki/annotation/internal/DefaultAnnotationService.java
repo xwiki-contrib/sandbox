@@ -21,7 +21,9 @@
 package org.xwiki.annotation.internal;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationService;
@@ -29,6 +31,7 @@ import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.io.IOTargetService;
+import org.xwiki.annotation.maintainer.AnnotationState;
 import org.xwiki.annotation.renderer.AnnotationPrintRenderer;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -120,7 +123,7 @@ public class DefaultAnnotationService implements AnnotationService
             WikiPrinter printer = new DefaultWikiPrinter();
             annotationsRenderer.setPrinter(printer);
             // set the annotations for this renderer
-            annotationsRenderer.setAnnotations(ioService.getValidAnnotations(sourceReference));
+            annotationsRenderer.setAnnotations(getValidAnnotations(sourceReference));
 
             xdom.traverse(annotationsRenderer);
 
@@ -162,7 +165,13 @@ public class DefaultAnnotationService implements AnnotationService
     public Collection<Annotation> getValidAnnotations(String target) throws AnnotationServiceException
     {
         try {
-            return ioService.getValidAnnotations(target);
+            List<Annotation> result = new ArrayList<Annotation>();
+            for (Annotation it : ioService.getAnnotations(target)) {
+                if (it.getState() == AnnotationState.SAFE || it.getState() == AnnotationState.UPDATED) {
+                    result.add(it);
+                }
+            }
+            return result;
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e);
         }

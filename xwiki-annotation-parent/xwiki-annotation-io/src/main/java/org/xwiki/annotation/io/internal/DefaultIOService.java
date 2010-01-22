@@ -190,22 +190,6 @@ public class DefaultIOService implements IOService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.IOService#getValidAnnotations(String)
-     */
-    public Collection<Annotation> getValidAnnotations(String target) throws IOServiceException
-    {
-        List<Annotation> result = new ArrayList<Annotation>();
-        for (Annotation it : getAnnotations(target)) {
-            if (it.getState() == AnnotationState.SAFE || it.getState() == AnnotationState.UPDATED) {
-                result.add(it);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
      * @see org.xwiki.annotation.io.IOService#removeAnnotation(String, String)
      */
     public void removeAnnotation(String target, String annotationID) throws IOServiceException

@@ -45,18 +45,6 @@ public interface IOService
     Collection<Annotation> getAnnotations(String target) throws IOServiceException;
 
     /**
-     * Shortcut function to get all annotations which are valid on the specified target, regardless of the updates the
-     * document and its annotations suffered from creation. <br />
-     * TODO: do we want this function here or it's better to only leave it in the annotation service, and any users of
-     * this component would use {@link #getAnnotations(String)} and do their own filtering?
-     * 
-     * @param target the string serialized reference to the content for which to get the annotations
-     * @return safe annotations of a given document
-     * @throws IOServiceException can be thrown if any exception occurs while manipulating annotations store
-     */
-    Collection<Annotation> getValidAnnotations(String target) throws IOServiceException;
-
-    /**
      * Adds annotation on the specified target.
      * 
      * @param target serialized reference of the target of the annotation

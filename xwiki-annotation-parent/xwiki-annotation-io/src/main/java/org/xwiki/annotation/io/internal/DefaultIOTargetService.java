@@ -51,7 +51,6 @@ public class DefaultIOTargetService implements IOTargetService
      */
     public String getSource(String reference) throws IOServiceException
     {
-
         try {
             return dab.getDocumentContent(reference);
         } catch (Exception e) {
