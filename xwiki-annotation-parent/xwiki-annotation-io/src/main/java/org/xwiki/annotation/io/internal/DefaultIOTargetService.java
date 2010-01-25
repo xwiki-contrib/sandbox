@@ -64,7 +64,7 @@ public class DefaultIOTargetService implements IOTargetService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.io.internal.DefaultIOService#getSource(String)
+     * @see org.xwiki.annotation.io.IOTargetService#getSource(java.lang.String)
      */
     public String getSource(String reference) throws IOServiceException
     {
