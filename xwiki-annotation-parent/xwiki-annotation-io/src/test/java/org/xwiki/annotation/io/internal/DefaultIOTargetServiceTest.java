@@ -203,5 +203,95 @@ public class DefaultIOTargetServiceTest extends AbstractComponentTestCase
         assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
     }
 
-    // TODO: write tests for the object property getters
+    @Test
+    public void testGetterWhenTargetIsTypedIndexedObjectProperty() throws Exception
+    {
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(dabMock).getProperty("wiki:Space.Page", "XWiki.Class", 1, "property");
+                will(returnValue("defcontent"));
+                oneOf(dabMock).getDocumentSyntaxId("wiki:Space.Page");
+                will(returnValue("xwiki/2.0"));
+            }
+        });
+
+        String reference = "OBJECT_PROPERTY://wiki:Space.Page^XWiki.Class[1]#property";
+        assertEquals("defcontent", ioTargetService.getSource(reference));
+        assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
+    }
+
+    @Test
+    public void testGetterWhenTargetIsTypedDefaultObjectProperty() throws Exception
+    {
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(dabMock).getProperty("wiki:Space.Page", "XWiki.Class", "property");
+                will(returnValue("defcontent"));
+                oneOf(dabMock).getDocumentSyntaxId("wiki:Space.Page");
+                will(returnValue("xwiki/2.0"));
+            }
+        });
+
+        String reference = "OBJECT_PROPERTY://wiki:Space.Page^XWiki.Class#property";
+        assertEquals("defcontent", ioTargetService.getSource(reference));
+        assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
+    }
+
+    @Test
+    public void testGetterWhenTargetIsTypedObjectPropertyInRelativeDocument() throws Exception
+    {
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(dabMock).getProperty("xwiki:Main.Page", "XWiki.Class", "property");
+                will(returnValue("defcontent"));
+                oneOf(dabMock).getDocumentSyntaxId("xwiki:Main.Page");
+                will(returnValue("xwiki/2.0"));
+            }
+        });
+
+        String reference = "OBJECT_PROPERTY://Page^XWiki.Class#property";
+        assertEquals("defcontent", ioTargetService.getSource(reference));
+        assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
+    }
+
+    @Test
+    public void testGetterWhenTargetIsNonTypedObjectProperty() throws Exception
+    {
+        mockery.checking(new Expectations()
+        {
+            {
+                // target will be parsed as document, because document is the default
+                oneOf(dabMock).getDocumentContent("wiki:Space\\.Page^XWiki.Class#property");
+                will(returnValue("defcontent"));
+                oneOf(dabMock).getDocumentSyntaxId("wiki:Space\\.Page^XWiki.Class#property");
+                will(returnValue("xwiki/2.0"));
+            }
+        });
+
+        String reference = "wiki:Space.Page^XWiki.Class#property";
+        assertEquals("defcontent", ioTargetService.getSource(reference));
+        assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
+    }
+    
+    @Test
+    public void testGetterWhenTargetIsTypedIndexedRelativeObjectProperty() throws Exception
+    {
+        mockery.checking(new Expectations()
+        {
+            {
+                // this will fail if defaults fail, not very well isolated
+                oneOf(dabMock).getProperty("xwiki:Main.WebHome", "Classes.Class", 3, "property");
+                will(returnValue("defcontent"));
+                oneOf(dabMock).getDocumentSyntaxId("xwiki:Main.WebHome");
+                will(returnValue("xwiki/2.0"));
+            }
+        });
+
+        String reference = "OBJECT_PROPERTY://Classes.Class[3]#property";
+        assertEquals("defcontent", ioTargetService.getSource(reference));
+        assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
+    }    
 }

@@ -22,6 +22,7 @@ package org.xwiki.annotation.io.internal;
 
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.io.IOTargetService;
+import org.xwiki.annotation.reference.IndexedObjectReference;
 import org.xwiki.annotation.reference.TypedStringEntityReferenceResolver;
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
@@ -70,9 +71,16 @@ public class DefaultIOTargetService implements IOTargetService
         try {
             EntityReference ref = referenceResolver.resolve(reference, EntityType.DOCUMENT);
             if (ref.getType() == EntityType.OBJECT_PROPERTY) {
-                // handle this as a reference to an object
-                // TODO: implement me
-                return "";
+                EntityReference docRef = ref.extractReference(EntityType.DOCUMENT);
+                // handle this as a reference to an object, parse an indexed object out of this property's parent
+                IndexedObjectReference objRef = new IndexedObjectReference(ref.getParent());
+                if (objRef.getObjectNumber() != null) {
+                    return dab.getProperty(serializer.serialize(docRef), objRef.getClassName(),
+                        objRef.getObjectNumber(), ref.getName()).toString();
+                } else {
+                    return dab.getProperty(serializer.serialize(docRef), objRef.getClassName(), ref.getName())
+                        .toString();
+                }
             } else if (ref.getType() == EntityType.DOCUMENT) {
                 return dab.getDocumentContent(serializer.serialize(ref));
             } else {

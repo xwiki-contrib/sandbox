@@ -57,11 +57,6 @@ public class DefaultIOService implements IOService
     private static final String ANNOTATION_CLASS_NAME = "XWiki.AnnotationClass";
 
     /**
-     * The name of the field of the annotation object containing the id of the annotation.
-     */
-    private static final String ANNOTATION_ID = "annotationID";
-
-    /**
      * The name of the field of the annotation object containing the length of the annotation.
      */
     private static final String DATE = "date";
@@ -70,7 +65,7 @@ public class DefaultIOService implements IOService
      * The name of the field of the annotation object containing the reference of the content on which the annotation is
      * added.
      */
-    private static final String TARGET_ID = "pageID";
+    private static final String TARGET = "target";
 
     /**
      * The name of the field of the annotation object containing the author of the annotation.
@@ -130,10 +125,8 @@ public class DefaultIOService implements IOService
             XWikiDocument document = deprecatedContext.getWiki().getDocument(target, deprecatedContext);
             int id = document.createNewObject(ANNOTATION_CLASS_NAME, deprecatedContext);
             BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, id);
-            // FIXME: why exactly are we storing the ID since the ID is the object index?, and we interpret it as such
-            object.set(ANNOTATION_ID, Integer.valueOf(id), deprecatedContext);
             object.set(DATE, new SimpleDateFormat(DATE_FORMAT).format(new Date()), deprecatedContext);
-            object.set(TARGET_ID, document.getName(), deprecatedContext);
+            object.set(TARGET, document.getName(), deprecatedContext);
             object.set(AUTHOR, annotation.getAuthor(), deprecatedContext);
             object.set(STATE, AnnotationState.SAFE.name(), deprecatedContext);
             object.set(ANNOTATION_TEXT, annotation.getAnnotation(), deprecatedContext);
@@ -169,10 +162,11 @@ public class DefaultIOService implements IOService
                 if (object == null) {
                     continue;
                 }
+                // use the object guid as annotation id
                 Annotation annotation =
-                    new Annotation(object.getStringValue(TARGET_ID), object.getStringValue(AUTHOR), object
+                    new Annotation(object.getStringValue(TARGET), object.getStringValue(AUTHOR), object
                         .getStringValue(ANNOTATION_TEXT), object.getStringValue(SELECTION), object
-                        .getStringValue(CONTEXT), object.getStringValue(ANNOTATION_ID));
+                        .getStringValue(CONTEXT), object.getNumber() + "");
                 annotation.setDisplayDate(object.getStringValue(DATE));
                 annotation.setState(AnnotationState.valueOf(object.getStringValue(STATE)));
                 String originalSelection = object.getStringValue(ORIGINAL_SELECTION);
@@ -217,8 +211,7 @@ public class DefaultIOService implements IOService
             XWikiContext deprecatedContext = getXWikiContext();
             XWikiDocument document = deprecatedContext.getWiki().getDocument(target, deprecatedContext);
             for (Annotation annotation : annotations) {
-                // parse annotation id as string. If cannot parse, then ignore it
-                // TODO: add a decent unique identifier. Potentially look it up with a query?
+                // parse annotation id as string. If cannot parse, then ignore annotation, is not valid
                 int annId = 0;
                 try {
                     annId = Integer.parseInt(annotation.getId());
@@ -226,11 +219,8 @@ public class DefaultIOService implements IOService
                     continue;
                 }
                 BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, annId);
-                // FIXME: why exactly are we storing the ID since the ID is the object index?, and we interpret it as
-                // such
-                object.set(ANNOTATION_ID, Integer.valueOf(annotation.getId()), deprecatedContext);
                 object.set(DATE, new SimpleDateFormat(DATE_FORMAT).format(new Date()), deprecatedContext);
-                object.set(TARGET_ID, document.getName(), deprecatedContext);
+                object.set(TARGET, document.getName(), deprecatedContext);
                 object.set(AUTHOR, annotation.getAuthor(), deprecatedContext);
                 object.set(STATE, annotation.getState().name(), deprecatedContext);
                 object.set(ANNOTATION_TEXT, annotation.getAnnotation(), deprecatedContext);
