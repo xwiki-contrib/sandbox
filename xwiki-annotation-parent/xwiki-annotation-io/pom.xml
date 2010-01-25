@@ -51,7 +51,7 @@
       <artifactId>xwiki-annotation-model-backport</artifactId>
       <version>${pom.version}</version>
       <scope>provided</scope>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>com.xpn.xwiki.platform</groupId>
       <artifactId>xwiki-core</artifactId>

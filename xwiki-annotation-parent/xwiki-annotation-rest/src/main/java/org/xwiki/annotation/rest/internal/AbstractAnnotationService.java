@@ -70,9 +70,7 @@ public abstract class AbstractAnnotationService extends XWikiResource
             annotation.setAuthor(xwikiAnnotation.getAuthor());
             annotation.setDate(xwikiAnnotation.getDisplayDate());
             annotation.setInitialSelection(xwikiAnnotation.getSelection());
-            annotation.setLength(xwikiAnnotation.getLength());
-            annotation.setOffset(xwikiAnnotation.getOffset());
-            annotation.setPageId(xwikiAnnotation.getPage());
+            annotation.setTarget(xwikiAnnotation.getTarget());
             annotation.setSelectionContext(xwikiAnnotation.getSelectionContext());
             annotation.setState(xwikiAnnotation.getState().toString());
             set.add(annotation);
@@ -90,12 +88,12 @@ public abstract class AbstractAnnotationService extends XWikiResource
      * @return wrapped set of annotation, annotated and rendered content
      */
     protected Annotations getAnnotations(Collection<org.xwiki.annotation.Annotation> annotations,
-        CharSequence htmlContent)
+        String htmlContent)
     {
         ObjectFactory factory = new ObjectFactory();
         Annotations result = factory.createAnnotations();
         result.getAnnotations().addAll(getAnnotationSet(annotations));
-        result.setSource(htmlContent.toString());
+        result.setSource(htmlContent);
         return result;
     }
 

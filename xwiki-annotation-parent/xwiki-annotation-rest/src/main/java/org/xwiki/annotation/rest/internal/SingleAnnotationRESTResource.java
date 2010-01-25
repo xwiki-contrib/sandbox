@@ -28,6 +28,9 @@ import javax.ws.rs.PathParam;
 
 import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 
 /**
  * This class allow to do delete a single annotation.
@@ -38,6 +41,12 @@ import org.xwiki.component.annotation.Component;
 @Path("/wikis/{wikiName}/spaces/{spaceName}/pages/{pageName}/annotation/{id}")
 public class SingleAnnotationRESTResource extends AbstractAnnotationService
 {
+    /**
+     * Entity reference serializer used to get reference to the document to perform annotation operation on.
+     */
+    @Requirement
+    private EntityReferenceSerializer<String> referenceSerializer;
+    
     /**
      * Deletes the specified annotation.
      * 
@@ -52,8 +61,8 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
         @PathParam("wikiName") String wiki, @PathParam("id") String id)
     {
         try {
-            DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
-            String documentName = docInfo.getDocument().getFullName();
+            DocumentReference docRef = new DocumentReference(wiki, space, page);
+            String documentName = referenceSerializer.serialize(docRef);
             annotationService.removeAnnotation(documentName, id);
 
             AnnotationRequestResponse result = new AnnotationRequestResponse();

@@ -52,7 +52,14 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-annotation-core</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${pom.version}</version>
+    </dependency>
+    <!-- Remove this dependency when moving to 2.2 with http://jira.xwiki.org/jira/browse/XWIKI-4775 fixed -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-annotation-model-backport</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>

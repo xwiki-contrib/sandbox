@@ -30,11 +30,10 @@ import org.xwiki.annotation.maintainer.AnnotationState;
 public class Annotation
 {
     /**
-     * The page on which this annotation is added, the target content of the annotation. <br />
-     * TODO: refactor this to mean a reference of some content, not a particular page. Also, think if this is needed in
-     * the default annotation class or only in the xwiki storage of annotation.
+     * The target on which this annotation is added, the target content of the annotation. <br />
+     * TODO: is this really needed here?
      */
-    protected final String page;
+    protected final String target;
 
     /**
      * The username of the author of this annotation, e.g. xwiki:XWiki.Admin.
@@ -87,7 +86,7 @@ public class Annotation
      * @deprecated this field doesn't hold correct information any longer, selection and selectionContext should be used
      *             to map the annotation on the source if needed
      */
-    protected int offset;
+    protected int offset = -1;
 
     /**
      * The length of this annotation in the content on which it is added.
@@ -95,10 +94,10 @@ public class Annotation
      * @deprecated this field doesn't hold correct information any longer, selection and selectionContext should be used
      *             to map the annotation on the source if needed
      */
-    protected int length;
+    protected int length = -1;
 
     /**
-     * @param page the document where the annotation is added
+     * @param target the document where the annotation is added
      * @param author the author of the annotation
      * @param date the date of the annotation
      * @param state the state of the annotation, whether it was safely updated upon further edits of the document or not
@@ -110,10 +109,10 @@ public class Annotation
      * @param length the length of the selection of this annotation
      * @deprecated use the {@link Annotation#Annotation(String, String, String, String, String, String)} constructor
      */
-    public Annotation(String page, String author, String date, AnnotationState state, String annotation,
+    public Annotation(String target, String author, String date, AnnotationState state, String annotation,
         String initialSelection, String selectionContext, String id, int offset, int length)
     {
-        this.page = page;
+        this.target = target;
         this.author = author;
         this.displayDate = date;
         this.state = state;
@@ -129,34 +128,32 @@ public class Annotation
      * Build an annotation from the selection and selection context with invalid values for the offset and length which
      * are deprecated.
      * 
-     * @param page the document where the annotation is added
+     * @param target the document where the annotation is added
      * @param author the author of the annotation
      * @param annotation the text of the annotation
      * @param initialSelection the initial selection of the annotation
      * @param selectionContext the context of the annotation selection
      * @param id the id of the annotation
      */
-    public Annotation(String page, String author, String annotation, String initialSelection, String selectionContext,
-        String id)
+    public Annotation(String target, String author, String annotation, String initialSelection,
+        String selectionContext, String id)
     {
-        this.page = page;
+        this.target = target;
         this.author = author;
         this.annotation = annotation;
         this.selection = initialSelection;
         this.selectionContext = selectionContext;
         this.id = id;
-        this.offset = -1;
-        this.length = -1;
         this.state = AnnotationState.SAFE;
         this.displayDate = "";
     }
 
     /**
-     * @return page of annotation.
+     * @return target of annotation.
      */
-    public String getPage()
+    public String getTarget()
     {
-        return page;
+        return target;
     }
 
     /**

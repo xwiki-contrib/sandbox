@@ -34,6 +34,8 @@ import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 
 import com.xpn.xwiki.XWikiContext;
 
@@ -57,9 +59,15 @@ public class AnnotationsRESTService extends AbstractAnnotationService
     private Execution execution;
 
     /**
-     * @param space concerned
-     * @param page concerned
-     * @param wiki concerned
+     * Entity reference serializer used to get reference to the document to perform annotation operation on.
+     */
+    @Requirement
+    private EntityReferenceSerializer<String> referenceSerializer;
+
+    /**
+     * @param wiki the wiki of the document to get annotations for
+     * @param space the space of the document to get annotations for
+     * @param page the name of the document to get annotation for
      * @return annotations of a given XWiki page
      */
     @GET
@@ -67,8 +75,8 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         @PathParam("wikiName") String wiki)
     {
         try {
-            DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
-            String documentName = docInfo.getDocument().getFullName();
+            DocumentReference docRef = new DocumentReference(wiki, space, page);
+            String documentName = referenceSerializer.serialize(docRef);
             // TODO: action should be obtained from the calling client in the parameters
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
             // TODO: return AnnotationRequestResponse so that we can return an error here somehow
@@ -85,21 +93,21 @@ public class AnnotationsRESTService extends AbstractAnnotationService
     /**
      * Add annotation to a given page.
      * 
-     * @param t contains annotation information
-     * @param wiki concerned
-     * @param space concerned
-     * @param page concerned
+     * @param request the request object with the annotation to be added
+     * @param wiki the wiki of the document to add annotation on
+     * @param space the space of the document to add annotation on
+     * @param page the name of the document to add annotation on
      * @return AnnotationRequestResponse, responseCode = 0 if no error
      */
     @PUT
-    public AnnotationRequestResponse doPut(AnnotationRequest t, @PathParam("wikiName") String wiki,
+    public AnnotationRequestResponse doPut(AnnotationRequest request, @PathParam("wikiName") String wiki,
         @PathParam("spaceName") String space, @PathParam("pageName") String page)
     {
         try {
-            DocumentInfo docInfo = getDocumentInfo(wiki, space, page, null, null, true, true);
-            String documentName = docInfo.getDocument().getFullName();
-            annotationService.addAnnotation(documentName, t.getInitialSelection(), t.getSelectionContext(), t
-                .getContextOffset(), getXWikiUser(), t.getAnnotation());
+            DocumentReference docRef = new DocumentReference(wiki, space, page);
+            String documentName = referenceSerializer.serialize(docRef);
+            annotationService.addAnnotation(documentName, request.getInitialSelection(), request.getSelectionContext(),
+                request.getContextOffset(), getXWikiUser(), request.getAnnotation());
             AnnotationRequestResponse result = new AnnotationRequestResponse();
             result.setResponseCode(0);
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);

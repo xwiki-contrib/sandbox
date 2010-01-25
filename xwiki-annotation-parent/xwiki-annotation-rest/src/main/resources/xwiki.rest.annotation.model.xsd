@@ -22,7 +22,7 @@
     </annotation>
     <sequence>
       <element name="annotationId" type="string"></element>
-      <element name="pageId" type="string"></element>
+      <element name="target" type="string"></element>
       <element name="state"></element>
       <element name="author" type="string"></element>
       <element name="date" type="string"></element>
@@ -30,8 +30,6 @@
 
       <element name="initialSelection" type="string"></element>
       <element name="selectionContext" type="string"></element>
-      <element name="offset" type="int"></element>
-      <element name="length" type="int"></element>
     </sequence>
   </complexType>
 
