@@ -68,7 +68,8 @@ public class IndexedObjectReference extends ObjectReference
      * the document referenced by {@code parent}.
      * 
      * @param className the name of the class of the object
-     * @param objectNumber the number of the object in the document
+     * @param objectNumber the number of the object in the document, or {@code null} if the default object should be
+     *            referenced
      * @param parent reference to the parent document where the object is
      */
     public IndexedObjectReference(String className, Integer objectNumber, EntityReference parent)

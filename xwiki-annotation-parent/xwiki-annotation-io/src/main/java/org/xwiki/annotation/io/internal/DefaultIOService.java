@@ -266,6 +266,10 @@ public class DefaultIOService implements IOService
             // get the document
             XWikiContext deprecatedContext = getXWikiContext();
             XWikiDocument document = deprecatedContext.getWiki().getDocument(docName, deprecatedContext);
+            if (document.isNew()) {
+                // if the document doesn't exist already skip it
+                return;
+            }
             // and the document object on it
             BaseObject annotationObject =
                 document.getObject(ANNOTATION_CLASS_NAME, Integer.valueOf(annotationID.toString()));
