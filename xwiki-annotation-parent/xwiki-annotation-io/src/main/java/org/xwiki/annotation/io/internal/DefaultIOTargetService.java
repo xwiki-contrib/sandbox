@@ -89,8 +89,7 @@ public class DefaultIOTargetService implements IOTargetService
                 return dab.getDocumentContent(reference);
             }
         } catch (Exception e) {
-            throw new IOServiceException("An exception message has occurred while getting the source for " + reference,
-                e);
+            throw new IOServiceException("An exception has occurred while getting the source for " + reference, e);
         }
     }
 
