@@ -25,13 +25,24 @@ import java.util.Map;
 import com.xpn.xwiki.gwt.api.client.XObject;
 import com.xpn.xwiki.gwt.api.client.XWikiGWTException;
 import com.xpn.xwiki.gwt.api.client.XWikiService;
+import com.xpn.xwiki.watch.client.annotation.Annotation;
+import com.xpn.xwiki.watch.client.data.FeedArticle;
 
 /**
  * Service to expose Watch specific functions, extending the default XWikiService, to preserve the default functions.
  */
 public interface XWatchService extends XWikiService
 {
-    public List getArticles(String sql, int nb, int start) throws XWikiGWTException;
+    public List<FeedArticle> getArticles(String sql, int nb, int start) throws XWikiGWTException;
+    
+    /**
+     * Builds and returns a single feed article, built from the object in the passed document.
+     * 
+     * @param documentName the name of the document for which to fetch and build a feed article
+     * @return the FeedArticle object for the feed entry in the passed document 
+     * @throws XWikiGWTException if anything goes wrong
+     */
+    public FeedArticle getArticle(String documentName) throws XWikiGWTException;
     
     /**
      * Returns the configuration documents for the instance of Watch in the specified space: the feeds, groups and 
@@ -87,4 +98,14 @@ public interface XWatchService extends XWikiService
      * @throws XWikiGWTException in case something goes wrong during addition
      */
     public boolean addFeed(String spaceName, String feedName, XObject feedObject) throws XWikiGWTException;
+    
+    // annnotation functions for feeds
+    
+    public String getAnnotatedEntryFeed(String documentName) throws XWikiGWTException;
+    
+    public void addAnnotation(String selection, String metadata, String documentName) throws XWikiGWTException;
+    
+    public void removeAnnotation(String documentName, String id) throws XWikiGWTException;
+    
+    public List<Annotation> getAnnotations(String documentName) throws XWikiGWTException;
 }

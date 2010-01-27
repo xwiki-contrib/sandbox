@@ -27,18 +27,29 @@ import com.xpn.xwiki.watch.client.ui.utils.LoadingAsyncCallback;
 import com.xpn.xwiki.watch.client.ui.utils.LoadingWidget;
 import com.xpn.xwiki.watch.client.Watch;
 import com.xpn.xwiki.watch.client.Constants;
+import com.xpn.xwiki.watch.client.annotation.Annotation;
 import com.xpn.xwiki.watch.client.data.Feed;
 import com.xpn.xwiki.watch.client.data.FeedArticle;
 import com.xpn.xwiki.watch.client.data.FeedArticleComment;
+import com.xpn.xwiki.gwt.api.client.XObject;
+import com.xpn.xwiki.gwt.api.client.dialog.Dialog;
 import com.xpn.xwiki.gwt.api.client.widgets.WordListSuggestOracle;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
 import java.util.List;
 
-public class ArticleListWidget extends WatchWidget {
+import org.xwiki.gwt.dom.client.Document;
+import org.xwiki.gwt.dom.client.Selection;
 
+public class ArticleListWidget extends WatchWidget
+{
+	private PopupPanel popup;
+	private String selection;
+	private FeedArticle currentArticle;
+	
     public ArticleListWidget() {
         super();
     }
@@ -56,6 +67,7 @@ public class ArticleListWidget extends WatchWidget {
 
     public void init() {
         super.init();
+        this.popup = buildPopup();
     }
 
     public void refreshData() {
@@ -107,6 +119,8 @@ public class ArticleListWidget extends WatchWidget {
         p.add(getTitlePanel(article, articlePanel, contentZonePanel));
         p.add(getDetailsPanel(article));
         p.add(contentZonePanel);
+        // add the annotations panel to the article header
+        p.add(getAnnotationZonePanel(article));
         HTML commentsStatus = new HTML ();
         commentsStatus.setStyleName(watch.getStyleName("article", "comments-status"));
         int nbcomments = article.getCommentsNumber();
@@ -122,6 +136,104 @@ public class ArticleListWidget extends WatchWidget {
         p.add(getStatusPanel(article, commentsZonePanel, commentsStatus));
         p.add(commentsZonePanel);
         return p;
+    }
+    
+    /**
+     * @param article the article to build an annotations panel
+     * @return the annotations panel for the passed article.
+     */
+    protected Widget getAnnotationZonePanel(final FeedArticle article)
+    {
+    	FlowPanel p = new FlowPanel();
+    	for(final Annotation ann : article.getAnnotations())
+    	{
+    	    FlowPanel annotationPanel = new FlowPanel();
+    	    annotationPanel.addStyleName(watch.getCSSPrefix() + "-article-annotation");
+    		Label metadataLabel = new Label(ann.getAnnotation());
+    		Label authorLabel = new Label("by " + ann.getAuthor());
+    		Image deleteImage = new Image("/xwiki/bin/download/WatchCode/GWT/watch.zip/watch-delete-active.png");
+    		deleteImage.addClickListener(new ClickListener()
+    		{
+				public void onClick(Widget arg0)
+				{
+					watch.getXWatchServiceInstance().removeAnnotation(article.getPageName(), ann.getId() + "", 
+					    new AsyncCallback<String>()
+					{
+
+						public void onFailure(Throwable arg0)
+						{
+							showArticle(article);
+						}
+
+						public void onSuccess(String arg0)
+						{
+							watch.refreshArticleList();
+							showArticle(article);
+						}
+					});
+				}
+			});
+    		metadataLabel.addStyleName("ann-metadata");
+    		authorLabel.addStyleName("ann-author");
+    		deleteImage.addStyleName("ann-delete");
+    		
+    		annotationPanel.add(metadataLabel);
+    		annotationPanel.add(authorLabel);
+    		annotationPanel.add(deleteImage);
+    		p.add(annotationPanel);
+    	}
+    	return p;
+    }
+    
+    protected PopupPanel buildPopup()
+    {
+    	final PopupPanel popup = new PopupPanel(true);
+    	popup.setStyleName(watch.getCSSPrefix() + "-add-annotation-popup");
+    	FlowPanel contents = new FlowPanel();
+        popup.setTitle("Add Annotation");
+        final TextArea ta = new TextArea();
+        
+        Button cancel = new Button("Cancel", new ClickListener()
+        {
+        	public void onClick(Widget arg0)
+        	{
+        		popup.hide();
+        	}
+		});
+        Button annotate = new Button("Annotate", new ClickListener()
+        {
+        	public void onClick(Widget arg0)
+        	{
+        		if(selection != null)
+        		{
+        			watch.getXWatchServiceInstance().addAnnotation(selection, ta.getText(), currentArticle.getPageName(), 
+        			    new AsyncCallback<String>()
+        			{
+						public void onSuccess(String arg0)
+        				{
+        					watch.refreshArticleList();
+						}
+						
+						public void onFailure(Throwable arg0)
+						{
+							Window.alert("FAILURE : "+arg0.toString());
+						}
+					});
+        		}
+        		popup.hide();
+        	}
+		});
+        FlowPanel taPanel = new FlowPanel();
+        taPanel.addStyleName("popup-textarea");
+        taPanel.add(ta);
+        contents.add(taPanel);
+        FlowPanel holder = new FlowPanel();
+        holder.add(cancel);
+        holder.add(annotate);
+        holder.setStyleName("popup-panel-footer");
+        contents.add(holder);
+        popup.setWidget(contents);
+        return popup;
     }
     
     protected Widget getDetailsPanel(FeedArticle article) {
@@ -694,11 +806,44 @@ public class ArticleListWidget extends WatchWidget {
      * on list fill. 
      */
     protected void showContentPanel(boolean visible, ComplexPanel contentPanel, FeedArticle article) {
-        if (visible && (contentPanel.getWidgetCount() == 0)) {
+        if (visible && (contentPanel.getWidgetCount() == 0))
+        {
             // populate this panel
             HTML content = new HTML(article.getContent());
             content.setStyleName(watch.getStyleName("article", "content"));
-            contentPanel.add(content);         
+            contentPanel.add(content);
+            final FeedArticle myArticle = article;
+            content.addMouseListener(new MouseListener()
+            {
+				public void onMouseUp(Widget arg0, int arg1, int arg2)
+				{
+					Document doc = (Document) Document.get();
+            		Selection sel = doc.getSelection();
+            		if (sel.toString() == "")
+            		{
+						return;
+					}
+            		selection = sel.toString();
+            		currentArticle = myArticle;
+            		popup.center();
+				}
+				
+				public void onMouseMove(Widget arg0, int arg1, int arg2)
+				{
+				}
+				
+				public void onMouseLeave(Widget arg0)
+				{
+				}
+				
+				public void onMouseEnter(Widget arg0)
+				{
+				}
+				
+				public void onMouseDown(Widget arg0, int arg1, int arg2)
+				{
+				}
+			});
         }
         contentPanel.setVisible(visible);
     }

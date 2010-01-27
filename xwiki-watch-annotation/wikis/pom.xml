@@ -25,16 +25,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.xpn.xwiki.products</groupId>
-    <artifactId>xwiki-watch-parent</artifactId>
+    <groupId>org.xwiki.contrib.sandbox</groupId>
+    <artifactId>xwiki-watch-annotation-parent</artifactId>
     <version>1.1-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-watch-wikis</artifactId>
+  <artifactId>xwiki-watch-annotation-wikis</artifactId>
   <packaging>pom</packaging>
   <name>XWiki Products - Watch - Wikis - Parent POM</name>
-  <description>XWiki Products - Watch - Wikis - Parent POM</description>
+  <description>XWiki Watch Annotations - Wikis - Parent POM</description>
   <modules>
     <module>watch</module>
-    <module>standalone</module>
   </modules>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-xar-handlers</artifactId>
+        <version>${platform.tool.xar-handler.version}</version>
+      </extension>
+    </extensions>
+    <plugins>
+      <plugin>
+        <groupId>org.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-xar-plugin</artifactId>
+        <version>${platform.tool.xar-plugin.version}</version>
+      </plugin>
+    </plugins>
+  </build>  
 </project>

@@ -62,7 +62,7 @@ if (request.space) {
  if (request.force=="1") {
   xwiki.feed.getUpdateThread(request.space).update();
  } else {
-  xwiki.feed.startUpdateFeedsInSpace(request.space, 300000);
+  xwiki.feed.startUpdateFeedsInSpace(request.space, 19000);
 def updateThread = xwiki.feed.getUpdateThread(request.space);
 
 //print stats only if requested

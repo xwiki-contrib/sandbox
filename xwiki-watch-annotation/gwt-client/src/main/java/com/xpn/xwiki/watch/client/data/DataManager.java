@@ -634,7 +634,7 @@ public class DataManager {
         watch.getXWatchServiceInstance().getConfigDocuments(watch.getWatchSpace(), cb);
     }
 
-    public void getArticles(FilterStatus filterStatus, int nb, int start, final AsyncCallback cb) {
+    public void getArticles(FilterStatus filterStatus, int nb, int start, final AsyncCallback<List<FeedArticle>> cb) {
         try {
             String sql = prepareSQLQuery(filterStatus);
             watch.getXWatchServiceInstance().getArticles(sql, nb, start, cb);
@@ -723,14 +723,12 @@ public class DataManager {
      * @return
      */
     public void getArticle(String pageName, final AsyncCallback cb) {
-        watch.getXWikiServiceInstance().getDocument(pageName, true, true, false, new AsyncCallback() {
+        watch.getXWatchServiceInstance().getArticle(pageName, new AsyncCallback<FeedArticle>() {
             public void onFailure(Throwable caught) {
                 cb.onFailure(caught);
             }
 
-            public void onSuccess(Object result) {
-                // We encapsulate the result in a FeedArticle object
-                FeedArticle article = new FeedArticle((Document) result);
+            public void onSuccess(FeedArticle article) {
                 cb.onSuccess(article);
             }
         });

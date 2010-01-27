@@ -36,7 +36,7 @@ public class Config {
     private Map feedsByGroupList;
     private List keywords;
     private Map groups;
-    private List articles;
+    private List<FeedArticle> articles;
     private boolean lastPage;
     
     /*
@@ -92,7 +92,7 @@ public class Config {
         feedsByGroupList = new HashMap();
         keywords = new ArrayList();
         groups = new HashMap();
-        articles = new ArrayList();
+        articles = new ArrayList<FeedArticle>();
         this.hasCommentRight = this.hasEditRight = this.hasDeleteRight = true;
         this.lastPage = false;
     }
@@ -123,17 +123,17 @@ public class Config {
         FilterStatus fstatus = watch.getFilterStatus();
         //hack to test the existance of next articles: ask for one more: 
         //if we get it, then we have more articles
-        watch.getDataManager().getArticles(fstatus, watch.getArticleNbParam() + 1, fstatus.getStart(), new AsyncCallback() {
+        watch.getDataManager().getArticles(fstatus, watch.getArticleNbParam() + 1, fstatus.getStart(), 
+            new AsyncCallback<List<FeedArticle>>() {
             public void onFailure(Throwable caught) {
                 if (cb != null) {
                     cb.onFailure(caught);
                 }
             }
 
-            public void onSuccess(Object result) {
+            public void onSuccess(List<FeedArticle> articlesList) {
                 //test the size of the list
-                List resultList = (List)result;
-                if (resultList.size() == (watch.getArticleNbParam() + 1)) {
+                if (articlesList.size() == (watch.getArticleNbParam() + 1)) {
                     //we have next
                     lastPage = false;
                 } else {
@@ -141,24 +141,17 @@ public class Config {
                 }
                 //remove the last element if fetched for next
                 if (!lastPage) {
-                    resultList.remove(resultList.size() - 1);
+                    articlesList.remove(articlesList.size() - 1);
                 }
                 //update the article list
-                updateArticleList(resultList);
+                articles.clear();
+                articles.addAll(articlesList);
                 if (cb != null) {
-                    cb.onSuccess(result);
+                    cb.onSuccess(articlesList);
                 }
             }
         });
     }
-    
-    private void updateArticleList(List result) {
-        this.articles.clear();
-        //update the articles list
-        for (Iterator rIt = result.iterator(); rIt.hasNext();) {
-            this.articles.add(new FeedArticle((Document)rIt.next()));
-        }
-    }    
     
     public void refreshRights(final AsyncCallback cb)
     {

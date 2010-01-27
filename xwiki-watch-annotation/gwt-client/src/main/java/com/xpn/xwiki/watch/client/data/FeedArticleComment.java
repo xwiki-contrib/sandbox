@@ -1,5 +1,7 @@
 package com.xpn.xwiki.watch.client.data;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
@@ -22,7 +24,7 @@ package com.xpn.xwiki.watch.client.data;
  * @author ldubost
  */
 
-public class FeedArticleComment extends Object {
+public class FeedArticleComment implements IsSerializable {
     private String author;
     private String date;
     private String content;

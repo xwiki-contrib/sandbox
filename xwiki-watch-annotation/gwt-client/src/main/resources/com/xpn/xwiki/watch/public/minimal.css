@@ -152,9 +152,3 @@ div.minwidth {
 	padding-left:30px;
 	width:auto;
 }
-
-.clearfloats {
-	clear: both;
-	width: 1px;
-	height: 1px;
-}

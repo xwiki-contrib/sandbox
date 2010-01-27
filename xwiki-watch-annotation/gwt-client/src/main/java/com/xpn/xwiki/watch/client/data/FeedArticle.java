@@ -1,8 +1,10 @@
 package com.xpn.xwiki.watch.client.data;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.xpn.xwiki.gwt.api.client.Document;
 import com.xpn.xwiki.gwt.api.client.XObject;
 import com.xpn.xwiki.watch.client.Constants;
+import com.xpn.xwiki.watch.client.annotation.Annotation;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -26,11 +28,9 @@ import java.util.ArrayList;
  * License along with this software;if not,write to the Free
  * Software Foundation,Inc.,51 Franklin St,Fifth Floor,Boston,MA
  * 02110-1301 USA,or see the FSF site:http://www.fsf.org.
- *
- * @author ldubost
  */
 
-public class FeedArticle {
+public class FeedArticle implements IsSerializable {
     protected String pageName;
     protected String title;
     protected String feedName;
@@ -39,10 +39,11 @@ public class FeedArticle {
     protected String author;
     protected String date;
     protected String content;
-    protected List tags = new ArrayList();
+    protected List<String> tags = new ArrayList<String>();
     protected int flagStatus;
     protected int readStatus;
-    protected List comments = new ArrayList();
+    protected List<FeedArticleComment> comments = new ArrayList<FeedArticleComment>();
+    protected List<Annotation> annotations = new ArrayList<Annotation>();
 
     public FeedArticle() {
     }
@@ -65,7 +66,7 @@ public class FeedArticle {
         flagStatus = (iFlag==null) ? 0 : iFlag.intValue();
         Integer iRead = (Integer) feedentry.getProperty("read");
         readStatus = (iRead==null) ? 0 : iRead.intValue();
-        List commentList = article.getObjects("XWiki.XWikiComments");
+        List<XObject> commentList = article.getObjects("XWiki.XWikiComments");
         if (commentList!=null) {
             for (int i=0;i<commentList.size();i++) {
                 XObject comment = (XObject) commentList.get(i);
@@ -77,8 +78,8 @@ public class FeedArticle {
         }
     }
     
-    public static List parseTagsString(String tagsString, boolean removeDuplicates) {
-        List tagsList = new ArrayList();
+    public static List<String> parseTagsString(String tagsString, boolean removeDuplicates) {
+        List<String> tagsList = new ArrayList<String>();
         if (tagsString != null) {
             String[] tagarray = tagsString.split(Constants.PROPERTY_TAGS_SEPARATORS_EDIT);
             for (int i = 0; i < tagarray.length; i++) {
@@ -90,8 +91,8 @@ public class FeedArticle {
         return tagsList;
     }
     
-    public static List joinTagsLists(List l1, List l2, boolean removeDuplicates) {
-        List newList = new ArrayList();
+    public static List<String> joinTagsLists(List<String> l1, List<String> l2, boolean removeDuplicates) {
+        List<String> newList = new ArrayList<String>();
         newList.addAll(l1);
         if (removeDuplicates) {
             for (int i = 0; i < l2.size(); i++) {
@@ -161,11 +162,11 @@ public class FeedArticle {
         this.content = content;
     }
 
-    public List getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(List tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 
@@ -185,11 +186,11 @@ public class FeedArticle {
         this.readStatus = readStatus;
     }
 
-    public List getComments() {
+    public List<FeedArticleComment> getComments() {
         return comments;
     }
 
-    public void setComments(List comments) {
+    public void setComments(List<FeedArticleComment> comments) {
         this.comments = comments;
     }
 
@@ -202,5 +203,19 @@ public class FeedArticle {
 
     public String getPageName() {
         return pageName;
+    }
+    
+    public List<Annotation> getAnnotations()
+    {
+    	return annotations;
+    }
+
+    /**
+     * @param annotations the annotations to set
+     */
+    public void setAnnotations(List<Annotation> annotations)
+    {
+        this.annotations.clear();
+        this.annotations.addAll(annotations);
     }
 }

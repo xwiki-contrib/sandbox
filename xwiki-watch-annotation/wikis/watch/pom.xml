@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.xpn.xwiki.products</groupId>
-    <artifactId>xwiki-watch-wikis</artifactId>
+    <groupId>org.xwiki.contrib.sandbox</groupId>
+    <artifactId>xwiki-watch-annotation-wikis</artifactId>
     <version>1.1-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-watch-wikis-watch</artifactId>
+  <artifactId>xwiki-watch-annotation-wikis-watch</artifactId>
   <name>XWiki Products - Watch - Wikis - Watch Wiki</name>
   <packaging>xar</packaging>
-  <description>XWiki Watch Default Pages</description>
+  <description>XWiki Watch Annotations - Default Pages</description>
   <build>
     <plugins>
       <!-- 1) copy the GWT zip to the target directory so that it can be added as an attachment
@@ -25,8 +25,8 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>com.xpn.xwiki.products</groupId>
-                  <artifactId>xwiki-watch-gwt-client</artifactId>
+                  <groupId>org.xwiki.contrib.sandbox</groupId>
+                  <artifactId>xwiki-watch-annotation-gwt-client</artifactId>
                   <version>${pom.version}</version>
                   <type>zip</type>
                   <overWrite>true</overWrite>
@@ -60,7 +60,7 @@
               to exclude translations since the Packager currently doesn't handle translated
               resources and thus will fail in the database/ modules. -->
       <plugin>
-        <groupId>com.xpn.xwiki.platform.tools</groupId>
+        <groupId>org.xwiki.platform.tools</groupId>
         <artifactId>xwiki-xar-plugin</artifactId>
         <configuration>
           <excludes>

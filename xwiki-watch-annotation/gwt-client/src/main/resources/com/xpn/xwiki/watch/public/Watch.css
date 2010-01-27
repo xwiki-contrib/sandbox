@@ -1213,3 +1213,43 @@ div.info {
 .tagline a.f63 { font-size: 63px; line-height: 63px; cursor: pointer;}
 .tagline a.f64 { font-size: 64px; line-height: 64px; cursor: pointer;}
 
+/*
+ Annotations styles
+*/
+
+span.annotation, .watch-article-annotation .ann-metadata {
+	background-color: #ffdd99;
+}
+
+.watch-article-annotation {
+	margin-top: 2px;
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.watch-article-annotation .ann-metadata, .watch-article-annotation .ann-author {
+	display: inline;
+	margin-right: 5px;
+}
+
+.watch-article-annotation .ann-delete {
+	cursor: pointer;
+}
+
+.watch-add-annotation-popup {
+    border: 3px solid black;
+    background-color: #ffffff;
+}
+
+.watch-add-annotation-popup .popup-textarea textarea {
+    width: 220px;
+    height: 60px;
+    margin: 5px;
+}
+	
+
+.watch-add-annotation-popup .popup-panel-footer
+{
+    text-align: right;
+}
+

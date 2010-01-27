@@ -16,30 +16,31 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
  */
-package org.xwiki.watch.component.internal.vcinitializer;
 
-import org.apache.velocity.VelocityContext;
-import org.xwiki.velocity.VelocityContextInitializer;
-import org.xwiki.watch.component.WatchService;
+package com.xpn.xwiki.watch.client.annotation;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Implements the <tt>VelocityContextInitializer</tt> to add the {@link WatchService} to the velocity context.
+ * Used to specify if an annotation target has been altered by a document modification.
  * 
  * @version $Id$
  */
-public class WatchServiceVelocityContextInitializer implements VelocityContextInitializer
+public enum AnnotationState implements IsSerializable
 {
-    public static final String VELOCITY_CONTEXT_KEY = "watch";
-    
     /**
-     * Injected by the component manager dependency manager
+     * An annotation is safe when it is valid and can be rendered on the document it has been added.
      */
-    private WatchService watchService;
-
-    public void initialize(VelocityContext context)
-    {
-        context.put(VELOCITY_CONTEXT_KEY, this.watchService);
-    }
+    SAFE,
+    /**
+     * An annotation is altered when the document on which it has been added changed and the annotation position could
+     * not be correctly found on the updated document.
+     */
+    ALTERED,
+    /**
+     * An annotation is updated if its selected text has suffered a modification and it could be detected and recovered
+     * during the maintaining process.
+     */
+    UPDATED;
 }
