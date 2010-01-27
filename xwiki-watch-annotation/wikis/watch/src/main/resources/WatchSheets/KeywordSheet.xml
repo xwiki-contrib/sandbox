@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>WatchSheets</web>
+<name>KeywordSheet</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1194892910000</creationDate>
+<date>1194952319000</date>
+<contentUpdateDate>1195114894000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>WatchSheets.KeywordSheet</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<property>
+<tags/>
+</property>
+</object>
+<content>#set($keywordObj = false)
+#set($keywordObj = $doc.getObject("XWiki.KeywordClass"))
+#if ($keywordObj)
+  ## print the articles that match this keyword
+  #set($keywordValue = $keywordObj.getProperty("name").value)
+  ## escape all
+  #set($keywordValueEsc = $keywordValue.replaceAll("'", "''"))
+  #set($keywordGroup = $keywordObj.getProperty("group").value)
+  #set($groupQuery = "")
+  #if ("$!keywordGroup" != "")
+    #set($keywordGroupEsc = $keywordGroup.replaceAll("'", "''"))
+    #set($groupQuery = " and feedentry.feedurl in (select feed.url from XWiki.AggregatorURLClass as feed where '${keywordGroupEsc}' in elements(feed.group))")
+  #end
+  #set($articlesQuery = ", BaseObject as obj, XWiki.FeedEntryClass as feedentry where doc.fullName = obj.name and obj.className  = 'XWiki.FeedEntryClass' and obj.id = feedentry.id  and (lower(feedentry.title) like '%${keywordValueEsc.toLowerCase()}%' or lower(feedentry.content) like '%${keywordValueEsc.toLowerCase()}%' or lower(feedentry.fullContent) like '%${keywordValueEsc.toLowerCase()}%') ${groupQuery}")
+  #set($list = $xwiki.searchDocuments($articlesQuery))
+  #set($parList = $xwiki.arrayList)
+  #set($dispose = $parList.add($keywordValue))
+  1.1 $msg.get("watch.wiki.keyword.articles", $parList)
+  #includeForm("WatchSheets.Results")
+#else
+  #warning($msg.get("watch.wiki.keyword.noKeyword"))
+#end</content>
+</xwikidoc>

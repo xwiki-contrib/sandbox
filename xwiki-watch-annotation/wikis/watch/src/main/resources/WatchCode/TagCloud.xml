@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>WatchCode</web>
+<name>TagCloud</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1181211969000</creationDate>
+<date>1181575034000</date>
+<contentUpdateDate>1181575034000</contentUpdateDate>
+<version>1.4</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<name>tags</name>
+<prettyName>Tags</prettyName>
+<unmodifiable>0</unmodifiable>
+<relationalStorage>1</relationalStorage>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<size>30</size>
+<separator> </separator>
+<cache>0</cache>
+<separators> ,|</separators>
+<values></values>
+<number>1</number>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>WatchCode.TagCloud</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<property>
+<tags/>
+</property>
+</object>
+<content>{pre}
+&lt;style&gt;
+&lt;% 
+for(size in 12..64) {
+println ".tagline a.f$size { font-size: ${size}px; line-height: ${size}px; cursor: pointer;}"
+}
+%&gt;
+&lt;/style&gt;
+&lt;div class="tagline"&gt;
+&lt;%
+if (request.keyword==null)
+ skeyword = ""
+else
+ skeyword = request.keyword
+
+String skeyword = skeyword.replaceAll("'", "''");
+String sql = ", BaseObject as obj, XWiki.FeedEntryClass as feedentry ";
+String wheresql = "where doc.fullName=obj.name and obj.className='XWiki.FeedEntryClass' and obj.id=feedentry.id ";
+if (!(skeyword.trim()=="")) {
+   wheresql  += " and (lower(feedentry.title) like '%" + skeyword.toLowerCase() + "%' or lower(feedentry.content) like '%" + skeyword.toLowerCase() + "%' or lower(feedentry.fullContent) like '%" + skeyword.toLowerCase() + "%') ";
+}
+
+if (request.flagged=="1") {
+             wheresql += " and feedentry.flag=1";
+} else if ((request.flagged=="-1")&amp;&amp;(request.trashed=="-1")) {
+            wheresql += " and (feedentry.flag=0 or feedentry.flag is null)";
+} else if (request.trashed=="1") {
+            wheresql += " and feedentry.flag=-1";
+} else if (request.trashed=="-1") {
+            wheresql += " and (feedentry.flag&gt;-1 or feedentry.flag is null)";
+} else if (request.flagged=="-1") {
+            wheresql += " and (feedentry.flag&lt;1 or feedentry.flag is null)";
+}
+
+if ((request.feed!=null)&amp;&amp;(!request.feed.trim().equals(""))) {
+            wheresql += " and feedentry.feedurl like '" + request.feed.replaceAll("'","''") + "'";
+} else if ((request.group!=null)&amp;&amp;(!request.group.trim().equals(""))) {
+            wheresql += " and feedentry.feedurl in (select feed.url from XWiki.AggregatorURLClass as feed where '" + request.group.replaceAll("'","''") + "' in elements(feed.group))"; 
+}
+
+if (request.tags!=null) {
+ for(tag in request.getParameterValues("tags")) {
+  wheresql += " and '" + tag.replaceAll("'","''") + "' in elements(feedentry.tags) ";
+ }
+}
+
+if (request.read=="1") {
+  wheresql += " and feedentry.read=1";
+}
+if (request.read=="-1") {
+   wheresql += " and (feedentry.read is null or feedentry.read=0)";
+}
+
+
+if (request.dateStart) {
+  wheresql += " and feedentry.date &gt;= '" + request.dateStart + "' ";
+}
+
+if (request.dateEnd) {
+  wheresql += " and feedentry.date &lt;= '" + request.dateEnd + "' ";
+}
+
+sql += wheresql + " and doc.web='" + request.space + "' order by feedentry.date desc, doc.creationDate desc";
+
+def content = "";
+
+ for(item in xwiki.searchDocuments(sql)) {
+    def itemdoc = xwiki.getDocument(item)
+    itemdoc.use("XWiki.FeedEntryClass")
+    content += " " + itemdoc.getValue("title")
+    content += " " + itemdoc.getValue("content").replaceAll("&lt;.*?&gt;","").replaceAll("[\"&lt;&gt;]","")
+ }
+ if (content!="") { 
+  langFilter = request.filterlang;
+  if (!langFilter) {
+    langFilter = context.getLanguage();
+  }
+  def tagcloud = xwiki.autotag.generateTagCloud(content, langFilter)
+  println tagcloud.getHtml()
+ } else {
+   println "No data: "
+   println "SQL: ${sql}"
+ }
+%&gt;
+&lt;/div&gt;
+{/pre} 
+</content></xwikidoc>

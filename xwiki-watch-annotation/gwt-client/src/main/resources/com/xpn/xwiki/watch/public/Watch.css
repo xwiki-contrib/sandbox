@@ -1,0 +1,1215 @@
+/* fix height for containers in toucan, in quirks mode */
+#xwikimaincontainerinner, #contentcontainer {
+    height: auto;
+}
+
+.watch-main {
+    width: 100%;
+    float: left;
+    margin-top:0px;
+}
+
+div#contentcolumn, div.main {
+	background-image: url(watch-bg.png) ;
+}
+div.main {
+  margin-top:-30px;
+  padding: 0;
+  background-color: transparent;
+  background-position: top right;
+  background-repeat: repeat-y;
+}
+html>body div.main {
+*margin-top: 0;
+}
+
+div#contentcolumn {
+  background-color: transparent;
+  background-position: top left;
+  background-repeat: repeat-y;
+}
+img.watch-article-logo-icon,
+img.watch-feedtree-logo-icon {
+	width: 16px;
+	height: 16px;
+}
+
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* @group TITLEBAR */
+
+.watch-titlebar {
+    width: 100%;
+    float: left;
+}
+.watch-titlebar-title,.watch-titlebar-refresh, .watch-actionbar {
+     float: left;
+}
+
+
+.watch-search-text,.watch-search-box,.watch-search-button {
+    float: left;
+}
+
+.watch-search {
+    float: right;
+    width: 200px;
+}
+div.watch-titlebar {
+	height: 50px;
+	background-color: #868C94;
+}
+img.watch-titlebar-refresh {
+	margin: 13px;
+	cursor: pointer;
+}
+.watch-search {
+    float: right;
+    width: auto;
+    color:  #fff;
+	font-size:  1.1em;
+	padding-top: 15px;
+	margin-right: 1.2em;
+}
+div.watch-search-text {
+	padding: 3px 10px;
+}
+button.watch-search-button {
+	background-color: #868C94;
+	border:  none;
+	color:  #fff;
+	font-size:  1.1em;
+	cursor: pointer;
+}
+#Watch div.watch-main div.watch-titlebar div.watch-titlebar-title {
+	color: #fff;
+	font-size: 1.1em;
+	padding-top: 17px;
+	margin-left: 1.2em;
+}
+
+/* @end */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* @group ACTIONBAR */
+
+.watch-actionbar {
+    float: left;
+    width: 100%;
+  background: #808080;
+  height: 40px;
+  /*cover the missing pixels in FF3, if adjustment has been made to handle floating point width values*/
+  border-right: 2px solid #808080;
+  color: #fff;
+}
+
+.watch-actionbar-pressreview, .watch-actionbar-analysis, .watch-actionbar-showhidereadarticles {
+  border-left: 3px solid #fff;
+  padding-left: 5px;
+  cursor: pointer;
+  height: 40px;
+}
+
+.watch-imagetext {
+    float: right;
+    width: 150px;
+}
+
+img.watch-imagetext-image {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.watch-imagetext-image, .watch-imagetext-text {
+    float: left;
+}
+
+.watch-actionbar-pressreview, .watch-actionbar-analysis, .watch-actionbar-showhidereadarticles {
+    width: 150px;
+    float: right;
+}
+.watch-actionbar-title {
+  line-height: 40px;
+  float: left;
+  padding: 0pt 10px;
+}
+
+/* @end */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* @group FEEDS */
+
+.watch-feedtree {
+    float: left;
+    clear: left;
+    width: 200px;
+}
+.watch-feedtree-image {
+    float: right;
+    cursor: pointer;
+}
+
+.watch-feedtree-groups {
+    float: left;
+    clear: both;
+}
+.watch-feedtree{
+	background-color: #868C94;
+}
+
+/*correct the toucan border setting for all tds*/
+.watch-feedtree td {
+	border: none;
+}
+
+.watch-feedtree-title {
+    float: left;
+    height: 40px;
+    border-bottom: none;
+    background-color: #43464A;
+    color: #FFF;
+    width:  200px;
+    font-size: 1.8em;
+    line-height: 40px;
+    text-indent: 10px;
+    padding: 0 ;
+    font-weight: normal;
+    text-transform: uppercase;
+}
+img.watch-feedtree-image {
+    float: right;
+    padding: 0px;
+    margin-top: -30px !important;
+    margin-right: 10px;
+}
+div.watch-feedtree-groups div table {
+	font-size: 0.9em;
+	margin: 0px;
+}
+img.watch-feedtree-logo-icon {
+	margin-right: 5px;
+}
+div.watch-feedtree-groups div table a:link,
+div.watch-feedtree-groups div table a:visited,
+div.watch-feedtree-groups div table a:active,
+div.watch-feedtree-groups div table a{
+	color: #fff;
+	text-decoration: none;
+	line-height: 16px;
+}
+
+span.gwt-TreeItem-selected div.watch-feedtree-link {
+	font-weight: bold;
+	color: #ffffff;
+	}
+
+
+div.watch-feedtree-groups div span div table {
+	font-size: 0.9em;
+	margin: 0;
+	width: 180px;
+}
+div.watch-feedtree-link {
+	display:  inline;
+	color: #ffffff;
+	cursor: pointer;
+	white-space: normal;
+	font-size: 100%;
+}
+
+div.watch-feedtree-group {
+    display: block;
+    width: 160px;
+    overflow-x: hidden;
+}
+
+div.watch-feedtree-feed {
+    display: block;
+    width: 150px;
+    overflow-x: hidden;
+}
+
+.watch-feedtree-feedaction, .watch-feedtree-groupaction, .watch-keyword-keywordaction {
+	float: right;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	font-size:0.9em;
+	color: #FFFFFF;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.watch-feedtree-feedaction .gwt-Label, .watch-feedtree-groupaction .gwt-Label, .watch-keyword-keywordaction .gwt-Label {
+    display: inline;
+}
+
+div.watch-feedtree-editfeed, div.watch-feedtree-editgroup, div.watch-keyword-editkeyword {
+	background-color: #FFAA00;
+}
+
+div.watch-feedtree-deletefeed, div.watch-feedtree-deletegroup, div.watch-keyword-deletekeyword{
+	background-color: #FF0000;
+}
+
+#Watch div.watch-main div.watch-feedtree div.watch-feedtree-groups div span div table tbody tr td  {
+	white-space: normal;
+}
+
+
+
+
+/* @end */
+
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* @group ARTICLES */
+
+
+
+.watch-navbar, .watch-navbar-bottom {
+ clear: both;
+ padding: 8px 0 5px 0;
+  text-align: center;
+
+}
+.watch-navbar div, .watch-navbar-bottom div {
+  display: inline;
+  margin: 5px 20px;
+}
+.watch-navbar-next, .watch-navbar-previous, .watch-navbar-bottom-next, .watch-navbar-bottom-previous {
+text-decoration: none;
+text-transform: uppercase;
+color: #000;
+font-weight: bold;
+cursor: pointer;
+}
+
+.watch-navbar div.watch-navbar-previous, .watch-navbar div.watch-navbar-next, 
+.watch-navbar-bottom div.watch-navbar-previous, .watch-navbar-bottom div.watch-navbar-next {
+  display:none;
+}
+.watch-navbar div.watch-navbar-previous-active, .watch-navbar div.watch-navbar-next-active,
+.watch-navbar-bottom div.watch-navbar-previous-active, .watch-navbar-bottom div.watch-navbar-next-active {
+  display:inline;
+}
+
+.watch-articlelist {
+    float: left;
+    background-color: #fff;
+}
+/*put a nice margin to the info*/
+.watch-articlelist div.info {
+	margin: 20px;
+}
+.watch-article {
+    width: 100%;
+    float: left;
+
+}
+.watch-article-headline {
+	position: relative;
+	zoom:1;/* haslayout for IE6  --> to remove*/
+	display: block;
+    overflow: auto;
+	margin: 4px 10px 0px 10px;
+	padding: 5px 0px;
+	border-top: 1px dotted #e6e6e6;
+}
+
+.watch-article-read div.watch-article-headline {
+	background: #ffffff;
+}
+
+.watch-article-unread div.watch-article-headline {
+	background: #ffffff;
+}
+
+.watch-article-unread div.watch-article-title div.gwt-HTML {
+	color: #000;
+	font-size: 1.1em;
+}
+
+.watch-article-read div.watch-article-title div.gwt-HTML {
+	color: #868c94;
+	font-size: 1.1em;
+}
+
+.watch-article-header {
+	margin: 0px 0px 0px 5px;
+	width: 90%;
+}
+
+.watch-article-title {
+	float: none;
+	overflow-x: hidden;
+	width: auto !important;
+	width: 80%;
+	margin: 0 50px 0 0;
+}
+
+div.watch-article-title div {
+	cursor: pointer;
+	display: inline;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.watch-article-details {
+	float: none;
+	overflow-x: hidden;
+	width: auto !important;
+	width: 80%;
+	margin: 0 50px 0 0;
+}
+
+div.watch-article-feedname {
+	position: relative;
+	float: left;
+	font-size: 0.9em;
+	color: #43464A;
+		zoom:1;/* haslayout for IE6  --> to remove*/
+}
+
+div.watch-article-feedname-text {
+		position: relative;
+float: left;
+width: auto;
+white-space: nowrap;
+	padding: 0;
+	margin: 0pt 1em 0 5px;
+}
+
+div.watch-article-date {
+	position: relative;
+	float: left;
+	font-size: 0.9em;
+	color: #43464A;
+	white-space: nowrap;
+	display: inline;
+}
+
+div.watch-article-date .watch-article-date-text {
+    display: inline;
+}
+
+.watch-article-logo {
+	float: left;
+	display: inline;
+}
+
+.watch-article-logo .gwt-HTML {
+	display: inline;
+}
+
+div.watch-article-actionsleft {
+	position: relative;
+	float: left;
+	margin: 0px 5px 0px 0px;
+	display: inline;
+}
+
+div.watch-article-actionsleft img {
+	margin-left: 2px;
+}
+
+div.watch-article-actionsright {
+	top: 5px;
+	right: 0px;
+	position: absolute;
+}
+
+div.watch-article-actionsright img {
+	margin-left: 5px;
+}
+
+div.watch-article-trash, div.watch-article-flag, div.watch-article-trash div {
+   display: inline;
+}
+
+.watch-article-status {
+	display: block;
+	overflow-x: hidden;
+	width: auto !important;
+}
+
+.watch-article-content {
+	margin: 10px 0px;
+	text-align: justify;
+}
+
+.watch-article-comments-status {
+	float: left;
+	display: inline;
+	font-size: 0.9em;
+	margin-right: 20px;
+	margin-left: 5px;
+	color: #43464A;
+	cursor: default;
+	white-space: nowrap;
+}
+
+.watch-article-tags-status {
+	float: left;
+	display: inline;
+	color: #43464A;
+	font-size: 0.9em;
+	margin-right: 5px;
+	margin-left: 5px;
+	white-space: nowrap;
+	cursor: default;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.watch-article-comments-add {
+	float: left;
+	overflow-x: hidden;
+	width: 90%;
+	margin-left: 20px;
+}
+
+.watch-article-comments-add .gwt-Label {
+	font-size: 0.9em;
+	color: #43464A;
+}
+
+.watch-article-comments-add .gwt-TextArea {
+	width: 450px;
+	height: 100px;
+	border: 1px solid #43464A;
+}
+
+.watch-article-comments-add .gwt-HTML {
+	float: left;
+	font-size: 0.8em;
+	color: #43464A;
+	padding: 3px;
+	margin: 5px;
+	text-decoration: underlined;
+}
+
+.watch-article-comments-add button.watch-article-comment-add,
+.watch-article-comments-add button.watch-article-comment-add:hover {
+    text-align: center;
+    font-weight: normal;
+    font-size: 0.8em;
+    color: #E6EAEE;
+    background-color: #43464A;
+    border: 0px;
+    padding: 3px;
+    margin: 5px;
+    float: left;
+}
+
+.watch-article-comments-add button.watch-article-comment-cancel,
+.watch-article-comments-add button.watch-article-comment-cancel:hover {
+    text-align: center;
+    font-weight: normal;
+    font-size: 0.8em;
+    color: #43464A;
+    background-color: #FFFFFF;
+    border: 0px;
+    padding: 3px;
+    margin: 5px;
+    float: left;
+}
+
+.watch-article-comment {
+	font-size: 0.9em;
+	background-color: #fff;
+	margin: 10px 0px;
+	padding: 5px 0px;
+}
+
+.watch-article-comment-details {
+	width: 120px;
+}
+
+
+.watch-article-comment-author {
+    clear: both;
+    float: left;
+
+}
+
+.watch-article-comment-author {
+	font-size: 0.7em;
+	padding: 0px 5px;
+	color: #43464A;
+	font-weight: bold;
+	overflow: hidden;
+	float: left;
+	margin: 0xp;
+	width: 90%;
+}
+
+.watch-article-comment-date {
+	clear: both;
+	color: #43464A;
+	font-size: 0.8em;
+}
+
+.watch-article-date-on {
+    padding: 0;
+    margin: 0 1em 0 0;
+    color: #43464A;
+    float: left;
+}
+
+.watch-article-comment-content {
+	border-left: 1px dotted #43464A;
+	background-color: #fff;
+	font-size: 0.9em;
+	color: #43464A;
+	text-align: justify;
+	margin: 0px 5px;
+	padding: 0px 5px;
+}
+
+.watch-article-tag {
+	float: left;
+	margin-right: 10px;
+}
+
+.watch-article-tag-remove .gwt-Image {
+    cursor: pointer;	
+}
+
+.watch-article-tag-remove {
+	padding: 3px 4px 5px;
+}
+
+
+.watch-article-tag-name {
+	font-size: 0.9em;
+	color: #43464A;
+}
+
+.watch-article-tags-add .gwt-TextBox {
+	border: 1px solid #43464A;
+	width: 100px;
+	font-size: 0.7em;
+	padding: 0px;
+	margin: 0px;
+}
+
+.watch-article-tags-add .gwt-Button,.watch-article-tags-add .gwt-Button:hover {
+	text-align: center;
+	font-weight: normal;
+	font-size: 0.6em;
+	color: #E6EAEE;
+	background-color: #43464A;
+	padding: 1px;
+	margin: 0px 2px;
+	float: left;
+}
+
+/* add padding to suggestions list*/
+.gwt-SuggestBoxPopup td.item {
+    padding: 2px;
+}
+
+/* highlight current selected suggestion */
+.gwt-SuggestBoxPopup .item-selected {
+    background-color: #43464a;
+    color: #FFFFFF;
+}
+
+.gwt-SuggestBoxPopup {
+	background-color: #E6EAEE;
+    border: 1px outset #868C94;
+}
+
+div.watch-article-comment {
+	padding:5px ;
+	margin: 2px -5px;
+	font-size: 0.9em;
+    background-color: #fff;
+}
+div.watch-article-comments {
+    background-color: #fdffef;
+    border: 1px solid #ccc;
+    color: #555;
+}
+
+
+div.watch-article-tags-text, div.watch-article-comments-title-text {
+	display:  inline;
+	margin-left: 10px;
+}
+
+
+.watch-article-comment-author {
+  float: left;
+  font-weight: bold;
+
+}
+.watch-article-comment-date {
+	float:  left;
+  	text-transform: lowercase;
+	margin-left: 21px;
+}
+
+/* @end */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* @group FILTER */
+
+.watch-filterbar {
+    float: right;
+    width: 200px;
+    background-color: #868c94;
+    overflow-x: auto;
+}
+
+div.watch-filter-title-text {
+	float: left;
+	height:  40px;
+    border-left: 0px solid #CCC;
+    background-color: #43464A;
+    color: #FFF;
+    width:  200px;
+    font-size: 1.8em;
+    line-height: 40px;
+    text-indent: 10px;
+    padding: 0 ;
+    font-weight: normal;
+    text-transform: uppercase;
+}
+div.watch-filter-init {
+	clear: both;
+	text-align: center;
+	padding: 1.5em 0;
+}
+
+div.watch-filter-seeonly-title, div.watch-filter-keywords-title, div.watch-filter-tagcloud-title, div.watch-filter-dates-title {
+	padding: 3px 0 0 10px;
+	font-weight: bold;
+	border-bottom: 1px solid #000;
+	margin-bottom: 0.5em;
+	clear: both;
+}
+
+
+div.watch-filter-filter span.gwt-CheckBox {
+	padding-left: 10px;
+	color: #fff;
+}
+
+div.watch-filter-filter, div.watch-keywords, div.watch-tagcloud {
+	margin:0 0 1.5em 0;
+}
+
+div.watch-filter-init-text {
+	color: #000000;
+	text-decoration: underline;
+	cursor: pointer;
+	padding: 4px 0px 3px 0px;
+	background-color: #E6EAEE;
+}
+div.watch-keyword-link {
+	width: 100%;
+	overflow-x: hidden;
+}
+
+div.watch-tagscloud-9, div.watch-tagscloud-10, div.watch-tagscloud-11,
+div.watch-tagscloud-12, div.watch-tagscloud-13, div.watch-tagscloud-14,
+div.watch-tagscloud-15 {
+	float: left;
+    cursor: pointer;
+}
+
+div.watch-tagscloud-9
+{color: #fff;text-decoration: none;	padding: 0 4px;font-size:  0.9em;}
+div.watch-tagscloud-10
+{color: #fff;text-decoration: none;	padding: 0 4px;font-size:  1em;}
+div.watch-tagscloud-11
+{color: #fff;text-decoration: none;	padding: 0 4px;font-size:  1.1em;}
+div.watch-tagscloud-12
+{color: #fff;text-decoration: none;	padding: 0 4px;font-size:  1.2em;}
+div.watch-tagscloud-13
+{color: #fff;text-decoration: none;	padding: 0 4px;font-size:  1.3em;}
+div.watch-tagscloud-14
+{color: #fff;text-decoration: none;	padding: 0 4px;font-size:  1.4em;}
+div.watch-tagscloud-15
+{color: #fff;text-decoration: none;	padding: 0 4px;font-size:  1.5em;}
+
+
+div.watch-tagscloud, div.watch-keyword-link {
+	color: #fff;
+	text-decoration: none;
+	line-height:15px;
+    cursor: pointer;
+}
+
+/* @end */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* @group ADMIN */
+
+
+.watch-addfeed-buttons button,.watch-configtype-buttons button {
+    background: #EBEBEB;
+    border: 1px solid #999;
+    width: 180px;
+    font: 12px Arial;
+    color: #666699;
+    text-align: left;
+    padding: 10px 5px 10px 5px;
+    white-space: normal;
+    overflow: visible;
+    display: block;
+    max-width: 180px;
+}
+
+div.dialog-message .gwt-ModalDialog-Content {
+    padding: 10px;
+    text-align: center;
+}
+
+div.dialog-message .gwt-ModalDialog-Content .gwt-Button {
+	margin: 0;
+}
+
+div.dialog-loading .gwt-ModalDialog-Content {
+    padding: 10px;
+    text-align: center;
+}
+
+div.dialog-loading .gwt-ModalDialog-Content .gwt-Button {
+    margin: 0;
+}
+
+div.gwt-DialogBox {
+	position: relative;
+    border: 3px solid black;
+    background-color: white;
+    padding: 0px;
+ 	width:  400px;
+ 	overflow: hidden;
+}
+
+div.gwt-DialogBox .Caption {
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 90%;
+    font-weight: bold;
+    background-color: #43464a;
+    color: #fff;
+    padding: 3px;
+    cursor: default;
+}
+
+.gwt-DialogBox table {
+	width: 400px;
+}
+
+
+
+.watch-next,.watch-close,.watch-finish  {
+    background: #aaf;
+    color: #000;
+    border: 1px solid #99f;
+}
+.watch-cancel,.watch-back {
+    background: #DCDCDC;
+    border: 1px solid #A5A5A5;
+    color: #3F3F3F;
+    margin-right: 2px;
+}
+.watch-addfeed-help,.watch-configtype-help {
+	float: right;
+    width: 200px;
+    text-align: center;
+}
+div.commentadd-invitation,
+div.tagsadd-invitation,
+div.standardfeed-invitation,
+div.configtype-invitation,
+div.addfeed-invitation,
+div.standard-invitation,
+div.addkeyword-invitation,
+div.addgroup-invitation,
+div.loadingstatus-invitation,
+div.googleblog-invitation,
+div.googlenews-invitation,
+div.feedster-invitation,
+div.technoratitag-invitation,
+div.pressreview-invitation,
+div.analysis-invitation,
+div.chooseaction-invitation,
+div.removefeed-invitation,
+div.preview-invitation,
+div.email-invitation,
+div.wikio-invitation,
+div.chooseproutput-invitation
+ {
+	text-align: center;
+	font-size: 1.3em;
+	font-weight: bold;
+	padding: 10px;
+	color: #999;
+}
+
+div.watch-configtype-buttons, div.watch-addfeed-buttons {
+	float: left;
+    width: 200px;
+}
+
+#body div.gwt-DialogBox.watch-analysis div.tagline  {
+	padding: 10px;
+}
+
+div.analysis-lang {
+	text-align: center;
+}
+
+div.analysis-lang div.gwt-Label {
+	display: inline;
+}
+
+
+img.watch-configtype-help-content-image {
+	width: 180px ;
+	height:  75px;
+}
+
+
+button.gwt-Button{
+	font-weight: bold;
+	text-align: center;
+	color: #000;
+	background-color: #fff9d8;
+	border: 1px solid #ddd;
+	padding: 7px;
+	margin: 5px;
+}
+
+
+button.watch-addfeed-button-standard, button.watch-addfeed-button-googlenews, 
+button.watch-addfeed-button-googleblog, button.watch-addfeed-button-technoratitag,
+button.watch-addfeed-button-feedster, button.watch-addfeed-button-wikio, 
+button.watch-configtype-button-addfeed, button.watch-configtype-button-addkeyword,
+button.watch-configtype-button-addgroup, button.watch-configtype-button-loadingstatus {
+    overflow-x: auto;
+}
+
+
+div.tk-GlassPanel.tk-ModalDialog-glassPanel {
+	background: #000;
+	filter:alpha(opacity=25);
+	-moz-opacity:0.25;
+	opacity:0.25;
+}
+button.gwt-Button:hover{
+	font-weight: bold;
+	color: #000;
+	background-color: #d6e4ff;
+	border: 1px solid #ddd;
+	padding: 7px;
+	margin: 5px;
+}
+textarea.watch-commentadd-comment,
+input.watch-tagsadd-tags,
+input.watch-standardfeed-feedname,
+input.watch-standardfeed-feedurl,
+input.watch-standard-feedname,
+input.watch-standard-feedurl ,
+input.watch-googlenews-feedname,
+input.watch-googlenews-query ,
+input.watch-addkeyword-keyword,
+input.watch-addgroup-group ,
+input.watch-googleblog-feedname,
+input.watch-googleblog-query,
+input.watch-technoratitag-feedname ,
+input.watch-technoratitag-query,
+input.watch-feedster-feedname ,
+input.watch-feedster-query,
+input.watch-wikio-feedname,
+input.watch-wikio-query,
+input.watch-email-mailsubject,
+input.watch-email-mailto,
+textarea.watch-email-mailcontent
+{
+	width: 380px;
+	margin: 0 10px;
+}
+span.watch-email-withcontent, span.watch-email-withcomments, span.watch-removefeed-witharticles {
+	margin: 0 10px;
+	width: 380px;
+	display: block;
+}
+span.watch-email-withcontent label, span.watch-email-withcomments label, span.watch-removefeed-witharticles label {
+	margin: 10px 0 0 10px;
+}
+span.watch-email-withcontent input, span.watch-email-withcomments input {
+	margin: 10px 0 0 0;
+}
+select.gwt-ListBox
+{
+	width: 380px;
+	padding: 3px 5px;
+	margin: 0 10px;
+}
+div.comment-label,
+div.tags-label,
+div.pressreview-html,
+div.keyword-label,
+div.groups-label,
+div.group-label,
+div.mailsubject-label,
+div.feedname-label,
+div.feedurl-label,
+div.query-label,
+div.mailto-label,
+div.mailcontent-label,
+div.language-label
+{
+	margin: 10px 10px 0 10px;
+}
+div.watch-commentadd-actions,
+div.watch-tagsadd-actions,
+.watch-standardfeed-actions,
+div.watch-configtype-actions,
+div.watch-addfeed-actions,
+div.watch-googlenews-actions,
+div.watch-addkeyword-actions,
+div.watch-addgroup-actions,
+div.watch-loadingstatus-actions,
+div.watch-standard-actions,
+div.watch-googleblog-actions,
+div.watch-pressreview-actions,
+div.watch-analysis-actions
+ {
+	clear: both;
+	padding-top:  25px;
+}
+
+.gwt-DialogBox .watch-cancel, .gwt-DialogBox .watch-back {
+	float: left;
+	background-color: #ff991b;
+	color:  #fff;
+	border: 2px solid #000;
+
+}
+.gwt-DialogBox .watch-cancel:hover, .gwt-DialogBox .watch-back:hover {
+	float: left;
+	background-color: #ffba1a;
+	color:  #fff;
+	border: 2px solid #000;
+
+}
+.gwt-DialogBox .watch-next
+ {
+	float: right;
+	background-color: #caf117;
+	color:  #000;
+	border: 2px solid #000;
+}
+.gwt-DialogBox .watch-next:hover
+ {
+	float: right;
+	background-color: #d7ff23;
+	color:  #000;
+	border: 2px solid #000;
+}
+
+
+
+.watch-chooseaction-help-content-text,
+.watch-chooseaction-help-content-description,
+.watch-addfeed-help-content-text,
+.watch-addfeed-help-content-description,
+.watch-configtype-help-content-text,
+.watch-configtype-help-content-description
+{
+    padding: 10px;
+    line-height: 140%;
+    color: #999;
+}
+
+
+div.gwt-DialogBox.watch-analysis, div.gwt-DialogBox.watch-pressreview  {
+	width: 800px;
+}
+div.gwt-DialogBox.watch-analysis  table, div.gwt-DialogBox.watch-pressreview table {
+	width: 800px;
+}
+
+div.gwt-DialogBox.watch-commentadd  {
+	width: 424px;
+}
+
+div.loadingstatus-content {
+    margin: 10px;
+}
+
+div.loadingstatus-content h2 {
+    font-size: 1.5em;
+}
+
+div.loadingstatus-content table.wiki-table th {
+    background:#F4F9FE;
+    border:1px solid #E5EFF8;
+    color:#66A3D3;
+    font-size-adjust:none;
+    font-variant:normal;
+    font-weight:bold;
+    line-height:1.4em;
+    padding: 3px 4px;
+    text-align:center;	
+}
+
+div.loadingstatus-content table.wiki-table td {
+    border: 1px solid #E5EFF8;
+    padding: 1px 2px;
+}
+
+div.watch-loadingstatus {
+	width: auto;
+}
+
+
+/* @end */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ------------------------------------------------------- */
+/* ancien Style attache */
+
+
+/* flix */
+
+#xwikidata, .about {
+  display: none;
+}
+.watch-imagetext-text {
+  width: 115px;
+  padding: 0 5px;
+  font-size: 0.9em;
+  line-height: 40px;
+}
+
+div.watch-tagscloud-active {
+	font-weight: bold;
+	text-decoration: none;
+}
+
+div.watch-keyword {
+	clear: both;
+	padding: 0pt 10px;
+}
+
+div.watch-keyword-active div.watch-keyword-link {
+	font-weight: bold;
+}
+
+/*
+filter styles
+*/
+button.watch-filter-date-month-button, button.watch-filter-date-year-button {
+	padding: 0px;
+	margin: 2px;
+}
+
+button.watch-filter-date-month-button:hover, button.watch-filter-date-year-button:hover {
+	padding: 0px;
+	margin: 2px;
+}
+
+div.watch-filter-date-year-label, div.watch-filter-date-month-label, div.watch-filter-date-title-label, div.watch-filter-date-label {
+	display: inline;
+}
+
+div.watch-filter-date-title-label, div.watch-filter-date-label {
+	color: #FFFFFF;
+}
+
+table.calendar-panel, button.watch-filter-date-month-button, button.watch-filter-date-year-button {
+	background-color: #E6EAEE;
+}
+div.watch-datestartwidget, div.watch-dateendwidget {
+    padding-left: 10px;
+}
+div.calendar-dateCell {
+	cursor: pointer;
+}
+
+/* Styles for the HTMLMessages, universal across watch application */
+div.info {
+	padding: 16px 10px 16px 42px;
+	background: #E8F1FF url('watch-info.png') 5px center no-repeat; 
+    border: 1px solid #5599FF;
+    color: #5599FF;
+}
+
+/* Tag cloud styles: although they are generated and inserted in HTML by the TagCloud page, */ 
+/* Internet Explorer does not apply styles added dynamically. So, in order for the text analisys */
+/* to be correctly displayed, we need them here */
+.tagline a.f12 { font-size: 12px; line-height: 12px; cursor: pointer;}
+.tagline a.f13 { font-size: 13px; line-height: 13px; cursor: pointer;}
+.tagline a.f14 { font-size: 14px; line-height: 14px; cursor: pointer;}
+.tagline a.f15 { font-size: 15px; line-height: 15px; cursor: pointer;}
+.tagline a.f16 { font-size: 16px; line-height: 16px; cursor: pointer;}
+.tagline a.f17 { font-size: 17px; line-height: 17px; cursor: pointer;}
+.tagline a.f18 { font-size: 18px; line-height: 18px; cursor: pointer;}
+.tagline a.f19 { font-size: 19px; line-height: 19px; cursor: pointer;}
+.tagline a.f20 { font-size: 20px; line-height: 20px; cursor: pointer;}
+.tagline a.f21 { font-size: 21px; line-height: 21px; cursor: pointer;}
+.tagline a.f22 { font-size: 22px; line-height: 22px; cursor: pointer;}
+.tagline a.f23 { font-size: 23px; line-height: 23px; cursor: pointer;}
+.tagline a.f24 { font-size: 24px; line-height: 24px; cursor: pointer;}
+.tagline a.f25 { font-size: 25px; line-height: 25px; cursor: pointer;}
+.tagline a.f26 { font-size: 26px; line-height: 26px; cursor: pointer;}
+.tagline a.f27 { font-size: 27px; line-height: 27px; cursor: pointer;}
+.tagline a.f28 { font-size: 28px; line-height: 28px; cursor: pointer;}
+.tagline a.f29 { font-size: 29px; line-height: 29px; cursor: pointer;}
+.tagline a.f30 { font-size: 30px; line-height: 30px; cursor: pointer;}
+.tagline a.f31 { font-size: 31px; line-height: 31px; cursor: pointer;}
+.tagline a.f32 { font-size: 32px; line-height: 32px; cursor: pointer;}
+.tagline a.f33 { font-size: 33px; line-height: 33px; cursor: pointer;}
+.tagline a.f34 { font-size: 34px; line-height: 34px; cursor: pointer;}
+.tagline a.f35 { font-size: 35px; line-height: 35px; cursor: pointer;}
+.tagline a.f36 { font-size: 36px; line-height: 36px; cursor: pointer;}
+.tagline a.f37 { font-size: 37px; line-height: 37px; cursor: pointer;}
+.tagline a.f38 { font-size: 38px; line-height: 38px; cursor: pointer;}
+.tagline a.f39 { font-size: 39px; line-height: 39px; cursor: pointer;}
+.tagline a.f40 { font-size: 40px; line-height: 40px; cursor: pointer;}
+.tagline a.f41 { font-size: 41px; line-height: 41px; cursor: pointer;}
+.tagline a.f42 { font-size: 42px; line-height: 42px; cursor: pointer;}
+.tagline a.f43 { font-size: 43px; line-height: 43px; cursor: pointer;}
+.tagline a.f44 { font-size: 44px; line-height: 44px; cursor: pointer;}
+.tagline a.f45 { font-size: 45px; line-height: 45px; cursor: pointer;}
+.tagline a.f46 { font-size: 46px; line-height: 46px; cursor: pointer;}
+.tagline a.f47 { font-size: 47px; line-height: 47px; cursor: pointer;}
+.tagline a.f48 { font-size: 48px; line-height: 48px; cursor: pointer;}
+.tagline a.f49 { font-size: 49px; line-height: 49px; cursor: pointer;}
+.tagline a.f50 { font-size: 50px; line-height: 50px; cursor: pointer;}
+.tagline a.f51 { font-size: 51px; line-height: 51px; cursor: pointer;}
+.tagline a.f52 { font-size: 52px; line-height: 52px; cursor: pointer;}
+.tagline a.f53 { font-size: 53px; line-height: 53px; cursor: pointer;}
+.tagline a.f54 { font-size: 54px; line-height: 54px; cursor: pointer;}
+.tagline a.f55 { font-size: 55px; line-height: 55px; cursor: pointer;}
+.tagline a.f56 { font-size: 56px; line-height: 56px; cursor: pointer;}
+.tagline a.f57 { font-size: 57px; line-height: 57px; cursor: pointer;}
+.tagline a.f58 { font-size: 58px; line-height: 58px; cursor: pointer;}
+.tagline a.f59 { font-size: 59px; line-height: 59px; cursor: pointer;}
+.tagline a.f60 { font-size: 60px; line-height: 60px; cursor: pointer;}
+.tagline a.f61 { font-size: 61px; line-height: 61px; cursor: pointer;}
+.tagline a.f62 { font-size: 62px; line-height: 62px; cursor: pointer;}
+.tagline a.f63 { font-size: 63px; line-height: 63px; cursor: pointer;}
+.tagline a.f64 { font-size: 64px; line-height: 64px; cursor: pointer;}
+

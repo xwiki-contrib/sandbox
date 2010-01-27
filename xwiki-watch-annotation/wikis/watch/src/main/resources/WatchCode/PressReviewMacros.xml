@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>WatchCode</web>
+<name>PressReviewMacros</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1210096675000</creationDate>
+<date>1210098439000</date>
+<contentUpdateDate>1210098439000</contentUpdateDate>
+<version>3.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>WatchCode.PressReviewMacros</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<property>
+<tags/>
+</property>
+</object>
+<content>{pre}
+######################################################################################################
+## Generate the list of articles matching the specified parameters, putting it in it's last parameter.
+## The macro uses its parameters in readonly mode (safe to be used with $request.&lt;parameter&gt; values).
+######################################################################################################
+#macro (articlesList $space $read $flagged $trashed $feed $group $tags $keyword $limit $dateStart $dateEnd $result)
+  ## check space specification
+  #if (!$space)
+    $msg.get("watch.pressreview.noquery")
+    ## and set the result list to the void list
+    #set($result = $util.arrayList)
+  #else
+
+    ## check keyword specification
+    #set($skeyword = "")
+    #if ($keyword)
+      #set($skeyword = $keyword)
+    #end
+    #set($skeyword = $skeyword.replaceAll("'", "''"))
+
+    ## use a limit, put it on default 50 if none else specified
+    #set($iLimit = $limit)
+    #if ($iLimit)
+      #set($iLimit = $xwiki.parseInt($iLimit))
+    #else
+      #set($iLimit = 50)
+    #end
+
+    ##start building the query    
+    #set($sql = ", BaseObject as obj, XWiki.FeedEntryClass as feedentry ")
+    #set($wheresql = "where doc.fullName=obj.name and obj.className='XWiki.FeedEntryClass' and obj.id=feedentry.id ")
+
+    #if (!($skeyword.trim().equals("")))
+      #set($wheresql = "${wheresql} and (lower(feedentry.title) like '%${skeyword.toLowerCase()}%' or lower(feedentry.content) like '%${skeyword.toLowerCase()}%' or lower(feedentry.fullContent) like '%${skeyword.toLowerCase()}%') ")
+    #end
+    
+    #set($iFlagged = $flagged)
+    #set($iFlagged = $xwiki.parseInt($iFlagged))
+    #set($iTrashed = $trashed)
+    #set($iTrashed = $xwiki.parseInt($iTrashed))
+    #set($iRead = $read)
+    #set($iRead = $xwiki.parseInt($iRead))
+
+    #if ($iFlagged == 1)
+      #set($wheresql = "${wheresql} and feedentry.flag = 1")
+    #elseif (($iFlagged == -1) &amp;&amp; ($iTrashed == -1))
+      #set($wheresql = "${wheresql} and (feedentry.flag = 0 or feedentry.flag is null)")
+    #elseif ($iTrashed == 1)
+      #set($wheresql = "${wheresql} and feedentry.flag = -1")
+    #elseif ($iTrashed == -1)
+      #set($wheresql = "${wheresql} and (feedentry.flag &gt; -1 or feedentry.flag is null)")
+    #elseif ($iFlagged == -1)
+      #set($wheresql = "${wheresql} and (feedentry.flag &lt; 1 or feedentry.flag is null)")
+    #end
+
+    #if ($feed &amp;&amp; $feed != "")
+      #set($escapedFeed = $feed.replaceAll("'", "''"))
+      #set($wheresql = "${wheresql} and feedentry.feedurl='${escapedFeed}'")
+    #elseif ($group &amp;&amp; $group != "")
+      #set($escapedGroup = $group.replaceAll("'", "''"))
+      #set($wheresql = "${wheresql} and feedentry.feedurl in (select feed.url from XWiki.AggregatorURLClass as feed where '${escapedGroup}' in elements(feed.group))")
+    #end
+
+    #if ($tags)
+      #foreach($tag in $tags)
+        #set($escapedTag = $tag.replaceAll("'", "''"))
+        #set($wheresql = "${wheresql} and '${escapedTag}' in elements(feedentry.tags) ")
+      #end
+    #end
+
+    #if ($iRead == 1)
+      #set($wheresql = "${wheresql} and feedentry.read = 1")
+    #end
+    #if ($iRead == -1)
+      #set($wheresql = "${wheresql} and (feedentry.read is null or feedentry.read=0)")
+    #end
+
+    #if ($dateStart &amp;&amp; !$dateStart.equals(""))
+      #set($wheresql = "${wheresql} and feedentry.date &gt;= '${dateStart}' ")
+    #end
+
+    #if ($dateEnd &amp;&amp; !$dateEnd.equals(""))
+      #set($wheresql = "${wheresql} and feedentry.date &lt;= '${dateEnd}' ")
+    #end
+
+    #set($sql = "${sql} ${wheresql} and doc.web='${space}' order by feedentry.date desc, doc.creationDate desc")
+
+    #set($result = $xwiki.searchDocuments($sql, $iLimit, 0))
+  #end
+#end
+
+##########################################################################################################
+## Prints an html press review to the output. The press review is generated for the passed parameters.
+##
+##########################################################################################################
+#macro(htmlPressReview $space $read $flagged $trashed $feed $group $tags $keyword $limit $dateStart $dateEnd $withcontent $withcomments)
+  #articlesList($space, $read, $flagged, $trashed, $feed, $group, $tags, $keyword, $limit, $dateStart, $dateEnd, $result)
+  #foreach($item in $result)
+    #set($itemdoc = $xwiki.getDocument($item))
+    #set($dispose = $itemdoc.use("XWiki.FeedEntryClass"))
+    #set($atitle = $itemdoc.display("title"))
+    #set($url = $itemdoc.display("url"))
+    #set($feedname = $itemdoc.display("feedname"))
+    &lt;div class='article'&gt;
+    &lt;span class='article-title'&gt;&lt;a class='article-url' href="${url}"&gt;{pre}${atitle}{/pre}&lt;/a&gt; $msg.get("watch.pressreview.in") ${feedname}&lt;/span&gt;
+    #if ($withcontent &amp;&amp; !$withcontent.equals("0") &amp;&amp; $withcontent != 0)
+      &lt;p class="article-content"&gt;$itemdoc.display("content")&lt;/p&gt;
+    #end
+    #if ($withcomments &amp;&amp; !$withcomments.equals("0") &amp;&amp; $withcomments != 0)
+      #set($comments = $itemdoc.getComments(true))
+      #if ($comments.size() &gt; 0)
+        &lt;ul class='article-comments'&gt;
+        #foreach ($comment in $comments)
+          #set($dispose = $itemdoc.use($comment))
+          #set($author = $xwiki.getLocalUserName($itemdoc.display("author", "view")))
+          &lt;li&gt;&lt;span class="article-comment"&gt;${itemdoc.display("comment", "view")}&lt;/span&gt; $msg.get("watch.pressreview.by") &lt;span class="article-comment-author"&gt;${author}&lt;/span&gt;&lt;/li&gt;
+        #end
+        &lt;/ul&gt;
+      #end
+    #end
+    &lt;/div&gt;
+  #end
+#end
+{/pre}</content>
+</xwikidoc>

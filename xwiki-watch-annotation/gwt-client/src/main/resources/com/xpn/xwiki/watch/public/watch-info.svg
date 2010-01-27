@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32px"
+   height="32px"
+   id="svg14417"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   sodipodi:docname="watch-warning.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="/media/sda3/xwiki/svn/watch-new/trunks/gwt-client/newicons/watch-warning.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs14419">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 16 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="32 : 16 : 1"
+       inkscape:persp3d-origin="16 : 10.666667 : 1"
+       id="perspective14425" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="11.294988"
+     inkscape:cx="16"
+     inkscape:cy="16"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:window-width="640"
+     inkscape:window-height="663"
+     inkscape:window-x="581"
+     inkscape:window-y="52" />
+  <metadata
+     id="metadata14422">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <path
+       id="path12254"
+       d="M 1.0305369,23.211434 L 11.939626,4.9411293 C 13.070844,3.0466057 15.821773,2.2783211 18.084195,3.2255829 C 18.971152,3.5975789 19.688649,4.1984053 20.131374,4.9411293 L 31.040455,23.211434 C 32.171659,25.10589 31.255697,27.409543 28.993275,28.356818 C 28.356691,28.622701 27.655985,28.76205 26.944588,28.76205 L 5.1264036,28.76205 C 2.5968311,28.76205 0.54660843,27.045155 0.54660843,24.9269 C 0.54660843,24.331199 0.71147729,23.744441 1.0305369,23.211434 z"
+       style="fill:#5599ff;fill-opacity:1" />
+    <polygon
+       points="23,25 35,25 35,44 39,44 39,48 23,48 23,44 27,44 27,28 23,28 23,25 "
+       id="polygon12262"
+       style="fill:#ffffff;fill-opacity:1"
+       transform="matrix(0.558194,0,0,0.4615498,-0.7978056,2.4981418)" />
+    <circle
+       r="4"
+       cx="31"
+       cy="17"
+       id="circle12264"
+       sodipodi:cx="31"
+       sodipodi:cy="17"
+       sodipodi:rx="4"
+       sodipodi:ry="4"
+       style="fill:#ffffff;fill-opacity:1"
+       transform="matrix(0.558194,0,0,0.4615498,-0.7978056,2.4981418)" />
+  </g>
+</svg>

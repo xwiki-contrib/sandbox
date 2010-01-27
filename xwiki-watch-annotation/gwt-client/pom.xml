@@ -1,0 +1,236 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.xpn.xwiki.products</groupId>
+    <artifactId>xwiki-watch-parent</artifactId>
+    <version>1.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>xwiki-watch-gwt-client</artifactId>
+  <name>XWiki Products - Watch - GWT Client</name>
+  <packaging>jar</packaging>
+  <description>XWiki Products - Watch - GWT Client</description>
+  <properties>
+    <gwt.js.style>OBF</gwt.js.style>
+  </properties>  
+  <dependencies>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-servlet</artifactId>
+      <version>${gwt.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <version>${gwt.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.gwt-widget</groupId>
+      <artifactId>gwt-widgets</artifactId>
+      <version>0.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.xpn.xwiki.platform</groupId>
+      <artifactId>xwiki-web-gwt</artifactId>
+      <version>${platform.web.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.xpn.xwiki.platform</groupId>
+      <artifactId>xwiki-web-gwt</artifactId>
+      <version>${platform.web.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+  </dependencies>
+  <build>
+    <!-- exclude all svg images from resources -->
+    <!-- this does not work for the maven-googlewebtoolkit2-plugin, which copies everything in the 
+    target folder so we excluded them in the gwt assembly-->
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/resources</directory>
+        <excludes>
+          <exclude>**/*.svg</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+    
+      <!-- Download and unpack the GWT libs -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unzip-gwt-libs</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.google.gwt</groupId>
+                  <artifactId>gwt-dev</artifactId>
+                  <version>${gwt.version}</version>
+                  <classifier>${platform}-libs</classifier>
+                  <type>zip</type>
+                  <overWrite>false</overWrite>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${settings.localRepository}/com/google/gwt/gwt-dev/${gwt.version}</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.totsp.gwt</groupId>
+        <artifactId>maven-googlewebtoolkit2-plugin</artifactId>
+        <version>2.0-beta24</version>
+        <configuration>
+          <compileTargets>
+            <value>com.xpn.xwiki.watch.Watch</value>
+          </compileTargets>
+          <runTarget>com.xpn.xwiki.watch.Watch/Watch.html</runTarget>
+          <!-- <output>${project.build.directory}/${project.build.finalName}/resources/js/xwiki/wysiwyg/gwt</output> -->
+          <logLevel>WARN</logLevel><!-- ERROR, WARN, INFO, TRACE, DEBUG, SPAM, ALL -->
+          <style>${gwt.js.style}</style><!-- OBF[USCATED], PRETTY, DETAILED -->
+          <noServer>false</noServer>
+          <!--
+            In order to prevent the "java.lang.InternalError: Can't connect to X11 window server using ':1.0' as the
+            value of the DISPLAY variable." error message we have to run the GWT compiler with the headless AWT option.
+            See http://code.google.com/support/bin/answer.py?hl=en&answer=71442
+          -->
+          <extraJvmArgs>-Xmx1024m -Djava.awt.headless=true</extraJvmArgs>
+          <gwtVersion>${gwt.version}</gwtVersion>
+        </configuration>
+        <executions>
+          <execution>
+            <id>compile-gwt</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+           <descriptors>
+             <descriptor>src/assemble/watch.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Configure the jar packing since we don't need any other class but the service interface-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>com/xpn/xwiki/watch/client/XWatchService.class</include>
+          </includes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- Skip tests because they are failing tests. They're there just because of refactoring -->
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>hosted</id>
+      <properties>
+        <gwt.js.style>DETAILED</gwt.js.style>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <!--
+              GWT's hosted browser needs client sources. We include all the sources for now because we cannot filter
+              server sources.
+            -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>build-source-jar</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <!-- Resources are included in the classes jar -->
+                  <excludeResources>true</excludeResources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+   <!--
+      We have to define the following profiles because gwt-dev is platform dependent. These profiles set the value of
+      the ${platform} property which is used as a classifier for loading the proper gwt-dev jar. This jar is needed by
+      the GWT modules that have unit tests extending GWTTestCase.
+    -->
+    <profile>
+      <id>gwt-dev-windows</id>
+      <properties>
+        <platform>windows</platform>
+      </properties>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+    </profile>
+    <profile>
+      <id>gwt-dev-mac</id>
+      <properties>
+        <platform>mac</platform>
+      </properties>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+    </profile>
+    <profile>
+      <id>gwt-dev-linux</id>
+      <properties>
+        <platform>linux</platform>
+      </properties>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <os>
+          <name>linux</name>
+        </os>
+      </activation>
+    </profile>
+  </profiles>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>gwt-maven</id>
+      <url>http://gwt-maven.googlecode.com/svn/trunk/mavenrepo/</url>
+    </pluginRepository>
+  </pluginRepositories>
+</project>

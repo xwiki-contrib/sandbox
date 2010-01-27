@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>WatchSheets</web>
+<name>WebHomeSheet</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1181369985000</creationDate>
+<date>1182249905000</date>
+<contentUpdateDate>1182249905000</contentUpdateDate>
+<version>1.8</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<content>#if ($context.action.equals("view") &amp;&amp; !$doc.fullName.equals("WatchSheets.WebHomeSheet"))
+## if we didn't receive the xpage=plain parameter, redirect
+#set($isPlain = false)
+#set($isPlain = $!request.xpage.trim().equals("plain"))
+##if everything is fine, show the page
+#if ($isPlain)
+  #set($watchbaseurl =  $xwiki.getAttachmentURL("WatchCode.GWT", "watch.zip"))
+  #if($request.space)
+    #set($space = $request.space)
+  #else
+    #set($space = $doc.web)
+  #end
+  {pre}
+&lt;?xml version="1.0" encoding="ISO-8859-1" ?&gt;  
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;  
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;${doc.fullName}&lt;/title&gt;
+
+&lt;meta name="gwt:property" content="locale=$context.language"&gt;&lt;/meta&gt;
+&lt;meta name="gwt:property" content="watchspace=${space}"&gt;&lt;/meta&gt;
+&lt;meta name="gwt:property" content="resourcepath=$watchbaseurl"&gt;&lt;/meta&gt;
+&lt;meta name="gwt:property" content="translations=WatchCode.Translations"&gt;&lt;/meta&gt;
+&lt;link rel="stylesheet" type="text/css" href="$watchbaseurl/Watch.css"&gt;&lt;/link&gt;
+&lt;script type="text/javascript" src="$watchbaseurl/com.xpn.xwiki.watch.Watch.nocache.js"&gt;&lt;/script&gt;
+
+&lt;link rel="stylesheet" href="$watchbaseurl/minimal.css" type="text/css"&gt;&lt;/link&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="xwikimaincontainer"&gt;&lt;div id="xwikimaincontainerinner" &gt;
+#template("header.vm")
+&lt;div class="minwidth" &gt;&lt;/div&gt;
+
+&lt;div id="Watch"&gt;
+&lt;/div&gt;
+
+#template("footer.vm")
+&lt;/div&gt; ##xwikimaincontainerinner
+&lt;/div&gt; ##xwikimaincontainer
+&lt;/body&gt;
+&lt;/html&gt;
+
+  {/pre}
+#else
+  #set($params = "")
+  #if (!$isPlain)
+    #if(!$params.equals(""))
+      #set($params = $params + "&amp;")
+    #end
+    #set($params = $params + "xpage=plain")
+  #end
+  #set($redirectString = $doc.getURL("view", $params))
+  #if ($request.queryString)
+    #set($redirectString = "${redirectString}&amp;${request.queryString}")
+  #end
+  $response.sendRedirect($redirectString)  
+#end
+#end
+</content></xwikidoc>

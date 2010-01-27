@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>WatchCode</web>
+<name>Translations</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1181135859000</creationDate>
+<date>1196847556000</date>
+<contentUpdateDate>1196847556000</contentUpdateDate>
+<version>1.2</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>WatchCode.Translations</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<property>
+<tags/>
+</property>
+</object>
+<content>watch.loading.loading_icon_spinner=spinner.gif
+watch.rssreaderpath=/xwiki
+watch.productname=XWiki Watch
+watch.introduction=Welcome to XWiki Watch ! XWiki Watch will allow you to track information about your company or the subject that your are interested in in Real Time. It will also allow you to collaboratively comment and tag interesting information to share it with your co-workers.
+watch.spacesavailable=Watch Spaces available
+watch.administration=Administration
+
+watch.createanewwatchspace=Create a new Watch Space
+watch.newspace=New Space Name
+watch.newspacehelp=New Space Help
+watch.password=Password
+watch.passwordhelp=Password Help
+
+watch.copyof=Copy of
+watch.creationofspace=Space Creation
+watch.spacecreated=Space created
+watch.title=Welcome to XWiki Watch
+watch.feedtree.title=Feeds
+watch.feedtree.edit=edit
+watch.feedtree.delete=delete
+watch.keyword.delete=delete
+watch.keyword.edit=edit
+
+watch.actionbar.title=Related actions:
+watch.actionbar.pressreview=Press Review
+watch.actionbar.hidereadarticles=Hide Read Articles
+watch.actionbar.analysis=Text Analysis
+
+watch.feedarticle=Article
+watch.articletitle=Article Title 	
+watch.url=URL	
+watch.feedname=Feed Name 	
+watch.feedurl=Feed URL
+watch.author=Author		
+watch.date=Date
+watch.category=Category
+watch.flag=Flagged 		
+watch.read=Read
+watch.content=Content 	
+
+watch.search=Search
+watch.tags=Tags:
+watch.notags=No Tags
+watch.comments=Comments
+watch.nocomments=No Comments
+watch.ok=OK
+watch.on=ON
+loading.loading_msg=The page is loading...
+
+watch.filter.title=Filters
+watch.filter.initfilter=Reset Current Filters
+watch.filter.keywords.title=Keywords
+watch.filter.tagcloud.title=Tag Cloud
+
+watch.loading.loading_msg=The page is loading...
+watch.navbar.previous=Previous
+watch.navbar.next=Next
+
+watch.configtype.caption=XWiki Watch Main Menu
+watch.configtype.invitation=Please choose an action below
+watch.configtype.button.addfeed.description=Add a RSS Feed
+watch.configtype.button.addkeyword.description=Add a Keyword
+watch.configtype.button.addgroup.description=Create a Group
+watch.configtype.button.loadingstatus.description=Check the loading status
+watch.configtype.noselection=You have not selected any action
+
+watch.button.add=Add
+watch.button.cancel=Cancel
+watch.button.next=Next
+watch.button.back=Back
+watch.addfeed.noselection=You have not selected any feed
+watch.addfeed.accessdenied=You are not allowed to edit feeds
+watch.addfeed.caption=Add a RSS Feed
+watch.addfeed.invitation=You can choose from the following sources:
+
+watch.addfeed.button.standard.description=Add a RSS Feed URL
+watch.addfeed.button.googlenews.description=Create and add a Feed &lt;br /&gt;from Google News Search
+watch.addfeed.button.googleblog.description=Create and add a Feed &lt;br /&gt;from Google Blog Search
+watch.addfeed.button.technoratitag.description=Create and add a Feed &lt;br /&gt;from Technorati
+watch.addfeed.button.feedster.description=Create and add a Feed &lt;br /&gt;from Feedster
+watch.addfeed.button.wikio.description=Create and add a Feed &lt;br /&gt;from Wikio
+
+watch.removefeed.caption=Remove feed
+watch.removefeed.confirm=Are you sure you want to delete feed "{0}"?
+watch.removefeed.withArticles=Also delete fetched articles
+watch.removefeed.accessdenied=You are not allowed to delete this feed
+watch.removegroup.confirm=Are you sure you want to delete group "{0}"?
+watch.removegroup.accessdenied=You are not allowed to delete this group
+watch.removekeyword.confirm=Are you sure you want to delete keyword "{0}"?
+watch.removekeyword.accessdenied=You are not allowed to delete this keyword
+
+watch.addgroup.invitation=Please add a group below
+watch.addgroup.group=Group Name
+watch.addgroup.caption=Add a Group
+watch.addgroup.nogroup=Please input a Group name
+watch.addgroup.notuniquename=A group with this name already exists, please choose another name
+watch.addgroup.error.caption=Add group error
+watch.addgroup.accessdenied=You are not allowed to edit this group
+
+watch.loadingstatus.caption=XWiki Watch Loading Status
+watch.loadingstatus.invitation=The loading status is the following:
+watch.articlelist.noarticle=There is no article in this feed list
+watch.articlelist.open = Open this article
+
+watch.addkeyword.keyword=Keyword:
+watch.addkeyword.invitation=Please add your Keyword below
+watch.addkeyword.caption=Add a Keyword 
+watch.addkeyword.nokeyword=Please input a Keyword
+watch.addkeyword.notuniquename=This keyword already exists, please choose a different keyword or a different group
+watch.addkeyword.groups=Please choose a group for this Keyword
+watch.addkeyword.error.caption=Add keyword error
+watch.addkeyword.accessdenied=You are not allowed to edit this keyword
+
+watch.standard.caption=Edit Feed
+watch.standard.error.caption=Update Feed Error
+watch.standard.invitation=Please update your feed below
+watch.standard.feedname=Choose the Feed Name:
+watch.standard.feedurl=Enter the Feed URL:
+watch.standard.nofeedurl=There is no feed URL entered
+watch.standard.nofeedname=You did not enter a name for your feed
+watch.standard.notuniquename=A feed with this name already exists, please choose another name
+watch.standard.groups=Please choose the groups for this feed
+
+watch.googlenews.caption=Add a feed from Google News
+watch.googlenews.error.caption=Edit Feed Error
+watch.googlenews.invitation=This will automatically create a Google News Feed
+watch.googlenews.feedname=Choose the name of your feed:
+watch.googlenews.query=Enter your query:
+watch.googlenews.noquery=There is no query entered
+watch.googlenews.nofeedname=You did not enter a name for your feed
+watch.googlenews.notuniquename=A feed with this name already exists, please choose another name
+watch.googlenews.groups=Please choose the groups for this feed
+watch.googlenews.language=Please choose the Google News version to be used for this feed (English or French)
+
+watch.googleblog.caption=Add a feed from Google Blog Search
+watch.googleblog.error.caption=Edit Feed Error
+watch.googleblog.invitation=This will automatically create a Google Blog Search Feed
+watch.googleblog.feedname=Choose the name of your feed:
+watch.googleblog.query=Enter your query:
+watch.googleblog.nofeedname=You did not enter a name for your feed
+watch.googleblog.noquery=There is no query entered
+watch.googleblog.notuniquename=A feed with this name already exists, please choose another name  
+watch.googleblog.groups=Please choose the groups for this feed
+watch.googleblog.language=Please choose the Google Blog version to be used for this feed (English or French)
+
+watch.technoratitag.caption=Add a Feed from Technorati
+watch.technoratitag.error.caption=Edit Feed Error
+watch.technoratitag.invitation=This will automatically create a Technorati Feed
+watch.technoratitag.feedname=Choose the name of your feed:
+watch.technoratitag.query=Enter your query:
+watch.technoratitag.noquery=There is no query entered
+watch.technoratitag.nofeedname=You did not enter a name for your feed
+watch.technoratitag.notuniquename=A feed with this name already exists, please choose another name  
+watch.technoratitag.groups=Please choose the groups for this feed
+
+watch.feedster.caption=Add a feed from Feedster
+watch.feedster.error.caption=Edit Feed Error
+watch.feedster.invitation=This will automatically create a Feedster Feed
+watch.feedster.feedname=Choose the name of your feed:
+watch.feedster.query=Enter your query:
+watch.feedster.noquery=There is no query entered
+watch.feedster.nofeedname=You did not enter a name for your feed
+watch.feedster.notuniquename=A feed with this name already exists, please choose another name  
+watch.feedster.groups=Please choose the groups for this feed
+
+watch.wikio.caption=Add a feed from Wikio
+watch.wikio.error.caption=Edit Feed Error
+watch.wikio.invitation=This will automatically create a Wikio Feed
+watch.wikio.feedname=Choose the name of your feed:
+watch.wikio.query=Enter your query:
+watch.wikio.nofeedname=You did not enter a name for your feed
+watch.wikio.noquery=There is no query entered
+watch.wikio.notuniquename=A feed with this name already exists, please choose another name 
+watch.wikio.groups=Please choose the groups for this feed
+
+watch.filter.seeonly.title=Filter by
+watch.filter.seeonly.flagged=Flagged articles
+watch.filter.seeonly.read=Read articles
+watch.filter.seeonly.unread=Unread articles
+watch.filter.seeonly.trashed=Trashed articles
+
+watch.tagsadd.caption=Add a Tag
+watch.tagsadd.invitation=Please edit the tags for this article below
+watch.tagsadd.tags=Tags:
+watch.tagsadd.notags=Please add a tag before clicking "Next"
+watch.tagsadd.accessdenied=You are not allowed to edit this article
+
+watch.commentadd.caption=Add a comment ...
+watch.commentadd.invitation=Please enter your comment for this article below
+watch.commentadd.comment=Comment:
+watch.commentadd.nocomment=Please add your comment in the box below before clicking on next
+watch.commentadd.accessdenied=You are not allowed to add a comment on this article
+
+watch.newarticles={0} New articles
+watch.articles={0} Articles
+
+watch.appname=XWiki Watch
+watch.errorwithcode=Sorry, a problem occurred... Please wait a few seconds or refresh the page to go back to the reader main page.
+watch.missing_rights=You are not allowed to perform this action
+
+watch.chooseaction.caption=Choose an action
+watch.chooseaction.invitation=Do you want to remove or update this feed ?
+watch.chooseaction.button.updatefeed.description=Edit this feed
+watch.chooseaction.button.removefeed.description=Remove this feed
+
+watch.analysis.caption=XWiki Watch Text Analysis
+watch.analysis.invitation=Here is a list of the words that are the most frequent in the articles matching your current filter:
+watch.analysis.noselection=Please select a word
+watch.analysis.language=Select content language: 
+watch.pressreview.caption=XWiki Watch Press Review
+watch.pressreview.invitation=Here is the list of Articles matching the Filters that were Activated before generating the Press Review:
+watch.pressreview.noselection=There is no other Article in this Press Review
+watch.pressreview.noquery=There are no parameters for the Press Review selection
+watch.pressreview.in=in
+watch.pressreview.by=by
+
+watch.articlelist.noarticles=There are no articles for this filter
+
+watch.config=Configure
+watch.refresh=Refresh articles
+watch.article.flag.accessdenied = You are not allowed to edit this article
+watch.article.read.accessdenied = You are not allowed to edit this article
+watch.article.flag.add.caption=Flag this article
+watch.article.flag.remove.caption=Unflag this article
+watch.article.trash.add.caption=Trash this article
+watch.article.trash.remove.caption=Untrash this article
+watch.article.tag.add.caption= Add tag
+watch.article.tag.remove.caption= Delete tag
+
+watch.all=All
+watch.Ok=Ok
+
+
+watch.updateactive = Update active
+watch.updateinprogress = Articles loading in progress
+watch.nbtotalarticles = Number of articles
+watch.nbdefinedfeeds = Number of feeds
+watch.nbdefinedfeedswithdata = Number of feeds receiving data
+watch.feeds = Feeds
+watch.nbloadedfeeds = Loaded feeds
+watch.nbloadedfeedserrors = Feeds with loading errors
+watch.nbarticles=Articles
+watch.previousnbarticlesloaded=Articles loaded previously
+watch.startdata=Data start date
+watch.enddata=Data end date
+watch.errorfeeds=Feeds wth errors
+watch.nbarticlesloaded=Number of loaded articles
+watch.exception=Unloaded articles
+watch.loadingstatus.true = Yes
+watch.loadingstatus.false = No
+watch.loadingstatus.title=Watch loading status
+
+watch.chooseproutput.caption=XWiki Watch Press Review
+watch.chooseproutput.invitation=Choose the output type for your press review
+watch.chooseproutput.button.email.description=e-Mail
+watch.chooseproutput.button.pdf.description=PDF
+watch.chooseproutput.button.rss.description=RSS
+watch.chooseproutput.button.web.description=HTML
+
+watch.rss.caption=XWiki Watch Press Review RSS Feed
+watch.rss=Click on &lt;a href="{0}&amp;amp;basicauth=1" target="_blank"&gt;this link&lt;/a&gt; to open the press review RSS feed. This feed is protected and can only be read in an RSS reader supporting authenticated feeds. Please check the XWiki Watch guide to learn more about authenticated RSS feeds.
+
+watch.pdf.caption=XWiki Watch Press Review PDF
+watch.pdf=Click on &lt;a href="{0}" target="_blank"&gt;this link&lt;/a&gt; to open the press review PDF
+
+watch.web.caption=XWiki Watch Press Review HTML
+watch.web=Click on &lt;a href="{0}" target="_blank"&gt;this link&lt;/a&gt; to open the press review page
+
+
+watch.preview.caption=Preview of your Press Review
+watch.preview.invitation=The following articles will be included in your Press Review:
+watch.betahelp=Beta User Guide
+
+watch.email.caption=XWiki Watch Press Review email
+watch.email.mailsubject=Choose the subject of the mail you will send to the Press Review recipients
+watch.email.mailsubjectdefault=Today's Press Review
+watch.email.mailto=Type the email addresses of recipients (comma separated)
+watch.email.mailcontent=Edit the content that will be sent along the Press Review
+watch.email.mailcontentdefault=You have received a Press Review from XWiki Watch. It includes the following articles:
+watch.email.notimplemented=This feature is not available in the Beta version in order to protect recipients from spam.
+watch.email.invitation=Please insert data about the Press Review email
+watch.email.success=Press review email was successfully sent through email to the following addresses:
+watch.email.dialogtitle=Press Review Email result
+watch.chooseproutput.noselection=You have not selected any output
+watch.email.noaddress=There are no addresses to send email to
+watch.email.error=Press Review email sending failed due to the following reason:
+watch.email.articleswithcontent=Include articles content in the Press Review
+watch.email.articleswithcomments=Include articles comments in the Press Review
+
+watch.pressreviewforspace=XWiki Watch Press Review for Space
+
+watch.yes=Yes
+watch.no=No
+
+watch.wiki.aggregator.title=Articles for feed 
+
+watch.wiki.feeds=Feeds
+watch.wiki.articles=Articles
+watch.wiki.articles.flagged=Latest flagged articles
+watch.wiki.articles.unread=Latest unread articles
+watch.wiki.articles.read=Latest read articles
+watch.wiki.articles.tags =Articles tagged "{0}"
+watch.wiki.articles.display=latest {0} items
+watch.wiki.keywords = Keywords
+watch.wiki.tags = Tags
+
+watch.wiki.posted.author=Posted by
+watch.wiki.posted.date=on
+
+watch.wiki.keyword.articles = Articles for keyword "{0}"
+watch.wiki.keyword.noKeyword = This document does not contain a keyword!
+watch.wiki.group.articles=Feeds in group "{0}"
+watch.wiki.group.noGroup=This document does not contain a group
+
+watch.wiki.reader=XWiki Watch Reader
+watch.wiki.reader.goto=Go to the {0}
+
+watch.wiki.page=Page
+watch.wiki.date=Date
+watch.wiki.lastauthor=Last author
+watch.wiki.actions=Actions
+watch.wiki.score=Score
+
+watch.filter.dates.title = Date filters
+watch.filter.dates.startDate = From date: 
+watch.filter.dates.endDate = To date: 
+watch.filter.dates.months.next = Next month
+watch.filter.dates.months.previous = Previous month
+watch.filter.dates.years.next = Next year
+watch.filter.dates.years.previous = Previous year
+watch.filter.dates.months = January, February, March, April, May, June, July, August, September, October, November, December
+watch.filter.dates.days = S, M, T, W, T, F, S
+watch.filter.dates.firstDayOfWeek = 0
+
+watch.language.en=English
+watch.language.fr=French
+
+</content>
+</xwikidoc>

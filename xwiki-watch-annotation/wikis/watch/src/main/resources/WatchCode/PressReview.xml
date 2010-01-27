@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>WatchCode</web>
+<name>PressReview</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1181212721000</creationDate>
+<date>1195556874000</date>
+<contentUpdateDate>1195556874000</contentUpdateDate>
+<version>1.13</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<content>
+#includeMacros("WatchCode.PressReviewMacros")
+#set($withcomments = true)
+#if($!request.withcomments.equals("0"))
+  #set($withcomments = false)
+#end
+#set($withcontent = false)
+#if($!request.withcontent.equals("1"))
+  #set($withcontent = true)
+#end
+#htmlPressReview($request.space, $request.read, $request.flagged, $request.trashed, $request.feed, $request.group, $request.getParameterValues("tags"), $request.keyword, $request.limit, $request.dateStart, $request.dateEnd, $withcontent, $withcomments)
+</content>
+</xwikidoc>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ *
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ *
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.xpn.xwiki.platform</groupId>
+    <artifactId>xwiki</artifactId>
+    <version>22</version>
+  </parent>
+  <groupId>com.xpn.xwiki.products</groupId>
+  <artifactId>xwiki-watch-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>XWiki Products - Watch - Parent POM</name>
+  <version>1.1-SNAPSHOT</version>
+  <description>XWiki Products - Watch - Parent POM</description>
+  <scm>
+    <connection>scm:svn:http://svn.xwiki.org/svnroot/xwiki/watch/trunk</connection>
+    <developerConnection>scm:svn:https://svn.xwiki.org/svnroot/xwiki/watch/trunk</developerConnection>
+    <url>http://svn.xwiki.org/svnroot/xwiki/watch/trunk</url>
+  </scm>
+  <properties>
+    <gwt.version>1.5.3</gwt.version>
+    <!-- Versions of XWiki dependencies used in Watch modules -->
+    <platform.tool.xar-handler.version>1.8</platform.tool.xar-handler.version>
+    <platform.tool.xar-plugin.version>1.12</platform.tool.xar-plugin.version>
+    <platform.tool.configuration.version>1.25.1</platform.tool.configuration.version>
+    <platform.tool.jetty.version>1.13</platform.tool.jetty.version>
+    <platform.tool.rootwebapp.version>1.1</platform.tool.rootwebapp.version>
+    <platform.tool.packager.version>1.11</platform.tool.packager.version>
+    <platform.tool.xmldoc.version>1.3</platform.tool.xmldoc.version>
+    <platform.core.version>1.8.4</platform.core.version>
+    <platform.web.version>1.8.4</platform.web.version>
+    <product.enterprise.version>1.8.4</product.enterprise.version>
+  </properties>
+  <modules>
+    <module>gwt-client</module>
+    <module>gwt-server</module>
+    <module>web</module>
+    <module>wikis</module>
+    <module>database</module>
+    <module>distribution</module>
+  </modules>
+  <profiles>
+    <profile>
+      <id>ci</id>
+      <activation>
+        <!-- This property is automatically defined by the Maven release plugin when executing
+             a release. Thus this profile will be automatically enabled when releasing -->
+        <property>
+          <name>performRelease</name>
+        </property>
+      </activation>
+      <modules>
+        <module>distribution-test</module>
+        <module>installers</module>
+      </modules>
+    </profile> 
+    <profile>
+      <id>mysql</id>
+      <properties>
+        <xwiki.db.connection.url>jdbc:mysql://localhost/xwiki?useServerPrepStmts=false&amp;amp;amp;sessionVariables=sql_mode=''</xwiki.db.connection.url>
+      </properties>
+    </profile>
+  </profiles>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>com.xpn.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-xar-handlers</artifactId>
+        <version>${platform.tool.xar-handler.version}</version>
+      </extension>
+	</extensions>
+    <plugins>
+      <plugin>
+        <groupId>com.xpn.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-xar-plugin</artifactId>
+        <version>${platform.tool.xar-plugin.version}</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+

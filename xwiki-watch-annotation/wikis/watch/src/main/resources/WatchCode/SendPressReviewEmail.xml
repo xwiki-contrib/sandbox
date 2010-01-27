@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xwikidoc>
+<web>WatchCode</web>
+<name>SendPressReviewEmail</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1201985133000</creationDate>
+<date>1202223295000</date>
+<contentUpdateDate>1202223295000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>WatchCode.SendPressReviewEmail</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<property>
+<tags/>
+</property>
+</object>
+<content>&lt;%
+//send the email only if query parameters are set
+if (request.space==null) {
+  println "$msg.get("watch.pressreview.noquery")";
+} else if (request.address==null) {
+  println "$msg.get("watch.email.noaddress")";
+} else {
+  //get the email parameters
+  if (request.subject) {
+    subject = request.subject;
+  } else {
+    subject = "";
+  }
+  if (request.content) {
+    content = request.content;
+  } else {
+    content = "";
+  }
+  //for all the rest of parameters from the request, send them to the pressReview
+  prDoc = xwiki.getDocument("WatchCode.PressReview");
+  //get addressses
+  errorMessage = "";
+  error = false;
+  addresses = "";
+  renderedPR = xwiki.renderText(prDoc.getContent(), doc);
+  for (addr in request.getParameterValues("address")) {
+    message = "&lt;div style='line-height: 1.5em'&gt;" + content + "&lt;br /&gt;" + renderedPR + "&lt;/div&gt;";
+    //mailResult = xwiki.mailsender.sendTextMessage(xwiki.getXWikiPreference("admin_email"), addr, subject, message);
+    mailResult = xwiki.mailsender.sendHtmlMessage(" XWiki Watch " + "&lt;" + xwiki.getXWikiPreference("admin_email") + "&gt;", addr, null, null, subject, message, message, null);
+    if (mailResult == 0) {
+      if (!addresses.equals("")) {
+        addresses += ", ";  
+      }
+      addresses += addr;
+    } else {
+      error = true;
+      errorMessage = errorMessage + " " + context.error;
+    }
+  }
+  //report
+  if (error) {
+    println "$msg.get("watch.email.error") " + errorMessage;
+  } else {
+    println "$msg.get("watch.email.success") " + addresses;
+  }
+}
+%&gt;</content>
+</xwikidoc>

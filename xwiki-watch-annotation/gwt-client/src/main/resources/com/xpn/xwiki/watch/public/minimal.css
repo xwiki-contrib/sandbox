@@ -1,0 +1,160 @@
+.gwt-DialogBox table td {	
+	border-collapse:separate;
+	border-spacing:0pt;
+	clear:both;
+	text-align:left;
+}
+
+.watch-main .watch-feedtree-groups td {
+	color:#4E6172;
+	padding:3px 4px;
+}
+
+.watch-main .watch-datestartwidget td,  .watch-main .watch-dateendwidget td {
+	color:#4E6172;
+	padding:3px 4px;
+}
+
+a, a:link, a:active, a:visited {
+	color: #39397f; 
+	text-decoration: none;
+}
+a:hover {
+	color: #00007e;
+	text-decoration:underline;
+}
+
+body {
+	font-size: 87.5%;
+	font-family: sans-serif;
+	width: 100%; 
+	padding: 0;
+	margin: 0 ;
+	min-width: 970px;
+}
+
+#globalmenu {
+	padding: 0.5em;
+	text-align: right;
+	font-size: 1em;
+	line-height: 1.1em;
+}
+#company {
+	height: 80px;
+	position: relative;
+	float: left;
+	width: 100%;
+}
+#companylogo {
+	width: 740px;
+	padding: 0;
+	background-color: #FFF;
+	margin-right: 220px;
+	height: 80px;
+}
+#companylogo a {
+	display: block;
+	height:  80px;
+	width: 220px;
+	text-decoration: none;
+}
+
+#globalmenu a:hover,
+#companylogo a:hover {
+	border: none;
+}
+#companylogo a img {
+	height: 80px;
+	width: 220px;
+}
+#companylogo a img {
+	position: relative; 
+	float: left;
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+#globaldoctitle {
+	display: none; 
+}
+
+body#body.editbody #globallinks, #globallinks {
+	float:right;
+	font-size:1em;
+	height:80px;	
+	line-height:1.2em;
+	margin-left:-220px;
+	position:relative;
+	width:220px;
+}
+
+body#body.editbody #globallinks #globalmenu .glink, #globalmenu .glink {
+	color: #868C94;
+	display:block;
+	font-size:1em;
+	font-weight:bold;
+	line-height:1.4em;
+	padding:0px 5px;
+	text-decoration:none;
+}
+
+#globalmenu span.separator {
+	display: none;
+}
+#headerspace hr, #footerglobal hr {
+	display: none;
+}
+#footerglobal a, #headerspace a {
+	color: #ccc;
+	text-decoration: none;
+}
+
+#footerglobal {
+	clear:both;
+	text-align: center;
+	background-color: #ffffff;
+	padding:  25px 0;
+	font-size: 0.7em;
+	text-transform: uppercase;
+	color: #222;
+	border-top: 1px dotted #CCC;
+	width: 100%;
+}
+#footerglobal a {
+	color: #555;
+	text-decoration: none;
+}
+
+div#xwikimaincontainerinner, div.watch-main {
+	background-color: transparent;
+	background-repeat: repeat-y;
+	background-image: url(watch-bg.png);	
+}
+
+div#xwikimaincontainerinner {
+	background-position: top left;
+}
+
+div.watch-main {
+	background-position:right top;
+	width: 100%;
+}
+
+div.minwidth {
+	width: 970px;
+	display: none;
+	height: 0;
+}
+
+#headerspace #breadcrumbs {
+	background-color:#FFFFFF;
+	color:#CCCCCC;
+	padding-left:30px;
+	width:auto;
+}
+
+.clearfloats {
+	clear: both;
+	width: 1px;
+	height: 1px;
+}
