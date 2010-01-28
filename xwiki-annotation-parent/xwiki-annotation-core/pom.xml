@@ -83,7 +83,8 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <excludes>
-            org/xwiki/annotation/Annotation.java
+            org/xwiki/annotation/Annotation.java,
+            org/xwiki/annotation/internal/content/SpaceNormalizerContentAlterer.java
           </excludes>
         </configuration>
       </plugin>
