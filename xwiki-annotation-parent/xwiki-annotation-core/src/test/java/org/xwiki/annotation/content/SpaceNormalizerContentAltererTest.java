@@ -84,6 +84,11 @@ public class SpaceNormalizerContentAltererTest extends AbstractComponentTestCase
         // starting or ending with a non-breakable space
         params.add(new String[] {"\u00A0roses, see I in her cheeks;", "roses, see I in her cheeks;"});
         params.add(new String[] {"roses, see I in her cheeks;\u00A0", "roses, see I in her cheeks;"});
+        
+        // empty string should stay empty string
+        params.add(new String[] {"", ""});
+        // spaces only string should become empty string
+        params.add(new String[] {" \t\n", ""});
 
         return params;
     }

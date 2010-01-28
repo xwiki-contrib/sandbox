@@ -88,7 +88,7 @@ public class SpaceNormalizerContentAlterer extends AbstractContentAlterer
             }
         }
         // if the last character is a space, remove it and add it to the removed chars
-        if (buffer.charAt(buffer.length() - 1) == ' ') {
+        if (buffer.length() > 0 && buffer.charAt(buffer.length() - 1) == ' ') {
             buffer.deleteCharAt(buffer.length() - 1);
             removedChars++;
             // remove the mapping from the altered to initial mapping since it doesn't exist anymore. buffer.length is
