@@ -45,6 +45,14 @@ public interface IOService
     Collection<Annotation> getAnnotations(String target) throws IOServiceException;
 
     /**
+     * @param target the string serialized reference to the content for which the annotation is added
+     * @param annotationID the identifier of the annotation
+     * @return the annotation with the given id on the passed target
+     * @throws IOServiceException if any exception occurs while manipulating annotations store
+     */
+    Annotation getAnnotation(String target, String annotationID) throws IOServiceException;
+
+    /**
      * Adds annotation on the specified target.
      * 
      * @param target serialized reference of the target of the annotation

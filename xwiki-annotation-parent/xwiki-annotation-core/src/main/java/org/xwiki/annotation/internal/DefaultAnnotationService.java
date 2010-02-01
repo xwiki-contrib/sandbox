@@ -190,4 +190,18 @@ public class DefaultAnnotationService implements AnnotationService
             throw new AnnotationServiceException(e.getMessage());
         }
     }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.AnnotationService#getAnnotation(java.lang.String, java.lang.String)
+     */
+    public Annotation getAnnotation(String target, String id) throws AnnotationServiceException
+    {
+        try {
+            return ioService.getAnnotation(target, id);
+        } catch (IOServiceException e) {
+            throw new AnnotationServiceException(e.getMessage());
+        }
+    }
 }

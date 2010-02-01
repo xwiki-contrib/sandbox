@@ -96,6 +96,16 @@ public interface AnnotationService
     Collection<Annotation> getAnnotations(String target) throws AnnotationServiceException;
 
     /**
+     * Returns the annotation identified by {@code id} on the specified target.
+     * 
+     * @param target the serialized reference to the content on which the annotation is added
+     * @param id the identifier of the annotation
+     * @return the annotation identified by {@code id}
+     * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
+     */
+    Annotation getAnnotation(String target, String id) throws AnnotationServiceException;
+
+    /**
      * Shortcut function to get all annotations which are valid on the specified target, regardless of the updates the
      * document and its annotations suffered from creation ('safe' or 'updated' state).
      * 

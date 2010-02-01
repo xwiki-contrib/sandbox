@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>AnnotationCode</web>
+<name>Script</name>
+<language></language>
+<defaultLanguage></defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1264860755000</creationDate>
+<date>1265017817000</date>
+<contentUpdateDate>1265017817000</contentUpdateDate>
+<version>1.0</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.JavaScriptExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>onDemand=On demand|always=Always</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>AnnotationCode.Script</name>
+<number>0</number>
+<className>XWiki.JavaScriptExtension</className>
+<guid>046e135f-7fed-40ec-a51d-c01ec1ac25e6</guid>
+<property>
+<cache></cache>
+</property>
+<property>
+<code>if (typeof (XWiki) == 'undefined') {
+    XWiki = new Object();
+}
+
+XWiki.Annotation = Class.create({
+  // tab name of the anntoatations tab
+  annTabname : 'Annotations',
+  // whether current displayed doc is the rendered annotated document
+  fetchedAnnotations : false,
+  // the display annotations check box in the settings panel
+  displayAnnotationsCheckbox : false,
+
+  initialize : function () {
+    this.hookMenuButton();
+    this.hookTabShortcut();
+    this.hookTab();
+
+    // add the delete listeners to the annotations in the annotations tab when the extra panels are loaded
+    document.observe('xwiki:docextra:loaded', this.addDeleteListeners);
+  },
+
+  hookMenuButton : function() {
+    var rightMenu = $('contentmenu').down('.rightmenu');
+    // create and insert if it doesn't exist
+    if (!rightMenu) {
+      rightMenu = new Element('div', {'class':'rightmenu'});
+      // insert it before the left menu
+      var leftMenu = $('contentmenu').down('.leftmenu');
+      if (leftMenu) {
+        leftMenu.insert({before: rightMenu});
+      } else {
+        $('contentmenu').insert({bottom: rightMenu});
+      }
+    }
+    // create the annotations button
+    var annContainer = new Element('div', {'class': 'topmenuentry hasIcon', 'id': 'tmAnnotations'});
+    var annLink = new Element('a', {'class': 'tme', 'href': '#' + this.annTabname});
+    annLink.update("&lt;strong&gt;$msg.get('annotations.title')&lt;/strong&gt;");
+    annContainer.insert({top: annLink});
+    rightMenu.insert({bottom: annContainer});
+
+    annLink.observe('click', this.toggleSettingsPanel.bind(this));
+  },
+
+  hookTabShortcut : function() {
+    var shortcutsContainer = $('commentsshortcut').up();
+    var annShortcut = new Element('span', {'id' : 'annotationsshortcut'}).update('&lt;a href="#' + this.annTabname + '"&gt;$msg.get("annotations.title")&lt;/a&gt; ');
+    shortcutsContainer.insert({top: annShortcut});
+    var separator = new Element('span', {'class' : 'separator'}).update('|');
+    annShortcut.insert({after : separator});
+
+    annShortcut.observe('click', XWiki.displayDocExtra.bind(XWiki, this.annTabname, 'annotationsinline.vm', true));
+  },
+  
+  hookTab : function() {
+    // the tab title
+    var tabTitlesContainer = $('docExtrasTabsUl');
+    var annTitle = new Element('li', {'id' : this.annTabname + 'tab'}).update('&lt;a href="#' + this.annTabname + '" id="' + this.annTabname + 'link"&gt;$msg.get("annotations.title")&lt;/a&gt;');
+    tabTitlesContainer.insert({top: annTitle});
+
+    annTitle.observe('click', XWiki.displayDocExtra.bind(XWiki, this.annTabname, 'annotationsinline.vm', true));
+
+    // add tab pane here, to fill in with ajax call
+    var tabPaneContainer = $('docextrapanes');
+    var annPane = new Element('div', {'id' : this.annTabname + 'pane', 'class': 'hidden empty'});
+    tabPaneContainer.insert({top: annPane});
+
+    // add the anchor before the annotations pane
+    var anchorsContainer = $('docextraanchors');
+    anchorsContainer.insert({top : new Element('span', {'id' : this.annTabname + 'anchor'}).update("&amp;nbsp;")})
+  },
+  
+  toggleSettingsPanel : function(event) {
+    var menu = event.element();
+    // prevent link
+    event.stop();
+    // if another click handling is in progress
+    if (menu.disabled) {
+      return;
+    }
+    if (!this.settingsPanel) {
+      new Ajax.Request('$xwiki.getURL("AnnotationCode.Settings", "view", "xpage=plain")', {
+        onCreate: function() {
+          // disable the button
+          menu.disabled = true;
+          // show nice loading message at page bottom
+          menu._x_notification = new XWiki.widgets.Notification("$msg.get('annotations.menu.loading')", "inprogress");
+        },
+
+        onSuccess: function(response) {
+          $('contentmenu').insert({after: response.responseText});
+          this.settingsPanel = $('contentmenu').next();
+          // hide message at page bottom
+          menu._x_notification.hide();
+          // store the displayed annotations checkbox
+          this.displayAnnotationsCheckbox = $('annotationsdisplay');
+          this.attachSettingsListeners();
+          $('tmAnnotations').toggleClassName('active');
+        }.bind(this),
+   
+        onFailure: function(response) {
+          var failureReason = response.statusText;
+          if (response.statusText == '' /* No response */ || response.status == 12031 /* In IE */) {
+            failureReason = 'Server not responding';
+          }
+          // show the error message at the bottom
+          menu._x_notification.replace(new XWiki.widgets.Notification("$msg.get('annotations.menu.loaderror')" + failureReason, "error"));
+        },
+
+        on0: function (response) {
+          response.request.options.onFailure(response);
+        },
+
+        onComplete: function() {
+          // In the end: re-enable the button
+          menu.disabled = false;
+        }
+      });
+    } else {
+      this.settingsPanel.toggleClassName('hidden');
+      $('tmAnnotations').toggleClassName('active');
+    }
+  },
+
+  attachSettingsListeners : function() {
+    this.displayAnnotationsCheckbox.observe('change', function(event) {
+      // will check later when all is done
+      event.stop();
+      // don't do anything if another call is in progress
+      if (this.displayAnnotationsCheckbox.disabled) {
+        return;
+      }
+      if (!this.fetchedAnnotations &amp;&amp; this.displayAnnotationsCheckbox.checked) {
+        this.fetchAnnotations(true);
+      } else {
+        this.toggleAnnotations(this.displayAnnotationsCheckbox.checked);
+      }
+    }.bindAsEventListener(this));
+  },
+  
+  // check if I need this parameter or not
+  toggleAnnotations : function(visible) {
+    $$('#xwikicontent .annotation').invoke('toggleClassName', 'annotation-highlight');
+    //and hide all annotation markers
+    $$('#xwikicontent .annotation-marker').invoke('toggleClassName', 'hidden');
+    this.displayAnnotationsCheckbox.checked = visible;
+  },
+
+  fetchAnnotations : function(andShow) {
+    // TODO: fixme, get the URL in a less hardcoded way
+    var getAnnotationsURL = '/xwiki/rest/wikis/' + XWiki.currentWiki + '/spaces/' + XWiki.currentSpace + '/pages/' + $$('meta[name=page]')[0].content + '/annotation?media=json';
+    new Ajax.Request(getAnnotationsURL, {method: 'GET',
+      onCreate: function() {
+        // show nice loading message at page bottom
+        this._x_notification = new XWiki.widgets.Notification("$msg.get('annotations.annotated.loading')", "inprogress");
+      }.bind(this),
+
+      onSuccess: function(response) {
+        // TODO: check this response to see what's inside
+        // TODO: store the annotated element in a different way, to have it the same in the instance (when it's an object prop for example)
+        $('xwikicontent').update(response.responseJSON.source);
+        // and display the annotations
+        if (andShow) {
+          this.toggleAnnotations(true);
+        }
+        // hide message at page bottom
+        this._x_notification.hide();
+        // store the state of the annotations
+        this.fetchedAnnotations = true;
+        if (response.responseJSON.annotations) {
+          this.addAnnotationMarkers(response.responseJSON.annotations);
+        }
+      }.bind(this),
+
+      onFailure: function(response) {
+        var failureReason = response.statusText;
+        if (response.statusText == '' /* No response */ || response.status == 12031 /* In IE */) {
+          failureReason = 'Server not responding';
+        }
+        // show the error message at the bottom
+        this._x_notification.replace(new XWiki.widgets.Notification("$msg.get('annotations.annotated.loaderror')" + failureReason, "error"));
+      }.bind(this),
+
+      on0: function (response) {
+        response.request.options.onFailure(response);
+      }.bind(this),
+
+      onComplete: function() {
+        // In the end: re-enable the checkbox
+        this.displayAnnotationsCheckbox.disabled = false;
+      }.bind(this)
+    });
+  },
+
+  addDeleteListeners : function() {
+    $$(".annotation a.delete").each(function(item) {
+      item.observe('click', function(event) {
+        item.blur();
+        event.stop();
+        if (item.disabled) {
+          // Do nothing if the button was already clicked and it's waiting for a response from the server.
+          return;
+        } else {
+          new XWiki.widgets.ConfirmedAjaxRequest(
+            item.href,
+            {
+              onCreate : function() {
+                // Disable the button, to avoid a cascade of clicks from impatient users
+                item.disabled = true;
+              },
+              onSuccess : function() {
+                // Remove the corresponding HTML element from the UI and update the comment count
+                var annotation = item.up('.annotation');
+                // If the form is inside this comment's reply thread, move it back to the bottom.
+                if (this.form &amp;&amp; this.form.descendantOf(comment.next('.commentthread'))) {
+                  this.resetForm();
+                }
+                annotation.remove();
+              }.bind(this),
+              onComplete : function() {
+                // In the end: re-enable the button
+                item.disabled = false;
+              }
+            },
+            /* Interaction parameters */
+            {
+               confirmationText: "$msg.get('annotations.delete.confirm')",
+               progressMessageText : "$msg.get('annotations.delete.inProgress')",
+               successMessageText : "$msg.get('annotations.delete.done')",
+               failureMessageText : "$msg.get('annotations.delete.failed')"
+            }
+          );
+        }
+      }.bindAsEventListener(this));
+    }.bind(this));
+  },
+
+  addAnnotationMarkers : function(annotations) {
+    annotations.each(function(item){
+      // get the last span of this annotation
+      var allSpans = $$('#xwikicontent .ID' + item.annotationId);
+      if (allSpans.size() == 0) {
+        return;
+      }
+      var lastSpan = allSpans[allSpans.size() - 1];
+      var markerSpan = new Element('span', {'id': 'ID' + item.annotationId, 'class' : 'annotation-marker ' + item.state});
+      lastSpan.insert({after: markerSpan});
+    });
+  }
+});
+
+// TODO: add conditions here to load only on activated spaces and only if annotations are activated in the config document
+document.observe('dom:loaded', function() {
+  new XWiki.Annotation();
+});</code>
+</property>
+<property>
+<name>Annotation Javascript</name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>always</use>
+</property>
+</object>
+<content>
+</content></xwikidoc>
