@@ -2,65 +2,92 @@
 <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.xwiki.org" xmlns:xwiki="http://www.xwiki.org"
   elementFormDefault="qualified">
 
-  <complexType name="AnnotationRequest">
+  <complexType name="AnnotationField">
     <annotation>
-      <documentation> Stores the information about a request for an annotation to be added, such as its
-        position in the annotated document, the annotated text and the text of the annotation.</documentation>
+      <documentation>Stores an extra field (any field besides the required ones) for an annotation, as a simple string
+        element, with the name of the extra field in an attribute.</documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="string">
+        <attribute name="name" type="string"></attribute>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="AnnotationAddRequest">
+    <annotation>
+      <documentation> Stores the information about a request for an annotation to be added, such as the annotated text
+        and the context of the annotation, along with extra fields.</documentation>
     </annotation>
     <sequence>
       <element name="initialSelection" type="string"></element>
       <element name="contextOffset" type="int"></element>
       <element name="selectionContext" type="string"></element>
-      <element name="annotation" type="string"></element>
+      <!-- allow extra parameters to be sent for annotations, if requested -->
+      <element name="field" minOccurs="0" maxOccurs="unbounded" type="xwiki:AnnotationField"></element>
     </sequence>
   </complexType>
 
-  <complexType name="Annotation">
+  <complexType name="AnnotationStub">
     <annotation>
-      <documentation>Stores information about an annotation, such as the id, the page where it's added,
-        the text of the annotation and the annotated content, its state, author and date.</documentation>
+      <documentation>Stores stub information about an annotation, such as the id, its target and its state, allowing it
+        to be further requested from the annotation service for the extra details.</documentation>
     </annotation>
     <sequence>
       <element name="annotationId" type="string"></element>
       <element name="target" type="string"></element>
       <element name="state"></element>
-      <element name="author" type="string"></element>
-      <element name="date" type="string"></element>
-      <element name="annotation" type="string"></element>
-
-      <element name="initialSelection" type="string"></element>
-      <element name="selectionContext" type="string"></element>
+      <!-- allow extra parameters to be sent for annotations, if requested -->
+      <element name="field" minOccurs="0" maxOccurs="unbounded" type="xwiki:AnnotationField"></element>
     </sequence>
   </complexType>
 
-  <element name="annotations">
-    <complexType>
-      <annotation>
-        <documentation>Stores a collection of annotations together with the rendered annotated document.
-        </documentation>
-      </annotation>
-      <sequence>
-        <element name="annotation" type="xwiki:Annotation" minOccurs="0" maxOccurs="unbounded"></element>
-        <element name="source" type="string" minOccurs="1" maxOccurs="1"></element>
-      </sequence>
-    </complexType>
-  </element>
-
-  <element name="annotationRequest" type="xwiki:AnnotationRequest"></element>
-
-  <complexType name="AnnotationRequestResponse">
+  <complexType name="AnnotatedContent">
     <annotation>
-      <documentation>Stores the server response for an annotation request, containing the annotation
-        that was
-        requested, a response code and the newly annotated source.</documentation>
+      <documentation>Stores the rendered annotated content along with a list of annotation stubs allowing to display an
+        annotated document and the annotation markers on it.</documentation>
     </annotation>
     <sequence>
-      <element name="annotation" type="xwiki:Annotation" minOccurs="0" maxOccurs="unbounded"></element>
-      <element name="responseCode" type="int"></element>
-      <element name="responseMessage" type="string"></element>
-      <element name="source" type="string" minOccurs="1" maxOccurs="1"></element>
+      <element name="content" type="string" minOccurs="1" maxOccurs="1">
+        <annotation>
+          <documentation>The requested content, rendered with annotations.</documentation>
+        </annotation>
+      </element>
+      <element name="annotation" type="xwiki:AnnotationStub" minOccurs="0" maxOccurs="unbounded">
+        <annotation>
+          <documentation>The annotation information for the requested content.</documentation>
+        </annotation>
+      </element>
     </sequence>
   </complexType>
 
-  <element name="annotationRequestResponse" type="xwiki:AnnotationRequestResponse"></element>
+  <complexType name="AnnotationResponse">
+    <annotation>
+      <documentation>Stores the server response for an annotation request, containing the annotated content requested, a
+        response code and a response message.</documentation>
+    </annotation>
+    <sequence>
+      <element name="responseCode" type="int">
+        <annotation>
+          <documentation>The response code for the annotation request. Note that this is an application level response
+            code.</documentation>
+        </annotation>
+      </element>
+      <element name="responseMessage" type="string">
+        <annotation>
+          <documentation>The human readable message associated with this response, usually set when the response is
+            an
+            error.</documentation>
+        </annotation>
+      </element>
+      <element name="annotatedContent" type="xwiki:AnnotatedContent">
+        <annotation>
+          <documentation>The annotated document along with annotations identifiers for the </documentation>
+        </annotation>
+      </element>
+    </sequence>
+  </complexType>
+
+  <element name="annotationAddRequest" type="xwiki:AnnotationAddRequest"></element>
+  <element name="annotationResponse" type="xwiki:AnnotationResponse"></element>
 </schema>

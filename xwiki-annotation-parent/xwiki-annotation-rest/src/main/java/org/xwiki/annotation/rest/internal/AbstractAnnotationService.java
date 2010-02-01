@@ -24,13 +24,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.velocity.VelocityContext;
 import org.xwiki.annotation.AnnotationService;
-import org.xwiki.annotation.rest.internal.model.jaxb.Annotation;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
-import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotatedContent;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationResponse;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationStub;
 import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.rest.XWikiResource;
@@ -56,44 +57,53 @@ public abstract class AbstractAnnotationService extends XWikiResource
      * to the JAXB model to be serialized for REST communication.
      * 
      * @param annotations the annotations collection to be translated
+     * @param fields the extra parameters that should be set for the prepared annotations
      * @return translate set of org.xwiki.annotation.internal.annotation.Annotation to set of
      *         org.xwiki.annotation.internal.annotation.Annotation
      */
-    protected Collection<Annotation> getAnnotationSet(Collection<org.xwiki.annotation.Annotation> annotations)
+    protected Collection<AnnotationStub> prepareAnnotationStubsSet(
+        Collection<org.xwiki.annotation.Annotation> annotations, List<String> fields)
     {
         ObjectFactory factory = new ObjectFactory();
-        List<Annotation> set = new ArrayList<Annotation>();
+        List<AnnotationStub> set = new ArrayList<AnnotationStub>();
         for (org.xwiki.annotation.Annotation xwikiAnnotation : annotations) {
-            Annotation annotation = factory.createAnnotation();
-            annotation.setAnnotation(xwikiAnnotation.getAnnotation());
+            AnnotationStub annotation = factory.createAnnotationStub();
             annotation.setAnnotationId(xwikiAnnotation.getId());
-            annotation.setAuthor(xwikiAnnotation.getAuthor());
-            annotation.setDate(xwikiAnnotation.getDisplayDate());
-            annotation.setInitialSelection(xwikiAnnotation.getSelection());
             annotation.setTarget(xwikiAnnotation.getTarget());
-            annotation.setSelectionContext(xwikiAnnotation.getSelectionContext());
             annotation.setState(xwikiAnnotation.getState().toString());
+            // for all the requested extra fields, get them from the annotation and send them
+            /*
+            for (String extraField : fields) {
+                Object value = xwikiAnnotation.get(extraField);
+                AnnotationField field = new AnnotationField();
+                field.setName(extraField);
+                // value.toString() by default, null if value is missing
+                field.setValue(value != null ? value.toString() : null);
+                annotation.getFields().add(field);
+            }
+            */
             set.add(annotation);
         }
         return set;
     }
 
     /**
-     * Helper function to build an {@link Annotations} object from a collection of annotations of type
+     * Helper function to build an {@link AnnotatedContent} object from a collection of annotations of type
      * {@link org.xwiki.annotation.Annotation} and the rendered html, to the JAXB model to be serialized for REST
      * communication.
      * 
      * @param annotations the list of annotations to be transformed for serialization
      * @param htmlContent the rendered content of the document to be packed with the collection of annotations
+     * @param fields the fields to return from the annotations
      * @return wrapped set of annotation, annotated and rendered content
      */
-    protected Annotations getAnnotations(Collection<org.xwiki.annotation.Annotation> annotations,
-        String htmlContent)
+    protected AnnotatedContent prepareAnnotatedContent(Collection<org.xwiki.annotation.Annotation> annotations,
+        String htmlContent, List<String> fields)
     {
         ObjectFactory factory = new ObjectFactory();
-        Annotations result = factory.createAnnotations();
-        result.getAnnotations().addAll(getAnnotationSet(annotations));
-        result.setSource(htmlContent);
+        AnnotatedContent result = factory.createAnnotatedContent();
+        result.getAnnotations().addAll(prepareAnnotationStubsSet(annotations, Collections.EMPTY_LIST));
+        result.setContent(htmlContent);
         return result;
     }
 
@@ -103,9 +113,9 @@ public abstract class AbstractAnnotationService extends XWikiResource
      * @param exception the exception that was encountered during regular execution of service
      * @return an error response
      */
-    protected AnnotationRequestResponse getErrorResponse(Throwable exception)
+    protected AnnotationResponse getErrorResponse(Throwable exception)
     {
-        AnnotationRequestResponse result = new AnnotationRequestResponse();
+        AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
         result.setResponseCode(1);
         String responseMessage = exception.getMessage();
         if (responseMessage == null) {
@@ -115,7 +125,7 @@ public abstract class AbstractAnnotationService extends XWikiResource
             responseMessage = stackTraceWriter.toString();
         }
         result.setResponseMessage(responseMessage);
-        result.setSource(null);
+        result.setAnnotatedContent(null);
         return result;
     }
 

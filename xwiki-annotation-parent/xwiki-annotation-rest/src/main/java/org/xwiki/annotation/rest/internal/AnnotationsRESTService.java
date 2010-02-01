@@ -20,17 +20,22 @@
 
 package org.xwiki.annotation.rest.internal;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 import org.xwiki.annotation.AnnotationServiceException;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequest;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
-import org.xwiki.annotation.rest.internal.model.jaxb.Annotations;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotatedContent;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationAddRequest;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationField;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationResponse;
+import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -43,7 +48,7 @@ import com.xpn.xwiki.XWikiContext;
  * @version $Id$
  */
 @Component("org.xwiki.annotation.rest.internal.AnnotationsRESTService")
-@Path("/wikis/{wikiName}/spaces/{spaceName}/pages/{pageName}/annotation")
+@Path("/wikis/{wikiName}/spaces/{spaceName}/pages/{pageName}/annotations")
 public class AnnotationsRESTService extends AbstractAnnotationService
 {
     /**
@@ -68,11 +73,14 @@ public class AnnotationsRESTService extends AbstractAnnotationService
      * @param wiki the wiki of the document to get annotations for
      * @param space the space of the document to get annotations for
      * @param page the name of the document to get annotation for
+     * @param fields the extra fields to be returned from the annotation structure when returning the annotation resume
+     *            to the client side
      * @return annotations of a given XWiki page
      */
     @GET
-    public Annotations doGet(@PathParam("spaceName") String space, @PathParam("pageName") String page,
-        @PathParam("wikiName") String wiki)
+    public AnnotatedContent doGetAnnotatedContent(@PathParam("spaceName") String space, 
+        @PathParam("pageName") String page, @PathParam("wikiName") String wiki, 
+        @QueryParam("field") List<String> fields)
     {
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
@@ -80,7 +88,7 @@ public class AnnotationsRESTService extends AbstractAnnotationService
             // TODO: action should be obtained from the calling client in the parameters
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
             // TODO: return AnnotationRequestResponse so that we can return an error here somehow
-            return getAnnotations(annotationService.getAnnotations(documentName), renderedHTML);
+            return prepareAnnotatedContent(annotationService.getAnnotations(documentName), renderedHTML, fields);
         } catch (AnnotationServiceException e) {
             logger.log(Level.SEVERE, e.getMessage());
             return null;
@@ -93,26 +101,32 @@ public class AnnotationsRESTService extends AbstractAnnotationService
     /**
      * Add annotation to a given page.
      * 
-     * @param request the request object with the annotation to be added
      * @param wiki the wiki of the document to add annotation on
      * @param space the space of the document to add annotation on
      * @param page the name of the document to add annotation on
+     * @param request the request object with the annotation to be added
      * @return AnnotationRequestResponse, responseCode = 0 if no error
      */
-    @PUT
-    public AnnotationRequestResponse doPut(AnnotationRequest request, @PathParam("wikiName") String wiki,
-        @PathParam("spaceName") String space, @PathParam("pageName") String page)
+    @POST
+    public AnnotationResponse doPostAnnotation(@PathParam("wikiName") String wiki,
+        @PathParam("spaceName") String space, @PathParam("pageName") String page, AnnotationAddRequest request)
     {
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
             String documentName = referenceSerializer.serialize(docRef);
+            String annotationMetadata = "";
+            for (AnnotationField f : request.getFields()) {
+                if ("annotation".equals(f.getName())) {
+                    annotationMetadata = f.getValue();
+                }
+            }
             annotationService.addAnnotation(documentName, request.getInitialSelection(), request.getSelectionContext(),
-                request.getContextOffset(), getXWikiUser(), request.getAnnotation());
-            AnnotationRequestResponse result = new AnnotationRequestResponse();
+                request.getContextOffset(), getXWikiUser(), annotationMetadata);
+            AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
             result.setResponseCode(0);
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
-            result.setSource(renderedHTML);
-            result.getAnnotations().addAll(getAnnotationSet(annotationService.getAnnotations(documentName)));
+            result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
+                renderedHTML, Collections.EMPTY_LIST));
             return result;
         } catch (AnnotationServiceException e) {
             logger.log(Level.SEVERE, e.getMessage());

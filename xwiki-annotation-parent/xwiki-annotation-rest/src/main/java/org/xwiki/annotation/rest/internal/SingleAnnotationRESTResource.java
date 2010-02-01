@@ -20,13 +20,15 @@
 
 package org.xwiki.annotation.rest.internal;
 
+import java.util.Collections;
 import java.util.logging.Level;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationRequestResponse;
+import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationResponse;
+import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.DocumentReference;
@@ -46,7 +48,7 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
      */
     @Requirement
     private EntityReferenceSerializer<String> referenceSerializer;
-    
+
     /**
      * Deletes the specified annotation.
      * 
@@ -57,7 +59,7 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
      * @return a annotation response for which the response code will be 0 in case of success and non-zero otherwise
      */
     @DELETE
-    public AnnotationRequestResponse doDelete(@PathParam("spaceName") String space, @PathParam("pageName") String page,
+    public AnnotationResponse doDelete(@PathParam("spaceName") String space, @PathParam("pageName") String page,
         @PathParam("wikiName") String wiki, @PathParam("id") String id)
     {
         try {
@@ -65,12 +67,12 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             String documentName = referenceSerializer.serialize(docRef);
             annotationService.removeAnnotation(documentName, id);
 
-            AnnotationRequestResponse result = new AnnotationRequestResponse();
+            AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
             result.setResponseCode(0);
             // TODO: action should be obtained from the calling client in the parameters
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, "view");
-            result.setSource(renderedHTML);
-            result.getAnnotations().addAll(getAnnotationSet(annotationService.getAnnotations(documentName)));
+            result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
+                renderedHTML, Collections.EMPTY_LIST));
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
