@@ -245,6 +245,52 @@ public class DefaultIOService implements IOService
     }
 
     /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.io.IOService#getAnnotation(java.lang.String, java.lang.String)
+     */
+    public Annotation getAnnotation(String target, String annotationID) throws IOServiceException
+    {
+        try {
+            // parse the target and extract the local reference serialized from it, by the same rules
+            EntityReference targetReference = referenceResolver.resolve(target, EntityType.DOCUMENT);
+            // build the target identifier for the annotation
+            String localTargetId = target;
+            // and the name of the document where it should be stored
+            String docName = target;
+            if (targetReference.getType() == EntityType.DOCUMENT
+                || targetReference.getType() == EntityType.OBJECT_PROPERTY) {
+                localTargetId = localSerializer.serialize(targetReference);
+                docName = serializer.serialize(targetReference.extractReference(EntityType.DOCUMENT));
+            }
+            // get the document
+            XWikiContext deprecatedContext = getXWikiContext();
+            XWikiDocument document = deprecatedContext.getWiki().getDocument(docName, deprecatedContext);
+            // and the annotation class objects in it
+            // parse the annotation id as object index
+            BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, Integer.valueOf(annotationID.toString()));
+            if (object == null || !localTargetId.equals(object.getStringValue(TARGET))) {
+                return null;
+            }
+            // use the object number as annotation id
+            Annotation annotation =
+                new Annotation(object.getStringValue(TARGET), object.getStringValue(AUTHOR), object
+                    .getStringValue(ANNOTATION_TEXT), object.getStringValue(SELECTION), object.getStringValue(CONTEXT),
+                    object.getNumber() + "");
+            annotation.setDisplayDate(object.getStringValue(DATE));
+            annotation.setState(AnnotationState.valueOf(object.getStringValue(STATE)));
+            String originalSelection = object.getStringValue(ORIGINAL_SELECTION);
+            if (originalSelection != null && originalSelection.length() > 0) {
+                annotation.setOriginalSelection(originalSelection);
+            }
+            return annotation;
+        } catch (XWikiException e) {
+            throw new IOServiceException("An exception has occurred while loading the annotation with id "
+                + annotationID, e);
+        }
+    }
+
+    /**
      * {@inheritDoc} <br />
      * This implementation deletes the annotation object with the object number indicated by {@code annotationID} from
      * the document indicated by {@code target}, if its stored target matches the passed target.
