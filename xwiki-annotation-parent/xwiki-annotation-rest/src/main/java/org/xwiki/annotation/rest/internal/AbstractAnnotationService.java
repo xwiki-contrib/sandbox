@@ -29,10 +29,10 @@ import java.util.List;
 
 import org.apache.velocity.VelocityContext;
 import org.xwiki.annotation.AnnotationService;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotatedContent;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationResponse;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationStub;
-import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
+import org.xwiki.annotation.rest.model.jaxb.AnnotatedContent;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationStub;
+import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.rest.XWikiResource;
 import org.xwiki.velocity.VelocityManager;

@@ -21,6 +21,7 @@
 package org.xwiki.annotation.rest.internal;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -29,13 +30,14 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import org.xwiki.annotation.AnnotationServiceException;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotatedContent;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationAddRequest;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationField;
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationResponse;
-import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
+import org.xwiki.annotation.rest.model.jaxb.AnnotatedContent;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationAddRequest;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
+import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -75,20 +77,24 @@ public class AnnotationsRESTService extends AbstractAnnotationService
      * @param page the name of the document to get annotation for
      * @param fields the extra fields to be returned from the annotation structure when returning the annotation resume
      *            to the client side
-     * @return annotations of a given XWiki page
+     * @return annotations of a given XWiki page. Note that we're returning a response holding the AnnotatedContent
+     *         instead of an AnnotatedContent object because we need to be able to set custom expire fields to prevent
+     *         IE from caching this resource.
      */
     @GET
-    public AnnotatedContent doGetAnnotatedContent(@PathParam("spaceName") String space, 
-        @PathParam("pageName") String page, @PathParam("wikiName") String wiki, 
-        @QueryParam("field") List<String> fields)
+    public Response doGetAnnotatedContent(@PathParam("spaceName") String space, @PathParam("pageName") String page,
+        @PathParam("wikiName") String wiki, @QueryParam("field") List<String> fields)
     {
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
             String documentName = referenceSerializer.serialize(docRef);
             // TODO: action should be obtained from the calling client in the parameters
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
-            // TODO: return AnnotationRequestResponse so that we can return an error here somehow
-            return prepareAnnotatedContent(annotationService.getAnnotations(documentName), renderedHTML, fields);
+            // TODO: return AnnotationResponse so that we can return an error here somehow
+            AnnotatedContent response =
+                prepareAnnotatedContent(annotationService.getAnnotations(documentName), renderedHTML, fields);
+            // make this content expire now because cacheControl is not implemented in this version of restlet
+            return Response.ok(response).expires(new Date()).build();
         } catch (AnnotationServiceException e) {
             logger.log(Level.SEVERE, e.getMessage());
             return null;
@@ -120,8 +126,8 @@ public class AnnotationsRESTService extends AbstractAnnotationService
                     annotationMetadata = f.getValue();
                 }
             }
-            annotationService.addAnnotation(documentName, request.getInitialSelection(), request.getSelectionContext(),
-                request.getContextOffset(), getXWikiUser(), annotationMetadata);
+            annotationService.addAnnotation(documentName, request.getSelection(), request.getSelectionContext(),
+                request.getSelectionOffset(), getXWikiUser(), annotationMetadata);
             AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
             result.setResponseCode(0);
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);

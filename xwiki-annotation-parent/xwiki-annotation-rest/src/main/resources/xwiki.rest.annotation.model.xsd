@@ -20,8 +20,8 @@
         and the context of the annotation, along with extra fields.</documentation>
     </annotation>
     <sequence>
-      <element name="initialSelection" type="string"></element>
-      <element name="contextOffset" type="int"></element>
+      <element name="selection" type="string"></element>
+      <element name="selectionOffset" type="int"></element>
       <element name="selectionContext" type="string"></element>
       <!-- allow extra parameters to be sent for annotations, if requested -->
       <element name="field" minOccurs="0" maxOccurs="unbounded" type="xwiki:AnnotationField"></element>

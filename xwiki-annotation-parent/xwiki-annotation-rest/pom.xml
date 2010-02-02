@@ -61,6 +61,11 @@
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.4</version>
+    </dependency>    
   </dependencies>
   <build>
     <plugins>
@@ -75,7 +80,7 @@
           </args>
           <schemaDirectory>src/main/resources</schemaDirectory>
           <generateDirectory>${basedir}/src/main/java</generateDirectory>
-          <generatePackage>org.xwiki.annotation.rest.internal.model.jaxb</generatePackage>
+          <generatePackage>org.xwiki.annotation.rest.model.jaxb</generatePackage>
           <verbose>true</verbose>
           <removeOldOutput>false</removeOldOutput>
           <plugins>
@@ -96,18 +101,10 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <excludes>
-            org/xwiki/annotation/rest/internal/model/jaxb/**/*
+            org/xwiki/annotation/rest/model/jaxb/**/*
           </excludes>
         </configuration>
       </plugin>

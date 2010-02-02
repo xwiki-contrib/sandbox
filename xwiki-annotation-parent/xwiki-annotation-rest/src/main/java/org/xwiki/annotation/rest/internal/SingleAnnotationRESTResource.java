@@ -27,8 +27,8 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import org.xwiki.annotation.rest.internal.model.jaxb.AnnotationResponse;
-import org.xwiki.annotation.rest.internal.model.jaxb.ObjectFactory;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
+import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.DocumentReference;
