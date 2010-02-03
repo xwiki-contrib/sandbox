@@ -21,10 +21,22 @@
 
 package com.xwiki.authentication.ntlm;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.xpn.xwiki.XWikiContext;
 
 public class NTLMConfig
 {
+    /** LogFactory <code>LOGGER</code>. */
+    private static final Log LOG = LogFactory.getLog(NTLMConfig.class);
+
+    protected static final String PREF_KEY = "ntlm";
+
     protected static final String CONF_KEY = "xwiki.authentication.ntlm";
 
     public String getParam(String name, XWikiContext context)
@@ -36,7 +48,7 @@ public class NTLMConfig
     {
         String param = null;
         try {
-            param = context.getWiki().getXWikiPreference(name, context);
+            param = context.getWiki().getXWikiPreference(PREF_KEY + "_" + name, context);
         } catch (Exception e) {
         }
 
@@ -52,5 +64,30 @@ public class NTLMConfig
         }
 
         return param;
+    }
+
+    public Map<String, String> getMapParam(String name, Map<String, String> def, XWikiContext context)
+    {
+        Map<String, String> mappings = new HashMap<String, String>();
+
+        String str = getParam(name, null, context);
+
+        if (!StringUtils.isEmpty(str)) {
+            String[] fields = StringUtils.split(str, '|');
+
+            for (int i = 0; i < fields.length; i++) {
+                String[] field = StringUtils.split(fields[i], '=');
+                if (2 == field.length) {
+                    String key = field[0];
+                    String value = field[1];
+
+                    mappings.put(key, value);
+                } else {
+                    LOG.error("Error parsing " + name + " attribute in xwiki.cfg: " + fields[i]);
+                }
+            }
+        }
+
+        return mappings;
     }
 }
