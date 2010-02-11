@@ -50,8 +50,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.xpn.xwiki.platform</groupId>
-      <artifactId>xwiki-core</artifactId>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-bridge</artifactId>
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -71,6 +71,13 @@
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Remove this dependency when moving to 2.2 with http://jira.xwiki.org/jira/browse/XWIKI-4775 fixed -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-annotation-model-backport</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>org.incava</groupId>
       <artifactId>java-diff</artifactId>
@@ -80,6 +87,12 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-rendering-api</artifactId>
+      <version>${platform.core.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-rendering-syntax-wikimodel</artifactId>
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>

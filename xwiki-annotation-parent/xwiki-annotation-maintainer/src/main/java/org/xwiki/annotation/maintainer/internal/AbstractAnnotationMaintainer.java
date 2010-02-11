@@ -38,6 +38,9 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
+import org.xwiki.model.EntityType;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.DocumentUpdateEvent;
 import org.xwiki.observation.event.Event;
@@ -65,6 +68,12 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      */
     @Requirement
     protected Execution execution;
+
+    /**
+     * Entity reference serializer, to serialize the modified document reference to send to the annotations service.
+     */
+    @Requirement
+    protected EntityReferenceSerializer<String> serializer;
 
     /**
      * Annotations storage service.
@@ -129,15 +138,15 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     /**
      * Update the annotations on the passed content.
      * 
-     * @param documentName is name of document concerned by update
+     * @param documentReference is name of document concerned by update
      * @param previousContent the previous content of the document (before the update)
      * @param currentContent the current content of the document (after the update)
      */
-    protected void maintainDocumentAnnotations(String documentName, String previousContent, String currentContent)
+    protected void maintainDocumentAnnotations(String documentReference, String previousContent, String currentContent)
     {
         Collection<Annotation> annotations;
         try {
-            annotations = ioService.getAnnotations(documentName);
+            annotations = ioService.getAnnotations(documentReference);
 
             if (annotations.size() == 0) {
                 // no annotations, nothing to do
@@ -145,7 +154,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             }
 
             // produce the ptr of the previous and current, wrt to syntax
-            String syntaxId = ioContentService.getSourceSyntax(documentName);
+            String syntaxId = ioContentService.getSourceSyntax(documentReference);
             String renderedPreviousContent = renderPlainText(previousContent, syntaxId);
             String renderedCurrentContent = renderPlainText(currentContent, syntaxId);
 
@@ -161,9 +170,10 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             }
 
             // finally store the updates
-            ioService.updateAnnotations(documentName, annotations);
+            ioService.updateAnnotations(documentReference, annotations);
         } catch (Exception e) {
-            getLogger().error("An exception occurred while updating annotations for content at " + documentName, e);
+            getLogger()
+                .error("An exception occurred while updating annotations for content at " + documentReference, e);
         }
     }
 
@@ -488,7 +498,13 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             isUpdating = true;
             String content = currentDocument.getContent();
             String previousContent = previousDocument.getContent();
-            maintainDocumentAnnotations(currentDocument.getFullName(), previousContent, content);
+            // create the document reference
+            EntityReference docReference =
+                new EntityReference(currentDocument.getPageName(), EntityType.DOCUMENT, new EntityReference(
+                    currentDocument.getSpaceName(), EntityType.SPACE, new EntityReference(
+                        currentDocument.getWikiName(), EntityType.WIKI)));
+            // serialize
+            maintainDocumentAnnotations(serializer.serialize(docReference), previousContent, content);
             isUpdating = false;
         }
     }
