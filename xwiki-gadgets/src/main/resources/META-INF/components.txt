@@ -1,0 +1,4 @@
+org.xwiki.gadgets.internal.XWikiMacroService
+org.xwiki.gadgets.internal.GoogleGadgetService
+org.xwiki.gadgets.internal.vcinitializer.MacroServiceVelocityContextInitializer
+org.xwiki.gadgets.internal.vcinitializer.GadgetServiceVelocityContextInitializer
