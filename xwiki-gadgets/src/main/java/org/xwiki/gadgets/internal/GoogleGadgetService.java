@@ -30,6 +30,8 @@ import org.xml.sax.XMLReader;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.gadgets.GadgetService;
+import org.xwiki.gadgets.ModulePrefs;
+import org.xwiki.gadgets.ModulePrefsHandler;
 import org.xwiki.gadgets.UserPref;
 import org.xwiki.gadgets.UserPrefsHandler;
 import org.xwiki.xml.XMLReaderFactory;
@@ -57,6 +59,30 @@ public class GoogleGadgetService implements GadgetService
             xr.parse(new InputSource(gadgetUri));
 
             return upHandler.getResult();
+        } catch (SAXException e) {
+            // TODO: log error
+        } catch (ParserConfigurationException e) {
+            // TODO: log error
+        } catch (IOException e) {
+            // TODO: log parse error
+        }
+        return null;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * @see GadgetService#parseModulePrefs(String)
+     */
+    public ModulePrefs parseModulePrefs(String gadgetUri)
+    {
+        try {
+            XMLReader xr = xmlReaderFactory.createXMLReader();
+            ModulePrefsHandler mpHandler = new ModulePrefsHandler();
+            xr.setContentHandler(mpHandler);
+            xr.parse(new InputSource(gadgetUri));
+
+            return mpHandler.getResult();
         } catch (SAXException e) {
             // TODO: log error
         } catch (ParserConfigurationException e) {

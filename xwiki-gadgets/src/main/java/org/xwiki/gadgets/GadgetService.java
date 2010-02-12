@@ -30,10 +30,18 @@ import org.xwiki.component.annotation.ComponentRole;
 public interface GadgetService
 {
     /**
-     * Parses all User Preferences from gadget XML file
+     * Parses all User Preferences from a gadget XML
      * 
      * @param gadgetUri URI location of gadget XML
      * @return a list of all User Preferences if parsing was successful, otherwise returns null
      */
     List<UserPref> parseUserPrefs(String gadgetUri);
+    
+    /**
+     * Parses Module Preferences from a gadget XML
+     * 
+     * @param gadgetUri URI location of gadget XML
+     * @return gadget Module Preferences if parsing was successful, otherwise returns null
+     */
+    ModulePrefs parseModulePrefs(String gadgetUri);
 }
