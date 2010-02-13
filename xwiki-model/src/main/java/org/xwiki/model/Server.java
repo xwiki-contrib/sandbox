@@ -17,8 +17,8 @@ public interface Server extends Persistable
 
     Wiki getWiki(String wikiName);
 
+    // Shouldn't we have: Wiki addWiki(String wikiName) or have Wiki createWiki(String wikiName) add the wiki?
     Wiki createWiki(String wikiName);
-    
     void addWiki(Wiki wiki);
 
     void removeWiki(String wikiName);
@@ -26,13 +26,15 @@ public interface Server extends Persistable
     boolean hasWiki(String wikiName);
 
     // Q: Should the methods below be moved into some other class, such as a DocumentQuery component which would
-    // be less generic than using the Query Manager?
+    // be less generic than using the Query Manager? In JCR the ability to get an Entity from an absolute reference
+    // is located in the Session class.
+    // We also need a place where to store reference aliases.
+    // I see 3 options:
+    // - this Server class
+    // - an EntityManager class
+    // - an EntityReferenceManager class in charge of getting Entities from their references and in charge of
+    //   setting reference aliases for entities too.
 
-    // Q: Is this ok?
     Document getDocument(DocumentReference documentReference);
-
-    // Should we also have getSpace(SpaceName spaceName)?
-
-    // Q: Is this ok?
     boolean hasDocument(DocumentReference documentReference);
 }
