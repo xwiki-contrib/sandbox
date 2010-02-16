@@ -2,7 +2,7 @@
 
 <xwikidoc>
 <web>AnnotationCode</web>
-<name>Tab</name>
+<name>DisplayForm</name>
 <language></language>
 <defaultLanguage>en</defaultLanguage>
 <translation>0</translation>
@@ -11,10 +11,10 @@
 <author>XWiki.Admin</author>
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
-<creationDate>1264870914000</creationDate>
-<date>1266219799000</date>
-<contentUpdateDate>1266219799000</contentUpdateDate>
-<version>1.0</version>
+<creationDate>1265968899000</creationDate>
+<date>1266221221000</date>
+<contentUpdateDate>1266221221000</contentUpdateDate>
+<version>13.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -24,14 +24,9 @@
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <content>{{velocity filter="none"}}
-{{html wiki="false" clean="false"}}
 #includeTopic('AnnotationCode.Macros')
-## clean=false because otherwise the html macro fails on blockquote
-  &lt;div id="allAnnotations"&gt;
-  #foreach($ann in $annotations.getAnnotations($doc.prefixedFullName))
-    #displayAnnotation($ann, 'list', $doc.wiki, $doc.space, $doc.name)
-  #end
-  &lt;/div&gt;
+{{html wiki="true" clean="false"}}
+#displayViewBox("$!{request.id}", "$!{request.wiki}", "$!{request.space}", "$!{request.page}")
 {{/html}}
 {{/velocity}}</content>
 </xwikidoc>
