@@ -19,6 +19,9 @@ public class LoginPage extends BasePage
     @FindBy(xpath = "//input[@type='submit' and @value='Log-in']")
     private WebElement submitButton;
 
+    @FindBy(xpath = "//div[@class='errormessage']")
+    private WebElement loginErrorDiv;
+
     public LoginPage(WebDriver driver)
     {
         super(driver);
@@ -44,6 +47,11 @@ public class LoginPage extends BasePage
 
     public void loginAs(String username, String password)
     {
-        loginAs(username, password);
+        loginAs(username, password, false);
+    }
+
+    public boolean hasInvalidCredentialsErrorMessage()
+    {
+        return this.loginErrorDiv.getText().equals("Invalid credentials");
     }
 }

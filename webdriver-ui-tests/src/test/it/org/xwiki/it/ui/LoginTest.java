@@ -1,8 +1,10 @@
 package org.xwiki.it.ui;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -11,15 +13,19 @@ import org.xwiki.it.ui.elements.LoginPage;
 
 public class LoginTest
 {
-    private WebDriver driver;
+    private static WebDriver driver;
 
     private HomePage homePage;
+
+    @BeforeClass
+    public static void init()
+    {
+        driver = new FirefoxDriver();
+    }
 
     @Before
     public void setUp()
     {
-        driver = new FirefoxDriver();
-
         homePage = new HomePage(driver);
         homePage.gotoHomePage();
 
@@ -29,10 +35,10 @@ public class LoginTest
         }
     }
 
-    @After
-    public void tearDown()
+    @AfterClass
+    public static void shutdown()
     {
-        driver.close();
+//        driver.close();
     }
 
     @Test
@@ -52,5 +58,21 @@ public class LoginTest
         homePage.clickLogout();
         Assert.assertFalse(homePage.isAuthenticated());
         Assert.assertTrue(homePage.isOnHomePage());
+    }
+
+    @Test
+    public void testLoginWithInvalidCredentials()
+    {
+        LoginPage loginPage = homePage.clickLogin();
+        loginPage.loginAs("Admin", "wrong password");
+        Assert.assertTrue(loginPage.hasInvalidCredentialsErrorMessage());
+    }
+
+    @Test
+    public void testLoginWithInvalidUsername()
+    {
+        LoginPage loginPage = homePage.clickLogin();
+        loginPage.loginAs("non existent user", "admin");
+        Assert.assertTrue(loginPage.hasInvalidCredentialsErrorMessage());
     }
 }
