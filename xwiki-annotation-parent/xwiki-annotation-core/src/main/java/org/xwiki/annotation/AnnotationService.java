@@ -21,6 +21,7 @@
 package org.xwiki.annotation;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.xwiki.component.annotation.ComponentRole;
 
@@ -70,12 +71,12 @@ public interface AnnotationService
      * @param selection HTML selection concerned by annotations
      * @param selectionContext HTML selection context
      * @param offset offset of the selection in context
-     * @param user the author of the annotation
-     * @param metadata annotation content
+     * @param author the author of the annotation
+     * @param metadata annotation metadata, as key, value pairs
      * @throws AnnotationServiceException if selection resolution fail or if an XWikiException occurred
      */
-    void addAnnotation(String target, String selection, String selectionContext, int offset, String user,
-        String metadata) throws AnnotationServiceException;
+    void addAnnotation(String target, String selection, String selectionContext, int offset, String author,
+        Map<String, Object> metadata) throws AnnotationServiceException;
 
     /**
      * Remove an annotation given by its identifier, which should be unique among all annotations on the same target.
@@ -85,6 +86,16 @@ public interface AnnotationService
      * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
      */
     void removeAnnotation(String target, String annotationID) throws AnnotationServiceException;
+
+    /**
+     * Updates the passed annotation with the new values. Matching of the annotation is done by the annotation id field,
+     * among all annotations on the same target.
+     * 
+     * @param target the string serialized reference to the content on which the annotation is added
+     * @param annotation the new description of the annotation to update, with a valid id
+     * @throws AnnotationServiceException if anything goes wrong accessing the annotations store
+     */
+    void updateAnnotation(String target, Annotation annotation) throws AnnotationServiceException;
 
     /**
      * Returns all the annotations on the passed content.

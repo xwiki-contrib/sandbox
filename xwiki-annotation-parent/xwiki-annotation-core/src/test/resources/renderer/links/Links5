@@ -12,4 +12,4 @@ Link with label
 link Space.ExistingPage with
 link Space.ExistingPage with
 .annotated
-<p>Some <span class="annotation ID0" title="Link with label">link&nbsp;</span><span class="wikilink"><a href="/xwiki/bin/view/Space/ExistingPage"><span class="wikigeneratedlinkcontent"><span class="annotation ID0" title="Link with label">Space.ExistingPage</span></span></a></span><span class="annotation ID0" title="Link with label">&nbsp;with</span> generated label</p>
+<p>Some <span class="annotation ID0">link&nbsp;</span><span class="wikilink"><a href="/xwiki/bin/view/Space/ExistingPage"><span class="wikigeneratedlinkcontent"><span class="annotation ID0">Space.ExistingPage</span></span></a></span><span class="annotation ID0">&nbsp;with</span> generated label</p>

@@ -24,9 +24,13 @@ import java.util.Collections;
 import java.util.logging.Level;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
+import org.xwiki.annotation.Annotation;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationFieldCollection;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Component;
@@ -70,7 +74,48 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
             result.setResponseCode(0);
             // TODO: action should be obtained from the calling client in the parameters
-            String renderedHTML = renderDocumentWithAnnotations(documentName, null, "view");
+            String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
+            result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
+                renderedHTML, Collections.EMPTY_LIST));
+            return result;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage());
+            return getErrorResponse(e);
+        }
+    }
+
+    /**
+     * Updates the specified annotation with the values of the fields in received collection.
+     * 
+     * @param space the space of the document to update the annotation from
+     * @param page the name of the document to update the annotation from
+     * @param wiki the wiki of the document to update the annotation from
+     * @param id the id of the annotation to update
+     * @param fields the pairs of name value to update the annotation data
+     * @return a annotation response for which the response code will be 0 in case of success and non-zero otherwise
+     */
+    @PUT
+    public AnnotationResponse doUpdate(@PathParam("spaceName") String space, @PathParam("pageName") String page,
+        @PathParam("wikiName") String wiki, @PathParam("id") String id, AnnotationFieldCollection fields)
+    {
+        try {
+            DocumentReference docRef = new DocumentReference(wiki, space, page);
+            String documentName = referenceSerializer.serialize(docRef);
+            // id from the url
+            Annotation newAnnotation = new Annotation(id);
+            // fields from the posted content
+            for (AnnotationField field : fields.getFields()) {
+                newAnnotation.set(field.getName(), field.getValue());
+            }
+            // overwrite author if any was set because we know better who's logged in
+            newAnnotation.setAuthor(getXWikiUser());
+            // and update
+            annotationService.updateAnnotation(documentName, newAnnotation);
+
+            AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
+            result.setResponseCode(0);
+            // TODO: action should be obtained from the calling client in the parameters
+            String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
             result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
                 renderedHTML, Collections.EMPTY_LIST));
             return result;

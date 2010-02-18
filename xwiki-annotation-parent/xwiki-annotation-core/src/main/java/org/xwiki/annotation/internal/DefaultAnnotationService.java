@@ -22,8 +22,10 @@ package org.xwiki.annotation.internal;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationService;
@@ -74,16 +76,27 @@ public class DefaultAnnotationService implements AnnotationService
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(String, String, String, int, String, String)
+     * @see org.xwiki.annotation.target.AnnotationTarget#addAnnotation(String, String, String, int, String, Map)
      */
-    public void addAnnotation(String target, String selection, String selectionContext, int offset, String user,
-        String metadata) throws AnnotationServiceException
+    public void addAnnotation(String target, String selection, String selectionContext, int offset, String author,
+        Map<String, Object> metadata) throws AnnotationServiceException
     {
         try {
             // create the annotation with this data and send it to the storage service
             // TODO: also think of mapping the annotation on the document at add time and fail it if it's not mappable,
             // for extra security
-            Annotation annotation = new Annotation(target, user, metadata, selection, selectionContext, "");
+            Annotation annotation = new Annotation(selection, selectionContext);
+            annotation.setAuthor(author);
+            // skip these fields as we don't want to overwrite them with whatever is in this map. Setters should be used
+            // for these values or constructor
+            Collection<String> skippedFields =
+                Arrays.asList(new String[] {Annotation.SELECTION_FIELD, Annotation.SELECTION_CONTEXT_FIELD,
+                    Annotation.ORIGINAL_SELECTION_FIELD, Annotation.AUTHOR_FIELD, Annotation.STATE_FIELD});
+            for (Map.Entry<String, Object> field : metadata.entrySet()) {
+                if (!skippedFields.contains(field.getKey())) {
+                    annotation.set(field.getKey(), field.getValue());
+                }
+            }
             ioService.addAnnotation(target, annotation);
         } catch (IOServiceException e) {
             throw new AnnotationServiceException("An exception occurred when accessing the storage services", e);
@@ -186,6 +199,20 @@ public class DefaultAnnotationService implements AnnotationService
     {
         try {
             ioService.removeAnnotation(target, annotationID);
+        } catch (IOServiceException e) {
+            throw new AnnotationServiceException(e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.annotation.AnnotationService#updateAnnotation(java.lang.String, org.xwiki.annotation.Annotation)
+     */
+    public void updateAnnotation(String target, Annotation annotation) throws AnnotationServiceException
+    {
+        try {
+            ioService.updateAnnotations(target, Arrays.asList(annotation));
         } catch (IOServiceException e) {
             throw new AnnotationServiceException(e.getMessage());
         }

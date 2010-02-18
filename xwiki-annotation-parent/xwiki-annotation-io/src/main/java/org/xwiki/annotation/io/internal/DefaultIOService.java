@@ -20,8 +20,8 @@
 
 package org.xwiki.annotation.io.internal;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -32,8 +32,10 @@ import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOServiceException;
 import org.xwiki.annotation.maintainer.AnnotationState;
 import org.xwiki.annotation.reference.TypedStringEntityReferenceResolver;
+import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.context.Execution;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
@@ -43,6 +45,7 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.objects.BaseProperty;
 
 /**
  * Default {@link IOService} implementation, based on storing annotations in XWiki Objects in XWiki documents. The
@@ -53,63 +56,13 @@ import com.xpn.xwiki.objects.BaseObject;
  * @version $Id$
  */
 @Component
-public class DefaultIOService implements IOService
+public class DefaultIOService extends AbstractLogEnabled implements IOService
 {
-    /**
-     * The XWiki class of the stored annotation objects.
-     */
-    private static final String ANNOTATION_CLASS_NAME = "XWiki.AnnotationClass";
-
-    /**
-     * The name of the field of the annotation object containing the length of the annotation.
-     */
-    private static final String DATE = "date";
-
     /**
      * The name of the field of the annotation object containing the reference of the content on which the annotation is
      * added.
      */
     private static final String TARGET = "target";
-
-    /**
-     * The name of the field of the annotation object containing the author of the annotation.
-     */
-    private static final String AUTHOR = "author";
-
-    /**
-     * The name of the field of the annotation object containing the state of the annotation.
-     * 
-     * @see AnnotationState
-     */
-    private static final String STATE = "state";
-
-    /**
-     * The name of the field of the annotation object containing the text of the annotation, the actual user inserted
-     * text to annotate the selected content.
-     */
-    private static final String ANNOTATION_TEXT = "annotation";
-
-    /**
-     * The name of the field of the annotation object containing the selected text of the annotation.
-     */
-    private static final String SELECTION = "selection";
-
-    /**
-     * The name of the field of the annotation object containing the original selected text of the annotation, for the
-     * annotations that were updated.
-     */
-    private static final String ORIGINAL_SELECTION = "originalSelection";
-
-    /**
-     * The name of the field of the annotation object containing the context of selected text of the annotation, that
-     * makes it unique inside the document.
-     */
-    private static final String CONTEXT = "selectionContext";
-
-    /**
-     * The date format used to store the annotation date in the XWiki objects.
-     */
-    private static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
     /**
      * The execution used to get the deprecated XWikiContext.
@@ -136,6 +89,12 @@ public class DefaultIOService implements IOService
     private EntityReferenceSerializer<String> localSerializer;
 
     /**
+     * Document access bridge used to get the annotations configuration parameters.
+     */
+    @Requirement
+    private DocumentAccessBridge dab;
+
+    /**
      * {@inheritDoc} <br />
      * This implementation saves the added annotation in the document where the target of the annotation is.
      * 
@@ -157,9 +116,12 @@ public class DefaultIOService implements IOService
             XWikiContext deprecatedContext = getXWikiContext();
             XWikiDocument document = deprecatedContext.getWiki().getDocument(documentFullName, deprecatedContext);
             // create a new object in this document to hold the annotation
-            int id = document.createNewObject(ANNOTATION_CLASS_NAME, deprecatedContext);
-            BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, id);
-            object.set(DATE, new SimpleDateFormat(DATE_FORMAT).format(new Date()), deprecatedContext);
+            String annotationClassName = getAnnotationClassName();
+            int id = document.createNewObject(annotationClassName, deprecatedContext);
+            BaseObject object = document.getObject(annotationClassName, id);
+            updateObject(object, annotation, deprecatedContext);
+            // and set additional data date to now and the annotation target
+            object.set(Annotation.DATE_FIELD, new Date(), deprecatedContext);
             // store the target of this annotation, serialized with a local serializer, to be exportable and importable
             // in a different wiki
             // TODO: figure out if this is the best idea in terms of target serialization
@@ -174,16 +136,8 @@ public class DefaultIOService implements IOService
             } else {
                 object.set(TARGET, target, deprecatedContext);
             }
-            object.set(AUTHOR, annotation.getAuthor(), deprecatedContext);
-            object.set(STATE, AnnotationState.SAFE.name(), deprecatedContext);
-            object.set(ANNOTATION_TEXT, annotation.getAnnotation(), deprecatedContext);
-            object.set(SELECTION, annotation.getSelection(), deprecatedContext);
-            object.set(CONTEXT, annotation.getSelectionContext(), deprecatedContext);
-            if (annotation.getOriginalSelection() != null) {
-                object.set(ORIGINAL_SELECTION, annotation.getOriginalSelection(), deprecatedContext);
-            }
             deprecatedContext.getWiki().saveDocument(document,
-                "Added annotation \"" + annotation.getAnnotation() + "\"", deprecatedContext);
+                "Added annotation on \"" + annotation.getSelection() + "\"", deprecatedContext);
         } catch (XWikiException e) {
             throw new IOServiceException("An exception message has occurred while saving the annotation", e);
         }
@@ -214,7 +168,7 @@ public class DefaultIOService implements IOService
             XWikiContext deprecatedContext = getXWikiContext();
             XWikiDocument document = deprecatedContext.getWiki().getDocument(docName, deprecatedContext);
             // and the annotation class objects in it
-            List<BaseObject> objects = document.getObjects(ANNOTATION_CLASS_NAME);
+            List<BaseObject> objects = document.getObjects(getAnnotationClassName());
             // and build a list of Annotation objects
             List<Annotation> result = new ArrayList<Annotation>();
             if (objects == null) {
@@ -226,17 +180,7 @@ public class DefaultIOService implements IOService
                     continue;
                 }
                 // use the object number as annotation id
-                Annotation annotation =
-                    new Annotation(object.getStringValue(TARGET), object.getStringValue(AUTHOR), object
-                        .getStringValue(ANNOTATION_TEXT), object.getStringValue(SELECTION), object
-                        .getStringValue(CONTEXT), object.getNumber() + "");
-                annotation.setDisplayDate(object.getStringValue(DATE));
-                annotation.setState(AnnotationState.valueOf(object.getStringValue(STATE)));
-                String originalSelection = object.getStringValue(ORIGINAL_SELECTION);
-                if (originalSelection != null && originalSelection.length() > 0) {
-                    annotation.setOriginalSelection(originalSelection);
-                }
-                result.add(annotation);
+                result.add(loadAnnotationFromObject(object, deprecatedContext));
             }
             return result;
         } catch (XWikiException e) {
@@ -268,22 +212,12 @@ public class DefaultIOService implements IOService
             XWikiDocument document = deprecatedContext.getWiki().getDocument(docName, deprecatedContext);
             // and the annotation class objects in it
             // parse the annotation id as object index
-            BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, Integer.valueOf(annotationID.toString()));
+            BaseObject object = document.getObject(getAnnotationClassName(), Integer.valueOf(annotationID.toString()));
             if (object == null || !localTargetId.equals(object.getStringValue(TARGET))) {
                 return null;
             }
             // use the object number as annotation id
-            Annotation annotation =
-                new Annotation(object.getStringValue(TARGET), object.getStringValue(AUTHOR), object
-                    .getStringValue(ANNOTATION_TEXT), object.getStringValue(SELECTION), object.getStringValue(CONTEXT),
-                    object.getNumber() + "");
-            annotation.setDisplayDate(object.getStringValue(DATE));
-            annotation.setState(AnnotationState.valueOf(object.getStringValue(STATE)));
-            String originalSelection = object.getStringValue(ORIGINAL_SELECTION);
-            if (originalSelection != null && originalSelection.length() > 0) {
-                annotation.setOriginalSelection(originalSelection);
-            }
-            return annotation;
+            return loadAnnotationFromObject(object, deprecatedContext);
         } catch (XWikiException e) {
             throw new IOServiceException("An exception has occurred while loading the annotation with id "
                 + annotationID, e);
@@ -318,7 +252,7 @@ public class DefaultIOService implements IOService
             }
             // and the document object on it
             BaseObject annotationObject =
-                document.getObject(ANNOTATION_CLASS_NAME, Integer.valueOf(annotationID.toString()));
+                document.getObject(getAnnotationClassName(), Integer.valueOf(annotationID.toString()));
 
             // if object exists and its target matches the requested target, delete it
             if (annotationObject != null && localTargetId.equals(annotationObject.getStringValue(TARGET))) {
@@ -363,21 +297,11 @@ public class DefaultIOService implements IOService
                 } catch (NumberFormatException e) {
                     continue;
                 }
-                BaseObject object = document.getObject(ANNOTATION_CLASS_NAME, annId);
+                BaseObject object = document.getObject(getAnnotationClassName(), annId);
                 if (object == null) {
                     continue;
                 }
-                updated = true;
-                // should we check the target or update it?
-                object.set(DATE, new SimpleDateFormat(DATE_FORMAT).format(new Date()), deprecatedContext);
-                object.set(AUTHOR, annotation.getAuthor(), deprecatedContext);
-                object.set(STATE, annotation.getState().name(), deprecatedContext);
-                object.set(ANNOTATION_TEXT, annotation.getAnnotation(), deprecatedContext);
-                object.set(SELECTION, annotation.getSelection(), deprecatedContext);
-                if (annotation.getOriginalSelection() != null) {
-                    object.set(ORIGINAL_SELECTION, annotation.getOriginalSelection(), deprecatedContext);
-                }
-                object.set(CONTEXT, annotation.getSelectionContext(), deprecatedContext);
+                updated = updateObject(object, annotation, deprecatedContext) || updated;
             }
             if (updated) {
                 deprecatedContext.getWiki().saveDocument(document, "Updated annotations", deprecatedContext);
@@ -388,10 +312,114 @@ public class DefaultIOService implements IOService
     }
 
     /**
+     * Helper function to load an annotation object from an xwiki object.
+     * 
+     * @param object the xwiki object to load an annotation from
+     * @param deprecatedContext XWikiContext to make operations on xwiki data
+     * @return the Annotation instance for the annotation stored in BaseObject
+     */
+    protected Annotation loadAnnotationFromObject(BaseObject object, XWikiContext deprecatedContext)
+    {
+        // load the annotation with its ID, special handling of the state since it needs deserialization, special
+        // handling of the original selection which shouldn't be set if it's empty
+        Annotation annotation = new Annotation(object.getNumber() + "");
+        annotation.setState(AnnotationState.valueOf(object.getStringValue(Annotation.STATE_FIELD)));
+        String originalSelection = object.getStringValue(Annotation.ORIGINAL_SELECTION_FIELD);
+        if (originalSelection != null && originalSelection.length() > 0) {
+            annotation.setOriginalSelection(originalSelection);
+        }
+
+        Collection<String> skippedFields =
+            Arrays.asList(new String[] {Annotation.ORIGINAL_SELECTION_FIELD, Annotation.STATE_FIELD});
+        // go through all props and load them in the annotation, except for the ones already loaded
+        // get all the props, filter those that need to be skipped and save the rest
+        for (String propName : object.getPropertyNames()) {
+            if (!skippedFields.contains(propName)) {
+                try {
+                    annotation.set(propName, ((BaseProperty) object.get(propName)).getValue());
+                } catch (XWikiException e) {
+                    getLogger().warn(
+                        "Unable to get property " + propName + " from object " + object.getClassName() + "["
+                            + object.getNumber() + "]. Will not be saved in the annotation.", e);
+                }
+            }
+        }
+        return annotation;
+    }
+
+    /**
+     * Helper function to update object from an annotation.
+     * 
+     * @param object the object to update
+     * @param annotation the annotation to marshal in the object
+     * @param deprecatedContext the XWikiContext execute object operations
+     * @return {@code true} if any modification was done on this object, {@code false} otherwise
+     */
+    protected boolean updateObject(BaseObject object, Annotation annotation, XWikiContext deprecatedContext)
+    {
+        boolean updated = false;
+        // TODO: there's an issue here to solve with (custom) types which need to be serialized before saved. Some do,
+        // some don't.... Custom field types in the annotation map should match the types accepted by the object
+        // special handling for state which needs to be string serialized, since the prop in the class is string and the
+        // state is an enum
+        updated =
+            setIfNotNull(object, Annotation.STATE_FIELD, annotation.getState() == null ? null : annotation.getState()
+                .toString(), deprecatedContext)
+                || updated;
+        // don't reset the state, the date (which will be set now, upon save), and ignore anything that could overwrite
+        // the target
+        Collection<String> skippedFields =
+            Arrays.asList(new String[] {Annotation.STATE_FIELD, Annotation.DATE_FIELD, TARGET});
+        // all fields in the annotation, try to put them in object (I wonder what happens if I can't...)
+        for (String propName : annotation.getFieldNames()) {
+            if (!skippedFields.contains(propName)) {
+                updated = setIfNotNull(object, propName, annotation.get(propName), deprecatedContext) || updated;
+            }
+        }
+        // if it was updated, set the new date of the annotation to now
+        // TODO: change this type to Date
+        if (updated) {
+            object.set(Annotation.DATE_FIELD, new Date(), deprecatedContext);
+        }
+
+        return updated;
+    }
+
+    /**
+     * Helper function to set a field on an object only if the new value is not null. If you wish to reset the value of
+     * a field, pass the empty string for the new value.
+     * 
+     * @param object the object to set the value of the field
+     * @param fieldName the name of the field to set
+     * @param newValue the new value to set to the field. It will be ignored if it's {@code null}
+     * @param deprecatedContext the XWikiContext
+     * @return {@code true} if the field was set to newValue, {@code false} otherwise
+     */
+    protected boolean setIfNotNull(BaseObject object, String fieldName, Object newValue, XWikiContext deprecatedContext)
+    {
+        if (newValue != null) {
+            object.set(fieldName, newValue, deprecatedContext);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @return the deprecated xwiki context used to manipulate xwiki objects
      */
     private XWikiContext getXWikiContext()
     {
         return (XWikiContext) execution.getContext().getProperty("xwikicontext");
+    }
+
+    /**
+     * Helper function to return the annotation class from the annotation configuration document.
+     * 
+     * @return the name of the annotation class that describes the annotation structure
+     */
+    protected String getAnnotationClassName()
+    {
+        String configDocument = "AnnotationCode.AnnotationConfig";
+        return (String) dab.getProperty(configDocument, configDocument, "annotationClass");
     }
 }

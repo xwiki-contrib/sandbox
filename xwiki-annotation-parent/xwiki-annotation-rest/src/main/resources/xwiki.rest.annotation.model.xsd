@@ -14,18 +14,30 @@
     </simpleContent>
   </complexType>
 
+  <complexType name="AnnotationFieldCollection">
+    <annotation>
+      <documentation> Stores the information about a request for an annotation to be updated, which is basically any
+        collection of fields.</documentation>
+    </annotation>
+    <sequence>
+      <element name="field" minOccurs="0" maxOccurs="unbounded" type="xwiki:AnnotationField"></element>
+    </sequence>
+  </complexType>
+
   <complexType name="AnnotationAddRequest">
     <annotation>
       <documentation> Stores the information about a request for an annotation to be added, such as the annotated text
         and the context of the annotation, along with extra fields.</documentation>
     </annotation>
-    <sequence>
-      <element name="selection" type="string"></element>
-      <element name="selectionOffset" type="int"></element>
-      <element name="selectionContext" type="string"></element>
-      <!-- allow extra parameters to be sent for annotations, if requested -->
-      <element name="field" minOccurs="0" maxOccurs="unbounded" type="xwiki:AnnotationField"></element>
-    </sequence>
+    <complexContent>
+      <extension base="xwiki:AnnotationFieldCollection">
+        <sequence>
+          <element name="selection" type="string"></element>
+          <element name="selectionOffset" type="int"></element>
+          <element name="selectionContext" type="string"></element>
+        </sequence>
+      </extension>
+    </complexContent>
   </complexType>
 
   <complexType name="AnnotationStub">
@@ -35,6 +47,7 @@
     </annotation>
     <sequence>
       <element name="annotationId" type="string"></element>
+      <!-- this is really needed here? -->
       <element name="target" type="string"></element>
       <element name="state"></element>
       <!-- allow extra parameters to be sent for annotations, if requested -->
@@ -90,4 +103,5 @@
 
   <element name="annotationAddRequest" type="xwiki:AnnotationAddRequest"></element>
   <element name="annotationResponse" type="xwiki:AnnotationResponse"></element>
+  <element name="annotationUpdateRequest" type="xwiki:AnnotationFieldCollection"></element>
 </schema>

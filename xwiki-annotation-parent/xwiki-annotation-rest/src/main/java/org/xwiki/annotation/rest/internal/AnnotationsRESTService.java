@@ -22,7 +22,9 @@ package org.xwiki.annotation.rest.internal;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import javax.ws.rs.GET;
@@ -36,15 +38,13 @@ import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.rest.model.jaxb.AnnotatedContent;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationAddRequest;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationFieldCollection;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
-
-import com.xpn.xwiki.XWikiContext;
 
 /**
  * @version $Id$
@@ -58,12 +58,6 @@ public class AnnotationsRESTService extends AbstractAnnotationService
      * TODO: action should be obtained from the calling client in the parameters
      */
     private static final String DEFAULT_ACTION = "view";
-
-    /**
-     * The execution needed to get the annotation author from the context user.
-     */
-    @Requirement
-    private Execution execution;
 
     /**
      * Entity reference serializer used to get reference to the document to perform annotation operation on.
@@ -120,12 +114,7 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
             String documentName = referenceSerializer.serialize(docRef);
-            String annotationMetadata = "";
-            for (AnnotationField f : request.getFields()) {
-                if ("annotation".equals(f.getName())) {
-                    annotationMetadata = f.getValue();
-                }
-            }
+            Map<String, Object> annotationMetadata = getMap(request);
             annotationService.addAnnotation(documentName, request.getSelection(), request.getSelectionContext(),
                 request.getSelectionOffset(), getXWikiUser(), annotationMetadata);
             AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
@@ -144,10 +133,18 @@ public class AnnotationsRESTService extends AbstractAnnotationService
     }
 
     /**
-     * @return the xwiki user in the context.
+     * Builds a simple map from a field collection.
+     * 
+     * @param fields the collection of fields to build a map for
+     * @return a map of the fields, as string key and Object value pair
      */
-    protected String getXWikiUser()
+    protected Map<String, Object> getMap(AnnotationFieldCollection fields)
     {
-        return ((XWikiContext) execution.getContext().getProperty("xwikicontext")).getUser();
+        Map<String, Object> metadataMap = new HashMap<String, Object>();
+        for (AnnotationField f : fields.getFields()) {
+            metadataMap.put(f.getName(), f.getValue());
+        }
+
+        return metadataMap;
     }
 }

@@ -12,4 +12,4 @@ The content to annotate
 with some content
 with some content
 .annotated
-<p>Macro test <span class="annotation ID0" title="The content to annotate">with&nbsp;</span><strong><span class="annotation ID0" title="The content to annotate">some content</span> which is generated</strong> to annotate</p>
+<p>Macro test <span class="annotation ID0">with&nbsp;</span><strong><span class="annotation ID0">some content</span> which is generated</strong> to annotate</p>

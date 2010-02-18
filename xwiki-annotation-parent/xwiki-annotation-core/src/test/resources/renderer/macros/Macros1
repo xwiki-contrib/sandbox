@@ -12,4 +12,4 @@ Macro content
 generated
 generated
 .annotated
-<p>Macro test with some content which is <span class="annotation ID0" title="Macro content">generated</span> to annotate</p>
+<p>Macro test with some content which is <span class="annotation ID0">generated</span> to annotate</p>

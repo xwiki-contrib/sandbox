@@ -12,4 +12,4 @@ Like the sun...
 eyes are nothing
 eyes are nothing
 .annotated
-<p>My <strong>mistress' <span class="annotation ID0" title="Like the sun...">eyes</span></strong><span class="annotation ID0" title="Like the sun...">&nbsp;are&nbsp;</span><em><span class="annotation ID0" title="Like the sun...">nothing</span> like the sun</em>;</p>
+<p>My <strong>mistress' <span class="annotation ID0">eyes</span></strong><span class="annotation ID0">&nbsp;are&nbsp;</span><em><span class="annotation ID0">nothing</span> like the sun</em>;</p>

@@ -24,16 +24,17 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.velocity.VelocityContext;
 import org.xwiki.annotation.AnnotationService;
 import org.xwiki.annotation.rest.model.jaxb.AnnotatedContent;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationStub;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.context.Execution;
 import org.xwiki.rest.XWikiResource;
 import org.xwiki.velocity.VelocityManager;
 
@@ -47,10 +48,22 @@ import com.xpn.xwiki.doc.XWikiDocument;
 public abstract class AbstractAnnotationService extends XWikiResource
 {
     /**
+     * The default action to render the document for. <br />
+     * TODO: action should be obtained from the calling client in the parameters
+     */
+    protected static final String DEFAULT_ACTION = "view";
+
+    /**
      * The annotations service to be used by this REST interface.
      */
     @Requirement
     protected AnnotationService annotationService;
+
+    /**
+     * The execution needed to get the annotation author from the context user.
+     */
+    @Requirement
+    protected Execution execution;
 
     /**
      * Helper function to translate a collection of annotations from the {@link org.xwiki.annotation.Annotation} model
@@ -69,10 +82,8 @@ public abstract class AbstractAnnotationService extends XWikiResource
         for (org.xwiki.annotation.Annotation xwikiAnnotation : annotations) {
             AnnotationStub annotation = factory.createAnnotationStub();
             annotation.setAnnotationId(xwikiAnnotation.getId());
-            annotation.setTarget(xwikiAnnotation.getTarget());
             annotation.setState(xwikiAnnotation.getState().toString());
             // for all the requested extra fields, get them from the annotation and send them
-            /*
             for (String extraField : fields) {
                 Object value = xwikiAnnotation.get(extraField);
                 AnnotationField field = new AnnotationField();
@@ -81,7 +92,6 @@ public abstract class AbstractAnnotationService extends XWikiResource
                 field.setValue(value != null ? value.toString() : null);
                 annotation.getFields().add(field);
             }
-            */
             set.add(annotation);
         }
         return set;
@@ -90,11 +100,12 @@ public abstract class AbstractAnnotationService extends XWikiResource
     /**
      * Helper function to build an {@link AnnotatedContent} object from a collection of annotations of type
      * {@link org.xwiki.annotation.Annotation} and the rendered html, to the JAXB model to be serialized for REST
-     * communication.
+     * communication. <br />
+     * TODO: make all callers of this function pass custom parameters, such as color, from client request
      * 
      * @param annotations the list of annotations to be transformed for serialization
      * @param htmlContent the rendered content of the document to be packed with the collection of annotations
-     * @param fields the fields to return from the annotations
+     * @param fields the fields to return from the annotations stubs
      * @return wrapped set of annotation, annotated and rendered content
      */
     protected AnnotatedContent prepareAnnotatedContent(Collection<org.xwiki.annotation.Annotation> annotations,
@@ -102,7 +113,7 @@ public abstract class AbstractAnnotationService extends XWikiResource
     {
         ObjectFactory factory = new ObjectFactory();
         AnnotatedContent result = factory.createAnnotatedContent();
-        result.getAnnotations().addAll(prepareAnnotationStubsSet(annotations, Collections.EMPTY_LIST));
+        result.getAnnotations().addAll(prepareAnnotationStubsSet(annotations, fields));
         result.setContent(htmlContent);
         return result;
     }
@@ -191,5 +202,13 @@ public abstract class AbstractAnnotationService extends XWikiResource
         String translatedDocKey = "tdoc";
         context.put(translatedDocKey, tdoc);
         vcontext.put(translatedDocKey, tdoc.newDocument(context));
+    }
+
+    /**
+     * @return the xwiki user in the context.
+     */
+    protected String getXWikiUser()
+    {
+        return ((XWikiContext) execution.getContext().getProperty("xwikicontext")).getUser();
     }
 }

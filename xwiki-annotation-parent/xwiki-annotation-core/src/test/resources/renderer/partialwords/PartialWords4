@@ -18,4 +18,4 @@ Comparison
 ng like
 ng like
 .annotated
-<p>My mistress' <span class="annotation ID0" title="Eyes">eyes are not</span>hi<span class="annotation ID1" title="Comparison">ng like</span> the sun;</p>
+<p>My mistress' <span class="annotation ID0">eyes are not</span>hi<span class="annotation ID1">ng like</span> the sun;</p>

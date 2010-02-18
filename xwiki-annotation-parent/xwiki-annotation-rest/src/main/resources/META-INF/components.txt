@@ -1,3 +1,4 @@
 org.xwiki.annotation.rest.internal.AnnotationsRESTService
 org.xwiki.annotation.rest.internal.SingleAnnotationRESTResource
-org.xwiki.annotation.rest.internal.FormUrlEncodedAnnotationAddRequestReader
+org.xwiki.annotation.rest.internal.representations.FormUrlEncodedAnnotationAddRequestReader
+org.xwiki.annotation.rest.internal.representations.FormUrlEncodedAnnotationFieldCollectionReader

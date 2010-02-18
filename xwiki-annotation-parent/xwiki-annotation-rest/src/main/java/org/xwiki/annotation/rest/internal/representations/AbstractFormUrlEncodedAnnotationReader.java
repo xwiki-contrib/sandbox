@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.annotation.rest.internal;
+package org.xwiki.annotation.rest.internal.representations;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,61 +26,38 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.Provider;
 
 import org.restlet.Context;
 import org.restlet.data.Form;
 import org.restlet.resource.InputRepresentation;
 import org.restlet.resource.Representation;
-import org.xwiki.annotation.rest.model.jaxb.AnnotationAddRequest;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationFieldCollection;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
-import org.xwiki.component.annotation.Component;
 import org.xwiki.rest.Constants;
 import org.xwiki.rest.XWikiRestComponent;
 
 /**
- * Reads an annotation add request from a request encoded as a form submit.
+ * Partial implementation of a reader from form submits requests for annotation related types, to handle generic request
+ * reader code.
  * 
+ * @param <T> the type read from the url encoded form
  * @version $Id$
  */
-@Component("org.xwiki.annotation.rest.internal.FormUrlEncodedAnnotationAddRequestReader")
-@Provider
-@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-public class FormUrlEncodedAnnotationAddRequestReader implements MessageBodyReader<AnnotationAddRequest>,
-    XWikiRestComponent
+public abstract class AbstractFormUrlEncodedAnnotationReader<T extends AnnotationFieldCollection> implements
+    MessageBodyReader<T>, XWikiRestComponent
 {
-    // TODO: should send selection, contextLeft and contextRight
     /**
-     * Name of the selection context field submitted by a form.
-     */
-    private static final String SELECTION_CONTEXT_FIELD_NAME = "selectionContext";
-
-    /**
-     * Name of the field holding the selection offset in context submitted by a form.
-     */
-    private static final String SELECTION_OFFSET_FIELD_NAME = "selectionOffset";
-
-    /**
-     * Name of the selection context field submitted by a form.
-     */
-    private static final String SELECTION_FIELD_NAME = "selection";
-
-    /**
-     * {@inheritDoc}
+     * Helper function to provide an instance of the read object from the object factory.
      * 
-     * @see javax.ws.rs.ext.MessageBodyReader#isReadable(java.lang.Class, java.lang.reflect.Type,
-     *      java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType)
+     * @param factory the object factory
+     * @return an instance of the read type T, as built by the object factory.
      */
-    public boolean isReadable(Class< ? > type, Type genericType, Annotation[] annotations, MediaType mediaType)
-    {
-        return AnnotationAddRequest.class.isAssignableFrom(type);
-    }
+    protected abstract T getReadObjectInstance(ObjectFactory factory);
 
     /**
      * {@inheritDoc}
@@ -89,12 +66,12 @@ public class FormUrlEncodedAnnotationAddRequestReader implements MessageBodyRead
      *      java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType, javax.ws.rs.core.MultivaluedMap,
      *      java.io.InputStream)
      */
-    public AnnotationAddRequest readFrom(Class<AnnotationAddRequest> type, Type genericType, Annotation[] annotations,
-        MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException,
+    public T readFrom(Class<T> type, Type genericType, Annotation[] annotations, MediaType mediaType,
+        MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException,
         WebApplicationException
     {
         ObjectFactory objectFactory = new ObjectFactory();
-        AnnotationAddRequest annotationAddRequest = objectFactory.createAnnotationAddRequest();
+        T annotationAddRequest = getReadObjectInstance(objectFactory);
 
         // parse a form from the content of this request
         Representation representation =
@@ -128,40 +105,19 @@ public class FormUrlEncodedAnnotationAddRequestReader implements MessageBodyRead
     }
 
     /**
-     * Helper function to save a parameter in the annotation add request.
+     * Helper function to save a parameter in the read object. To implement in subclasses to provide type specific
+     * behaviour.
      * 
-     * @param annotationAddRequest the request to fill with data
+     * @param readObject the request to fill with data
      * @param key the key of the field
      * @param value the value of the field
      * @param objectFactory the objects factory to create the annotation fields
      */
-    private void saveField(AnnotationAddRequest annotationAddRequest, String key, String value,
-        ObjectFactory objectFactory)
+    protected void saveField(T readObject, String key, String value, ObjectFactory objectFactory)
     {
-        // check this key against the 'known fields'
-        if (SELECTION_FIELD_NAME.equals(key)) {
-            annotationAddRequest.setSelection(value);
-            return;
-        }
-        if (SELECTION_CONTEXT_FIELD_NAME.equals(key)) {
-            annotationAddRequest.setSelectionContext(value);
-            return;
-        }
-        if (SELECTION_OFFSET_FIELD_NAME.equals(key)) {
-            // use the parameter as a string and parse it as an integer
-            int offset = 0;
-            try {
-                offset = Integer.parseInt(value);
-            } catch (NumberFormatException exc) {
-                // nothing, will leave the 0 value
-            }
-            annotationAddRequest.setSelectionOffset(offset);
-            return;
-        }
-        // if none matched, add as extra field
         AnnotationField extraField = objectFactory.createAnnotationField();
         extraField.setName(key);
         extraField.setValue(value);
-        annotationAddRequest.getFields().add(extraField);
+        readObject.getFields().add(extraField);
     }
 }

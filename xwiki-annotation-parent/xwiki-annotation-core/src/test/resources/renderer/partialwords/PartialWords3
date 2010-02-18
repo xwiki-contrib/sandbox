@@ -18,4 +18,4 @@ Eyes
 tress' eyes are nothing
 tress' eyes are nothing
 .annotated
-<p>My m<span class="annotation ID0" title="Mistress">is<span class="annotation ID1" title="Eyes">tress' eyes</span></span><span class="annotation ID1" title="Eyes">&nbsp;are nothing</span> like the sun;</p>
+<p>My m<span class="annotation ID0">is<span class="annotation ID1">tress' eyes</span></span><span class="annotation ID1">&nbsp;are nothing</span> like the sun;</p>

@@ -176,8 +176,13 @@ public class TestDocumentFactory
         } catch (NumberFormatException e) {
             // nothing leave them on zero
         }
-        return new Annotation(docName, properties[1], null, state, properties[2], properties[3], properties[4],
-            properties[0], annotationOffset, annotationLength);
-
+        Annotation ann = new Annotation(properties[0], properties[3], properties[4]);
+        ann.setAuthor(properties[1]);
+        ann.setState(state);
+        ann.set("annotation", properties[2]);
+        ann.set("offset", annotationOffset);
+        ann.set("length", annotationLength);
+        
+        return ann;
     }
 }
