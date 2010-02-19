@@ -22,28 +22,35 @@ package org.xwiki.model.internal.reference;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.EntityType;
-import org.xwiki.model.ModelConfiguration;
+import org.xwiki.model.reference.EntityReferenceResolver;
+import org.xwiki.model.reference.ObjectReference;
+import org.xwiki.model.reference.ObjectReferenceResolver;
 
 /**
- * Generic implementation that resolve {@link org.xwiki.model.reference.EntityReference} objects from their string
- * representation. This implementation uses fixed default values when parts of the Reference are missing in the string
- * representation. Default values are retrieved from the {@link org.xwiki.model.ModelConfiguration} class.  
- *
+ * Specialized version of {@link org.xwiki.model.reference.EntityReferenceResolver} which can be considered a helper
+ * component to resolve {@link ObjectReference} objects from their string representation. This implementation uses fixed
+ * default values when parts of the Reference are missing in the string representation. Default values are retrieved
+ * from the {@link org.xwiki.model.ModelConfiguration} class.
+ * 
  * @version $Id$
- * @since 2.2M1
+ * @since 2.2M2
  */
 @Component
-public class DefaultStringEntityReferenceResolver extends AbstractStringEntityReferenceResolver
+public class DefaultStringObjectReferenceResolver implements ObjectReferenceResolver<String>
 {
+    /**
+     * The default entity resolver, used to delegate actual resolving of string representations.
+     */
     @Requirement
-    private ModelConfiguration configuration;
+    private EntityReferenceResolver<String> entityReferenceResolver;
 
     /**
      * {@inheritDoc}
-     * @see AbstractStringEntityReferenceResolver#getDefaultValuesForType(org.xwiki.model.EntityType)
+     * 
+     * @see org.xwiki.model.reference.DocumentReferenceResolver#resolve(Object)
      */
-    protected String getDefaultValuesForType(EntityType type)
+    public ObjectReference resolve(String objectReferenceRepresentation)
     {
-        return this.configuration.getDefaultReferenceValue(type);
+        return new ObjectReference(entityReferenceResolver.resolve(objectReferenceRepresentation, EntityType.OBJECT));
     }
 }

@@ -17,46 +17,25 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.model;
+package org.xwiki.model.reference;
+
+import org.xwiki.component.annotation.ComponentRole;
 
 /**
- * Represents a type of entity (ie a Model Object such as a Wiki, a Space, a Document, an Attachment, etc).
+ * Resolve an Attachment reference defined in a given representation into a validated {@link AttachmentReference}
+ * object, ie with valid values and a valid hierarchy (eg an Attachment reference must have a parent which is a
+ * document reference, reference values must not be null, etc).
  *
  * @version $Id$
  * @since 2.2M1
+ * @param <T> the type of the representation (eg a String)
  */
-public enum EntityType
+@ComponentRole
+public interface AttachmentReferenceResolver<T>
 {
-    // Note that order below is important since it creates an order.
-    // For example: EntityType.WIKI.ordinal() < EntityType.SPACE.ordinal()
-
     /**
-     * Represents a Wiki Entity.
+     * @param attachmentReferenceRepresentation the representation of an attachment reference (eg as a String)
+     * @return the valid resolved attachment reference as an Object
      */
-    WIKI,
-
-    /**
-     * Represents a Space Entity.
-     */
-    SPACE,
-
-    /**
-     * Represents a Document Entity.
-     */
-    DOCUMENT,
-
-    /**
-     * Represents an Attachment Entity.
-     */
-    ATTACHMENT,
-
-    /**
-     * Represents an Object Entity.
-     */
-    OBJECT,
-
-    /**
-     * Represents an Object Property Entity.
-     */
-    OBJECT_PROPERTY
+    AttachmentReference resolve(T attachmentReferenceRepresentation);
 }

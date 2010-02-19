@@ -19,44 +19,21 @@
  */
 package org.xwiki.model;
 
+import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.model.reference.EntityReference;
+
 /**
- * Represents a type of entity (ie a Model Object such as a Wiki, a Space, a Document, an Attachment, etc).
- *
+ * Allows accessing Model Objects for current objects (current document, current wiki, current space, etc) placed in the
+ * Execution Context.
+ * 
  * @version $Id$
  * @since 2.2M1
  */
-public enum EntityType
+@ComponentRole
+public interface ModelContext
 {
-    // Note that order below is important since it creates an order.
-    // For example: EntityType.WIKI.ordinal() < EntityType.SPACE.ordinal()
-
     /**
-     * Represents a Wiki Entity.
+     * @return the reference to the current entity located in the Execution Context or null if there's none
      */
-    WIKI,
-
-    /**
-     * Represents a Space Entity.
-     */
-    SPACE,
-
-    /**
-     * Represents a Document Entity.
-     */
-    DOCUMENT,
-
-    /**
-     * Represents an Attachment Entity.
-     */
-    ATTACHMENT,
-
-    /**
-     * Represents an Object Entity.
-     */
-    OBJECT,
-
-    /**
-     * Represents an Object Property Entity.
-     */
-    OBJECT_PROPERTY
+    EntityReference getCurrentEntityReference();
 }

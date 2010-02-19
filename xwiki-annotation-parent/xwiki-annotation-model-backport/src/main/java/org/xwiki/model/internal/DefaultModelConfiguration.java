@@ -19,9 +19,6 @@
  */
 package org.xwiki.model.internal;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
@@ -31,10 +28,13 @@ import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.ModelConfiguration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Get configuration data from the XWiki configuration using a {@link ConfigurationSource}. If no
- * {@link ConfigurationSource} component is found in the system then default to default values.
- * 
+ * {@link ConfigurationSource} component is found in the system then default to default values.  
+ *
  * @version $Id$
  * @since 2.2M1
  */
@@ -46,33 +46,27 @@ public class DefaultModelConfiguration extends AbstractLogEnabled implements Mod
      */
     private static final String PREFIX = "model.";
 
-    private static final Map<EntityType, String> DEFAULT_VALUES = new HashMap<EntityType, String>()
-    {
-        {
-            put(EntityType.WIKI, "xwiki");
-            put(EntityType.SPACE, "Main");
-            put(EntityType.DOCUMENT, "WebHome");
-            put(EntityType.ATTACHMENT, "filename");
-            // TODO: do we want this full reference to the class?
-            put(EntityType.OBJECT, "Main.WebHome");
-            put(EntityType.OBJECT_PROPERTY, "property");
-        }
-    };
+    private static final Map<EntityType, String> DEFAULT_VALUES = new HashMap<EntityType, String>() {{
+        put(EntityType.WIKI, "xwiki");
+        put(EntityType.SPACE, "Main");
+        put(EntityType.DOCUMENT, "WebHome");
+        put(EntityType.ATTACHMENT, "filename");
+        put(EntityType.OBJECT, "object");
+        put(EntityType.OBJECT_PROPERTY, "property");
+    }};
 
     /**
-     * We want to make sure this component can be loaded and used even if there's no ConfigurationSource available in
-     * the system. This is why we lazy load the ConfigurationSource component.
+     * We want to make sure this component can be loaded and used even if there's no ConfigurationSource available
+     * in the system. This is why we lazy load the ConfigurationSource component.
      */
     @Requirement
     private ComponentManager componentManager;
 
     /**
      * {@inheritDoc}
-     * 
-     * @see org.xwiki.model.model.ModelConfiguration
-     *      #getDefaultReferenceName(org.xwiki.model.EntityType)
+     * @see org.xwiki.model.ModelConfiguration#getDefaultReferenceValue(org.xwiki.model.EntityType)
      */
-    public String getDefaultReferenceName(EntityType type)
+    public String getDefaultReferenceValue(EntityType type)
     {
         String name;
         try {
@@ -81,13 +75,12 @@ public class DefaultModelConfiguration extends AbstractLogEnabled implements Mod
             // code has been migrated to use References instead of Strings).
             ConfigurationSource configuration =
                 this.componentManager.lookup(ConfigurationSource.class, "xwikiproperties");
-            name =
-                configuration.getProperty(PREFIX + "reference.default." + type.toString().toLowerCase(), DEFAULT_VALUES
-                    .get(type));
+            name = configuration.getProperty(PREFIX + "reference.default." + type.toString().toLowerCase(),
+                DEFAULT_VALUES.get(type));
         } catch (ComponentLookupException e) {
             // Failed to load the component, use default values
-            getLogger().debug(
-                "Failed to load [" + ConfigurationSource.class.getName() + "]. Using default Model values", e);
+            getLogger().debug("Failed to load [" + ConfigurationSource.class.getName()
+                + "]. Using default Model values", e);
             name = DEFAULT_VALUES.get(type);
         }
 

@@ -22,28 +22,33 @@ package org.xwiki.model.internal.reference;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.EntityType;
-import org.xwiki.model.ModelConfiguration;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.EntityReferenceResolver;
 
 /**
- * Generic implementation that resolve {@link org.xwiki.model.reference.EntityReference} objects from their string
- * representation. This implementation uses fixed default values when parts of the Reference are missing in the string
- * representation. Default values are retrieved from the {@link org.xwiki.model.ModelConfiguration} class.  
- *
+ * Specialized version of {@link org.xwiki.model.reference.EntityReferenceResolver} which can be considered a helper
+ * component to resolve {@link DocumentReference} objects from their string representation. This implementation uses
+ * fixed default values when parts of the Reference are missing in the string representation. Default values are
+ * retrieved from the {@link org.xwiki.model.ModelConfiguration} class.
+ * 
  * @version $Id$
  * @since 2.2M1
  */
 @Component
-public class DefaultStringEntityReferenceResolver extends AbstractStringEntityReferenceResolver
+public class DefaultStringDocumentReferenceResolver implements DocumentReferenceResolver<String>
 {
     @Requirement
-    private ModelConfiguration configuration;
+    private EntityReferenceResolver<String> entityReferenceResolver;
 
     /**
      * {@inheritDoc}
-     * @see AbstractStringEntityReferenceResolver#getDefaultValuesForType(org.xwiki.model.EntityType)
+     * 
+     * @see org.xwiki.model.reference.DocumentReferenceResolver#resolve(Object)
      */
-    protected String getDefaultValuesForType(EntityType type)
+    public DocumentReference resolve(String documentReferenceRepresentation)
     {
-        return this.configuration.getDefaultReferenceValue(type);
+        return new DocumentReference(this.entityReferenceResolver.resolve(documentReferenceRepresentation,
+            EntityType.DOCUMENT));
     }
 }

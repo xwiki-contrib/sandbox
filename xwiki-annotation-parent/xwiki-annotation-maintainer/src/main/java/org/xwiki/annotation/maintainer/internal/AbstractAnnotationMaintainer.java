@@ -503,7 +503,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
                 new EntityReference(currentDocument.getPageName(), EntityType.DOCUMENT, new EntityReference(
                     currentDocument.getSpaceName(), EntityType.SPACE, new EntityReference(
                         currentDocument.getWikiName(), EntityType.WIKI)));
-            // serialize
+            // maintain the document annotations
             maintainDocumentAnnotations(serializer.serialize(docReference), previousContent, content);
             isUpdating = false;
         }

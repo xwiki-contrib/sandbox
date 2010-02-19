@@ -22,28 +22,33 @@ package org.xwiki.model.internal.reference;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.EntityType;
-import org.xwiki.model.ModelConfiguration;
+import org.xwiki.model.reference.AttachmentReference;
+import org.xwiki.model.reference.AttachmentReferenceResolver;
+import org.xwiki.model.reference.EntityReferenceResolver;
 
 /**
- * Generic implementation that resolve {@link org.xwiki.model.reference.EntityReference} objects from their string
- * representation. This implementation uses fixed default values when parts of the Reference are missing in the string
- * representation. Default values are retrieved from the {@link org.xwiki.model.ModelConfiguration} class.  
- *
+ * Specialized version of {@link org.xwiki.model.reference.EntityReferenceResolver} which can be considered a helper
+ * component to resolve {@link AttachmentReference} objects from their string representation. This implementation uses
+ * fixed default values when parts of the Reference are missing in the string representation. Default values are
+ * retrieved from the {@link org.xwiki.model.ModelConfiguration} class.
+ * 
  * @version $Id$
  * @since 2.2M1
  */
 @Component
-public class DefaultStringEntityReferenceResolver extends AbstractStringEntityReferenceResolver
+public class DefaultStringAttachmentReferenceResolver implements AttachmentReferenceResolver<String>
 {
     @Requirement
-    private ModelConfiguration configuration;
+    private EntityReferenceResolver<String> entityReferenceResolver;
 
     /**
      * {@inheritDoc}
-     * @see AbstractStringEntityReferenceResolver#getDefaultValuesForType(org.xwiki.model.EntityType)
+     * 
+     * @see org.xwiki.model.reference.AttachmentReferenceResolver#resolve(Object)
      */
-    protected String getDefaultValuesForType(EntityType type)
+    public AttachmentReference resolve(String attachmentReferenceRepresentation)
     {
-        return this.configuration.getDefaultReferenceValue(type);
+        return new AttachmentReference(this.entityReferenceResolver.resolve(
+            attachmentReferenceRepresentation, EntityType.ATTACHMENT));
     }
 }

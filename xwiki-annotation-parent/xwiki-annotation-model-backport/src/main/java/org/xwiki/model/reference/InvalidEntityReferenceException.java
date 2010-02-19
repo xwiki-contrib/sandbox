@@ -17,46 +17,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.model;
+package org.xwiki.model.reference;
 
 /**
- * Represents a type of entity (ie a Model Object such as a Wiki, a Space, a Document, an Attachment, etc).
+ * Thrown when an Entity Reference isn't valid. For example a Document Reference having an Attachment Reference as
+ * parent is invalid. 
  *
  * @version $Id$
- * @since 2.2M1
+ * @since 2.2M1 
  */
-public enum EntityType
+public class InvalidEntityReferenceException extends RuntimeException
 {
-    // Note that order below is important since it creates an order.
-    // For example: EntityType.WIKI.ordinal() < EntityType.SPACE.ordinal()
+    public InvalidEntityReferenceException()
+    {
+        super();
+    }
 
-    /**
-     * Represents a Wiki Entity.
-     */
-    WIKI,
+    public InvalidEntityReferenceException(String message)
+    {
+        super(message);
+    }
 
-    /**
-     * Represents a Space Entity.
-     */
-    SPACE,
+    public InvalidEntityReferenceException(String message, Throwable throwable)
+    {
+        super(message, throwable);
+    }
 
-    /**
-     * Represents a Document Entity.
-     */
-    DOCUMENT,
-
-    /**
-     * Represents an Attachment Entity.
-     */
-    ATTACHMENT,
-
-    /**
-     * Represents an Object Entity.
-     */
-    OBJECT,
-
-    /**
-     * Represents an Object Property Entity.
-     */
-    OBJECT_PROPERTY
+    public InvalidEntityReferenceException(Throwable throwable)
+    {
+        super(throwable);
+    }
 }

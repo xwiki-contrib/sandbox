@@ -29,39 +29,33 @@ import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceResolver;
 
 /**
- * Generic implementation deferring default values for unspecified reference parts to extending classes. This allows for
- * example both the Current Entity Reference Resolver and the Default Entity Reference Resolver to share the code from
- * this class.
- * 
+ * Generic implementation deferring default values for unspecified reference parts to extending classes. This allows
+ * for example both the Current Entity Reference Resolver and the Default Entity Reference Resolver to share the code
+ * from this class. 
+ *
  * @version $Id$
  * @since 2.2M1
  */
 public abstract class AbstractStringEntityReferenceResolver implements EntityReferenceResolver<String>
 {
-    private Map<EntityType, List<Character>> separators = new HashMap<EntityType, List<Character>>()
-    {
-        {
-            put(EntityType.DOCUMENT, Arrays.asList('.', ':'));
-            put(EntityType.ATTACHMENT, Arrays.asList('@', '.', ':'));
-            put(EntityType.SPACE, Arrays.asList(':'));
-            put(EntityType.OBJECT, Arrays.asList('^', '.', ':'));
-            put(EntityType.OBJECT_PROPERTY, Arrays.asList('#', '^', '.', ':'));
-        }
-    };
+    private Map<EntityType, List<Character>> separators = new HashMap<EntityType, List<Character>>() {{
+        put(EntityType.DOCUMENT, Arrays.asList('.', ':'));
+        put(EntityType.ATTACHMENT, Arrays.asList('@', '.', ':'));
+        put(EntityType.SPACE, Arrays.asList(':'));
+        put(EntityType.OBJECT, Arrays.asList('^', '.', ':'));
+        put(EntityType.OBJECT_PROPERTY, Arrays.asList('#', '^', '.', ':'));
+    }};
 
-    private Map<EntityType, List<EntityType>> entityTypes = new HashMap<EntityType, List<EntityType>>()
-    {
-        {
-            put(EntityType.DOCUMENT, Arrays.asList(EntityType.DOCUMENT, EntityType.SPACE, EntityType.WIKI));
-            put(EntityType.ATTACHMENT, Arrays.asList(EntityType.ATTACHMENT, EntityType.DOCUMENT, EntityType.SPACE,
-                EntityType.WIKI));
-            put(EntityType.SPACE, Arrays.asList(EntityType.SPACE, EntityType.WIKI));
-            put(EntityType.OBJECT, Arrays.asList(EntityType.OBJECT, EntityType.DOCUMENT, EntityType.SPACE,
-                EntityType.WIKI));
-            put(EntityType.OBJECT_PROPERTY, Arrays.asList(EntityType.OBJECT_PROPERTY, EntityType.OBJECT,
-                EntityType.DOCUMENT, EntityType.SPACE, EntityType.WIKI));
-        }
-    };
+    private Map<EntityType, List<EntityType>> entityTypes = new HashMap<EntityType, List<EntityType>>() {{
+        put(EntityType.DOCUMENT, Arrays.asList(EntityType.DOCUMENT, EntityType.SPACE, EntityType.WIKI));
+        put(EntityType.ATTACHMENT, Arrays.asList(EntityType.ATTACHMENT, EntityType.DOCUMENT, EntityType.SPACE,
+            EntityType.WIKI));
+        put(EntityType.SPACE, Arrays.asList(EntityType.SPACE, EntityType.WIKI));
+        put(EntityType.OBJECT, Arrays.asList(EntityType.OBJECT, EntityType.DOCUMENT, EntityType.SPACE,
+            EntityType.WIKI));
+        put(EntityType.OBJECT_PROPERTY, Arrays.asList(EntityType.OBJECT_PROPERTY, EntityType.OBJECT, 
+            EntityType.DOCUMENT, EntityType.SPACE, EntityType.WIKI));
+    }};
 
     /**
      * @param type the entity type for which to return the default value to use (since the use has not specified it)
@@ -146,7 +140,7 @@ public abstract class AbstractStringEntityReferenceResolver implements EntityRef
         // Search all characters for a non escaped separator. If found, then consider the part after the
         // character as the reference name and continue parsing the part before the separator.
         boolean found = false;
-        for (int j = representation.length() - 1; j > -1; j--) {
+        for (int j = representation.length() - 1; j > -1 ; j--) {
             char currentChar = representation.charAt(j);
             char nextChar = 0;
             if (j > 0) {

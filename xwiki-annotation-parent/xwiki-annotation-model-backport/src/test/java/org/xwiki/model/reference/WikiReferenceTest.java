@@ -17,46 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.model;
+package org.xwiki.model.reference;
+
+import junit.framework.Assert;
+import org.junit.Test;
+import org.xwiki.model.EntityType;
 
 /**
- * Represents a type of entity (ie a Model Object such as a Wiki, a Space, a Document, an Attachment, etc).
+ * Unit tests for {@link WikiReference}.
  *
  * @version $Id$
  * @since 2.2M1
  */
-public enum EntityType
+public class WikiReferenceTest
 {
-    // Note that order below is important since it creates an order.
-    // For example: EntityType.WIKI.ordinal() < EntityType.SPACE.ordinal()
-
-    /**
-     * Represents a Wiki Entity.
-     */
-    WIKI,
-
-    /**
-     * Represents a Space Entity.
-     */
-    SPACE,
-
-    /**
-     * Represents a Document Entity.
-     */
-    DOCUMENT,
-
-    /**
-     * Represents an Attachment Entity.
-     */
-    ATTACHMENT,
-
-    /**
-     * Represents an Object Entity.
-     */
-    OBJECT,
-
-    /**
-     * Represents an Object Property Entity.
-     */
-    OBJECT_PROPERTY
+    @Test
+    public void testInvalidType()
+    {
+        try {
+            new WikiReference(new EntityReference("wiki", EntityType.DOCUMENT));
+            Assert.fail("Should have thrown an exception here");
+        } catch (IllegalArgumentException expected) {
+            Assert.assertEquals("Invalid type [DOCUMENT] for a wiki reference", expected.getMessage());
+        }
+    }
 }
