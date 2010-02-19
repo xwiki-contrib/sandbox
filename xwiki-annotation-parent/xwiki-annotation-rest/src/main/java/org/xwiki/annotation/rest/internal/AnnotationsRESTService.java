@@ -121,7 +121,7 @@ public class AnnotationsRESTService extends AbstractAnnotationService
             result.setResponseCode(0);
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
             result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
-                renderedHTML, Collections.EMPTY_LIST));
+                renderedHTML, Collections.<String> emptyList()));
             return result;
         } catch (AnnotationServiceException e) {
             logger.log(Level.SEVERE, e.getMessage());

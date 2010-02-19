@@ -76,7 +76,7 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             // TODO: action should be obtained from the calling client in the parameters
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
             result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
-                renderedHTML, Collections.EMPTY_LIST));
+                renderedHTML, Collections.<String> emptyList()));
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
@@ -117,7 +117,7 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             // TODO: action should be obtained from the calling client in the parameters
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
             result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
-                renderedHTML, Collections.EMPTY_LIST));
+                renderedHTML, Collections.<String> emptyList()));
             return result;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
