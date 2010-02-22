@@ -12,9 +12,9 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1265903593000</creationDate>
-<date>1265996846000</date>
-<contentUpdateDate>1265996846000</contentUpdateDate>
-<version>84.1</version>
+<date>1266850228000</date>
+<contentUpdateDate>1266850228000</contentUpdateDate>
+<version>96.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -85,6 +85,7 @@
   #set($discard = $macroObj.set('id', $macroId))
   #set($discard = $macroObj.set('name', $macroName))
   #set($discard = $macroObj.set('visibility', 'Current Wiki'))
+  #set($discard = $macroObj.set('supportsInlineMode', 0))
   #set($discard = $macroObj.set('contentType', 'No content'))
   ##
   ## Parse gadget XML for module prefs
@@ -122,18 +123,33 @@
         #set($paramObj = $macroDoc.newObject('XWiki.WikiMacroParameterClass'))
         ##
         #set($discard = $paramObj.set('name', "up_$!{userPref.name}"))
-        #set($discard = $paramObj.set('description', "$!{userPref.displayName}"))
         ##
         #set($mandatory = 0)
         #if("$!{userPref.required}" == 'true') #set($mandatory = 1) #end
         #set($discard = $paramObj.set('mandatory', $mandatory))
+        ##
+        #set($up_desc = "$!{userPref.displayName}")
+        ##
+        ## For enum values, keep the allowed values in the description for now
+        #if (${userPref.datatype} == 'enum')
+          #set($up_desc = "${up_desc} - Allowed values:")
+          #foreach ($ev in ${userPref.enumValues})
+             #set($up_desc = "${up_desc} ${ev.value} (${ev.displayValue})")
+          #end
+        #end
+        ##
+        ## For really long list of enum values, keep only first 400 chars
+        #if($up_desc.length() &gt; 400)
+          #set($up_desc = "${up_desc.substring(0, 400)}...")
+        #end
+        #set($discard = $paramObj.set('description', $up_desc))
       #end
     #end
     ##
     #set($discard = $macroDoc.save())
     {{info}}Google Gadget imported successfully. See [[$macroDocName]].{{/info}}
   #else
-    {{error}}Error while parsing gadget at URI [[${url}]]{{/error}}
+    {{error}}Error while parsing gadget at URL [[${url}]]{{/error}}
   #end
 #end
 #end
