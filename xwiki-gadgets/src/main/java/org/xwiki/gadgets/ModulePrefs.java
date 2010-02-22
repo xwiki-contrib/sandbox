@@ -44,31 +44,34 @@ import java.util.Map;
 /**
  * A Google Gadget Module Preferences
  * 
+ * @see <a href="http://code.google.com/apis/gadgets/docs/reference.html#Moduleprefs_Ref"> Gadgets XML Reference -
+ *      ModulePrefs</a>
  * @version $Id$
  */
 public class ModulePrefs
 {
     /**
-     * Module preferences like: title, description, thumbnail, screenshot, author, etc. 
-     * mapped to their values
+     * Module preferences like: title, title_url, description, author, author_email, screenshot, thumbnail (attributes
+     * that are supported in all containers) and other, mapped to their values. All attributes are optional. See your
+     * container documentation for any container-specific attributes
      */
-    private Map<String, String> prefs;
+    private Map<String, String> attrs;
 
     /**
      * Initializes the preferences map
      */
     public ModulePrefs()
     {
-        this.prefs = new HashMap<String, String>();
+        this.attrs = new HashMap<String, String>();
     }
 
     /**
      * @param key
-     * @return value 
+     * @return value the value associated to the key, null if key not found (or value is actually null)
      */
     public String get(String key)
     {
-        return prefs.get(key);
+        return attrs.get(key);
     }
 
     /**
@@ -78,7 +81,7 @@ public class ModulePrefs
      */
     public String set(String key, String value)
     {
-        return prefs.put(key, value);
+        return attrs.put(key, value);
     }
 
 }

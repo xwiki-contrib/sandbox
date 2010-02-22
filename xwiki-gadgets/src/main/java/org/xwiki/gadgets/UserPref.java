@@ -19,10 +19,14 @@
  */
 package org.xwiki.gadgets;
 
+import java.util.List;
+
 /**
  * A Google Gadget User Preference. It is used by the GadgetsService when parsing a gadget XML for the UserPrefs and
- * when importing a Google Gadget as a XWiki Wiki Macro in Velocity
+ * when importing a Google Gadget as a XWiki Wiki Macro in Velocity.
  * 
+ * @see <a href="http://code.google.com/apis/gadgets/docs/reference.html#Userprefs_Ref"> Gadgets XML Reference - User
+ *      Preferences</a>
  * @version $Id$
  */
 public class UserPref
@@ -48,7 +52,7 @@ public class UserPref
      * Optional string that indicates the data type of this attribute. Can be string, bool, enum, hidden (a string that
      * is not visible or user editable), or list (dynamic array generated from user input). The default is string.
      */
-    private String datatype;
+    private String datatype = "string";
 
     /**
      * Optional boolean argument (true or false) indicating whether this user preference is required. The default is
@@ -60,6 +64,12 @@ public class UserPref
      * Optional string that indicates a user preference's default value.
      */
     private String defaultValue;
+
+    /**
+     * If the value for the datatype attribute is enum, the enum data type is presented in the user interface as a menu
+     * of choices. You specify the contents of the menu using {@link EnumValue}.
+     */
+    private List<EnumValue> enumValues;
 
     public String getName()
     {
@@ -111,7 +121,7 @@ public class UserPref
         this.required = required;
     }
 
-    public String getDefault_value()
+    public String getDefaultValue()
     {
         return defaultValue;
     }
@@ -119,5 +129,15 @@ public class UserPref
     public void setDefaultValue(String defaultValue)
     {
         this.defaultValue = defaultValue;
+    }
+
+    public List<EnumValue> getEnumValues()
+    {
+        return enumValues;
+    }
+
+    public void setEnumValues(List<EnumValue> enumValues)
+    {
+        this.enumValues = enumValues;
     }
 }

@@ -19,13 +19,12 @@
  */
 package org.xwiki.gadgets.internal;
 
-import java.io.IOException;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -42,6 +41,14 @@ import org.xwiki.xml.XMLReaderFactory;
 @Component("google")
 public class GoogleGadgetService implements GadgetService
 {
+    /**
+     * Default XWiki logger to report errors correctly
+     */
+    private static final Log LOG = LogFactory.getLog(GoogleGadgetService.class);
+
+    /**
+     * The XML reader factory used to create XML readers
+     */
     @Requirement
     private XMLReaderFactory xmlReaderFactory;
 
@@ -59,16 +66,13 @@ public class GoogleGadgetService implements GadgetService
             xr.parse(new InputSource(gadgetUri));
 
             return upHandler.getResult();
-        } catch (SAXException e) {
-            // TODO: log error
-        } catch (ParserConfigurationException e) {
-            // TODO: log error
-        } catch (IOException e) {
-            // TODO: log parse error
+        } catch (Exception e) {
+            LOG.error(String.format("Exception while parsing User Preferences from gadget XML at location %s.",
+                gadgetUri), e);
+            return null;
         }
-        return null;
     }
-    
+
     /**
      * {@inheritDoc}
      * 
@@ -83,13 +87,10 @@ public class GoogleGadgetService implements GadgetService
             xr.parse(new InputSource(gadgetUri));
 
             return mpHandler.getResult();
-        } catch (SAXException e) {
-            // TODO: log error
-        } catch (ParserConfigurationException e) {
-            // TODO: log error
-        } catch (IOException e) {
-            // TODO: log parse error
+        } catch (Exception e) {
+            LOG.error(String.format("Exception while parsing Module Preferences from gadget XML at location %s.",
+                gadgetUri), e);
+            return null;
         }
-        return null;
     }
 }

@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,18 +31,14 @@ import org.xwiki.gadgets.MacroService;
 import org.xwiki.gadgets.descriptor.IdedMacroDescriptor;
 import org.xwiki.gadgets.internal.descriptor.DefaultIdedMacroDescriptor;
 import org.xwiki.rendering.macro.Macro;
-import org.xwiki.rendering.macro.MacroCategoryManager;
 import org.xwiki.rendering.macro.MacroId;
 import org.xwiki.rendering.macro.MacroLookupException;
 import org.xwiki.rendering.macro.MacroManager;
-import org.xwiki.rendering.macro.descriptor.MacroDescriptor;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.syntax.SyntaxFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
-import org.xwiki.component.phase.Initializable;
-import org.xwiki.component.phase.InitializationException;
 
 /**
  * @version $Id$
@@ -58,7 +52,7 @@ public class XWikiMacroService extends AbstractLogEnabled implements MacroServic
     private static final Log LOG = LogFactory.getLog(XWikiMacroService.class);
 
     /**
-     * The syntax factory used to create {@link Syntax} instances from string syntax identifiers.
+     * The syntax factory used to create {@link Syntax} instances from string syntax identifiers
      */
     @Requirement
     private SyntaxFactory syntaxFactory;

@@ -34,6 +34,7 @@ public interface GadgetService
      * 
      * @param gadgetUri URI location of gadget XML
      * @return a list of all User Preferences if parsing was successful, otherwise returns null
+     * @see UserPref
      */
     List<UserPref> parseUserPrefs(String gadgetUri);
     
@@ -42,6 +43,7 @@ public interface GadgetService
      * 
      * @param gadgetUri URI location of gadget XML
      * @return gadget Module Preferences if parsing was successful, otherwise returns null
+     * @see ModulePrefs
      */
     ModulePrefs parseModulePrefs(String gadgetUri);
 }

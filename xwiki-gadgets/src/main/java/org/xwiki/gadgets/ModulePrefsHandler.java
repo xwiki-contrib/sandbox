@@ -65,10 +65,10 @@ public class ModulePrefsHandler extends DefaultHandler
     {
         // catch ModulePrefs tags
         if (MODULE_PREFS_ELEMENT_QNAME.equals(qName)) {
-
             for (int i = 0; i < atts.getLength(); i++) {
                 String qname = atts.getQName(i);
                 String value = atts.getValue(i);
+
                 result.set(qname, value);
             }
         }
@@ -76,6 +76,7 @@ public class ModulePrefsHandler extends DefaultHandler
 
     /**
      * @return the Module Preferences
+     * @see ModulePrefs
      */
     public ModulePrefs getResult()
     {

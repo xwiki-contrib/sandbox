@@ -31,11 +31,6 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class UserPrefsHandler extends DefaultHandler
 {
-    /**
-     * User Preferences are collected here
-     */
-    private List<UserPref> result;
-
     private static final String USER_PREF_ELEMENT_QNAME = "UserPref";
 
     private static final String USER_PREF_ATTRIBUTE_NAME_QNAME = "name";
@@ -49,6 +44,24 @@ public class UserPrefsHandler extends DefaultHandler
     private static final String USER_PREF_ATTRIBUTE_REQUIRED_QNAME = "required";
 
     private static final String USER_PREF_ATTRIBUTE_DEFAULT_VALUE_QNAME = "default_value";
+
+    private static final String ENUM_VALUE_ELEMENT_QNAME = "EnumValue";
+
+    private static final String ENUM_VALUE_ATTRIBUTE_VALUE_QNAME = "value";
+
+    private static final String ENUM_VALUE_ATTRIBUTE_DISPLAY_VALUE_QNAME = "display_value";
+
+    private static final String USER_PREF_ATTRIBUTE_DATATYPE_ENUM_VALUE = "enum";
+
+    /**
+     * User Preferences are collected here
+     */
+    private List<UserPref> result;
+
+    /**
+     * The currently parsed User Preference
+     */
+    private UserPref currentUserPref;
 
     /**
      * Creates a new instance
@@ -71,7 +84,9 @@ public class UserPrefsHandler extends DefaultHandler
     }
 
     /**
-     * Catches a User Preference XML tag. Creates a new UserPref object and attaches it to the results list
+     * Catches User Preference and EnumValue XML tags. When a UserPref tags is found, it creates a new UserPref object
+     * as the currently parsed User Preference. When it catches EnumValue XML tag, and if a user pref is currently
+     * parsed, it appends to its enum value list.
      * 
      * @see DefaultHandler#startElement(String, String, String, Attributes)
      */
@@ -80,15 +95,44 @@ public class UserPrefsHandler extends DefaultHandler
     {
         // catch UserPref tags
         if (USER_PREF_ELEMENT_QNAME.equals(qName)) {
-            UserPref up = new UserPref();
-            up.setName(atts.getValue(USER_PREF_ATTRIBUTE_NAME_QNAME));
-            up.setDisplayName(atts.getValue(USER_PREF_ATTRIBUTE_DISPLAY_NAME_QNAME));
-            up.setUrlparam(atts.getValue(USER_PREF_ATTRIBUTE_URLPARAM_QNAME));
-            up.setDatatype(atts.getValue(USER_PREF_ATTRIBUTE_DATATYPE_QNAME));
-            up.setRequired(atts.getValue(USER_PREF_ATTRIBUTE_REQUIRED_QNAME));
-            up.setDefaultValue(atts.getValue(USER_PREF_ATTRIBUTE_DEFAULT_VALUE_QNAME));
+            currentUserPref = new UserPref();
+            currentUserPref.setName(atts.getValue(USER_PREF_ATTRIBUTE_NAME_QNAME));
+            currentUserPref.setDisplayName(atts.getValue(USER_PREF_ATTRIBUTE_DISPLAY_NAME_QNAME));
+            currentUserPref.setUrlparam(atts.getValue(USER_PREF_ATTRIBUTE_URLPARAM_QNAME));
+            currentUserPref.setDatatype(atts.getValue(USER_PREF_ATTRIBUTE_DATATYPE_QNAME));
+            currentUserPref.setRequired(atts.getValue(USER_PREF_ATTRIBUTE_REQUIRED_QNAME));
+            currentUserPref.setDefaultValue(atts.getValue(USER_PREF_ATTRIBUTE_DEFAULT_VALUE_QNAME));
 
-            result.add(up);
+            // initialize enum values list, if datatype is of type "enum"
+            if (USER_PREF_ATTRIBUTE_DATATYPE_ENUM_VALUE.equals(currentUserPref.getDatatype()))
+                currentUserPref.setEnumValues(new ArrayList<EnumValue>());
+
+        } else if (ENUM_VALUE_ELEMENT_QNAME.equals(qName)
+            && USER_PREF_ATTRIBUTE_DATATYPE_ENUM_VALUE.equals(currentUserPref.getDatatype())) {
+            // catch Enum Value tags, only if a User Pref is currently parsed
+            if (currentUserPref != null) {
+                EnumValue ev = new EnumValue();
+                ev.setValue(atts.getValue(ENUM_VALUE_ATTRIBUTE_VALUE_QNAME));
+                ev.setDisplayValue(atts.getValue(ENUM_VALUE_ATTRIBUTE_DISPLAY_VALUE_QNAME));
+
+                currentUserPref.getEnumValues().add(ev);
+            }
+        }
+    }
+
+    /**
+     * Catches the end tags for User Preferences, and appends the parsed preference to the results list.
+     * 
+     * @see DefaultHandler#endElement(String, String, String)
+     */
+    @Override
+    public void endElement(String namespaceURI, String localName, String qName) throws SAXException
+    {
+        if (USER_PREF_ELEMENT_QNAME.equals(qName)) {
+            if (currentUserPref != null) {
+                result.add(currentUserPref);
+                currentUserPref = null;
+            }
         }
     }
 
