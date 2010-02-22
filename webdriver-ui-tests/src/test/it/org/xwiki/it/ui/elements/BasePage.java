@@ -3,24 +3,24 @@ package org.xwiki.it.ui.elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.FindBys;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.pagefactory.AjaxElementLocatorFactory;
 import org.openqa.selenium.support.pagefactory.ElementLocatorFactory;
 
 public class BasePage
 {
-    @FindBy(xpath = "//div[@id='tmRegister']/a")
+    @FindBys({@FindBy(id = "tmRegister"), @FindBy(tagName = "a")})
     private WebElement registerLink;
 
-    @FindBy(xpath = "//div[@id='tmLogin']/a")
+    @FindBys({@FindBy(id = "tmLogin"), @FindBy(tagName = "a")})
     private WebElement loginLink;
 
-    @FindBy(xpath = "//div[@id='tmLogout']/a")
+    @FindBys({@FindBy(id = "tmLogout"), @FindBy(tagName = "a")})
     private WebElement logoutLink;
 
-    @FindBy(xpath = "//div[@id='tmUser']//a")
+    @FindBys({@FindBy(id = "tmUser"), @FindBy(tagName = "a")})
     private WebElement userLink;
 
     private WebDriver driver;

@@ -1,6 +1,5 @@
 package org.xwiki.it.ui;
 
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,7 +37,7 @@ public class LoginTest
     @AfterClass
     public static void shutdown()
     {
-//        driver.close();
+        driver.close();
     }
 
     @Test
