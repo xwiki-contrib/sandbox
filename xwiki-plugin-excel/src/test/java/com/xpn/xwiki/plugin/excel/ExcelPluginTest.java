@@ -19,21 +19,18 @@
  */
 package com.xpn.xwiki.plugin.excel;
 
-import com.xpn.xwiki.plugin.excel.ExcelPlugin;
-import com.xpn.xwiki.plugin.excel.ExcelPluginAPI;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.test.AbstractBridgedXWikiComponentTestCase;
 import jxl.write.WritableWorkbook;
 import jxl.write.WritableSheet;
 import jxl.write.WritableCell;
 import jxl.Cell;
 import jxl.Workbook;
-import junit.framework.TestCase;
 
-public class ExcelPluginTest extends TestCase
+public class ExcelPluginTest extends AbstractBridgedXWikiComponentTestCase
 {
     public void testWritableExcel() throws Exception
     {
-
         XWikiContext context = new XWikiContext();
         ExcelPlugin ep = new ExcelPlugin("", "", context);
         ExcelPluginAPI epa = (ExcelPluginAPI) ep.getPluginApi(ep, context);
@@ -47,6 +44,5 @@ public class ExcelPluginTest extends TestCase
         Workbook workbook = epa.getWorkbook("", data);
         String table2 = epa.getTableFromWorkbook("", "1", "A1-A1", workbook);
         assertEquals("Tables are different", table1, table2);
-
     }
 }

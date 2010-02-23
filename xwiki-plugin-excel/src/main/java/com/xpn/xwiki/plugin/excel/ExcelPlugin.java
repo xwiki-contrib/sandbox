@@ -37,7 +37,6 @@ import jxl.WorkbookSettings;
 import jxl.biff.EmptyCell;
 import jxl.format.RGB;
 import jxl.write.WritableWorkbook;
-
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Api;
@@ -48,7 +47,6 @@ import com.xpn.xwiki.plugin.XWikiPluginInterface;
 
 public class ExcelPlugin extends XWikiDefaultPlugin
 {
-
     public ExcelPlugin(String name, String className, XWikiContext context)
     {
         super(name, className, context);
@@ -272,7 +270,6 @@ public class ExcelPlugin extends XWikiDefaultPlugin
     {
 
         return getTableFromCells(getTableFromSheetAsCells(spreadsheetname, ranges, range, sheet), sheet);
-
     }
 
     public String getTableFromCells(List cellList, Sheet sheet)
@@ -322,18 +319,20 @@ public class ExcelPlugin extends XWikiDefaultPlugin
         int row = cell.getRow();
         int col = cell.getColumn();
         Hyperlink[] links = sheet.getHyperlinks();
-        if (links == null)
+        if (links == null) {
             return null;
+        }
         for (int i = 0; i < links.length; i++) {
             int hrow = links[i].getRow();
             int hrow2 = links[i].getLastRow();
             int hcol = links[i].getColumn();
             int hcol2 = links[i].getLastColumn();
-            if ((row >= hrow) && (row <= hrow2) && (col >= hcol) && (col <= hcol2))
+            if ((row >= hrow) && (row <= hrow2) && (col >= hcol) && (col <= hcol2)) {
                 return links[i].getURL();
+            }
         }
         return null;
-    };
+    }
 
     private String showCell(Cell cell, String element, String classmod, Sheet sheet)
     {
@@ -347,7 +346,8 @@ public class ExcelPlugin extends XWikiDefaultPlugin
         }
 
         if ((cell.getCellFormat() != null) && (cell.getCellFormat().getFont() != null)
-            && (cell.getCellFormat().getFont().getColour() != null)) {
+            && (cell.getCellFormat().getFont().getColour() != null))
+        {
             RGB color = cell.getCellFormat().getFont().getColour().getDefaultRGB();
             textcolor = "color: rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + "); ";
         }
@@ -357,11 +357,12 @@ public class ExcelPlugin extends XWikiDefaultPlugin
             (url == null) ? cell.getContents() : "<a href=\"" + url.toString() + "\" target=\"_blank\" />"
                 + cell.getContents() + "</a>";
 
-        if ((bgcolor == null) && (textcolor == null))
+        if ((bgcolor == null) && (textcolor == null)) {
             return "<" + element + " " + classmod + ">" + content + "</" + element + ">";
-        else
+        } else {
             return "<" + element + " " + classmod + " style=\"" + textcolor + bgcolor + "\">" + content + "</"
                 + element + ">";
+        }
     }
 
     private boolean isNumeric(String str)

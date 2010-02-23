@@ -33,7 +33,6 @@ import java.util.Date;
 
 public class ExcelPluginAPI extends Api
 {
-
     private static ExcelPlugin plugin;
 
     private Map workbookstreams = new HashMap();
@@ -112,8 +111,9 @@ public class ExcelPluginAPI extends Api
     public boolean setNumberCell(WritableWorkbook wb, String name, double nb)
     {
         Range[] ranges = wb.findByName(name);
-        if (ranges.length == 0)
+        if (ranges.length == 0) {
             return false;
+        }
 
         Range range = ranges[0];
         WritableSheet sheet = wb.getSheet(range.getFirstSheetIndex());
@@ -154,8 +154,9 @@ public class ExcelPluginAPI extends Api
     public boolean setDateTimeCell(WritableWorkbook wb, String name, Date date)
     {
         Range[] ranges = wb.findByName(name);
-        if (ranges.length == 0)
+        if (ranges.length == 0) {
             return false;
+        }
 
         Range range = ranges[0];
         WritableSheet sheet = wb.getSheet(range.getFirstSheetIndex());
@@ -194,8 +195,9 @@ public class ExcelPluginAPI extends Api
     public boolean setFormulaCell(WritableWorkbook wb, String name, String formula)
     {
         Range[] ranges = wb.findByName(name);
-        if (ranges.length == 0)
+        if (ranges.length == 0) {
             return false;
+        }
 
         Range range = ranges[0];
         WritableSheet sheet = wb.getSheet(range.getFirstSheetIndex());
@@ -234,8 +236,9 @@ public class ExcelPluginAPI extends Api
     public boolean setLabelCell(WritableWorkbook wb, String name, String text)
     {
         Range[] ranges = wb.findByName(name);
-        if (ranges.length == 0)
+        if (ranges.length == 0) {
             return false;
+        }
 
         Range range = ranges[0];
         WritableSheet sheet = wb.getSheet(range.getFirstSheetIndex());
@@ -266,8 +269,9 @@ public class ExcelPluginAPI extends Api
     {
         try {
             ByteArrayOutputStream baos = (ByteArrayOutputStream) workbookstreams.get(wwb);
-            if (baos == null)
+            if (baos == null) {
                 return null;
+            }
             wwb.write();
             wwb.close();
             return baos.toByteArray();
@@ -347,11 +351,12 @@ public class ExcelPluginAPI extends Api
     public String getTableFromWorkbook(String spreadsheetname, String sheetname, String range, Object workbook)
     {
         try {
-            if (workbook instanceof Workbook)
+            if (workbook instanceof Workbook) {
                 return plugin.getTableFromWorkbook(spreadsheetname, sheetname, range, (Workbook) workbook);
-            else
+            } else {
                 return plugin.getTableFromWritableWorkbook(spreadsheetname, sheetname, range,
                     (WritableWorkbook) workbook);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             context.put("exception", e);

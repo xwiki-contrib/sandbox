@@ -33,14 +33,12 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
 public class ExcelDataSource extends DefaultDataSource implements DataSource
 {
-
     public static final String FILENAME = "file";
 
     public static final String SHEET = "sheet";
