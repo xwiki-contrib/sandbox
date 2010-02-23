@@ -16,7 +16,6 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
  */
 package com.xwiki.authentication.headers;
 
@@ -25,7 +24,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.user.api.XWikiUser;
@@ -43,7 +41,7 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
  * <li>xwiki.authentication.headers.fields_mapping: mapping between HTTP header values and XWiki user profile values.
  * The default mapping is <code>{@value #DEFAULT_FILEDS_MAPPING}.</code></li>
  * </ul>
- * 
+ *
  * @version $Id: $
  */
 public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
@@ -63,7 +61,7 @@ public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.user.impl.xwiki.AppServerTrustedAuthServiceImpl#checkAuth(com.xpn.xwiki.XWikiContext)
      */
     @Override
@@ -122,7 +120,7 @@ public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.user.impl.xwiki.AppServerTrustedAuthServiceImpl#checkAuth(java.lang.String, java.lang.String,
      *      java.lang.String, com.xpn.xwiki.XWikiContext)
      */
