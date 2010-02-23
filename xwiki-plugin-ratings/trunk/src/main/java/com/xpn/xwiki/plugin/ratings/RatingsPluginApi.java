@@ -49,8 +49,9 @@ public class RatingsPluginApi extends PluginApi<RatingsPlugin>
 
     protected static List<RatingApi> wrapRatings(List<Rating> ratings, XWikiContext context)
     {
-        if (ratings == null)
+        if (ratings == null) {
             return null;
+        }
 
         List<RatingApi> ratingsResult = new ArrayList<RatingApi>();
         for (Rating rating : ratings) {
@@ -59,7 +60,6 @@ public class RatingsPluginApi extends PluginApi<RatingsPlugin>
         return ratingsResult;
     }
 
-    
     public RatingApi setRating(Document doc, String author, int vote)
     {
         // TODO protect this with programming rights
@@ -78,8 +78,9 @@ public class RatingsPluginApi extends PluginApi<RatingsPlugin>
             Rating rating =
                 getRatingsPlugin()
                     .getRating(doc.getFullName(), author, context);
-            if (rating == null)
+            if (rating == null) {
                 return null;
+            }
             return new RatingApi(rating, context);
         } catch (Throwable e) {
             context.put("exception", e);
@@ -100,7 +101,6 @@ public class RatingsPluginApi extends PluginApi<RatingsPlugin>
             context.put("exception", e);
             return null;
         }
-
     }
 
     public AverageRatingApi getAverageRating(Document doc, String method)
@@ -138,7 +138,8 @@ public class RatingsPluginApi extends PluginApi<RatingsPlugin>
     public AverageRatingApi getAverageRating(String fromsql, String wheresql)
     {
         try {
-            return new AverageRatingApi(getRatingsPlugin().getAverageRatingFromQuery(fromsql, wheresql, context), context);
+            return new AverageRatingApi(getRatingsPlugin().getAverageRatingFromQuery(fromsql, wheresql, context),
+                context);
         } catch (Throwable e) {
             context.put("exception", e);
             return null;
@@ -154,5 +155,4 @@ public class RatingsPluginApi extends PluginApi<RatingsPlugin>
             return null;
         }
     }
-
 }

@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -38,7 +37,6 @@ import com.xpn.xwiki.plugin.ratings.RatingsException;
  */
 public class DefaultRatingsManager extends AbstractRatingsManager
 {
-
     private static Log LOG = LogFactory.getLog(DefaultRatingsManager.class);
 
     public DefaultRatingsManager()
@@ -48,7 +46,7 @@ public class DefaultRatingsManager extends AbstractRatingsManager
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.RatingsManager#setRating(com.xpn.xwiki.plugin.comments.Container, String, int,
      *      com.xpn.xwiki.XWikiContext)
      */
@@ -71,15 +69,16 @@ public class DefaultRatingsManager extends AbstractRatingsManager
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.RatingsManager#getRatings(com.xpn.xwiki.plugin.comments.Container, int, int,
      *      boolean, com.xpn.xwiki.XWikiContext)
      */
     public List<Rating> getRatings(String documentName, int start, int count, boolean asc, XWikiContext context)
         throws RatingsException
     {
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Calling default manager code for ratings");
+        }
         try {
             int skipped = 0;
             int nb = 0;
@@ -95,8 +94,9 @@ public class DefaultRatingsManager extends AbstractRatingsManager
                             ratings.add(getDefaultRating(documentName, bobj, context));
                             nb++;
                         }
-                        if ((count != 0) && (nb == count))
+                        if ((count != 0) && (nb == count)) {
                             break;
+                        }
                     }
                 }
                 return ratings;
@@ -111,24 +111,27 @@ public class DefaultRatingsManager extends AbstractRatingsManager
     {
         try {
             int i1 = ratingId.indexOf(":");
-            if (i1 == -1)
+            if (i1 == -1) {
                 throw new RatingsException(RatingsException.MODULE_PLUGIN_RATINGS,
                     RatingsException.ERROR_RATINGS_INVALID_RATING_ID, "Invalid rating ID, cannot parse rating id");
+            }
 
             String docName = ratingId.substring(0, i1);
             String sObjectNb = ratingId.substring(i1 + 1);
             int objectNb = Integer.parseInt(sObjectNb);
             XWikiDocument doc = context.getWiki().getDocument(docName, context);
 
-            if (doc.isNew())
+            if (doc.isNew()) {
                 throw new RatingsException(RatingsException.MODULE_PLUGIN_RATINGS,
                     RatingsException.ERROR_RATINGS_INVALID_RATING_ID, "Invalid rating ID, document does not exist");
+            }
 
             BaseObject object = doc.getObject(getRatingsClassName(context), objectNb);
 
-            if (object == null)
+            if (object == null) {
                 throw new RatingsException(RatingsException.MODULE_PLUGIN_RATINGS,
                     RatingsException.ERROR_RATINGS_INVALID_RATING_ID, "Invalid rating ID, could not find rating");
+            }
 
             return new DefaultRating(docName, object, context);
         } catch (XWikiException e) {
@@ -138,7 +141,7 @@ public class DefaultRatingsManager extends AbstractRatingsManager
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.RatingsManager#getRating(com.xpn.xwiki.plugin.comments.Container, int,
      *      com.xpn.xwiki.XWikiContext)
      */
@@ -151,10 +154,11 @@ public class DefaultRatingsManager extends AbstractRatingsManager
             if (bobjects != null) {
                 for (BaseObject bobj : bobjects) {
                     if (bobj != null) {
-                        if (skipped < id)
+                        if (skipped < id) {
                             skipped++;
-                        else
+                        } else {
                             return getDefaultRating(documentName, bobj, context);
+                        }
                     }
                 }
             }
@@ -166,21 +170,24 @@ public class DefaultRatingsManager extends AbstractRatingsManager
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.RatingsManager#getRating(com.xpn.xwiki.plugin.comments.Container, String,
      *      com.xpn.xwiki.XWikiContext)
      */
     public Rating getRating(String documentName, String author, XWikiContext context) throws RatingsException
     {
         try {
-            if (author == null)
+            if (author == null) {
                 return null;
+            }
             List<Rating> ratings = getRatings(documentName, 0, 0, false, context);
-            if (ratings == null)
+            if (ratings == null) {
                 return null;
+            }
             for (Rating rating : ratings) {
-                if (rating != null && author.equals(rating.getAuthor()))
+                if (rating != null && author.equals(rating.getAuthor())) {
                     return rating;
+                }
             }
         } catch (XWikiException e) {
             return null;
@@ -192,5 +199,4 @@ public class DefaultRatingsManager extends AbstractRatingsManager
     {
         return new DefaultRating(documentName, bobj, context);
     }
-
 }

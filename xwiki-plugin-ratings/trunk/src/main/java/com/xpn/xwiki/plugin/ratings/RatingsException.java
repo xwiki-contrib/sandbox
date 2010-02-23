@@ -37,7 +37,7 @@ public class RatingsException extends XWikiException
     public static final int ERROR_RATINGS_ADDRATING_NULLCONTENT = 1120003;
 
     public static final int ERROR_RATINGS_INVALID_RATING_ID = 1120004;
-    
+
     public static final int ERROR_RATINGS_SAVERATING_NULLDOCUMENT = 1120005;
 
     public RatingsException()

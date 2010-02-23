@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.api.Api;
 import com.xpn.xwiki.plugin.XWikiDefaultPlugin;
@@ -51,7 +50,7 @@ public class RatingsPlugin extends XWikiDefaultPlugin
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.XWikiDefaultPlugin#getName()
      */
     public String getName()
@@ -61,7 +60,7 @@ public class RatingsPlugin extends XWikiDefaultPlugin
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.XWikiDefaultPlugin#getPluginApi
      */
     public Api getPluginApi(XWikiPluginInterface plugin, XWikiContext context)
@@ -78,14 +77,16 @@ public class RatingsPlugin extends XWikiDefaultPlugin
                     context.getWiki().Param("xwiki.ratings.ratingsmanager",
                         "com.xpn.xwiki.plugin.ratings.internal.SeparatePageRatingsManager");
 
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Init comments manager with class " + ratingsManagerClass);
+                }
 
                 try {
                     this.ratingsManager = (RatingsManager) Class.forName(ratingsManagerClass).newInstance();
                 } catch (Exception e) {
-                    if (LOG.isErrorEnabled())
+                    if (LOG.isErrorEnabled()) {
                         LOG.error("Could not init ragints manager for class " + ratingsManagerClass, e);
+                    }
                     this.ratingsManager = new DefaultRatingsManager();
                 }
             }
@@ -160,5 +161,4 @@ public class RatingsPlugin extends XWikiDefaultPlugin
     {
         return getRatingsManager(context).getUserReputation(username, context);
     }
-
 }

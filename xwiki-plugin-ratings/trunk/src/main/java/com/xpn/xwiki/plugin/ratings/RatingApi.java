@@ -25,15 +25,14 @@ import com.xpn.xwiki.XWikiContext;
 import java.util.Date;
 
 /**
- * Wrapper around a {@link Rating}, typically returned by the {@link RatingsPluginApi} and manipulated using a
- * scripting language in the wiki.
- * 
+ * Wrapper around a {@link Rating}, typically returned by the {@link RatingsPluginApi} and manipulated using a scripting
+ * language in the wiki.
+ *
  * @version $Id: $
  * @see Rating
  */
 public class RatingApi extends Api
 {
-
     /**
      * The wrapped rating.
      */
@@ -41,7 +40,7 @@ public class RatingApi extends Api
 
     /**
      * Constructor of this wrapper
-     * 
+     *
      * @param rating the wrapped rating
      * @param context the XWiki context
      */
@@ -66,10 +65,11 @@ public class RatingApi extends Api
 
     public int getVote()
     {
-        if (rating == null)
+        if (rating == null) {
             return 0;
-        else
+        } else {
             return rating.getVote();
+        }
     }
 
     public String getAuthor()

@@ -23,7 +23,7 @@ import com.xpn.xwiki.XWikiContext;
 
 /**
  * Represents a computed average rating for a container or a set of containers.
- * 
+ *
  * @version $Id: $
  */
 public interface AverageRating
@@ -35,7 +35,7 @@ public interface AverageRating
 
     /**
      * Sets the number of votes for the container this average rating represents.
-     * 
+     *
      * @param nbVotes the total number of votes for the container represented by this average rating.
      */
     public void setNbVotes(int nbVotes);
@@ -62,7 +62,7 @@ public interface AverageRating
 
     /**
      * Saves this average rating.
-     * 
+     *
      * @param context the XWiki context
      * @throws RatingsException when an error occurs while saving this average rating.
      */

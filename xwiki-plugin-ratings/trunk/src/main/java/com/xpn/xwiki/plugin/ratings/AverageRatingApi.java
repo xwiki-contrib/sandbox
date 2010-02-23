@@ -24,13 +24,12 @@ import com.xpn.xwiki.api.Api;
 
 /**
  * Api wrapper for an average rating.
- * 
+ *
  * @version $Id: $
  * @see AverageRating
  */
 public class AverageRatingApi extends Api
 {
-
     /**
      * The wrapped average rating
      */
@@ -38,7 +37,7 @@ public class AverageRatingApi extends Api
 
     /**
      * Constructor of this average rating wrapper.
-     * 
+     *
      * @param arating the wrapped rating
      * @param context the XWiki context
      */
@@ -54,10 +53,11 @@ public class AverageRatingApi extends Api
      */
     public int getNbVotes()
     {
-        if (averageRating == null)
+        if (averageRating == null) {
             return 0;
-        else
+        } else {
             return averageRating.getNbVotes();
+        }
     }
 
     /**
@@ -66,10 +66,11 @@ public class AverageRatingApi extends Api
      */
     public float getAverageVote()
     {
-        if (averageRating == null)
+        if (averageRating == null) {
             return 0;
-        else
+        } else {
             return averageRating.getAverageVote();
+        }
     }
 
     /**
@@ -78,10 +79,10 @@ public class AverageRatingApi extends Api
      */
     public String getMethod()
     {
-        if (averageRating == null)
+        if (averageRating == null) {
             return "";
-        else
+        } else {
             return averageRating.getMethod();
+        }
     }
-
 }

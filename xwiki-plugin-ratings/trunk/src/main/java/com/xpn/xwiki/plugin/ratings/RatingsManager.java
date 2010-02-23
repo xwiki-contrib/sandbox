@@ -26,23 +26,14 @@ import java.util.List;
 public interface RatingsManager
 {
     String RATING_CLASS_FIELDNAME_DATE = "date";
-
     String RATING_CLASS_FIELDNAME_AUTHOR = "author";
-
     String RATING_CLASS_FIELDNAME_VOTE = "vote";
-
     String RATING_CLASS_FIELDNAME_PARENT = "parent";
-
     String AVERAGERATING_CLASS_FIELDNAME_NBVOTES = "nbvotes";
-
     String AVERAGERATING_CLASS_FIELDNAME_AVERAGEVOTE = "averagevote";
-
     String AVERAGERATING_CLASS_FIELDNAME_AVERAGEVOTE_METHOD = "method";
-
     String RATING_REPUTATION_METHOD_BALANCED = "balanced";
-
     String RATING_REPUTATION_METHOD_AVERAGE = "average";
-
     String RATING_REPUTATION_METHOD_DEFAULT = "average";
 
     void init(XWikiContext context);

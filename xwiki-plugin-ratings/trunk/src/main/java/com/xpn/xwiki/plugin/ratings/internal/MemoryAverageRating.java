@@ -29,7 +29,6 @@ import com.xpn.xwiki.plugin.ratings.RatingsException;
  */
 public class MemoryAverageRating implements AverageRating
 {
-
     private String documentName;
 
     private int nbVotes;

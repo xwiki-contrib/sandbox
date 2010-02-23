@@ -31,13 +31,12 @@ import com.xpn.xwiki.plugin.ratings.ReputationException;
 
 /**
  * Default very simple reputation algorithm. It won't include recalculation put only flow level reputation
- * 
+ *
  * @version $Id: $
  * @see ReputationAlgorythm
  */
 public class DefaultReputationAlgorythm implements ReputationAlgorythm
 {
-
     protected RatingsManager ratingsManager;
 
     public DefaultReputationAlgorythm()
@@ -51,11 +50,10 @@ public class DefaultReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Gets or calculates the user reputation.
-     * 
+     *
      * @param username Person to calculate the reputation for
      * @param context context of the request
      * @return AverageRating of the voter
-     * @throws ReputationException
      */
     public AverageRating getUserReputation(String username, XWikiContext context) throws ReputationException
     {
@@ -68,14 +66,6 @@ public class DefaultReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Not implemented. Voters don't receive reputation
-     * 
-     * @param voter
-     * @param container
-     * @param rating
-     * @param oldVote
-     * @param context
-     * @return
-     * @throws ReputationException
      */
     public AverageRating calcNewVoterReputation(String voter, String documentName, Rating rating, int oldVote,
         XWikiContext context) throws ReputationException
@@ -86,14 +76,6 @@ public class DefaultReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Implemented. Authors will receive a simple reputation.
-     * 
-     * @param contributor
-     * @param container
-     * @param rating
-     * @param oldVote
-     * @param context
-     * @return
-     * @throws ReputationException
      */
     public AverageRating calcNewContributorReputation(String contributor, String documentName, Rating rating,
         int oldVote, XWikiContext context) throws ReputationException
@@ -104,13 +86,6 @@ public class DefaultReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Not implemented
-     * 
-     * @param container
-     * @param rating
-     * @param oldVote
-     * @param context
-     * @return
-     * @throws ReputationException
      */
     public Map<String, AverageRating> calcNewAuthorsReputation(String documentName, Rating rating, int oldVote,
         XWikiContext context) throws ReputationException
@@ -121,10 +96,6 @@ public class DefaultReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Not implemented
-     * 
-     * @param context
-     * @return
-     * @throws ReputationException
      */
     public Map<String, AverageRating> recalcAllReputation(XWikiContext context) throws ReputationException
     {

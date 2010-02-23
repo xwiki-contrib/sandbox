@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -65,7 +64,7 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.RatingsManager#setRating(com.xpn.xwiki.plugin.comments.Container, String, int,
      *      com.xpn.xwiki.XWikiContext)
      */
@@ -92,15 +91,16 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.RatingsManager#getRatings(com.xpn.xwiki.plugin.comments.Container, int, int,
      *      boolean, com.xpn.xwiki.XWikiContext)
      */
     public List<Rating> getRatings(String documentName, int start, int count, boolean asc, XWikiContext context)
         throws RatingsException
     {
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Calling separate page manager code for ratings");
+        }
 
         String sql =
             ", BaseObject as obj, StringProperty as parentprop where doc.fullName=obj.name and obj.className='"
@@ -109,9 +109,11 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
                 + RATING_CLASS_FIELDNAME_PARENT
                 + "' and parentprop.value='"
                 + documentName
-                + "' and obj.name not in (select obj2.name from BaseObject as obj2, StringProperty as statusprop where obj2.className='"
+                +
+                "' and obj.name not in (select obj2.name from BaseObject as obj2, StringProperty as statusprop where obj2.className='"
                 + getRatingsClassName(context)
-                + "' and obj2.id=statusprop.id.id and statusprop.id.name='status' and (statusprop.value='moderated' or statusprop.value='refused') and obj.id=obj2.id) order by doc.date "
+                +
+                "' and obj2.id=statusprop.id.id and statusprop.id.name='status' and (statusprop.value='moderated' or statusprop.value='refused') and obj.id=obj2.id) order by doc.date "
                 + (asc ? "asc" : "desc");
         List<Rating> ratings = new ArrayList<Rating>();
         try {
@@ -131,7 +133,7 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.RatingsManager#getRatings(com.xpn.xwiki.plugin.comments.Container, int, int,
      *      boolean, com.xpn.xwiki.XWikiContext)
      */
@@ -144,14 +146,16 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
                 + RATING_CLASS_FIELDNAME_PARENT
                 + "' and parentprop.value='"
                 + documentName
-                + "' and obj.name not in (select obj2.name from BaseObject as obj2, StringProperty as statusprop where obj2.className='"
+                +
+                "' and obj.name not in (select obj2.name from BaseObject as obj2, StringProperty as statusprop where obj2.className='"
                 + getRatingsClassName(context)
-                + "' and obj2.id=statusprop.id.id and statusprop.id.name='status' and (statusprop.value='moderated' or statusprop.value='refused') and obj.id=obj2.id) order by doc.date desc";
+                +
+                "' and obj2.id=statusprop.id.id and statusprop.id.name='status' and (statusprop.value='moderated' or statusprop.value='refused') and obj.id=obj2.id) order by doc.date desc";
         try {
             List<String> ratingPageNameList = context.getWiki().getStore().searchDocumentsNames(sql, 1, id, context);
-            if ((ratingPageNameList == null) || (ratingPageNameList.size() == 0))
+            if ((ratingPageNameList == null) || (ratingPageNameList.size() == 0)) {
                 return null;
-            else {
+            } else {
                 return new SeparatePageRatingsManager().getRatingFromDocument(documentName, context.getWiki()
                     .getDocument(ratingPageNameList.get(0), context), context);
             }
@@ -162,7 +166,7 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.RatingsManager#getRating(com.xpn.xwiki.plugin.comments.Container, String,
      *      com.xpn.xwiki.XWikiContext)
      */
@@ -170,8 +174,9 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
     {
         try {
             for (Rating rating : getRatings(documentName, 0, 0, false, context)) {
-                if (author.equals(rating.getAuthor()))
+                if (author.equals(rating.getAuthor())) {
                     return rating;
+                }
             }
         } catch (XWikiException e) {
             return null;
@@ -183,19 +188,22 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
     {
         try {
             int i1 = ratingId.indexOf(".");
-            if (i1 == -1)
+            if (i1 == -1) {
                 throw new RatingsException(RatingsException.MODULE_PLUGIN_RATINGS,
                     RatingsException.ERROR_RATINGS_INVALID_RATING_ID, "Invalid rating ID, cannot parse rating id");
+            }
 
             XWikiDocument doc = context.getWiki().getDocument(ratingId, context);
-            if (doc.isNew())
+            if (doc.isNew()) {
                 throw new RatingsException(RatingsException.MODULE_PLUGIN_RATINGS,
                     RatingsException.ERROR_RATINGS_INVALID_RATING_ID, "Invalid rating ID, rating does not exist");
+            }
 
             BaseObject object = doc.getObject(getRatingsClassName(context));
-            if (object == null)
+            if (object == null) {
                 throw new RatingsException(RatingsException.MODULE_PLUGIN_RATINGS,
                     RatingsException.ERROR_RATINGS_INVALID_RATING_ID, "Invalid rating ID, rating does not exist");
+            }
 
             String parentDocName = object.getStringValue(RATING_CLASS_FIELDNAME_PARENT);
 
@@ -210,5 +218,4 @@ public class SeparatePageRatingsManager extends AbstractRatingsManager
     {
         return new SeparatePageRating(documentName, doc, context);
     }
-
 }

@@ -33,13 +33,12 @@ import com.xpn.xwiki.plugin.ratings.ReputationException;
 
 /**
  * Default very simple reputation algorithm. It won't include recalculation put only flow level reputation
- * 
+ *
  * @version $Id: $
  * @see ReputationAlgorythm
  */
 public class SimpleReputationAlgorythm implements ReputationAlgorythm
 {
-
     protected RatingsManager ratingsManager;
 
     protected float totalReputation;
@@ -59,11 +58,10 @@ public class SimpleReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Gets or calculates the user reputation.
-     * 
+     *
      * @param username Person to calculate the reputation for
      * @param context context of the request
      * @return AverageRating of the voter
-     * @throws com.xpn.xwiki.plugin.ratings.ReputationException
      */
     public AverageRating getUserReputation(String username, XWikiContext context) throws ReputationException
     {
@@ -81,14 +79,6 @@ public class SimpleReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Not implemented. Voters don't receive reputation
-     * 
-     * @param voter
-     * @param container
-     * @param rating
-     * @param oldVote
-     * @param context
-     * @return
-     * @throws com.xpn.xwiki.plugin.ratings.ReputationException
      */
     public AverageRating calcNewVoterReputation(String voter, String documentName, Rating rating, int oldVote,
         XWikiContext context) throws ReputationException
@@ -99,14 +89,6 @@ public class SimpleReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Implemented. Authors will receive a simple reputation.
-     * 
-     * @param contributor
-     * @param container
-     * @param rating
-     * @param oldVote
-     * @param context
-     * @return
-     * @throws com.xpn.xwiki.plugin.ratings.ReputationException
      */
     public AverageRating calcNewContributorReputation(String contributor, String documentName, Rating rating,
         int oldVote, XWikiContext context) throws ReputationException
@@ -132,10 +114,11 @@ public class SimpleReputationAlgorythm implements ReputationAlgorythm
                         .search(
                             "select sum(prop.value) from XWikiDocument as doc, BaseObject as obj, FloatProperty as prop where doc.fullName=obj.name and obj.className='XWiki.XWikiUsers' and obj.id=prop.id.id and prop.id.name='averagevote'",
                             context);
-                if ((result == null) || (result.size() == 0))
+                if ((result == null) || (result.size() == 0)) {
                     totalReputation = 0;
-                else
+                } else {
                     totalReputation = ((Float) result.get(0)).floatValue();
+                }
             } catch (XWikiException e) {
                 totalReputation = 0;
             }
@@ -155,13 +138,6 @@ public class SimpleReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Not implemented
-     * 
-     * @param documentName
-     * @param rating
-     * @param oldVote
-     * @param context
-     * @return
-     * @throws com.xpn.xwiki.plugin.ratings.ReputationException
      */
     public Map<String, AverageRating> calcNewAuthorsReputation(String documentName, Rating rating, int oldVote,
         XWikiContext context) throws ReputationException
@@ -172,10 +148,6 @@ public class SimpleReputationAlgorythm implements ReputationAlgorythm
 
     /**
      * Not implemented
-     * 
-     * @param context
-     * @return
-     * @throws com.xpn.xwiki.plugin.ratings.ReputationException
      */
     public Map<String, AverageRating> recalcAllReputation(XWikiContext context) throws ReputationException
     {

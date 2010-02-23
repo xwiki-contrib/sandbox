@@ -25,7 +25,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -208,8 +207,9 @@ public abstract class AbstractRatingsManager implements RatingsManager
         throws RatingsException
     {
         String[] methods = getDefaultReputationMethods(context);
-        for (int i = 0; i < methods.length; i++)
+        for (int i = 0; i < methods.length; i++) {
             updateAverageRating(documentName, rating, oldVote, methods[i], context);
+        }
     }
 
     public AverageRating getAverageRatingFromQuery(String fromsql, String wheresql, XWikiContext context)
@@ -239,8 +239,9 @@ public abstract class AbstractRatingsManager implements RatingsManager
                 "select sum(avgvote.value) as vote, count(avgvote.value) as nbvotes from XWikiDocument as doc "
                     + fromsql2 + wheresql2;
 
-            if (LOG.isDebugEnabled())
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Running average rating with sql " + sql);
+            }
             context.put("lastsql", sql);
 
             List result = context.getWiki().getStore().search(sql, 0, 0, context);
@@ -261,29 +262,26 @@ public abstract class AbstractRatingsManager implements RatingsManager
 
     /**
      * Get the reputation algorythm class. Make sure the version is checked when it is a groovy script
-     * 
-     * @param context
-     * @return
-     * @throws RatingsException
      */
     public ReputationAlgorythm getReputationAlgorythm(XWikiContext context) throws RatingsException
     {
         String groovyPage = getReputationAlgorythmGroovyPage(context);
         if (reputationAlgorythm != null) {
-            if ((reputationAlgorythmVersion == null) || (groovyPage == null))
+            if ((reputationAlgorythmVersion == null) || (groovyPage == null)) {
                 return reputationAlgorythm;
-            else {
+            } else {
                 XWikiDocument groovyDoc = null;
                 try {
                     groovyDoc = context.getWiki().getDocument(groovyPage, context);
                     String groovyVersion = groovyDoc.getVersion();
                     // version is the same let's use the already loaded one
-                    if (reputationAlgorythmVersion.equals(groovyVersion))
+                    if (reputationAlgorythmVersion.equals(groovyVersion)) {
                         return reputationAlgorythm;
-
+                    }
                 } catch (XWikiException e) {
-                    if (LOG.isErrorEnabled())
+                    if (LOG.isErrorEnabled()) {
                         LOG.error("Could not load reputation algorythm for groovy " + groovyPage, e);
+                    }
                     return reputationAlgorythm;
                 }
             }
@@ -299,8 +297,9 @@ public abstract class AbstractRatingsManager implements RatingsManager
                 } catch (Exception e) {
                 }
             } catch (XWikiException e) {
-                if (LOG.isErrorEnabled())
+                if (LOG.isErrorEnabled()) {
                     LOG.error("Could not init reputation algorythm for groovy page " + groovyPage, e);
+                }
                 reputationAlgorythm = new DefaultReputationAlgorythm();
             }
         } else {
@@ -311,8 +310,9 @@ public abstract class AbstractRatingsManager implements RatingsManager
             try {
                 reputationAlgorythm = (ReputationAlgorythm) Class.forName(className).newInstance();
             } catch (Exception e) {
-                if (LOG.isErrorEnabled())
+                if (LOG.isErrorEnabled()) {
                     LOG.error("Could not init reputation algorythm for class " + className, e);
+                }
                 reputationAlgorythm = new DefaultReputationAlgorythm();
             }
         }
@@ -335,8 +335,9 @@ public abstract class AbstractRatingsManager implements RatingsManager
         float totalVote = 0;
         float averageVote = 0;
         List<Rating> ratings = getRatings(documentName, 0, 0, true, context);
-        if (ratings == null)
+        if (ratings == null) {
             return null;
+        }
         for (Rating rating : ratings) {
             if (method.equals(RATING_REPUTATION_METHOD_BALANCED)) {
                 String author = rating.getAuthor();
@@ -359,12 +360,14 @@ public abstract class AbstractRatingsManager implements RatingsManager
             nbVotes++;
         }
 
-        if (balancedNbVotes != 0)
+        if (balancedNbVotes != 0) {
             averageVote = totalVote / balancedNbVotes;
+        }
         return new MemoryAverageRating(documentName, nbVotes, averageVote, method);
     }
 
-    public void updateAverageRating(String documentName, Rating rating, int oldVote, String method, XWikiContext context)
+    public void updateAverageRating(String documentName, Rating rating, int oldVote, String method,
+        XWikiContext context)
         throws RatingsException
     {
         // we only update if we are in stored mode and if the vote changed
@@ -399,9 +402,10 @@ public abstract class AbstractRatingsManager implements RatingsManager
             } catch (ReputationException e) {
                 if (e.getCode() != ReputationException.ERROR_REPUTATION_NOT_IMPLEMENTED) {
                     // we should log this error
-                    if (LOG.isErrorEnabled())
+                    if (LOG.isErrorEnabled()) {
                         LOG.error("Error while calculating voter reputation " + rating.getAuthor() + " for document "
                             + documentName, e);
+                    }
                 }
             }
 
@@ -415,14 +419,16 @@ public abstract class AbstractRatingsManager implements RatingsManager
             } catch (ReputationException e) {
                 if (e.getCode() != ReputationException.ERROR_REPUTATION_NOT_IMPLEMENTED) {
                     // we should log this error
-                    if (LOG.isErrorEnabled())
+                    if (LOG.isErrorEnabled()) {
                         LOG.error("Error while calculating author reputation for document "
                             + documentName, e);
+                    }
                 }
             } catch (XWikiException e) {
-                if (LOG.isErrorEnabled())
+                if (LOG.isErrorEnabled()) {
                     LOG.error("Error while calculating author reputation for document " + documentName,
                         e);
+                }
             }
 
             // all authors reputation. This will be used to give points to all participants to a document
@@ -433,13 +439,15 @@ public abstract class AbstractRatingsManager implements RatingsManager
             } catch (ReputationException e) {
                 if (e.getCode() != ReputationException.ERROR_REPUTATION_NOT_IMPLEMENTED) {
                     // we should log this error
-                    if (LOG.isErrorEnabled())
+                    if (LOG.isErrorEnabled()) {
                         LOG.error("Error while calculating authors reputation for document "
                             + documentName, e);
+                    }
                 }
             } catch (XWikiException e) {
-                if (LOG.isErrorEnabled())
+                if (LOG.isErrorEnabled()) {
                     LOG.error("Error while calculating authors for document " + documentName, e);
+                }
             }
         }
     }
@@ -466,8 +474,9 @@ public abstract class AbstractRatingsManager implements RatingsManager
         } catch (ReputationException e) {
             if (e.getCode() == ReputationException.ERROR_REPUTATION_NOT_IMPLEMENTED) {
                 return getAverageRating(username, context);
-            } else
+            } else {
                 throw e;
+            }
         }
     }
 
@@ -506,5 +515,4 @@ public abstract class AbstractRatingsManager implements RatingsManager
             throw new RatingsException(e);
         }
     }
-
 }

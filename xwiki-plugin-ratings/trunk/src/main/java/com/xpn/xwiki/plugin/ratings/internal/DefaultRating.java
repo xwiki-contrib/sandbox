@@ -32,7 +32,6 @@ import com.xpn.xwiki.plugin.ratings.RatingsManager;
 import com.xpn.xwiki.plugin.ratings.RatingsPlugin;
 
 /**
- * @version
  * @see Rating
  */
 public class DefaultRating implements Rating
@@ -106,7 +105,7 @@ public class DefaultRating implements Rating
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.Rating#getAuthor()
      */
     public String getAuthor()
@@ -121,7 +120,7 @@ public class DefaultRating implements Rating
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.Rating#getDate()
      */
     public Date getDate()
@@ -136,7 +135,7 @@ public class DefaultRating implements Rating
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.Rating#getVote()
      */
     public int getVote()
@@ -151,7 +150,7 @@ public class DefaultRating implements Rating
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.Rating#get(String)
      */
     public Object get(String propertyName)
@@ -165,7 +164,7 @@ public class DefaultRating implements Rating
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.Rating#display(String,String, com.xpn.xwiki.XWikiContext)
      */
     public String display(String propertyName, String mode, XWikiContext context)
@@ -175,7 +174,7 @@ public class DefaultRating implements Rating
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.Rating#getDocumentName()
      */
     public String getDocumentName()
@@ -204,7 +203,7 @@ public class DefaultRating implements Rating
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.Rating#remove()
      */
     public boolean remove()
@@ -214,7 +213,7 @@ public class DefaultRating implements Rating
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @see com.xpn.xwiki.plugin.ratings.Rating#remove()
      */
     protected boolean remove(boolean withSave)
@@ -225,8 +224,9 @@ public class DefaultRating implements Rating
                 return false;
             } else {
                 // save is needed to remove effectively
-                if (withSave)
+                if (withSave) {
                     context.getWiki().saveDocument(doc, context);
+                }
                 return true;
             }
         } catch (XWikiException e) {
@@ -274,5 +274,4 @@ public class DefaultRating implements Rating
 
         return sb.toString();
     }
-
 }
