@@ -26,7 +26,11 @@ import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationService;
 import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.rights.AnnotationRightService;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -55,19 +59,22 @@ public class AnnotationVelocityBridge
     private Execution execution;
 
     /**
-     * Builds a velocity bridge wrapper for the passed annotation service, with the passed rights checking service and
-     * the specified execution context.
-     * 
-     * @param annotationService the annotation service to wrap
-     * @param annotationRightService the annotations rights service
-     * @param execution the execution context
+     * Entity reference serializer, to create references to the documents to which annotation targets refer.
      */
-    public AnnotationVelocityBridge(AnnotationService annotationService, AnnotationRightService annotationRightService,
-        Execution execution)
+    private EntityReferenceSerializer<String> serializer;
+
+    /**
+     * Builds a velocity bridge wrapper for the annotation related functions.
+     * 
+     * @param componentManager the component manager to get the services from, to provide annotation services
+     * @throws ComponentLookupException if anything goes wrong looking up components
+     */
+    public AnnotationVelocityBridge(ComponentManager componentManager) throws ComponentLookupException
     {
-        this.annotationService = annotationService;
-        this.rightsService = annotationRightService;
-        this.execution = execution;
+        this.annotationService = componentManager.lookup(AnnotationService.class);
+        this.rightsService = componentManager.lookup(AnnotationRightService.class);
+        this.execution = componentManager.lookup(Execution.class);
+        this.serializer = componentManager.lookup(EntityReferenceSerializer.class);
     }
 
     /**
@@ -229,7 +236,7 @@ public class AnnotationVelocityBridge
      */
     public boolean removeAnnotation(String target, String annotationID)
     {
-        if (!rightsService.canRemoveAnnotation(annotationID, target, getCurrentUser())) {
+        if (!rightsService.canEditAnnotation(annotationID, target, getCurrentUser())) {
             setAccessExceptionOnContext();
             return false;
         }
@@ -265,6 +272,48 @@ public class AnnotationVelocityBridge
             setExceptionOnContext(e);
             return false;
         }
+    }
+
+    /**
+     * Checks if the current user can edit an annotation on the document given by wiki, space and page. This function is
+     * a helper function, using wiki, space and page instead of the target to avoid target generation in velocity
+     * scripting.<br />
+     * TODO: annotations should only operate on targets, and velocity context should only operate with targets so that
+     * they can pass a target to this function. This also assumes refactoring of the REST service to always get target
+     * references instead of wiki, space and pages in the path.
+     * 
+     * @param annotationId the id of the annotation to edit
+     * @param wiki the wiki of the document where the annotation is added
+     * @param space the space of the document where the annotation is added
+     * @param page the document page
+     * @return {@code true} if the current user can edit the annotation identified by the id on the specified document,
+     *         {@code false} otherwise
+     */
+    public boolean canEditAnnotation(String annotationId, String wiki, String space, String page)
+    {
+        DocumentReference docRef = new DocumentReference(wiki, space, page);
+        String serializedDocRef = serializer.serialize(docRef);
+
+        return rightsService.canEditAnnotation(annotationId, serializedDocRef, getCurrentUser());
+    }
+
+    /**
+     * Checks if the current user can add an annotation on the document given by the wiki, space and page. This function
+     * is a helper function, using wiki, space and page instead of the target to avoid target generation in velocity
+     * scripting.<br />
+     * 
+     * @param wiki the wiki of the document where the annotation is added
+     * @param space the space of the document where the annotation is added
+     * @param page the document page
+     * @return {@code true} if the current user can add an annotation on the specified document, {@code false} otherwise
+     * @see #canEditAnnotation(String, String, String, String)
+     */
+    public boolean canAddAnnotation(String wiki, String space, String page)
+    {
+        DocumentReference docRef = new DocumentReference(wiki, space, page);
+        String serializedDocRef = serializer.serialize(docRef);
+
+        return rightsService.canAddAnnotation(serializedDocRef, getCurrentUser());
     }
 
     /**

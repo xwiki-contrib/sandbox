@@ -36,9 +36,14 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-annotation-core</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>provided</scope>
+      <version>${pom.version}</version>
     </dependency>
+    <!-- replace this dependency with a core-model dependency when moving to a platform version >= 2.2 -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-annotation-model-backport</artifactId>
+      <version>${pom.version}</version>
+    </dependency>    
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-velocity</artifactId>

@@ -116,17 +116,6 @@ public class XWikiAnnotationRightService extends AbstractLogEnabled implements A
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.rights.AnnotationRightService#canRemoveAnnotation(java.lang.String, java.lang.String,
-     *      java.lang.String)
-     */
-    public boolean canRemoveAnnotation(String annotationId, String target, String userName)
-    {
-        return canEditAnnotation(annotationId, target, userName);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
      * @see org.xwiki.annotation.rights.AnnotationRightService#canViewAnnotatedTarget(java.lang.String,
      *      java.lang.String)
      */

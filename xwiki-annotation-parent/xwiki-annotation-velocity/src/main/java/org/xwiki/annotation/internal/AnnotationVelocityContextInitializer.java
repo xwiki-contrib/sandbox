@@ -20,11 +20,11 @@
 package org.xwiki.annotation.internal;
 
 import org.apache.velocity.VelocityContext;
-import org.xwiki.annotation.AnnotationService;
-import org.xwiki.annotation.rights.AnnotationRightService;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.context.Execution;
+import org.xwiki.component.logging.AbstractLogEnabled;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.velocity.VelocityContextInitializer;
 
 /**
@@ -33,7 +33,7 @@ import org.xwiki.velocity.VelocityContextInitializer;
  * @version $Id$
  */
 @Component("annotations")
-public class AnnotationVelocityContextInitializer implements VelocityContextInitializer
+public class AnnotationVelocityContextInitializer extends AbstractLogEnabled implements VelocityContextInitializer
 {
     /**
      * The key to add to the velocity context.
@@ -41,22 +41,10 @@ public class AnnotationVelocityContextInitializer implements VelocityContextInit
     public static final String VELOCITY_CONTEXT_KEY = "annotations";
 
     /**
-     * The annotations service instance to wrap with a velocity bridge and add in the context.
+     * Component manager to pull all services instances to build the bridge.
      */
     @Requirement
-    private AnnotationService annotationService;
-
-    /**
-     * The annotations rights checking service, to add access restrictions to the annotations service.
-     */
-    @Requirement
-    private AnnotationRightService annotationRightService;
-
-    /**
-     * The current execution, to get this execution's context.
-     */
-    @Requirement
-    private Execution execution;
+    private ComponentManager componentManager;
 
     /**
      * {@inheritDoc}
@@ -65,9 +53,14 @@ public class AnnotationVelocityContextInitializer implements VelocityContextInit
      */
     public void initialize(VelocityContext context)
     {
-        // create a wrapper of the annotation service for exposing its methods in velocity
-        AnnotationVelocityBridge bridge =
-            new AnnotationVelocityBridge(annotationService, annotationRightService, execution);
-        context.put(VELOCITY_CONTEXT_KEY, bridge);
+        try {
+            // create a wrapper of the annotation service for exposing its methods in velocity
+            AnnotationVelocityBridge bridge = new AnnotationVelocityBridge(componentManager);
+            context.put(VELOCITY_CONTEXT_KEY, bridge);
+        } catch (ComponentLookupException e) {
+            getLogger().warn(
+                "Could not initialize the annotations velocity bridge, "
+                    + "annotations service will not be accessible in velocity context.");
+        }
     }
 }

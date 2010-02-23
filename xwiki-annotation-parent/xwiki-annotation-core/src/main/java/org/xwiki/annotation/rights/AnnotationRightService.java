@@ -66,14 +66,4 @@ public interface AnnotationRightService
      * @return {@code true} if the user can edit the annotation, {@code false} otherwise
      */
     boolean canEditAnnotation(String annotationId, String target, String userName);
-
-    /**
-     * Checks if the user can remove the specified annotation.
-     * 
-     * @param target the target of the annotation to remove
-     * @param userName the name of the user to remove the annotation
-     * @param annotationId the id of the annotation to be removed
-     * @return {@code true} if the user can remove the annotation, {@code false} otherwise
-     */    
-    boolean canRemoveAnnotation(String annotationId, String target, String userName);
 }

@@ -76,7 +76,7 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             String documentName = referenceSerializer.serialize(docRef);
 
             // check access to this function
-            if (!annotationRightService.canRemoveAnnotation(id, documentName, getXWikiUser())) {
+            if (!annotationRightService.canEditAnnotation(id, documentName, getXWikiUser())) {
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
 
