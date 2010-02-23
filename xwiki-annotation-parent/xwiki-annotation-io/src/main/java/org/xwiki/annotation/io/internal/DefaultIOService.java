@@ -201,6 +201,9 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
     public Annotation getAnnotation(String target, String annotationID) throws IOServiceException
     {
         try {
+            if (annotationID == null || target == null) {
+                return null;
+            }
             // parse the target and extract the local reference serialized from it, by the same rules
             EntityReference targetReference = referenceResolver.resolve(target, EntityType.DOCUMENT);
             // build the target identifier for the annotation
@@ -223,6 +226,8 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
             }
             // use the object number as annotation id
             return loadAnnotationFromObject(object, deprecatedContext);
+        } catch (NumberFormatException e) {
+            throw new IOServiceException("Could not parse annotation id " + annotationID, e);
         } catch (XWikiException e) {
             throw new IOServiceException("An exception has occurred while loading the annotation with id "
                 + annotationID, e);
@@ -239,6 +244,10 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
     public void removeAnnotation(String target, String annotationID) throws IOServiceException
     {
         try {
+            if (annotationID == null || target == null) {
+                return;
+            }
+
             EntityReference targetReference = referenceResolver.resolve(target, EntityType.DOCUMENT);
             // get the target identifier and the document name from the parsed reference
             String localTargetId = target;
