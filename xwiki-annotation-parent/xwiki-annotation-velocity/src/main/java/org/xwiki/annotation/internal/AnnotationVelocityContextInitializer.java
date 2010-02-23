@@ -21,8 +21,10 @@ package org.xwiki.annotation.internal;
 
 import org.apache.velocity.VelocityContext;
 import org.xwiki.annotation.AnnotationService;
+import org.xwiki.annotation.rights.AnnotationRightService;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.context.Execution;
 import org.xwiki.velocity.VelocityContextInitializer;
 
 /**
@@ -39,10 +41,22 @@ public class AnnotationVelocityContextInitializer implements VelocityContextInit
     public static final String VELOCITY_CONTEXT_KEY = "annotations";
 
     /**
-     * The annotations service instance to add to the velocity context, injected by the component manager.
+     * The annotations service instance to wrap with a velocity bridge and add in the context.
      */
     @Requirement
     private AnnotationService annotationService;
+
+    /**
+     * The annotations rights checking service, to add access restrictions to the annotations service.
+     */
+    @Requirement
+    private AnnotationRightService annotationRightService;
+
+    /**
+     * The current execution, to get this execution's context.
+     */
+    @Requirement
+    private Execution execution;
 
     /**
      * {@inheritDoc}
@@ -51,6 +65,9 @@ public class AnnotationVelocityContextInitializer implements VelocityContextInit
      */
     public void initialize(VelocityContext context)
     {
-        context.put(VELOCITY_CONTEXT_KEY, annotationService);
+        // create a wrapper of the annotation service for exposing its methods in velocity
+        AnnotationVelocityBridge bridge =
+            new AnnotationVelocityBridge(annotationService, annotationRightService, execution);
+        context.put(VELOCITY_CONTEXT_KEY, bridge);
     }
 }

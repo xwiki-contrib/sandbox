@@ -120,8 +120,11 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
             int id = document.createNewObject(annotationClassName, deprecatedContext);
             BaseObject object = document.getObject(annotationClassName, id);
             updateObject(object, annotation, deprecatedContext);
-            // and set additional data date to now and the annotation target
+            // and set additional data: author to annotation author, date to now and the annotation target
             object.set(Annotation.DATE_FIELD, new Date(), deprecatedContext);
+            // TODO: maybe we shouldn't trust what we receive from the caller but set the author from the context.
+            // Or the other way around, set the author of the document from the annotations author.
+            object.set(Annotation.AUTHOR_FIELD, annotation.getAuthor(), deprecatedContext);
             // store the target of this annotation, serialized with a local serializer, to be exportable and importable
             // in a different wiki
             // TODO: figure out if this is the best idea in terms of target serialization
@@ -136,6 +139,8 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
             } else {
                 object.set(TARGET, target, deprecatedContext);
             }
+            // set the author of the document to the current user
+            document.setAuthor(deprecatedContext.getUser());
             deprecatedContext.getWiki().saveDocument(document,
                 "Added annotation on \"" + annotation.getSelection() + "\"", deprecatedContext);
         } catch (XWikiException e) {
@@ -257,6 +262,7 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
             // if object exists and its target matches the requested target, delete it
             if (annotationObject != null && localTargetId.equals(annotationObject.getStringValue(TARGET))) {
                 document.removeObject(annotationObject);
+                document.setAuthor(deprecatedContext.getUser());
                 deprecatedContext.getWiki().saveDocument(document, "Deleted annotation " + annotationID,
                     deprecatedContext);
             }
@@ -304,6 +310,8 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
                 updated = updateObject(object, annotation, deprecatedContext) || updated;
             }
             if (updated) {
+                // set the author of the document to the current user
+                document.setAuthor(deprecatedContext.getUser());
                 deprecatedContext.getWiki().saveDocument(document, "Updated annotations", deprecatedContext);
             }
         } catch (XWikiException e) {
@@ -367,9 +375,10 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
                 .toString(), deprecatedContext)
                 || updated;
         // don't reset the state, the date (which will be set now, upon save), and ignore anything that could overwrite
-        // the target
+        // the target. Don't set the author either, will be set by caller, if needed
         Collection<String> skippedFields =
-            Arrays.asList(new String[] {Annotation.STATE_FIELD, Annotation.DATE_FIELD, TARGET});
+            Arrays
+                .asList(new String[] {Annotation.STATE_FIELD, Annotation.DATE_FIELD, Annotation.AUTHOR_FIELD, TARGET});
         // all fields in the annotation, try to put them in object (I wonder what happens if I can't...)
         for (String propName : annotation.getFieldNames()) {
             if (!skippedFields.contains(propName)) {
@@ -377,7 +386,6 @@ public class DefaultIOService extends AbstractLogEnabled implements IOService
             }
         }
         // if it was updated, set the new date of the annotation to now
-        // TODO: change this type to Date
         if (updated) {
             object.set(Annotation.DATE_FIELD, new Date(), deprecatedContext);
         }

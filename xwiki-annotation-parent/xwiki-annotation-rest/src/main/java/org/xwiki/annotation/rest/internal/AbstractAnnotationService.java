@@ -28,21 +28,27 @@ import java.util.List;
 
 import org.apache.velocity.VelocityContext;
 import org.xwiki.annotation.AnnotationService;
+import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.rest.model.jaxb.AnnotatedContent;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationStub;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
+import org.xwiki.annotation.rights.AnnotationRightService;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.context.Execution;
 import org.xwiki.rest.XWikiResource;
 import org.xwiki.velocity.VelocityManager;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
+ * Base class for the annotation REST services, to implement common functionality to all annotation REST services.
+ * 
  * @version $Id$
  */
 public abstract class AbstractAnnotationService extends XWikiResource
@@ -58,6 +64,12 @@ public abstract class AbstractAnnotationService extends XWikiResource
      */
     @Requirement
     protected AnnotationService annotationService;
+
+    /**
+     * The annotations rights checking service, to check user rights to perform annotations actions.
+     */
+    @Requirement
+    protected AnnotationRightService annotationRightService;
 
     /**
      * The execution needed to get the annotation author from the context user.
@@ -149,9 +161,11 @@ public abstract class AbstractAnnotationService extends XWikiResource
      * @param language the language in which to render the document
      * @param action the context action to render the document for
      * @return the HTML rendered content of the document
-     * @throws Exception in case anything wrong happens while rendering the document
+     * @throws XWikiException if anything wrong happens while setting up the context for rendering
+     * @throws AnnotationServiceException if anything goes wrong during the rendering of the annotations
      */
-    protected String renderDocumentWithAnnotations(String docName, String language, String action) throws Exception
+    protected String renderDocumentWithAnnotations(String docName, String language, String action)
+        throws XWikiException, AnnotationServiceException
     {
         String isInRenderingEngineKey = "isInRenderingEngine";
         XWikiContext context = org.xwiki.rest.Utils.getXWikiContext(componentManager);
@@ -179,29 +193,35 @@ public abstract class AbstractAnnotationService extends XWikiResource
      * 
      * @param docName the full name of the document to prepare context for
      * @param language the language of the document
-     * @throws Exception if anything goes wrong accessing documents
+     * @throws XWikiException if anything goes wrong accessing documents
      */
-    protected void setUpDocuments(String docName, String language) throws Exception
+    protected void setUpDocuments(String docName, String language) throws XWikiException
     {
-        VelocityManager velocityManager = componentManager.lookup(VelocityManager.class);
-        VelocityContext vcontext = velocityManager.getVelocityContext();
+        try {
+            VelocityManager velocityManager = componentManager.lookup(VelocityManager.class);
+            VelocityContext vcontext = velocityManager.getVelocityContext();
 
-        XWikiContext context = org.xwiki.rest.Utils.getXWikiContext(componentManager);
-        XWiki xwiki = context.getWiki();
+            XWikiContext context = org.xwiki.rest.Utils.getXWikiContext(componentManager);
+            XWiki xwiki = context.getWiki();
 
-        // prepare the messaging tools and set them on context
-        xwiki.prepareResources(context);
+            // prepare the messaging tools and set them on context
+            xwiki.prepareResources(context);
 
-        XWikiDocument doc = xwiki.getDocument(docName, context);
-        // setup the xwiki context and the velocity context
-        String docKey = "doc";
-        context.put(docKey, doc);
-        vcontext.put(docKey, doc.newDocument(context));
-        vcontext.put("cdoc", vcontext.get(docKey));
-        XWikiDocument tdoc = doc.getTranslatedDocument(language, context);
-        String translatedDocKey = "tdoc";
-        context.put(translatedDocKey, tdoc);
-        vcontext.put(translatedDocKey, tdoc.newDocument(context));
+            XWikiDocument doc = xwiki.getDocument(docName, context);
+            // setup the xwiki context and the velocity context
+            String docKey = "doc";
+            context.put(docKey, doc);
+            vcontext.put(docKey, doc.newDocument(context));
+            vcontext.put("cdoc", vcontext.get(docKey));
+            XWikiDocument tdoc = doc.getTranslatedDocument(language, context);
+            String translatedDocKey = "tdoc";
+            context.put(translatedDocKey, tdoc);
+            vcontext.put(translatedDocKey, tdoc.newDocument(context));
+        } catch (ComponentLookupException e) {
+            throw new XWikiException(XWikiException.MODULE_XWIKI_RENDERING,
+                XWikiException.ERROR_XWIKI_RENDERING_VELOCITY_EXCEPTION,
+                "Couldn't lookup velocity context to setup rendegin context.");
+        }
     }
 
     /**

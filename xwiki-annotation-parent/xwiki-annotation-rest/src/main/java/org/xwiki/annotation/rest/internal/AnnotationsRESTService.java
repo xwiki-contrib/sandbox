@@ -32,10 +32,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.xwiki.annotation.AnnotationServiceException;
-import org.xwiki.annotation.rest.model.jaxb.AnnotatedContent;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationAddRequest;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationFieldCollection;
@@ -45,6 +46,8 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+
+import com.xpn.xwiki.XWikiException;
 
 /**
  * @version $Id$
@@ -82,19 +85,25 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
             String documentName = referenceSerializer.serialize(docRef);
+            // check access to this function
+            if (!annotationRightService.canViewAnnotatedTarget(documentName, getXWikiUser())) {
+                throw new WebApplicationException(Status.UNAUTHORIZED);
+            }
+
             // TODO: action should be obtained from the calling client in the parameters
             String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
-            // TODO: return AnnotationResponse so that we can return an error here somehow
-            AnnotatedContent response =
-                prepareAnnotatedContent(annotationService.getAnnotations(documentName), renderedHTML, fields);
+            AnnotationResponse response = new ObjectFactory().createAnnotationResponse();
+            response.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
+                renderedHTML, fields));
+            response.setResponseCode(0);
             // make this content expire now because cacheControl is not implemented in this version of restlet
             return Response.ok(response).expires(new Date()).build();
         } catch (AnnotationServiceException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-            return null;
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getMessage());
-            return null;
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return Response.ok(getErrorResponse(e)).build();
+        } catch (XWikiException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return Response.ok(getErrorResponse(e)).build();
         }
     }
 
@@ -114,6 +123,12 @@ public class AnnotationsRESTService extends AbstractAnnotationService
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
             String documentName = referenceSerializer.serialize(docRef);
+
+            // check access to this function
+            if (!annotationRightService.canAddAnnotation(documentName, getXWikiUser())) {
+                throw new WebApplicationException(Status.UNAUTHORIZED);
+            }
+
             Map<String, Object> annotationMetadata = getMap(request);
             annotationService.addAnnotation(documentName, request.getSelection(), request.getSelectionContext(),
                 request.getSelectionOffset(), getXWikiUser(), annotationMetadata);
@@ -124,10 +139,10 @@ public class AnnotationsRESTService extends AbstractAnnotationService
                 renderedHTML, Collections.<String> emptyList()));
             return result;
         } catch (AnnotationServiceException e) {
-            logger.log(Level.SEVERE, e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage(), e);
             return getErrorResponse(e);
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getMessage());
+        } catch (XWikiException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
             return getErrorResponse(e);
         }
     }

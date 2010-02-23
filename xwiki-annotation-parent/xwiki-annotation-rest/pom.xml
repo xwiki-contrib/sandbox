@@ -104,7 +104,8 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <excludes>
-            org/xwiki/annotation/rest/model/jaxb/**/*
+            org/xwiki/annotation/rest/model/jaxb/**/*,
+            org/xwiki/annotation/rest/internal/AbstractAnnotationService.java
           </excludes>
         </configuration>
       </plugin>

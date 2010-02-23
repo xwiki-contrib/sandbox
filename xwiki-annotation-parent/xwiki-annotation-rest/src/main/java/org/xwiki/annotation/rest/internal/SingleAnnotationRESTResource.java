@@ -27,8 +27,11 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 
 import org.xwiki.annotation.Annotation;
+import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationFieldCollection;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
@@ -37,6 +40,8 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+
+import com.xpn.xwiki.XWikiException;
 
 /**
  * This class allow to do delete a single annotation.
@@ -69,6 +74,12 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
             String documentName = referenceSerializer.serialize(docRef);
+
+            // check access to this function
+            if (!annotationRightService.canRemoveAnnotation(id, documentName, getXWikiUser())) {
+                throw new WebApplicationException(Status.UNAUTHORIZED);
+            }
+
             annotationService.removeAnnotation(documentName, id);
 
             AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
@@ -78,8 +89,11 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
                 renderedHTML, Collections.<String> emptyList()));
             return result;
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getMessage());
+        } catch (XWikiException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return getErrorResponse(e);
+        } catch (AnnotationServiceException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
             return getErrorResponse(e);
         }
     }
@@ -101,6 +115,12 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
             String documentName = referenceSerializer.serialize(docRef);
+
+            // check access to this function
+            if (!annotationRightService.canEditAnnotation(id, documentName, getXWikiUser())) {
+                throw new WebApplicationException(Status.UNAUTHORIZED);
+            }
+
             // id from the url
             Annotation newAnnotation = new Annotation(id);
             // fields from the posted content
@@ -119,8 +139,11 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
                 renderedHTML, Collections.<String> emptyList()));
             return result;
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getMessage());
+        } catch (XWikiException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return getErrorResponse(e);
+        } catch (AnnotationServiceException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
             return getErrorResponse(e);
         }
     }
