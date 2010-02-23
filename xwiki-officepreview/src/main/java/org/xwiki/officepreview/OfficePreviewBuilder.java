@@ -19,8 +19,8 @@
  */
 package org.xwiki.officepreview;
 
-import org.xwiki.bridge.AttachmentName;
 import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.rendering.block.XDOM;
 
 /**
@@ -34,9 +34,9 @@ public interface OfficePreviewBuilder
     /**
      * Builds a preview {@link XDOM} of the specified office attachment. 
      * 
-     * @param attachmentName name of the attachment which contains office document data.
+     * @param attachRef office attachment reference.
      * @return {@link XDOM} containing a preview of the specified attachment.
      * @throws Exception if an error occurs while accessing the attachment or building the preview.
      */
-    XDOM build(AttachmentName attachmentName) throws Exception;
+    XDOM build(AttachmentReference attachRef) throws Exception;
 }

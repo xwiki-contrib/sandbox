@@ -27,11 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
-import org.xwiki.bridge.AttachmentName;
-import org.xwiki.bridge.DocumentName;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.model.reference.AttachmentReference;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.officeimporter.builder.XDOMOfficeDocumentBuilder;
 import org.xwiki.officeimporter.document.XDOMOfficeDocument;
 import org.xwiki.rendering.block.Block;
@@ -56,13 +55,13 @@ public class DefaultOfficePreviewBuilder extends AbstractOfficePreviewBuilder
     /**
      * {@inheritDoc}
      */
-    protected OfficeDocumentPreview build(AttachmentName attachmentName, String attachmentVersion,
-        InputStream attachmentStream) throws Exception
+    protected OfficeDocumentPreview build(AttachmentReference attachRef, String version,
+        InputStream data) throws Exception
     {
-        byte [] officeFileData = IOUtils.toByteArray(attachmentStream);
-        DocumentName reference = attachmentName.getDocumentName();
+        DocumentReference docRef = attachRef.getDocumentReference();
         
-        XDOMOfficeDocument xdomOfficeDoc = xdomOfficeDocumentBuilder.build(officeFileData, reference, true);
+        XDOMOfficeDocument xdomOfficeDoc = xdomOfficeDocumentBuilder.build(data, attachRef.getName(),
+            docRef, true);
         
         XDOM xdom = xdomOfficeDoc.getContentDocument();
         Map<String, byte[]> artifacts = xdomOfficeDoc.getArtifacts();
@@ -77,10 +76,10 @@ public class DefaultOfficePreviewBuilder extends AbstractOfficePreviewBuilder
             if (artifacts.containsKey(imageName)) {             
                 try {
                     // Write the image into a temporary file.
-                    File tempFile = writeArtifact(attachmentName, imageName, artifacts.get(imageName));
+                    File tempFile = writeArtifact(attachRef, imageName, artifacts.get(imageName));
 
                     // Build a URLImage which links to above temporary image file.
-                    URLImage urlImage = new URLImage(getURL(attachmentName, tempFile.getName()));
+                    URLImage urlImage = new URLImage(getURL(attachRef, tempFile.getName()));
 
                     // Replace the old image block with new one backed by the URLImage.
                     Block newImgBlock = new ImageBlock(urlImage, false, imgBlock.getParameters());
@@ -95,6 +94,6 @@ public class DefaultOfficePreviewBuilder extends AbstractOfficePreviewBuilder
             }
         }
 
-        return new OfficeDocumentPreview(attachmentName, attachmentVersion, xdom, tempFiles);
+        return new OfficeDocumentPreview(attachRef, version, xdom, tempFiles);
     }   
 }

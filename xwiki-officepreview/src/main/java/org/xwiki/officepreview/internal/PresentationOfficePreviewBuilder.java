@@ -34,10 +34,9 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.VelocityContext;
-import org.xwiki.bridge.AttachmentName;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.officeimporter.openoffice.OpenOfficeDocumentConverter;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
 import org.xwiki.velocity.VelocityEngine;
@@ -51,12 +50,6 @@ import org.xwiki.velocity.VelocityManager;
 @Component("presentation")
 public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuilder
 {
-    /**
-     * Used to extract presentation slide images from office presentations.
-     */
-    @Requirement
-    private OpenOfficeDocumentConverter officeConverter;
-
     /**
      * Used to parse the presentation template.
      */
@@ -72,10 +65,12 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
     /**
      * {@inheritDoc}
      */
-    protected OfficeDocumentPreview build(AttachmentName attachmentName, String attachmentVersion,
-        InputStream attachmentStream) throws Exception
+    protected OfficeDocumentPreview build(AttachmentReference attachRef, String version, InputStream data)
+        throws Exception
     {
-        Map<String, byte[]> artifacts = officeConverter.convert(IOUtils.toByteArray(attachmentStream));
+        Map<String, InputStream> inputs = Collections.singletonMap(attachRef.getName(), data);
+        Map<String, byte[]> artifacts =
+            officeManager.getConverter().convert(inputs, attachRef.getName(), "output.html");
 
         // First extract all the image slides.
         List<String> slideNames = new ArrayList<String>();
@@ -103,10 +98,10 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
         for (String slideName : slideNames) {
             try {
                 // Write the slide into a temporary file.
-                File tempFile = writeArtifact(attachmentName, slideName, artifacts.get(slideName));
+                File tempFile = writeArtifact(attachRef, slideName, artifacts.get(slideName));
 
                 // Collect the external URL which refers this temporary file.
-                String url = getURL(attachmentName, tempFile.getName());
+                String url = getURL(attachRef, tempFile.getName());
                 if (null != url) {
                     slideUrls.add(url);
                 }
@@ -121,7 +116,7 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
 
         XDOM presentation = buildPresentationXDOM(slideUrls);
 
-        return new OfficeDocumentPreview(attachmentName, attachmentVersion, presentation, slideFiles);
+        return new OfficeDocumentPreview(attachRef, version, presentation, slideFiles);
     }
 
     /**

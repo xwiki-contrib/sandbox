@@ -25,11 +25,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
-import org.xwiki.bridge.AttachmentName;
-import org.xwiki.bridge.AttachmentNameSerializer;
 import org.xwiki.bridge.DocumentAccessBridge;
-import org.xwiki.bridge.DocumentName;
-import org.xwiki.bridge.DocumentNameSerializer;
 import org.xwiki.cache.Cache;
 import org.xwiki.cache.CacheException;
 import org.xwiki.cache.CacheManager;
@@ -41,6 +37,10 @@ import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.container.Container;
 import org.xwiki.context.Execution;
+import org.xwiki.model.reference.AttachmentReference;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.officeimporter.openoffice.OpenOfficeManager;
 import org.xwiki.officeimporter.openoffice.OpenOfficeManager.ManagerState;
 import org.xwiki.officepreview.OfficePreviewBuilder;
@@ -76,24 +76,18 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
      */
     @Requirement
     private DocumentAccessBridge docBridge;
-
+    
     /**
-     * Used for serializing {@link DocumentName} instances into strings.
+     * Used for serialzing {@link EntityReference} instances.
      */
     @Requirement
-    private DocumentNameSerializer documentNameSerializer;
-
-    /**
-     * Used for serializing {@link AttachmentName} instances into strings.
-     */
-    @Requirement
-    private AttachmentNameSerializer attachmentNameSerializer;
+    private EntityReferenceSerializer<String> refSerializer;
 
     /**
      * Used to query openoffice server state.
      */
     @Requirement
-    private OpenOfficeManager officeManager;
+    protected OpenOfficeManager officeManager;
     
     /**
      * Used to read configuration details.
@@ -133,30 +127,30 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     /**
      * {@inheritDoc}
      */
-    public XDOM build(AttachmentName attachmentName) throws Exception
+    public XDOM build(AttachmentReference attachRef) throws Exception
     {
-        String strAttachmentName = attachmentNameSerializer.serialize(attachmentName);
-        DocumentName reference = attachmentName.getDocumentName();
+        String strAttachRef = refSerializer.serialize(attachRef);
+        DocumentReference docRef = attachRef.getDocumentReference();
 
         // Search the cache.
-        OfficeDocumentPreview preview = previewsCache.get(strAttachmentName);
+        OfficeDocumentPreview preview = previewsCache.get(strAttachRef);
 
         // It's possible that the attachment has been deleted. We need to catch such events and cleanup the cache.
-        if (!docBridge.getAttachments(reference).contains(attachmentName)) {
+        if (!docBridge.getAttachmentReferences(docRef).contains(attachRef)) {
             // If a cached preview exists, flush it.
             if (null != preview) {
-                previewsCache.remove(strAttachmentName);
+                previewsCache.remove(strAttachRef);
             }
-            throw new Exception(String.format("Attachment [%s] does not exist.", strAttachmentName));
+            throw new Exception(String.format("Attachment [%s] does not exist.", strAttachRef));
         }
 
         // Query the current version of the attachment.
-        String currentVersion = getAttachmentVersion(attachmentName);
+        String currentVersion = getAttachmentVersion(attachRef);
 
         // Check if the preview has been expired.
-        if (null != preview && !currentVersion.equals(preview.getAttachmentVersion())) {
+        if (null != preview && !currentVersion.equals(preview.getVersion())) {
             // Flush the cached preview.
-            previewsCache.remove(strAttachmentName);
+            previewsCache.remove(strAttachRef);
             preview = null;
         }
 
@@ -166,10 +160,10 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
             connect();
 
             // Build preview.
-            preview = build(attachmentName, currentVersion, docBridge.getAttachmentContent(attachmentName));
+            preview = build(attachRef, currentVersion, docBridge.getAttachmentContent(attachRef));
 
             // Cache the preview.
-            previewsCache.set(strAttachmentName, preview);
+            previewsCache.set(strAttachRef, preview);
         }
 
         // Done.
@@ -179,29 +173,29 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     /**
      * Builds a {@link OfficeDocumentPreview} of the specified attachment.
      * 
-     * @param attachmentName name of the attachment to be previewed.
-     * @param attachmentVersion version of the attachment for which the preview should be generated for.
-     * @param attachmentStream content stream of the attachment.
+     * @param attachRef reference to the attachment to be previewed.
+     * @param version version of the attachment for which the preview should be generated for.
+     * @param data content stream of the attachment.
      * @return {@link OfficeDocumentPreview} corresponding to the specified attachment.
      * @throws Exception if an error occurs while building the attachment.
      */
-    protected abstract OfficeDocumentPreview build(AttachmentName attachmentName, String attachmentVersion,
-        InputStream attachmentStream) throws Exception;
+    protected abstract OfficeDocumentPreview build(AttachmentReference attachRef, String version,
+        InputStream data) throws Exception;
 
     /**
      * Writes specified artifact into a temporary file.
      * 
-     * @param attachmentName attachment into which this artifact belongs.
+     * @param attachRef reference of the attachment to which this artifact belongs.
      * @param artifactName original name of the artifact.
      * @param fileData artifact data.
      * @return file that was just written.
      * @throws Exception if an error occurs while writing the temporary file.
      */
-    protected File writeArtifact(AttachmentName attachmentName, String artifactName, byte[] fileData) throws Exception
+    protected File writeArtifact(AttachmentReference attachRef, String artifactName, byte[] fileData) throws Exception
     {
         String extension = artifactName.substring(artifactName.indexOf('.') + 1);
         String tempFileName = String.format("%s.%s", UUID.randomUUID().toString(), extension);
-        File tempFile = new File(getTempDir(attachmentName), tempFileName);
+        File tempFile = new File(getTempDir(attachRef), tempFileName);
 
         FileOutputStream fos = null;
         try {
@@ -217,10 +211,10 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     /**
      * Utility method for obtaining a temporary storage directory for holding preview artifacts for a given attachment.
      * 
-     * @param attachmentName name of the attachment.
+     * @param attachRef reference to the attachment.
      * @return directory used to hold temporary files belonging to the office preview of the specified attachment.
      */
-    protected File getTempDir(AttachmentName attachmentName)
+    protected File getTempDir(AttachmentReference attachRef)
     {
         // TODO: For the moment we're using the charting directory to store office preview images. We need to change
         // this when a generic temporary-resource action becomes available.
@@ -232,11 +226,11 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
      * Utility method for building a URL for the specified temporary file belonging to the office preview of the given
      * attachment.
      * 
-     * @param attachmentName name of the attachment being previewed.
+     * @param attachRef reference to the attachment being previewed.
      * @param fileName name of the temporary file.
      * @return URL string that refers the specified temporary file.
      */
-    protected String getURL(AttachmentName attachmentName, String fileName)
+    protected String getURL(AttachmentReference attachRef, String fileName)
     {
         // TODO: Since we are using the charting directory for holding temporary image files, here also we have to use
         // the charting action so that we have valid URL references. This needs to be updated when a temporary-resource
@@ -265,16 +259,15 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     /**
      * Utility method for finding the current version of the specified attachment.
      * 
-     * @param attachmentName name of the office attachment.
+     * @param attachRef office attachment reference.
      * @return current version of the specified attachment.
      * @throws Exception if an error occurs while accessing attachment details.
      */
-    private String getAttachmentVersion(AttachmentName attachmentName) throws Exception
+    private String getAttachmentVersion(AttachmentReference attachRef) throws Exception
     {
         XWikiContext xcontext = getContext();
-        String documentName = documentNameSerializer.serialize(attachmentName.getDocumentName());
-        XWikiDocument doc = xcontext.getWiki().getDocument(documentName, xcontext);
-        XWikiAttachment attach = doc.getAttachment(attachmentName.getFileName());
+        XWikiDocument doc = xcontext.getWiki().getDocument(attachRef.getDocumentReference(), xcontext);
+        XWikiAttachment attach = doc.getAttachment(attachRef.getName());
         return attach.getVersion();
     }
 

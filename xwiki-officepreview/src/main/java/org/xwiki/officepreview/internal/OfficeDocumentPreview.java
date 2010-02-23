@@ -22,8 +22,8 @@ package org.xwiki.officepreview.internal;
 import java.io.File;
 import java.util.Set;
 
-import org.xwiki.bridge.AttachmentName;
 import org.xwiki.cache.DisposableCacheValue;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.rendering.block.XDOM;
 
 /**
@@ -34,14 +34,14 @@ import org.xwiki.rendering.block.XDOM;
 public class OfficeDocumentPreview implements DisposableCacheValue
 {
     /**
-     * Name of the attachment to which this preview belongs.
+     * Reference to the attachment to which this preview belongs.
      */
-    private AttachmentName attachmentName;
+    private AttachmentReference attachmentReference;
 
     /**
      * Specific version of the attachment to which this preview corresponds.
      */
-    private String attachmentVersion;
+    private String version;
 
     /**
      * {@link XDOM} holding the preview document syntax.
@@ -56,16 +56,16 @@ public class OfficeDocumentPreview implements DisposableCacheValue
     /**
      * Creates a new {@link OfficeDocumentPreview} instance.
      * 
-     * @param attachmentName name of the attachment to which this preview belongs.
-     * @param attachmentVersion version of the attachment to which this preview corresponds.
+     * @param attachmentReference reference to the attachment to which this preview belongs.
+     * @param version version of the attachment to which this preview corresponds.
      * @param xdom {@link XDOM} holding the preview document syntax.
      * @param tempFiles temporary files that belongs to this preview.
      */
-    public OfficeDocumentPreview(AttachmentName attachmentName, String attachmentVersion, XDOM xdom,
+    public OfficeDocumentPreview(AttachmentReference attachmentReference, String version, XDOM xdom,
         Set<File> tempFiles)
     {
-        this.attachmentName = attachmentName;
-        this.attachmentVersion = attachmentVersion;
+        this.attachmentReference = attachmentReference;
+        this.version = version;
         this.xdom = xdom;
         this.tempFiles = tempFiles;
     }
@@ -84,17 +84,17 @@ public class OfficeDocumentPreview implements DisposableCacheValue
     /**
      * @return name of the attachment to which this preview belongs.
      */
-    public AttachmentName getAttachmentName()
+    public AttachmentReference getAttachmentReference()
     {
-        return this.attachmentName;
+        return this.attachmentReference;
     }
 
     /**
      * @return version of the attachment to which this preview corresponds.
      */
-    public String getAttachmentVersion()
+    public String getVersion()
     {
-        return this.attachmentVersion;
+        return this.version;
     }
 
     /**

@@ -22,13 +22,13 @@ package org.xwiki.officepreview;
 import java.util.Arrays;
 import java.util.List;
 
-import org.xwiki.bridge.AttachmentName;
-import org.xwiki.bridge.AttachmentNameFactory;
 import org.xwiki.bridge.DocumentAccessBridge;
-import org.xwiki.bridge.DocumentNameSerializer;
 import org.xwiki.component.logging.Logger;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
+import org.xwiki.model.reference.AttachmentReference;
+import org.xwiki.model.reference.AttachmentReferenceResolver;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.renderer.BlockRenderer;
@@ -68,9 +68,9 @@ public class OfficePreviewVelocityBridge
     private Execution execution;
 
     /**
-     * Used to create {@link AttachmentName} instances from string formed attachment names.
+     * Used for constructing {@link AttachmentReference} instances from strings.
      */
-    private AttachmentNameFactory attachmentNameFactory;
+    private AttachmentReferenceResolver<String> attachRefResolver;
 
     /**
      * For building previews of non-presentation office documents.
@@ -88,9 +88,9 @@ public class OfficePreviewVelocityBridge
     private DocumentAccessBridge docBridge;
 
     /**
-     * Used to serialize document names into strings.
+     * Used to serialize {@link EntityReference} instances into strings.
      */
-    private DocumentNameSerializer documentNameSerializer;
+    private EntityReferenceSerializer<String> refSerializer;
 
     /**
      * Constructs a new bridge instance.
@@ -99,6 +99,7 @@ public class OfficePreviewVelocityBridge
      * @param logger for logging support.
      * @throws Exception if an error occurs while initializing bridge.
      */
+    @SuppressWarnings("unchecked")
     public OfficePreviewVelocityBridge(ComponentManager componentManager, Logger logger) throws Exception
     {
         // Base components.
@@ -107,11 +108,11 @@ public class OfficePreviewVelocityBridge
 
         // Lookup other required components.
         this.execution = componentManager.lookup(Execution.class);
-        this.attachmentNameFactory = componentManager.lookup(AttachmentNameFactory.class);
+        this.attachRefResolver = componentManager.lookup(AttachmentReferenceResolver.class);
         this.defaultOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class);
         this.presentationOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class, "presentation");
         this.docBridge = componentManager.lookup(DocumentAccessBridge.class);
-        this.documentNameSerializer = componentManager.lookup(DocumentNameSerializer.class);
+        this.refSerializer = componentManager.lookup(EntityReferenceSerializer.class);
     }
 
     /**
@@ -136,9 +137,9 @@ public class OfficePreviewVelocityBridge
      */
     public String preview(String attachmentNameString, String outputSyntaxId)
     {
-        AttachmentName attachmentName = attachmentNameFactory.createAttachmentName(attachmentNameString);
+        AttachmentReference attachRef = attachRefResolver.resolve(attachmentNameString);
         try {
-            return preview(attachmentName, outputSyntaxId);
+            return preview(attachRef, outputSyntaxId);
         } catch (Exception ex) {
             String message = "Could not preview office document [%s] - %s";
             message = String.format(message, attachmentNameString, ex.getMessage());
@@ -151,16 +152,16 @@ public class OfficePreviewVelocityBridge
     /**
      * Builds a preview of the specified office attachment and renders the result in specified syntax.
      * 
-     * @param attachmentName name of the attachment to be previewed.
+     * @param attachRef reference to the attachment to be previewed.
      * @param outputSyntaxId output syntax identifier or null if default document syntax should be used.
      * @return preview of the specified office attachment rendered in specified output syntax or default document
      *         syntax.
      * @throws Exception if current user does not have enough privileges to view the requested attachment or if an error
      *             occurs while generating the preview.
      */
-    private String preview(AttachmentName attachmentName, String outputSyntaxId) throws Exception
+    private String preview(AttachmentReference attachRef, String outputSyntaxId) throws Exception
     {
-        String strDocumentName = documentNameSerializer.serialize(attachmentName.getDocumentName());
+        String strDocumentName = refSerializer.serialize(attachRef.getDocumentReference());
 
         // Check whether current user has view rights on the document containing the attachment.
         if (!docBridge.isDocumentViewable(strDocumentName)) {
@@ -171,10 +172,10 @@ public class OfficePreviewVelocityBridge
         String syntaxId = (outputSyntaxId == null) ? docBridge.getDocumentSyntaxId(strDocumentName) : outputSyntaxId;
 
         XDOM preview;
-        if (isPresentation(attachmentName.getFileName())) {
-            preview = presentationOfficePreviewBuilder.build(attachmentName);
+        if (isPresentation(attachRef.getName())) {
+            preview = presentationOfficePreviewBuilder.build(attachRef);
         } else {
-            preview = defaultOfficePreviewBuilder.build(attachmentName);
+            preview = defaultOfficePreviewBuilder.build(attachRef);
         }
 
         // Build the preview and render the result.
