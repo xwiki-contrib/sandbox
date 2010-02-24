@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.xwiki.annotation.maintainer.AnnotationState;
 
 /**
@@ -41,12 +42,20 @@ public class Annotation
     public static final String SELECTION_FIELD = "selection";
 
     /**
-     * The name of the field of this annotation selection context. <br />
+     * The name of the field of this annotation selection context to the left of the annotation. <br />
      * The context of the selection is used to uniquely localize an annotation on the content where is added. Or, if the
      * context appears twice, semantically speaking it shouldn't make any difference if the annotation is displayed &
      * handled in one or other of the occurrences.
      */
-    public static final String SELECTION_CONTEXT_FIELD = "selectionContext";
+    public static final String SELECTION_LEFT_CONTEXT_FIELD = "selectionLeftContext";
+
+    /**
+     * The name of the field of this annotation selection context to the right of the annotation. <br />
+     * The context of the selection is used to uniquely localize an annotation on the content where is added. Or, if the
+     * context appears twice, semantically speaking it shouldn't make any difference if the annotation is displayed &
+     * handled in one or other of the occurrences.
+     */
+    public static final String SELECTION_RIGHT_CONTEXT_FIELD = "selectionRightContext";
 
     /**
      * The name of the field of this annotation state. <br />
@@ -91,34 +100,21 @@ public class Annotation
     }
 
     /**
-     * Builds an annotation stub for the annotation with the passed values, to load it afterwards with the rest of the
-     * data. Used when loading annotations from the storage.
-     * 
-     * @param id the id of this annotation
-     * @param initialSelection the selected text of this annotation
-     * @param selectionContext the context of the selection, which makes the selection identifiable in the content on
-     *            which this annotation is added
-     */
-    public Annotation(String id, String initialSelection, String selectionContext)
-    {
-        this.id = id;
-        fields.put(SELECTION_FIELD, initialSelection);
-        fields.put(SELECTION_CONTEXT_FIELD, selectionContext);
-        // also initialize the state of this annotation to safe
-        fields.put(STATE_FIELD, AnnotationState.SAFE);
-    }
-
-    /**
      * Builds an annotation for the passed selection in the context, used to pass an annotation to be added (which does
      * not have an id yet since it hasn't been stored yet).
      * 
      * @param initialSelection the selected text of this annotation
-     * @param selectionContext the context of the selection, which makes the selection identifiable in the content on
-     *            which this annotation is added
+     * @param leftContext the context to the left of the selection, which makes the selection uniquely identifiable in
+     *            the content on which this annotation is added. Can be void if selection itself is unique
+     * @param rightContext the context to the right of the selection, which makes the selection uniquely identifiable in
+     *            the content on which this annotation is added. Can be void if selection itself is unique
      */
-    public Annotation(String initialSelection, String selectionContext)
+    public Annotation(String initialSelection, String leftContext, String rightContext)
     {
-        this(null, initialSelection, selectionContext);
+        this(null);
+        setSelection(initialSelection, leftContext, rightContext);
+        // also initialize the state of this annotation to safe
+        setState(AnnotationState.SAFE);
     }
 
     /**
@@ -180,35 +176,58 @@ public class Annotation
     }
 
     /**
-     * Sets the selection of this annotation through its context, the offset of the selection inside the context and its
-     * length. Setting this value is done in this manner to make sure it's kept consistent.
+     * Helper method to get the selection of this annotation in its context, with the context left to the left and
+     * context right to the right. This method ensures that a non-null value will be returned, even if some of the
+     * components of the selection are missing.
      * 
-     * @param selectionContext the context of the selection
-     * @param selectionOffset the offset of the actual selection in the context
-     * @param selectionLength the length of the selection in the context. Note that context must be at least offset +
-     *            length in size, otherwise the selection will be set to the rest of the context starting from the
-     *            specified offset
+     * @return the selection of this annotation in its context, with the context left to the left and context right to
+     *         the right
      */
-    public void setSelection(String selectionContext, int selectionOffset, int selectionLength)
+    public String getSelectionInContext()
     {
-        String newSelection;
-        if (selectionOffset < 0 || selectionOffset > selectionContext.length()) {
-            newSelection = selectionContext;
-        } else if (selectionLength < 0 || selectionOffset + selectionLength > selectionContext.length()) {
-            newSelection = selectionContext.substring(selectionOffset);
-        } else {
-            newSelection = selectionContext.substring(selectionOffset, selectionOffset + selectionLength);
-        }
-        fields.put(SELECTION_CONTEXT_FIELD, selectionContext);
-        fields.put(SELECTION_FIELD, newSelection);
+        return (StringUtils.isEmpty(getSelectionLeftContext()) ? "" : getSelectionLeftContext())
+            + (StringUtils.isEmpty(getSelection()) ? "" : getSelection())
+            + (StringUtils.isEmpty(getSelectionRightContext()) ? "" : getSelectionRightContext());
     }
 
     /**
-     * @return selection context of annotation
+     * Sets the selection of this annotation and the context along with it.
+     * 
+     * @param selection the selection of this annotation
+     * @param contextLeft the context to the left of the annotation
+     * @param contextRight the context to the right of the annotation
      */
-    public String getSelectionContext()
+    public void setSelection(String selection, String contextLeft, String contextRight)
     {
-        return (String) fields.get(SELECTION_CONTEXT_FIELD);
+        fields.put(SELECTION_FIELD, selection);
+        fields.put(SELECTION_LEFT_CONTEXT_FIELD, contextLeft);
+        fields.put(SELECTION_RIGHT_CONTEXT_FIELD, contextRight);
+    }
+
+    /**
+     * Sets the selection of this annotation.
+     * 
+     * @param selection the selection of the annotation
+     */
+    public void setSelection(String selection)
+    {
+        setSelection(selection, "", "");
+    }
+
+    /**
+     * @return selection context to the left of annotation
+     */
+    public String getSelectionLeftContext()
+    {
+        return (String) fields.get(SELECTION_LEFT_CONTEXT_FIELD);
+    }
+
+    /**
+     * @return selection context to the right of annotation
+     */
+    public String getSelectionRightContext()
+    {
+        return (String) fields.get(SELECTION_RIGHT_CONTEXT_FIELD);
     }
 
     /**
@@ -227,8 +246,9 @@ public class Annotation
     @Override
     public String toString()
     {
-        return "id: " + getId() + " | author: " + getAuthor() + " | selection: " + getSelection()
-            + " | selection context: " + getSelectionContext();
+        return "id: " + getId() + " | author: " + getAuthor() + " | selection left context: "
+            + getSelectionLeftContext() + " | selection: " + getSelection() + " | selection right context: "
+            + getSelectionRightContext();
     }
 
     /**
@@ -249,7 +269,8 @@ public class Annotation
         } else {
             // else compare selection and selection context
             return ("" + getSelection()).equals(other.getSelection())
-                && ("" + getSelectionContext()).equals(other.getSelectionContext());
+                && ("" + getSelectionLeftContext()).equals(other.getSelectionLeftContext())
+                && ("" + getSelectionRightContext()).equals(other.getSelectionRightContext());
         }
     }
 
@@ -261,7 +282,8 @@ public class Annotation
     @Override
     public int hashCode()
     {
-        return (getId() != null ? getId() : getSelection() + getSelectionContext()).hashCode();
+        return (getId() != null ? getId() : getSelectionLeftContext() + getSelection() + getSelectionRightContext())
+            .hashCode();
     }
 
     /**

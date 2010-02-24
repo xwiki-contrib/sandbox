@@ -227,7 +227,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
 
         // TODO: remove this from here if ever selection & context normalization of annotation will be done on add
         String normalizedSelection = normalizeContent(annotation.getSelection());
-        String normalizedContext = normalizeContent(annotation.getSelectionContext());
+        String normalizedContext = normalizeContent(annotation.getSelectionInContext());
         int cStart = renderedPreviousContent.indexOf(normalizedContext);
 
         if (cStart < 0) {
@@ -295,8 +295,12 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             if (annotation.getState() == AnnotationState.UPDATED && initialState == AnnotationState.SAFE) {
                 annotation.setOriginalSelection(annotation.getSelection());
             }
+
+            String contextLeft = newContext.substring(0, cLeftSize);
+            String selection = newContext.substring(cLeftSize, cLeftSize + alteredSLength);
+            String contextRight = newContext.substring(cLeftSize + alteredSLength);
             // and finally update the context & selection
-            annotation.setSelection(newContext, cLeftSize, alteredSLength);
+            annotation.setSelection(selection, contextLeft, contextRight);
 
             // make sure annotation stays unique
             ensureUnique(annotation, renderedCurrentContent, alteredCStart, cLeftSize, alteredSLength, cRightSize);
@@ -319,7 +323,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         int cRightSize)
     {
         // find out if there is another encounter of the selection text & context than the one at cStart
-        List<Integer> occurrences = getOccurrences(content, annotation.getSelectionContext(), cStart);
+        List<Integer> occurrences = getOccurrences(content, annotation.getSelectionInContext(), cStart);
         if (occurrences.size() == 0) {
             // it appears only once, it's done
             return;
@@ -383,7 +387,11 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             expansionRight = expansionRight + toNextWord(content, cStart + cLength + expansionRight, false);
             String newContext = content.substring(cStart - expansionLeft, cStart + cLength + expansionRight);
             // normally selection is not updated here, only the context therefore we don't set original selection
-            annotation.setSelection(newContext, cLeftSize + expansionLeft, sLength);
+            String contextLeft = newContext.substring(0, cLeftSize + expansionLeft);
+            String selection = newContext.substring(cLeftSize + expansionLeft, cLeftSize + expansionLeft + sLength);
+            String contextRight = newContext.substring(cLeftSize + expansionLeft + sLength);
+
+            annotation.setSelection(selection, contextLeft, contextRight);
         } else {
             // left the loop for other reasons: for example couldn't expand context
             // leave it unchanged there's not much we could do anyway

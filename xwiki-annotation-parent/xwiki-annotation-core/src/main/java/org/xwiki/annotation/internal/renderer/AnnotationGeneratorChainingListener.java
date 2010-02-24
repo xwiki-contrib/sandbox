@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.content.AlteredContent;
 import org.xwiki.annotation.content.ContentAlterer;
@@ -199,7 +200,14 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
     {
         for (Annotation ann : annotations) {
             // clean it up and its context
-            AlteredContent cleanedContext = selectionAlterer.alter(ann.getSelectionContext());
+            String annotationContext = ann.getSelectionInContext();
+            if (StringUtils.isEmpty(annotationContext)) {
+                // cannot find the context of the annotation or the annotation selection cannot be found in the
+                // annotation context, ignore it
+                // TODO: mark it somehow...
+                continue;
+            }
+            AlteredContent cleanedContext = selectionAlterer.alter(annotationContext);
             // find it in the plaintextContent
             int contextIndex = plainTextContent.indexOf(cleanedContext.getContent().toString());
             // find the selection inside the context in the plainTextContent

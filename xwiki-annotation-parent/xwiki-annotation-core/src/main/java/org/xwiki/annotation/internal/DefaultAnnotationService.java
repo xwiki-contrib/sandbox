@@ -85,13 +85,17 @@ public class DefaultAnnotationService implements AnnotationService
             // create the annotation with this data and send it to the storage service
             // TODO: also think of mapping the annotation on the document at add time and fail it if it's not mappable,
             // for extra security
-            Annotation annotation = new Annotation(selection, selectionContext);
+            // TODO: normalize spaces at this level
+            String leftContext = selectionContext.substring(0, offset);
+            String rightContext = selectionContext.substring(offset + selection.length());
+            Annotation annotation = new Annotation(selection, leftContext, rightContext);
             annotation.setAuthor(author);
             // skip these fields as we don't want to overwrite them with whatever is in this map. Setters should be used
             // for these values or constructor
             Collection<String> skippedFields =
-                Arrays.asList(new String[] {Annotation.SELECTION_FIELD, Annotation.SELECTION_CONTEXT_FIELD,
-                    Annotation.ORIGINAL_SELECTION_FIELD, Annotation.AUTHOR_FIELD, Annotation.STATE_FIELD});
+                Arrays.asList(new String[] {Annotation.SELECTION_FIELD, Annotation.SELECTION_LEFT_CONTEXT_FIELD,
+                    Annotation.SELECTION_RIGHT_CONTEXT_FIELD, Annotation.ORIGINAL_SELECTION_FIELD, 
+                    Annotation.AUTHOR_FIELD, Annotation.STATE_FIELD});
             for (Map.Entry<String, Object> field : metadata.entrySet()) {
                 if (!skippedFields.contains(field.getKey())) {
                     annotation.set(field.getKey(), field.getValue());

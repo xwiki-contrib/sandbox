@@ -273,7 +273,8 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
             Annotation expectedAnn = getAnnotation(actualAnn.getId(), expected);
             assertNotNull(expectedAnn);
             assertEquals(expectedAnn.getSelection(), actualAnn.getSelection());
-            assertEquals(expectedAnn.getSelectionContext(), actualAnn.getSelectionContext());
+            assertEquals(expectedAnn.getSelectionLeftContext(), actualAnn.getSelectionLeftContext());
+            assertEquals(expectedAnn.getSelectionRightContext(), actualAnn.getSelectionRightContext());
             assertEquals(expectedAnn.getState(), actualAnn.getState());
             assertEquals(expectedAnn.getOriginalSelection(), actualAnn.getOriginalSelection());
         }

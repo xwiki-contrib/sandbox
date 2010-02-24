@@ -176,13 +176,17 @@ public class TestDocumentFactory
         } catch (NumberFormatException e) {
             // nothing leave them on zero
         }
-        Annotation ann = new Annotation(properties[0], properties[3], properties[4]);
+        Annotation ann = new Annotation(properties[0]);
+        int offset = properties[4].indexOf(properties[3]);
+        String contextLeft = properties[4].substring(0, offset);
+        String contextRight = properties[4].substring(offset + properties[3].length());
+        ann.setSelection(properties[3], contextLeft, contextRight);
         ann.setAuthor(properties[1]);
         ann.setState(state);
         ann.set("annotation", properties[2]);
         ann.set("offset", annotationOffset);
         ann.set("length", annotationLength);
-        
+
         return ann;
     }
 }
