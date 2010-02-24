@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A Google Gadget Module Preferences
+ * A Google Gadget Module Preferences.
  * 
  * @see <a href="http://code.google.com/apis/gadgets/docs/reference.html#Moduleprefs_Ref"> Gadgets XML Reference -
  *      ModulePrefs</a>
@@ -58,7 +58,7 @@ public class ModulePrefs
     private Map<String, String> attrs;
 
     /**
-     * Initializes the preferences map
+     * Initializes the preferences map.
      */
     public ModulePrefs()
     {
@@ -67,7 +67,7 @@ public class ModulePrefs
 
     /**
      * @param key
-     * @return value the value associated to the key, null if key not found (or value is actually null)
+     * @return the value associated to the key, null if key not found (or value is actually null)
      */
     public String get(String key)
     {

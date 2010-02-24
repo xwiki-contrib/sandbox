@@ -41,21 +41,33 @@ public class EnumValue
      */
     private String displayValue;
 
+    /**
+     * @return
+     */
     public String getValue()
     {
         return value;
     }
 
+    /**
+     * @param value
+     */
     public void setValue(String value)
     {
         this.value = value;
     }
 
+    /**
+     * @return
+     */
     public String getDisplayValue()
     {
         return displayValue;
     }
 
+    /**
+     * @param displayValue
+     */
     public void setDisplayValue(String displayValue)
     {
         this.displayValue = displayValue;

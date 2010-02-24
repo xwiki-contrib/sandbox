@@ -42,12 +42,12 @@ import org.xwiki.xml.XMLReaderFactory;
 public class GoogleGadgetService implements GadgetService
 {
     /**
-     * Default XWiki logger to report errors correctly
+     * Default XWiki logger to report errors correctly.
      */
     private static final Log LOG = LogFactory.getLog(GoogleGadgetService.class);
 
     /**
-     * The XML reader factory used to create XML readers
+     * The XML reader factory used to create XML readers.
      */
     @Requirement
     private XMLReaderFactory xmlReaderFactory;

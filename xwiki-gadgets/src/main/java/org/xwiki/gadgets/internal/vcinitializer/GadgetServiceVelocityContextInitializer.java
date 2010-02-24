@@ -32,12 +32,12 @@ import org.xwiki.velocity.VelocityContextInitializer;
 public class GadgetServiceVelocityContextInitializer implements VelocityContextInitializer
 {
     /**
-     * The key to add to the velocity context
+     * The key to add to the velocity context.
      */
     public static final String VELOCITY_CONTEXT_KEY = "gadgets";
 
     /**
-     * The component mapped to the key in the velocity context
+     * The component mapped to the key in the velocity context.
      */
     @Requirement("google")
     private GadgetService gadgets;

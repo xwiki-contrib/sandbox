@@ -22,7 +22,7 @@ package org.xwiki.gadgets;
 import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.gadgets.descriptor.IdedMacroDescriptor;
+import org.xwiki.rendering.macro.descriptor.MacroDescriptor;
 
 /**
  * @version $Id$
@@ -31,17 +31,17 @@ import org.xwiki.gadgets.descriptor.IdedMacroDescriptor;
 public interface MacroService
 {
     /**
-     * Gets the sorted by name definition list of all macros
+     * Gets the sorted by name definition list of all macros.
      * 
      * @return sorted list of all macros
      */
-    List<IdedMacroDescriptor> getMacroDescriptors();
+    List<MacroDescriptor> getMacroDescriptors();
 
     /**
-     * Looks up a macro
+     * Looks up a macro.
      * 
      * @param macroId the id of the macro to lookup
-     * @return the macro descriptor if macro was found, null otherwise
+     * @return the macro descriptor if macro was found, else null
      */
-    IdedMacroDescriptor getMacroDescriptor(String macroId);
+    MacroDescriptor getMacroDescriptor(String macroId);
 }

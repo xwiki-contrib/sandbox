@@ -28,13 +28,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.xwiki.gadgets.MacroService;
-import org.xwiki.gadgets.descriptor.IdedMacroDescriptor;
-import org.xwiki.gadgets.internal.descriptor.DefaultIdedMacroDescriptor;
-import org.xwiki.rendering.macro.Macro;
 import org.xwiki.rendering.macro.MacroId;
 import org.xwiki.rendering.macro.MacroLookupException;
 import org.xwiki.rendering.macro.MacroManager;
-import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.rendering.macro.descriptor.MacroDescriptor;
 import org.xwiki.rendering.syntax.SyntaxFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -47,18 +44,18 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 public class XWikiMacroService extends AbstractLogEnabled implements MacroService
 {
     /**
-     * Default XWiki logger to report errors correctly
+     * Default XWiki logger to report errors correctly.
      */
     private static final Log LOG = LogFactory.getLog(XWikiMacroService.class);
 
     /**
-     * The syntax factory used to create {@link Syntax} instances from string syntax identifiers
+     * The syntax factory used to create {@link Syntax} instances from string syntax identifiers.
      */
     @Requirement
     private SyntaxFactory syntaxFactory;
 
     /**
-     * The macro manager used to retrieve macros
+     * The macro manager used to retrieve macros.
      */
     @Requirement
     private MacroManager macroManager;
@@ -68,19 +65,17 @@ public class XWikiMacroService extends AbstractLogEnabled implements MacroServic
      * 
      * @see MacroService#getMacroDescriptors()
      */
-    public List<IdedMacroDescriptor> getMacroDescriptors()
+    public List<MacroDescriptor> getMacroDescriptors()
     {
         try {
-            List<IdedMacroDescriptor> descriptors = new ArrayList<IdedMacroDescriptor>();
+            List<MacroDescriptor> descriptors = new ArrayList<MacroDescriptor>();
             for (MacroId macroId : macroManager.getMacroIds()) {
-                Macro< ? > macro = macroManager.getMacro(macroId);
-                IdedMacroDescriptor macroDefinition = new DefaultIdedMacroDescriptor(macro.getDescriptor(), macroId);
-                descriptors.add(macroDefinition);
+                descriptors.add(macroManager.getMacro(macroId).getDescriptor());
             }
 
-            Collections.sort(descriptors, new Comparator<IdedMacroDescriptor>()
+            Collections.sort(descriptors, new Comparator<MacroDescriptor>()
             {
-                public int compare(IdedMacroDescriptor alice, IdedMacroDescriptor bob)
+                public int compare(MacroDescriptor alice, MacroDescriptor bob)
                 {
                     return alice.getName().toLowerCase().compareTo(bob.getName().toLowerCase());
                 }
@@ -98,13 +93,12 @@ public class XWikiMacroService extends AbstractLogEnabled implements MacroServic
      * 
      * @see MacroService#getMacroDescriptor(String)
      */
-    public IdedMacroDescriptor getMacroDescriptor(String macroId)
+    public MacroDescriptor getMacroDescriptor(String macroId)
     {
         try {
             MacroId macroIdObject = new MacroId(macroId);
-            Macro< ? > macro = macroManager.getMacro(macroIdObject);
-
-            return new DefaultIdedMacroDescriptor(macro.getDescriptor(), macroIdObject);
+            
+            return macroManager.getMacro(macroIdObject).getDescriptor();
         } catch (MacroLookupException e) {
             // if macro not found, return null
             return null;

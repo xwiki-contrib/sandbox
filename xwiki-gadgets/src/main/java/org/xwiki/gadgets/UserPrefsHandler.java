@@ -54,17 +54,17 @@ public class UserPrefsHandler extends DefaultHandler
     private static final String USER_PREF_ATTRIBUTE_DATATYPE_ENUM_VALUE = "enum";
 
     /**
-     * User Preferences are collected here
+     * User Preferences are collected here.
      */
     private List<UserPref> result;
 
     /**
-     * The currently parsed User Preference
+     * The currently parsed User Preference.
      */
     private UserPref currentUserPref;
 
     /**
-     * Creates a new instance
+     * Creates a new instance.
      */
     public UserPrefsHandler()
     {
@@ -72,7 +72,7 @@ public class UserPrefsHandler extends DefaultHandler
     }
 
     /**
-     * Initializes the list of User Preferences result
+     * Initializes the list of User Preferences result.
      * 
      * @see DefaultHandler#startDocument()
      */
@@ -86,7 +86,7 @@ public class UserPrefsHandler extends DefaultHandler
     /**
      * Catches User Preference and EnumValue XML tags. When a UserPref tags is found, it creates a new UserPref object
      * as the currently parsed User Preference. When it catches EnumValue XML tag, and if a user pref is currently
-     * parsed, it appends to its enum value list.
+     * parsed, it appends to its enum value list. {@inheritDoc}
      * 
      * @see DefaultHandler#startElement(String, String, String, Attributes)
      */
@@ -104,8 +104,9 @@ public class UserPrefsHandler extends DefaultHandler
             currentUserPref.setDefaultValue(atts.getValue(USER_PREF_ATTRIBUTE_DEFAULT_VALUE_QNAME));
 
             // initialize enum values list, if datatype is of type "enum"
-            if (USER_PREF_ATTRIBUTE_DATATYPE_ENUM_VALUE.equals(currentUserPref.getDatatype()))
+            if (USER_PREF_ATTRIBUTE_DATATYPE_ENUM_VALUE.equals(currentUserPref.getDatatype())) {
                 currentUserPref.setEnumValues(new ArrayList<EnumValue>());
+            }
 
         } else if (ENUM_VALUE_ELEMENT_QNAME.equals(qName)
             && USER_PREF_ATTRIBUTE_DATATYPE_ENUM_VALUE.equals(currentUserPref.getDatatype())) {
@@ -122,6 +123,8 @@ public class UserPrefsHandler extends DefaultHandler
 
     /**
      * Catches the end tags for User Preferences, and appends the parsed preference to the results list.
+     * 
+     * {@inheritDoc}
      * 
      * @see DefaultHandler#endElement(String, String, String)
      */
