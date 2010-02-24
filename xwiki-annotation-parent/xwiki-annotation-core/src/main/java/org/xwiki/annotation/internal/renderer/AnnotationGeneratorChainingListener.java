@@ -210,19 +210,21 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
             AlteredContent cleanedContext = selectionAlterer.alter(annotationContext);
             // find it in the plaintextContent
             int contextIndex = plainTextContent.indexOf(cleanedContext.getContent().toString());
-            // find the selection inside the context in the plainTextContent
-            // assume at this point that the selection appears only once in the context
-            String alteredSelection = selectionAlterer.alter(ann.getSelection()).getContent().toString();
-            int selectionIndexInContext = cleanedContext.getContent().toString().indexOf(alteredSelection);
+            // find the indexes where annotation starts and ends inside the cleaned context, wrt to its endpoints in the
+            // original selection
+            int leftIndex =
+                (StringUtils.isEmpty(ann.getSelectionLeftContext()) ? "" : ann.getSelectionLeftContext()).length();
+            int alteredLeftIndex = cleanedContext.getAlteredOffset(leftIndex);
+            int rightIndex =
+                leftIndex + (StringUtils.isEmpty(ann.getSelection()) ? "" : ann.getSelection()).length() - 1;
+            int alteredRightIndex = cleanedContext.getAlteredOffset(rightIndex);
             // check that the context is in the plainText representation and selection was found inside it
-            if (contextIndex >= 0 && selectionIndexInContext >= 0) {
-                // compute annotation index in the plain text repr
-                int annotationIndex = contextIndex + selectionIndexInContext;
+            if (contextIndex >= 0 && alteredLeftIndex >= 0) {
                 // get the start and end events for the annotation
                 // annotation starts before char at annotationIndex and ends after char at annotationIndex +
                 // alteredSelection.length() - 1
-                Object[] startEvt = getEventAndOffset(annotationIndex, false);
-                Object[] endEvt = getEventAndOffset(annotationIndex + alteredSelection.length() - 1, true);
+                Object[] startEvt = getEventAndOffset(contextIndex + alteredLeftIndex, false);
+                Object[] endEvt = getEventAndOffset(contextIndex + alteredRightIndex, true);
                 if (startEvt != null & endEvt != null) {
                     // store the bookmarks
                     addBookmark((Event) startEvt[0], new AnnotationEvent(AnnotationEventType.START, ann),

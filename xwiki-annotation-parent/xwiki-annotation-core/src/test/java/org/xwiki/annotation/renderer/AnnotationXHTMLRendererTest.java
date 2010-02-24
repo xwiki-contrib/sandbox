@@ -93,6 +93,13 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         addFileToTest("renderer/ambiguous/Ambiguous2");
         addFileToTest("renderer/ambiguous/Ambiguous3");
         addFileToTest("renderer/ambiguous/Ambiguous4");
+        addFileToTest("renderer/ambiguous/Ambiguous5");
+        addFileToTest("renderer/ambiguous/Ambiguous6");
+        // FIXME: fix support for empty selection annotations by making sure that, at each point, for the same
+        // annotation, startEvents & end events are sent in this order. FTM the convention is that annotations are
+        // closed before are opened, for which reason the annotation is something like: </span><span
+        // class="annotation annotationID0">...
+        // addFileToTest("renderer/ambiguous/Ambiguous7");
 
         // tests in which more than one annotation needs to be rendered in the content
         addFileToTest("renderer/multiple/Multiple1");

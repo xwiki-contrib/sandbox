@@ -155,38 +155,20 @@ public class TestDocumentFactory
             properties[propIndex] = line;
             propIndex++;
         }
-        // last three properties (annotation state and annotation position in the source) can be missing so parse them
-        // separately and default to 0 if they're not set
-        // current position of the index, to increment only if the state can be parsed
-        int index = 5;
-
         AnnotationState state = AnnotationState.SAFE;
         try {
-            state = AnnotationState.valueOf(properties[index] != null ? properties[index] : "");
-            index++;
+            state = AnnotationState.valueOf(properties[6] != null ? properties[6] : "");
         } catch (IllegalArgumentException e) {
             // nothing, leave it to SAFE
         }
-
-        int annotationOffset = 0;
-        int annotationLength = 0;
-        try {
-            annotationOffset = Integer.parseInt(properties[index++]);
-            annotationLength = Integer.parseInt(properties[index++]);
-        } catch (NumberFormatException e) {
-            // nothing leave them on zero
-        }
         Annotation ann = new Annotation(properties[0]);
-        int offset = properties[4].indexOf(properties[3]);
-        String contextLeft = properties[4].substring(0, offset);
-        String contextRight = properties[4].substring(offset + properties[3].length());
-        ann.setSelection(properties[3], contextLeft, contextRight);
+        // allow left context and right context properties to miss
+        String leftContext = properties[4] == null ? "" : properties[4];
+        String rightContext = properties[5] == null ? "" : properties[5];
+        ann.setSelection(properties[3], leftContext, rightContext);
         ann.setAuthor(properties[1]);
         ann.setState(state);
         ann.set("annotation", properties[2]);
-        ann.set("offset", annotationOffset);
-        ann.set("length", annotationLength);
-
         return ann;
     }
 }

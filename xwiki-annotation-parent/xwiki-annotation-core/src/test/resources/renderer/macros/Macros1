@@ -10,6 +10,5 @@ Macro test with {{testgeneratedcontent/}} to annotate
 XWiki.XWikiGuest
 Macro content
 generated
-generated
 .annotated
 <p>Macro test with some content which is <span class="annotation ID0">generated</span> to annotate</p>

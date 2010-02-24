@@ -1,5 +1,5 @@
 ##################################################
-# Ambiguous annotation, where context indeed appears twice and selection cannot be identified
+# Ambiguous annotation, where context (void in this case) indeed appears twice and selection cannot be identified
 ##################################################
 .source
 As of some one gently rapping, rapping at my chamber door.
@@ -11,8 +11,6 @@ Only this, and nothing more."
 0
 XWiki.XWikiGuest
 Sharply striking
-# selection index in the context will be computed at test time as the indexOf selection in context
-rapping
 rapping
 # expect annotation to be mapped on the first encounter of the selection
 .annotated

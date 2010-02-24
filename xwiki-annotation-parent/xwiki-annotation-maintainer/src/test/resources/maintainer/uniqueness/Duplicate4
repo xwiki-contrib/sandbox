@@ -1,5 +1,5 @@
 ##################################################
-# Context is updated and it becomes duplicate.
+# Selection is updated and it becomes duplicate.
 ##################################################
 .source
 If hairs be wires, then I would say that 
@@ -14,11 +14,11 @@ There could be black wires, grow on her head.
 XWiki.XWikiGuest
 Comparison
 hairs
-hairs
 .annotationUpdated
 0
 XWiki.XWikiGuest
 Comparison
 wires
-If wires be
+If 
+ be
 UPDATED
