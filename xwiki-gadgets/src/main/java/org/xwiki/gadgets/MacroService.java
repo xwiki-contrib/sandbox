@@ -44,4 +44,20 @@ public interface MacroService
      * @return the macro descriptor if macro was found, else null
      */
     MacroDescriptor getMacroDescriptor(String macroId);
+
+    /**
+     * Checks if a macro is of type XWiki Wiki Macro.
+     * 
+     * @param macroId the id of the macro
+     * @return true if the macro is of type Wiki, else false
+     * @throws RuntimeException if no macro with this id is found
+     */
+    boolean isWikiMacro(String macroId);
+
+    /**
+     * @param macroId the id of the macro; the macro must be of type Wiki Macro to have a document entity reference
+     * @return the serialized name of the document entity reference of the Wiki Macro, else null
+     * @throws RuntimeException if no macro with this id is found
+     */
+    String getWikiMacroDocumentReferenceFullName(String macroId);
 }

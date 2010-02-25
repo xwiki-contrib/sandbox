@@ -28,10 +28,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.xwiki.gadgets.MacroService;
+import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.rendering.macro.Macro;
 import org.xwiki.rendering.macro.MacroId;
 import org.xwiki.rendering.macro.MacroLookupException;
 import org.xwiki.rendering.macro.MacroManager;
 import org.xwiki.rendering.macro.descriptor.MacroDescriptor;
+import org.xwiki.rendering.macro.wikibridge.WikiMacro;
 import org.xwiki.rendering.syntax.SyntaxFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -59,6 +63,12 @@ public class XWikiMacroService extends AbstractLogEnabled implements MacroServic
      */
     @Requirement
     private MacroManager macroManager;
+
+    /**
+     * The {@link EntityReferenceSerializer} to serialize a {@link DocumentReference}.
+     */
+    @Requirement
+    private EntityReferenceSerializer< ? > entityReferenceSerializer;
 
     /**
      * {@inheritDoc}
@@ -97,13 +107,58 @@ public class XWikiMacroService extends AbstractLogEnabled implements MacroServic
     {
         try {
             MacroId macroIdObject = new MacroId(macroId);
-            
+
             return macroManager.getMacro(macroIdObject).getDescriptor();
         } catch (MacroLookupException e) {
             // if macro not found, return null
             return null;
         } catch (Exception e) {
             LOG.error(String.format("Exception while retrieving macro descriptor for macro id %s.", macroId), e);
+            throw new RuntimeException(e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see MacroService#isWikiMacro(String)
+     */
+    public boolean isWikiMacro(String macroId)
+    {
+        try {
+            Macro< ? > macro = macroManager.getMacro(new MacroId(macroId));
+            if (macro instanceof WikiMacro) {
+                return true;
+            }
+
+            return false;
+        } catch (MacroLookupException e) {
+            LOG.error(String.format("Exception checking Wiki Macro type while retrieving macro with id %s.", macroId),
+                e);
+            throw new RuntimeException(e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see MacroService#getWikiMacroDocumentReferenceFullName(String)
+     */
+    public String getWikiMacroDocumentReferenceFullName(String macroId)
+    {
+        try {
+            Macro< ? > macro = macroManager.getMacro(new MacroId(macroId));
+            if (macro instanceof WikiMacro) {
+
+                DocumentReference doc = ((WikiMacro) macro).getDocumentReference();
+                return (String) entityReferenceSerializer.serialize(doc);
+            }
+
+            return null;
+        } catch (MacroLookupException e) {
+            LOG.error(String.format(
+                "Exception fetching Wiki Macro document entity reference while retrieving macro with id %s.", macroId),
+                e);
             throw new RuntimeException(e.getLocalizedMessage());
         }
     }
