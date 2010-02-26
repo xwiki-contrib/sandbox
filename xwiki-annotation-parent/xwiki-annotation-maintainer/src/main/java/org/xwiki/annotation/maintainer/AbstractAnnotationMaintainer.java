@@ -17,12 +17,10 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
-package org.xwiki.annotation.maintainer.internal;
+package org.xwiki.annotation.maintainer;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,19 +30,10 @@ import org.xwiki.annotation.content.ContentAlterer;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOTargetService;
 import org.xwiki.annotation.maintainer.AnnotationState;
-import org.xwiki.annotation.maintainer.XDelta;
-import org.xwiki.bridge.DocumentModelBridge;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.context.Execution;
-import org.xwiki.model.EntityType;
-import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.EntityReferenceSerializer;
-import org.xwiki.observation.EventListener;
-import org.xwiki.observation.event.DocumentUpdateEvent;
-import org.xwiki.observation.event.Event;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.renderer.PrintRenderer;
@@ -55,27 +44,12 @@ import org.xwiki.rendering.syntax.SyntaxFactory;
 import org.xwiki.rendering.transformation.TransformationManager;
 
 /**
- * Event listener to listen to documents update events and update the annotations that are impacted by the document
- * change, to update the selection and context to match the new document content. <br />
- * FIXME: fix me: sky high complexity of the functions & fan-out. Split to be able to potentially test on small pieces,
- * and decouple event handling logic & actual update logic.
+ * Default implementation for the annotation maintainer.
  * 
  * @version $Id$
  */
-public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled implements EventListener
+public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled implements AnnotationMaintainer
 {
-    /**
-     * Execution object to get data about the current execution context.
-     */
-    @Requirement
-    protected Execution execution;
-
-    /**
-     * Entity reference serializer, to serialize the modified document reference to send to the annotations service.
-     */
-    @Requirement
-    protected EntityReferenceSerializer<String> serializer;
-
     /**
      * Annotations storage service.
      */
@@ -95,59 +69,16 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     protected ComponentManager componentManager;
 
     /**
-     * Marks that there is currently an annotations update in progress so all the saves should not trigger a new update.
-     * All document edits that take place because of updating the annotations for the current document shouldn't be
-     * considered.
-     */
-    protected volatile boolean isUpdating;
-
-    /**
-     * The events observed by this observation manager.
-     */
-    protected final List<Event> eventsList = new ArrayList<Event>(Arrays.asList(new DocumentUpdateEvent()));
-
-    /**
-     * Returns the differences between the previous content and the current content, to be implemented by the subclasses
-     * with the specific diff implementation.
-     * 
-     * @param previous the previous content
-     * @param current the current content
-     * @return the collection of differences between the old content and the new content
-     */
-    protected abstract Collection<XDelta> getDifferences(String previous, String current);
-
-    /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.observation.EventListener#getEvents()
+     * @see org.xwiki.annotation.maintainer.AnnotationMaintainer#updateAnnotations(java.lang.String, java.lang.String,
+     *      java.lang.String)
      */
-    public List<Event> getEvents()
-    {
-        return eventsList;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.observation.EventListener#getName()
-     */
-    public String getName()
-    {
-        return "AnnotationMaintainer";
-    }
-
-    /**
-     * Update the annotations on the passed content.
-     * 
-     * @param documentReference is name of document concerned by update
-     * @param previousContent the previous content of the document (before the update)
-     * @param currentContent the current content of the document (after the update)
-     */
-    protected void maintainDocumentAnnotations(String documentReference, String previousContent, String currentContent)
+    public void updateAnnotations(String target, String previousContent, String currentContent)
     {
         Collection<Annotation> annotations;
         try {
-            annotations = ioService.getAnnotations(documentReference);
+            annotations = ioService.getAnnotations(target);
 
             if (annotations.size() == 0) {
                 // no annotations, nothing to do
@@ -155,12 +86,13 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             }
 
             // produce the ptr of the previous and current, wrt to syntax
-            String syntaxId = ioContentService.getSourceSyntax(documentReference);
+            String syntaxId = ioContentService.getSourceSyntax(target);
             String renderedPreviousContent = renderPlainText(previousContent, syntaxId);
             String renderedCurrentContent = renderPlainText(currentContent, syntaxId);
 
             // create the diffs
-            Collection<XDelta> differences = getDifferences(renderedPreviousContent, renderedCurrentContent);
+            Collection<XDelta> differences =
+                getDiffService().getDifferences(renderedPreviousContent, renderedCurrentContent);
             // if any differences: note that there can be updates on the content that have no influence on the plain
             // text space normalized version
             if (differences.size() > 0) {
@@ -171,10 +103,9 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             }
 
             // finally store the updates
-            ioService.updateAnnotations(documentReference, annotations);
+            ioService.updateAnnotations(target, annotations);
         } catch (Exception e) {
-            getLogger()
-                .error("An exception occurred while updating annotations for content at " + documentReference, e);
+            getLogger().error("An exception occurred while updating annotations for content at " + target, e);
         }
     }
 
@@ -483,33 +414,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     }
 
     /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.observation.EventListener#onEvent(org.xwiki.observation.event.Event, java.lang.Object,
-     *      java.lang.Object)
+     * @return the diff service to be used by this maintainer to get the content differences
      */
-    public void onEvent(Event event, Object source, Object data)
-    {
-        DocumentModelBridge currentDocument = (DocumentModelBridge) source;
-
-        DocumentModelBridge previousDocument = currentDocument.getOriginalDocument();
-
-        // if it's not a modification triggered by the updates of the annotations while running the same annotation
-        // maintainer, and the difference is in the content of the document
-        // FIXME: should update also if an object is modified as the content of the object could be used in the
-        // rendering of the document. But for this the transformations need to be run
-        if (!isUpdating && !previousDocument.getContent().equals(currentDocument.getContent())) {
-            isUpdating = true;
-            String content = currentDocument.getContent();
-            String previousContent = previousDocument.getContent();
-            // create the document reference
-            EntityReference docReference =
-                new EntityReference(currentDocument.getPageName(), EntityType.DOCUMENT, new EntityReference(
-                    currentDocument.getSpaceName(), EntityType.SPACE, new EntityReference(
-                        currentDocument.getWikiName(), EntityType.WIKI)));
-            // maintain the document annotations
-            maintainDocumentAnnotations(serializer.serialize(docReference), previousContent, content);
-            isUpdating = false;
-        }
-    }
+    public abstract DiffService getDiffService();
 }

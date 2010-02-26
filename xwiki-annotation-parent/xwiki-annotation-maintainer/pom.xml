@@ -128,7 +128,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <excludes>
-            org/xwiki/annotation/maintainer/internal/AbstractAnnotationMaintainer.java
+            org/xwiki/annotation/maintainer/AbstractAnnotationMaintainer.java
           </excludes>
         </configuration>
       </plugin>

@@ -26,25 +26,24 @@ import java.util.List;
 
 import org.incava.util.diff.Diff;
 import org.incava.util.diff.Difference;
+import org.xwiki.annotation.maintainer.DiffService;
 import org.xwiki.annotation.maintainer.XDelta;
 import org.xwiki.component.annotation.Component;
 
 /**
- * Annotation maintainer implementation based on getting the content differences between at character level using the
- * java diff implementation.
+ * DiffService implementation providing character level differences between content.
  * 
  * @version $Id$
  */
-@Component("annotation-maintainer")
-public class JavaDiffBasedAnnotationMaintainer extends AbstractAnnotationMaintainer
+@Component(hints = {"default", "character" })
+public class CharacterDiffService implements DiffService
 {
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.internal.maintainment.AbstractAnnotationMaintainer#getDifferences(String, String)
+     * @see org.xwiki.annotation.maintainer.DiffService#getDifferences(java.lang.String, java.lang.String)
      */
-    @Override
-    protected Collection<XDelta> getDifferences(String previous, String current)
+    public Collection<XDelta> getDifferences(String previous, String current)
     {
         // get differences at character level
         // FIXME: do we want at character level or we'd better get word level, to have it working faster

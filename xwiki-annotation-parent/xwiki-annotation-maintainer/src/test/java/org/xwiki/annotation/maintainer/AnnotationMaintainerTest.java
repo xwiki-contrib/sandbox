@@ -69,7 +69,7 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
     /**
      * The annotation maintainer that this class will test.
      */
-    protected EventListener annotationMaintainer;
+    protected EventListener documentContentAnnotationUpdater;
 
     /**
      * The setup for mocking components needed in annotation code.
@@ -186,7 +186,8 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
     {
         super.setUp();
 
-        annotationMaintainer = getComponentManager().lookup(EventListener.class, "annotation-maintainer");
+        documentContentAnnotationUpdater =
+            getComponentManager().lookup(EventListener.class, "document-content-annotation-updater");
     }
 
     /**
@@ -254,7 +255,7 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         copyOriginalSelections(doc);
 
         // and launch the event
-        annotationMaintainer.onEvent(documentUpdateEvt, mock, null);
+        documentContentAnnotationUpdater.onEvent(documentUpdateEvt, mock, null);
 
         // test the result
         assertSameAnnotations(doc.getUpdatedAnnotations(), doc.getAnnotations());
