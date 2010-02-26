@@ -1,26 +1,14 @@
 package org.xwiki.it.ui;
 
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.xwiki.it.ui.elements.HomePage;
 import org.xwiki.it.ui.elements.LoginPage;
 
-public class LoginTest
+public class LoginTest extends AbstractTest
 {
-    private static WebDriver driver;
-
     private HomePage homePage;
-
-    @BeforeClass
-    public static void init()
-    {
-        driver = new FirefoxDriver();
-    }
 
     @Before
     public void setUp()
@@ -32,12 +20,6 @@ public class LoginTest
         if (homePage.isAuthenticated()) {
             homePage.clickLogout();
         }
-    }
-
-    @AfterClass
-    public static void shutdown()
-    {
-        driver.close();
     }
 
     @Test
