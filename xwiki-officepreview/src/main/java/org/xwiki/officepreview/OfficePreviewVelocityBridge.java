@@ -28,7 +28,7 @@ import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.AttachmentReferenceResolver;
-import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.renderer.BlockRenderer;
@@ -88,6 +88,11 @@ public class OfficePreviewVelocityBridge
     private DocumentAccessBridge docBridge;
 
     /**
+     * Used to serialize {@link EntityReference} instances into strings.
+     */
+    private EntityReferenceSerializer<String> refSerializer;
+
+    /**
      * Constructs a new bridge instance.
      * 
      * @param componentManager used to lookup for other required components.
@@ -107,6 +112,7 @@ public class OfficePreviewVelocityBridge
         this.defaultOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class);
         this.presentationOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class, "presentation");
         this.docBridge = componentManager.lookup(DocumentAccessBridge.class);
+        this.refSerializer = componentManager.lookup(EntityReferenceSerializer.class);
     }
 
     /**
@@ -155,15 +161,15 @@ public class OfficePreviewVelocityBridge
      */
     private String preview(AttachmentReference attachRef, String outputSyntaxId) throws Exception
     {
-        DocumentReference docRef = attachRef.getDocumentReference();
+        String strDocumentName = refSerializer.serialize(attachRef.getDocumentReference());
 
         // Check whether current user has view rights on the document containing the attachment.
-        if (!docBridge.isDocumentViewable(docRef)) {
+        if (!docBridge.isDocumentViewable(strDocumentName)) {
             throw new Exception("Inadequate privileges.");
         }
 
         // If output syntax is not specified, use the default document syntax.
-        String syntaxId = (outputSyntaxId == null) ? docBridge.getDocument(docRef).getSyntaxId() : outputSyntaxId;
+        String syntaxId = (outputSyntaxId == null) ? docBridge.getDocumentSyntaxId(strDocumentName) : outputSyntaxId;
 
         XDOM preview;
         if (isPresentation(attachRef.getName())) {
