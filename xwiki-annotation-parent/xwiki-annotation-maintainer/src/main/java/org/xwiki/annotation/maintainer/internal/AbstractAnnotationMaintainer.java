@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.xwiki.annotation.Annotation;
+import org.xwiki.annotation.content.AlteredContent;
 import org.xwiki.annotation.content.ContentAlterer;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOTargetService;
@@ -225,9 +226,24 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             return;
         }
 
+        ContentAlterer normalizerContentAlterer;
+        int leftIndex =
+            (annotation.getSelectionLeftContext() == null ? "" : annotation.getSelectionLeftContext()).length();
+        int rightIndex = leftIndex + (annotation.getSelection() == null ? "" : annotation.getSelection()).length();
+        String normalizedContext = annotation.getSelectionInContext();
         // TODO: remove this from here if ever selection & context normalization of annotation will be done on add
-        String normalizedSelection = normalizeContent(annotation.getSelection());
-        String normalizedContext = normalizeContent(annotation.getSelectionInContext());
+        try {
+            normalizerContentAlterer = componentManager.lookup(ContentAlterer.class, "space-normalizer");
+            AlteredContent alteredContext = normalizerContentAlterer.alter(annotation.getSelectionInContext());
+            normalizedContext = alteredContext.getContent().toString();
+            leftIndex = alteredContext.getAlteredOffset(leftIndex);
+            // -1 + 1 so that we find the altered index, and then move to the next position, since otherwise the index
+            // doesn't exist in the altered content, if it's the last index for example
+            rightIndex = alteredContext.getAlteredOffset(rightIndex - 1) + 1;
+        } catch (ComponentLookupException e) {
+            // it's ok, just use the original context, as is, and the indexes as they are
+            getLogger().warn(e.getMessage(), e);
+        }
         int cStart = renderedPreviousContent.indexOf(normalizedContext);
 
         if (cStart < 0) {
@@ -240,9 +256,9 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         AnnotationState initialState = annotation.getState();
 
         // assume at this point that selection appears only once in the context
-        int cLeftSize = normalizedContext.indexOf(normalizedSelection);
+        int cLeftSize = leftIndex;
         int sStart = cStart + cLeftSize;
-        int sEnd = sStart + normalizedSelection.length();
+        int sEnd = sStart + rightIndex - leftIndex;
         int cRightSize = cStart + normalizedContext.length() - sEnd;
 
         int alteredCStart = cStart;
@@ -464,26 +480,6 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         } else {
             return null;
         }
-    }
-
-    /**
-     * Helper function to clean the passed content. To be used to generate the normalized spaces version of the
-     * selection and its context.
-     * 
-     * @param content the content to normalize
-     * @return the content with normalized-spaces
-     */
-    protected String normalizeContent(String content)
-    {
-        ContentAlterer normalizerContentAlterer;
-        try {
-            normalizerContentAlterer = componentManager.lookup(ContentAlterer.class, "space-normalizer");
-            return normalizerContentAlterer.alter(content).getContent().toString();
-        } catch (ComponentLookupException e) {
-            getLogger().error(e.getMessage(), e);
-        }
-        // if something went wrong fetching the alterer, return original version, assume it's ok
-        return content;
     }
 
     /**

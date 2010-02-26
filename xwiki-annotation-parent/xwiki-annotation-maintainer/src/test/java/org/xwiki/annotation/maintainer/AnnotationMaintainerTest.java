@@ -86,6 +86,7 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         addFileToTest("maintainer/correction/Correction1");
         addFileToTest("maintainer/correction/Correction2");
         addFileToTest("maintainer/correction/Correction3");
+        addFileToTest("maintainer/correction/Correction4");
 
         addFileToTest("maintainer/correction/multiple/CorrectionMultiple1");
         addFileToTest("maintainer/correction/multiple/CorrectionMultiple2");
