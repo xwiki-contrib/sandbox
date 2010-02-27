@@ -7,7 +7,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class AbstractTest
 {
-    protected static WebDriver driver;
+    private static WebDriver driver;
 
     @BeforeClass
     public static void init()
@@ -26,4 +26,8 @@ public class AbstractTest
         super();
     }
 
+    protected WebDriver getDriver()
+    {
+        return this.driver;
+    }
 }

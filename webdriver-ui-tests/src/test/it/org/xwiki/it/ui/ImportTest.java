@@ -26,7 +26,7 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
     {
         super.setUp();
 
-        adminPage = new AdministrationPage(driver);
+        adminPage = new AdministrationPage(getDriver());
         adminPage.gotoAdministrationPage();
 
         importPage = adminPage.clickImportSection();
@@ -35,7 +35,7 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
     @Test
     public void testImportPackageListIsEmpty()
     {
-        Assert.assertTrue(importPage.isPackageListEmpty());
+        Assert.assertTrue("Package list should be empty", importPage.isPackageListEmpty());
     }
 
     @Test
