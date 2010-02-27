@@ -1,15 +1,11 @@
 package org.xwiki.it.ui;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URL;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.xwiki.it.ui.elements.AdministrationPage;
 import org.xwiki.it.ui.elements.BasePage;
 import org.xwiki.it.ui.elements.HistoryPane;
@@ -17,9 +13,9 @@ import org.xwiki.it.ui.elements.ImportPage;
 
 public class ImportTest extends AbstractAdminAuthenticatedTest
 {
-    private static final String PACKAGE_WITHOUT_HISTORY = "Main.TestPage_no-history.xar";
+    private static final String PACKAGE_WITHOUT_HISTORY = "Main.TestPage-no-history.xar";
 
-    private static final String PACKAGE_WITH_HISTORY = "Main.TestPage_with-history.xar";
+    private static final String PACKAGE_WITH_HISTORY = "Main.TestPage-with-history.xar";
 
     private AdministrationPage adminPage;
 
@@ -43,29 +39,43 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
     }
 
     @Test
-    public void testAttachPackage() throws IOException
+    public void testImportWithPackageRevisions() throws IOException
     {
-        InputStream st = this.getClass().getResourceAsStream("/" + PACKAGE_WITHOUT_HISTORY);
+        URL fileUrl = this.getClass().getResource("/" + PACKAGE_WITH_HISTORY);
+        
+        importPage.attachPackage(fileUrl);
+        importPage.selectPackage(PACKAGE_WITH_HISTORY);
+        
+        importPage.selectOptionReplaceHistory();
+        importPage.submitPackage();
 
-        File pack = this.createFileFromStream("package", "xar", st);
+        BasePage importedPage = importPage.clickImportedPage("Main.TestPage");
 
-        importPage.attachPackage(pack);
-        Assert.assertTrue(importPage.isPackagePresent(pack.getName()));
+        HistoryPane history = importedPage.openHistoryDocExtraPane();
+
+        Assert.assertEquals("4.1", history.getCurrentVersion());
+        Assert.assertEquals("Imported from XAR", history.getCurrentVersionComment());
+        Assert.assertTrue(history.hasVersionWithSummary("A new version of the document"));
+        
+        importedPage.delete();
+
+        // Go back to import section to clean up
+        adminPage.gotoAdministrationPage();
+        importPage = adminPage.clickImportSection();
+
+        // Delete our package
+        importPage.deletePackage(PACKAGE_WITH_HISTORY);
     }
-
+    
     @Test
     public void testImportUnexistingPageAsNewVersion() throws IOException
     {
-        InputStream st = this.getClass().getResourceAsStream("/" + PACKAGE_WITHOUT_HISTORY);
-        
-        File pack = this.createFileFromStream("package-", ".xar", st);
+        URL fileUrl = this.getClass().getResource("/" + PACKAGE_WITHOUT_HISTORY);
 
-        importPage.attachPackage(pack);
-        importPage.selectPackage(pack.getName());
+        importPage.attachPackage(fileUrl);
+        importPage.selectPackage(PACKAGE_WITHOUT_HISTORY);
 
         importPage.submitPackage();
-
-        importPage.waitUntilElementIsVisible(By.linkText("Main.TestPage"));
 
         BasePage importedPage = importPage.clickImportedPage("Main.TestPage");
 
@@ -73,34 +83,15 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
 
         Assert.assertEquals("1.1", history.getCurrentVersion());
         Assert.assertEquals("Imported from XAR", history.getCurrentVersionComment());
-        
+
         importedPage.delete();
-        
+
         // Go back to import section to clean up
         adminPage.gotoAdministrationPage();
         importPage = adminPage.clickImportSection();
-        
+
         // Delete our package
-        importPage.deletePackage(pack.getName());
+        importPage.deletePackage(PACKAGE_WITHOUT_HISTORY);
     }
 
-    private File createFileFromStream(String prefix, String postfix, InputStream source) throws IOException
-    {
-        File f = File.createTempFile(prefix, postfix);
-        FileOutputStream fw = new FileOutputStream(f);
-        InputStreamReader reader = new InputStreamReader(source);
-
-        try {
-            byte buffer[] = new byte[1024];
-            int length;
-            while ((length = source.read(buffer)) > 0) {
-                fw.write(buffer, 0, length);
-            }
-        } finally {
-            reader.close();
-            fw.close();
-        }
-
-        return f;
-    }
 }

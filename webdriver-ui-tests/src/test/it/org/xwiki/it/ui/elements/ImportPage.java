@@ -1,6 +1,7 @@
 package org.xwiki.it.ui.elements;
 
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -27,6 +28,12 @@ public class ImportPage extends BasePage
     public void attachPackage(File file)
     {
         getDriver().findElement(By.id("xwikiuploadfile")).sendKeys(file.getAbsolutePath());
+        getDriver().findElement(By.xpath("//input[@type='submit']")).submit();
+    }
+
+    public void attachPackage(URL file)
+    {
+        getDriver().findElement(By.id("xwikiuploadfile")).sendKeys(file.getPath());
         getDriver().findElement(By.xpath("//input[@type='submit']")).submit();
     }
 
@@ -59,13 +66,26 @@ public class ImportPage extends BasePage
 
     public void submitPackage()
     {
+        // Click submit
         getDriver().findElement(By.xpath("//input[@value='Import']")).click();
+        // Wait for the "Import successful message"
+        this.waitUntilElementIsVisible(By.cssSelector("div#packagecontainer div.infomessage"));
     }
 
     public BasePage clickImportedPage(String pageName)
     {
         getDriver().findElement(By.linkText(pageName)).click();
         return new BasePage(getDriver());
+    }
+
+    public void selectOptionReplaceHistory()
+    {
+        getDriver().findElement(By.xpath("//input[@name='historyStrategy' and @value='replace']")).click();
+    }
+
+    public void selectOptionResetHistory()
+    {
+        getDriver().findElement(By.xpath("//input[@name='historyStrategy' and @value='replace']")).click();
     }
 
 }
