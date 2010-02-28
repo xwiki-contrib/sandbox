@@ -32,6 +32,7 @@ import org.openqa.selenium.support.pagefactory.ElementLocatorFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.xwiki.it.ui.framework.TestUtils;
 
 public class BasePage
 {
@@ -80,7 +81,7 @@ public class BasePage
     }
 
     /**
-     * Logs in the Admin user (move to the home page if the current page has no log in link). 
+     * Logs in the Admin user (move to the home page if the current page has no log in link).
      */
     public void loginAsAdmin()
     {
@@ -130,7 +131,8 @@ public class BasePage
         return new RegisterPage(getDriver());
     }
 
-    public void delete()
+    // TODO: I don't think we should go through the menus, it's probably faster to to as deletePage() does 
+    public void deleteCurrentPage()
     {
         getDriver().findElement(By.partialLinkText("More actions")).click();
         getDriver().findElement(By.linkText("Delete")).click();
@@ -162,46 +164,5 @@ public class BasePage
     protected void makeConfirmDialogSilent()
     {
         ((JavascriptExecutor) driver).executeScript("window.confirm = function() { return true; }");
-    }
-
-    protected boolean isOnPage(String space, String page, String action)
-    {
-        return getDriver().getCurrentUrl().equals(getURLForPage(space, page, action));
-    }
-
-    protected boolean isOnPage(String space, String page)
-    {
-        return isOnPage(space, page, "view");
-    }
-
-    protected void gotoPage(String space, String page)
-    {
-        gotoPage(space, page, "view");
-    }
-
-    protected void gotoPage(String space, String page, String action)
-    {
-        gotoPage(space, page, "view", null);
-    }
-
-    protected void gotoPage(String space, String page, String action, String queryString)
-    {
-        String url = getURLForPage(space, page, action, queryString);
-
-        // Verify if we're already on the correct page and if so don't do anything
-        if (!getDriver().getCurrentUrl().equals(url)) {
-            getDriver().get(url);
-        }
-    }
-
-    private String getURLForPage(String space, String page, String action)
-    {
-        return getURLForPage(space, page, action, null);
-    }
-
-    private String getURLForPage(String space, String page, String action, String queryString)
-    {
-        return "http://localhost:8080/xwiki/bin/" + action + "/" + space + "/" + page
-            + (queryString == null ? "" : "?" + queryString);
     }
 }

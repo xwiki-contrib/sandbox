@@ -27,6 +27,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.xwiki.it.ui.framework.TestUtils;
 
 /**
  * Represents the actions possible on the Administration Import Page.
@@ -58,7 +59,7 @@ public class ImportPage extends BasePage
 
     public void gotoImportPage()
     {
-        gotoPage("XWiki", "Import", "import", "editor=globaladmin&section=Import");     
+        TestUtils.gotoPage("XWiki", "Import", "import", "editor=globaladmin&section=Import", getDriver());     
     }
 
     public void attachPackage(URL file)

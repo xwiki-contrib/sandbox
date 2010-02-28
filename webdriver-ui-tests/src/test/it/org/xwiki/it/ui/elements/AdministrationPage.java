@@ -22,6 +22,7 @@ package org.xwiki.it.ui.elements;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.xwiki.it.ui.framework.TestUtils;
 
 /**
  * Represents the actions possible on the main Administration Page.
@@ -41,7 +42,7 @@ public class AdministrationPage extends BasePage
     
     public void gotoAdministrationPage()
     {
-        gotoPage("XWiki", "XWikiPreferences", "admin");
+        TestUtils.gotoPage("XWiki", "XWikiPreferences", "admin", getDriver());
     }
 
     public ImportPage clickImportSection()

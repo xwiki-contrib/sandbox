@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.it.ui.elements.HomePage;
 import org.xwiki.it.ui.elements.LoginPage;
+import org.xwiki.it.ui.framework.AbstractTest;
 
 public class LoginTest extends AbstractTest
 {

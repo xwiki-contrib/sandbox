@@ -22,7 +22,6 @@ package org.xwiki.it.ui;
 import java.io.IOException;
 import java.net.URL;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +29,8 @@ import org.xwiki.it.ui.elements.AdministrationPage;
 import org.xwiki.it.ui.elements.BasePage;
 import org.xwiki.it.ui.elements.HistoryPane;
 import org.xwiki.it.ui.elements.ImportPage;
+import org.xwiki.it.ui.framework.AbstractAdminAuthenticatedTest;
+import org.xwiki.it.ui.framework.TestUtils;
 
 public class ImportTest extends AbstractAdminAuthenticatedTest
 {
@@ -45,6 +46,9 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
     public void setUp()
     {
         super.setUp();
+
+        // Delete Test Page we import from XAR to ensure to start with a predefined state.
+        TestUtils.deletePage("Main", "TestPage", getDriver());
         
         adminPage = new AdministrationPage(getDriver());
         adminPage.gotoAdministrationPage();
@@ -82,8 +86,6 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
         Assert.assertEquals("4.1", history.getCurrentVersion());
         Assert.assertEquals("Imported from XAR", history.getCurrentVersionComment());
         Assert.assertTrue(history.hasVersionWithSummary("A new version of the document"));
-
-        importedPage.delete();
     }
     
     @Test
@@ -102,7 +104,5 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
 
         Assert.assertEquals("1.1", history.getCurrentVersion());
         Assert.assertEquals("Imported from XAR", history.getCurrentVersionComment());
-
-        importedPage.delete();
     }
 }

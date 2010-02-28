@@ -20,6 +20,7 @@
 package org.xwiki.it.ui.elements;
 
 import org.openqa.selenium.WebDriver;
+import org.xwiki.it.ui.framework.TestUtils;
 
 /**
  * Represents the actions possible on the Home Page.
@@ -36,11 +37,11 @@ public class HomePage extends BasePage
 
     public void gotoHomePage()
     {
-        gotoPage("Main", "WebHome");
+        TestUtils.gotoPage("Main", "WebHome", getDriver());
     }
 
     public boolean isOnHomePage()
     {
-        return isOnPage("Main", "WebHome");
+        return TestUtils.isOnPage("Main", "WebHome", getDriver());
     }
 }
