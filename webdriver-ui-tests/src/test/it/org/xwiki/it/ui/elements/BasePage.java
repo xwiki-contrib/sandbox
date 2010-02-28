@@ -1,3 +1,22 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
 package org.xwiki.it.ui.elements;
 
 import org.openqa.selenium.By;
@@ -58,6 +77,28 @@ public class BasePage
                 return element.isDisplayed() ? element : null;
             }
         });
+    }
+
+    /**
+     * Logs in the Admin user (move to the home page if the current page has no log in link). 
+     */
+    public void loginAsAdmin()
+    {
+        if (!isAuthenticated()) {
+            // If there's no login link then go to the home page
+            if (!hasLoginLink()) {
+                HomePage homePage = new HomePage(getDriver());
+                homePage.gotoHomePage();
+            }
+            clickLogin().loginAsAdmin();
+        }
+    }
+
+    public boolean hasLoginLink()
+    {
+        // Note that we cannot test if the loginLink field is accessible since we're using an AjaxElementLocatorFactory
+        // and thus it would wait 15 seconds before considering it's not accessible.
+        return !getDriver().findElements(By.id("tmLogin")).isEmpty();
     }
 
     public LoginPage clickLogin()
@@ -140,7 +181,12 @@ public class BasePage
 
     protected void gotoPage(String space, String page, String action)
     {
-        String url = getURLForPage(space, page, action);
+        gotoPage(space, page, "view", null);
+    }
+
+    protected void gotoPage(String space, String page, String action, String queryString)
+    {
+        String url = getURLForPage(space, page, action, queryString);
 
         // Verify if we're already on the correct page and if so don't do anything
         if (!getDriver().getCurrentUrl().equals(url)) {
@@ -150,7 +196,12 @@ public class BasePage
 
     private String getURLForPage(String space, String page, String action)
     {
-        return "http://localhost:8080/xwiki/bin/" + action + "/" + space + "/" + page;
+        return getURLForPage(space, page, action, null);
     }
 
+    private String getURLForPage(String space, String page, String action, String queryString)
+    {
+        return "http://localhost:8080/xwiki/bin/" + action + "/" + space + "/" + page
+            + (queryString == null ? "" : "?" + queryString);
+    }
 }

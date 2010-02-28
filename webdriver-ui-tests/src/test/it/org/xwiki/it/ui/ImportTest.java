@@ -1,8 +1,28 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
 package org.xwiki.it.ui;
 
 import java.io.IOException;
 import java.net.URL;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,29 +45,35 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
     public void setUp()
     {
         super.setUp();
-
+        
         adminPage = new AdministrationPage(getDriver());
         adminPage.gotoAdministrationPage();
 
         importPage = adminPage.clickImportSection();
+
+        // Remove our packages if they're there already
+        if (importPage.isPackagePresent(PACKAGE_WITH_HISTORY)) {
+            importPage.deletePackage(PACKAGE_WITH_HISTORY);
+            // TODO: Remove this when the delete doesn't redirect to the Admin home page any more (which is a bug)
+            importPage = adminPage.clickImportSection();
+        }
+        if (importPage.isPackagePresent(PACKAGE_WITHOUT_HISTORY)) {
+            importPage.deletePackage(PACKAGE_WITHOUT_HISTORY);
+            // TODO: Remove this when the delete doesn't redirect to the Admin home page any more (which is a bug)
+            importPage = adminPage.clickImportSection();
+        }
     }
 
     @Test
-    public void testImportPackageListIsEmpty()
-    {
-        Assert.assertTrue("Package list should be empty", importPage.isPackageListEmpty());
-    }
-
-    @Test
-    public void testImportWithPackageRevisions() throws IOException
+    public void testImportWithHistory() throws IOException
     {
         URL fileUrl = this.getClass().getResource("/" + PACKAGE_WITH_HISTORY);
         
         importPage.attachPackage(fileUrl);
         importPage.selectPackage(PACKAGE_WITH_HISTORY);
         
-        importPage.selectOptionReplaceHistory();
-        importPage.submitPackage();
+        importPage.toggleReplaceHistoryOption();
+        importPage.importPackage();
 
         BasePage importedPage = importPage.clickImportedPage("Main.TestPage");
 
@@ -56,26 +82,19 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
         Assert.assertEquals("4.1", history.getCurrentVersion());
         Assert.assertEquals("Imported from XAR", history.getCurrentVersionComment());
         Assert.assertTrue(history.hasVersionWithSummary("A new version of the document"));
-        
+
         importedPage.delete();
-
-        // Go back to import section to clean up
-        adminPage.gotoAdministrationPage();
-        importPage = adminPage.clickImportSection();
-
-        // Delete our package
-        importPage.deletePackage(PACKAGE_WITH_HISTORY);
     }
     
     @Test
-    public void testImportUnexistingPageAsNewVersion() throws IOException
+    public void testImportWithNewHistoryVersion() throws IOException
     {
         URL fileUrl = this.getClass().getResource("/" + PACKAGE_WITHOUT_HISTORY);
 
         importPage.attachPackage(fileUrl);
         importPage.selectPackage(PACKAGE_WITHOUT_HISTORY);
 
-        importPage.submitPackage();
+        importPage.importPackage();
 
         BasePage importedPage = importPage.clickImportedPage("Main.TestPage");
 
@@ -85,13 +104,5 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
         Assert.assertEquals("Imported from XAR", history.getCurrentVersionComment());
 
         importedPage.delete();
-
-        // Go back to import section to clean up
-        adminPage.gotoAdministrationPage();
-        importPage = adminPage.clickImportSection();
-
-        // Delete our package
-        importPage.deletePackage(PACKAGE_WITHOUT_HISTORY);
     }
-
 }
