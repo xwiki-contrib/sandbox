@@ -1,6 +1,7 @@
 package org.xwiki.it.ui.framework;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 
 /**
  * Helper methods not related to a specific Page Object.
@@ -10,6 +11,26 @@ import org.openqa.selenium.WebDriver;
  */
 public class TestUtils
 {
+    private static final String URL_PREFIX = "http://localhost:8080/xwiki/bin/";
+
+    private static WebDriver driver;
+
+    public static void initDriver()
+    {
+        driver = new FirefoxDriver();
+    }
+
+    public static WebDriver getDriver()
+    {
+        return driver;
+    }
+
+    public static void closeDriver()
+    {
+        driver.close();
+        driver = null;
+    }
+    
     public static void gotoPage(String space, String page, WebDriver driver)
     {
         gotoPage(space, page, "view", driver);
@@ -37,7 +58,7 @@ public class TestUtils
 
     public static String getURLForPage(String space, String page, String action, String queryString)
     {
-        return "http://localhost:8080/xwiki/bin/" + action + "/" + space + "/" + page
+        return URL_PREFIX + action + "/" + space + "/" + page
             + (queryString == null ? "" : "?" + queryString);
     }
 

@@ -17,33 +17,35 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.it.ui.framework;
+package org.xwiki.it.ui;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.openqa.selenium.WebDriver;
+import org.junit.extensions.cpsuite.ClasspathSuite;
+import org.junit.runner.RunWith;
+import org.xwiki.it.ui.framework.TestUtils;
 
-public class AbstractTest
+/**
+ * Runs all functional tests found in the classpath.
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
+@RunWith(ClasspathSuite.class)
+public class AllTests
 {
     @BeforeClass
     public static void init()
     {
-        if (TestUtils.getDriver() == null) {
-            TestUtils.initDriver();
-        }
+        // We set a system property in order to specify we're running in a test suite so that
+        // AbstractTest.shutdown() doesn't close the WebDriver when a Test finishes (so that we reuse the same
+        // driver instance for all tests in this suite).
+        System.setProperty("xwiki.alltests", "true");
     }
 
     @AfterClass
     public static void shutdown()
     {
-        // Only close if we're not part of the AllTests test suite
-        if (!Boolean.parseBoolean(System.getProperty("xwiki.alltests"))) {
-            TestUtils.closeDriver();
-        }
-    }
-
-    public WebDriver getDriver()
-    {
-        return TestUtils.getDriver();
+        TestUtils.closeDriver();
     }
 }

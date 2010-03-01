@@ -55,7 +55,7 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
 
         importPage = adminPage.clickImportSection();
 
-        // Remove our packages if they're there already
+        // Remove our packages if they're there already, to ensure to start with a predefined state.
         if (importPage.isPackagePresent(PACKAGE_WITH_HISTORY)) {
             importPage.deletePackage(PACKAGE_WITH_HISTORY);
             // TODO: Remove this when the delete doesn't redirect to the Admin home page any more (which is a bug)
