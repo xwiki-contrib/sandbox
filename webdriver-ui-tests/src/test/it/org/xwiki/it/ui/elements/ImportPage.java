@@ -109,7 +109,7 @@ public class ImportPage extends BasePage
         return new BasePage(getDriver());
     }
 
-    public void toggleReplaceHistoryOption()
+    public void selectReplaceHistoryOption()
     {
         getDriver().findElement(By.xpath("//input[@name='historyStrategy' and @value='replace']")).click();
     }

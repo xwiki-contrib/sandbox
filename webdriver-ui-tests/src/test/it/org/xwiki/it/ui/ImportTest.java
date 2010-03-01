@@ -76,7 +76,7 @@ public class ImportTest extends AbstractAdminAuthenticatedTest
         importPage.attachPackage(fileUrl);
         importPage.selectPackage(PACKAGE_WITH_HISTORY);
         
-        importPage.toggleReplaceHistoryOption();
+        importPage.selectReplaceHistoryOption();
         importPage.importPackage();
 
         BasePage importedPage = importPage.clickImportedPage("Main.TestPage");
