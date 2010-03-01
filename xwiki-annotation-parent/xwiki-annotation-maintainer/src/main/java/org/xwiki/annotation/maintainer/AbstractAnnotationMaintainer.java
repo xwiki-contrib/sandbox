@@ -29,7 +29,6 @@ import org.xwiki.annotation.content.AlteredContent;
 import org.xwiki.annotation.content.ContentAlterer;
 import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOTargetService;
-import org.xwiki.annotation.maintainer.AnnotationState;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentLookupException;
@@ -158,19 +157,20 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         }
 
         ContentAlterer normalizerContentAlterer;
-        int leftIndex =
+        int leftContextIndex =
             (annotation.getSelectionLeftContext() == null ? "" : annotation.getSelectionLeftContext()).length();
-        int rightIndex = leftIndex + (annotation.getSelection() == null ? "" : annotation.getSelection()).length();
+        int rightContextIndex =
+            leftContextIndex + (annotation.getSelection() == null ? "" : annotation.getSelection()).length();
         String normalizedContext = annotation.getSelectionInContext();
         // TODO: remove this from here if ever selection & context normalization of annotation will be done on add
         try {
             normalizerContentAlterer = componentManager.lookup(ContentAlterer.class, "space-normalizer");
             AlteredContent alteredContext = normalizerContentAlterer.alter(annotation.getSelectionInContext());
             normalizedContext = alteredContext.getContent().toString();
-            leftIndex = alteredContext.getAlteredOffset(leftIndex);
+            leftContextIndex = alteredContext.getAlteredOffset(leftContextIndex);
             // -1 + 1 so that we find the altered index, and then move to the next position, since otherwise the index
             // doesn't exist in the altered content, if it's the last index for example
-            rightIndex = alteredContext.getAlteredOffset(rightIndex - 1) + 1;
+            rightContextIndex = alteredContext.getAlteredOffset(rightContextIndex - 1) + 1;
         } catch (ComponentLookupException e) {
             // it's ok, just use the original context, as is, and the indexes as they are
             getLogger().warn(e.getMessage(), e);
@@ -186,11 +186,8 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         // save initial annotation state, to check how it needs to be updated afterwards
         AnnotationState initialState = annotation.getState();
 
-        // assume at this point that selection appears only once in the context
-        int cLeftSize = leftIndex;
-        int sStart = cStart + cLeftSize;
-        int sEnd = sStart + rightIndex - leftIndex;
-        int cRightSize = cStart + normalizedContext.length() - sEnd;
+        int sStart = cStart + leftContextIndex;
+        int sEnd = cStart + rightContextIndex;
 
         int alteredCStart = cStart;
         int alteredSLength = sEnd - sStart;
@@ -235,22 +232,24 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
 
         if (annotation.getState() != AnnotationState.ALTERED) {
             // recompute the annotation context and all
-            String newContext =
-                renderedCurrentContent
-                    .substring(alteredCStart, alteredCStart + cLeftSize + alteredSLength + cRightSize);
             // if this annotation was updated first time during this update, set its original selection
             if (annotation.getState() == AnnotationState.UPDATED && initialState == AnnotationState.SAFE) {
                 annotation.setOriginalSelection(annotation.getSelection());
             }
 
-            String contextLeft = newContext.substring(0, cLeftSize);
-            String selection = newContext.substring(cLeftSize, cLeftSize + alteredSLength);
-            String contextRight = newContext.substring(cLeftSize + alteredSLength);
+            String contextLeft = renderedCurrentContent.substring(alteredCStart, alteredCStart + leftContextIndex);
+            String selection =
+                renderedCurrentContent.substring(alteredCStart + leftContextIndex, alteredCStart + leftContextIndex
+                    + alteredSLength);
+            String contextRight =
+                renderedCurrentContent.substring(alteredCStart + leftContextIndex + alteredSLength, alteredCStart
+                    + leftContextIndex + alteredSLength + normalizedContext.length() - rightContextIndex);
             // and finally update the context & selection
             annotation.setSelection(selection, contextLeft, contextRight);
 
             // make sure annotation stays unique
-            ensureUnique(annotation, renderedCurrentContent, alteredCStart, cLeftSize, alteredSLength, cRightSize);
+            ensureUnique(annotation, renderedCurrentContent, alteredCStart, leftContextIndex, alteredSLength,
+                normalizedContext.length() - rightContextIndex);
         }
     }
 
@@ -332,11 +331,10 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             // one letter)
             expansionLeft = expansionLeft + toNextWord(content, cStart - expansionLeft, true);
             expansionRight = expansionRight + toNextWord(content, cStart + cLength + expansionRight, false);
-            String newContext = content.substring(cStart - expansionLeft, cStart + cLength + expansionRight);
             // normally selection is not updated here, only the context therefore we don't set original selection
-            String contextLeft = newContext.substring(0, cLeftSize + expansionLeft);
-            String selection = newContext.substring(cLeftSize + expansionLeft, cLeftSize + expansionLeft + sLength);
-            String contextRight = newContext.substring(cLeftSize + expansionLeft + sLength);
+            String contextLeft = content.substring(cStart - expansionLeft, cStart + cLeftSize);
+            String selection = content.substring(cStart + cLeftSize, cStart + cLeftSize + sLength);
+            String contextRight = content.substring(cStart + cLeftSize + sLength, cStart + cLength + expansionRight);
 
             annotation.setSelection(selection, contextLeft, contextRight);
         } else {
