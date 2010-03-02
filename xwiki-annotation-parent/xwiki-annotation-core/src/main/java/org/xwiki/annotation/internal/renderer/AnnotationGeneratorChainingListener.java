@@ -207,24 +207,29 @@ public class AnnotationGeneratorChainingListener extends QueueListener implement
                 // TODO: mark it somehow...
                 continue;
             }
-            AlteredContent cleanedContext = selectionAlterer.alter(annotationContext);
-            // find it in the plaintextContent
-            int contextIndex = plainTextContent.indexOf(cleanedContext.getContent().toString());
-            // find the indexes where annotation starts and ends inside the cleaned context, wrt to its endpoints in the
-            // original selection
-            int leftIndex =
-                (StringUtils.isEmpty(ann.getSelectionLeftContext()) ? "" : ann.getSelectionLeftContext()).length();
-            int alteredLeftIndex = cleanedContext.getAlteredOffset(leftIndex);
-            int rightIndex =
-                leftIndex + (StringUtils.isEmpty(ann.getSelection()) ? "" : ann.getSelection()).length() - 1;
-            int alteredRightIndex = cleanedContext.getAlteredOffset(rightIndex);
-            // check that the context is in the plainText representation and selection was found inside it
-            if (contextIndex >= 0 && alteredLeftIndex >= 0) {
+            // build the cleaned version of the annotation by cleaning its left context, selection and right context and
+            // concatenating them together
+            String alteredsLeftContext =
+                StringUtils.isEmpty(ann.getSelectionLeftContext()) ? "" : selectionAlterer.alter(
+                    ann.getSelectionLeftContext()).getContent().toString();
+            String alteredRightContext =
+                StringUtils.isEmpty(ann.getSelectionRightContext()) ? "" : selectionAlterer.alter(
+                    ann.getSelectionRightContext()).getContent().toString();
+            String alteredSelection =
+                StringUtils.isEmpty(ann.getSelection()) ? "" : selectionAlterer.alter(ann.getSelection()).getContent()
+                    .toString();
+            String cleanedContext = alteredsLeftContext + alteredSelection + alteredRightContext;
+            // find the annotation with its context in the plain text representation of the content
+            int contextIndex = plainTextContent.indexOf(cleanedContext);
+            if (contextIndex >= 0) {
+                // find the indexes where annotation starts and ends inside the cleaned context
+                int alteredSelectionStartIndex = alteredsLeftContext.length();
+                int alteredSelectionEndIndex = alteredSelectionStartIndex + alteredSelection.length() - 1;
                 // get the start and end events for the annotation
                 // annotation starts before char at annotationIndex and ends after char at annotationIndex +
                 // alteredSelection.length() - 1
-                Object[] startEvt = getEventAndOffset(contextIndex + alteredLeftIndex, false);
-                Object[] endEvt = getEventAndOffset(contextIndex + alteredRightIndex, true);
+                Object[] startEvt = getEventAndOffset(contextIndex + alteredSelectionStartIndex, false);
+                Object[] endEvt = getEventAndOffset(contextIndex + alteredSelectionEndIndex, true);
                 if (startEvt != null & endEvt != null) {
                     // store the bookmarks
                     addBookmark((Event) startEvt[0], new AnnotationEvent(AnnotationEventType.START, ann),

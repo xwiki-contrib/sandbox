@@ -143,6 +143,10 @@ public class AnnotationXHTMLRendererTest extends AbstractComponentTestCase
         addFileToTest("renderer/partialwords/PartialWords4");
         addFileToTest("renderer/partialwords/PartialWords5");
         addFileToTest("renderer/partialwords/PartialWords6");
+
+        addFileToTest("renderer/spaces/Spaces1");
+        addFileToTest("renderer/spaces/Spaces2");
+        addFileToTest("renderer/spaces/Spaces3");
     }
 
     /**
