@@ -195,9 +195,9 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         // map spaceless annotation (in context) on the spaceless version of the content
         int cStart = spacelessPreviousContent.getContent().toString().indexOf(spacelessContext);
 
-        if (cStart < 0) {
-            // annotation context could not be found in the previous rendered content, it must be somewhere in the
-            // generated content or something like that, skip it
+        if (spacelessContext.length() == 0 || cStart < 0) {
+            // annotation context does not exist or could not be found in the previous rendered content, it must be
+            // somewhere in the generated content or something like that, skip it
             return;
         }
 
@@ -260,7 +260,6 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         }
 
         if (annotation.getState() != AnnotationState.ALTERED) {
-
             // compute the sizes of the contexts to be able to build the annotation contexts
             int cLeftSize = sStart - cStart;
             int cRightSize = cEnd - sEnd;

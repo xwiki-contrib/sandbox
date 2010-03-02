@@ -145,6 +145,9 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         addFileToTest("maintainer/spaces/Spaces3");
         addFileToTest("maintainer/spaces/Spaces4");
         addFileToTest("maintainer/spaces/Spaces5");
+        // TODO: add test cases here for the case when an annotation becomes non-unique on update, but the 2 differ by
+        // some spaces (spaceless they are the same, but with normalized spaces they are different. Maintainer will fail
+        // in this case)
 
         // TODO: add tests for the case of multiple annotations which are being changed
     }
