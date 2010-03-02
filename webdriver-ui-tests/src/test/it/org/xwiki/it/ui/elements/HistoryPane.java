@@ -28,6 +28,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+/**
+ * Represents the actions possible on the History Pane at the bottom of a page.
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
 public class HistoryPane
 {
     private WebDriver driver;

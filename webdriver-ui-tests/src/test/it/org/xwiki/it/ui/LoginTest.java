@@ -26,6 +26,12 @@ import org.xwiki.it.ui.elements.HomePage;
 import org.xwiki.it.ui.elements.LoginPage;
 import org.xwiki.it.ui.framework.AbstractTest;
 
+/**
+ * Test the Login feature.
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
 public class LoginTest extends AbstractTest
 {
     private HomePage homePage;

@@ -23,6 +23,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+/**
+ * Represents the actions possible on the Login page.
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
 public class LoginPage extends BasePage
 {
     @FindBy(id = "j_username")

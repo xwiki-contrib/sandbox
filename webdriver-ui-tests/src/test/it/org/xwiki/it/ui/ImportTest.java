@@ -32,6 +32,12 @@ import org.xwiki.it.ui.elements.ImportPage;
 import org.xwiki.it.ui.framework.AbstractAdminAuthenticatedTest;
 import org.xwiki.it.ui.framework.TestUtils;
 
+/**
+ * Test the Import XAR feature.
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
 public class ImportTest extends AbstractAdminAuthenticatedTest
 {
     private static final String PACKAGE_WITHOUT_HISTORY = "Main.TestPage-no-history.xar";

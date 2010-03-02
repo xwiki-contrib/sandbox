@@ -23,6 +23,12 @@ import org.junit.Before;
 import org.xwiki.it.ui.elements.HomePage;
 import org.xwiki.it.ui.framework.AbstractTest;
 
+/**
+ * Helper class to be extended by tests requiring an Admin user logged in.
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
 public class AbstractAdminAuthenticatedTest extends AbstractTest
 {
     private HomePage homePage;

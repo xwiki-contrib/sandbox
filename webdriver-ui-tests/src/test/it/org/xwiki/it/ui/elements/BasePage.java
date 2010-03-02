@@ -34,6 +34,12 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.xwiki.it.ui.framework.TestUtils;
 
+/**
+ * Represents the common actions possible on all Pages.
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
 public class BasePage
 {
     @FindBys({@FindBy(id = "tmRegister"), @FindBy(tagName = "a")})

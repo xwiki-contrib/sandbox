@@ -23,6 +23,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.openqa.selenium.WebDriver;
 
+/**
+ * To be extended by all Test Classes. Allows to start/stop the Web Driver and get access to it. 
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
 public class AbstractTest
 {
     @BeforeClass

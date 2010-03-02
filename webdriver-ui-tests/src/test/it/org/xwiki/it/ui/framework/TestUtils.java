@@ -4,7 +4,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 /**
- * Helper methods not related to a specific Page Object.
+ * Helper methods for testing, not related to a specific Page Object.
  *
  * @version $Id$ 
  * @since 2.3M1

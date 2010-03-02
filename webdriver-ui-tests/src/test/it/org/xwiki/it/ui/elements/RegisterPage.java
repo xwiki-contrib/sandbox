@@ -21,6 +21,12 @@ package org.xwiki.it.ui.elements;
 
 import org.openqa.selenium.WebDriver;
 
+/**
+ * Represents the actions possible on the Registration Page
+ *
+ * @version $Id$
+ * @since 2.3M1
+ */
 public class RegisterPage extends BasePage
 {
     public RegisterPage(WebDriver driver)
