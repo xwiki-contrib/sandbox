@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.content.AlteredContent;
 import org.xwiki.annotation.content.ContentAlterer;
@@ -31,7 +32,6 @@ import org.xwiki.annotation.io.IOService;
 import org.xwiki.annotation.io.IOTargetService;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
-import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
@@ -62,6 +62,13 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     protected IOTargetService ioContentService;
 
     /**
+     * Space stripper content alterer, to be able to map annotations on the content in the same way the rendering
+     * mapping does it.
+     */
+    @Requirement("whitespace")
+    protected ContentAlterer spaceStripperContentAlterer;
+
+    /**
      * The component manager, used to grab the plain text renderer.
      */
     @Requirement
@@ -74,6 +81,7 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
      *      java.lang.String)
      */
     public void updateAnnotations(String target, String previousContent, String currentContent)
+        throws MaintainerServiceException
     {
         Collection<Annotation> annotations;
         try {
@@ -95,16 +103,23 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             // if any differences: note that there can be updates on the content that have no influence on the plain
             // text space normalized version
             if (differences.size() > 0) {
+                // compute the spaceless version of the renderedPreviousContent to be able to map the annotation on it
+                // (so that matching is done in the same way as for rendering), and then go back to the normalized
+                // version
+                AlteredContent spacelessRenderedPreviousContent =
+                    spaceStripperContentAlterer.alter(renderedPreviousContent);
                 // recompute properties for all annotations
                 for (Annotation annotation : annotations) {
-                    recomputeProperties(annotation, differences, renderedPreviousContent, renderedCurrentContent);
+                    recomputeProperties(annotation, differences, renderedPreviousContent,
+                        spacelessRenderedPreviousContent, renderedCurrentContent);
                 }
             }
 
             // finally store the updates
             ioService.updateAnnotations(target, annotations);
         } catch (Exception e) {
-            getLogger().error("An exception occurred while updating annotations for content at " + target, e);
+            throw new MaintainerServiceException("An exception occurred while updating annotations for content at "
+                + target, e);
         }
     }
 
@@ -141,41 +156,44 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
     }
 
     /**
-     * For each annotation, recompute its properties wrt the differences in the document.
+     * For each annotation, recompute its properties wrt the differences in the document. The annotation mapping will be
+     * done using the spaceless version of the rendered previous content, in order to have synchronization with the
+     * rendering, whereas the annotation diff & update will be done wrt to the normalized spaces version, to produce
+     * human readable versions of the annotation selection & contexts.
      * 
      * @param annotation the annotation to update properties for
      * @param differences the differences between {@code renderedPreviousContent} and {@code renderedCurrentContent}
      * @param renderedPreviousContent the plain text space normalized rendered previous content
+     * @param spacelessPreviousContent the spaceless version of the rendered previous content, to be used to map
+     *            annotations on the content in the same way they are done on rendering, that is, spaceless.
      * @param renderedCurrentContent the plain text space normalized rendered current content
      */
     protected void recomputeProperties(Annotation annotation, Collection<XDelta> differences,
-        String renderedPreviousContent, String renderedCurrentContent)
+        String renderedPreviousContent, AlteredContent spacelessPreviousContent, String renderedCurrentContent)
     {
         // TODO: do we still want this here? Do we want to try to recover altered annotations?
         if (annotation.getState().equals(AnnotationState.ALTERED)) {
             return;
         }
 
-        ContentAlterer normalizerContentAlterer;
-        int leftContextIndex =
-            (annotation.getSelectionLeftContext() == null ? "" : annotation.getSelectionLeftContext()).length();
-        int rightContextIndex =
-            leftContextIndex + (annotation.getSelection() == null ? "" : annotation.getSelection()).length();
-        String normalizedContext = annotation.getSelectionInContext();
-        // TODO: remove this from here if ever selection & context normalization of annotation will be done on add
-        try {
-            normalizerContentAlterer = componentManager.lookup(ContentAlterer.class, "space-normalizer");
-            AlteredContent alteredContext = normalizerContentAlterer.alter(annotation.getSelectionInContext());
-            normalizedContext = alteredContext.getContent().toString();
-            leftContextIndex = alteredContext.getAlteredOffset(leftContextIndex);
-            // -1 + 1 so that we find the altered index, and then move to the next position, since otherwise the index
-            // doesn't exist in the altered content, if it's the last index for example
-            rightContextIndex = alteredContext.getAlteredOffset(rightContextIndex - 1) + 1;
-        } catch (ComponentLookupException e) {
-            // it's ok, just use the original context, as is, and the indexes as they are
-            getLogger().warn(e.getMessage(), e);
-        }
-        int cStart = renderedPreviousContent.indexOf(normalizedContext);
+        String spacelessLeftContext =
+            StringUtils.isEmpty(annotation.getSelectionLeftContext()) ? "" : spaceStripperContentAlterer.alter(
+                annotation.getSelectionLeftContext()).getContent().toString();
+        String spacelessRightContext =
+            StringUtils.isEmpty(annotation.getSelectionRightContext()) ? "" : spaceStripperContentAlterer.alter(
+                annotation.getSelectionRightContext()).getContent().toString();
+        String spacelessSelection =
+            StringUtils.isEmpty(annotation.getSelection()) ? "" : spaceStripperContentAlterer.alter(
+                annotation.getSelection()).getContent().toString();
+        String spacelessContext = spacelessLeftContext + spacelessSelection + spacelessRightContext;
+        // get the positions for the first character in selection and last character in selection (instead of first out)
+        // to protect selection boundaries (spaces are grouped to the left when altered and we don't want extra spaces
+        // in the selection by using first index outside the selection)
+        int selectionIndex = spacelessLeftContext.length();
+        int lastSelectionIndex = selectionIndex + spacelessSelection.length() - 1;
+
+        // map spaceless annotation (in context) on the spaceless version of the content
+        int cStart = spacelessPreviousContent.getContent().toString().indexOf(spacelessContext);
 
         if (cStart < 0) {
             // annotation context could not be found in the previous rendered content, it must be somewhere in the
@@ -183,12 +201,23 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
             return;
         }
 
+        int cEnd = cStart + spacelessContext.length();
+        int sStart = cStart + selectionIndex;
+        int sEnd = cStart + lastSelectionIndex;
+
+        // translate all back to the spaces version
+        cStart = spacelessPreviousContent.getInitialOffset(cStart);
+        // -1 +1 here because we're interested in the first character outside the context. To get that, we get last
+        // significant character and we advance one char further
+        cEnd = spacelessPreviousContent.getInitialOffset(cEnd - 1) + 1;
+        sStart = spacelessPreviousContent.getInitialOffset(sStart);
+        // add one char here so that selection end is outside the selection
+        sEnd = spacelessPreviousContent.getInitialOffset(sEnd) + 1;
+
         // save initial annotation state, to check how it needs to be updated afterwards
         AnnotationState initialState = annotation.getState();
 
-        int sStart = cStart + leftContextIndex;
-        int sEnd = cStart + rightContextIndex;
-
+        // the context start & selection length after the modification of the content has took place
         int alteredCStart = cStart;
         int alteredSLength = sEnd - sStart;
 
@@ -231,25 +260,28 @@ public abstract class AbstractAnnotationMaintainer extends AbstractLogEnabled im
         }
 
         if (annotation.getState() != AnnotationState.ALTERED) {
+
+            // compute the sizes of the contexts to be able to build the annotation contexts
+            int cLeftSize = sStart - cStart;
+            int cRightSize = cEnd - sEnd;
+
             // recompute the annotation context and all
             // if this annotation was updated first time during this update, set its original selection
             if (annotation.getState() == AnnotationState.UPDATED && initialState == AnnotationState.SAFE) {
                 annotation.setOriginalSelection(annotation.getSelection());
             }
 
-            String contextLeft = renderedCurrentContent.substring(alteredCStart, alteredCStart + leftContextIndex);
+            String contextLeft = renderedCurrentContent.substring(alteredCStart, alteredCStart + cLeftSize);
             String selection =
-                renderedCurrentContent.substring(alteredCStart + leftContextIndex, alteredCStart + leftContextIndex
-                    + alteredSLength);
+                renderedCurrentContent.substring(alteredCStart + cLeftSize, alteredCStart + cLeftSize + alteredSLength);
             String contextRight =
-                renderedCurrentContent.substring(alteredCStart + leftContextIndex + alteredSLength, alteredCStart
-                    + leftContextIndex + alteredSLength + normalizedContext.length() - rightContextIndex);
+                renderedCurrentContent.substring(alteredCStart + cLeftSize + alteredSLength, alteredCStart + cLeftSize
+                    + alteredSLength + cRightSize);
             // and finally update the context & selection
             annotation.setSelection(selection, contextLeft, contextRight);
 
             // make sure annotation stays unique
-            ensureUnique(annotation, renderedCurrentContent, alteredCStart, leftContextIndex, alteredSLength,
-                normalizedContext.length() - rightContextIndex);
+            ensureUnique(annotation, renderedCurrentContent, alteredCStart, cLeftSize, alteredSLength, cRightSize);
         }
     }
 

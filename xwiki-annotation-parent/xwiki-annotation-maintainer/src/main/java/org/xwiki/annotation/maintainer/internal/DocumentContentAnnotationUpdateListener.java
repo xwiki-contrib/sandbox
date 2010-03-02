@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.xwiki.annotation.maintainer.AnnotationMaintainer;
+import org.xwiki.annotation.maintainer.MaintainerServiceException;
 import org.xwiki.bridge.DocumentModelBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -113,7 +114,12 @@ public class DocumentContentAnnotationUpdateListener extends AbstractLogEnabled 
                     currentDocument.getSpaceName(), EntityType.SPACE, new EntityReference(
                         currentDocument.getWikiName(), EntityType.WIKI)));
             // maintain the document annotations
-            maintainer.updateAnnotations(serializer.serialize(docReference), previousContent, content);
+            try {
+                maintainer.updateAnnotations(serializer.serialize(docReference), previousContent, content);
+            } catch (MaintainerServiceException e) {
+                getLogger().warn(e.getMessage(), e);
+                // nothing else, just go further
+            }
             isUpdating = false;
         }
     }

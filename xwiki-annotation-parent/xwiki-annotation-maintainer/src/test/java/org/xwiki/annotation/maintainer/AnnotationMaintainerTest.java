@@ -38,14 +38,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationsMockSetup;
-import org.xwiki.bridge.DocumentModelBridge;
 import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
-import org.xwiki.observation.EventListener;
-import org.xwiki.observation.event.DocumentUpdateEvent;
-import org.xwiki.observation.event.Event;
 import org.xwiki.test.AbstractComponentTestCase;
 
 /**
@@ -67,9 +63,9 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
     protected String docName;
 
     /**
-     * The annotation maintainer that this class will test.
+     * The annotation maintainer under test.
      */
-    protected EventListener documentContentAnnotationUpdater;
+    protected AnnotationMaintainer annotationMaintainer;
 
     /**
      * The setup for mocking components needed in annotation code.
@@ -144,6 +140,12 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         addFileToTest("maintainer/unchanged/Unchanged4");
         addFileToTest("maintainer/unchanged/Unchanged5");
 
+        addFileToTest("maintainer/spaces/Spaces1");
+        addFileToTest("maintainer/spaces/Spaces2");
+        addFileToTest("maintainer/spaces/Spaces3");
+        addFileToTest("maintainer/spaces/Spaces4");
+        addFileToTest("maintainer/spaces/Spaces5");
+
         // TODO: add tests for the case of multiple annotations which are being changed
     }
 
@@ -186,8 +188,7 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
     {
         super.setUp();
 
-        documentContentAnnotationUpdater =
-            getComponentManager().lookup(EventListener.class, "document-content-annotation-updater");
+        annotationMaintainer = getComponentManager().lookup(AnnotationMaintainer.class);
     }
 
     /**
@@ -243,19 +244,17 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
      * Tests the update of a document.
      * 
      * @throws IOException if anything goes wrong mocking the documents
+     * @throws MaintainerServiceException if anything goes wrong maintaining the the document annotations
      */
     @Test
-    public void testUpdate() throws IOException
+    public void testUpdate() throws IOException, MaintainerServiceException
     {
         // ignore the docName ftm, just test the marvelous setup
-        Event documentUpdateEvt = new DocumentUpdateEvent();
         MockDocument doc = ((TestDocumentFactory) setup.getDocFactory()).getDocument(docName);
-        DocumentModelBridge mock = getDocumentModelBridgeMock(docName, doc.getModifiedSource(), doc.getSource());
         // TODO: this is not the place to put this code, but it's the most comfortable
         copyOriginalSelections(doc);
 
-        // and launch the event
-        documentContentAnnotationUpdater.onEvent(documentUpdateEvt, mock, null);
+        annotationMaintainer.updateAnnotations(docName, doc.getSource(), doc.getModifiedSource());
 
         // test the result
         assertSameAnnotations(doc.getUpdatedAnnotations(), doc.getAnnotations());
@@ -316,45 +315,5 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
             Annotation originalAnn = getAnnotation(updatedAnn.getId(), doc.getAnnotations());
             updatedAnn.setOriginalSelection(originalAnn.getSelection());
         }
-    }
-
-    /**
-     * Creates a mock document model bridge for an updated document for the passed document name with the current
-     * content and previous content.
-     * 
-     * @param docName the name of the document to mock
-     * @param content the content of the document
-     * @param previousContent the previous content to set to this mock, to be returned as a document model bridge mock
-     *            on call of getOriginalDocument. If this parameter is {@code null}, this function will not be mocked
-     * @return the created document model bridge mock
-     */
-    public DocumentModelBridge getDocumentModelBridgeMock(final String docName, final String content,
-        final String previousContent)
-    {
-        String mockName = docName + "-" + (previousContent != null ? "modified" : "original");
-        final DocumentModelBridge dmbMock = setup.getMockery().mock(DocumentModelBridge.class, mockName);
-        setup.getMockery().checking(new Expectations()
-        {
-            {
-                allowing(dmbMock).getPageName();
-                will(returnValue(docName));
-
-                allowing(dmbMock).getSpaceName();
-                will(returnValue("Space"));
-
-                allowing(dmbMock).getWikiName();
-                will(returnValue("wiki"));
-
-                allowing(dmbMock).getContent();
-                will(returnValue(content));
-
-                if (previousContent != null) {
-                    allowing(dmbMock).getOriginalDocument();
-                    will(returnValue(getDocumentModelBridgeMock(docName, previousContent, null)));
-                }
-            }
-        });
-
-        return dmbMock;
     }
 }

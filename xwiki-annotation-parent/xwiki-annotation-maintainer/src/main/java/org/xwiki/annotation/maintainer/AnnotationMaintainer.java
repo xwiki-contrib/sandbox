@@ -37,6 +37,9 @@ public interface AnnotationMaintainer
      * @param target is serialized reference to the content concerned by the annotation
      * @param previousContent the previous content of the document (before the update)
      * @param currentContent the current content of the document (after the update)
+     * @throws MaintainerServiceException in case something goes wrong handling the annotation updates on the passed
+     *             content
      */
-    void updateAnnotations(String target, String previousContent, String currentContent);
+    void updateAnnotations(String target, String previousContent, String currentContent)
+        throws MaintainerServiceException;
 }
