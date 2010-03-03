@@ -236,9 +236,8 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         // the charting action so that we have valid URL references. This needs to be updated when a temporary-resource
         // action becomes available.
         XWikiContext xcontext = getContext();
-        String strDocRef = refSerializer.serialize(docBridge.getCurrentDocumentReference());
         try {
-            return xcontext.getWiki().getExternalURL(strDocRef, "charting", xcontext) + "/" + fileName;
+            return xcontext.getWiki().getURL(null, "charting", xcontext) + "/" + fileName;
         } catch (Exception ex) {
             getLogger().error("Unexpected error.", ex);
         }

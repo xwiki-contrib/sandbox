@@ -116,30 +116,16 @@ public class OfficePreviewVelocityBridge
     }
 
     /**
-     * Builds a preview of the specified office attachment and renders the result in default document syntax.
+     * Builds a preview of the specified office attachment in xhtml/1.0 syntax.
      * 
      * @param attachmentNameString string identifying the office attachment.
-     * @return preview of the specified office attachment rendered in default document syntax or null if an error
-     *         occurs.
+     * @return preview of the specified office attachment or null if an error occurs.
      */
     public String preview(String attachmentNameString)
     {
-        return preview(attachmentNameString, null);
-    }
-
-    /**
-     * Builds a preview of the specified office attachment and renders the result in specified syntax.
-     * 
-     * @param attachmentNameString string identifying the office attachment.
-     * @param outputSyntaxId output syntax identifier or null if default document syntax should be used.
-     * @return preview of the specified office attachment rendered in specified output syntax (defaulting to document
-     *         syntax if output syntax is not specified) or null if an error occurs.
-     */
-    public String preview(String attachmentNameString, String outputSyntaxId)
-    {
         AttachmentReference attachRef = attachRefResolver.resolve(attachmentNameString);
         try {
-            return preview(attachRef, outputSyntaxId);
+            return preview(attachRef);
         } catch (Exception ex) {
             String message = "Could not preview office document [%s] - %s";
             message = String.format(message, attachmentNameString, ex.getMessage());
@@ -150,16 +136,14 @@ public class OfficePreviewVelocityBridge
     }
 
     /**
-     * Builds a preview of the specified office attachment and renders the result in specified syntax.
+     * Builds a preview of the specified office attachment in xhtml/1.0 syntax.
      * 
      * @param attachRef reference to the attachment to be previewed.
-     * @param outputSyntaxId output syntax identifier or null if default document syntax should be used.
-     * @return preview of the specified office attachment rendered in specified output syntax or default document
-     *         syntax.
+     * @return preview of the specified office attachment in xhtml/1.0 syntax.
      * @throws Exception if current user does not have enough privileges to view the requested attachment or if an error
      *             occurs while generating the preview.
      */
-    private String preview(AttachmentReference attachRef, String outputSyntaxId) throws Exception
+    private String preview(AttachmentReference attachRef) throws Exception
     {
         String strDocumentName = refSerializer.serialize(attachRef.getDocumentReference());
 
@@ -167,9 +151,6 @@ public class OfficePreviewVelocityBridge
         if (!docBridge.isDocumentViewable(strDocumentName)) {
             throw new Exception("Inadequate privileges.");
         }
-
-        // If output syntax is not specified, use the default document syntax.
-        String syntaxId = (outputSyntaxId == null) ? docBridge.getDocumentSyntaxId(strDocumentName) : outputSyntaxId;
 
         XDOM preview;
         if (isPresentation(attachRef.getName())) {
@@ -179,25 +160,7 @@ public class OfficePreviewVelocityBridge
         }
 
         // Build the preview and render the result.
-        return render(preview, syntaxId);
-    }
-
-    /**
-     * @return an error message set inside current execution or null.
-     */
-    public String getErrorMessage()
-    {
-        return (String) execution.getContext().getProperty(OFFICE_PREVIEW_ERROR);
-    }
-
-    /**
-     * Utility method for setting an error message inside current execution.
-     * 
-     * @param message error message.
-     */
-    private void setErrorMessage(String message)
-    {
-        execution.getContext().setProperty(OFFICE_PREVIEW_ERROR, message);
+        return render(preview, "xhtml/1.0");
     }
 
     /**
@@ -226,5 +189,23 @@ public class OfficePreviewVelocityBridge
         BlockRenderer renderer = componentManager.lookup(BlockRenderer.class, syntaxId);
         renderer.render(block, printer);
         return printer.toString();
+    }
+    
+    /**
+     * @return an error message set inside current execution or null.
+     */
+    public String getErrorMessage()
+    {
+        return (String) execution.getContext().getProperty(OFFICE_PREVIEW_ERROR);
+    }
+
+    /**
+     * Utility method for setting an error message inside current execution.
+     * 
+     * @param message error message.
+     */
+    private void setErrorMessage(String message)
+    {
+        execution.getContext().setProperty(OFFICE_PREVIEW_ERROR, message);
     }
 }

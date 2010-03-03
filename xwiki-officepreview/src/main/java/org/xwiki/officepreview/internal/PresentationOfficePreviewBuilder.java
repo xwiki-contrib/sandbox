@@ -39,6 +39,8 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
+import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.rendering.transformation.TransformationManager;
 import org.xwiki.velocity.VelocityEngine;
 import org.xwiki.velocity.VelocityManager;
 
@@ -61,6 +63,12 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
      */
     @Requirement("xwiki/2.0")
     private Parser xwiki20Parser;
+    
+    /**
+     * Used to transform the XDOM.
+     */
+    @Requirement
+    private TransformationManager transformationManager;
 
     /**
      * {@inheritDoc}
@@ -143,7 +151,11 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
 
             vEngine.evaluate(vContext, outputWriter, template, templateReader);
 
-            return xwiki20Parser.parse(new StringReader(outputWriter.toString()));
+            XDOM xdom = xwiki20Parser.parse(new StringReader(outputWriter.toString()));
+            
+            transformationManager.performTransformations(xdom, Syntax.XWIKI_2_0);
+                        
+            return xdom;
         } catch (Exception ex) {
             throw new Exception("Error while building presentation XDOM.", ex);
         } finally {
