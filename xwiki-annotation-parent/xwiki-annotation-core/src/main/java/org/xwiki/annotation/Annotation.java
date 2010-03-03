@@ -156,7 +156,24 @@ public class Annotation
      */
     public AnnotationState getState()
     {
-        return (AnnotationState) fields.get(STATE_FIELD);
+        // have a little bit of mercy, try to parse this from string if it's a string
+        Object stateField = fields.get(STATE_FIELD);
+        if (stateField == null) {
+            // null stays null no matter what
+            return null;
+        }
+        if (AnnotationState.class.isAssignableFrom(stateField.getClass())) {
+            return (AnnotationState) stateField;
+        } else if (String.class.isAssignableFrom(stateField.getClass())) {
+            try {
+                return AnnotationState.valueOf((String) stateField);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+
+        // return no state, can't actually make sense of the value in the map. Hopefully this will never happen
+        return null;
     }
 
     /**
