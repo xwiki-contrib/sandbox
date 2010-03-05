@@ -15,7 +15,7 @@ Support NTLM and BAsic authenticator and fallback on generic LDAP authenticator 
 * xwiki.authentication.ntlm.validate: can be 1 or 0 (default to 0), if 1 the resolved NTLM login and pass are used to validate credentials, it's usually done by apache but it's possible to force it in some environment for specific security reasons
 * xwiki.authentication.ntlm.domainMapping: if set LDAP identifier is composed with domain and user name the following way userName@domain. Mapping is used to be able to transform some domain coming form NTLM into another to put after the @ sign.
   ex: NTLMDOMAIN1=domain1.xwiki.org|NTLMDOMAIN2=domain2.xwiki.org
-* xwiki.authentication.ntlm.realm: realm to use in authentication popup. No popup if not set.  
+* xwiki.authentication.ntlm.realm: the message to show to the user in basic authentication popup  
 
 It's possible to overwrite theses parameters in the wiki preferences using the following names (need to add them to XWiki.XWikiPreferences class):
 * xwiki.authentication.ntlm.domainController -> ntlm_domainController
