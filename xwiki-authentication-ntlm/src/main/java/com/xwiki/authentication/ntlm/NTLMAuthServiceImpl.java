@@ -292,14 +292,14 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         try {
             context.setDatabase(context.getMainXWiki());
 
-            return authenticateNTLMInContext(!context.isMainWiki(wikiName), context);
+            return authenticateNTLMInContext(wikiName.equals(context.getMainXWiki()), context);
         } catch (XWikiException e) {
             LOG.debug("Failed to authenticate with NTLM", e);
+
+            return null;
         } finally {
             context.setDatabase(wikiName);
         }
-
-        return null;
     }
 
     public Principal authenticateNTLMInContext(boolean local, XWikiContext context) throws XWikiException
