@@ -204,6 +204,7 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             String encuname = encryptText(principal.getName(), context);
             Cookie usernameCookie = new Cookie("XWIKINTLMAUTHINFO", encuname);
             usernameCookie.setMaxAge(-1);
+            usernameCookie.setPath("/");
             context.getResponse().addCookie(usernameCookie);
         }
 
