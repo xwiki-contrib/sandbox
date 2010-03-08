@@ -39,7 +39,6 @@ import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbSession;
 import jcifs.util.Base64;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.securityfilter.realm.SimplePrincipal;
@@ -246,8 +245,8 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                         if (ntResponse == null)
                             ntResponse = new byte[0];
                         ntlm =
-                                new NtlmPasswordAuthentication(type3.getDomain(), type3.getUser(), challenge,
-                                    lmResponse, ntResponse);
+                            new NtlmPasswordAuthentication(type3.getDomain(), type3.getUser(), challenge, lmResponse,
+                                ntResponse);
                     }
                 } else {
                     LOG.debug("Basic session");
@@ -263,7 +262,7 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                     ntlm = new NtlmPasswordAuthentication(domain, user, pass);
                 }
 
-                if ("1".equals(getConfig().getParam("validateNTLM", "0", context))) {
+                if (ntlm != null && "1".equals(getConfig().getParam("validate", "1", context))) {
                     try {
                         SmbSession.logon(dc, ntlm);
                     } catch (SmbAuthException sae) {
@@ -285,29 +284,20 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
     public Principal authenticate(String login, String password, XWikiContext context) throws XWikiException
     {
-        Principal principal = null;
-
         String wikiName = context.getDatabase();
 
         // NTLM authentication
         try {
             context.setDatabase(context.getMainXWiki());
 
-            principal = authenticateNTLMInContext(!context.isMainWiki(wikiName), context);
+            return authenticateNTLMInContext(!context.isMainWiki(wikiName), context);
         } catch (XWikiException e) {
             LOG.debug("Failed to authenticate with NTLM", e);
         } finally {
             context.setDatabase(wikiName);
         }
 
-        if (principal == null) {
-            // LDAP fallback
-            LOG.debug("Try to authenticate using generic LDAP authenticator");
-
-            principal = super.authenticate(login, password, context);
-        }
-
-        return principal;
+        return null;
     }
 
     public Principal authenticateNTLMInContext(boolean local, XWikiContext context) throws XWikiException
@@ -319,9 +309,15 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         NtlmPasswordAuthentication ntlm = resolveNTLM(context);
 
         if (ntlm == null) {
-            throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                "Failed to resolve NTLM. It usually mean that no NTLM header has been provided to XWiki.");
+            if ("1".equals(getConfig().getParam("validate", "1", context))) {
+                return null;
+            } else {
+                throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
+                    "Failed to resolve NTLM. It usually mean that no NTLM header has been provided to XWiki.");
+            }
         }
+
+        LOG.debug("NtlmPasswordAuthentication: " + ntlm);
 
         String ldapUid = ntlm.getUsername();
         String validXWikiUserName = ntlm.getUsername();
@@ -370,42 +366,7 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         XWikiDocument userProfile = getUserProfileByUid(validXWikiUserName, ldapUid, context);
 
-        // ////////////////////////////////////////////////////////////////////
-        // if group param, verify group membership (& get DN)
-        // ////////////////////////////////////////////////////////////////////
-
         String ldapDn = null;
-        String filterGroupDN = config.getLDAPParam("ldap_user_group", "", context);
-
-        if (filterGroupDN.length() > 0) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Checking if the user belongs to the user group: " + filterGroupDN);
-            }
-
-            ldapDn = ldapUtils.isUidInGroup(ldapUid, filterGroupDN, context);
-
-            if (ldapDn == null) {
-                throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                    "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] {ldapUid, filterGroupDN});
-            }
-        }
-
-        // ////////////////////////////////////////////////////////////////////
-        // if exclude group param, verify group membership
-        // ////////////////////////////////////////////////////////////////////
-
-        String excludeGroupDN = config.getLDAPParam("ldap_exclude_group", "", context);
-
-        if (excludeGroupDN.length() > 0) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Checking if the user does not belongs to the exclude group: " + excludeGroupDN);
-            }
-
-            if (ldapUtils.isUidInGroup(ldapUid, excludeGroupDN, context) != null) {
-                throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                    "LDAP user {0} should not belong to LDAP group {1}.", null, new Object[] {ldapUid, filterGroupDN});
-            }
-        }
 
         // ////////////////////////////////////////////////////////////////////
         // if no dn search for user
@@ -477,10 +438,11 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
      */
     public void showLogin(XWikiContext context) throws XWikiException
     {
-        String realm = getConfig().getParam("realm", "XWiki NTLM", context);
-
-        if (!StringUtils.isEmpty(realm)) {
+        if ("1".equals(getConfig().getParam("validate", "1", context))) {
             LOG.debug("showLogin");
+
+            String realm = getConfig().getParam("realm", "XWiki NTLM", context);
+
             context.getResponse().setHeader("WWW-Authenticate", "NTLM");
             context.getResponse().addHeader("WWW-Authenticate", "Basic realm=\"" + realm + "\"");
 
