@@ -207,6 +207,8 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             context.getResponse().addCookie(usernameCookie);
         }
 
+        LOG.debug("XWikiUser=" + principal.getName());
+
         return new XWikiUser(principal.getName());
     }
 
@@ -322,13 +324,18 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         String ldapUid = ntlm.getUsername();
         String validXWikiUserName = ntlm.getUsername();
 
+        LOG.debug("ntlm.getName(): " + ntlm.getName());
+        LOG.debug("ntlm.getDomain(): " + ntlm.getDomain());
+        LOG.debug("ldapUid: " + ldapUid);
+        LOG.debug("validXWikiUserName: " + validXWikiUserName);
+
         // ////////////////////////////////////////////////////////////////////
         // map LDAP domain
         // ////////////////////////////////////////////////////////////////////
 
         Map<String, String> domainMapping = getConfig().getMapParam("domainMapping", null, context);
 
-        if (domainMapping != null) {
+        if (domainMapping != null && domainMapping.containsKey(ntlm.getDomain())) {
             String ldapDomain = domainMapping.get(ntlm.getDomain());
 
             ldapUid = ldapUid + "@" + ldapDomain;
@@ -427,6 +434,8 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         } catch (XWikiException e) {
             LOG.error("Failed to synchronise user's groups membership", e);
         }
+
+        LOG.debug("Principal=" + principal);
 
         return principal;
     }
