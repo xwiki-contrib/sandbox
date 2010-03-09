@@ -281,7 +281,17 @@ public class CollectionPluginApi extends Api {
 	}
 	
 	/**
-	 * List collections in which the document is present
+	 * Is a document representing a collection of a specific className
+	 * @param docName document to check
+	 * @param className class name to detect if it is a collection
+	 * @return true if it represents a collection
+	 */
+	public boolean isCollection(String docName, String className) {
+		return plugin.isCollection(docName, className, context);
+	}
+	
+	/**
+	 * List collections in which the document is present 
 	 * @param docName document to check collections for
 	 * @return list of documents that are collections
 	 */
@@ -318,6 +328,54 @@ public class CollectionPluginApi extends Api {
 	 */
 	public Map<String, String> getCollectionsWithPath(String docName, String path, ArrayList<String> pageList) {
 		return plugin.getCollectionsWithPath(docName, path, pageList, context);
+	}
+
+	/**
+	 * List collections in which the document is present 
+	 * and limited to collections of a specific class
+	 * @param docName document to check collections for
+	 * @param className class name to detect if it is a collection
+	 * @return list of documents that are collections
+	 */
+	public List<String> getCollections(String docName, String className) {
+		return plugin.getCollections(docName, className, context);
+	}
+	
+	/**
+	 * List collections in which the document is present
+	 * and limited to collections of a specific class
+	 * @param docName document to check collections for
+	 * @param className class name to detect if it is a collection
+	 * @param pageList pageList to exclude
+	 * @return list of documents that are collections
+	 */
+	public List<String> getCollections(String docName, String className, ArrayList<String> pageList) {
+		return plugin.getCollections(docName, className, pageList, context);
+	}
+	
+	/**
+	 * Retrieves the collections in which the document docName is present
+	 * and include the path to this collection with the document
+	 * and limited to collections of a specific class
+	 * @param docName document to search collections for
+	 * @param className class name to detect if it is a collection
+	 * @return map of pages representing collections and the path as the map values
+	 */	
+	public Map<String, String> getCollectionsWithPath(String docName, String className) {
+		return plugin.getCollectionsWithPath(docName, className, context);
+	}
+	
+	/**
+	 * Retrieves the collections in which the document docName is present
+	 * and include the path to this collection with the document
+	 * and limited to collections of a specific class
+	 * @param docName document to search collections for
+	 * @param className class name to detect if it is a collection
+	 * @param pageList list of pages already traversed to avoid infinite loops
+	 * @return map of pages representing collections and the path as the map values
+	 */
+	public Map<String, String> getCollectionsWithPath(String docName, String className, String path, ArrayList<String> pageList) {
+		return plugin.getCollectionsWithPath(docName, className, path, pageList, context);
 	}
 	
 	/** 

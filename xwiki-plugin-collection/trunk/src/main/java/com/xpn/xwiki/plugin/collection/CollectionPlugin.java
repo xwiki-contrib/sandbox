@@ -674,12 +674,44 @@ XWikiPluginInterface {
 	}
 
 	/**
+	 * Detects if a document represents a collection of class className
+	 * @param docName document to check
+	 * @param className class to use to detect if it is a collection
+	 * @param context XWiki Context
+	 * @return true if it represents a collection
+	 */
+	public boolean isCollection(String docName, String className, XWikiContext context) {
+		try {
+			return isCollection(context.getWiki().getDocument(docName, context), className, context);
+		} catch (XWikiException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Detects if a document represents a collection of class className
+	 * @param doc XWiki Document to check
+	 * @param className class to use to detect if it is a collection. If null use the default list of collections.
+	 * @param context XWiki Context
+	 * @return true if it represents a collection
+	 */
+	public boolean isCollection(XWikiDocument doc, String className, XWikiContext context) {
+		if (className==null)
+		    return isCollection(doc, context);
+		    
+		if (doc.getObject(className)!=null)
+			return true;
+
+		return false;
+	}
+
+	/**
 	 * Retrieves the collections in which the document docName is present
 	 * @param docName document to search collections for
 	 * @return list of pages representing collections
 	 */
 	public List<String> getCollections(String docName, XWikiContext context) {
-		return getCollections(docName, new ArrayList<String>(), context);
+		return getCollections(docName, null, new ArrayList<String>(), context);
 	}
 
 	/**
@@ -690,6 +722,53 @@ XWikiPluginInterface {
 	 * @return list of pages representing collections
 	 */
 	public List<String> getCollections(String docName, ArrayList<String> pageList, XWikiContext context) {
+		return getCollections(docName, null, pageList, context);		
+	}
+
+	/**
+	 * Retrieves the collections in which the document docName is present
+	 * and include the path to this collection with the document
+	 * @param docName document to search collections for
+	 * @param context XWiki Context
+	 * @return map of pages representing collections and the path as the map values
+	 */	
+	public Map<String, String> getCollectionsWithPath(String docName, XWikiContext context) {
+		return getCollectionsWithPath(docName, null, "", new ArrayList<String>(), context);
+	}
+
+	/**
+	 * Retrieves the collections in which the document docName is present
+	 * and include the path to this collection with the document
+	 * @param docName document to search collections for
+	 * @param pageList list of pages already traversed to avoid infinite loops
+	 * @param context XWiki Context
+	 * @return map of pages representing collections and the path as the map values
+	 */
+	public Map<String, String> getCollectionsWithPath(String docName, String path, ArrayList<String> pageList, XWikiContext context) {
+		return getCollectionsWithPath(docName, null, "", pageList, context);
+	}
+
+	/**
+	 * Retrieves the collections in which the document docName is present
+	 * and limit only to collection using class className
+	 * @param docName document to search collections for
+	 * @param className class to use to detect if it is a collection
+	 * @return list of pages representing collections
+	 */
+	public List<String> getCollections(String docName, String className, XWikiContext context) {
+		return getCollections(docName, className, new ArrayList<String>(), context);
+	}
+
+	/**
+	 * Retrieves the collections in which the document docName is present
+	 * and limit only to collection using class className
+	 * @param docName document to search collections for
+	 * @param className class to use to detect if it is a collection
+	 * @param pageList list of pages already traversed to avoid infinite loops
+	 * @param context XWiki Context
+	 * @return list of pages representing collections
+	 */
+	public List<String> getCollections(String docName, String className, ArrayList<String> pageList, XWikiContext context) {
 		List<String> collectionList = new ArrayList<String>();
 		XWikiDocument doc;
 		// add to the pageList to avoid infinite loops
@@ -700,7 +779,7 @@ XWikiPluginInterface {
 			// could not read document ignore it
 			return collectionList;
 		}
-		if (isCollection(doc, context))
+		if (isCollection(doc, className, context))
 			collectionList.add(docName);
 		else {
 			try {
@@ -708,7 +787,7 @@ XWikiPluginInterface {
 				for (Iterator<String> iterator = backLinks.iterator(); iterator.hasNext();) {
 					String backLink = (String) iterator.next();
 					if (!pageList.contains(backLink)) {
-						collectionList.addAll(getCollections(backLink, pageList, context));					
+						collectionList.addAll(getCollections(backLink, className, pageList, context));					
 					}
 				}
 			} catch (XWikiException e) {
@@ -721,23 +800,27 @@ XWikiPluginInterface {
 	/**
 	 * Retrieves the collections in which the document docName is present
 	 * and include the path to this collection with the document
+	 * and limit only to collection using class className
 	 * @param docName document to search collections for
+	 * @param className class to use to detect if it is a collection
 	 * @param context XWiki Context
 	 * @return map of pages representing collections and the path as the map values
 	 */	
-	public Map<String, String> getCollectionsWithPath(String docName, XWikiContext context) {
-		return getCollectionsWithPath(docName, "", new ArrayList<String>(), context);
+	public Map<String, String> getCollectionsWithPath(String docName, String className, XWikiContext context) {
+		return getCollectionsWithPath(docName, className, "", new ArrayList<String>(), context);
 	}
 
 	/**
 	 * Retrieves the collections in which the document docName is present
 	 * and include the path to this collection with the document
+	 * and limit only to collection using class className
 	 * @param docName document to search collections for
+	 * @param className class to use to detect if it is a collection
 	 * @param pageList list of pages already traversed to avoid infinite loops
 	 * @param context XWiki Context
 	 * @return map of pages representing collections and the path as the map values
 	 */
-	public Map<String, String> getCollectionsWithPath(String docName, String path, ArrayList<String> pageList, XWikiContext context) {
+	public Map<String, String> getCollectionsWithPath(String docName, String className, String path, ArrayList<String> pageList, XWikiContext context) {
 		Map<String, String> collectionMap = new HashMap<String, String>();
 		// add to the pageList to avoid infinite loops
 		pageList.add(docName);
@@ -748,7 +831,7 @@ XWikiPluginInterface {
 			// could not read document ignore it
 			return collectionMap;
 		}
-		if (isCollection(doc, context))
+		if (isCollection(doc, className, context))
 			collectionMap.put(docName, path);
 		else {
 			try {
@@ -757,7 +840,7 @@ XWikiPluginInterface {
 					String backLink = (String) iterator.next();
 					// check if pages already handle to avoid infinite loop
 					if (!pageList.contains(backLink)) {
-						collectionMap.putAll(getCollectionsWithPath(backLink, docName + ";" + path, pageList, context));	
+						collectionMap.putAll(getCollectionsWithPath(backLink, className, docName + ";" + path, pageList, context));	
 					}
 				}
 			} catch (XWikiException e) {
