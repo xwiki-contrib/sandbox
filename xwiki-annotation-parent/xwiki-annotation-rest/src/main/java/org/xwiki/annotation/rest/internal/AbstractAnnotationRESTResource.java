@@ -27,10 +27,12 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.velocity.VelocityContext;
+import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationService;
 import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.rest.model.jaxb.AnnotatedContent;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationRequest;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationStub;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
@@ -51,7 +53,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
  * 
  * @version $Id$
  */
-public abstract class AbstractAnnotationService extends XWikiResource
+public abstract class AbstractAnnotationRESTResource extends XWikiResource
 {
     /**
      * The default action to render the document for. <br />
@@ -78,25 +80,59 @@ public abstract class AbstractAnnotationService extends XWikiResource
     protected Execution execution;
 
     /**
-     * Helper function to translate a collection of annotations from the {@link org.xwiki.annotation.Annotation} model
-     * to the JAXB model to be serialized for REST communication.
+     * Builds an annotation response containing the annotated content along with the annotation stubs, according to the
+     * requirements in the passed annotations request.
+     * 
+     * @param request the annotations request
+     * @param documentName the name of the document to provide an annotated response for
+     * @return an annotation response with the annotated content and the annotation stubs
+     * @throws AnnotationServiceException in case something goes wrong handling the annotations
+     * @throws XWikiException in case something goes wrong manipulating the xwiki context & documents
+     */
+    protected AnnotationResponse getSuccessResponseWithAnnotatedContent(String documentName, AnnotationRequest request)
+        throws AnnotationServiceException, XWikiException
+    {
+        ObjectFactory factory = new ObjectFactory();
+        AnnotationResponse response = factory.createAnnotationResponse();
+
+        // get the annotations on this content
+        Collection<Annotation> annotations = annotationService.getAnnotations(documentName);
+        // filter them according to the request
+        Collection<Annotation> filteredAnnotations = filterAnnotations(annotations, request);
+        // render the document with the filtered annotations on it
+        String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION, filteredAnnotations);
+        // prepare the annotated content
+        AnnotatedContent annotatedContentResponse = factory.createAnnotatedContent();
+        annotatedContentResponse.getAnnotations().addAll(
+            prepareAnnotationStubsSet(filteredAnnotations, request.getRequest().getFields()));
+        annotatedContentResponse.setContent(renderedHTML);
+        // set the annotated content along with the return code in the response and return it
+        response.setAnnotatedContent(annotatedContentResponse);
+        response.setResponseCode(0);
+
+        return response;
+    }
+
+    /**
+     * Helper function to translate a collection of annotations from the {@link Annotation} model to the JAXB model to
+     * be serialized for REST communication.
      * 
      * @param annotations the annotations collection to be translated
-     * @param fields the extra parameters that should be set for the prepared annotations
+     * @param requestedFields the extra parameters that should be set for the prepared annotations
      * @return translate set of org.xwiki.annotation.internal.annotation.Annotation to set of
      *         org.xwiki.annotation.internal.annotation.Annotation
      */
-    protected Collection<AnnotationStub> prepareAnnotationStubsSet(
-        Collection<org.xwiki.annotation.Annotation> annotations, List<String> fields)
+    private Collection<AnnotationStub> prepareAnnotationStubsSet(Collection<Annotation> annotations,
+        List<String> requestedFields)
     {
         ObjectFactory factory = new ObjectFactory();
         List<AnnotationStub> set = new ArrayList<AnnotationStub>();
-        for (org.xwiki.annotation.Annotation xwikiAnnotation : annotations) {
+        for (Annotation xwikiAnnotation : annotations) {
             AnnotationStub annotation = factory.createAnnotationStub();
             annotation.setAnnotationId(xwikiAnnotation.getId());
             annotation.setState(xwikiAnnotation.getState().toString());
             // for all the requested extra fields, get them from the annotation and send them
-            for (String extraField : fields) {
+            for (String extraField : requestedFields) {
                 Object value = xwikiAnnotation.get(extraField);
                 AnnotationField field = new AnnotationField();
                 field.setName(extraField);
@@ -107,27 +143,6 @@ public abstract class AbstractAnnotationService extends XWikiResource
             set.add(annotation);
         }
         return set;
-    }
-
-    /**
-     * Helper function to build an {@link AnnotatedContent} object from a collection of annotations of type
-     * {@link org.xwiki.annotation.Annotation} and the rendered html, to the JAXB model to be serialized for REST
-     * communication. <br />
-     * TODO: make all callers of this function pass custom parameters, such as color, from client request
-     * 
-     * @param annotations the list of annotations to be transformed for serialization
-     * @param htmlContent the rendered content of the document to be packed with the collection of annotations
-     * @param fields the fields to return from the annotations stubs
-     * @return wrapped set of annotation, annotated and rendered content
-     */
-    protected AnnotatedContent prepareAnnotatedContent(Collection<org.xwiki.annotation.Annotation> annotations,
-        String htmlContent, List<String> fields)
-    {
-        ObjectFactory factory = new ObjectFactory();
-        AnnotatedContent result = factory.createAnnotatedContent();
-        result.getAnnotations().addAll(prepareAnnotationStubsSet(annotations, fields));
-        result.setContent(htmlContent);
-        return result;
     }
 
     /**
@@ -160,23 +175,26 @@ public abstract class AbstractAnnotationService extends XWikiResource
      * @param docName the name of the document to render
      * @param language the language in which to render the document
      * @param action the context action to render the document for
+     * @param annotations the annotations to render on the document
      * @return the HTML rendered content of the document
      * @throws XWikiException if anything wrong happens while setting up the context for rendering
      * @throws AnnotationServiceException if anything goes wrong during the rendering of the annotations
      */
-    protected String renderDocumentWithAnnotations(String docName, String language, String action)
-        throws XWikiException, AnnotationServiceException
+    private String renderDocumentWithAnnotations(String docName, String language, String action,
+        Collection<Annotation> annotations) throws XWikiException, AnnotationServiceException
     {
         String isInRenderingEngineKey = "isInRenderingEngine";
         XWikiContext context = org.xwiki.rest.Utils.getXWikiContext(componentManager);
         Object isInRenderingEngine = context.get(isInRenderingEngineKey);
         String result = null;
         try {
+            // setup documents on the context, and velocity context, and message tool for i18n and all
             setUpDocuments(docName, language);
             // set the current action on the context
             context.setAction(action);
             context.put(isInRenderingEngineKey, true);
-            result = annotationService.getAnnotatedHTML(docName);
+            // render the content in xhtml syntax, with the passed list of annotations
+            result = annotationService.getAnnotatedRenderedContent(docName, null, "xhtml/1.0", annotations);
         } finally {
             if (isInRenderingEngine != null) {
                 context.put(isInRenderingEngineKey, isInRenderingEngine);
@@ -195,7 +213,7 @@ public abstract class AbstractAnnotationService extends XWikiResource
      * @param language the language of the document
      * @throws XWikiException if anything goes wrong accessing documents
      */
-    protected void setUpDocuments(String docName, String language) throws XWikiException
+    private void setUpDocuments(String docName, String language) throws XWikiException
     {
         try {
             VelocityManager velocityManager = componentManager.lookup(VelocityManager.class);
@@ -220,8 +238,52 @@ public abstract class AbstractAnnotationService extends XWikiResource
         } catch (ComponentLookupException e) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_RENDERING,
                 XWikiException.ERROR_XWIKI_RENDERING_VELOCITY_EXCEPTION,
-                "Couldn't lookup velocity context to setup rendegin context.");
+                "Couldn't lookup velocity context to setup rendering context.");
         }
+    }
+
+    /**
+     * Helper method to filter a set of annotations according to the criteria in the passed annotation request. The
+     * fields in the filter of the request will be interpreted as a filter for equality with the value in the actual
+     * annotation, and all the fields conditions will be put together with an "or" operation.
+     * 
+     * @param annotations the collection of annotations to filter
+     * @param request the request according which to filter
+     * @return the filtered collection of annotations
+     */
+    protected Collection<Annotation> filterAnnotations(Collection<Annotation> annotations, AnnotationRequest request)
+    {
+        Collection<Annotation> result = new ArrayList<Annotation>();
+
+        for (Annotation ann : annotations) {
+            // matches starts true if there are no filters, and false if there are any, so that it would be made true by
+            // the actual match on one of the filters
+            boolean matches = request.getFilter().getFields().size() == 0;
+            for (AnnotationField filterField : request.getFilter().getFields()) {
+                String fieldName = filterField.getName();
+                String filterValue = filterField.getValue();
+                // this shouldn't happen. Ever. But if ever ever comes, we'd better be safe
+                if (fieldName == null || filterValue == null) {
+                    continue;
+                }
+
+                Object annotationValue = ann.get(fieldName);
+                // if the annotation doesn't specify the value we want to filter for, go to next filter
+                if (annotationValue == null) {
+                    continue;
+                }
+                // if the enforced value is equal to the string version of the annotation value of this field, it
+                // matches and we break, since we found a match, and we combine filters as OR
+                if (filterValue.equals(annotationValue.toString())) {
+                    matches = true;
+                    break;
+                }
+            }
+            if (matches) {
+                result.add(ann);
+            }
+        }
+        return result;
     }
 
     /**

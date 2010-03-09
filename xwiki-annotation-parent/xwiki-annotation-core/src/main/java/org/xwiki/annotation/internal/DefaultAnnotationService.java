@@ -111,10 +111,10 @@ public class DefaultAnnotationService implements AnnotationService
      * {@inheritDoc}
      * 
      * @see org.xwiki.annotation.AnnotationService#getAnnotatedRenderedContent(java.lang.String, java.lang.String,
-     *      java.lang.String)
+     *      java.lang.String, Collection)
      */
-    public String getAnnotatedRenderedContent(String sourceReference, String sourceSyntax, String outputSyntax)
-        throws AnnotationServiceException
+    public String getAnnotatedRenderedContent(String sourceReference, String sourceSyntax, String outputSyntax,
+        Collection<Annotation> annotations) throws AnnotationServiceException
     {
         try {
             String source = targetIoService.getSource(sourceReference);
@@ -140,7 +140,7 @@ public class DefaultAnnotationService implements AnnotationService
             WikiPrinter printer = new DefaultWikiPrinter();
             annotationsRenderer.setPrinter(printer);
             // set the annotations for this renderer
-            annotationsRenderer.setAnnotations(getValidAnnotations(sourceReference));
+            annotationsRenderer.setAnnotations(annotations);
 
             xdom.traverse(annotationsRenderer);
 
@@ -157,7 +157,7 @@ public class DefaultAnnotationService implements AnnotationService
      */
     public String getAnnotatedHTML(String sourceReference) throws AnnotationServiceException
     {
-        return getAnnotatedRenderedContent(sourceReference, null, "xhtml/1.0");
+        return getAnnotatedRenderedContent(sourceReference, null, "xhtml/1.0", getValidAnnotations(sourceReference));
     }
 
     /**

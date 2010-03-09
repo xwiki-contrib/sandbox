@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.Provider;
 
 import org.xwiki.annotation.rest.model.jaxb.AnnotationAddRequest;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationRequest;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Component;
 
@@ -39,7 +40,7 @@ import org.xwiki.component.annotation.Component;
 @Provider
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class FormUrlEncodedAnnotationAddRequestReader extends
-    AbstractFormUrlEncodedAnnotationReader<AnnotationAddRequest>
+    AbstractFormUrlEncodedAnnotationUpdateRequestReader<AnnotationAddRequest>
 {
     // TODO: should send selection, contextLeft and contextRight
     /**
@@ -73,34 +74,40 @@ public class FormUrlEncodedAnnotationAddRequestReader extends
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.rest.internal.representations.AbstractFormUrlEncodedAnnotationReader
+     * @see org.xwiki.annotation.rest.internal.representations.AbstractFormUrlEncodedAnnotationRequestReader
      *      #getReadObjectInstance(org.xwiki.annotation.rest.model.jaxb.ObjectFactory)
      */
     @Override
     protected AnnotationAddRequest getReadObjectInstance(ObjectFactory factory)
     {
-        return factory.createAnnotationAddRequest();
+        AnnotationAddRequest addRequest = factory.createAnnotationAddRequest();
+        // and initialize it
+        addRequest.setRequest(new AnnotationRequest.Request());
+        addRequest.setFilter(factory.createAnnotationFieldCollection());
+        addRequest.setAnnotation(factory.createAnnotationFieldCollection());
+        
+        return addRequest;
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.rest.internal.representations.AbstractFormUrlEncodedAnnotationReader
+     * @see org.xwiki.annotation.rest.internal.representations.AbstractFormUrlEncodedAnnotationRequestReader
      *      #saveField(java.lang.Object, java.lang.String, java.lang.String,
      *      org.xwiki.annotation.rest.model.jaxb.ObjectFactory)
      */
     @Override
-    protected void saveField(AnnotationAddRequest annotationAddRequest, String key, String value,
+    protected boolean saveField(AnnotationAddRequest annotationAddRequest, String key, String value,
         ObjectFactory objectFactory)
     {
         // check this key against the 'known fields'
         if (SELECTION_FIELD_NAME.equals(key)) {
             annotationAddRequest.setSelection(value);
-            return;
+            return true;
         }
         if (SELECTION_CONTEXT_FIELD_NAME.equals(key)) {
             annotationAddRequest.setSelectionContext(value);
-            return;
+            return true;
         }
         if (SELECTION_OFFSET_FIELD_NAME.equals(key)) {
             // use the parameter as a string and parse it as an integer
@@ -111,9 +118,9 @@ public class FormUrlEncodedAnnotationAddRequestReader extends
                 // nothing, will leave the 0 value
             }
             annotationAddRequest.setSelectionOffset(offset);
-            return;
+            return true;
         }
-        // if none matched, add as extra field
-        super.saveField(annotationAddRequest, key, value, objectFactory);
+        // if none matched, handle as an annotation update field
+        return super.saveField(annotationAddRequest, key, value, objectFactory);
     }
 }

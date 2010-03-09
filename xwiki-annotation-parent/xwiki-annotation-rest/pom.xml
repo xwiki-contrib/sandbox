@@ -105,7 +105,7 @@
         <configuration>
           <excludes>
             org/xwiki/annotation/rest/model/jaxb/**/*,
-            org/xwiki/annotation/rest/internal/AbstractAnnotationService.java
+            org/xwiki/annotation/rest/internal/AbstractAnnotationRESTResource.java
           </excludes>
         </configuration>
       </plugin>

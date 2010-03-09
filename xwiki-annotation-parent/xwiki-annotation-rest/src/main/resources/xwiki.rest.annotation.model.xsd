@@ -24,13 +24,48 @@
     </sequence>
   </complexType>
 
-  <complexType name="AnnotationAddRequest">
+  <complexType name="AnnotationRequest">
     <annotation>
-      <documentation> Stores the information about a request for an annotation to be added, such as the annotated text
-        and the context of the annotation, along with extra fields.</documentation>
+      <documentation> Stores the information about an annotations request: what annotations should be returned with the
+        annotated content and the annotations stubs. Such information are the annotations filter (which annotations
+        should be displayed) and the annotation additional fields that should be added in the stubs.
+      </documentation>
+    </annotation>
+    <sequence>
+      <!-- The request fields element -->
+      <element name="request" minOccurs="0">
+        <complexType>
+          <sequence>
+            <element name="field" type="string" minOccurs="0" maxOccurs="unbounded" />
+          </sequence>
+        </complexType>
+      </element>
+      <!-- An annotation fields collection holding the fields to filter for, and their respective values -->
+      <element name="filter" type="xwiki:AnnotationFieldCollection" minOccurs="0" />
+    </sequence>
+  </complexType>
+
+  <complexType name="AnnotationUpdateRequest">
+    <annotation>
+      <documentation> Stores a request for an annotation to be updated: besides the annotation request components, a
+        collection of fields for the annotation.</documentation>
     </annotation>
     <complexContent>
-      <extension base="xwiki:AnnotationFieldCollection">
+      <extension base="xwiki:AnnotationRequest">
+        <sequence>
+          <element name="annotation" type="xwiki:AnnotationFieldCollection"></element>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="AnnotationAddRequest">
+    <annotation>
+      <documentation> Extends the annotation update request by adding the set of 'special' fields for annotation
+        selection.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xwiki:AnnotationUpdateRequest">
         <sequence>
           <element name="selection" type="string"></element>
           <element name="selectionOffset" type="int"></element>
@@ -46,12 +81,12 @@
         to be further requested from the annotation service for the extra details.</documentation>
     </annotation>
     <sequence>
-      <element name="annotationId" type="string"></element>
+      <element name="annotationId" type="string" />
       <!-- this is really needed here? -->
-      <element name="target" type="string"></element>
-      <element name="state"></element>
+      <element name="target" type="string" />
+      <element name="state" />
       <!-- allow extra parameters to be sent for annotations, if requested -->
-      <element name="field" minOccurs="0" maxOccurs="unbounded" type="xwiki:AnnotationField"></element>
+      <element name="field" minOccurs="0" maxOccurs="unbounded" type="xwiki:AnnotationField" />
     </sequence>
   </complexType>
 
@@ -102,6 +137,9 @@
   </complexType>
 
   <element name="annotationAddRequest" type="xwiki:AnnotationAddRequest"></element>
+  <element name="annotationUpdateRequest" type="xwiki:AnnotationUpdateRequest"></element>
+  <!-- The delete request is only a field collection to only pass the filter for the returned annotations. -->
+  <element name="annotationDeleteRequest" type="xwiki:AnnotationRequest"></element>
+
   <element name="annotationResponse" type="xwiki:AnnotationResponse"></element>
-  <element name="annotationUpdateRequest" type="xwiki:AnnotationFieldCollection"></element>
 </schema>

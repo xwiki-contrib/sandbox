@@ -36,7 +36,7 @@ import org.restlet.data.Form;
 import org.restlet.resource.InputRepresentation;
 import org.restlet.resource.Representation;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
-import org.xwiki.annotation.rest.model.jaxb.AnnotationFieldCollection;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationRequest;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.rest.Constants;
 import org.xwiki.rest.XWikiRestComponent;
@@ -48,9 +48,21 @@ import org.xwiki.rest.XWikiRestComponent;
  * @param <T> the type read from the url encoded form
  * @version $Id$
  */
-public abstract class AbstractFormUrlEncodedAnnotationReader<T extends AnnotationFieldCollection> implements
+public abstract class AbstractFormUrlEncodedAnnotationRequestReader<T extends AnnotationRequest> implements
     MessageBodyReader<T>, XWikiRestComponent
 {
+    /**
+     * The parameter name for a field requested to appear in the annotations stub. <br />
+     * Note: This can get problematic if a custom field of the annotation is called the same
+     */
+    protected static final String REQUESTED_FIELD = "request_field";
+
+    /**
+     * The prefix of the parameters of the annotations filters. <br />
+     * Note: This can get problematic if custom fields of the annotation are called the same
+     */
+    protected static final String FILTER_FIELD_PREFIX = "filter_";
+
     /**
      * Helper function to provide an instance of the read object from the object factory.
      * 
@@ -71,22 +83,22 @@ public abstract class AbstractFormUrlEncodedAnnotationReader<T extends Annotatio
         WebApplicationException
     {
         ObjectFactory objectFactory = new ObjectFactory();
-        T annotationAddRequest = getReadObjectInstance(objectFactory);
+        T annotationRequest = getReadObjectInstance(objectFactory);
 
         // parse a form from the content of this request
         Representation representation =
             new InputRepresentation(entityStream, org.restlet.data.MediaType.APPLICATION_WWW_FORM);
         Form form = new Form(representation);
 
-        /*
-         * If the form is empty then it might have happened that some filter has invalidated the entity stream. Try to
-         * read data using getParameter()
-         */
-        if (form.getValuesMap().size() != 0) {
-            for (Map.Entry<String, String> entry : ((Map<String, String>) form.getValuesMap()).entrySet()) {
-                saveField(annotationAddRequest, entry.getKey(), entry.getValue(), objectFactory);
+        if (form.getNames().size() != 0) {
+            for (String paramName : form.getNames()) {
+                for (String paramValue : form.getValuesArray(paramName)) {
+                    saveField(annotationRequest, paramName, paramValue, objectFactory);
+                }
             }
         } else {
+            // If the form is empty then it might have happened that some filter has invalidated the entity stream. Try
+            // to read data using the parameters
             HttpServletRequest httpServletRequest =
                 (HttpServletRequest) Context.getCurrent().getAttributes().get(Constants.HTTP_REQUEST);
             for (Object entryObj : httpServletRequest.getParameterMap().entrySet()) {
@@ -96,12 +108,15 @@ public abstract class AbstractFormUrlEncodedAnnotationReader<T extends Annotatio
                 if ("method".equals(entry.getKey()) || "media".equals(entry.getKey())) {
                     continue;
                 }
-                saveField(annotationAddRequest, (String) entry.getKey(), ((String[]) entry.getValue())[0],
-                    objectFactory);
+                // save all the values of this field, one by one
+                String[] paramValues = (String[]) entry.getValue();
+                for (String value : paramValues) {
+                    saveField(annotationRequest, (String) entry.getKey(), value, objectFactory);
+                }
             }
         }
 
-        return annotationAddRequest;
+        return annotationRequest;
     }
 
     /**
@@ -112,12 +127,25 @@ public abstract class AbstractFormUrlEncodedAnnotationReader<T extends Annotatio
      * @param key the key of the field
      * @param value the value of the field
      * @param objectFactory the objects factory to create the annotation fields
+     * @return true if the field was saved at this level, false otherwise
      */
-    protected void saveField(T readObject, String key, String value, ObjectFactory objectFactory)
+    protected boolean saveField(T readObject, String key, String value, ObjectFactory objectFactory)
     {
-        AnnotationField extraField = objectFactory.createAnnotationField();
-        extraField.setName(key);
-        extraField.setValue(value);
-        readObject.getFields().add(extraField);
+        // if the field is a requested field, put it in the requested fields list
+        if (REQUESTED_FIELD.equals(key)) {
+            readObject.getRequest().getFields().add(value);
+            return true;
+        }
+        // if the field is a filter field, direct it to the filter fields collection
+        if (key.startsWith(FILTER_FIELD_PREFIX)) {
+            AnnotationField filterField = objectFactory.createAnnotationField();
+            // put only the name of the prop to filter for, not the filter prefix too
+            filterField.setName(key.substring(FILTER_FIELD_PREFIX.length()));
+            filterField.setValue(value);
+            readObject.getFilter().getFields().add(filterField);
+            return true;
+        }
+
+        return false;
     }
 }

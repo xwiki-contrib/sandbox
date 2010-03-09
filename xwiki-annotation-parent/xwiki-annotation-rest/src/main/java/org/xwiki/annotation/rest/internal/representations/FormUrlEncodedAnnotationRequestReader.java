@@ -26,31 +26,33 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.Provider;
 
-import org.xwiki.annotation.rest.model.jaxb.AnnotationFieldCollection;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationRequest;
 import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
 import org.xwiki.component.annotation.Component;
 
 /**
- * Implementation of the form url encoded reader for the annotation update requests.
- * 
  * @version $Id$
  */
-@Component("org.xwiki.annotation.rest.internal.representations.FormUrlEncodedAnnotationFieldCollectionReader")
+@Component("org.xwiki.annotation.rest.internal.representations.FormUrlEncodedAnnotationRequestReader")
 @Provider
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-public class FormUrlEncodedAnnotationFieldCollectionReader extends
-    AbstractFormUrlEncodedAnnotationReader<AnnotationFieldCollection>
+public class FormUrlEncodedAnnotationRequestReader extends
+    AbstractFormUrlEncodedAnnotationRequestReader<AnnotationRequest>
 {
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.annotation.rest.internal.representations.AbstractFormUrlEncodedAnnotationReader
+     * @see org.xwiki.annotation.rest.internal.representations.AbstractFormUrlEncodedAnnotationRequestReader
      *      #getReadObjectInstance(org.xwiki.annotation.rest.model.jaxb.ObjectFactory)
      */
     @Override
-    protected AnnotationFieldCollection getReadObjectInstance(ObjectFactory factory)
+    protected AnnotationRequest getReadObjectInstance(ObjectFactory factory)
     {
-        return factory.createAnnotationFieldCollection();
+        AnnotationRequest request = factory.createAnnotationRequest();
+        request.setRequest(new AnnotationRequest.Request());
+        request.setFilter(factory.createAnnotationFieldCollection());
+        
+        return request;
     }
 
     /**
@@ -63,6 +65,7 @@ public class FormUrlEncodedAnnotationFieldCollectionReader extends
     {
         // this reader will only read annotationAddRequests, and none of the superclasses. Superclasses will read
         // themselves
-        return type.equals(AnnotationFieldCollection.class);
+        return type.equals(AnnotationRequest.class);
     }
+
 }

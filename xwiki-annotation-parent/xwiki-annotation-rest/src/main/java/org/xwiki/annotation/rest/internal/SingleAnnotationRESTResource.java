@@ -20,7 +20,6 @@
 
 package org.xwiki.annotation.rest.internal;
 
-import java.util.Collections;
 import java.util.logging.Level;
 
 import javax.ws.rs.DELETE;
@@ -33,9 +32,9 @@ import javax.ws.rs.core.Response.Status;
 import org.xwiki.annotation.Annotation;
 import org.xwiki.annotation.AnnotationServiceException;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationField;
-import org.xwiki.annotation.rest.model.jaxb.AnnotationFieldCollection;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationRequest;
 import org.xwiki.annotation.rest.model.jaxb.AnnotationResponse;
-import org.xwiki.annotation.rest.model.jaxb.ObjectFactory;
+import org.xwiki.annotation.rest.model.jaxb.AnnotationUpdateRequest;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.DocumentReference;
@@ -50,7 +49,7 @@ import com.xpn.xwiki.XWikiException;
  */
 @Component("org.xwiki.annotation.rest.internal.SingleAnnotationRESTResource")
 @Path("/wikis/{wikiName}/spaces/{spaceName}/pages/{pageName}/annotation/{id}")
-public class SingleAnnotationRESTResource extends AbstractAnnotationService
+public class SingleAnnotationRESTResource extends AbstractAnnotationRESTResource
 {
     /**
      * Entity reference serializer used to get reference to the document to perform annotation operation on.
@@ -65,11 +64,13 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
      * @param page the name of the document to delete the annotation from
      * @param wiki the wiki of the document to delete the annotation from
      * @param id the id of the annotation to delete
+     * @param request the annotation request to configure the returned annotated content after the execution of the
+     *            operation
      * @return a annotation response for which the response code will be 0 in case of success and non-zero otherwise
      */
     @DELETE
     public AnnotationResponse doDelete(@PathParam("spaceName") String space, @PathParam("pageName") String page,
-        @PathParam("wikiName") String wiki, @PathParam("id") String id)
+        @PathParam("wikiName") String wiki, @PathParam("id") String id, AnnotationRequest request)
     {
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
@@ -79,16 +80,11 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             if (!annotationRightService.canEditAnnotation(id, documentName, getXWikiUser())) {
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
-
+            // remove the annotation
             annotationService.removeAnnotation(documentName, id);
-
-            AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
-            result.setResponseCode(0);
-            // TODO: action should be obtained from the calling client in the parameters
-            String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
-            result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
-                renderedHTML, Collections.<String> emptyList()));
-            return result;
+            // and then return the annotated content, as specified by the annotation request
+            AnnotationResponse response = getSuccessResponseWithAnnotatedContent(documentName, request);
+            return response;
         } catch (XWikiException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return getErrorResponse(e);
@@ -105,12 +101,12 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
      * @param page the name of the document to update the annotation from
      * @param wiki the wiki of the document to update the annotation from
      * @param id the id of the annotation to update
-     * @param fields the pairs of name value to update the annotation data
+     * @param updateRequest the request to update the annotation pointed by the id
      * @return a annotation response for which the response code will be 0 in case of success and non-zero otherwise
      */
     @PUT
     public AnnotationResponse doUpdate(@PathParam("spaceName") String space, @PathParam("pageName") String page,
-        @PathParam("wikiName") String wiki, @PathParam("id") String id, AnnotationFieldCollection fields)
+        @PathParam("wikiName") String wiki, @PathParam("id") String id, AnnotationUpdateRequest updateRequest)
     {
         try {
             DocumentReference docRef = new DocumentReference(wiki, space, page);
@@ -124,21 +120,16 @@ public class SingleAnnotationRESTResource extends AbstractAnnotationService
             // id from the url
             Annotation newAnnotation = new Annotation(id);
             // fields from the posted content
-            for (AnnotationField field : fields.getFields()) {
+            for (AnnotationField field : updateRequest.getAnnotation().getFields()) {
                 newAnnotation.set(field.getName(), field.getValue());
             }
             // overwrite author if any was set because we know better who's logged in
             newAnnotation.setAuthor(getXWikiUser());
             // and update
             annotationService.updateAnnotation(documentName, newAnnotation);
-
-            AnnotationResponse result = new ObjectFactory().createAnnotationResponse();
-            result.setResponseCode(0);
-            // TODO: action should be obtained from the calling client in the parameters
-            String renderedHTML = renderDocumentWithAnnotations(documentName, null, DEFAULT_ACTION);
-            result.setAnnotatedContent(prepareAnnotatedContent(annotationService.getAnnotations(documentName),
-                renderedHTML, Collections.<String> emptyList()));
-            return result;
+            // and then return the annotated content, as specified by the annotation request
+            AnnotationResponse response = getSuccessResponseWithAnnotatedContent(documentName, updateRequest);
+            return response;
         } catch (XWikiException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return getErrorResponse(e);

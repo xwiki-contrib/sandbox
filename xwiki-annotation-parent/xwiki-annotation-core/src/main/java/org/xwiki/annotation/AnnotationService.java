@@ -40,29 +40,34 @@ public interface AnnotationService
 {
     /**
      * Returns the XHTML of the requested source, along with annotations inserted as {@code span} elements inside it.
-     * It's a particular case of {@link #getAnnotatedRenderedContent(String, String, String)} for unspecified input
-     * syntax and {@code xhtml/1.0} output syntax.
+     * It's a particular case of {@link #getAnnotatedRenderedContent(String, String, String, Collection)} for
+     * unspecified input syntax, {@code xhtml/1.0} output syntax and the list of annotations returned by
+     * {@link #getValidAnnotations(String)} for this source reference.
      * 
      * @param sourceReference reference to the source to be rendered in XHTML with annotations
      * @return rendered and annotated document
      * @throws AnnotationServiceException if anything goes wrong retrieving or rendering the requested source
-     * @see #getAnnotatedRenderedContent(String, String, String)
+     * @see #getAnnotatedRenderedContent(String, String, String, Collection)
      */
     String getAnnotatedHTML(String sourceReference) throws AnnotationServiceException;
 
     /**
-     * Returns result obtained by rendering with annotations the source referenced by the {@code sourceReference},
-     * parsed in {@code sourceSyntax}.
+     * Returns result obtained by rendering with annotations markers the source referenced by the {@code
+     * sourceReference} parsed in {@code sourceSyntax}. The list of annotations to be added markers for is passed in the
+     * {@code annotations} parameter. Note that no test is done on the actual target of the annotations in the passed
+     * list, they will all be rendered, as long as their selected text and context can be identified in the content.
      * 
      * @param sourceReference the reference to the source to be rendered in XHTML with annotations
      * @param sourceSyntax the syntax to parse the source in. If this parameter is null, the default source syntax will
      *            be used, as returned by the target IO service.
      * @param outputSyntax the syntax to render in (e.g. "xhtml/1.0")
+     * @param annotations the annotations to render on the content referred by the {@code sourceReference}. Can be the
+     *            whole set of annotations on that source or a subset, filtered by various criteria
      * @return the annotated rendered source
      * @throws AnnotationServiceException if anything goes wrong retrieving or rendering the requested source
      */
-    String getAnnotatedRenderedContent(String sourceReference, String sourceSyntax, String outputSyntax)
-        throws AnnotationServiceException;
+    String getAnnotatedRenderedContent(String sourceReference, String sourceSyntax, String outputSyntax,
+        Collection<Annotation> annotations) throws AnnotationServiceException;
 
     /**
      * Adds an the specified annotation for the specified target.
