@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>xwiki-core-parent</artifactId>
+    <groupId>org.xwiki.platform</groupId>
+    <version>2.3-SNAPSHOT</version>
+  </parent>
+  <groupId>org.xwiki.contrib</groupId>
+  <artifactId>xwiki-userevents</artifactId>
+  <packaging>jar</packaging>
+  <name>XWiki Contrib - User Events</name>
+  <version>1.0-SNAPSHOT</version>
+  <description>A module providing OM events related to user profiles + a feature of email notifications upon user registration.</description>
+  <properties>
+    <platform.core.version>2.3-SNAPSHOT</platform.core.version>
+    <platform.mailsender.version>1.14-SNAPSHOT</platform.mailsender.version>
+  </properties>
+  <dependencies>
+    <!-- XWiki Component -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-component-api</artifactId>
+      <version>${platform.core.version}</version>
+    </dependency>
+    <!-- XWiki Model -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-model</artifactId>
+      <version>${platform.core.version}</version>
+    </dependency>
+    <!-- XWiki Observation -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-observation-local</artifactId>
+      <version>${platform.core.version}</version>
+    </dependency>
+    <!-- XWiki Core -->
+    <dependency>
+      <groupId>com.xpn.xwiki.platform</groupId>
+      <artifactId>xwiki-core</artifactId>
+      <version>${platform.core.version}</version>
+    </dependency>
+    <!-- Mailsender Plugin -->
+    <dependency>
+      <groupId>com.xpn.xwiki.platform.plugins</groupId>
+      <artifactId>xwiki-plugin-mailsender</artifactId>
+      <version>${platform.mailsender.version}</version>
+    </dependency>
+  </dependencies>
+</project>
