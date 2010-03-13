@@ -12,6 +12,7 @@ import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.Event;
 import org.xwiki.user.RegistrationNotifierConfiguration;
 import org.xwiki.user.event.UserCreationEvent;
+import org.xwiki.user.event.UserValidationEvent;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.plugin.mailsender.MailSenderPluginApi;
@@ -26,20 +27,22 @@ public class UserRegistrationNotifier implements EventListener
     @Requirement
     private RegistrationNotifierConfiguration configuration;
 
-    @Override
     public List<Event> getEvents()
     {
+        if (this.isEmailValidationMode()) {
+            // If the wiki requires users to validate their account from an email, we will listen to this event.
+            return Arrays.<Event> asList(new UserValidationEvent());
+        }
+        // Otherwise we just listen to user creation event.
         return Arrays.<Event> asList(new UserCreationEvent());
     }
 
-    @Override
     public String getName()
     {
         return "registrationNotifier";
     }
 
     @SuppressWarnings("unchecked")
-    @Override
     public void onEvent(Event event, Object source, Object data)
     {
         if (configuration.getEmailAddressesToNotify().length > 0) {
@@ -70,6 +73,11 @@ public class UserRegistrationNotifier implements EventListener
     private String getAdminEmail()
     {
         return getXWikiContext().getWiki().getXWikiPreference("admin_email", getXWikiContext());
+    }
+
+    private boolean isEmailValidationMode()
+    {
+        return getXWikiContext().getWiki().getXWikiPreference("use_email_verification", getXWikiContext()).equals("1");
     }
 
 }
