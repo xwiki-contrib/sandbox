@@ -1,0 +1,2 @@
+org.xwiki.wikiimporter.internal.mediawiki.MediaWikiXmlImporter
+org.xwiki.wikiimporter.internal.mediawiki.MediaWikiImporterListener
