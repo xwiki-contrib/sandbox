@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.wikiimporter;
+package org.xwiki.wikiimporter.importer;
 
 import org.xwiki.component.logging.Logger;
 import org.xwiki.component.manager.ComponentManager;

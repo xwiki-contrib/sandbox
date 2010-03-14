@@ -21,43 +21,44 @@ package org.xwiki.wikiimporter.wiki;
 
 import java.util.List;
 
+import org.xwiki.rendering.block.XDOM;
+
 /**
  * WikiPageRevision interface represents a Wiki Page Revision used during import process.
  * 
  * @version $Id$
  */
-public interface WikiPageRevision {
+public interface WikiPageRevision
+{
 
+    /**
+     *@return the author of Page revision.
+     */
+    public String getAuthor();
 
-	/**
-	 *@return the author of Page revision.
-	 */
-	public String getAuthor();
-	
+    /**
+     *@return the list of attachments of a Page revision.
+     */
+    public List<Attachment> getAttachments();
 
-	/**
-	 *@return the list of attachments of a Page revision.
-	 */
-	public List<Attachment> getAttachments();
-	
-	/**
-	 *@return the version of Page revision.
-	 */
-	public String getVersion();
-	
-	/**
-	 *@return the text content of Page revision.
-	 */
-	public String getContent();
-	
-	/**
-	 *@return the comment on Page revision.
-	 */
-	public String getComment();
-	
-	/**
-	 *@return <tt>true</tt> if the revision is  a minor edit, <tt>false</tt> if not.
-	 */
-	public boolean isMinorEdit();
-	
+    /**
+     *@return the version of Page revision.
+     */
+    public String getVersion();
+
+    /**
+     *@return the text content of Page revision.
+     */
+    public XDOM getContent();
+
+    /**
+     *@return the comment on Page revision.
+     */
+    public String getComment();
+
+    /**
+     *@return <tt>true</tt> if the revision is a minor edit, <tt>false</tt> if not.
+     */
+    public boolean isMinorEdit();
+
 }

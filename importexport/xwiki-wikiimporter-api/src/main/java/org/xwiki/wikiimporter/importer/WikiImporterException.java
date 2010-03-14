@@ -17,28 +17,27 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.wikiimporter;
+package org.xwiki.wikiimporter.importer;
 
 /**
- * Encapsulate wiki importer data parse error.
+ * Encapsulate wiki importer error.
  * 
  * @version $Id$
  */
-
-public class WikiImporterParseException extends Exception
+public class WikiImporterException extends Exception
 {
 
     /**
      * Class version.
      */
-    private static final long serialVersionUID = 129432454803316987L;
+    private static final long serialVersionUID = 162832454803316987L;
 
     /**
      * Constructs a new exception with the specified message.
      * 
      * @param message The explanation of the exception.
      */
-    public WikiImporterParseException(String message)
+    public WikiImporterException(String message)
     {
         super(message);
     }
@@ -48,7 +47,7 @@ public class WikiImporterParseException extends Exception
      * 
      * @param throwable The underlying cause for this exception.
      */
-    public WikiImporterParseException(Throwable throwable)
+    public WikiImporterException(Throwable throwable)
     {
         super(throwable);
     }
@@ -59,7 +58,7 @@ public class WikiImporterParseException extends Exception
      * @param message The explanation of the exception.
      * @param throwable The underlying cause for this exception.
      */
-    public WikiImporterParseException(String message, Throwable throwable)
+    public WikiImporterException(String message, Throwable throwable)
     {
         super(message, throwable);
     }

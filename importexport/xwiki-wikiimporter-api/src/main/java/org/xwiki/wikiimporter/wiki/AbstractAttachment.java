@@ -19,12 +19,21 @@
  */
 package org.xwiki.wikiimporter.wiki;
 
+import java.io.File;
+
 /**
- * 
  * @version $Id$
  */
 public abstract class AbstractAttachment implements Attachment
 {
+
+    protected String author;
+
+    protected String mimeType;
+
+    protected String fileName;
+
+    protected File attachmentAsFile;
 
     /**
      * {@inheritDoc}
@@ -33,19 +42,7 @@ public abstract class AbstractAttachment implements Attachment
      */
     public String getAuthor()
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.Attachment#getContent()
-     */
-    public byte[] getContent()
-    {
-        // TODO Auto-generated method stub
-        return null;
+        return author;
     }
 
     /**
@@ -55,8 +52,7 @@ public abstract class AbstractAttachment implements Attachment
      */
     public String getFileName()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return fileName;
     }
 
     /**
@@ -64,10 +60,10 @@ public abstract class AbstractAttachment implements Attachment
      * 
      * @see org.xwiki.wikiimporter.wiki.Attachment#getFileSize()
      */
-    public int getFileSize()
+    public long getFileSize()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        // TODO Attachment File Size
+        return attachmentAsFile.length();
     }
 
     /**
@@ -77,8 +73,7 @@ public abstract class AbstractAttachment implements Attachment
      */
     public String getMimeType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return mimeType;
     }
 
 }

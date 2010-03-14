@@ -26,28 +26,29 @@ import java.util.List;
  * 
  * @version $Id$
  */
-public interface Wiki {
+public interface Wiki
+{
 
-	/**
-	 *@return the list of Wiki pages.
-	 */
-	public List<WikiPage> getWikiPages();
-	
-	/**
-	 *@return list of names of the spaces.
-	 */
-	public List<String> getSpaceNames();
-	
-	/**
-	 *@param space name.
-	 *@return corresponding list of pages.
-	 */
+    /**
+     *@return the list of Wiki pages.
+     */
+    public List<WikiPage> getWikiPages();
+
+    /**
+     *@return list of names of the spaces.
+     */
+    public List<String> getSpaceNames();
+
+    /**
+     *@param space name.
+     *@return corresponding list of pages.
+     */
     public List<String> getPageNames(String space);
-    
+
     /**
      *@param space name.
      *@param page name.
      *@return the corresponding Wiki Page.
      */
-    public WikiPage getWikiPage(String space,String page);
- }
+    public WikiPage getWikiPage(String space, String page);
+}

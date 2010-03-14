@@ -1,2 +1,3 @@
-org.xwiki.wikiimporter.internal.WikiImporterVelocityContextInitializer
+org.xwiki.wikiimporter.internal.importer.WikiImporterVelocityContextInitializer
 org.xwiki.wikiimporter.internal.type.DefaultWikiImporterTypeFactory
+org.xwiki.wikiimporter.internal.bridge.DefaultWikiImporterDocumentBridge

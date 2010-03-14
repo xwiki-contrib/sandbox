@@ -22,7 +22,7 @@ package org.xwiki.wikiimporter.type;
 import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.wikiimporter.WikiImporterException;
+import org.xwiki.wikiimporter.importer.WikiImporterException;
 
 /**
  * WikiImporter factory component exposes the information about supported wikis and dataformats
@@ -35,6 +35,7 @@ public interface WikiImporterTypeFactory
 
     /**
      * Create a specific WikiImporter type with given Id as String. (eg : "mediawiki/xml", "wordpress/xmlrpc" .. )
+     * 
      * @param wikiImporterType Type id as String.
      * @return WikiImporterType
      */

@@ -44,6 +44,10 @@ public interface WikiImporterDescriptor
      */
     Class< ? > getParametersBeanClass();
 
+    /**
+     * @return the parameter descriptor map
+     */
+
     Map<String, WikiImporterParameterDescriptor> getParameterDescriptorMap();
 
 }

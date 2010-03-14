@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.wikiimporter.internal;
+package org.xwiki.wikiimporter.internal.importer;
 
 import org.apache.velocity.VelocityContext;
 import org.xwiki.component.annotation.Component;
@@ -25,7 +25,7 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.velocity.VelocityContextInitializer;
-import org.xwiki.wikiimporter.WikiImporterVelocityBridge;
+import org.xwiki.wikiimporter.importer.WikiImporterVelocityBridge;
 
 /**
  * Velocity Context Initializer for WikiImporter.

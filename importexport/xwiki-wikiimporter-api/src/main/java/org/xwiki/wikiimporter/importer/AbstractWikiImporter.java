@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.wikiimporter;
+package org.xwiki.wikiimporter.importer;
 
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
@@ -62,9 +62,9 @@ public abstract class AbstractWikiImporter extends AbstractLogEnabled implements
     private Class< ? > parametersBeanClass;
 
     /**
-     * @param name
-     * @param description
-     * @param parameterBeanClass
+     * @param name The human-readable wiki importer name
+     * @param description WikiImporter description
+     * @param parameterBeanClass Parameter bean class used to generate the WikiImporter descriptor
      */
 
     public AbstractWikiImporter(String name, String description, Class< ? > parameterBeanClass)
@@ -77,7 +77,7 @@ public abstract class AbstractWikiImporter extends AbstractLogEnabled implements
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.wikiimporter.WikiImporter#getDescriptor()
+     * @see org.xwiki.wikiimporter.importer.WikiImporter#getDescriptor()
      */
     public WikiImporterDescriptor getDescriptor()
     {
@@ -93,7 +93,7 @@ public abstract class AbstractWikiImporter extends AbstractLogEnabled implements
     {
         // Initialise WikiImporter Descriptor.
         DefaultWikiImporterDescriptor descriptor =
-            new DefaultWikiImporterDescriptor(description, name, beanManager.getBeanDescriptor(parametersBeanClass));
+            new DefaultWikiImporterDescriptor(name, description, beanManager.getBeanDescriptor(parametersBeanClass));
 
         setDescriptor(descriptor);
     }

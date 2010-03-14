@@ -19,47 +19,36 @@
  */
 package org.xwiki.wikiimporter;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
+import org.xwiki.test.AbstractComponentTestCase;
+import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
+
 /**
- * Encapsulate wiki importer error.
- * 
  * @version $Id$
  */
-public class WikiImporterException extends Exception
+public class WikiImporterDocumentBridgeTest extends AbstractComponentTestCase
 {
 
-    /**
-     * Class version.
-     */
-    private static final long serialVersionUID = 162832454803316987L;
+    WikiImporterDocumentBridge bridge;
 
     /**
-     * Constructs a new exception with the specified message.
+     * {@inheritDoc}
      * 
-     * @param message The explanation of the exception.
+     * @see org.xwiki.test.AbstractComponentTestCase#registerComponents()
      */
-    public WikiImporterException(String message)
+    @Override
+    protected void registerComponents() throws Exception
     {
-        super(message);
+        super.registerComponents();
+        bridge = getComponentManager().lookup(WikiImporterDocumentBridge.class);
     }
 
-    /**
-     * Constructs a new exception with the specified cause.
-     * 
-     * @param throwable The underlying cause for this exception.
-     */
-    public WikiImporterException(Throwable throwable)
+    @Test
+    public void testDocumentBridge()
     {
-        super(throwable);
-    }
-
-    /**
-     * Constructs a new exception with the specified message and cause.
-     * 
-     * @param message The explanation of the exception.
-     * @param throwable The underlying cause for this exception.
-     */
-    public WikiImporterException(String message, Throwable throwable)
-    {
-        super(message, throwable);
+        Assert.assertNotNull(bridge);
+        Assert.assertNotNull(bridge.getDocAccessBridge());
     }
 }

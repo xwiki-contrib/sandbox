@@ -17,19 +17,25 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.wikiimporter;
-
-import java.util.Map;
+package org.xwiki.wikiimporter.listener;
 
 import org.xml.sax.InputSource;
+import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.rendering.listener.Listener;
 
 /**
  * Contains callback events called when a document to be imported has been parsed.
  * 
  * @version $Id$
  */
-public interface WikiImporterListener
+@ComponentRole
+public interface WikiImporterListener extends Listener
 {
+
+    /**
+     * Call back for Start of a Wiki page.
+     */
+    void beginWikiPage();
 
     /**
      * Call back for Start of a Wiki page.
@@ -37,33 +43,35 @@ public interface WikiImporterListener
      * @param pageName the page name.
      * @param params the parameters of page
      */
-    void beginWikiPage(String pageName, Map<String, String> params);
+    void beginWikiPage(String pageName);
 
     /**
-     *Call back for  Start of Wiki page revision
+     *Call back for Start of Wiki page revision
+     */
+    void beginWikiPageRevision();
+
+    /**
+     *Call back for Start of Wiki page revision
      * 
      * @param pageName the page name
      * @param revision number/id of revision
-     * @param params parameters of revision
      */
-    void beginWikiPageRevision(String pageName, int revision, Map<String, String> params);
+    void beginWikiPageRevision(String pageName, int revision);
 
     /**
      * Call back for Start of an Object.
      * 
      * @param objectType type of Object
-     * @param params parameters of the object
      */
-    void beginObject(String objectType, Map<String, String> params);
+    void beginObject(String objectType);
 
     /**
      * Called when parser comes across a property associated to page or revision.
      * 
      * @param property name of the property.
-     * @param params parameters associated with the property
      * @param value value of the property.
      */
-    void onProperty(String property, Map<String, String> params, String value);
+    void onProperty(String property, String value);
 
     /**
      *Call back for End of an Object.
@@ -71,48 +79,36 @@ public interface WikiImporterListener
      * @param objectType type of Object
      * @param params parameters of the object
      */
-    void endObject(String objectType, Map<String, String> params);
+    void endObject(String objectType);
 
     /**
      * Call back for End of Wiki page revision
-     * 
-     * @param pageName the page name
-     * @param revision number/id of revision
-     * @param params parameters of revision
      */
-    void endWikiPageRevision(String pageName, int revision, Map<String, String> params);
+    void endWikiPageRevision();
 
     /**
      * Call back for End of a Wiki page.
-     * 
-     * @param pageName the page name.
-     * @param params the parameters of page
      */
-    void endWikiPage(String pageName, Map<String, String> params);
+    void endWikiPage();
 
     /**
      * Call back for Start of Attachment
      * 
      * @param attachment name of the attachment
-     * @param params parameters associated with the attachment
      */
-    void beginAttachment(String attachmentName, Map<String, String> params);
+    void beginAttachment(String attachmentName);
 
     /**
      * Called when parser comes across a attachment.
      * 
      * @param attachmentName name of the attachment
-     * @param params parameters associated with the attachment
      * @param input Attachment data as {@link InputSource}
      */
-    void onAttachmentRevision(String attachmentName, Map<String, String> params, InputSource input);
+    void onAttachmentRevision(String attachmentName, InputSource input);
 
     /**
      * Call back for End of Attachment
-     * 
-     * @param attachment name of the attachment
-     * @param params parameters associated with the attachment
      */
-    void endAttachment(String attachmentName, Map<String, String> params);
+    void endAttachment();
 
 }

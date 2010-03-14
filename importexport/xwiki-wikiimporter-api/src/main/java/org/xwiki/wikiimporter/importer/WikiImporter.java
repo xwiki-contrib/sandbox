@@ -17,10 +17,13 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.wikiimporter;
+package org.xwiki.wikiimporter.importer;
+
+import java.util.Map;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.wikiimporter.descriptor.WikiImporterDescriptor;
+import org.xwiki.wikiimporter.listener.WikiImporterListener;
 import org.xwiki.wikiimporter.type.WikiImporterType;
 
 /**
@@ -38,6 +41,17 @@ public interface WikiImporter
     WikiImporterDescriptor getDescriptor();
 
     /**
+     * This uses default WikiImporterListener implemented for the given WikiImporter type.
+     * 
+     * @param paramMap the wiki-importer parameters as a map.
+     * @throws WikiImporterException
+     */
+
+    void importWiki(Map<String, ? > paramMap) throws WikiImporterException;
+
+    /**
+     * Parses the document with given import parameters and fires events on custom WikiImporterListener.
+     * 
      * @param object the wiki-importer parameters class object.
      * @param listener listens to the events generated during parsing/import process.
      * @throws WikiImporterException if a unexpected error happens during the import process.
@@ -48,4 +62,5 @@ public interface WikiImporter
      * @return the export type format of WikiImporter (eg: MediaWiki XML, Confluence XML, Wordpress XMLRPC... )
      */
     WikiImporterType getType();
+
 }

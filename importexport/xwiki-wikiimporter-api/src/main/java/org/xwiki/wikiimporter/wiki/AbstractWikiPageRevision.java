@@ -21,12 +21,40 @@ package org.xwiki.wikiimporter.wiki;
 
 import java.util.List;
 
+import org.xwiki.rendering.block.XDOM;
+
 /**
- * 
  * @version $Id$
  */
 public abstract class AbstractWikiPageRevision implements WikiPageRevision
 {
+
+    protected String author;
+
+    protected String comment;
+
+    protected String version;
+
+    protected boolean minorEdit;
+
+    protected List<Attachment> attachmentList;
+
+    protected XDOM textContent;
+
+    /**
+     * @param author
+     * @param comment
+     * @param version
+     * @param minorEdit
+     */
+    public AbstractWikiPageRevision(String author, String comment, String version, boolean minorEdit)
+    {
+        super();
+        this.author = author;
+        this.comment = comment;
+        this.version = version;
+        this.minorEdit = minorEdit;
+    }
 
     /**
      * {@inheritDoc}
@@ -35,8 +63,7 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public List<Attachment> getAttachments()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return attachmentList;
     }
 
     /**
@@ -46,8 +73,7 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public String getAuthor()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return author;
     }
 
     /**
@@ -57,8 +83,7 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public String getComment()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return comment;
     }
 
     /**
@@ -66,10 +91,9 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      * 
      * @see org.xwiki.wikiimporter.wiki.WikiPageRevision#getContent()
      */
-    public String getContent()
+    public XDOM getContent()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return textContent;
     }
 
     /**
@@ -79,8 +103,7 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public String getVersion()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return version;
     }
 
     /**
@@ -90,8 +113,51 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public boolean isMinorEdit()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return minorEdit;
     }
 
+    /**
+     * @param author the author to set
+     */
+    public void setAuthor(String author)
+    {
+        this.author = author;
+    }
+
+    /**
+     * @param comment the comment to set
+     */
+    public void setComment(String comment)
+    {
+        this.comment = comment;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(String version)
+    {
+        this.version = version;
+    }
+
+    /**
+     * @param minorEdit the minorEdit to set
+     */
+    public void setMinorEdit(boolean minorEdit)
+    {
+        this.minorEdit = minorEdit;
+    }
+
+    /**
+     * @param textContent the textContent to set
+     */
+    public void setTextContent(XDOM textContent)
+    {
+        this.textContent = textContent;
+    }
+
+    public void addAttachment(Attachment attachment)
+    {
+        this.attachmentList.add(attachment);
+    }
 }

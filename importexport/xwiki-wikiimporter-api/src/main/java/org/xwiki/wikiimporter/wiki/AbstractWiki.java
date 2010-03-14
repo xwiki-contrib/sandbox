@@ -22,7 +22,6 @@ package org.xwiki.wikiimporter.wiki;
 import java.util.List;
 
 /**
- * 
  * @version $Id$
  */
 public abstract class AbstractWiki implements Wiki

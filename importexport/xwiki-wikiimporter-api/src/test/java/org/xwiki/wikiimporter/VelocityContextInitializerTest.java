@@ -26,7 +26,6 @@ import org.xwiki.test.AbstractComponentTestCase;
 import org.xwiki.velocity.VelocityContextFactory;
 
 /**
- * 
  * @version $Id$
  */
 public class VelocityContextInitializerTest extends AbstractComponentTestCase
@@ -34,7 +33,7 @@ public class VelocityContextInitializerTest extends AbstractComponentTestCase
 
     /**
      * Test the presence of velocity bridges.
-     *
+     * 
      * @throws Exception
      */
     @Test
@@ -42,8 +41,7 @@ public class VelocityContextInitializerTest extends AbstractComponentTestCase
     {
         VelocityContext context = getComponentManager().lookup(VelocityContextFactory.class).createContext();
         Assert.assertNotNull(context.get("wikiimporter"));
-       
+
     }
-    
-    
+
 }

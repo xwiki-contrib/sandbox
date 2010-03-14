@@ -19,25 +19,42 @@
  */
 package org.xwiki.wikiimporter.wiki;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
- * 
  * @version $Id$
  */
 public abstract class AbstractWikiPage implements WikiPage
 {
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getAttachment(java.lang.String)
-     */
-    public Attachment getAttachment(String fileName)
+    protected String title;
+
+    protected LinkedList<WikiPageRevision> pageRevisionList = new LinkedList<WikiPageRevision>();
+
+    protected LinkedList<Attachment> attachmentList = new LinkedList<Attachment>();
+
+    protected List<String> children = new ArrayList<String>();
+
+    protected String parent;
+
+    protected String space;
+
+    protected String pageName;
+
+    protected String wiki;
+
+    protected Set<String> tags = new TreeSet<String>();
+
+    public AbstractWikiPage(String title, String defaultSpace, String wiki)
     {
-        // TODO Auto-generated method stub
-        return null;
+        this.title = title;
+        this.space = defaultSpace;
+        this.wiki = wiki;
     }
 
     /**
@@ -47,8 +64,7 @@ public abstract class AbstractWikiPage implements WikiPage
      */
     public List<Attachment> getAttachments()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return attachmentList;
     }
 
     /**
@@ -69,30 +85,7 @@ public abstract class AbstractWikiPage implements WikiPage
      */
     public WikiPageRevision getLastRevision()
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getName()
-     */
-    public String getName()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getParent()
-     */
-    public String getParent()
-    {
-        // TODO Auto-generated method stub
-        return null;
+        return pageRevisionList.getLast();
     }
 
     /**
@@ -113,19 +106,7 @@ public abstract class AbstractWikiPage implements WikiPage
      */
     public List<WikiPageRevision> getRevisions()
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getSpace()
-     */
-    public String getSpace()
-    {
-        // TODO Auto-generated method stub
-        return null;
+        return pageRevisionList;
     }
 
     /**
@@ -133,21 +114,54 @@ public abstract class AbstractWikiPage implements WikiPage
      * 
      * @see org.xwiki.wikiimporter.wiki.WikiPage#getTags()
      */
-    public List<String> getTags()
+    public Set<String> getTags()
     {
         // TODO Auto-generated method stub
-        return null;
+        return tags;
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getTitle()
+     * @see org.xwiki.wikiimporter.wiki.WikiPage#getTagsAsString()
      */
-    public String getTitle()
+    public String getTagsAsString()
     {
-        // TODO Auto-generated method stub
-        return null;
+        StringBuilder tagString = new StringBuilder();
+        for (String tag : tags) {
+            tagString.append(tag + "|");
+        }
+        return tagString.toString();
+    }
+
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
+    public void setSpace(String space)
+    {
+        this.space = space;
+    }
+
+    public void setWiki(String wiki)
+    {
+        this.wiki = wiki;
+    }
+
+    public void addRevision(WikiPageRevision revision)
+    {
+        pageRevisionList.addLast(revision);
+    }
+
+    public void addTag(String tag)
+    {
+        tags.add(tag);
+    }
+
+    public void addAttachment(Attachment attachment)
+    {
+        attachmentList.add(attachment);
     }
 
 }

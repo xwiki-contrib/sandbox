@@ -21,34 +21,34 @@ package org.xwiki.wikiimporter.wiki;
 
 /**
  * Attachment interface is used to handle attachments during import process by Wiki Importer.
+ * 
  * @version $Id$
  */
-public interface Attachment {
+public interface Attachment
+{
 
-	/**
-	 * @return the name of attachment file.
-	 */
-	public String getFileName();
-	
-	/**
-	 * @return the content of attachment in bytes
-	 */
-	public byte[] getContent();
-	
-	/**
-	 * @return the MIME type of attachment.
- 	 */
-	public String getMimeType();
-	
-	/**
-	 * 
-	 * @return the file size of attachment.
-	 */
-	public int getFileSize();
+    /**
+     * @return the name of attachment file.
+     */
+    public String getFileName();
 
-	/**
-	 * 
-	 * @return the author of attachment.
-	 */
-	public String getAuthor();
+    /**
+     * @return the content of attachment in bytes
+     */
+    public byte[] getContent();
+
+    /**
+     * @return the MIME type of attachment.
+     */
+    public String getMimeType();
+
+    /**
+     * @return the file size of attachment.
+     */
+    public long getFileSize();
+
+    /**
+     * @return the author of attachment.
+     */
+    public String getAuthor();
 }
