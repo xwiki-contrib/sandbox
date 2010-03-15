@@ -1,12 +1,11 @@
 = What it does =
 
-Support NTLM and BAsic authenticator and fallback on generic LDAP authenticator if it fails.
+Support NTLM and Basic authenticator (from browsers not supporting NTLM).
 
 = This authenticator execute the following process =
 
-* if no login is provided it tries to find an NTLM token in the HTTP headers
-  ** if one is found it tried to resolve the token into a proper LDAP identifier
-* if NTLM fail it calls the generic LDAP authenticator
+* if it can find NTLM or Basic header it tries to resolve the user name and search it in LDAP server 
+* if none is found it reply to the browser asking for NTLM or BASIC authentication
 
 = Configuration (in xwiki.cfg file) =
 
