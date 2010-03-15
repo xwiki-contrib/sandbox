@@ -235,12 +235,17 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                         Type1Message type1 = new Type1Message(src);
                         Type2Message type2 = new Type2Message(type1, challenge, null);
                         msg = Base64.encode(type2.toByteArray());
+                        LOG.debug("message1 supplied domain: " + type1.getSuppliedDomain());
+                        LOG.debug("message1 supplied workstation: " + type1.getSuppliedWorkstation());
                         context.getResponse().setHeader("WWW-Authenticate", "NTLM " + msg);
                         context.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         context.getResponse().flushBuffer();
                     } else if (src[8] == 3) {
                         LOG.debug("phase 2");
                         Type3Message type3 = new Type3Message(src);
+                        LOG.debug("message3 domain: " + type3.getDomain());
+                        LOG.debug("message3 user: " + type3.getUser());
+                        LOG.debug("message3 workstation: " + type3.getWorkstation());
                         byte[] lmResponse = type3.getLMResponse();
                         if (lmResponse == null)
                             lmResponse = new byte[0];
