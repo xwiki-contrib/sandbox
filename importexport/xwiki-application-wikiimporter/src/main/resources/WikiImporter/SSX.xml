@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>WikiImporter</web>
+<name>SSX</name>
+<language></language>
+<defaultLanguage></defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1265526944000</creationDate>
+<date>1267961736000</date>
+<contentUpdateDate>1267961736000</contentUpdateDate>
+<version>33.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>WikiImporter.SSX</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>6f3a38ba-cff2-463e-9ded-82de84858535</guid>
+<property>
+<cache>default</cache>
+</property>
+<property>
+<code>.imptype{
+  font-size : 16px; 
+  color : red;
+}
+
+.imptype ul,.imptype li {
+  color : #005A83;
+  list-style-type:none;
+}
+
+#wikiimporter-page-header{
+  background-color:#EBF2F3;
+  padding : 10px;
+  color : #005A83;
+  font-type : bold;
+}
+
+#wikiimporter-page-content #xwikieditcontent {
+  background-color: transparent;
+}
+
+#wikiimporter-page-content fieldset {
+  border: 0px;
+  border-bottom: 3px solid #FFF;
+  margin-bottom: 10px;
+}
+
+#wikiimporter-page-content fieldset p {
+  width: 80%;
+  display: block;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+#wikiimporter-page-content fieldset legend {
+  color: #606B72;
+  font-size: 1.5em;
+  font-weight: bold;
+  padding-top: 10px;
+  padding-left: 10px;
+}
+
+p.legend {
+  width: auto !important;
+  padding: 0px;
+  margin: 0px;
+  color: #606B72;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#wikiimporter-page-content fieldset p label {
+  width: 30% !important;
+  float: left;
+  color: #4A4A4B;
+  font-weight: bold;
+  clear: left;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
+#spacer {
+  clear: both;
+  height: 10px;
+  margin-top :10px;
+  margin-bottom:10px;
+}
+
+#wikiimporter-notifications{
+  background-color : #FFFFFF;
+  padding : 5px;
+  text-align : center;
+  color : #005A83;
+}
+
+
+li.error{
+  color : red;
+}
+
+li.warning{
+  color : orange;
+}
+
+li.info {
+  color : blue;
+}
+
+ol.importer{
+  margin:0em 0 0em 0em;
+}
+
+ul.importer {
+  margin:0 0 1em 2em;
+  list-style-position:inside;
+}
+</code></property><property><name>WikiImporterSSX</name>
+</property>
+<property>
+<parse></parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>WikiImporter.SSX</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>d401eafe-1065-494d-add2-3a9019644179</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>
+</content></xwikidoc>
