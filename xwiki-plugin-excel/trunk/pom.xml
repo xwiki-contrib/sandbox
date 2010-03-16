@@ -71,11 +71,6 @@
     <url>http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-plugin-excel/trunk</url>
   </scm>
   <distributionManagement>
-    <snapshotRepository>
-      <id>maven.xwiki.org</id>
-      <name>XWiki Maven2 Development Repository for Snapshots</name>
-      <url>scp://maven.xwiki.org/home/maven/public_html/snapshots</url>
-    </snapshotRepository>
     <repository>
       <id>maven.xwiki.org</id>
       <name>XWiki Staging Repository</name>
