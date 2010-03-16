@@ -29,3 +29,9 @@ See generic LDAP authenticator configuration for more about how the LDAP identif
 
 * copy this authenticator jar file into WEB_INF/lib/
 * make sure WEB_INF/lib/ contains jcifs library. See pom.xml file to make sure to get the proper version (should also work with more recent version).
+
+= Troubleshoot =
+
+== It works when accessing directly Tomcat but not through Apache HTTPD ==
+
+Make sure the "KeepAlive" configuration in Apache is "On" instead of "Off"
