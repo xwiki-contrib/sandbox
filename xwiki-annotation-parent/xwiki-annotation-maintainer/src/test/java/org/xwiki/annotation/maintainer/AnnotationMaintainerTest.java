@@ -220,7 +220,7 @@ public class AnnotationMaintainerTest extends AbstractComponentTestCase
         setup.getMockery().checking(new Expectations()
         {
             {
-                allowing(serializerMock).serialize(with(any(EntityReference.class)));
+                allowing(serializerMock).serialize(with(any(EntityReference.class)), with(any(Object.class)));
                 will(new Action()
                 {
                     public void describeTo(Description description)

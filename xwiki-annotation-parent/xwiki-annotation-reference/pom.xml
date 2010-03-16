@@ -44,12 +44,10 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- Backport dependency needed only when running on versions smaller than 2.2. Remove this dependency when 
-         switching to 2.2 platform dependency with http://jira.xwiki.org/jira/browse/XWIKI-4775 fixed. -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-annotation-model-backport</artifactId>
-      <version>${pom.version}</version>
+      <artifactId>xwiki-core-model</artifactId>
+      <version>${platform.core.version}</version>
     </dependency>
   </dependencies>
   <build>

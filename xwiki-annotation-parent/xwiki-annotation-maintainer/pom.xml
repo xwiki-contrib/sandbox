@@ -71,11 +71,10 @@
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
-    <!-- Remove this dependency when moving to 2.2 with http://jira.xwiki.org/jira/browse/XWIKI-4775 fixed -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-annotation-model-backport</artifactId>
-      <version>${pom.version}</version>
+      <artifactId>xwiki-core-model</artifactId>
+      <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
