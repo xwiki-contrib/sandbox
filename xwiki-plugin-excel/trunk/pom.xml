@@ -36,17 +36,15 @@
   <name>XWiki Platform - Plugins - Excel</name>
   <packaging>jar</packaging>
   <description>XWiki Platform - Plugins - Excel</description>
+  <properties>
+    <platform.core.version>2.2.2</platform.core.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.xpn.xwiki.platform</groupId>
       <artifactId>xwiki-core</artifactId>
-      <version>[2.0,)</version>
+      <version>${platform.core.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.jexcelapi</groupId>
@@ -56,15 +54,32 @@
     <dependency>
       <groupId>com.xpn.xwiki.platform</groupId>
       <artifactId>xwiki-core</artifactId>
-      <version>[2.0,)</version>
+      <version>${platform.core.version}</version>
       <scope>test</scope>
       <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-shared-tests</artifactId>
-      <version>[2.0,)</version>
+      <version>${platform.core.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <scm>
+    <connection>scm:svn:http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-plugin-excel/trunk</connection>
+    <developerConnection>scm:svn:https://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-plugin-excel/trunk</developerConnection>
+    <url>http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-plugin-excel/trunk</url>
+  </scm>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>maven.xwiki.org</id>
+      <name>XWiki Maven2 Development Repository for Snapshots</name>
+      <url>scp://maven.xwiki.org/home/maven/public_html/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>maven.xwiki.org</id>
+      <name>XWiki Staging Repository</name>
+      <url>http://nexus.xwiki.org/nexus/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 </project>      
