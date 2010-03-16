@@ -216,7 +216,7 @@ public class DefaultIOTargetServiceTest extends AbstractComponentTestCase
             }
         });
 
-        String reference = "OBJECT_PROPERTY://wiki:Space.Page^XWiki.Class[1]#property";
+        String reference = "OBJECT_PROPERTY://wiki:Space.Page^XWiki.Class[1].property";
         assertEquals("defcontent", ioTargetService.getSource(reference));
         assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
     }
@@ -234,7 +234,7 @@ public class DefaultIOTargetServiceTest extends AbstractComponentTestCase
             }
         });
 
-        String reference = "OBJECT_PROPERTY://wiki:Space.Page^XWiki.Class#property";
+        String reference = "OBJECT_PROPERTY://wiki:Space.Page^XWiki.Class.property";
         assertEquals("defcontent", ioTargetService.getSource(reference));
         assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
     }
@@ -252,7 +252,7 @@ public class DefaultIOTargetServiceTest extends AbstractComponentTestCase
             }
         });
 
-        String reference = "OBJECT_PROPERTY://Page^XWiki.Class#property";
+        String reference = "OBJECT_PROPERTY://Page^XWiki.Class.property";
         assertEquals("defcontent", ioTargetService.getSource(reference));
         assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
     }
@@ -264,14 +264,14 @@ public class DefaultIOTargetServiceTest extends AbstractComponentTestCase
         {
             {
                 // target will be parsed as document, because document is the default
-                oneOf(dabMock).getDocumentContent("wiki:Space\\.Page^XWiki.Class#property");
+                oneOf(dabMock).getDocumentContent("wiki:Space\\.Page^XWiki\\.Class.property");
                 will(returnValue("defcontent"));
-                oneOf(dabMock).getDocumentSyntaxId("wiki:Space\\.Page^XWiki.Class#property");
+                oneOf(dabMock).getDocumentSyntaxId("wiki:Space\\.Page^XWiki\\.Class.property");
                 will(returnValue("xwiki/2.0"));
             }
         });
 
-        String reference = "wiki:Space.Page^XWiki.Class#property";
+        String reference = "wiki:Space.Page^XWiki.Class.property";
         assertEquals("defcontent", ioTargetService.getSource(reference));
         assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
     }
@@ -290,7 +290,7 @@ public class DefaultIOTargetServiceTest extends AbstractComponentTestCase
             }
         });
 
-        String reference = "OBJECT_PROPERTY://Classes.Class[3]#property";
+        String reference = "OBJECT_PROPERTY://Classes.Class[3].property";
         assertEquals("defcontent", ioTargetService.getSource(reference));
         assertEquals("xwiki/2.0", ioTargetService.getSourceSyntax(reference));
     }    

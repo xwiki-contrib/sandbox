@@ -47,9 +47,9 @@ public class DefaultStringEntityReferenceSerializerTest
 
     private static final String DEFAULT_ATTACHMENT = "filename";
 
-    private static final String DEFAULT_OBJECT = "defobject";
+    private static final String DEFAULT_OBJECT = "Object";
 
-    private static final String DEFAULT_OBJECT_PROPERTY = "defproperty";
+    private static final String DEFAULT_OBJECT_PROPERTY = "Property";
 
     private EntityReferenceSerializer serializer;
 
@@ -169,55 +169,54 @@ public class DefaultStringEntityReferenceSerializerTest
     @Test
     public void testResolveAndSerializeObjectReference()
     {
-        EntityReference reference = resolver.resolve("wiki:space.page^xwiki.class[0]", EntityType.OBJECT);
-        Assert.assertEquals("wiki:space.page^xwiki.class[0]", serializer.serialize(reference));
+        EntityReference reference = resolver.resolve("wiki:space.page^Object", EntityType.OBJECT);
+        Assert.assertEquals("wiki:space.page^Object", serializer.serialize(reference));
 
         // default values
         reference = resolver.resolve("", EntityType.OBJECT);
-        Assert.assertEquals("xwiki:XWiki.WebHome^defobject", serializer.serialize(reference));
+        Assert.assertEquals("xwiki:XWiki.WebHome^Object", serializer.serialize(reference));
 
         // property reference with no object
-        reference = resolver.resolve("wiki:space.page#property", EntityType.OBJECT);
-        Assert.assertEquals("xwiki:XWiki.WebHome^wiki:space.page#property", serializer.serialize(reference));
+        reference = resolver.resolve("wiki:space.page.property", EntityType.OBJECT);
+        Assert.assertEquals("xwiki:XWiki.WebHome^wiki:space.page.property", serializer.serialize(reference));
 
         // test escaping character
-        reference = resolver.resolve("wiki:space.page^xwiki.cla\\^ss[0]", EntityType.OBJECT);
-        Assert.assertEquals("wiki:space.page^xwiki.cla\\^ss[0]", serializer.serialize(reference));
+        reference = resolver.resolve("wiki:space.page^Obje\\^ct", EntityType.OBJECT);
+        Assert.assertEquals("wiki:space.page^Obje\\^ct", serializer.serialize(reference));
 
-        reference = resolver.resolve("wiki:spa^ce.page^xwiki.cla\\^ss[0]", EntityType.OBJECT);
-        Assert.assertEquals("wiki:spa^ce.page^xwiki.cla\\^ss[0]", serializer.serialize(reference));
+        reference = resolver.resolve("wiki:spa^ce.page^Obje\\^ct", EntityType.OBJECT);
+        Assert.assertEquals("wiki:spa^ce.page^Obje\\^ct", serializer.serialize(reference));
 
         reference = resolver.resolve(":.\\^@", EntityType.OBJECT);
         Assert.assertEquals("xwiki:XWiki.WebHome^:.\\^@", serializer.serialize(reference));
     }
 
     /**
-     * Tests resolving and re-serializing an object reference.
+     * Tests resolving and re-serializing an object property reference.
      */
     @Test
     public void testResolveAndSerializePropertyReference()
     {
-        EntityReference reference = resolver.resolve("wiki:space.page^xwiki.class[0]#prop", EntityType.OBJECT_PROPERTY);
-        Assert.assertEquals("wiki:space.page^xwiki.class[0]#prop", serializer.serialize(reference));
+        EntityReference reference = resolver.resolve("wiki:space.page^xwiki.class[0].prop", EntityType.OBJECT_PROPERTY);
+        Assert.assertEquals("wiki:space.page^xwiki.class[0].prop", serializer.serialize(reference));
 
         // default values
         reference = resolver.resolve("", EntityType.OBJECT_PROPERTY);
-        Assert.assertEquals("xwiki:XWiki.WebHome^defobject#defproperty", serializer.serialize(reference));
+        Assert.assertEquals("xwiki:XWiki.WebHome^Object.Property", serializer.serialize(reference));
 
         // using separators
-        reference = resolver.resolve("space.page@attachment", EntityType.OBJECT_PROPERTY);
+        reference = resolver.resolve("space^page@attachment", EntityType.OBJECT_PROPERTY);
         Assert
-            .assertEquals("xwiki:XWiki.WebHome^defobject#space.page@attachment", serializer.serialize(reference));
+            .assertEquals("xwiki:XWiki.WebHome^Object.space^page@attachment", serializer.serialize(reference));
 
-        reference = resolver.resolve("space.page^xwiki.class[0]", EntityType.OBJECT_PROPERTY);
-        Assert.assertEquals("xwiki:XWiki.WebHome^defobject#space.page^xwiki.class[0]", serializer
-            .serialize(reference));
+        reference = resolver.resolve("wiki:space^object", EntityType.OBJECT_PROPERTY);
+        Assert.assertEquals("xwiki:XWiki.WebHome^Object.wiki:space^object", serializer.serialize(reference));
 
         // test escaping character
-        reference = resolver.resolve("wiki:space.page^xwiki.class[0]#prop\\#erty", EntityType.OBJECT_PROPERTY);
-        Assert.assertEquals("wiki:space.page^xwiki.class[0]#prop\\#erty", serializer.serialize(reference));
-
-        reference = resolver.resolve("wiki:space.page#^xwiki.class[0]#property", EntityType.OBJECT_PROPERTY);
-        Assert.assertEquals("wiki:space.page#^xwiki.class[0]#property", serializer.serialize(reference));
+        reference = resolver.resolve("wiki:space.page^xwiki.class[0].prop\\.erty", EntityType.OBJECT_PROPERTY);
+        Assert.assertEquals("wiki:space.page^xwiki.class[0].prop\\.erty", serializer.serialize(reference));
+        
+        reference = resolver.resolve(":\\.^@", EntityType.OBJECT_PROPERTY);
+        Assert.assertEquals("xwiki:XWiki.WebHome^Object.:\\.^@", serializer.serialize(reference));        
     }
 }

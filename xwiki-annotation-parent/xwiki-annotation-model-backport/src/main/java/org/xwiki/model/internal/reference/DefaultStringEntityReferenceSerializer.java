@@ -45,7 +45,7 @@ public class DefaultStringEntityReferenceSerializer implements EntityReferenceSe
         put(EntityType.DOCUMENT, Arrays.asList("."));
         put(EntityType.SPACE, Arrays.asList(":", "."));
         put(EntityType.OBJECT, Arrays.asList("^"));
-        put(EntityType.OBJECT_PROPERTY, Arrays.asList("#"));        
+        put(EntityType.OBJECT_PROPERTY, Arrays.asList("."));        
     }};
 
     private Map<EntityType, List<String>> replacements = new HashMap<EntityType, List<String>>() {{
@@ -53,7 +53,7 @@ public class DefaultStringEntityReferenceSerializer implements EntityReferenceSe
         put(EntityType.DOCUMENT, Arrays.asList("\\."));
         put(EntityType.SPACE, Arrays.asList("\\:", "\\."));
         put(EntityType.OBJECT, Arrays.asList("\\^"));
-        put(EntityType.OBJECT_PROPERTY, Arrays.asList("\\#"));        
+        put(EntityType.OBJECT_PROPERTY, Arrays.asList("\\."));        
     }};
 
     /**

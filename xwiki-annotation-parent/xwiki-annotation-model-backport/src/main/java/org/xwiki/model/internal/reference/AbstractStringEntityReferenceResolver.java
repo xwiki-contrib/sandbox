@@ -43,7 +43,7 @@ public abstract class AbstractStringEntityReferenceResolver implements EntityRef
         put(EntityType.ATTACHMENT, Arrays.asList('@', '.', ':'));
         put(EntityType.SPACE, Arrays.asList(':'));
         put(EntityType.OBJECT, Arrays.asList('^', '.', ':'));
-        put(EntityType.OBJECT_PROPERTY, Arrays.asList('#', '^', '.', ':'));
+        put(EntityType.OBJECT_PROPERTY, Arrays.asList('.', '^', '.', ':'));
     }};
 
     private Map<EntityType, List<EntityType>> entityTypes = new HashMap<EntityType, List<EntityType>>() {{
