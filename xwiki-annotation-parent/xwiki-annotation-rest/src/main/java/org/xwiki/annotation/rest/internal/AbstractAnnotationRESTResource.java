@@ -24,7 +24,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.velocity.VelocityContext;
 import org.xwiki.annotation.Annotation;
@@ -255,30 +257,35 @@ public abstract class AbstractAnnotationRESTResource extends XWikiResource
     {
         Collection<Annotation> result = new ArrayList<Annotation>();
 
-        for (Annotation ann : annotations) {
-            // matches starts true if there are no filters, and false if there are any, so that it would be made true by
-            // the actual match on one of the filters
-            boolean matches = request.getFilter().getFields().size() == 0;
-            for (AnnotationField filterField : request.getFilter().getFields()) {
-                String fieldName = filterField.getName();
-                String filterValue = filterField.getValue();
-                // this shouldn't happen. Ever. But if ever ever comes, we'd better be safe
-                if (fieldName == null || filterValue == null) {
-                    continue;
-                }
+        Map<String, List<String>> filters = new HashMap<String, List<String>>();
+        for (AnnotationField annotationField : request.getFilter().getFields()) {
+            String filterName = annotationField.getName();
+            List<String> values = filters.get(filterName);
+            if (values == null) {
+                values = new ArrayList<String>();
+                filters.put(filterName, values);
+            }
+            if (annotationField.getValue() != null) {
+                values.add(annotationField.getValue());
+            }
+        }
 
-                Object annotationValue = ann.get(fieldName);
-                // if the annotation doesn't specify the value we want to filter for, go to next filter
-                if (annotationValue == null) {
-                    continue;
-                }
-                // if the enforced value is equal to the string version of the annotation value of this field, it
-                // matches and we break, since we found a match, and we combine filters as OR
-                if (filterValue.equals(annotationValue.toString())) {
-                    matches = true;
+        if (filters.size() == 0) {
+            return annotations;
+        }
+
+        for (Annotation ann : annotations) {
+            boolean matches = true;
+            for (Map.Entry<String, List<String>> filter : filters.entrySet()) {
+                Object annotationValue = ann.get(filter.getKey());
+                // if the values is not set or is not among the requested values,
+                if (annotationValue == null || !filter.getValue().contains(annotationValue.toString())) {
+                    // it doesn't match and exit
+                    matches = false;
                     break;
                 }
             }
+            // if it matches in the end, add it to the results
             if (matches) {
                 result.add(ann);
             }
