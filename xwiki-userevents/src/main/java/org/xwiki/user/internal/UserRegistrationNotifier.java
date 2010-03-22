@@ -29,12 +29,7 @@ public class UserRegistrationNotifier implements EventListener
 
     public List<Event> getEvents()
     {
-        if (this.isEmailValidationMode()) {
-            // If the wiki requires users to validate their account from an email, we will listen to this event.
-            return Arrays.<Event> asList(new UserValidationEvent());
-        }
-        // Otherwise we just listen to user creation event.
-        return Arrays.<Event> asList(new UserCreationEvent());
+        return Arrays.<Event> asList(new UserValidationEvent(), new UserCreationEvent());
     }
 
     public String getName()
@@ -45,7 +40,7 @@ public class UserRegistrationNotifier implements EventListener
     @SuppressWarnings("unchecked")
     public void onEvent(Event event, Object source, Object data)
     {
-        if (configuration.getEmailAddressesToNotify().length > 0) {
+        if (this.shouldProcessEvent(event) && configuration.getEmailAddressesToNotify().length > 0) {
             // Prepare velocity context for the mail
             VelocityContext vcontext = new VelocityContext();
             Map<String, String> dataMap = (Map<String, String>) data;
@@ -80,4 +75,12 @@ public class UserRegistrationNotifier implements EventListener
         return getXWikiContext().getWiki().getXWikiPreference("use_email_verification", getXWikiContext()).equals("1");
     }
 
+    private boolean shouldProcessEvent(Event event)
+    {
+        if (this.isEmailValidationMode() && event instanceof UserValidationEvent 
+            || !this.isEmailValidationMode() && event instanceof UserCreationEvent) {
+            return true;
+        }
+        return false;
+    }
 }
