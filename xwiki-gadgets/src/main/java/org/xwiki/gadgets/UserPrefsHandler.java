@@ -72,6 +72,8 @@ public class UserPrefsHandler extends DefaultHandler
     }
 
     /**
+     * {@inheritDoc}
+     * 
      * Initializes the list of User Preferences result.
      * 
      * @see DefaultHandler#startDocument()
@@ -84,6 +86,8 @@ public class UserPrefsHandler extends DefaultHandler
     }
 
     /**
+     * {@inheritDoc}
+     * 
      * Catches User Preference and EnumValue XML tags. When a UserPref tags is found, it creates a new UserPref object
      * as the currently parsed User Preference. When it catches EnumValue XML tag, and if a user pref is currently
      * parsed, it appends to its enum value list. {@inheritDoc}
@@ -122,9 +126,9 @@ public class UserPrefsHandler extends DefaultHandler
     }
 
     /**
-     * Catches the end tags for User Preferences, and appends the parsed preference to the results list.
-     * 
      * {@inheritDoc}
+     * 
+     * Catches the end tags for User Preferences, and appends the parsed preference to the results list.
      * 
      * @see DefaultHandler#endElement(String, String, String)
      */
