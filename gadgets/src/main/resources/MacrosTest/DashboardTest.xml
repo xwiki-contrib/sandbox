@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xwikidoc>
-<web>Macros</web>
-<name>WebHome</name>
+<web>MacrosTest</web>
+<name>DashboardTest</name>
 <language></language>
 <defaultLanguage>en</defaultLanguage>
 <translation>0</translation>
@@ -11,15 +11,15 @@
 <author>XWiki.Admin</author>
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
-<creationDate>1265888160000</creationDate>
-<date>1267188499000</date>
-<contentUpdateDate>1267188499000</contentUpdateDate>
-<version>1.1</version>
+<creationDate>1269265044000</creationDate>
+<date>1269266290000</date>
+<contentUpdateDate>1269266290000</contentUpdateDate>
+<version>3.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
-<comment>Imported from XAR</comment>
+<comment></comment>
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
@@ -49,29 +49,18 @@
 <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
 </tags>
 </class>
-<name>Macros.WebHome</name>
+<name>MacrosTest.DashboardTest</name>
 <number>0</number>
 <className>XWiki.TagClass</className>
-<guid>b155eb3b-2205-487a-8f11-098ee920ce1d</guid>
+<guid>d64d1a5b-c5b7-40ad-943e-2d1c0616983e</guid>
 <property>
 <tags/>
 </property>
 </object>
-<content>{{velocity}}
-= Macro Directory =
-
-[[Import Google Gadget&gt;&gt;Macros.GoogleGadgetsImport]]
-
-#set($macroDescrs = $macros.macroDescriptors)
-#foreach($m in $macroDescrs)
-  #set($macroId = $m.getId().id)
-  #set($macroURL = $xwiki.getURL('Macros.Macro', 'view', "id=${macroId}"))
-
-  **{{html}}&lt;a href='${macroURL}'&gt;$m.name&lt;/a&gt;{{/html}}**
-  $m.description
-  #set($isWikiMacro = $macros.isWikiMacro($macroId))
-  //**Type:** #{if}($isWikiMacro)XWiki Wiki Macro\\ #{else}XWiki Java Macro\\ #{end}
-  **Default Category:** $!{m.defaultCategory}//
-#end
-{{/velocity}}
+<content>{{dashboard}}
+1 {{members/}}
+1 {{myrecentmodifications/}}
+2 {{blogcategories/}}
+3 {{wc99 title='Another Clock Gadget' w='280' up_tz1name='Bucharest' up_tz2name='Paris' up_tz1='RO' up_tz2='FR'/}}
+{{/dashboard}}
 </content></xwikidoc>

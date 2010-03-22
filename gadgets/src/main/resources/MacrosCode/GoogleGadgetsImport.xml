@@ -12,14 +12,14 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1265903593000</creationDate>
-<date>1267022662000</date>
-<contentUpdateDate>1267022662000</contentUpdateDate>
-<version>1.1</version>
+<date>1268232395000</date>
+<contentUpdateDate>1268232395000</contentUpdateDate>
+<version>6.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
-<comment>Imported from XAR</comment>
+<comment></comment>
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
@@ -84,6 +84,7 @@
   #set($macroObj = $macroDoc.newObject('XWiki.WikiMacroClass'))
   #set($discard = $macroObj.set('id', $macroId))
   #set($discard = $macroObj.set('name', $macroName))
+  #set($discard = $macroObj.set('defaultCategory', 'Google Gadget'))
   #set($discard = $macroObj.set('visibility', 'Current Wiki'))
   #set($discard = $macroObj.set('supportsInlineMode', 0))
   #set($discard = $macroObj.set('contentType', 'No content'))
@@ -101,12 +102,14 @@
   #set($paramObj = $macroDoc.newObject('XWiki.WikiMacroParameterClass'))
   #set($discard = $paramObj.set('name', 'w'))
   #set($discard = $paramObj.set('description', 'Width'))
-  #set($discard = $paramObj.set('mandatory', 1))
+  #set($discard = $paramObj.set('mandatory', 0))
+  #set($discard = $paramObj.set('defaultValue', '300'))
   ##
   #set($paramObj = $macroDoc.newObject('XWiki.WikiMacroParameterClass'))
   #set($discard = $paramObj.set('name', 'h'))
   #set($discard = $paramObj.set('description', 'Height'))
-  #set($discard = $paramObj.set('mandatory', 1))
+  #set($discard = $paramObj.set('mandatory', 0))
+  #set($discard = $paramObj.set('defaultValue', '300'))
   ##
   #set($paramObj = $macroDoc.newObject('XWiki.WikiMacroParameterClass'))
   #set($discard = $paramObj.set('name', 'title'))
@@ -143,11 +146,15 @@
           #set($up_desc = "${up_desc.substring(0, 400)}...")
         #end
         #set($discard = $paramObj.set('description', $up_desc))
+        ##
+        #set($discard = $paramObj.set('defaultValue', "$!{userPref.defaultValue}"))
       #end
     #end
     ##
     #set($discard = $macroDoc.save())
-    {{info}}Google Gadget imported successfully. See [[$macroDocName]].{{/info}}
+    ##
+    #set($macroURL = $xwiki.getURL('Macros.Macro', 'view', "id=${macroId}"))
+    {{info}}Google Gadget imported successfully. See {{html}}&lt;a href='${macroURL}'&gt;$macroName&lt;/a&gt;{{/html}}.{{/info}}
   #else
     {{error}}Error while parsing gadget at URL [[${url}]]{{/error}}
   #end

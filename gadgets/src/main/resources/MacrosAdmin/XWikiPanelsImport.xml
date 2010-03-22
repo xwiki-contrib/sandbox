@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>MacrosAdmin</web>
+<name>XWikiPanelsImport</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1268228927000</creationDate>
+<date>1268239012000</date>
+<contentUpdateDate>1268239012000</contentUpdateDate>
+<version>48.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>MacrosAdmin.XWikiPanelsImport</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>596bec25-d805-4329-bd87-9fb8deed23d5</guid>
+<property>
+<tags/>
+</property>
+</object>
+<content>{{velocity}}
+= Import All Panels as Macros =
+##
+#set($hql = "select obj.name from BaseObject obj where obj.className='Panels.PanelClass'")
+#set($panels = $xwiki.search($hql))
+#foreach($panel in $panels)
+  == Importing $panel ==
+  ##
+  ## Get Panel Object
+  #set($panelObj = $xwiki.getDocument($panel).getObject('Panels.PanelClass'))
+  ##
+  ## Fetch necessary info from Panel Object
+  #set($macroName = $panelObj.getProperty('name').value)
+  #set($macroId = $util.convertToAlphaNumeric($macroName).toLowerCase())
+  #set($macroDescription = $panelObj.getProperty('description').value)
+  #set($macroDefaultCategory = $panelObj.getProperty('category').value)
+  #set($macroCode = $panelObj.getProperty('content').value)
+  ##
+  ## Create Macro Document
+  #set($macroDocName = "Macros2.${macroName}")
+  #set($macroDoc = $xwiki.getDocument($macroDocName))
+  #if(!$macroDoc.isNew())
+    {{error}}A macro with this name already exists. See [[$macroDocName]].{{/error}}
+  ##
+  ## Check if a macro with the same macroId already exists
+  #elseif('' != "$!{macros.getMacroDescriptor($macroId)}")
+    {{error}}A macro with the same id ($macroId) already exists.{{/error}}
+  #else
+    ##
+    ## Create the macro
+    #set($macroObj = $macroDoc.newObject('XWiki.WikiMacroClass'))
+    #set($discard = $macroObj.set('id', $macroId))
+    #set($discard = $macroObj.set('name', $macroName))
+    #set($discard = $macroObj.set('description', $macroDescription))
+    #set($discard = $macroObj.set('defaultCategory', $macroDefaultCategory))
+    #set($discard = $macroObj.set('visibility', 'Current Wiki'))
+    #set($discard = $macroObj.set('supportsInlineMode', 0))
+    #set($discard = $macroObj.set('contentType', 'No content'))
+    #set($discard = $macroObj.set('code', $macroCode))
+    ##
+    #set($discard = $macroDoc.save())
+    ##
+    #set($macroURL = $xwiki.getURL('Macros.Macro', 'view', "id=${macroId}"))
+    {{info}}Google Gadget imported successfully. See {{html}}&lt;a href='${macroURL}'&gt;$macroName&lt;/a&gt;{{/html}}.{{/info}}
+  #end
+#end
+{{/velocity}}</content>
+</xwikidoc>

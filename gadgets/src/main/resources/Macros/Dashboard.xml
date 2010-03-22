@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>Macros</web>
+<name>Dashboard</name>
+<language></language>
+<defaultLanguage></defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1268243074000</creationDate>
+<date>1269262493000</date>
+<contentUpdateDate>1269262493000</contentUpdateDate>
+<version>109.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.JavaScriptExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>Macros.Dashboard</name>
+<number>0</number>
+<className>XWiki.JavaScriptExtension</className>
+<guid>7dd8e8f9-4b77-489e-977e-ce7aaf7a5f61</guid>
+<property>
+<cache></cache>
+</property>
+<property>
+<code>document.observe('dom:loaded', function(event) {
+  if($('tmAdminSpace') || $('tmEdit')) {
+    var dashb = new Dashboard('dashboard-1'); 
+  }
+});
+
+var Dashboard = Class.create({
+  initialize: function(element) {
+    this.element = $(element);
+
+    var options = Object.extend({
+      colNum: 3
+    }, arguments[1] || { });
+
+    this.options = options;
+    this.colNum = this.options.colNum;
+    
+    var columns = [];
+    for (var i=1; i &lt;= this.colNum; i++) {
+      columns[i] = element + '_dashboardColumn-' + i;
+    }
+
+    columns.each(function(columnId) {
+      var columnElemIds = '#' + columnId + ' div[class="dashboardCellContainer"]';
+      var columnHandleIds = '#' + columnId + ' div[class="dashboardCellHandle"]';
+      
+      Sortable.create(columnId, {elements:$$(columnElemIds), handles:$$(columnHandleIds), overlap: 'vertical', scroll: window, containment: columns, dropOnEmpty: true, constraint: false, ghosting:true});
+    });
+
+    $$('div[class="dashboardCellHandle hidden"]').each(function(elem) { console.log(elem); Element.toggleClassName(elem, 'hidden'); });
+  }
+});
+
+</code></property><property><name></name></property><property><parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>Macros.Dashboard</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>7082d89c-ec76-4fc4-9d6c-4d9337086c68</guid>
+<property>
+<cache></cache>
+</property>
+<property>
+<code>#template("colorThemeInit.vm")
+
+div.dashboard {
+  overflow: hidden;
+}
+
+div.dashboardCellContainer {
+  padding: 10px 15px;
+  margin-bottom:10px;
+  padding: 2px;
+}
+
+div.dashboardCellContainer div.dashboardCellContent {
+  font-size: 0.85em;
+  line-height: 1.6em;
+  overflow: hidden;
+}
+
+div.dashboardCellContainer div.dashboardCellContent li {
+  list-style-type: none;
+}
+
+div.dashboardCellHandle {
+  background-image: url("$xwiki.getSkinFile('icons/datamodel/move.png')");
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 20px;
+  float: right;
+  margin: 2px;
+  cursor: move;
+}
+
+div.dashboardColumn {
+  float: left;
+  margin-right: 10px;
+  width:320px;
+  min-height: 300px;
+  height: auto !important;
+  height: 300px;
+}
+
+.dropmarker {
+  background: $theme.highlightColor;
+  border: dashed 1px $theme.menuBackgroundColor;
+  width: 318px;
+  height: 20px;
+}
+</code></property><property><name></name></property><property><parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>Macros.Dashboard</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>fc2977fb-a1c6-4bba-bac8-998458abc9c3</guid>
+<property>
+<tags/>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<code>
+<name>code</name>
+<number>9</number>
+<prettyName>Macro code</prettyName>
+<rows>20</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<contentDescription>
+<name>contentDescription</name>
+<number>8</number>
+<prettyName>Content description (Not applicable for "No content" type)</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</contentDescription>
+<contentType>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>contentType</name>
+<number>7</number>
+<prettyName>Macro content type</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator>|</separator>
+<separators>|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Mandatory|Optional|No content</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</contentType>
+<defaultCategory>
+<name>defaultCategory</name>
+<number>4</number>
+<prettyName>Default category</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultCategory>
+<description>
+<name>description</name>
+<number>3</number>
+<prettyName>Macro description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<id>
+<name>id</name>
+<number>1</number>
+<prettyName>Macro id</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</id>
+<name>
+<name>name</name>
+<number>2</number>
+<prettyName>Macro name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<supportsInlineMode>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>supportsInlineMode</name>
+<number>5</number>
+<prettyName>Supports inline mode</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</supportsInlineMode>
+<visibility>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>visibility</name>
+<number>6</number>
+<prettyName>Macro visibility</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator>|</separator>
+<separators>|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Current User|Current Wiki|Global</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</visibility>
+</class>
+<name>Macros.Dashboard</name>
+<number>0</number>
+<className>XWiki.WikiMacroClass</className>
+<guid>e203b36b-4c73-4586-b731-78f78d49677d</guid>
+<property>
+<code>{{velocity}}
+$xwiki.jsfx.use('js/scriptaculous/dragdrop.js')
+$xwiki.jsx.use('Macros.Dashboard')
+$xwiki.ssx.use('Macros.Dashboard')
+##
+#set($colsNo = 3)
+##
+#set($cols = $util.getArrayList())
+#foreach($ci in [0..${colsNo}])
+  #set($discard = $cols.add($util.getArrayList()))
+#end
+##
+#set($content = "$!context.macro.get('content')")
+#set($lines = $content.split('\n'))
+#foreach($line in $lines)
+    #set($ginfo = $line.split(' ', 2))
+    #set($cidx = $util.parseInt($ginfo.get(0)))
+    #set($cmacro = $ginfo.get(1))
+    #set($discard = $cols.get($cidx).add($cmacro))
+#end
+##
+{{html clean="false" wiki="true"}}
+&lt;div id='dashboard-1' class='dashboard'&gt;
+#foreach($ci in [1..${colsNo}])
+  &lt;div id='dashboard-1_dashboardColumn-${ci}' class='dashboardColumn'&gt;
+  #set($colstack = $cols.get($ci))
+  #foreach($m in $colstack)
+    &lt;div class='dashboardCellContainer'&gt;
+      &lt;div class='dashboardCellHandle hidden' title='Drag and drop to change the order'&gt;&lt;/div&gt;
+      &lt;div class='dashboardCellContent'&gt;
+
+        $m
+    
+      &lt;/div&gt;
+    &lt;/div&gt;
+  #end
+  &lt;/div&gt;
+#end
+&lt;/div&gt;
+{{/html}}
+{{/velocity}}
+</code></property><property><contentDescription>The Gadgets from the Dashboard, in the format &lt;column_no&gt; &lt;macro call&gt;, one on each line.</contentDescription>
+</property>
+<property>
+<contentType>Optional</contentType>
+</property>
+<property>
+<defaultCategory></defaultCategory>
+</property>
+<property>
+<description>Drag&amp;Drop iGoogle like dashboard for XWiki and Google gadgets.</description>
+</property>
+<property>
+<id>dashboard</id>
+</property>
+<property>
+<name>Dashboard</name>
+</property>
+<property>
+<supportsInlineMode>0</supportsInlineMode>
+</property>
+<property>
+<visibility>Global</visibility>
+</property>
+</object>
+<content>
+</content></xwikidoc>
