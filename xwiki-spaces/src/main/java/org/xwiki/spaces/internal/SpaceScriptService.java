@@ -19,6 +19,7 @@
  */
 package org.xwiki.spaces.internal;
 
+import org.apache.commons.lang.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -31,10 +32,7 @@ import org.xwiki.spaces.SpaceManagerException;
 import com.xpn.xwiki.XWikiContext;
 
 /**
- * The exposed script service for manipulation Spaces components from scripts in the wiki.
- * 
- * Example of usage:
- * <code>
+ * The exposed script service for manipulation Spaces components from scripts in the wiki. Example of usage: <code>
  * $services.spaces.createSpace("MySpace", "My personnal space", "user")
  * </code>
  * 
@@ -52,19 +50,23 @@ public class SpaceScriptService implements ScriptService
     private SpaceManager manager;
 
     /**
-     * Equivalent of {@link SpaceManager#createSpace(String, String)} except exceptions are caught and error messages 
+     * Equivalent of {@link SpaceManager#createSpace(String, String)} except exceptions are caught and error messages
      * stored in the context for further display by scripts.
      * 
      * @see SpaceManager#createSpace(String, String)
      * @param key the key of the space to create
      * @param name the name of the space to create
-     * 
+     * @param type the type of space to create
      * @return 0 if everything went allright, a negative integer code otherwise.
      */
-    public int createSpace(String key, String name)
+    public int createSpace(String key, String name, String type)
     {
         try {
-            this.manager.createSpace(key, name);
+            if (StringUtils.isBlank(type)) {
+                this.manager.createSpace(key, name);
+            } else {
+                this.manager.createSpace(key, name, type);
+            }
             return 0;
         } catch (SpaceAlreadyExistsException e) {
             this.addMessageInContext(e);
@@ -76,6 +78,20 @@ public class SpaceScriptService implements ScriptService
             this.addMessageInContext(e);
             return -2;
         }
+    }
+
+    /**
+     * Equivalent of {@link SpaceManager#createSpace(String, String)} except exceptions are caught and error messages
+     * stored in the context for further display by scripts.
+     * 
+     * @see SpaceManager#createSpace(String, String)
+     * @param key the key of the space to create
+     * @param name the name of the space to create
+     * @return 0 if everything went allright, a negative integer code otherwise.
+     */
+    public int createSpace(String key, String name)
+    {
+        return this.createSpace(key, name, "");
     }
 
     /**

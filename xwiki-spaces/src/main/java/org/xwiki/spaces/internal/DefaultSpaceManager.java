@@ -72,18 +72,7 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
     /** Execution needed to get access to the XWiki context. */
     @Requirement
     private Execution execution;
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see SpaceManager#createSpace(String, String)
-     */
-    public void createSpace(String key, String name) throws SpaceAlreadyExistsException, SpaceManagerException,
-        IllegalSpaceKeyException
-    {
-        this.createSpace(key, name, configuration.getDefaultSpaceType());
-    }
-
+    
     /**
      * {@inheritDoc}
      * 
@@ -95,6 +84,17 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
             return false;
         }
         return true;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * @see SpaceManager#createSpace(String, String)
+     */
+    public void createSpace(String key, String name) throws SpaceAlreadyExistsException, SpaceManagerException,
+        IllegalSpaceKeyException
+    {
+        this.createSpace(key, name, configuration.getDefaultSpaceType());
     }
 
     /**
