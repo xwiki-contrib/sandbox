@@ -328,7 +328,7 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         LOG.debug("NtlmPasswordAuthentication: " + ntlm);
 
         String ldapUid = ntlm.getUsername();
-        String validXWikiUserName = ntlm.getUsername();
+        String validXWikiUserName = ldapUid.replace(".", "");
 
         LOG.debug("ntlm.getName(): " + ntlm.getName());
         LOG.debug("ntlm.getDomain(): " + ntlm.getDomain());
