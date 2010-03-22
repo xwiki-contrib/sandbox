@@ -20,6 +20,7 @@
 package org.xwiki.spaces;
 
 import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.model.reference.DocumentReference;
 
 /**
  * An interface to manage Spaces. Spaces (with an upper-case S) are a higher abstraction than the technical document
@@ -66,4 +67,26 @@ public interface SpaceManager
      * @return true if the key is legal and would be accepted by {@link #createSpace} methods, false otherwise.
      */
     boolean isLegalSpaceKey(String key);
+    
+    /**
+     * Adds a member to the Space.
+     * 
+     * @param spaceKey the key of the space to add the member to
+     * @param userReference the reference to the document of user to add as member
+     * @throws SpaceDoesNotExistsException when trying to add a member to a Space that does not exists
+     * @throws SpaceManagerException when and error occur at a lower level trying to add the member.
+     */
+    void addMember(String spaceKey, DocumentReference userReference)
+        throws SpaceDoesNotExistsException, SpaceManagerException;
+
+    /**
+     * Adds a manager to the Space.
+     * 
+     * @param spaceKey the key of the space to add the member to
+     * @param userReference the reference to the document of user to add as member
+     * @throws SpaceDoesNotExistsException when trying to add a member to a Space that does not exists
+     * @throws SpaceManagerException when and error occur at a lower level trying to add the member.
+     */
+    void addManager(String spaceKey, DocumentReference userReference)
+        throws SpaceDoesNotExistsException, SpaceManagerException;
 }

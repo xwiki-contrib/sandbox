@@ -28,8 +28,11 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.spaces.GroupManager;
+import org.xwiki.spaces.GroupManagerException;
 import org.xwiki.spaces.IllegalSpaceKeyException;
 import org.xwiki.spaces.SpaceAlreadyExistsException;
+import org.xwiki.spaces.SpaceDoesNotExistsException;
 import org.xwiki.spaces.SpaceManager;
 import org.xwiki.spaces.SpaceManagerConfiguration;
 import org.xwiki.spaces.SpaceManagerException;
@@ -49,9 +52,14 @@ import com.xpn.xwiki.objects.BaseObject;
 @Component
 public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceManager
 {
+    /** The document name part of the reference representing the Space class. */
+    private static final String SPACE_CLASS = "SpaceClass";
+
+    /** The document name part of references representing space home pages. */
+    private static final String WEB_HOME = "WebHome";
 
     /** The document name part of the global rights class document reference. */
-    public static final String GLOBAL_RIGHTS_CLASSNAME = "XWikiGlobalRights";
+    private static final String GLOBAL_RIGHTS_CLASSNAME = "XWikiGlobalRights";
 
     /** The <tt>level</tt> field of the {@link #GLOBAL_RIGHTS_CLASSNAME} class. */
     private static final String LEVEL_FIELD = "level";
@@ -72,7 +80,11 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
     /** Execution needed to get access to the XWiki context. */
     @Requirement
     private Execution execution;
-    
+
+    /** Group manager used to add/remove members and managers to/from Space. */
+    @Requirement
+    private GroupManager groupManage;
+
     /**
      * {@inheritDoc}
      * 
@@ -85,7 +97,7 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
         }
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      * 
@@ -105,14 +117,14 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
     public void createSpace(String key, String name, String type) throws SpaceAlreadyExistsException,
         SpaceManagerException, IllegalSpaceKeyException
     {
-
         if (!this.isLegalSpaceKey(key)) {
             throw new IllegalSpaceKeyException(MessageFormat.format("Invalid key. Accepted pattern is [{0}]",
                 new Object[] {this.getValidationRegex()}));
         }
 
         XWikiContext context = getXWikiContext();
-        DocumentReference spaceHomeReference = new DocumentReference(getXWikiContext().getDatabase(), key, "WebHome");
+        DocumentReference spaceHomeReference =
+            new DocumentReference(getXWikiContext().getDatabase(), key, WEB_HOME);
 
         try {
             // Retrieve the document that will be the home of the space for that organization.
@@ -141,7 +153,7 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
             }
 
             BaseObject space =
-                spaceHome.newXObject(new DocumentReference(context.getDatabase(), XWIKI_SPACENAME, "SpaceClass"),
+                spaceHome.newXObject(new DocumentReference(context.getDatabase(), XWIKI_SPACENAME, SPACE_CLASS),
                     context);
             space.set("name", name, context);
             space.set("type", type, context);
@@ -200,6 +212,78 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
     }
 
     /**
+     * {@inheritDoc}
+     * 
+     * @see SpaceManager#addManager(String, DocumentReference)
+     */
+    public void addManager(String spaceKey, DocumentReference userReference) throws SpaceDoesNotExistsException,
+        SpaceManagerException
+    {
+        try {
+            if (!spaceExists(spaceKey)) {
+                throw new SpaceDoesNotExistsException(MessageFormat.format(
+                    "Failed to add manager. The space with key [{0}] does not exist in the wiki",
+                    new Object[] {spaceKey}));
+            }
+
+            this.groupManage.addUserToGroup(userReference, this.getManagersGroupReference(spaceKey));
+        } catch (XWikiException e) {
+            throw new SpaceManagerException(MessageFormat.format(
+                "Failed to add manager to space {0}, could not determine if the space exists or not.",
+                new Object[] {spaceKey}), e);
+        } catch (GroupManagerException e) {
+            throw new SpaceManagerException(MessageFormat.format("Failed to add manager to space {0}",
+                new Object[] {spaceKey}), e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see SpaceManager#addMember(String, DocumentReference)
+     */
+    public void addMember(String spaceKey, DocumentReference userReference) throws SpaceDoesNotExistsException,
+        SpaceManagerException
+    {
+        try {
+            if (!spaceExists(spaceKey)) {
+                throw new SpaceDoesNotExistsException(MessageFormat
+                    .format("Faild to add member. The space with key [{0}] does not exist in the wiki",
+                        new Object[] {spaceKey}));
+            }
+
+            this.groupManage.addUserToGroup(userReference, this.getMembersGroupReference(spaceKey));
+        } catch (XWikiException e) {
+            throw new SpaceManagerException(MessageFormat.format(
+                "Failed to add member to space {0}, could not determine if the space exists or not.",
+                new Object[] {spaceKey}), e);
+        } catch (GroupManagerException e) {
+            throw new SpaceManagerException(MessageFormat.format("Failed to add member to space {0}",
+                new Object[] {spaceKey}), e);
+        }
+
+    }
+
+    /**
+     * Checks whether a Space with a given keys exists already or not in the wiki.
+     * 
+     * @param key the key of the space to test
+     * @return true if the space exists already, false otherwise
+     * @throws XWikiException when an error occurs while checking
+     */
+    private boolean spaceExists(String key) throws XWikiException
+    {
+        XWikiContext context = getXWikiContext();
+        DocumentReference homeRef = new DocumentReference(context.getDatabase(), key, WEB_HOME);
+        XWikiDocument home = context.getWiki().getDocument(homeRef, context);
+        if (home.isNew()
+            || home.getXObject(new DocumentReference(context.getDatabase(), XWIKI_SPACENAME, SPACE_CLASS)) == null) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @return the XWiki context, retrieve from our {@link #execution}.
      */
     private XWikiContext getXWikiContext()
@@ -215,4 +299,21 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
         return configuration.getSpaceNameValidationRegex();
     }
 
+    /**
+     * @param spaceKey the Space key for which to get a managers group reference
+     * @return a document reference to the group of managers for the passed space key
+     */
+    private DocumentReference getManagersGroupReference(String spaceKey)
+    {
+        return new DocumentReference(getXWikiContext().getDatabase(), spaceKey, "ManagersGroup");
+    }
+
+    /**
+     * @param spaceKey the Space key for which to get a managers group reference
+     * @return a document reference to the group of managers for the passed space key
+     */
+    private DocumentReference getMembersGroupReference(String spaceKey)
+    {
+        return new DocumentReference(getXWikiContext().getDatabase(), spaceKey, "MembersGroup");
+    }
 }

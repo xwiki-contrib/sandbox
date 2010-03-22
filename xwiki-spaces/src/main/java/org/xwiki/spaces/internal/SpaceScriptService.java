@@ -23,9 +23,11 @@ import org.apache.commons.lang.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
+import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.spaces.IllegalSpaceKeyException;
 import org.xwiki.spaces.SpaceAlreadyExistsException;
+import org.xwiki.spaces.SpaceDoesNotExistsException;
 import org.xwiki.spaces.SpaceManager;
 import org.xwiki.spaces.SpaceManagerException;
 
@@ -48,6 +50,10 @@ public class SpaceScriptService implements ScriptService
     /** The internal component used to manage spaces. */
     @Requirement
     private SpaceManager manager;
+
+    /** A reference resolver that transform string representations to real entities references. */
+    @Requirement
+    private DocumentReferenceResolver<String> referenceResolver;
 
     /**
      * Equivalent of {@link SpaceManager#createSpace(String, String)} except exceptions are caught and error messages
@@ -92,6 +98,50 @@ public class SpaceScriptService implements ScriptService
     public int createSpace(String key, String name)
     {
         return this.createSpace(key, name, "");
+    }
+
+    /**
+     * Adds a member to a space.
+     * 
+     * @see SpaceManager#addMember(String, org.xwiki.model.reference.DocumentReference)
+     * @param key the key of the space to add a manager to
+     * @param name the string representation of the user to add
+     * @return 0 if everything went allright, a negative integer code otherwise.
+     */
+    public int addMember(String key, String name)
+    {
+        try {
+            this.manager.addMember(key, this.referenceResolver.resolve(name));
+            return 0;
+        } catch (SpaceDoesNotExistsException e) {
+            this.addMessageInContext(e);
+            return -1;
+        } catch (SpaceManagerException e) {
+            this.addMessageInContext(e);
+            return -2;
+        }
+    }
+
+    /**
+     * Adds a manager to a space.
+     * 
+     * @see SpaceManager#addManager(String, org.xwiki.model.reference.DocumentReference)
+     * @param key the key of the space to add a manager to
+     * @param name the string representation of the user to add
+     * @return 0 if everything went allright, a negative integer code otherwise.
+     */
+    public int addManager(String key, String name)
+    {
+        try {
+            this.manager.addManager(key, this.referenceResolver.resolve(name));
+            return 0;
+        } catch (SpaceDoesNotExistsException e) {
+            this.addMessageInContext(e);
+            return -1;
+        } catch (SpaceManagerException e) {
+            this.addMessageInContext(e);
+            return -2;
+        }
     }
 
     /**

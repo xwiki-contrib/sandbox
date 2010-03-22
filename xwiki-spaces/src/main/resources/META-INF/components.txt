@@ -1,3 +1,4 @@
 org.xwiki.spaces.internal.DefaultSpaceManager
 org.xwiki.spaces.internal.DefaultSpaceManagerConfiguration
 org.xwiki.spaces.internal.SpaceScriptService
+org.xwiki.spaces.internal.DefaultGroupManager
