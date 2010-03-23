@@ -21,6 +21,7 @@
 
 package com.xwiki.authentication.ntlm;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -192,6 +193,8 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             }
         }
 
+        XWikiUser user;
+
         // Authenticate
         if (principal == null) {
             principal = authenticate(null, null, context);
@@ -201,16 +204,24 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             }
 
             LOG.debug("Saving auth cookie");
-            String encuname = encryptText(principal.getName(), context);
+            String encuname =
+                encryptText(principal.getName().contains(":") ? principal.getName() : context.getDatabase() + ":"
+                    + principal.getName(), context);
             Cookie usernameCookie = new Cookie("XWIKINTLMAUTHINFO", encuname);
             usernameCookie.setMaxAge(-1);
             usernameCookie.setPath("/");
             context.getResponse().addCookie(usernameCookie);
+
+            user = new XWikiUser(principal.getName());
+        } else {
+            user =
+                new XWikiUser(principal.getName().startsWith(context.getDatabase()) ? principal.getName().substring(
+                    context.getDatabase().length() + 1) : principal.getName());
         }
 
         LOG.debug("XWikiUser=" + principal.getName());
 
-        return new XWikiUser(principal.getName());
+        return user;
     }
 
     public NtlmPasswordAuthentication resolveNTLM(XWikiContext context)
@@ -460,8 +471,18 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
             context.getResponse().setHeader("WWW-Authenticate", "NTLM");
             context.getResponse().addHeader("WWW-Authenticate", "Basic realm=\"" + realm + "\"");
-
+            
             context.getResponse().setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+            context.getResponse().setStatus(401);
+
+            try {
+                context.getResponse().setContentLength("NTLM and BASIS authentication".length());
+                context.getResponse().getOutputStream().write("NTLM and BASIS authentication".getBytes());
+                context.setFinished(true);
+            } catch (IOException e) {
+                LOG.error("Failed to write page", e);
+            }
         } else {
             super.showLogin(context);
         }
