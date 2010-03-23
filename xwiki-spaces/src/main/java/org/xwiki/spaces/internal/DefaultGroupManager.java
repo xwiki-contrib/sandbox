@@ -144,9 +144,9 @@ public class DefaultGroupManager implements GroupManager
 
         try {
             XWikiDocument groupDoc = xwiki.getDocument(group, context);
-            String serializedUserReference = compactWikiReferenceSerializer.serialize(user, group);
+            String userRefAsString = compactWikiReferenceSerializer.serialize(user, group);
 
-            BaseObject memberObject = groupDoc.getXObject(getGroupClassReference(), MEMBER_FIELD_NAME, serializedUserReference);
+            BaseObject memberObject = groupDoc.getXObject(getGroupClassReference(), MEMBER_FIELD_NAME, userRefAsString);
             if (memberObject == null) {
                 return;
             }
