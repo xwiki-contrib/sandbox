@@ -145,6 +145,50 @@ public class SpaceScriptService implements ScriptService
     }
 
     /**
+     * Removes a member to a space.
+     * 
+     * @see SpaceManager#removeMember(String, org.xwiki.model.reference.DocumentReference)
+     * @param key the key of the space to remove a manager from
+     * @param name the string representation of the user to remove
+     * @return 0 if everything went allright, a negative integer code otherwise.
+     */
+    public int removeMember(String key, String name)
+    {
+        try {
+            this.manager.removeMember(key, this.referenceResolver.resolve(name));
+            return 0;
+        } catch (SpaceDoesNotExistsException e) {
+            this.addMessageInContext(e);
+            return -1;
+        } catch (SpaceManagerException e) {
+            this.addMessageInContext(e);
+            return -2;
+        }
+    }
+
+    /**
+     * Removes a manager to a space.
+     * 
+     * @see SpaceManager#removeManager(String, org.xwiki.model.reference.DocumentReference)
+     * @param key the key of the space to remove a manager from
+     * @param name the string representation of the user to add
+     * @return 0 if everything went allright, a negative integer code otherwise.
+     */
+    public int removeManager(String key, String name)
+    {
+        try {
+            this.manager.removeManager(key, this.referenceResolver.resolve(name));
+            return 0;
+        } catch (SpaceDoesNotExistsException e) {
+            this.addMessageInContext(e);
+            return -1;
+        } catch (SpaceManagerException e) {
+            this.addMessageInContext(e);
+            return -2;
+        }
+    }
+    
+    /**
      * Helper that adds a message from an exception in the XWiki context.
      * 
      * @param e the exception which message to add in the context.

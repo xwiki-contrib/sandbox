@@ -82,11 +82,33 @@ public interface SpaceManager
     /**
      * Adds a manager to the Space.
      * 
-     * @param spaceKey the key of the space to add the member to
-     * @param userReference the reference to the document of user to add as member
+     * @param spaceKey the key of the space to add the manager to
+     * @param userReference the reference to the document of user to add as manager
      * @throws SpaceDoesNotExistsException when trying to add a member to a Space that does not exists
-     * @throws SpaceManagerException when and error occur at a lower level trying to add the member.
+     * @throws SpaceManagerException when and error occur at a lower level trying to add the manager.
      */
     void addManager(String spaceKey, DocumentReference userReference)
+        throws SpaceDoesNotExistsException, SpaceManagerException;
+    
+    /**
+     * Removes a member from the Space.
+     * 
+     * @param spaceKey the key of the space to remove the member from
+     * @param userReference the reference to the document of user to remove
+     * @throws SpaceDoesNotExistsException when trying to remove a member from a Space that does not exists
+     * @throws SpaceManagerException when and error occur at a lower level trying to remove the member.
+     */
+    void removeMember(String spaceKey, DocumentReference userReference)
+        throws SpaceDoesNotExistsException, SpaceManagerException;
+
+    /**
+     * Removes a manager to the Space.
+     * 
+     * @param spaceKey the key of the space to remove the manager from
+     * @param userReference the reference to the document of user to remove
+     * @throws SpaceDoesNotExistsException when trying to remove a member from a Space that does not exists
+     * @throws SpaceManagerException when and error occur at a lower level trying to remove the manager.
+     */
+    void removeManager(String spaceKey, DocumentReference userReference)
         throws SpaceDoesNotExistsException, SpaceManagerException;
 }

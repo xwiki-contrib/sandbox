@@ -108,14 +108,15 @@ public class DefaultGroupManager implements GroupManager
     {
         XWikiContext context = getXWikiContext();
         String serializedUserReference = compactWikiReferenceSerializer.serialize(user, group);
-
+        String serializedGroupReference = compactWikiReferenceSerializer.serialize(group);
+        
         try {
             Collection<String> coll =
                 ((RightsManagerPluginApi) context.getWiki().getPluginApi("rightsmanager", context))
                     .getAllGroupsNamesForMember(serializedUserReference);
             Iterator<String> it = coll.iterator();
             while (it.hasNext()) {
-                if (group.equals((String) it.next())) {
+                if (serializedGroupReference.equals(it.next())) {
                     return true;
                 }
             }

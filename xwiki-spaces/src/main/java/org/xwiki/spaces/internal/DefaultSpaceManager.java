@@ -248,7 +248,7 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
         try {
             if (!spaceExists(spaceKey)) {
                 throw new SpaceDoesNotExistsException(MessageFormat
-                    .format("Faild to add member. The space with key [{0}] does not exist in the wiki",
+                    .format("Failed to add member. The space with key [{0}] does not exist in the wiki",
                         new Object[] {spaceKey}));
             }
 
@@ -261,7 +261,58 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
             throw new SpaceManagerException(MessageFormat.format("Failed to add member to space {0}",
                 new Object[] {spaceKey}), e);
         }
+    }
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * @see SpaceManager#removeManager(String, DocumentReference)
+     */
+    public void removeManager(String spaceKey, DocumentReference userReference) throws SpaceDoesNotExistsException,
+    SpaceManagerException
+    {
+        try {
+            if (!spaceExists(spaceKey)) {
+                throw new SpaceDoesNotExistsException(MessageFormat
+                    .format("Failed to remove manager. The space with key [{0}] does not exist in the wiki",
+                        new Object[] {spaceKey}));
+            }
 
+            this.groupManage.removeUserFromGroup(userReference, this.getManagersGroupReference(spaceKey));
+        } catch (XWikiException e) {
+            throw new SpaceManagerException(MessageFormat.format(
+                "Failed to remove manager from space {0}, could not determine if the space exists or not.",
+                new Object[] {spaceKey}), e);
+        } catch (GroupManagerException e) {
+            throw new SpaceManagerException(MessageFormat.format("Failed to remove manager from space {0}",
+                new Object[] {spaceKey}), e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see SpaceManager#removeMember(String, DocumentReference)
+     */
+    public void removeMember(String spaceKey, DocumentReference userReference) throws SpaceDoesNotExistsException,
+    SpaceManagerException
+    {
+        try {
+            if (!spaceExists(spaceKey)) {
+                throw new SpaceDoesNotExistsException(MessageFormat
+                    .format("Failed to remove member. The space with key [{0}] does not exist in the wiki",
+                        new Object[] {spaceKey}));
+            }
+
+            this.groupManage.removeUserFromGroup(userReference, this.getMembersGroupReference(spaceKey));
+        } catch (XWikiException e) {
+            throw new SpaceManagerException(MessageFormat.format(
+                "Failed to remove member from space {0}, could not determine if the space exists or not.",
+                new Object[] {spaceKey}), e);
+        } catch (GroupManagerException e) {
+            throw new SpaceManagerException(MessageFormat.format("Failed to remove member from space {0}",
+                new Object[] {spaceKey}), e);
+        }
     }
 
     /**
@@ -316,4 +367,5 @@ public class DefaultSpaceManager extends AbstractLogEnabled implements SpaceMana
     {
         return new DocumentReference(getXWikiContext().getDatabase(), spaceKey, "MembersGroup");
     }
+
 }
