@@ -219,7 +219,7 @@ public class NTLMAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                     context.getDatabase().length() + 1) : principal.getName());
         }
 
-        LOG.debug("XWikiUser=" + principal.getName());
+        LOG.debug("XWikiUser=" + user);
 
         return user;
     }
