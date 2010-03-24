@@ -210,6 +210,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             }
         }
 
+        XWikiUser user;
+        
         // Authenticate
         if (principal == null) {
             principal = authenticate(username, password, context);
@@ -223,11 +225,17 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             usernameCookie.setMaxAge(-1);
             usernameCookie.setPath("/");
             context.getResponse().addCookie(usernameCookie);
+            
+            user = new XWikiUser(principal.getName());
+        } else {
+            user =
+                new XWikiUser(principal.getName().startsWith(context.getDatabase()) ? principal.getName().substring(
+                    context.getDatabase().length() + 1) : principal.getName());
         }
 
-        LOG.debug("XWikiUser=" + principal.getName());
+        LOG.debug("XWikiUser=" + user);
 
-        return new XWikiUser(principal.getName());
+        return user;
     }
 
     public Principal authenticate(String login, String password, XWikiContext context) throws XWikiException
