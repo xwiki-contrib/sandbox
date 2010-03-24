@@ -71,71 +71,113 @@ public class UserPref
      */
     private List<EnumValue> enumValues;
 
+    /**
+     * @return required "symbolic" name of the user preference
+     */
     public String getName()
     {
         return name;
     }
 
+    /**
+     * @param name required "symbolic" name of the user preference
+     */
     public void setName(String name)
     {
         this.name = name;
     }
 
+    /**
+     * @return optional display name
+     */
     public String getDisplayName()
     {
         return displayName;
     }
 
+    /**
+     * @param displayName optional display name
+     */
     public void setDisplayName(String displayName)
     {
         this.displayName = displayName;
     }
 
+    /**
+     * @return optional string to pass as the parameter name for content type="url"
+     */
     public String getUrlparam()
     {
         return urlparam;
     }
 
+    /**
+     * @param urlparam optional string to pass as the parameter name for content type="url"
+     */
     public void setUrlparam(String urlparam)
     {
         this.urlparam = urlparam;
     }
 
+    /**
+     * @return optional string that indicates the data type of this attribute
+     */
     public String getDatatype()
     {
         return datatype;
     }
 
+    /**
+     * @param datatype optional string that indicates the data type of this attribute
+     */
     public void setDatatype(String datatype)
     {
         this.datatype = datatype;
     }
 
+    /**
+     * @return optional boolean argument (true or false) indicating whether this user preference is required
+     */
     public String getRequired()
     {
         return required;
     }
 
+    /**
+     * @param required optional boolean argument (true or false) indicating whether this user preference is required
+     */
     public void setRequired(String required)
     {
         this.required = required;
     }
 
+    /**
+     * @return optional string that indicates a user preference's default value
+     */
     public String getDefaultValue()
     {
         return defaultValue;
     }
 
+    /**
+     * @param defaultValue optional string that indicates a user preference's default value
+     */
     public void setDefaultValue(String defaultValue)
     {
         this.defaultValue = defaultValue;
     }
 
+    /**
+     * @return optional string that indicates a user preference's default value
+     */
     public List<EnumValue> getEnumValues()
     {
         return enumValues;
     }
 
+    /**
+     * @param enumValues optional string that indicates a user preference's default value
+     */
     public void setEnumValues(List<EnumValue> enumValues)
     {
         this.enumValues = enumValues;

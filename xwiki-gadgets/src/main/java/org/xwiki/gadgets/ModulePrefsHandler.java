@@ -29,7 +29,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class ModulePrefsHandler extends DefaultHandler
 {
     /**
-     * The XML Module Preference tag name. 
+     * The XML Module Preference tag name.
      */
     private static final String MODULE_PREFS_ELEMENT_QNAME = "ModulePrefs";
 
@@ -37,7 +37,6 @@ public class ModulePrefsHandler extends DefaultHandler
      * Module Preferences are saved here.
      */
     private ModulePrefs result;
-
 
     /**
      * Creates a new instance.
@@ -48,9 +47,9 @@ public class ModulePrefsHandler extends DefaultHandler
     }
 
     /**
-     * Initializes the Module Preferences object.
+     * Initializes the Module Preferences object. {@inheritDoc}
      * 
-     * @throws SAXException
+     * @throws SAXException any SAX exception, possibly wrapping another exception
      * @see DefaultHandler#startDocument()
      */
     @Override
@@ -61,10 +60,8 @@ public class ModulePrefsHandler extends DefaultHandler
     }
 
     /**
-     * Catches the Module Preferences XML tag.
+     * Catches the Module Preferences XML tag. {@inheritDoc}
      * 
-     * {@inheritDoc}
-     *  
      * @see DefaultHandler#startElement(String, String, String, Attributes)
      */
     @Override
@@ -83,7 +80,7 @@ public class ModulePrefsHandler extends DefaultHandler
 
     /**
      * @return the Module Preferences
-     * @see ModulePrefs
+     * @see {@link ModulePrefs}
      */
     public ModulePrefs getResult()
     {

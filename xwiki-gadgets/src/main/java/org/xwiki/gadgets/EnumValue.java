@@ -42,7 +42,7 @@ public class EnumValue
     private String displayValue;
 
     /**
-     * @return
+     * @return the value
      */
     public String getValue()
     {
@@ -50,7 +50,7 @@ public class EnumValue
     }
 
     /**
-     * @param value
+     * @param value the value
      */
     public void setValue(String value)
     {
@@ -58,7 +58,7 @@ public class EnumValue
     }
 
     /**
-     * @return
+     * @return the display value
      */
     public String getDisplayValue()
     {
@@ -66,7 +66,7 @@ public class EnumValue
     }
 
     /**
-     * @param displayValue
+     * @param displayValue The display value
      */
     public void setDisplayValue(String displayValue)
     {

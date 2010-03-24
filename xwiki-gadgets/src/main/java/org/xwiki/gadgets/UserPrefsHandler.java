@@ -31,26 +31,59 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class UserPrefsHandler extends DefaultHandler
 {
+    /**
+     * The XML User Preference tag name.
+     */
     private static final String USER_PREF_ELEMENT_QNAME = "UserPref";
 
+    /**
+     * The XML User Preference name attribute name.
+     */
     private static final String USER_PREF_ATTRIBUTE_NAME_QNAME = "name";
 
+    /**
+     * The XML User Preference display name attribute name.
+     */
     private static final String USER_PREF_ATTRIBUTE_DISPLAY_NAME_QNAME = "display_name";
 
+    /**
+     * The XML User Preference url parameter attribute name.
+     */
     private static final String USER_PREF_ATTRIBUTE_URLPARAM_QNAME = "urlparam";
 
+    /**
+     * The XML User Preference datatype attribute name.
+     */
     private static final String USER_PREF_ATTRIBUTE_DATATYPE_QNAME = "datatype";
 
+    /**
+     * The XML User Preference required attribute name.
+     */
     private static final String USER_PREF_ATTRIBUTE_REQUIRED_QNAME = "required";
 
+    /**
+     * The XML User Preference default value attribute name.
+     */
     private static final String USER_PREF_ATTRIBUTE_DEFAULT_VALUE_QNAME = "default_value";
 
+    /**
+     * The XML Enum Value tag name.
+     */
     private static final String ENUM_VALUE_ELEMENT_QNAME = "EnumValue";
 
+    /**
+     * The XML Enum Value value attribute name.
+     */
     private static final String ENUM_VALUE_ATTRIBUTE_VALUE_QNAME = "value";
 
+    /**
+     * The XML Enum Value display name attribute name.
+     */
     private static final String ENUM_VALUE_ATTRIBUTE_DISPLAY_VALUE_QNAME = "display_value";
 
+    /**
+     * The XML Enum Value datatype enum attribute value.
+     */
     private static final String USER_PREF_ATTRIBUTE_DATATYPE_ENUM_VALUE = "enum";
 
     /**
@@ -72,9 +105,7 @@ public class UserPrefsHandler extends DefaultHandler
     }
 
     /**
-     * {@inheritDoc}
-     * 
-     * Initializes the list of User Preferences result.
+     * {@inheritDoc} Initializes the list of User Preferences result.
      * 
      * @see DefaultHandler#startDocument()
      */
@@ -86,8 +117,6 @@ public class UserPrefsHandler extends DefaultHandler
     }
 
     /**
-     * {@inheritDoc}
-     * 
      * Catches User Preference and EnumValue XML tags. When a UserPref tags is found, it creates a new UserPref object
      * as the currently parsed User Preference. When it catches EnumValue XML tag, and if a user pref is currently
      * parsed, it appends to its enum value list. {@inheritDoc}
@@ -126,9 +155,7 @@ public class UserPrefsHandler extends DefaultHandler
     }
 
     /**
-     * {@inheritDoc}
-     * 
-     * Catches the end tags for User Preferences, and appends the parsed preference to the results list.
+     * Catches the end tags for User Preferences, and appends the parsed preference to the results list. {@inheritDoc}
      * 
      * @see DefaultHandler#endElement(String, String, String)
      */
