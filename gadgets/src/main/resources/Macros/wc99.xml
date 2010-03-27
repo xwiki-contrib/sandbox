@@ -12,9 +12,9 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1268227565000</creationDate>
-<date>1268227566000</date>
-<contentUpdateDate>1268227566000</contentUpdateDate>
-<version>1.1</version>
+<date>1269345872000</date>
+<contentUpdateDate>1269345872000</contentUpdateDate>
+<version>2.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -23,6 +23,40 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>Macros.wc99</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>cc254686-3aef-4d8c-a99d-e3d7a8a10ecd</guid>
+<property>
+<tags/>
+</property>
+</object>
 <object>
 <class>
 <name>XWiki.WikiMacroClass</name>
@@ -129,10 +163,16 @@
 <className>XWiki.WikiMacroClass</className>
 <guid>f941da2e-fb64-4c54-84e1-ecf5d6276518</guid>
 <property>
-<code>{{velocity}}#set($gadgeturl = 'http://www.ljmsite.com/google/gadgets/worldclocks4.xml') #set($thumburl = 'http://www.ljmsite.com/google/gadgets/worldclocks/worldclocks_thumbnail.png'){{/velocity}}{{include document='MacrosCode.GoogleGadgetsMacroCode'}}</code>
+<code>{{velocity}}#set($gadgeturl = 'http://www.ljmsite.com/google/gadgets/worldclocks4.xml') #set($thumburl = 'http://www.ljmsite.com/google/gadgets/worldclocks/worldclocks_thumbnail.png'){{/velocity}}{{include document='MacrosCode.GoogleGadgetsMacroCode'/}}</code>
+</property>
+<property>
+<contentDescription></contentDescription>
 </property>
 <property>
 <contentType>No content</contentType>
+</property>
+<property>
+<defaultCategory></defaultCategory>
 </property>
 <property>
 <description>Gadget for your Google homepage or website that displays multiple analog or digital clocks at the times in the selected time zones or countries/cities. The clocks can be synchronized with our server to always display the correct times. This gadget is especially useful when working with Globally Dispersed Teams or when interacting with worldwide friends.</description>
@@ -323,6 +363,9 @@
 <number>2</number>
 <className>XWiki.WikiMacroParameterClass</className>
 <guid>3437c76b-fb15-4298-a9a4-41c71007b30c</guid>
+<property>
+<defaultValue></defaultValue>
+</property>
 <property>
 <description>Title</description>
 </property>

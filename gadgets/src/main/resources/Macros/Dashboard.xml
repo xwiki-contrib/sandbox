@@ -12,14 +12,14 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1268243074000</creationDate>
-<date>1269262493000</date>
-<contentUpdateDate>1269262493000</contentUpdateDate>
-<version>109.1</version>
+<date>1269689331000</date>
+<contentUpdateDate>1269689331000</contentUpdateDate>
+<version>380.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
-<comment></comment>
+<comment>Customize dashboard button, inline edit mode, persistent drag&amp;drop</comment>
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
@@ -99,8 +99,8 @@
 </property>
 <property>
 <code>document.observe('dom:loaded', function(event) {
-  if($('tmAdminSpace') || $('tmEdit')) {
-    var dashb = new Dashboard('dashboard-1'); 
+  if(XWiki.contextaction == 'inline') {
+    var dashb = new Dashboard('dashboard-1', {persistent: true});
   }
 });
 
@@ -109,28 +109,107 @@ var Dashboard = Class.create({
     this.element = $(element);
 
     var options = Object.extend({
-      colNum: 3
+      colNum: 3,
+      startTag: '{{dashboard}}',
+      endTag: '{{/dashboard}}',
+      contentElement: 'content',
+      persistent: false
     }, arguments[1] || { });
 
     this.options = options;
     this.colNum = this.options.colNum;
-    
-    var columns = [];
-    for (var i=1; i &lt;= this.colNum; i++) {
-      columns[i] = element + '_dashboardColumn-' + i;
+    this.startTag = this.options.startTag;
+    this.endTag = this.options.endTag;
+    this.contentElement = $(this.options.contentElement);
+    this.persistent = this.options.persistent;
+    this.colData = $A();
+    this.colOrder = this.initColumnOrder();
+
+    if(this.persistent) {
+      this.parseDocumentDashboardContent();
     }
 
-    columns.each(function(columnId) {
-      var columnElemIds = '#' + columnId + ' div[class="dashboardCellContainer"]';
-      var columnHandleIds = '#' + columnId + ' div[class="dashboardCellHandle"]';
-      
-      Sortable.create(columnId, {elements:$$(columnElemIds), handles:$$(columnHandleIds), overlap: 'vertical', scroll: window, containment: columns, dropOnEmpty: true, constraint: false, ghosting:true});
+    var columns = $H();
+    $R(1,this.colNum).each(function(colidx) {
+      columns.set(element + '_dashboardColumn-' + colidx, colidx);
     });
 
-    $$('div[class="dashboardCellHandle hidden"]').each(function(elem) { console.log(elem); Element.toggleClassName(elem, 'hidden'); });
+    columns.keys().each(function(columnId) {      
+      Sortable.create(columnId, {tag:'div', only:'dashboardCellContainer', handle:'dashboardCellHandle', overlap: 'vertical', scroll: window, containment: columns.keys(), dropOnEmpty: true, constraint: false, ghosting:true, onUpdate: this.onColumnUpdate.bind(this)});
+    }.bind(this));
+
+    this.columnIds = columns;
+    this.showHandles();
+  },
+
+  initColumnOrder: function() {
+    var colOrder = $H();
+    $R(1, this.colNum).each(function(colno) { colOrder.set(colno, $A()); })
+    return colOrder;
+  },
+
+  contentToString: function() {
+    var result = '';
+    this.colOrder.keys().each(function(colidx) {
+      this.colOrder.get(colidx).each(function(lineno) {
+        result = result.concat(colidx, ' ', this.colData[lineno], '\n');
+      }.bind(this));
+    }.bind(this));
+    return result;
+  },
+
+  onColumnUpdate: function(columnElement) {
+    if(this.persistent) {
+      var colidx = this.columnIds.get(columnElement.id);
+      this.colOrder.set(colidx, Sortable.sequence(columnElement));
+
+      this.updateDocumentDashboardContent();
+    }
+  },
+
+  parseDocumentDashboardContent: function() {
+    var content = this.contentElement.value;
+    var start = content.indexOf(this.startTag);
+    var end = content.indexOf(this.endTag);
+    
+    if(start&lt;0 || end&gt;=content.length || start&gt;=end) return;
+
+    var colData = $A();
+    var colOrder = this.initColumnOrder();
+
+    content = content.substring(start + this.startTag.length, end).strip();
+  
+    var lines = content.split('\n');
+    var columnidx = 0;
+    lines.each(function(line) {
+      if(!line.blank()) {
+        var sepidx = line.indexOf(' ');
+        var cidx = line.substr(0, sepidx);
+        var cdata = line.substr(sepidx + 1);
+        
+        colData.push(cdata);
+        colOrder.get(cidx).push(columnidx);
+        columnidx = columnidx+1;
+      }
+    });
+    this.colData = colData;
+    this.colOrder = colOrder;
+  },
+
+  updateDocumentDashboardContent: function() {
+    var content = this.contentElement.value;
+    var start = content.indexOf(this.startTag);
+    var end = content.indexOf(this.endTag);
+    
+    if(start&gt;=0 &amp;&amp; end&lt;content.length &amp;&amp; start&lt;end) {
+      this.contentElement.value = content.substring(0, start+this.startTag.length).concat('\n').concat(this.contentToString()).concat(content.substring(end));
+    }
+  },
+  
+  showHandles: function() {
+    $$('div[class="dashboardCellHandle hidden"]').each(function(elem) { Element.toggleClassName(elem, 'hidden'); });
   }
 });
-
 </code></property><property><name></name></property><property><parse>1</parse>
 </property>
 <property>
@@ -218,6 +297,24 @@ div.dashboard {
   overflow: hidden;
 }
 
+div.dashboardCustomizeBar {
+  float: right;
+}
+
+div.dashboardContent {
+  clear: both;
+  overflow: hidden;
+}
+
+div.dashboardColumn {
+  float: left;
+  margin-right: 10px;
+  width:320px;
+  min-height: 300px;
+  height: auto !important;
+  height: 300px;
+}
+
 div.dashboardCellContainer {
   padding: 10px 15px;
   margin-bottom:10px;
@@ -242,15 +339,6 @@ div.dashboardCellHandle {
   float: right;
   margin: 2px;
   cursor: move;
-}
-
-div.dashboardColumn {
-  float: left;
-  margin-right: 10px;
-  width:320px;
-  min-height: 300px;
-  height: auto !important;
-  height: 300px;
 }
 
 .dropmarker {
@@ -418,21 +506,26 @@ $xwiki.ssx.use('Macros.Dashboard')
 #end
 ##
 #set($content = "$!context.macro.get('content')")
-#set($lines = $content.split('\n'))
+#set($lines = $content.split('[\r\n|\r|\n]+'))
 #foreach($line in $lines)
+  #if($line != '' &amp;&amp; !$line.matches('[ \t]+'))
     #set($ginfo = $line.split(' ', 2))
     #set($cidx = $util.parseInt($ginfo.get(0)))
     #set($cmacro = $ginfo.get(1))
     #set($discard = $cols.get($cidx).add($cmacro))
+  #end
 #end
 ##
 {{html clean="false" wiki="true"}}
 &lt;div id='dashboard-1' class='dashboard'&gt;
+&lt;div id='dashboard-1_customize' class='dashboardCustomizeBar#if($context.action != 'view' || (!$hasEdit &amp;&amp; !$hasAdmin)) hidden#end'&gt;&lt;a href='$doc.getURL('inline')'&gt;» Customize dashboard «&lt;/a&gt;&lt;/div&gt;
+&lt;div class='dashboardContent'&gt;
+#set($idcurr = 0)
 #foreach($ci in [1..${colsNo}])
   &lt;div id='dashboard-1_dashboardColumn-${ci}' class='dashboardColumn'&gt;
   #set($colstack = $cols.get($ci))
   #foreach($m in $colstack)
-    &lt;div class='dashboardCellContainer'&gt;
+    &lt;div class='dashboardCellContainer' id='cell_${idcurr}'&gt;
       &lt;div class='dashboardCellHandle hidden' title='Drag and drop to change the order'&gt;&lt;/div&gt;
       &lt;div class='dashboardCellContent'&gt;
 
@@ -440,11 +533,16 @@ $xwiki.ssx.use('Macros.Dashboard')
     
       &lt;/div&gt;
     &lt;/div&gt;
+    #set($idcurr = $idcurr+1)
   #end
   &lt;/div&gt;
 #end
 &lt;/div&gt;
+&lt;/div&gt;
 {{/html}}
+#if($context.action=='inline')
+{{html wiki=false}}&lt;textarea id='content' name='content' class='hidden'&gt;$escapetool.xml($tdoc.content)&lt;/textarea&gt;{{/html}}
+#end
 {{/velocity}}
 </code></property><property><contentDescription>The Gadgets from the Dashboard, in the format &lt;column_no&gt; &lt;macro call&gt;, one on each line.</contentDescription>
 </property>
