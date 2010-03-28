@@ -90,5 +90,4 @@
 #else
 {{info}} Need admin rights to use this application. {{/info}}
 #end
-{{/velocity}}
-</content></xwikidoc>
+{{/velocity}}</content></xwikidoc>
