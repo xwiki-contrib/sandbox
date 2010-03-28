@@ -101,5 +101,4 @@
 #set($defaultweb = "FAQ")
 {{include document="XWiki.ClassSheet"/}}
 {{/html}}
-{{/velocity}}
-</content></xwikidoc>
+{{/velocity}}</content></xwikidoc>
