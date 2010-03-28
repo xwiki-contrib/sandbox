@@ -84,5 +84,4 @@
 {{include document="${space}Code.WebSearchCode"/}}
 {{include document="XWiki.Results"/}}
 {{/html}}
-{{/velocity}}
-</content></xwikidoc>
+{{/velocity}}</content></xwikidoc>

@@ -127,5 +127,4 @@
   ## datedlist contains items prefixed with the date; strip the date from the actual item name:
   #set($ok = $list.add(0, $item.substring(14)))
 #end
-{{/velocity}}
-</content></xwikidoc>
+{{/velocity}}</content></xwikidoc>
