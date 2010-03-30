@@ -29,7 +29,7 @@
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>xwiki-core-model-backport</artifactId>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
   <name>XWiki Core Model Backport</name>
   <description>
     Backport of the XWiki Core Model module, to be able to use entity references on versions smaller than 2.2 
@@ -92,8 +92,8 @@
     </repository>
   </distributionManagement>
   <scm>
-    <connection>scm:svn:http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/tags/xwiki-core-model-backport-1.0</connection>
-    <developerConnection>scm:svn:https://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/tags/xwiki-core-model-backport-1.0</developerConnection>
-    <url>http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/tags/xwiki-core-model-backport-1.0</url>
+    <connection>scm:svn:http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/trunk</connection>
+    <developerConnection>scm:svn:https://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/trunk</developerConnection>
+    <url>http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/trunk</url>
   </scm>
 </project>
