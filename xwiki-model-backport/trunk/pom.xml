@@ -85,4 +85,16 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+  <distributionManagement>
+    <repository>
+      <id>xwiki-staging</id>
+      <name>XWiki Staging Repository</name>
+      <url>http://nexus.xwiki.org/nexus/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+  <scm>
+    <connection>scm:svn:http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/trunk</connection>
+    <developerConnection>scm:svn:https://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/trunk</developerConnection>
+    <url>http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-model-backport/trunk</url>
+  </scm>
 </project>
