@@ -55,6 +55,7 @@ public class PUMAConfig
         try {
             param = context.getWiki().getXWikiPreference(PREF_KEY + "_" + name, context);
         } catch (Exception e) {
+            LOG.error("Faile to get preference [" + PREF_KEY + "_" + name + "]", e);
         }
 
         if (param == null || param.length() == 0) {
@@ -103,7 +104,7 @@ public class PUMAConfig
 
         String str = getParam(name, null, context);
 
-        if (str.trim().length() > 0) {
+        if (!StringUtils.isEmpty(str)) {
             String[] mappingTable = str.split("\\|");
 
             for (int i = 0; i < mappingTable.length; ++i) {
