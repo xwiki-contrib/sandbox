@@ -35,7 +35,9 @@ import com.xpn.xwiki.user.api.XWikiAuthService;
 
 public class PUMAConfig
 {
-    /** LogFactory <code>LOGGER</code>. */
+    /**
+     * LogFactory <code>LOGGER</code>.
+     */
     private static final Log LOG = LogFactory.getLog(PUMAConfig.class);
 
     protected static final String PREF_KEY = "puma";
@@ -140,16 +142,23 @@ public class PUMAConfig
     {
         return getMapParam("userMapping", null, context);
     }
-    
+
     public Map<String, Collection<String>> getGroupMappings(XWikiContext context)
     {
         return getManyToManyParam("groupsMapping", null, false, context);
     }
-    
-    /*public XWikiAuthService getFallbackAuthenticator(XWikiContext context)
+
+    public XWikiAuthService getFalbackAuthenticator(XWikiContext context)
     {
-        String authenticatorClassName = getParam("fallback", null, context);
-        
-        Class.forName(authenticatorClassName);
-    }*/
+        String authenticatorClassName = getParam("falback", null, context);
+
+        XWikiAuthService authenticator = null;
+        try {
+            authenticator = (XWikiAuthService) Class.forName(authenticatorClassName).newInstance();
+        } catch (Exception e) {
+            LOG.error("Faild to get falback authenticator [" + authenticatorClassName + "]", e);
+        }
+
+        return authenticator;
+    }
 }

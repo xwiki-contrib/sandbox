@@ -22,23 +22,18 @@
 package com.xwiki.authentication.puma;
 
 import java.security.Principal;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.securityfilter.realm.SimplePrincipal;
@@ -49,35 +44,31 @@ import com.ibm.portal.um.Group;
 import com.ibm.portal.um.PumaLocator;
 import com.ibm.portal.um.PumaProfile;
 import com.ibm.portal.um.User;
-import com.ibm.portal.um.exceptions.PumaAttributeException;
 import com.ibm.portal.um.exceptions.PumaException;
-import com.ibm.portal.um.exceptions.PumaMissingAccessRightsException;
-import com.ibm.portal.um.exceptions.PumaModelException;
-import com.ibm.portal.um.exceptions.PumaSystemException;
 import com.ibm.portal.um.portletservice.PumaHome;
-import com.novell.ldap.LDAPConnection;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.plugin.ldap.XWikiLDAPConfig;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPSearchAttribute;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPUtils;
+import com.xpn.xwiki.user.api.XWikiAuthService;
 import com.xpn.xwiki.user.api.XWikiUser;
-import com.xpn.xwiki.user.impl.LDAP.LDAPProfileXClass;
 import com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl;
-import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
 import com.xpn.xwiki.web.XWikiRequest;
 
 public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 {
-    /** LogFactory <code>LOGGER</code>. */
+    /**
+     * LogFactory <code>LOGGER</code>.
+     */
     private static final Log LOG = LogFactory.getLog(PUMAAuthServiceImpl.class);
 
     private static final String COOKIE_NAME = "XWIKISSOAUTHINFO";
 
     private PUMAConfig config = null;
+
+    private XWikiAuthService falback = null;
 
     protected String encryptText(String text, XWikiContext context)
     {
@@ -141,6 +132,15 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         return this.config;
     }
 
+    public XWikiAuthService getFalback(XWikiContext context)
+    {
+        if (this.falback == null) {
+            this.falback = getConfig().getFalbackAuthenticator(context);
+        }
+
+        return falback;
+    }
+
     protected Cookie getCookie(String cookieName, XWikiContext context)
     {
         Cookie[] cookies = context.getRequest().getCookies();
@@ -194,7 +194,11 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
 
         if (user == null) {
-            user = super.checkAuth(username, password, rememberme, context);
+            XWikiAuthService fallback = getFalback(context);
+
+            if (fallback != null) {
+                fallback.checkAuth(username, password, rememberme, context);
+            }
         }
 
         return user;
@@ -282,9 +286,13 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             context.setDatabase(wikiName);
         }
 
-        // Falback on PUUMA authenticator
+        // Falback on configured authenticator
         if (principal == null) {
-            principal = super.authenticate(login, password, context);
+            XWikiAuthService fallback = getFalback(context);
+
+            if (fallback != null) {
+                getFalback(context).authenticate(login, password, context);
+            }
         }
 
         return principal;
