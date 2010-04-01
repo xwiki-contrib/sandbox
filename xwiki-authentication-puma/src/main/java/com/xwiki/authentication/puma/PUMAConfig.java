@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.user.api.XWikiAuthService;
 
 public class PUMAConfig
 {
@@ -135,13 +136,20 @@ public class PUMAConfig
 
     // PUMA parameters
 
-    public Map<String, Collection<String>> getGroupMappings(XWikiContext context)
-    {
-        return getManyToManyParam("groupsMapping", null, false, context);
-    }
-
     public Map<String, String> getUserMappings(XWikiContext context)
     {
         return getMapParam("userMapping", null, context);
     }
+    
+    public Map<String, Collection<String>> getGroupMappings(XWikiContext context)
+    {
+        return getManyToManyParam("groupsMapping", null, false, context);
+    }
+    
+    /*public XWikiAuthService getFallbackAuthenticator(XWikiContext context)
+    {
+        String authenticatorClassName = getParam("fallback", null, context);
+        
+        Class.forName(authenticatorClassName);
+    }*/
 }

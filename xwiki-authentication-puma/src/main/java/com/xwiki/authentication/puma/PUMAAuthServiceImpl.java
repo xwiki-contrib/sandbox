@@ -49,7 +49,11 @@ import com.ibm.portal.um.Group;
 import com.ibm.portal.um.PumaLocator;
 import com.ibm.portal.um.PumaProfile;
 import com.ibm.portal.um.User;
+import com.ibm.portal.um.exceptions.PumaAttributeException;
 import com.ibm.portal.um.exceptions.PumaException;
+import com.ibm.portal.um.exceptions.PumaMissingAccessRightsException;
+import com.ibm.portal.um.exceptions.PumaModelException;
+import com.ibm.portal.um.exceptions.PumaSystemException;
 import com.ibm.portal.um.portletservice.PumaHome;
 import com.novell.ldap.LDAPConnection;
 import com.xpn.xwiki.XWikiContext;
@@ -425,15 +429,22 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
 
         Map<String, String> userMapping = getConfig().getUserMappings(context);
-        Map<String, Object> pumaAttributes = pumaProfile.getAttributes(user, userMapping.keySet());
+        Map<String, Object> pumaAttributes;
+        try {
+            pumaAttributes = pumaProfile.getAttributes(user, new ArrayList<String>(userMapping.keySet()));
+        } catch (Exception e) {
+            throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
+                "Impossible to retrieve user attributes for user [" + pumaUid + "] and attributes ["
+                    + userMapping.keySet() + "]", e);
+        }
 
         // Get attributes to synch
         Map<String, String> attributes = new HashMap<String, String>();
-        for (Map.Entry<String, Object> pumaAttribute : pumaAttributes) {
+        for (Map.Entry<String, Object> pumaAttribute : pumaAttributes.entrySet()) {
             Object value = pumaAttribute.getValue();
 
             if (value instanceof String) {
-                attributes.put(userMapping.get(pumaAttribute.getKey()), value);
+                attributes.put(userMapping.get(pumaAttribute.getKey()), (String) value);
             } else {
                 LOG.warn("Type [" + value.getClass() + "] for field [" + pumaAttribute.getKey()
                     + "] is not supported for PUMA user [" + pumaUid + "]");
