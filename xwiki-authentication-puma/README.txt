@@ -17,13 +17,21 @@ You will need to following jars to build the authenticator (you can find them in
 
 = Configuration (in xwiki.cfg file) =
 
-xwiki.authentication.puma.userMapping: indicate which PUMA user field to synchronize with which XWiki user field
-xwiki.authentication.puma.groupsMapping: indicate which PUMA group to synchronize with which XWiki group
-xwiki.authentication.puma.falback: indicate which authenticator to use when no PUMA informations are not provided (i.e. not SSO mode), does not falback on anything by default
+#-# Retrieve the following fields from PUMA and store them in the XWiki user object (puma-attribute=xwiki-attribute)
+# xwiki.authentication.puma.userMapping=sn=last_name,givenName=first_name,mail=email
+
+#-# Maps XWiki groups to PUMA groups, separator is "|"
+# xwiki.authentication.puma.groupsMapping=XWiki.XWikiAdminGroup=cn=AdminRole,ou=groups,o=MegaNova,c=US|\
+#                                         XWiki.Organisation=cn=testers,ou=groups,o=MegaNova,c=US
+
+#-# Indicate which authenticator to use when no PUMA informations are not provided (i.e. not SSO mode), does not falback on anything by default
+# xwiki.authentication.puma.falback=com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl 
 
 = Install =
 
 * copy this authenticator jar file into WEB_INF/lib/
+* setup xwiki.cfg with:
+xwiki.authentication.authclass=com.xwiki.authentication.puma.PUMAAuthServiceImpl
 
 = Troubleshoot =
 
