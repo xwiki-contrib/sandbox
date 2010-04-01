@@ -503,7 +503,7 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
                 // membership to add
                 for (Group group : pumaUserGroups) {
-                    String groupUid = pumaProfile.getIdentifier(user);
+                    String groupUid = pumaProfile.getIdentifier(group);
 
                     LOG.debug("  - " + groupUid);
 
