@@ -15,6 +15,8 @@ You will need to following jars to build the authenticator (you can find them in
 * wp.portletservices.api.standard.jar
 * wp.pe.api.standard.jar
 
+Put them in the /lib folder and that's all you can build with maven (mvn package).
+
 = Configuration (in xwiki.cfg file) =
 
 #-# Retrieve the following fields from PUMA and store them in the XWiki user object (puma-attribute=xwiki-attribute)

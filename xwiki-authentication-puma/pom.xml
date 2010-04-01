@@ -17,5 +17,40 @@
       <version>2.0.5</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.ibm</groupId>
+      <artifactId>wp.user.api</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/wp.user.api.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm</groupId>
+      <artifactId>wp.portletservices.api.legacy</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/wp.portletservices.api.legacy.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm</groupId>
+      <artifactId>wp.portletservices.api.standard</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/wp.portletservices.api.standard.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm</groupId>
+      <artifactId>wp.pe.api.standard</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/wp.pe.api.standard.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm</groupId>
+      <artifactId>wp.base</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/wp.base.jar</systemPath>
+    </dependency>
   </dependencies>
 </project>
