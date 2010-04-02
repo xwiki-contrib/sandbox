@@ -39,6 +39,13 @@ import javax.servlet.http.HttpServletResponse;
 public class DispatchFilter implements Filter
 {
     /**
+     * The name of the request attribute that specifies if this filter has already been applied to the current request.
+     * This flag is required to prevent prevent processing the same request multiple times. The value of this request
+     * attribute is a string. The associated boolean value is determined using {@link Boolean#valueOf(String)}.
+     */
+    private static final String ATTRIBUTE_APPLIED = DispatchFilter.class.getName() + ".applied";
+
+    /**
      * {@inheritDoc}
      * 
      * @see Filter#destroy()
@@ -55,11 +62,13 @@ public class DispatchFilter implements Filter
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
         ServletException
     {
-        if (request instanceof HttpServletRequest) {
+        if (request instanceof HttpServletRequest
+            && !Boolean.valueOf((String) request.getAttribute(ATTRIBUTE_APPLIED))) {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
             RequestType requestType = (RequestType) request.getAttribute(DispatchPortlet.ATTRIBUTE_REQUEST_TYPE);
             if (requestType != null) {
                 HttpServletResponse httpResponse = (HttpServletResponse) response;
+                request.setAttribute(ATTRIBUTE_APPLIED, "true");
                 switch (requestType) {
                     case ACTION:
                         doAction(httpRequest, httpResponse, chain);
@@ -114,12 +123,7 @@ public class DispatchFilter implements Filter
             URLRewriter rewriter =
                 new URLRewriter((DispatchURLFactory) request
                     .getAttribute(DispatchPortlet.ATTRIBUTE_DISPATCH_URL_FACTORY), request.getContextPath());
-            Boolean forceWriter = (Boolean) request.getAttribute(DispatchPortlet.ATTRIBUTE_FORCE_WRITER);
-            if (!forceWriter && responseWrapper.isByteStream()) {
-                rewriter.rewrite(responseWrapper.getInputStream(), response.getOutputStream());
-            } else {
-                rewriter.rewrite(responseWrapper.getReader(), response.getWriter());
-            }
+            rewriter.rewrite(responseWrapper.getReader(), response.getWriter());
         }
     }
 

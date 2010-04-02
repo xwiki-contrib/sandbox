@@ -19,9 +19,7 @@
  */
 package org.xwiki.portlet;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -350,31 +348,8 @@ public class ResponseData
     }
 
     /**
-     * @return {@code true} if the output stream was used to generate the response body, {@code false} otherwise
-     */
-    public boolean isByteStream()
-    {
-        return outputStream != null;
-    }
-
-    /**
-     * @return an input stream that can be used to access the content written using the output stream returned by
-     *         {@link #getOutputStream()}
-     * @throws UnsupportedEncodingException if the encoding returned by {@link #getCharacterEncoding()} is not supported
-     */
-    public InputStream getInputStream() throws UnsupportedEncodingException
-    {
-        if (outputStream != null) {
-            return outputStream.toInputStream();
-        } else if (writer != null) {
-            return writer.toInputStream(getCharacterEncoding());
-        } else {
-            return new ByteArrayInputStream(new byte[] {});
-        }
-    }
-
-    /**
-     * @return a reader that can be used to access the content written using the writer returned by {@link #getWriter()}
+     * @return a reader that can be used to access the content written using either the writer returned by
+     *         {@link #getWriter()} or the output stream returned by {@link #getOutputStream()}
      * @throws UnsupportedEncodingException if the encoding returned by {@link #getCharacterEncoding()} is unsupported
      */
     public Reader getReader() throws UnsupportedEncodingException

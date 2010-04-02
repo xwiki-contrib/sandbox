@@ -25,8 +25,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +40,11 @@ import org.apache.commons.logging.LogFactory;
  */
 public class URLRequestTypeMapper
 {
+    /**
+     * The equal sign.
+     */
+    private static final String EQUAL = "=";
+
     /**
      * Interface used to test if an URL matches some description.
      */
@@ -118,9 +125,9 @@ public class URLRequestTypeMapper
     private static class QueryStringURLMatcher implements URLMatcher
     {
         /**
-         * Query string parameters.
+         * The expected query string parameters.
          */
-        private final Map<String, String> params = new HashMap<String, String>();
+        private final Map<String, Set<String>> expectedParameters;
 
         /**
          * Creates a new matcher that matches URLs with the specified query string.
@@ -129,7 +136,32 @@ public class URLRequestTypeMapper
          */
         public QueryStringURLMatcher(String queryString)
         {
-            // TODO: Split query string.
+            expectedParameters = parseQueryString(queryString);
+        }
+
+        /**
+         * Parses the given query string into a map of parameters.
+         * 
+         * @param queryString the query string to be parsed
+         * @return the map of parameters extracted from the given query string
+         */
+        public Map<String, Set<String>> parseQueryString(String queryString)
+        {
+            Map<String, Set<String>> parameters = new HashMap<String, Set<String>>();
+            String[] keyValuePairs = queryString.split("&");
+            for (int i = 0; i < keyValuePairs.length; i++) {
+                if (keyValuePairs[i].length() == 0) {
+                    continue;
+                }
+                String[] pair = keyValuePairs[i].split(EQUAL, 2);
+                Set<String> values = parameters.get(pair[0]);
+                if (values == null) {
+                    values = new HashSet<String>();
+                    parameters.put(pair[0], values);
+                }
+                values.add(pair.length == 1 ? "" : pair[1]);
+            }
+            return parameters;
         }
 
         /**
@@ -139,8 +171,22 @@ public class URLRequestTypeMapper
          */
         public boolean matches(String url)
         {
-            // TODO: Match the query string.
-            return false;
+            int queryStringPos = url.lastIndexOf('?');
+            String queryString = queryStringPos < 0 ? "" : url.substring(queryStringPos + 1);
+            Map<String, Set<String>> actualParameters = parseQueryString(queryString);
+            // Test if the actual parameters include the expected parameters.
+            for (Map.Entry<String, Set<String>> entry : expectedParameters.entrySet()) {
+                Set<String> actualValues = actualParameters.get(entry.getKey());
+                if (actualValues == null) {
+                    return false;
+                }
+                for (String expectedValue : entry.getValue()) {
+                    if (!actualValues.contains(expectedValue)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 
@@ -196,7 +242,7 @@ public class URLRequestTypeMapper
             if (line.length() == 0) {
                 continue;
             }
-            if (line.endsWith("=")) {
+            if (line.endsWith(EQUAL)) {
                 try {
                     currentRequestType = RequestType.valueOf(line.substring(0, line.length() - 1).toUpperCase());
                 } catch (IllegalArgumentException e) {

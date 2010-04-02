@@ -19,21 +19,13 @@
  */
 package org.xwiki.portlet;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
-import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.AttributesImpl;
-import org.xml.sax.helpers.XMLFilterImpl;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
@@ -41,7 +33,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * 
  * @version $Id$
  */
-public class URLRewriter extends XMLFilterImpl
+public class URLRewriter
 {
     /**
      * The logger instance.
@@ -49,29 +41,9 @@ public class URLRewriter extends XMLFilterImpl
     private static final Log LOG = LogFactory.getLog(URLRewriter.class);
 
     /**
-     * The name of the anchor attribute holding the URL.
+     * The XML filter used to rewrite the servlet URLs into portlet URLs.
      */
-    private static final String HREF = "href";
-
-    /**
-     * The name of the script tag.
-     */
-    private static final String SCRIPT = "script";
-
-    /**
-     * The object used to create portlet URLs.
-     */
-    private final DispatchURLFactory dispatchURLFactory;
-
-    /**
-     * The servlet context path. Relative links should be prefixed with this string.
-     */
-    private final String contextPath;
-
-    /**
-     * Flag indicating if we are inside a script tag.
-     */
-    private boolean inScript;
+    private final URLRewriterXMLFilter filter;
 
     /**
      * Creates a new URL rewriter which converts relative servlet URLs prefixed with the given context path to portlet
@@ -82,25 +54,7 @@ public class URLRewriter extends XMLFilterImpl
      */
     public URLRewriter(DispatchURLFactory dispatchURLFactory, String contextPath)
     {
-        this.dispatchURLFactory = dispatchURLFactory;
-        this.contextPath = contextPath;
-    }
-
-    /**
-     * Rewrites the servlet URLs from the given HTML input stream and writes the result in the given output stream.
-     * 
-     * @param in the input stream, whose URLs will be rewritten
-     * @param out the output stream, where the new URLs will be written
-     */
-    public void rewrite(InputStream in, OutputStream out)
-    {
-        try {
-            setParent(createXMLReader());
-            setContentHandler(new XMLSerializer(out, new OutputFormat()));
-            parse(new InputSource(in));
-        } catch (Exception e) {
-            LOG.error("Failed to rewrite the URLs from input stream.", e);
-        }
+        filter = new URLRewriterXMLFilter(dispatchURLFactory, contextPath);
     }
 
     /**
@@ -112,76 +66,18 @@ public class URLRewriter extends XMLFilterImpl
     public void rewrite(Reader reader, Writer writer)
     {
         try {
-            setParent(createXMLReader());
-            setContentHandler(new XMLSerializer(writer, new OutputFormat()));
-            parse(new InputSource(reader));
+            XMLReader xmlReader = XMLReaderFactory.createXMLReader("org.cyberneko.html.parsers.SAXParser");
+            xmlReader.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment", true);
+            xmlReader.setProperty("http://cyberneko.org/html/properties/names/elems", "match");
+            xmlReader.setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
+
+            filter.setParent(xmlReader);
+
+            XHTMLWriter xhtmlWriter = new XHTMLWriter(writer);
+            xhtmlWriter.setParent(filter);
+            xhtmlWriter.parse(new InputSource(reader));
         } catch (Exception e) {
-            LOG.error("Failed to rewrite the URLs from reader.", e);
+            LOG.error("Failed to rewrite the URLs.", e);
         }
-    }
-
-    /**
-     * @return a new XML reader
-     * @throws SAXException if creating the XML reader fails
-     */
-    private XMLReader createXMLReader() throws SAXException
-    {
-        XMLReader reader = XMLReaderFactory.createXMLReader("org.cyberneko.html.parsers.SAXParser");
-        reader.setFeature("http://cyberneko.org/html/features/balance-tags", true);
-        return reader;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#startElement(String, String, String, Attributes)
-     */
-    @Override
-    public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
-    {
-        if ("a".equalsIgnoreCase(qName)) {
-            String href = atts.getValue(HREF);
-            if (href != null && href.startsWith(contextPath)) {
-                href = dispatchURLFactory.createURL(href.substring(contextPath.length())).toString();
-                AttributesImpl attsImpl = new AttributesImpl(atts);
-                attsImpl.setValue(atts.getIndex(HREF), href);
-                super.startElement(uri, localName, qName, attsImpl);
-                return;
-            }
-        } else if ("form".equalsIgnoreCase(qName)) {
-            String action = atts.getValue("action");
-            // TODO: Rewrite form action.
-        } else if (SCRIPT.equalsIgnoreCase(qName) && atts.getValue("src") != null) {
-            inScript = true;
-        }
-        super.startElement(uri, localName, qName, atts);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#endElement(String, String, String)
-     */
-    @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException
-    {
-        if (SCRIPT.equalsIgnoreCase(qName)) {
-            inScript = false;
-        }
-        super.endElement(uri, localName, qName);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#characters(char[], int, int)
-     */
-    @Override
-    public void characters(char[] ch, int start, int length) throws SAXException
-    {
-        if (inScript && length > 0) {
-            // TODO: Rewrite script URLs.
-        }
-        super.characters(ch, start, length);
     }
 }

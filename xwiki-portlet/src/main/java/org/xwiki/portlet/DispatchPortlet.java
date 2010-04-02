@@ -64,13 +64,6 @@ public class DispatchPortlet extends GenericPortlet
     public static final String PREFERENCE_DEFAULT_DISPATCH_URL = "defaultDispatchURL";
 
     /**
-     * The name of the preference that can be used to force the dispatch target to use the writer instead of the output
-     * stream to generate the response. This is useful because some portlet containers (e.g. GateIn) don't support too
-     * well the output stream when the content type is text/html.
-     */
-    public static final String PREFERENCE_FORCE_WRITER = "forceWriter";
-
-    /**
      * Attribute used to pass the request type information to the dispatch servlet filter.
      */
     public static final String ATTRIBUTE_REQUEST_TYPE = "org.xwiki.portlet.attribute.requestType";
@@ -89,11 +82,6 @@ public class DispatchPortlet extends GenericPortlet
      * The data of a dispatched response.
      */
     public static final String ATTRIBUTE_RESPONSE_DATA = "org.xwiki.portlet.attribute.responseData";
-
-    /**
-     * @see #PREFERENCE_FORCE_WRITER
-     */
-    public static final String ATTRIBUTE_FORCE_WRITER = "org.xwiki.portlet.attribute.forceWriter";
 
     /**
      * The object used get the portlet request type associated with a servlet URL.
@@ -166,14 +154,12 @@ public class DispatchPortlet extends GenericPortlet
     @Override
     protected void doView(RenderRequest request, RenderResponse response) throws PortletException, IOException
     {
-        boolean forceWriter = Boolean.valueOf(request.getPreferences().getValue(PREFERENCE_FORCE_WRITER, null));
         DispatchURLFactory dispatchURLFactory = new DispatchURLFactory(response, urlRequestTypeMapper);
         ResponseData responseData = getResponseData(request);
         if (responseData != null) {
             URLRewriter rewriter = new URLRewriter(dispatchURLFactory, request.getContextPath());
-            renderResponseData(responseData, response, rewriter, forceWriter);
+            renderResponseData(responseData, response, rewriter);
         } else {
-            request.setAttribute(ATTRIBUTE_FORCE_WRITER, forceWriter);
             request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RENDER);
             request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, dispatchURLFactory);
             getPortletContext().getRequestDispatcher(getDispatchURL(request)).forward(request, response);
@@ -265,12 +251,10 @@ public class DispatchPortlet extends GenericPortlet
      * @param responseData the data of a dispatched response
      * @param response the portlet response object used to render the data
      * @param rewriter the object used to rewrite servlet URLs into portlet URLs
-     * @param forceWriter {@code true} to force the use of the writer, {@code false} to use whatever the response data
-     *            prefers
      * @throws IOException if the rendering fails
      */
-    private void renderResponseData(ResponseData responseData, RenderResponse response, URLRewriter rewriter,
-        boolean forceWriter) throws IOException
+    private void renderResponseData(ResponseData responseData, RenderResponse response, URLRewriter rewriter)
+        throws IOException
     {
         // Set cookies.
         for (Cookie cookie : responseData.getCookies()) {
@@ -284,12 +268,17 @@ public class DispatchPortlet extends GenericPortlet
         }
         // Set response meta data.
         response.setContentType(responseData.getContentType());
-        // Set response body.
-        if (!forceWriter && responseData.isByteStream()) {
-            rewriter.rewrite(responseData.getInputStream(), response.getPortletOutputStream());
-        } else {
-            rewriter.rewrite(responseData.getReader(), response.getWriter());
+        // We can set the character encoding of the portlet response only through its content type. Currently we don't
+        // extract the character encoding from the content type in ResponseData#setContentType(String) so it can remain
+        // unset. The character encoding is needed though to read the response data, in case it was written using the
+        // output stream. We let the portlet response extract the character encoding from the content type and set the
+        // result on the response data.
+        if (responseData.getCharacterEncoding() == null) {
+            responseData.setCharacterEncoding(response.getCharacterEncoding());
         }
+        // Set response body.
+        // Follow portlet recommendations to use the writer for text-based markup (PLT.12.5.2).
+        rewriter.rewrite(responseData.getReader(), response.getWriter());
         response.flushBuffer();
     }
 }

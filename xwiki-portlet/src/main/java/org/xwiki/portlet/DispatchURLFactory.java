@@ -87,8 +87,6 @@ public class DispatchURLFactory
                 break;
         }
         url.setParameter(DispatchPortlet.PARAMETER_DISPATCH_URL, dispatchURL);
-        // TODO: The following line is just for demo. Don't forget to remove it.
-        url.setParameter("xpage", "plain");
         return url;
     }
 }
