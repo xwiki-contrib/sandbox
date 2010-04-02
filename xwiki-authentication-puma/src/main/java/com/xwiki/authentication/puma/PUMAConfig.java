@@ -60,13 +60,10 @@ public class PUMAConfig
 
         if (param == null || param.length() == 0) {
             try {
-                param = context.getWiki().Param(CONF_KEY + "." + name);
+                param = context.getWiki().Param(CONF_KEY + "." + name, def);
             } catch (Exception e) {
+                param = def;
             }
-        }
-
-        if (param == null) {
-            return def;
         }
 
         return param;
@@ -139,12 +136,12 @@ public class PUMAConfig
 
     // PUMA parameters
 
-    public Map<String, String> getUserMappings(XWikiContext context)
+    public Map<String, String> getUserMapping(XWikiContext context)
     {
         return getMapParam("userMapping", null, context);
     }
 
-    public Map<String, Collection<String>> getGroupMappings(XWikiContext context)
+    public Map<String, Collection<String>> getGroupMapping(XWikiContext context)
     {
         return getManyToManyParam("groupsMapping", null, false, context);
     }

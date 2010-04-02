@@ -436,7 +436,7 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             LOG.debug("LDAP attributes will be used to update XWiki attributes.");
         }
 
-        Map<String, String> userMapping = getConfig().getUserMappings(context);
+        Map<String, String> userMapping = getConfig().getUserMapping(context);
         Map<String, Object> pumaAttributes;
         try {
             pumaAttributes = pumaProfile.getAttributes(user, new ArrayList<String>(userMapping.keySet()));
@@ -490,7 +490,7 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         PumaProfile pumaProfile, XWikiContext context) throws XWikiException
     {
         // got valid group mappings
-        Map<String, Collection<String>> groupMappings = getConfig().getGroupMappings(context);
+        Map<String, Collection<String>> groupMappings = getConfig().getGroupMapping(context);
 
         if (groupMappings != null && groupMappings.size() > 0) {
             try {
