@@ -33,6 +33,11 @@ import org.apache.commons.logging.LogFactory;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.user.api.XWikiAuthService;
 
+/**
+ * Get PUMA authenticator configuration.
+ * 
+ * @version $Id$
+ */
 public class PUMAConfig
 {
     /**
@@ -94,7 +99,7 @@ public class PUMAConfig
         return mappings;
     }
 
-    public Map<String, Collection<String>> getManyToManyParam(String name, Map<String, Collection<String>> def,
+    public Map<String, Collection<String>> getOneToManyParam(String name, Map<String, Collection<String>> def,
         boolean left, XWikiContext context)
     {
         Map<String, Collection<String>> manyToMany = new HashMap<String, Collection<String>>();
@@ -143,7 +148,7 @@ public class PUMAConfig
 
     public Map<String, Collection<String>> getGroupMapping(XWikiContext context)
     {
-        return getManyToManyParam("groupsMapping", null, false, context);
+        return getOneToManyParam("groupsMapping", null, false, context);
     }
 
     public XWikiAuthService getFalbackAuthenticator(XWikiContext context)

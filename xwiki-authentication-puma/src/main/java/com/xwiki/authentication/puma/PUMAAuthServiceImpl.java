@@ -57,6 +57,11 @@ import com.xpn.xwiki.user.api.XWikiUser;
 import com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl;
 import com.xpn.xwiki.web.XWikiRequest;
 
+/**
+ * Authenticate using IBM WebSphere Portal PUMA api.
+ * 
+ * @version $Id$
+ */
 public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 {
     /**
