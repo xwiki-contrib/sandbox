@@ -40,15 +40,31 @@ public class DispatchURLFactory
     private final URLRequestTypeMapper urlRequestTypeMapper;
 
     /**
+     * The URL to use when the dispatch URL is not specified or is {@code null}.
+     */
+    private final String defaultDispatchURL;
+
+    /**
      * Creates a new URL factory based on the given response.
      * 
      * @param response the object used to create the portlet URLs
      * @param urlRequestTypeMapper the object used to get the portlet request type associated with a given servlet URL
+     * @param defaultDispatchURL the URL to use when the dispatch URL is not specified or is {@code null}
      */
-    public DispatchURLFactory(MimeResponse response, URLRequestTypeMapper urlRequestTypeMapper)
+    public DispatchURLFactory(MimeResponse response, URLRequestTypeMapper urlRequestTypeMapper,
+        String defaultDispatchURL)
     {
         this.response = response;
         this.urlRequestTypeMapper = urlRequestTypeMapper;
+        this.defaultDispatchURL = defaultDispatchURL;
+    }
+
+    /**
+     * @return a dispatch URL pointing to the current page
+     */
+    public BaseURL createURL()
+    {
+        return createURL(defaultDispatchURL);
     }
 
     /**
@@ -60,6 +76,15 @@ public class DispatchURLFactory
     public BaseURL createURL(String dispatchURL)
     {
         return createURL(dispatchURL, urlRequestTypeMapper.getType(dispatchURL));
+    }
+
+    /**
+     * @param requestType the type of URL to create
+     * @return a dispatch URL with the specified type, pointing to the current page
+     */
+    public BaseURL createURL(RequestType requestType)
+    {
+        return createURL(defaultDispatchURL, requestType);
     }
 
     /**
@@ -83,7 +108,7 @@ public class DispatchURLFactory
                 url = response.createResourceURL();
                 break;
             default:
-                url = null;
+                url = response.createRenderURL();
                 break;
         }
         url.setParameter(DispatchPortlet.PARAMETER_DISPATCH_URL, dispatchURL);

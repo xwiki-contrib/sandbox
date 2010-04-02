@@ -100,13 +100,13 @@ public class URLRewriterXMLFilter extends XMLFilterImpl
         } else if ("form".equalsIgnoreCase(qName)) {
             String action = atts.getValue(ACTION);
             if (action == null) {
-                action = dispatchURLFactory.createURL(null, RequestType.ACTION).toString();
+                action = dispatchURLFactory.createURL(RequestType.ACTION).toString();
                 AttributesImpl attsImpl = new AttributesImpl(atts);
                 attsImpl.addAttribute(uri, ACTION, ACTION, "CDATA", action);
                 super.startElement(uri, localName, qName, attsImpl);
                 return;
             } else if (action.length() == 0) {
-                action = dispatchURLFactory.createURL(null, RequestType.ACTION).toString();
+                action = dispatchURLFactory.createURL(RequestType.ACTION).toString();
                 AttributesImpl attsImpl = new AttributesImpl(atts);
                 attsImpl.setValue(atts.getIndex(ACTION), action);
                 super.startElement(uri, localName, qName, attsImpl);

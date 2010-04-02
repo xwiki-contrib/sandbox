@@ -20,6 +20,8 @@
 package org.xwiki.portlet;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -99,9 +101,14 @@ public class DispatchFilter implements Filter
     private void doAction(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws IOException, ServletException
     {
+        DispatchedRequest requestWrapper = new DispatchedRequest(request);
         DispatchedActionResponse responseWrapper = new DispatchedActionResponse(response);
-        chain.doFilter(new DispatchedRequest(request), responseWrapper);
-        request.setAttribute(DispatchPortlet.ATTRIBUTE_RESPONSE_DATA, responseWrapper.getResponseData());
+        chain.doFilter(requestWrapper, responseWrapper);
+        ResponseData responseData = responseWrapper.getResponseData();
+        // Transform the redirect URL to be able to use it with a request dispatcher.
+        // We pass the request wrapper because we need the request URL for the transformation.
+        responseData.sendRedirect(getDispatchURL(responseData.getRedirect(), requestWrapper));
+        request.setAttribute(DispatchPortlet.ATTRIBUTE_RESPONSE_DATA, responseData);
     }
 
     /**
@@ -149,5 +156,56 @@ public class DispatchFilter implements Filter
      */
     public void init(FilterConfig config) throws ServletException
     {
+    }
+
+    /**
+     * Creates an URL that can be used to dispatch the request.
+     * 
+     * @param url the source URL from where the dispatch URL is extracted/computed
+     * @param request the request object used to extract/compute the dispatch URL
+     * @return an URL that can be used to create a request dispatcher
+     */
+    private String getDispatchURL(String url, HttpServletRequest request)
+    {
+        if (url == null) {
+            return null;
+        }
+        String dispatchURL = url;
+        if (dispatchURL.length() > 0 && dispatchURL.charAt(0) == '/') {
+            // URL relative to the servlet container root.
+            if (dispatchURL.startsWith(request.getContextPath())) {
+                // We can dispatch only if the URL has the same context path as the current request.
+                dispatchURL = dispatchURL.substring(request.getContextPath().length());
+            }
+        } else {
+            if (dispatchURL.indexOf("://") > 0) {
+                // Absolute URL.
+                try {
+                    URL actualURL = new URL(dispatchURL);
+                    URL expectedURL = new URL(request.getRequestURL().toString());
+                    if (sameServer(expectedURL, actualURL)
+                        && actualURL.getPath().startsWith(request.getContextPath())) {
+                        dispatchURL = actualURL.getPath().substring(request.getContextPath().length());
+                    }
+                } catch (MalformedURLException e) {
+                    // We shouldn't get here.
+                }
+            } else {
+                // URL relative to the current request URI.
+                dispatchURL = request.getRequestURI().substring(request.getContextPath().length()) + '/' + url;
+            }
+        }
+        return dispatchURL;
+    }
+
+    /**
+     * @param expectedURL the expected URL
+     * @param actualURL the actual URL
+     * @return {@code true} if the given URLs point to the same web server, {@code false} otherwise
+     */
+    private boolean sameServer(URL expectedURL, URL actualURL)
+    {
+        return expectedURL.getProtocol().equals(actualURL.getProtocol())
+            && expectedURL.getAuthority().equals(actualURL.getAuthority());
     }
 }

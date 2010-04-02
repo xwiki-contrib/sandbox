@@ -29,7 +29,6 @@ import javax.portlet.ActionResponse;
 import javax.portlet.GenericPortlet;
 import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
-import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
@@ -154,7 +153,8 @@ public class DispatchPortlet extends GenericPortlet
     @Override
     protected void doView(RenderRequest request, RenderResponse response) throws PortletException, IOException
     {
-        DispatchURLFactory dispatchURLFactory = new DispatchURLFactory(response, urlRequestTypeMapper);
+        String dispatchURL = getDispatchURL(request);
+        DispatchURLFactory dispatchURLFactory = new DispatchURLFactory(response, urlRequestTypeMapper, dispatchURL);
         ResponseData responseData = getResponseData(request);
         if (responseData != null) {
             URLRewriter rewriter = new URLRewriter(dispatchURLFactory, request.getContextPath());
@@ -162,7 +162,7 @@ public class DispatchPortlet extends GenericPortlet
         } else {
             request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RENDER);
             request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, dispatchURLFactory);
-            getPortletContext().getRequestDispatcher(getDispatchURL(request)).forward(request, response);
+            getPortletContext().getRequestDispatcher(dispatchURL).forward(request, response);
         }
     }
 
@@ -187,8 +187,10 @@ public class DispatchPortlet extends GenericPortlet
     public void serveResource(ResourceRequest request, ResourceResponse response) throws PortletException, IOException
     {
         request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RESOURCE);
-        request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, new DispatchURLFactory(response, urlRequestTypeMapper));
-        getPortletContext().getRequestDispatcher(getDispatchURL(request)).forward(request, response);
+        String dispatchURL = getDispatchURL(request);
+        request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, new DispatchURLFactory(response, urlRequestTypeMapper,
+            dispatchURL));
+        getPortletContext().getRequestDispatcher(dispatchURL).forward(request, response);
     }
 
     /**
@@ -197,10 +199,9 @@ public class DispatchPortlet extends GenericPortlet
      */
     private String getDispatchURL(PortletRequest request)
     {
-        PortletPreferences preferences = request.getPreferences();
         String dispatchURL = request.getParameter(PARAMETER_DISPATCH_URL);
         if (dispatchURL == null) {
-            dispatchURL = preferences.getValue(PREFERENCE_DEFAULT_DISPATCH_URL, null);
+            dispatchURL = request.getPreferences().getValue(PREFERENCE_DEFAULT_DISPATCH_URL, null);
         }
         return dispatchURL;
     }
