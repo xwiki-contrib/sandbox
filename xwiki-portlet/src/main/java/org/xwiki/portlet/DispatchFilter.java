@@ -20,6 +20,7 @@
 package org.xwiki.portlet;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -30,6 +31,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -46,6 +48,13 @@ public class DispatchFilter implements Filter
      * attribute is a string. The associated boolean value is determined using {@link Boolean#valueOf(String)}.
      */
     private static final String ATTRIBUTE_APPLIED = DispatchFilter.class.getName() + ".applied";
+
+    /**
+     * The object used to parse the query string to extract the initial get parameters.
+     * 
+     * @see #exposeInitialGetParameters(HttpServletRequest)
+     */
+    private QueryStringParser queryStringParser = new QueryStringParser();
 
     /**
      * {@inheritDoc}
@@ -101,6 +110,14 @@ public class DispatchFilter implements Filter
     private void doAction(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws IOException, ServletException
     {
+        // We expose the initial query string parameters in case some of them were set from JavaScript. This is not
+        // clean because portlet URLs shouldn't be modified from JavaScript. We compromise in order to have most of the
+        // servlet mode features working in portlet mode.
+        // NOTE: Exposing the initial GET parameters on both action and render portlet requests can have unexpected side
+        // effects if the action and render portlet requests share the same client request. For the moment we expose the
+        // parameters only on action request.
+        exposeInitialGetParameters(request);
+
         DispatchedRequest requestWrapper = new DispatchedRequest(request);
         DispatchedActionResponse responseWrapper = new DispatchedActionResponse(response);
         chain.doFilter(requestWrapper, responseWrapper);
@@ -207,5 +224,28 @@ public class DispatchFilter implements Filter
     {
         return expectedURL.getProtocol().equals(actualURL.getProtocol())
             && expectedURL.getAuthority().equals(actualURL.getAuthority());
+    }
+
+    /**
+     * Exposes the initial get parameters in order to make the query string parameters that were set through JavaScript
+     * available to the dispatch target.
+     * 
+     * @param request the request whose initial get parameters must be saved
+     * @throws ServletException if decoding the initial get parameters fails
+     */
+    private void exposeInitialGetParameters(HttpServletRequest request) throws ServletException
+    {
+        HttpServletRequest initialRequest = request;
+        while (initialRequest instanceof HttpServletRequestWrapper) {
+            initialRequest = (HttpServletRequest) ((HttpServletRequestWrapper) initialRequest).getRequest();
+        }
+        if (initialRequest.getQueryString() != null) {
+            try {
+                request.setAttribute(DispatchedRequest.ATTRIBUTE_INITIAL_GET_PARAMETERS, queryStringParser.parse(
+                    initialRequest.getQueryString(), initialRequest.getCharacterEncoding()));
+            } catch (UnsupportedEncodingException e) {
+                throw new ServletException("Failed to decode the initial get parameters.", e);
+            }
+        }
     }
 }
