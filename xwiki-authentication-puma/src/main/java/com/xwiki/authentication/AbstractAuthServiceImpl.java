@@ -55,7 +55,7 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
      */
     private static final Log LOG = LogFactory.getLog(AbstractAuthServiceImpl.class);
 
-    public XWikiAuthService getFalback(XWikiContext context)
+    protected XWikiAuthService getFalback(XWikiContext context)
     {
         return null;
     }

@@ -65,12 +65,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
     private XWikiAuthService falback = null;
 
-    public void setConfig(PUMAConfig config)
-    {
-        this.config = config;
-    }
-
-    public PUMAConfig getConfig()
+    private PUMAConfig getConfig()
     {
         if (this.config == null) {
             this.config = new PUMAConfig();
@@ -79,7 +74,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         return this.config;
     }
 
-    public XWikiAuthService getFalback(XWikiContext context)
+    protected XWikiAuthService getFalback(XWikiContext context)
     {
         if (this.falback == null) {
             this.falback = getConfig().getFalbackAuthenticator(context);
