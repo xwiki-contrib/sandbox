@@ -32,6 +32,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.securityfilter.realm.SimplePrincipal;
 
 import com.ibm.portal.portlet.service.PortletServiceHome;
 import com.ibm.portal.portlet.service.PortletServiceUnavailableException;
@@ -128,12 +129,23 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
         syncUserFromPUMA(userProfile, ssoUser, user, pumaProfile, context);
 
+        System.out.println("User [" + userProfile.getFullName() + "] synchronized");
+
+        // from now on we can enter the application
+        if (local) {
+            principal = new SimplePrincipal(userProfile.getFullName());
+        } else {
+            principal = new SimplePrincipal(context.getDatabase() + ":" + userProfile.getFullName());
+        }
+
         // ////////////////////////////////////////////////////////////////////////
         // Synch membership
         // ////////////////////////////////////////////////////////////////////////
 
         PumaLocator pl = pumaHome.getLocator(request);
         syncGroupsMembershipFromPUMA(userProfile, user, pl, pumaProfile, context);
+
+        System.out.println("User [" + userProfile.getFullName() + "] membership synchronized");
 
         return principal;
     }
@@ -217,10 +229,6 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
     protected void syncUserFromPUMA(XWikiDocument userProfile, String ssoUser, User user, PumaProfile pumaProfile,
         XWikiContext context) throws XWikiException
     {
-        if (LOG.isDebugEnabled()) {
-            System.out.println("LDAP attributes will be used to update XWiki attributes.");
-        }
-
         // Get attributes to synch
         Map<String, String> attributes = new HashMap<String, String>();
         Map<String, String> userMapping = getConfig().getUserMapping(context);
@@ -250,20 +258,14 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
         // Sync
         if (userProfile.isNew()) {
-            if (LOG.isDebugEnabled()) {
-                System.out.println("Creating new XWiki user based on LDAP attribues located at [" + ssoUser + "]");
-            }
+            System.out.println("Creating new XWiki user based on LDAP attribues located at [" + ssoUser + "]");
 
             userProfile = createUserFromPUMA(userProfile, attributes, ssoUser, context);
 
-            if (LOG.isDebugEnabled()) {
-                System.out.println("New XWiki user created: [" + userProfile.getFullName() + "] in wiki ["
-                    + userProfile.getWikiName() + "]");
-            }
+            System.out.println("New XWiki user created: [" + userProfile.getFullName() + "] in wiki ["
+                + userProfile.getWikiName() + "]");
         } else {
-            if (LOG.isDebugEnabled()) {
-                System.out.println("Updating existing user with LDAP attribues located at " + ssoUser);
-            }
+            System.out.println("Updating existing user with LDAP attribues located at " + ssoUser);
 
             try {
                 updateUserFromPUMA(userProfile, attributes, ssoUser, context);

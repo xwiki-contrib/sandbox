@@ -178,7 +178,7 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
         context.getWiki().createUser(userProfile.getName(), map, userClass.getName(), content, syntaxId, "edit",
             context);
 
-        return context.getWiki().getDocument(userProfile.getFullName(), context);
+        return context.getWiki().getDocument(userProfile, context);
     }
 
     protected void syncGroupsMembership(XWikiDocument userProfile, Collection<String> xwikiGroupsIn,
@@ -303,6 +303,8 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
                 getFalback(context).authenticate(login, password, context);
             }
         }
+
+        System.out.println("Principal: " + principal);
 
         return principal;
     }

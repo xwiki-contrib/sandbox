@@ -154,7 +154,7 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
                     context.getDatabase().length() + 1) : principal.getName());
         }
 
-        System.out.println("XWikiUser=" + user);
+        System.out.println("XWikiUser: " + user);
 
         return user;
     }
