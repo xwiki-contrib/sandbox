@@ -43,10 +43,11 @@ public class PUMAConfig extends Config
      */
     private static final Log LOG = LogFactory.getLog(PUMAConfig.class);
 
-    protected static final String PREF_KEY = "puma";
-
-    protected static final String CONF_KEY = "xwiki.authentication.puma";
-
+    public PUMAConfig()
+    {
+        super("puma", "xwiki.authentication.puma");
+    }
+    
     public Map<String, String> getUserMapping(XWikiContext context)
     {
         return getMapParam("userMapping", null, context);

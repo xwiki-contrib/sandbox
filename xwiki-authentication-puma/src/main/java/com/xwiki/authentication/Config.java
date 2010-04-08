@@ -47,9 +47,15 @@ public class Config
      */
     private static final Log LOG = LogFactory.getLog(Config.class);
 
-    protected static final String PREF_KEY = "puma";
+    private final String prefSuffix;
 
-    protected static final String CONF_KEY = "xwiki.authentication.puma";
+    private final String confSuffix;
+
+    public Config(String prefSuffix, String confSuffix)
+    {
+        this.prefSuffix = prefSuffix;
+        this.confSuffix = confSuffix;
+    }
 
     public String getParam(String name, XWikiContext context)
     {
@@ -60,18 +66,18 @@ public class Config
     {
         String param = null;
         try {
-            param = context.getWiki().getXWikiPreference(PREF_KEY + "_" + name, context);
+            param = context.getWiki().getXWikiPreference(prefSuffix + "_" + name, context);
         } catch (Exception e) {
-            LOG.error("Faile to get preference [" + PREF_KEY + "_" + name + "]", e);
+            LOG.error("Faile to get preference [" + prefSuffix + "_" + name + "]", e);
         }
 
         if (StringUtils.isEmpty(param)) {
             param = def;
 
             try {
-                param = context.getWiki().Param(CONF_KEY + "." + name);
+                param = context.getWiki().Param(confSuffix + "." + name);
             } catch (Exception e) {
-                // use default when there is an issue
+                LOG.error("Failed to get property [" + confSuffix + "." + name + "] from configuration file", e);
             }
         }
 
