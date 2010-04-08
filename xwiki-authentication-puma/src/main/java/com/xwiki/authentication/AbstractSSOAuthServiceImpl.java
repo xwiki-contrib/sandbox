@@ -35,7 +35,7 @@ import com.xpn.xwiki.user.api.XWikiAuthService;
 import com.xpn.xwiki.user.api.XWikiUser;
 
 /**
- * Authenticate using IBM WebSphere Portal PUMA api.
+ * Base SSO authenticator. Provide some common tools.
  * 
  * @version $Id$
  */
