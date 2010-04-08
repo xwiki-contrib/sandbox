@@ -20,6 +20,7 @@
 package org.xwiki.portlet;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import javax.portlet.ActionResponse;
 import javax.portlet.GenericPortlet;
 import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
+import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
@@ -61,6 +63,17 @@ public class DispatchPortlet extends GenericPortlet
      * there's no dispatch URL parameter specified on the request.
      */
     public static final String PREFERENCE_DEFAULT_DISPATCH_URL = "defaultDispatchURL";
+
+    /**
+     * The name of the preference holding the edit URL, i.e. the URL where the edit request is dispatched to. This URL
+     * must be relative to the context path where the portlet is running.
+     */
+    public static final String PREFERENCE_EDIT_URL = "editURL";
+
+    /**
+     * The name of the preference that controls the title of the portlet.
+     */
+    public static final String PREFERENCE_TITLE = "title";
 
     /**
      * Attribute used to pass the request type information to the dispatch servlet filter.
@@ -139,10 +152,24 @@ public class DispatchPortlet extends GenericPortlet
      * 
      * @param request the action request
      * @param response the action response
+     * @throws PortletException if processing the edit form fails
+     * @throws IOException if saving the portlet preferences fails
      */
-    protected void processEdit(ActionRequest request, ActionResponse response)
+    protected void processEdit(ActionRequest request, ActionResponse response) throws PortletException, IOException
     {
-        // Do nothing for now.
+        savePortletPreferences(request);
+        response.setPortletMode(PortletMode.VIEW);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see GenericPortlet#getTitle(RenderRequest)
+     */
+    @Override
+    protected String getTitle(RenderRequest request)
+    {
+        return request.getPreferences().getValue(PREFERENCE_TITLE, super.getTitle(request));
     }
 
     /**
@@ -174,8 +201,12 @@ public class DispatchPortlet extends GenericPortlet
     @Override
     protected void doEdit(RenderRequest request, RenderResponse response) throws PortletException, IOException
     {
-        // Do nothing for now.
-        super.doEdit(request, response);
+        String editURL = request.getPreferences().getValue(PREFERENCE_EDIT_URL, null);
+        DispatchURLFactory dispatchURLFactory = new DispatchURLFactory(response, urlRequestTypeMapper, editURL);
+        request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RENDER);
+        request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, dispatchURLFactory);
+        exposePortletPreferences(request);
+        getPortletContext().getRequestDispatcher(editURL).forward(request, response);
     }
 
     /**
@@ -201,9 +232,18 @@ public class DispatchPortlet extends GenericPortlet
     {
         String dispatchURL = request.getParameter(PARAMETER_DISPATCH_URL);
         if (dispatchURL == null) {
-            dispatchURL = request.getPreferences().getValue(PREFERENCE_DEFAULT_DISPATCH_URL, null);
+            dispatchURL = getDefaultDispatchURL(request.getPreferences());
         }
         return dispatchURL;
+    }
+
+    /**
+     * @param preferences the portlet preferences to take the default dispatch URL from
+     * @return the URL used to dispatch the request when there's no dispatch URL parameter specified on the request
+     */
+    protected String getDefaultDispatchURL(PortletPreferences preferences)
+    {
+        return preferences.getValue(PREFERENCE_DEFAULT_DISPATCH_URL, null);
     }
 
     /**
@@ -281,5 +321,42 @@ public class DispatchPortlet extends GenericPortlet
         // Follow portlet recommendations to use the writer for text-based markup (PLT.12.5.2).
         rewriter.rewrite(responseData.getReader(), response.getWriter());
         response.flushBuffer();
+    }
+
+    /**
+     * Exposes all changeable portlet preferences as request attributes.
+     * 
+     * @param request the request object used to access and expose the preferences
+     */
+    private void exposePortletPreferences(RenderRequest request)
+    {
+        PortletPreferences preferences = request.getPreferences();
+        Enumeration<String> names = preferences.getNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            if (!preferences.isReadOnly(name)) {
+                request.setAttribute(name, preferences.getValues(name, null));
+            }
+        }
+    }
+
+    /**
+     * Updates the portlet preferences with the values submitted with the given request.
+     * 
+     * @param request the request to take the new preference values from
+     * @throws PortletException if setting the new preference values fails
+     * @throws IOException if saving the preferences fails
+     */
+    private void savePortletPreferences(ActionRequest request) throws PortletException, IOException
+    {
+        PortletPreferences preferences = request.getPreferences();
+        Enumeration<String> names = preferences.getNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            if (!preferences.isReadOnly(name) && request.getParameter(name) != null) {
+                preferences.setValues(name, request.getParameterValues(name));
+            }
+        }
+        preferences.store();
     }
 }

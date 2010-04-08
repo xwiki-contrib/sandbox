@@ -79,20 +79,27 @@ public class DispatchFilter implements Filter
             RequestType requestType = (RequestType) request.getAttribute(DispatchPortlet.ATTRIBUTE_REQUEST_TYPE);
             if (requestType != null) {
                 HttpServletResponse httpResponse = (HttpServletResponse) response;
+                // Make sure the filter is not applied twice on the same request.
                 request.setAttribute(ATTRIBUTE_APPLIED, "true");
                 switch (requestType) {
                     case ACTION:
                         doAction(httpRequest, httpResponse, chain);
-                        return;
+                        break;
                     case RENDER:
                         doRender(httpRequest, httpResponse, chain);
-                        return;
+                        break;
                     case RESOURCE:
                         doResource(httpRequest, httpResponse, chain);
-                        return;
+                        break;
                     default:
+                        // We should never get here.
                         break;
                 }
+                // Make sure the applied attribute is not shared between action and render requests (we shouldn't have
+                // to do this because the portlet specification says that the action and render requests must be
+                // isolated, but some portlet containers like WebSphere don't follow this requirement).
+                request.removeAttribute(ATTRIBUTE_APPLIED);
+                return;
             }
         }
         chain.doFilter(request, response);
