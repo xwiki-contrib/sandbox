@@ -25,9 +25,9 @@
     </dependency>
     <dependency>
       <!-- SAXParser -->
-      <groupId>nekohtml</groupId>
+      <groupId>net.sourceforge.nekohtml</groupId>
       <artifactId>nekohtml</artifactId>
-      <version>1.9.6.2</version>
+      <version>1.9.14</version>
       <!-- We don't use NekoHTML's SAXParser implementation directly. -->
       <scope>runtime</scope>
     </dependency>
