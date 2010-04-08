@@ -28,15 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 import javax.naming.NamingException;
-import javax.servlet.http.Cookie;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.securityfilter.realm.SimplePrincipal;
 
 import com.ibm.portal.portlet.service.PortletServiceHome;
 import com.ibm.portal.portlet.service.PortletServiceUnavailableException;
@@ -49,79 +44,26 @@ import com.ibm.portal.um.portletservice.PumaHome;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPConfig;
 import com.xpn.xwiki.user.api.XWikiAuthService;
-import com.xpn.xwiki.user.api.XWikiUser;
-import com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl;
 import com.xpn.xwiki.web.XWikiRequest;
+import com.xwiki.authentication.AbstractSSOAuthServiceImpl;
 
 /**
  * Authenticate using IBM WebSphere Portal PUMA api.
  * 
  * @version $Id$
  */
-public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
+public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 {
     /**
      * LogFactory <code>LOGGER</code>.
      */
     private static final Log LOG = LogFactory.getLog(PUMAAuthServiceImpl.class);
 
-    private static final String COOKIE_NAME = "XWIKISSOAUTHINFO";
-
     private PUMAConfig config = null;
 
     private XWikiAuthService falback = null;
-
-    protected String encryptText(String text, XWikiContext context)
-    {
-        try {
-            String secretKey = null;
-            secretKey = context.getWiki().Param("xwiki.authentication.encryptionKey");
-            secretKey = secretKey.substring(0, 24);
-
-            if (secretKey != null) {
-                SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(), "TripleDES");
-                Cipher cipher = Cipher.getInstance("TripleDES");
-                cipher.init(Cipher.ENCRYPT_MODE, key);
-                byte[] encrypted = cipher.doFinal(text.getBytes());
-                String encoded = new String(Base64.encodeBase64(encrypted));
-                return encoded.replaceAll("=", "_");
-            } else {
-                LOG.error("Encryption key not defined");
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to encrypt text", e);
-        }
-
-        return null;
-    }
-
-    protected String decryptText(String text, XWikiContext context)
-    {
-        try {
-            String secretKey = null;
-            secretKey = context.getWiki().Param("xwiki.authentication.encryptionKey");
-            secretKey = secretKey.substring(0, 24);
-
-            if (secretKey != null) {
-                SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(), "TripleDES");
-                Cipher cipher = Cipher.getInstance("TripleDES");
-                cipher.init(Cipher.DECRYPT_MODE, key);
-                byte[] encrypted = Base64.decodeBase64(text.replaceAll("_", "=").getBytes("ISO-8859-1"));
-                String decoded = new String(cipher.doFinal(encrypted));
-                return decoded;
-            } else {
-                LOG.error("Encryption key not defined");
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to decrypt text", e);
-        }
-
-        return null;
-    }
 
     public void setConfig(PUMAConfig config)
     {
@@ -146,166 +88,9 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         return falback;
     }
 
-    protected Cookie getCookie(String cookieName, XWikiContext context)
-    {
-        Cookie[] cookies = context.getRequest().getCookies();
-
-        if (cookies == null) {
-            return null;
-        }
-
-        for (Cookie cookie : cookies) {
-            if (cookieName.equals(cookie.getName())) {
-                return cookie;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl#checkAuth(com.xpn.xwiki.XWikiContext)
-     */
-    public XWikiUser checkAuth(XWikiContext context) throws XWikiException
-    {
-        XWikiUser user = null;
-
-        if (context.getRequest().getRemoteUser() != null) {
-            user = checkAuthSSO(null, null, context);
-        }
-
-        if (user == null) {
-            user = super.checkAuth(context);
-        }
-
-        return user;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl#checkAuth(java.lang.String, java.lang.String,
-     *      java.lang.String, com.xpn.xwiki.XWikiContext)
-     */
-    public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
-        throws XWikiException
-    {
-        XWikiUser user = null;
-
-        if (context.getRequest().getRemoteUser() != null) {
-            user = checkAuthSSO(username, password, context);
-        }
-
-        if (user == null) {
-            XWikiAuthService fallback = getFalback(context);
-
-            if (fallback != null) {
-                fallback.checkAuth(username, password, rememberme, context);
-            }
-        }
-
-        return user;
-    }
-
-    public XWikiUser checkAuthSSO(String username, String password, XWikiContext context) throws XWikiException
-    {
-        Cookie cookie;
-
-        LOG.debug("checkAuth");
-
-        LOG.debug("Action: " + context.getAction());
-        if (context.getAction().startsWith("logout")) {
-            cookie = getCookie(COOKIE_NAME, context);
-            if (cookie != null) {
-                cookie.setMaxAge(0);
-                context.getResponse().addCookie(cookie);
-            }
-
-            return null;
-        }
-
-        Principal principal = null;
-
-        if (LOG.isDebugEnabled()) {
-            Cookie[] cookies = context.getRequest().getCookies();
-            if (cookies != null) {
-                for (Cookie c : cookies) {
-                    LOG.debug("CookieList: " + c.getName() + " => " + c.getValue());
-                }
-            }
-        }
-
-        cookie = getCookie(COOKIE_NAME, context);
-        if (cookie != null) {
-            LOG.debug("Found Cookie");
-            String uname = decryptText(cookie.getValue(), context);
-            if (uname != null) {
-                principal = new SimplePrincipal(uname);
-            }
-        }
-
-        XWikiUser user;
-
-        // Authenticate
-        if (principal == null) {
-            principal = authenticate(username, password, context);
-            if (principal == null) {
-                return null;
-            }
-
-            LOG.debug("Saving auth cookie");
-            String encuname = encryptText(principal.getName(), context);
-            Cookie usernameCookie = new Cookie(COOKIE_NAME, encuname);
-            usernameCookie.setMaxAge(-1);
-            usernameCookie.setPath("/");
-            context.getResponse().addCookie(usernameCookie);
-
-            user = new XWikiUser(principal.getName());
-        } else {
-            user =
-                new XWikiUser(principal.getName().startsWith(context.getDatabase()) ? principal.getName().substring(
-                    context.getDatabase().length() + 1) : principal.getName());
-        }
-
-        LOG.debug("XWikiUser=" + user);
-
-        return user;
-    }
-
-    public Principal authenticate(String login, String password, XWikiContext context) throws XWikiException
-    {
-        Principal principal = null;
-
-        String wikiName = context.getDatabase();
-
-        // SSO authentication
-        try {
-            context.setDatabase(context.getMainXWiki());
-
-            principal = authenticateSSOInContext(wikiName.equals(context.getMainXWiki()), context);
-        } catch (XWikiException e) {
-            LOG.debug("Failed to authenticate with SSO", e);
-        } finally {
-            context.setDatabase(wikiName);
-        }
-
-        // Falback on configured authenticator
-        if (principal == null) {
-            XWikiAuthService fallback = getFalback(context);
-
-            if (fallback != null) {
-                getFalback(context).authenticate(login, password, context);
-            }
-        }
-
-        return principal;
-    }
-
     public Principal authenticateSSOInContext(boolean local, XWikiContext context) throws XWikiException
     {
-        LOG.debug("Authenticate SSO");
+        System.out.println("Authenticate SSO");
 
         XWikiRequest request = context.getRequest();
 
@@ -313,13 +98,21 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         if (request.getRemoteUser() == null) {
             LOG
-                .warn("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
+                .debug("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
 
             return null;
         }
 
-        LOG.debug("request remote user: " + request.getRemoteUser());
+        System.out.println("Request remote user: " + request.getRemoteUser());
 
+        String ssoUser = request.getRemoteUser();
+
+        XWikiDocument userProfile = getUserProfileByUid(ssoUser.replace(".", ""), ssoUser, context);
+
+        System.out.println("XWiki user resolved profile name: " + userProfile.getFullName());
+
+        // //////////////////////////////////////////////
+        // Get PUMA profile
         // //////////////////////////////////////////////
 
         PumaHome pumaHome = getPumaHome(context);
@@ -327,26 +120,18 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         PumaProfile pumaProfile = pumaHome.getProfile(request);
 
         User user;
-        String pumaUid;
         try {
             user = pumaProfile.getCurrentUser();
-            pumaUid = pumaProfile.getIdentifier(user);
         } catch (PumaException e) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                 "Can't get current user uid.", e);
         }
 
-        LOG.debug("Current user uid: " + pumaUid);
-
-        String validXWikiUserName = pumaUid.replace(".", "");
-
         // ////////////////////////////////////////////////////////////////////////
         // Synch user
         // ////////////////////////////////////////////////////////////////////////
 
-        XWikiDocument userProfile = getUserProfileByUid(validXWikiUserName, pumaUid, context);
-
-        syncUserFromPUMA(userProfile, pumaUid, user, pumaProfile, context);
+        syncUserFromPUMA(userProfile, ssoUser, user, pumaProfile, context);
 
         // ////////////////////////////////////////////////////////////////////////
         // Synch membership
@@ -383,7 +168,7 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
     }
 
-    protected XWikiDocument getUserProfileByUid(String validXWikiUserName, String pumaUid, XWikiContext context)
+    protected XWikiDocument getUserProfileByUid(String validXWikiUserName, String ssoUser, XWikiContext context)
         throws XWikiException
     {
         PUMAProfileXClass pumaXClass = new PUMAProfileXClass(context);
@@ -391,20 +176,20 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         // Try default profile name (generally in the cache)
         XWikiDocument userProfile = context.getWiki().getDocument("XWiki." + validXWikiUserName, context);
 
-        if (!pumaUid.equalsIgnoreCase(pumaXClass.getUid(userProfile))) {
+        if (!ssoUser.equalsIgnoreCase(pumaXClass.getUid(userProfile))) {
             // Search for existing profile with provided uid
-            userProfile = pumaXClass.searchDocumentByUid(pumaUid);
+            userProfile = pumaXClass.searchDocumentByUid(ssoUser);
 
             // Resolve default profile patch of an uid
             if (userProfile == null) {
-                userProfile = getAvailableUserProfile(validXWikiUserName, pumaUid, context);
+                userProfile = getAvailableUserProfile(validXWikiUserName, ssoUser, context);
             }
         }
 
         return userProfile;
     }
 
-    protected XWikiDocument getAvailableUserProfile(String validXWikiUserName, String pumaUid, XWikiContext context)
+    protected XWikiDocument getAvailableUserProfile(String validXWikiUserName, String ssoUser, XWikiContext context)
         throws XWikiException
     {
         BaseClass userClass = context.getWiki().getUserClass(context);
@@ -427,18 +212,18 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                 String pumaUidFromObject = pumaXClass.getUid(doc);
 
                 // If the user is a PUUMA user compare uids
-                if (pumaUidFromObject == null || pumaUid.equalsIgnoreCase(pumaUidFromObject)) {
+                if (pumaUidFromObject == null || ssoUser.equalsIgnoreCase(pumaUidFromObject)) {
                     return doc;
                 }
             }
         }
     }
 
-    protected void syncUserFromPUMA(XWikiDocument userProfile, String pumaUid, User user, PumaProfile pumaProfile,
+    protected void syncUserFromPUMA(XWikiDocument userProfile, String ssoUser, User user, PumaProfile pumaProfile,
         XWikiContext context) throws XWikiException
     {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("LDAP attributes will be used to update XWiki attributes.");
+            System.out.println("LDAP attributes will be used to update XWiki attributes.");
         }
 
         Map<String, String> userMapping = getConfig().getUserMapping(context);
@@ -447,7 +232,7 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             pumaAttributes = pumaProfile.getAttributes(user, new ArrayList<String>(userMapping.keySet()));
         } catch (Exception e) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                "Impossible to retrieve user attributes for user [" + pumaUid + "] and attributes ["
+                "Impossible to retrieve user attributes for user [" + ssoUser + "] and attributes ["
                     + userMapping.keySet() + "]", e);
         }
 
@@ -460,31 +245,31 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                 attributes.put(userMapping.get(pumaAttribute.getKey()), (String) value);
             } else {
                 LOG.warn("Type [" + value.getClass() + "] for field [" + pumaAttribute.getKey()
-                    + "] is not supported for PUMA user [" + pumaUid + "]");
+                    + "] is not supported for PUMA user [" + ssoUser + "]");
             }
         }
 
-        LOG.debug("Attributes to synchronize: " + attributes);
+        System.out.println("Attributes to synchronize: " + attributes);
 
         // Sync
         if (userProfile.isNew()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Creating new XWiki user based on LDAP attribues located at [" + pumaUid + "]");
+                System.out.println("Creating new XWiki user based on LDAP attribues located at [" + ssoUser + "]");
             }
 
-            userProfile = createUserFromPUMA(userProfile, attributes, pumaUid, context);
+            userProfile = createUserFromPUMA(userProfile, attributes, ssoUser, context);
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("New XWiki user created: [" + userProfile.getFullName() + "] in wiki ["
+                System.out.println("New XWiki user created: [" + userProfile.getFullName() + "] in wiki ["
                     + userProfile.getWikiName() + "]");
             }
         } else {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Updating existing user with LDAP attribues located at " + pumaUid);
+                System.out.println("Updating existing user with LDAP attribues located at " + ssoUser);
             }
 
             try {
-                updateUserFromPUMA(userProfile, attributes, pumaUid, context);
+                updateUserFromPUMA(userProfile, attributes, ssoUser, context);
             } catch (XWikiException e) {
                 LOG.error("Failed to synchronise user's informations", e);
             }
@@ -504,13 +289,13 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
                 List<Group> pumaUserGroups = pl.findGroupsByPrincipal(user, false);
 
-                LOG.debug("The user belongs to following PUMA groups: ");
+                System.out.println("The user belongs to following PUMA groups: ");
 
                 // membership to add
                 for (Group group : pumaUserGroups) {
                     String groupUid = pumaProfile.getIdentifier(group);
 
-                    LOG.debug("  - " + groupUid);
+                    System.out.println("  - " + groupUid);
 
                     Collection<String> xwikiGroups = groupMappings.get(groupUid);
                     if (xwikiGroups != null) {
@@ -533,21 +318,21 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
     }
 
-    protected void updateUserFromPUMA(XWikiDocument userProfile, Map<String, String> fields, String pumaUid,
+    protected void updateUserFromPUMA(XWikiDocument userProfile, Map<String, String> fields, String ssoUser,
         XWikiContext context) throws XWikiException
     {
         boolean needsUpdate = updateUser(userProfile, fields, context);
 
         // Update PUMA profile object
         PUMAProfileXClass pumaXClass = new PUMAProfileXClass(context);
-        needsUpdate |= pumaXClass.updatePUMAObject(userProfile, pumaUid);
+        needsUpdate |= pumaXClass.updatePUMAObject(userProfile, ssoUser);
 
         if (needsUpdate) {
             context.getWiki().saveDocument(userProfile, context);
         }
     }
 
-    protected XWikiDocument createUserFromPUMA(XWikiDocument userProfile, Map<String, String> fields, String pumaUid,
+    protected XWikiDocument createUserFromPUMA(XWikiDocument userProfile, Map<String, String> fields, String ssoUser,
         XWikiContext context) throws XWikiException
     {
         XWikiDocument createdUserProfile = createUser(userProfile, fields, context);
@@ -555,111 +340,10 @@ public class PUMAAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         // Update ldap profile object
         PUMAProfileXClass pumaXClass = new PUMAProfileXClass(context);
 
-        if (pumaXClass.updatePUMAObject(createdUserProfile, pumaUid)) {
+        if (pumaXClass.updatePUMAObject(createdUserProfile, ssoUser)) {
             context.getWiki().saveDocument(createdUserProfile, context);
         }
 
         return createdUserProfile;
-    }
-
-    // GENERIC
-
-    protected boolean updateUser(XWikiDocument userProfile, Map<String, String> fields, XWikiContext context)
-        throws XWikiException
-    {
-        BaseClass userClass = context.getWiki().getUserClass(context);
-
-        BaseObject userObj = userProfile.getObject(userClass.getName());
-
-        Map<String, String> map = new HashMap<String, String>();
-        for (Map.Entry<String, String> entry : fields.entrySet()) {
-            String key = entry.getKey();
-            if (userClass.get(key) == null) {
-                continue;
-            }
-            String value = entry.getValue();
-
-            String objValue = userObj.getStringValue(key);
-            if (objValue == null || !objValue.equals(value)) {
-                map.put(key, value);
-            }
-        }
-
-        boolean needsUpdate = false;
-        if (!map.isEmpty()) {
-            userClass.fromMap(map, userObj);
-            needsUpdate = true;
-        }
-
-        return needsUpdate;
-    }
-
-    protected XWikiDocument createUser(XWikiDocument userProfile, Map<String, String> fields, XWikiContext context)
-        throws XWikiException
-    {
-        XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
-
-        Map<String, String> userMappings = config.getUserMappings(null, context);
-
-        BaseClass userClass = context.getWiki().getUserClass(context);
-
-        Map<String, String> map = new HashMap<String, String>();
-        for (Map.Entry<String, String> entry : fields.entrySet()) {
-            String key = entry.getKey();
-
-            String xattr = userMappings.get(key);
-
-            if (xattr == null) {
-                continue;
-            }
-
-            map.put(xattr, entry.getValue());
-        }
-
-        // Mark user active
-        map.put("active", "1");
-
-        String content;
-        String syntaxId;
-        if (!context.getWiki().getDefaultDocumentSyntax().equals(XWikiDocument.XWIKI10_SYNTAXID)) {
-            content = "{{include document=\"XWiki.XWikiUserSheet\"/}}";
-            syntaxId = XWikiDocument.XWIKI20_SYNTAXID;
-        } else {
-            content = "#includeForm(\"XWiki.XWikiUserSheet\")";
-            syntaxId = XWikiDocument.XWIKI10_SYNTAXID;
-        }
-
-        context.getWiki().createUser(userProfile.getName(), map, userClass.getName(), content, syntaxId, "edit",
-            context);
-
-        return context.getWiki().getDocument(userProfile.getFullName(), context);
-    }
-
-    protected void syncGroupsMembership(XWikiDocument userProfile, Collection<String> xwikiGroupsIn,
-        Collection<String> xwikiGroupsOut, XWikiContext context) throws XWikiException
-    {
-        String fullName = userProfile.getFullName();
-
-        Collection<String> xwikiUserGroupList =
-            context.getWiki().getGroupService(context).getAllGroupsNamesForMember(fullName, 0, 0, context);
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The user belongs to following XWiki groups: ");
-            for (String userGroupName : xwikiUserGroupList) {
-                LOG.debug(userGroupName);
-            }
-        }
-
-        for (String xwikiGroupName : xwikiGroupsIn) {
-            if (!xwikiUserGroupList.contains(xwikiGroupName)) {
-                addUserToXWikiGroup(fullName, xwikiGroupName, context);
-            }
-        }
-
-        for (String xwikiGroupName : xwikiGroupsOut) {
-            if (xwikiUserGroupList.contains(xwikiGroupName)) {
-                removeUserFromXWikiGroup(fullName, xwikiGroupName, context);
-            }
-        }
     }
 }

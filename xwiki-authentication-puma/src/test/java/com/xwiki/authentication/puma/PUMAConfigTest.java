@@ -54,14 +54,27 @@ public class PUMAConfigTest
     {
         this.mockery.checking(new Expectations() {{
             allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", context); will(returnValue(null));
-            allowing(xwikiMock).Param("xwiki.authentication.puma.groupsMapping", null); will(returnValue(null));
+            allowing(xwikiMock).Param("xwiki.authentication.puma.groupsMapping"); will(returnValue(null));
+        }});
+
+        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(this.context);
+
+        Assert.assertNull(groupMapping);
+    }
+
+    @Test
+    public void testGetGroupMappingsWithEmptyProperty() throws Exception
+    {
+        this.mockery.checking(new Expectations() {{
+            allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", context); will(returnValue(""));
+            allowing(xwikiMock).Param("xwiki.authentication.puma.groupsMapping"); will(returnValue(""));
         }});
 
         Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(this.context);
 
         Assert.assertTrue(groupMapping.isEmpty());
     }
-    
+
     @Test
     public void testGetGroupMappingsWithOneCouple() throws Exception
     {
@@ -105,7 +118,20 @@ public class PUMAConfigTest
     {
         this.mockery.checking(new Expectations() {{
             allowing(xwikiMock).getXWikiPreference("puma_userMapping", context); will(returnValue(null));
-            allowing(xwikiMock).Param("xwiki.authentication.puma.userMapping", null); will(returnValue(null));
+            allowing(xwikiMock).Param("xwiki.authentication.puma.userMapping"); will(returnValue(null));
+        }});
+
+        Map<String, String> userMapping = this.config.getUserMapping(this.context);
+
+        Assert.assertNull(userMapping);
+    }
+
+    @Test
+    public void testGetUserMappingsWithEmptyProperty() throws Exception
+    {
+        this.mockery.checking(new Expectations() {{
+            allowing(xwikiMock).getXWikiPreference("puma_userMapping", context); will(returnValue(""));
+            allowing(xwikiMock).Param("xwiki.authentication.puma.userMapping"); will(returnValue(""));
         }});
 
         Map<String, String> userMapping = this.config.getUserMapping(this.context);
