@@ -21,6 +21,7 @@
 
 package com.xwiki.authentication;
 
+import java.security.Principal;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,12 +48,12 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
  * 
  * @version $Id$
  */
-public class DefaultAuthServiceImpl extends XWikiAuthServiceImpl
+public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
 {
     /**
      * LogFactory <code>LOGGER</code>.
      */
-    private static final Log LOG = LogFactory.getLog(DefaultAuthServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(AbstractAuthServiceImpl.class);
 
     public XWikiAuthService getFalback(XWikiContext context)
     {
@@ -207,7 +208,7 @@ public class DefaultAuthServiceImpl extends XWikiAuthServiceImpl
             }
         }
     }
-    
+
     /**
      * Remove user name from provided XWiki group.
      * 
@@ -233,7 +234,7 @@ public class DefaultAuthServiceImpl extends XWikiAuthServiceImpl
             LOG.error("Failed to remove a user from a group " + xwikiUserName + " group: " + groupName, e);
         }
     }
-    
+
     /**
      * Add user name to provided XWiki group.
      * 
@@ -263,11 +264,48 @@ public class DefaultAuthServiceImpl extends XWikiAuthServiceImpl
             context.getWiki().saveDocument(groupDoc, context);
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug(MessageFormat.format("Finished adding user {0} to xwiki group {1}", xwikiUserName, groupName));
+                LOG
+                    .debug(MessageFormat
+                        .format("Finished adding user {0} to xwiki group {1}", xwikiUserName, groupName));
             }
 
         } catch (Exception e) {
             LOG.error(MessageFormat.format("Failed to add a user [{0}] to a group [{1}]", xwikiUserName, groupName), e);
         }
     }
+
+    public Principal authenticate(String login, String password, XWikiContext context) throws XWikiException
+    {
+        Principal principal = null;
+
+        String wikiName = context.getDatabase();
+
+        // SSO authentication
+        try {
+            context.setDatabase(context.getMainXWiki());
+
+            principal = authenticateInContext(wikiName.equals(context.getMainXWiki()), context);
+        } catch (XWikiException e) {
+            // LOG.debug("Failed to authenticate with SSO", e);
+            System.out.println("Failed to authenticate with SSO");
+            e.printStackTrace();
+        } finally {
+            context.setDatabase(wikiName);
+        }
+
+        // Falback on configured authenticator
+        if (principal == null) {
+            XWikiAuthService fallback = getFalback(context);
+
+            if (fallback != null) {
+                LOG.debug("Falback on authenticator " + fallback);
+
+                getFalback(context).authenticate(login, password, context);
+            }
+        }
+
+        return principal;
+    }
+
+    protected abstract Principal authenticateInContext(boolean local, XWikiContext context) throws XWikiException;
 }

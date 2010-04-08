@@ -88,7 +88,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         return falback;
     }
 
-    public Principal authenticateSSOInContext(boolean local, XWikiContext context) throws XWikiException
+    protected Principal authenticateInContext(boolean local, XWikiContext context) throws XWikiException
     {
         System.out.println("Authenticate SSO");
 

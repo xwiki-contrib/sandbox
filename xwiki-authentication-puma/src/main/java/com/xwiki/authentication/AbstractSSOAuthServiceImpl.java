@@ -39,7 +39,7 @@ import com.xpn.xwiki.user.api.XWikiUser;
  * 
  * @version $Id$
  */
-public abstract class AbstractSSOAuthServiceImpl extends DefaultAuthServiceImpl
+public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
 {
     /**
      * LogFactory <code>LOGGER</code>.
@@ -158,37 +158,4 @@ public abstract class AbstractSSOAuthServiceImpl extends DefaultAuthServiceImpl
 
         return user;
     }
-
-    public Principal authenticate(String login, String password, XWikiContext context) throws XWikiException
-    {
-        Principal principal = null;
-
-        String wikiName = context.getDatabase();
-
-        // SSO authentication
-        try {
-            context.setDatabase(context.getMainXWiki());
-
-            principal = authenticateSSOInContext(wikiName.equals(context.getMainXWiki()), context);
-        } catch (XWikiException e) {
-            // LOG.debug("Failed to authenticate with SSO", e);
-            System.out.println("Failed to authenticate with SSO");
-            e.printStackTrace();
-        } finally {
-            context.setDatabase(wikiName);
-        }
-
-        // Falback on configured authenticator
-        if (principal == null) {
-            XWikiAuthService fallback = getFalback(context);
-
-            if (fallback != null) {
-                getFalback(context).authenticate(login, password, context);
-            }
-        }
-
-        return principal;
-    }
-    
-    protected abstract Principal authenticateSSOInContext(boolean local, XWikiContext context) throws XWikiException;
 }
