@@ -221,30 +221,32 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
             System.out.println("LDAP attributes will be used to update XWiki attributes.");
         }
 
-        Map<String, String> userMapping = getConfig().getUserMapping(context);
-        Map<String, Object> pumaAttributes;
-        try {
-            pumaAttributes = pumaProfile.getAttributes(user, new ArrayList<String>(userMapping.keySet()));
-        } catch (Exception e) {
-            throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                "Impossible to retrieve user attributes for user [" + ssoUser + "] and attributes ["
-                    + userMapping.keySet() + "]", e);
-        }
-
         // Get attributes to synch
         Map<String, String> attributes = new HashMap<String, String>();
-        for (Map.Entry<String, Object> pumaAttribute : pumaAttributes.entrySet()) {
-            Object value = pumaAttribute.getValue();
-
-            if (value instanceof String) {
-                attributes.put(userMapping.get(pumaAttribute.getKey()), (String) value);
-            } else {
-                LOG.warn("Type [" + value.getClass() + "] for field [" + pumaAttribute.getKey()
-                    + "] is not supported for PUMA user [" + ssoUser + "]");
+        Map<String, String> userMapping = getConfig().getUserMapping(context);
+        if (userMapping != null) {
+            Map<String, Object> pumaAttributes;
+            try {
+                pumaAttributes = pumaProfile.getAttributes(user, new ArrayList<String>(userMapping.keySet()));
+            } catch (Exception e) {
+                throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
+                    "Impossible to retrieve user attributes for user [" + ssoUser + "] and attributes ["
+                        + userMapping.keySet() + "]", e);
             }
-        }
 
-        System.out.println("Attributes to synchronize: " + attributes);
+            for (Map.Entry<String, Object> pumaAttribute : pumaAttributes.entrySet()) {
+                Object value = pumaAttribute.getValue();
+
+                if (value instanceof String) {
+                    attributes.put(userMapping.get(pumaAttribute.getKey()), (String) value);
+                } else {
+                    LOG.warn("Type [" + (value != null ? value.getClass() : null) + "] for field ["
+                        + pumaAttribute.getKey() + "] is not supported for PUMA user [" + ssoUser + "]");
+                }
+            }
+
+            System.out.println("Attributes to synchronize: " + attributes);
+        }
 
         // Sync
         if (userProfile.isNew()) {
