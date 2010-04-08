@@ -96,6 +96,12 @@ public class DispatchPortlet extends GenericPortlet
     public static final String ATTRIBUTE_RESPONSE_DATA = "org.xwiki.portlet.attribute.responseData";
 
     /**
+     * The attribute used to pass the URL to the home (landing) page to the dispatch target. The dispatch target can
+     * used this URL to create "Back to home" links.
+     */
+    public static final String ATTRIBUTE_HOME_URL = "org.xwiki.portlet.attribute.homeURL";
+
+    /**
      * The object used get the portlet request type associated with a servlet URL.
      */
     private URLRequestTypeMapper urlRequestTypeMapper;
@@ -137,6 +143,8 @@ public class DispatchPortlet extends GenericPortlet
     protected void processView(ActionRequest request, ActionResponse response) throws PortletException, IOException
     {
         request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.ACTION);
+        request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
+            + getDefaultDispatchURL(request.getPreferences()));
         getPortletContext().getRequestDispatcher(getDispatchURL(request)).forward(request, response);
         ResponseData responseData = (ResponseData) request.getAttribute(ATTRIBUTE_RESPONSE_DATA);
         if (responseData.getRedirect() != null) {
@@ -188,6 +196,8 @@ public class DispatchPortlet extends GenericPortlet
             renderResponseData(responseData, response, rewriter);
         } else {
             request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RENDER);
+            request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
+                + getDefaultDispatchURL(request.getPreferences()));
             request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, dispatchURLFactory);
             getPortletContext().getRequestDispatcher(dispatchURL).forward(request, response);
         }
@@ -218,6 +228,8 @@ public class DispatchPortlet extends GenericPortlet
     public void serveResource(ResourceRequest request, ResourceResponse response) throws PortletException, IOException
     {
         request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RESOURCE);
+        request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
+            + getDefaultDispatchURL(request.getPreferences()));
         String dispatchURL = getDispatchURL(request);
         request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, new DispatchURLFactory(response, urlRequestTypeMapper,
             dispatchURL));
