@@ -17,7 +17,9 @@ You will need to following jars to build the authenticator (you can find them in
 
 Put them in the /lib folder and that's all you can build with maven (mvn package).
 
-= Configuration (in xwiki.cfg file) =
+= Configuration =
+
+== xwiki.cfg file ==
 
 #-# Retrieve the following fields from PUMA and store them in the XWiki user object (puma-attribute=xwiki-attribute)
 # xwiki.authentication.puma.userMapping=sn=last_name,givenName=first_name,mail=email
@@ -27,7 +29,17 @@ Put them in the /lib folder and that's all you can build with maven (mvn package
 #                                         XWiki.Organisation=cn=testers,ou=groups,o=MegaNova,c=US
 
 #-# Indicate which authenticator to use when no PUMA informations are not provided (i.e. not SSO mode), does not falback on anything by default
-# xwiki.authentication.puma.falback=com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl 
+# xwiki.authentication.puma.fallback=com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl
+
+== XWikiPreferences == 
+
+It's also possible to put any of theses configuration in the XWiki.XWikiPreferences object in the XWiki.XWikiPreferences page. Add a string field with the proper name to the class and put the value you want.
+
+The fields names are not exactly the same, you have to change "xwiki.authentication.puma." prefix to "puma_":
+
+xwiki.authentication.puma.userMapping -> puma_userMapping
+xwiki.authentication.puma.groupsMapping -> puma_groupsMapping
+xwiki.authentication.puma.fallback -> puma_fallback
 
 = Install =
 
