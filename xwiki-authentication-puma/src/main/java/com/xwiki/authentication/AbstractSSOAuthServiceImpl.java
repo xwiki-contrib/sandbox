@@ -65,6 +65,8 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
             user = super.checkAuth(context);
         }
 
+        LOG.debug("XWikiUser: " + user);
+
         return user;
     }
 
@@ -87,14 +89,18 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
             XWikiAuthService fallback = getFallback(context);
 
             if (fallback != null) {
-                fallback.checkAuth(username, password, rememberme, context);
+                LOG.debug("Fallback on authenticator " + fallback);
+
+                user = fallback.checkAuth(username, password, rememberme, context);
             }
         }
+
+        LOG.debug("XWikiUser: " + user);
 
         return user;
     }
 
-    public XWikiUser checkAuthSSO(String username, String password, XWikiContext context) throws XWikiException
+    protected XWikiUser checkAuthSSO(String username, String password, XWikiContext context) throws XWikiException
     {
         Cookie cookie;
 
@@ -153,8 +159,6 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
                 new XWikiUser(principal.getName().startsWith(context.getDatabase()) ? principal.getName().substring(
                     context.getDatabase().length() + 1) : principal.getName());
         }
-
-        LOG.debug("XWikiUser: " + user);
 
         return user;
     }

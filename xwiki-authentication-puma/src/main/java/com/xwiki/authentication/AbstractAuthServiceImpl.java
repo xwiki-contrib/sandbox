@@ -296,9 +296,9 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
             XWikiAuthService fallback = getFallback(context);
 
             if (fallback != null) {
-                LOG.debug("Falback on authenticator " + fallback);
+                LOG.debug("Fallback on authenticator " + fallback);
 
-                fallback.authenticate(login, password, context);
+                principal = fallback.authenticate(login, password, context);
             }
         }
 
