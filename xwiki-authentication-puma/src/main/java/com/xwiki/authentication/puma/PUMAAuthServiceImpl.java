@@ -286,6 +286,8 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
                 Collection<String> xwikiGroupsIn = new ArrayList<String>();
                 Collection<String> xwikiGroupsOut = new ArrayList<String>();
 
+                Map<String, Collection<String>> groupsToRemove = new HashMap<String, Collection<String>>(groupMappings);
+
                 List<Group> pumaUserGroups = pl.findGroupsByPrincipal(user, false);
 
                 System.out.println("The user belongs to following PUMA groups: ");
@@ -296,16 +298,16 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
                     System.out.println("  - " + groupUid);
 
-                    Collection<String> xwikiGroups = groupMappings.get(groupUid);
+                    Collection<String> xwikiGroups = groupsToRemove.get(groupUid);
                     if (xwikiGroups != null) {
                         xwikiGroupsIn.addAll(xwikiGroups);
 
-                        groupMappings.remove(groupUid);
+                        groupsToRemove.remove(groupUid);
                     }
                 }
 
                 // membership to remove
-                for (Collection<String> xwikiGroups : groupMappings.values()) {
+                for (Collection<String> xwikiGroups : groupsToRemove.values()) {
                     xwikiGroupsOut.addAll(xwikiGroups);
                 }
 
