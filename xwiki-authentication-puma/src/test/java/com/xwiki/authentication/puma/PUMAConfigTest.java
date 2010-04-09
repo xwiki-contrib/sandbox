@@ -155,7 +155,7 @@ public class PUMAConfigTest
     public void testGetUserMappingsWithTwoCouples() throws Exception
     {
         this.mockery.checking(new Expectations() {{
-            allowing(xwikiMock).getXWikiPreference("puma_userMapping", context); will(returnValue("xwikifield=pumagfield|xwikifield2=pumagfield2"));
+            allowing(xwikiMock).getXWikiPreference("puma_userMapping", context); will(returnValue("xwikifield=pumagfield,xwikifield2=pumagfield2"));
         }});
 
         Map<String, String> userMapping = this.config.getUserMapping(this.context);

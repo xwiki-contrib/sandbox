@@ -64,7 +64,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
     private PUMAConfig config = null;
 
-    private XWikiAuthService falback = null;
+    private XWikiAuthService fallback = null;
 
     private PUMAConfig getConfig()
     {
@@ -75,18 +75,18 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         return this.config;
     }
 
-    protected XWikiAuthService getFalback(XWikiContext context)
+    protected XWikiAuthService getFallback(XWikiContext context)
     {
-        if (this.falback == null) {
-            this.falback = getConfig().getFalbackAuthenticator(context);
+        if (this.fallback == null) {
+            this.fallback = getConfig().getFallbackAuthenticator(context);
         }
 
-        return falback;
+        return fallback;
     }
 
     protected Principal authenticateInContext(boolean local, XWikiContext context) throws XWikiException
     {
-        System.out.println("Authenticate SSO");
+        LOG.debug("Authenticate SSO");
 
         XWikiRequest request = context.getRequest();
 
@@ -99,13 +99,13 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
             return null;
         }
 
-        System.out.println("Request remote user: " + request.getRemoteUser());
+        LOG.debug("Request remote user: " + request.getRemoteUser());
 
         String ssoUser = request.getRemoteUser();
 
         XWikiDocument userProfile = getUserProfileByUid(ssoUser.replace(".", ""), ssoUser, context);
 
-        System.out.println("XWiki user resolved profile name: " + userProfile.getFullName());
+        LOG.debug("XWiki user resolved profile name: " + userProfile.getFullName());
 
         // //////////////////////////////////////////////
         // Get PUMA profile
@@ -129,7 +129,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
         syncUserFromPUMA(userProfile, ssoUser, user, pumaProfile, context);
 
-        System.out.println("User [" + userProfile.getFullName() + "] synchronized");
+        LOG.debug("User [" + userProfile.getFullName() + "] synchronized");
 
         // from now on we can enter the application
         if (local) {
@@ -145,7 +145,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         PumaLocator pl = pumaHome.getLocator(request);
         syncGroupsMembershipFromPUMA(userProfile, user, pl, pumaProfile, context);
 
-        System.out.println("User [" + userProfile.getFullName() + "] membership synchronized");
+        LOG.debug("User [" + userProfile.getFullName() + "] membership synchronized");
 
         return principal;
     }
@@ -232,6 +232,9 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         // Get attributes to synch
         Map<String, String> attributes = new HashMap<String, String>();
         Map<String, String> userMapping = getConfig().getUserMapping(context);
+        
+        LOG.debug("userMapping: " + userMapping);
+        
         if (userMapping != null) {
             Map<String, Object> pumaAttributes;
             try {
@@ -253,19 +256,19 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
                 }
             }
 
-            System.out.println("Attributes to synchronize: " + attributes);
+            LOG.debug("Attributes to synchronize: " + attributes);
         }
 
         // Sync
         if (userProfile.isNew()) {
-            System.out.println("Creating new XWiki user based on LDAP attribues located at [" + ssoUser + "]");
+            LOG.debug("Creating new XWiki user based on LDAP attribues located at [" + ssoUser + "]");
 
             userProfile = createUserFromPUMA(userProfile, attributes, ssoUser, context);
 
-            System.out.println("New XWiki user created: [" + userProfile.getFullName() + "] in wiki ["
+            LOG.debug("New XWiki user created: [" + userProfile.getFullName() + "] in wiki ["
                 + userProfile.getWikiName() + "]");
         } else {
-            System.out.println("Updating existing user with LDAP attribues located at " + ssoUser);
+            LOG.debug("Updating existing user with LDAP attribues located at " + ssoUser);
 
             try {
                 updateUserFromPUMA(userProfile, attributes, ssoUser, context);
@@ -290,13 +293,13 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
                 List<Group> pumaUserGroups = pl.findGroupsByPrincipal(user, false);
 
-                System.out.println("The user belongs to following PUMA groups: ");
+                LOG.debug("The user belongs to following PUMA groups: ");
 
                 // membership to add
                 for (Group group : pumaUserGroups) {
                     String groupUid = pumaProfile.getIdentifier(group);
 
-                    System.out.println("  - " + groupUid);
+                    LOG.debug("  - " + groupUid);
 
                     Collection<String> xwikiGroups = groupsToRemove.get(groupUid);
                     if (xwikiGroups != null) {

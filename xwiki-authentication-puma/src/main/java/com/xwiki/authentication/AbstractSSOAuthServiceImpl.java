@@ -84,7 +84,7 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
         }
 
         if (user == null) {
-            XWikiAuthService fallback = getFalback(context);
+            XWikiAuthService fallback = getFallback(context);
 
             if (fallback != null) {
                 fallback.checkAuth(username, password, rememberme, context);
@@ -98,9 +98,9 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
     {
         Cookie cookie;
 
-        System.out.println("checkAuth");
+        LOG.debug("checkAuth");
 
-        System.out.println("Action: " + context.getAction());
+        LOG.debug("Action: " + context.getAction());
         if (context.getAction().startsWith("logout")) {
             cookie = getCookie(COOKIE_NAME, context);
             if (cookie != null) {
@@ -117,14 +117,14 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
             Cookie[] cookies = context.getRequest().getCookies();
             if (cookies != null) {
                 for (Cookie c : cookies) {
-                    System.out.println("CookieList: " + c.getName() + " => " + c.getValue());
+                    LOG.debug("CookieList: " + c.getName() + " => " + c.getValue());
                 }
             }
         }
 
         cookie = getCookie(COOKIE_NAME, context);
         if (cookie != null) {
-            System.out.println("Found Cookie");
+            LOG.debug("Found Cookie");
             String uname = decryptText(cookie.getValue(), context);
             if (uname != null) {
                 principal = new SimplePrincipal(uname);
@@ -140,7 +140,7 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
                 return null;
             }
 
-            System.out.println("Saving auth cookie");
+            LOG.debug("Saving auth cookie");
             String encuname = encryptText(principal.getName(), context);
             Cookie usernameCookie = new Cookie(COOKIE_NAME, encuname);
             usernameCookie.setMaxAge(-1);
@@ -154,7 +154,7 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
                     context.getDatabase().length() + 1) : principal.getName());
         }
 
-        System.out.println("XWikiUser: " + user);
+        LOG.debug("XWikiUser: " + user);
 
         return user;
     }

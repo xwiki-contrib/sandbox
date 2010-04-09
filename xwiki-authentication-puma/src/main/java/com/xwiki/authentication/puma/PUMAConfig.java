@@ -47,20 +47,20 @@ public class PUMAConfig extends Config
     {
         super("puma", "xwiki.authentication.puma");
     }
-    
+
     public Map<String, String> getUserMapping(XWikiContext context)
     {
-        return getMapParam("userMapping", null, context);
+        return getMapParam("userMapping", ',', null, context);
     }
 
     public Map<String, Collection<String>> getGroupMapping(XWikiContext context)
     {
-        return getOneToManyParam("groupsMapping", null, false, context);
+        return getOneToManyParam("groupsMapping", '|', null, false, context);
     }
 
-    public XWikiAuthService getFalbackAuthenticator(XWikiContext context)
+    public XWikiAuthService getFallbackAuthenticator(XWikiContext context)
     {
-        String authenticatorClassName = getParam("falback", null, context);
+        String authenticatorClassName = getParam("fallback", null, context);
 
         XWikiAuthService authenticator = null;
 

@@ -55,7 +55,7 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
      */
     private static final Log LOG = LogFactory.getLog(AbstractAuthServiceImpl.class);
 
-    protected XWikiAuthService getFalback(XWikiContext context)
+    protected XWikiAuthService getFallback(XWikiContext context)
     {
         return null;
     }
@@ -190,9 +190,9 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
             context.getWiki().getGroupService(context).getAllGroupsNamesForMember(fullName, 0, 0, context);
 
         if (LOG.isDebugEnabled()) {
-            System.out.println("The user belongs to following XWiki groups: ");
+            LOG.debug("The user belongs to following XWiki groups: ");
             for (String userGroupName : xwikiUserGroupList) {
-                System.out.println(userGroupName);
+                LOG.debug(userGroupName);
             }
         }
 
@@ -286,25 +286,23 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
 
             principal = authenticateInContext(wikiName.equals(context.getMainXWiki()), context);
         } catch (XWikiException e) {
-            // LOG.debug("Failed to authenticate with SSO", e);
-            System.out.println("Failed to authenticate with SSO");
-            e.printStackTrace();
+            LOG.debug("Failed to authenticate with SSO", e);
         } finally {
             context.setDatabase(wikiName);
         }
 
         // Falback on configured authenticator
         if (principal == null) {
-            XWikiAuthService fallback = getFalback(context);
+            XWikiAuthService fallback = getFallback(context);
 
             if (fallback != null) {
                 LOG.debug("Falback on authenticator " + fallback);
 
-                getFalback(context).authenticate(login, password, context);
+                fallback.authenticate(login, password, context);
             }
         }
 
-        System.out.println("Principal: " + principal);
+        LOG.debug("Principal: " + principal);
 
         return principal;
     }

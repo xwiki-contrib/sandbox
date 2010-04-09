@@ -84,7 +84,7 @@ public class Config
         return param;
     }
 
-    public List<String> getListParam(String name, List<String> def, XWikiContext context)
+    public List<String> getListParam(String name, char separator, List<String> def, XWikiContext context)
     {
         List<String> list = def;
 
@@ -92,7 +92,7 @@ public class Config
 
         if (str != null) {
             if (!StringUtils.isEmpty(str)) {
-                list = Arrays.asList(StringUtils.split(str, '|'));
+                list = Arrays.asList(StringUtils.split(str, separator));
             } else {
                 list = Collections.emptyList();
             }
@@ -101,11 +101,11 @@ public class Config
         return list;
     }
 
-    public Map<String, String> getMapParam(String name, Map<String, String> def, XWikiContext context)
+    public Map<String, String> getMapParam(String name, char separator, Map<String, String> def, XWikiContext context)
     {
         Map<String, String> mappings = def;
 
-        List<String> list = getListParam(name, null, context);
+        List<String> list = getListParam(name, separator, null, context);
 
         if (list != null) {
             if (list.isEmpty()) {
@@ -130,12 +130,12 @@ public class Config
         return mappings;
     }
 
-    public Map<String, Collection<String>> getOneToManyParam(String name, Map<String, Collection<String>> def,
-        boolean left, XWikiContext context)
+    public Map<String, Collection<String>> getOneToManyParam(String name, char separator,
+        Map<String, Collection<String>> def, boolean left, XWikiContext context)
     {
         Map<String, Collection<String>> oneToMany = def;
 
-        List<String> list = getListParam(name, null, context);
+        List<String> list = getListParam(name, separator, null, context);
 
         if (list != null) {
             if (list.isEmpty()) {
