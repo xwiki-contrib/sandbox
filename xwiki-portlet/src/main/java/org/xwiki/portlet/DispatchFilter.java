@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Wraps servlet requests that are dispatched from a portlet to overcome some of the limitations enforced by the JSR286
  * Portlet Specification.
@@ -194,7 +196,8 @@ public class DispatchFilter implements Filter
         if (url == null) {
             return null;
         }
-        String dispatchURL = url;
+        // Remove the fragment identifier from the URL if present.
+        String dispatchURL = StringUtils.substringBefore(url, "#");
         if (dispatchURL.length() > 0 && dispatchURL.charAt(0) == '/') {
             // URL relative to the servlet container root.
             if (dispatchURL.startsWith(request.getContextPath())) {

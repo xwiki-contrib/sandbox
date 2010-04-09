@@ -22,6 +22,8 @@ package org.xwiki.portlet;
 import javax.portlet.BaseURL;
 import javax.portlet.MimeResponse;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Creates portlet URLs that tell to their target where to dispatch the associated request.
  * 
@@ -111,7 +113,10 @@ public class DispatchURLFactory
                 url = response.createRenderURL();
                 break;
         }
-        url.setParameter(DispatchPortlet.PARAMETER_DISPATCH_URL, dispatchURL);
+        // We remove the fragment identifier from the dispatch URL. It would have been nice if we could add the fragment
+        // identifier to the created portlet URL but the portlet specification doesn't support it so we just ignore the
+        // portlet identifier.
+        url.setParameter(DispatchPortlet.PARAMETER_DISPATCH_URL, StringUtils.substringBefore(dispatchURL, "#"));
         return url;
     }
 }

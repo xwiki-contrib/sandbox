@@ -39,6 +39,8 @@ import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.servlet.http.Cookie;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Dispatches portlet requests coming from a JSR286 compatible portal to the URL provided in the
  * {@link #PARAMETER_DISPATCH_URL} request parameter. The dispatch target must be on the same context path as the
@@ -276,7 +278,8 @@ public class DispatchPortlet extends GenericPortlet
         if (dispatchURL == null) {
             dispatchURL = getDefaultDispatchURL(request.getPreferences());
         }
-        return dispatchURL;
+        // Remove the fragment identifier if present.
+        return StringUtils.substringBefore(dispatchURL, "#");
     }
 
     /**
