@@ -79,7 +79,7 @@ public class DispatchFilter implements Filter
             RequestType requestType = (RequestType) request.getAttribute(DispatchPortlet.ATTRIBUTE_REQUEST_TYPE);
             if (requestType != null) {
                 HttpServletResponse httpResponse = (HttpServletResponse) response;
-                // Make sure the filter is not applied twice on the same request.
+                // Prevent nested calls to this filter.
                 request.setAttribute(ATTRIBUTE_APPLIED, "true");
                 switch (requestType) {
                     case ACTION:
@@ -95,9 +95,9 @@ public class DispatchFilter implements Filter
                         // We should never get here.
                         break;
                 }
-                // Make sure the applied attribute is not shared between action and render requests (we shouldn't have
-                // to do this because the portlet specification says that the action and render requests must be
-                // isolated, but some portlet containers like WebSphere don't follow this requirement).
+                // Allow multiple calls to this filter, as long as they are not nested. We need this because we
+                // transform redirects into dispatches and thus a request can be dispatched multiple times, but these
+                // dispatches shouldn't be nested.
                 request.removeAttribute(ATTRIBUTE_APPLIED);
                 return;
             }
@@ -242,6 +242,11 @@ public class DispatchFilter implements Filter
      */
     private void exposeInitialGetParameters(HttpServletRequest request) throws ServletException
     {
+        // Check if the initial query string parameters are not already exposed. This can happen when the request is
+        // dispatched multiple times.
+        if (request.getAttribute(DispatchedRequest.ATTRIBUTE_INITIAL_GET_PARAMETERS) != null) {
+            return;
+        }
         HttpServletRequest initialRequest = request;
         while (initialRequest instanceof HttpServletRequestWrapper) {
             initialRequest = (HttpServletRequest) ((HttpServletRequestWrapper) initialRequest).getRequest();

@@ -20,6 +20,7 @@
 package org.xwiki.portlet;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -59,6 +60,14 @@ public class DispatchedRequest extends HttpServletRequestWrapper
      * The stack that holds the information about all the dispatches that affected this request.
      */
     private Stack<RequestDispatchInfo> dispatchStack = new Stack<RequestDispatchInfo>();
+
+    /**
+     * The map of query string parameters. We expose only the query string parameters if the request was redirected.
+     * 
+     * @see #isRedirected()
+     * @see #getQueryStringParameterMap()
+     */
+    private Map<String, String[]> queryStringParameterMap;
 
     /**
      * Wraps the given request that has been dispatched from a portlet.
@@ -232,15 +241,20 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     @Override
     public String getParameter(String name)
     {
-        String value = super.getParameter(name);
-        if (value == null && getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS) != null) {
-            Map<String, List<String>> initialGetParameters =
-                (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
-            if (initialGetParameters.containsKey(name)) {
-                value = initialGetParameters.get(name).get(0);
+        if (isRedirected()) {
+            String[] values = getQueryStringParameterMap().get(name);
+            return values != null ? values[0] : null;
+        } else {
+            String value = super.getParameter(name);
+            if (value == null && getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS) != null) {
+                Map<String, List<String>> initialGetParameters =
+                    (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
+                if (initialGetParameters.containsKey(name)) {
+                    value = initialGetParameters.get(name).get(0);
+                }
             }
+            return value;
         }
-        return value;
     }
 
     /**
@@ -252,18 +266,23 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     @Override
     public Map<String, String[]> getParameterMap()
     {
-        Map<String, List<String>> initialGetParameters =
-            (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
-        if (initialGetParameters != null) {
-            Map<String, String[]> map = new HashMap<String, String[]>((Map<String, String[]>) super.getParameterMap());
-            for (Map.Entry<String, List<String>> entry : initialGetParameters.entrySet()) {
-                if (!map.containsKey(entry.getKey())) {
-                    map.put(entry.getKey(), entry.getValue().toArray(new String[] {}));
-                }
-            }
-            return Collections.unmodifiableMap(map);
+        if (isRedirected()) {
+            return Collections.unmodifiableMap(getQueryStringParameterMap());
         } else {
-            return super.getParameterMap();
+            Map<String, List<String>> initialGetParameters =
+                (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
+            if (initialGetParameters != null) {
+                Map<String, String[]> map =
+                    new HashMap<String, String[]>((Map<String, String[]>) super.getParameterMap());
+                for (Map.Entry<String, List<String>> entry : initialGetParameters.entrySet()) {
+                    if (!map.containsKey(entry.getKey())) {
+                        map.put(entry.getKey(), entry.getValue().toArray(new String[] {}));
+                    }
+                }
+                return Collections.unmodifiableMap(map);
+            } else {
+                return super.getParameterMap();
+            }
         }
     }
 
@@ -276,18 +295,22 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     @Override
     public Enumeration<String> getParameterNames()
     {
-        Map<String, List<String>> initialGetParameters =
-            (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
-        if (initialGetParameters != null) {
-            Set<String> allNames = new HashSet<String>();
-            Enumeration<String> names = (Enumeration<String>) super.getParameterNames();
-            while (names.hasMoreElements()) {
-                allNames.add(names.nextElement());
-            }
-            allNames.addAll(initialGetParameters.keySet());
-            return Collections.enumeration(allNames);
+        if (isRedirected()) {
+            return Collections.enumeration(getQueryStringParameterMap().keySet());
         } else {
-            return super.getParameterNames();
+            Map<String, List<String>> initialGetParameters =
+                (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
+            if (initialGetParameters != null) {
+                Set<String> allNames = new HashSet<String>();
+                Enumeration<String> names = (Enumeration<String>) super.getParameterNames();
+                while (names.hasMoreElements()) {
+                    allNames.add(names.nextElement());
+                }
+                allNames.addAll(initialGetParameters.keySet());
+                return Collections.enumeration(allNames);
+            } else {
+                return super.getParameterNames();
+            }
         }
     }
 
@@ -300,15 +323,20 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     @Override
     public String[] getParameterValues(String name)
     {
-        String[] values = super.getParameterValues(name);
-        if (values == null && getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS) != null) {
-            Map<String, List<String>> initialGetParameters =
-                (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
-            if (initialGetParameters.containsKey(name)) {
-                values = initialGetParameters.get(name).toArray(new String[] {});
+        if (isRedirected()) {
+            String[] values = getQueryStringParameterMap().get(name);
+            return values != null ? Arrays.copyOf(values, values.length) : null;
+        } else {
+            String[] values = super.getParameterValues(name);
+            if (values == null && getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS) != null) {
+                Map<String, List<String>> initialGetParameters =
+                    (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
+                if (initialGetParameters.containsKey(name)) {
+                    values = initialGetParameters.get(name).toArray(new String[] {});
+                }
             }
+            return values;
         }
-        return values;
     }
 
     /**
@@ -362,5 +390,37 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         }
 
         return info;
+    }
+
+    /**
+     * @return {@code true} if this request was redirected, {@code false} otherwise
+     */
+    private boolean isRedirected()
+    {
+        return Boolean.valueOf((String) getAttribute(DispatchPortlet.ATTRIBUTE_REDIRECTED_REQUEST));
+    }
+
+    /**
+     * @return the map of query string parameters
+     */
+    private Map<String, String[]> getQueryStringParameterMap()
+    {
+        if (queryStringParameterMap == null) {
+            String queryString = getQueryString();
+            if (queryString == null) {
+                queryStringParameterMap = Collections.emptyMap();
+            } else {
+                try {
+                    Map<String, List<String>> map = new QueryStringParser().parse(queryString, getCharacterEncoding());
+                    queryStringParameterMap = new HashMap<String, String[]>();
+                    for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+                        queryStringParameterMap.put(entry.getKey(), entry.getValue().toArray(new String[] {}));
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    queryStringParameterMap = Collections.emptyMap();
+                }
+            }
+        }
+        return queryStringParameterMap;
     }
 }

@@ -102,6 +102,18 @@ public class DispatchPortlet extends GenericPortlet
     public static final String ATTRIBUTE_HOME_URL = "org.xwiki.portlet.attribute.homeURL";
 
     /**
+     * Flag indicating if the request was redirected or not. We transform redirects into dispatches because redirects
+     * are not allowed during render request and we can't create action URLs during action request. We set this flag to
+     * distinguish between normal dispatches and dispatches that were caused by a redirect.
+     */
+    public static final String ATTRIBUTE_REDIRECTED_REQUEST = "org.xwiki.portlet.attribute.redirectedRequest";
+
+    /**
+     * The maximum number of redirects allowed. This number is used to prevent endless redirect loops.
+     */
+    private static final int MAX_REDIRECT_COUNT = 5;
+
+    /**
      * The object used get the portlet request type associated with a servlet URL.
      */
     private URLRequestTypeMapper urlRequestTypeMapper;
@@ -145,14 +157,32 @@ public class DispatchPortlet extends GenericPortlet
         request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.ACTION);
         request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
             + getDefaultDispatchURL(request.getPreferences()));
-        getPortletContext().getRequestDispatcher(getDispatchURL(request)).forward(request, response);
-        ResponseData responseData = (ResponseData) request.getAttribute(ATTRIBUTE_RESPONSE_DATA);
-        if (responseData.getRedirect() != null) {
-            response.setRenderParameter(PARAMETER_DISPATCH_URL, responseData.getRedirect());
-        } else {
-            String responseKey = storeResponseData(request.getPortletSession(), responseData);
-            response.setRenderParameter(PARAMETER_DISPATCHED_RESPONSE_KEY, responseKey);
-        }
+        String dispatchURL = getDispatchURL(request);
+        boolean redirectedRequest = false;
+        int i = 0;
+        do {
+            // Dispatch the request until there are no redirects.
+            request.setAttribute(ATTRIBUTE_REDIRECTED_REQUEST, String.valueOf(redirectedRequest));
+            getPortletContext().getRequestDispatcher(dispatchURL).forward(request, response);
+            request.removeAttribute(ATTRIBUTE_REDIRECTED_REQUEST);
+            ResponseData responseData = (ResponseData) request.getAttribute(ATTRIBUTE_RESPONSE_DATA);
+            // Make sure the response data is fresh after the next dispatch.
+            request.removeAttribute(ATTRIBUTE_RESPONSE_DATA);
+            if (responseData.getRedirect() != null) {
+                // Transform the redirect into a dispatch because redirects are not allowed during render request and we
+                // can't create action URLs during action request.
+                dispatchURL = responseData.getRedirect();
+                redirectedRequest = true;
+            } else {
+                // Put the response data on the session and pass the key as a render parameter.
+                String responseKey = storeResponseData(request.getPortletSession(), responseData);
+                response.setRenderParameter(PARAMETER_DISPATCHED_RESPONSE_KEY, responseKey);
+                // Pass the last dispatch URL as a render parameter because the response data is removed from the
+                // session when it is first accessed and the portal can trigger a render requests at any time.
+                response.setRenderParameter(PARAMETER_DISPATCH_URL, dispatchURL);
+                break;
+            }
+        } while (++i < MAX_REDIRECT_COUNT);
     }
 
     /**
