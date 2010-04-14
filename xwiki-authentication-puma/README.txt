@@ -49,6 +49,6 @@ xwiki.authentication.authclass=com.xwiki.authentication.puma.PUMAAuthServiceImpl
 
 = Troubleshoot =
 
-= TODO =
+= IDEAS =
 
 * add support for servlet PUMA authentication (looks like PUMA is not only about portlet when i look at the api but i may be wrong)
