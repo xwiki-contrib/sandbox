@@ -230,11 +230,11 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         XWikiContext context) throws XWikiException
     {
         // Get attributes to synch
-        Map<String, String> attributes = new HashMap<String, String>();
+        Map<String, Object> attributes = new HashMap<String, Object>();
         Map<String, String> userMapping = getConfig().getUserMapping(context);
-        
+
         LOG.debug("userMapping: " + userMapping);
-        
+
         if (userMapping != null) {
             Map<String, Object> pumaAttributes;
             try {
@@ -246,14 +246,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
             }
 
             for (Map.Entry<String, Object> pumaAttribute : pumaAttributes.entrySet()) {
-                Object value = pumaAttribute.getValue();
-
-                if (value instanceof String) {
-                    attributes.put(userMapping.get(pumaAttribute.getKey()), (String) value);
-                } else {
-                    LOG.warn("Type [" + (value != null ? value.getClass() : null) + "] for field ["
-                        + pumaAttribute.getKey() + "] is not supported for PUMA user [" + ssoUser + "]");
-                }
+                attributes.put(userMapping.get(pumaAttribute.getKey()), pumaAttribute.getValue());
             }
 
             LOG.debug("Attributes to synchronize: " + attributes);
@@ -322,7 +315,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         }
     }
 
-    protected void updateUserFromPUMA(XWikiDocument userProfile, Map<String, String> fields, String ssoUser,
+    protected void updateUserFromPUMA(XWikiDocument userProfile, Map<String, Object> fields, String ssoUser,
         XWikiContext context) throws XWikiException
     {
         boolean needsUpdate = updateUser(userProfile, fields, context);
@@ -336,7 +329,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         }
     }
 
-    protected XWikiDocument createUserFromPUMA(XWikiDocument userProfile, Map<String, String> fields, String ssoUser,
+    protected XWikiDocument createUserFromPUMA(XWikiDocument userProfile, Map<String, Object> fields, String ssoUser,
         XWikiContext context) throws XWikiException
     {
         XWikiDocument createdUserProfile = createUser(userProfile, fields, context);

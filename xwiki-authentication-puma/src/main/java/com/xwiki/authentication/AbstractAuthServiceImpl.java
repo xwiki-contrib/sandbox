@@ -125,24 +125,27 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
         return null;
     }
 
-    protected boolean updateUser(XWikiDocument userProfile, Map<String, String> fields, XWikiContext context)
+    protected boolean updateUser(XWikiDocument userProfile, Map<String, Object> fields, XWikiContext context)
         throws XWikiException
     {
         BaseClass userClass = context.getWiki().getUserClass(context);
 
         BaseObject userObj = userProfile.getObject(userClass.getName());
 
-        Map<String, String> map = new HashMap<String, String>();
-        for (Map.Entry<String, String> entry : fields.entrySet()) {
+        Map<String, String> map = new HashMap<String, String>(fields.size());
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
             String key = entry.getKey();
             if (userClass.get(key) == null) {
                 continue;
             }
-            String value = entry.getValue();
+            Object value = entry.getValue();
+
+            // TODO: support more than just string
+            String valueStr = convertValueToString(userProfile, key, value);
 
             String objValue = userObj.getStringValue(key);
             if (objValue == null || !objValue.equals(value)) {
-                map.put(key, value);
+                map.put(key, valueStr);
             }
         }
 
@@ -155,30 +158,66 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
         return needsUpdate;
     }
 
-    protected XWikiDocument createUser(XWikiDocument userProfile, Map<String, String> fields, XWikiContext context)
+    protected XWikiDocument createUser(XWikiDocument userProfile, Map<String, Object> fields, XWikiContext context)
         throws XWikiException
     {
         BaseClass userClass = context.getWiki().getUserClass(context);
 
-        Map<String, String> map = new HashMap<String, String>(fields);
+        Map<String, String> map = new HashMap<String, String>(fields.size());
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
+            String key = entry.getKey();
+            if (userClass.get(key) == null) {
+                continue;
+            }
+            Object value = entry.getValue();
+
+            // TODO: support more than just string
+            map.put(key, convertValueToString(userProfile, key, value));
+        }
 
         // Mark user active
         map.put("active", "1");
 
-        String content;
-        String syntaxId;
-        if (!context.getWiki().getDefaultDocumentSyntax().equals(XWikiDocument.XWIKI10_SYNTAXID)) {
-            content = "{{include document=\"XWiki.XWikiUserSheet\"/}}";
-            syntaxId = XWikiDocument.XWIKI20_SYNTAXID;
-        } else {
-            content = "#includeForm(\"XWiki.XWikiUserSheet\")";
-            syntaxId = XWikiDocument.XWIKI10_SYNTAXID;
-        }
-
-        context.getWiki().createUser(userProfile.getName(), map, userClass.getName(), content, syntaxId, "edit",
-            context);
+        context.getWiki().createUser(userProfile.getName(), map, userClass.getName(),
+            "{{include document=\"XWiki.XWikiUserSheet\"/}}", XWikiDocument.XWIKI20_SYNTAXID, "edit", context);
 
         return context.getWiki().getDocument(userProfile, context);
+    }
+
+    protected String convertValueToString(XWikiDocument userProfile, String key, Object value)
+    {
+        String valueStr;
+
+        if (value instanceof String) {
+            valueStr = (String) value;
+        } else if (value instanceof Collection) {
+            Collection collectionValue = (Collection) value;
+
+            if (!collectionValue.isEmpty()) {
+                value = collectionValue.iterator().next();
+
+                if (value instanceof String) {
+                    valueStr = (String) value;
+                } else {
+                    LOG.warn("Value [" + (value != null ? (value + " (" + value.getClass() + ")") : null)
+                        + "] in java.util.Collection field [" + key + "] for user [" + userProfile
+                        + "] is not supported");
+
+                    valueStr = value.toString();
+                }
+            } else {
+                valueStr = value.toString();
+            }
+        } else {
+            LOG.warn("Value [" + (value != null ? (value + " (" + value.getClass() + ")") : null) + "] in field ["
+                + key + "] of user [" + userProfile + "] is for supported");
+
+            valueStr = value.toString();
+        }
+
+        LOG.debug(key + ": " + valueStr);
+
+        return valueStr;
     }
 
     protected void syncGroupsMembership(XWikiDocument userProfile, Collection<String> xwikiGroupsIn,
