@@ -12,9 +12,9 @@
 <customClass></customClass>
 <contentAuthor>XWiki.LudovicDubost</contentAuthor>
 <creationDate>1270882076000</creationDate>
-<date>1271701595000</date>
-<contentUpdateDate>1271701595000</contentUpdateDate>
-<version>35.1</version>
+<date>1271718580000</date>
+<contentUpdateDate>1271718580000</contentUpdateDate>
+<version>36.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -753,9 +753,9 @@ public class SVNLogReader {
     public getChangedPages(String spaces) {
         def changedList = new ArrayList();
         def sspaces = StringUtils.join(StringUtils.split(spaces," ,"), "','");
-        def sql = "where doc.space in ('${sspaces}')";
+        def sql = "select doc.fullName from XWikiDocument as doc where doc.space in ('${sspaces}')";
         debug("Searching for ${sql}");
-        def list = xwiki.searchDocuments(sql)
+        def list = xwiki.search(sql)
         for (page in list) {
            def pagedoc = xwiki.getDocument(page);
            def wikicontent = pagedoc.getDocument().toFullXML(context.getContext())
@@ -788,12 +788,17 @@ public class SVNLogReader {
     }
 }
 
-</content><versions>head	35.1;
+</content><versions>head	36.1;
 access;
 symbols;
 locks; strict;
 comment	@# @;
 
+
+36.1
+date	2010.04.19.23.09.40;	author XWiki_2ELudovicDubost;	state full;
+branches;
+next	35.1;
 
 35.1
 date	2010.04.19.18.26.35;	author XWiki_2ELudovicDubost;	state full;
@@ -973,6 +978,803 @@ next	;
 
 desc
 @@
+
+
+36.1
+log
+@@
+text
+@&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;xwikidoc&gt;
+&lt;web&gt;SVNCode&lt;/web&gt;
+&lt;name&gt;SVNGroovy&lt;/name&gt;
+&lt;language&gt;&lt;/language&gt;
+&lt;defaultLanguage&gt;en&lt;/defaultLanguage&gt;
+&lt;translation&gt;0&lt;/translation&gt;
+&lt;parent&gt;&lt;/parent&gt;
+&lt;creator&gt;XWiki.LudovicDubost&lt;/creator&gt;
+&lt;author&gt;XWiki.LudovicDubost&lt;/author&gt;
+&lt;customClass&gt;&lt;/customClass&gt;
+&lt;contentAuthor&gt;XWiki.LudovicDubost&lt;/contentAuthor&gt;
+&lt;creationDate&gt;1270882076000&lt;/creationDate&gt;
+&lt;date&gt;1271718580000&lt;/date&gt;
+&lt;contentUpdateDate&gt;1271718580000&lt;/contentUpdateDate&gt;
+&lt;version&gt;36.1&lt;/version&gt;
+&lt;title&gt;&lt;/title&gt;
+&lt;template&gt;&lt;/template&gt;
+&lt;defaultTemplate&gt;&lt;/defaultTemplate&gt;
+&lt;validationScript&gt;&lt;/validationScript&gt;
+&lt;comment&gt;&lt;/comment&gt;
+&lt;minorEdit&gt;false&lt;/minorEdit&gt;
+&lt;syntaxId&gt;xwiki/2.0&lt;/syntaxId&gt;
+&lt;hidden&gt;false&lt;/hidden&gt;
+&lt;object&gt;
+&lt;class&gt;
+&lt;name&gt;XWiki.TagClass&lt;/name&gt;
+&lt;customClass&gt;&lt;/customClass&gt;
+&lt;customMapping&gt;&lt;/customMapping&gt;
+&lt;defaultViewSheet&gt;&lt;/defaultViewSheet&gt;
+&lt;defaultEditSheet&gt;&lt;/defaultEditSheet&gt;
+&lt;defaultWeb&gt;&lt;/defaultWeb&gt;
+&lt;nameField&gt;&lt;/nameField&gt;
+&lt;validationScript&gt;&lt;/validationScript&gt;
+&lt;tags&gt;
+&lt;cache&gt;0&lt;/cache&gt;
+&lt;displayType&gt;checkbox&lt;/displayType&gt;
+&lt;multiSelect&gt;1&lt;/multiSelect&gt;
+&lt;name&gt;tags&lt;/name&gt;
+&lt;number&gt;1&lt;/number&gt;
+&lt;prettyName&gt;Tags&lt;/prettyName&gt;
+&lt;relationalStorage&gt;1&lt;/relationalStorage&gt;
+&lt;separator&gt; &lt;/separator&gt;
+&lt;separators&gt; ,|&lt;/separators&gt;
+&lt;size&gt;30&lt;/size&gt;
+&lt;unmodifiable&gt;0&lt;/unmodifiable&gt;
+&lt;values&gt;&lt;/values&gt;
+&lt;classType&gt;com.xpn.xwiki.objects.classes.StaticListClass&lt;/classType&gt;
+&lt;/tags&gt;
+&lt;/class&gt;
+&lt;name&gt;SVNCode.SVNGroovy&lt;/name&gt;
+&lt;number&gt;0&lt;/number&gt;
+&lt;className&gt;XWiki.TagClass&lt;/className&gt;
+&lt;guid&gt;e74e9501-16d5-4622-a16c-55bb96ac61e1&lt;/guid&gt;
+&lt;property&gt;
+&lt;tags/&gt;
+&lt;/property&gt;
+&lt;/object&gt;
+&lt;content&gt;
+import java.util.Collection;
+import java.util.Iterator;
+import org.apache.commons.lang.StringUtils;
+import org.tmatesoft.svn.core.*;
+import org.tmatesoft.svn.core.io.*;
+import org.tmatesoft.svn.core.wc.*;
+import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
+import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
+import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
+import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
+import org.tmatesoft.svn.core.io.diff.SVNDeltaGenerator;
+
+  
+
+public class SVNLogReader {
+    def xwiki;
+    def context;
+    def repurl = "";
+    def defaultspace = "";
+    def SVNRepository repository = null;
+    def username = "";
+    def password = "";
+    def sdebug = "";
+
+    public setXWiki(xwiki, context) {
+      this.xwiki = xwiki;
+      this.context = context;
+    }
+
+    public setSVNConfig(page) {
+       def configdoc = xwiki.getDocument(page)
+       this.username = configdoc.getValue("username")
+       this.password = configdoc.getObject("SVNCode.SVNConfigClass").getProperty("password").property.value
+       this.repurl = configdoc.getValue("repository");
+       this.defaultspace = configdoc.getValue("defaultspace");
+    }
+
+    public debug(message) {
+       sdebug += message + "\n";
+       def cdate = new Date();
+       System.out.println("${cdate}: ${message}");
+    }
+
+    public getDebug() {
+       return this.sdebug;
+    }
+   
+    public setRepository(rep) {
+        this.repurl = rep;
+    }
+
+    public getDefaultSpace() {
+        return this.defaultspace;
+    }
+
+    public boolean initRepository() {
+        /*
+         * initializes the library (it must be done before ever using the
+         * library itself)
+         */
+        setupLibrary();
+
+        try {
+            /*
+             * Creates an instance of SVNRepository to work with the repository.
+             * All user's requests to the repository are relative to the
+             * repository location used to create this SVNRepository.
+             * SVNURL is a wrapper for URL strings that refer to repository locations.
+             */
+            repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(repurl));
+        } catch (SVNException svne) {
+            /*
+             * Perhaps a malformed URL is the cause of this exception
+             */
+            debug("Error while creating an SVNRepository for location '"
+                            + repurl + "': " + svne.getMessage());
+            return false;
+        }
+ 
+        /*
+         * User's authentication information (name/password) is provided via  an 
+         * ISVNAuthenticationManager  instance.  SVNWCUtil  creates  a   default 
+         * authentication manager given user's name and password.
+         * 
+         * Default authentication manager first attempts to use provided user name 
+         * and password and then falls back to the credentials stored in the 
+         * default Subversion credentials storage that is located in Subversion 
+         * configuration area. If you'd like to use provided user name and password 
+         * only you may use BasicAuthenticationManager class instead of default 
+         * authentication manager:
+         * 
+         *  authManager = new BasicAuthenticationsManager(userName, userPassword);
+         *  
+         * You may also skip this point - anonymous access will be used. 
+         */
+        ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(username, password);
+        repository.setAuthenticationManager(authManager);
+
+        try {
+            /*
+             * Checks up if the specified path/to/repository part of the URL
+             * really corresponds to a directory. If doesn't the program exits.
+             * SVNNodeKind is that one who says what is located at a path in a
+             * revision. -1 means the latest revision.
+             */
+            SVNNodeKind nodeKind = repository.checkPath("", -1);
+            if (nodeKind == SVNNodeKind.NONE) {
+                debug("There is no entry at '" + repurl + "'.");
+                return false;
+            } else if (nodeKind == SVNNodeKind.FILE) {
+                debug("The entry at '" + repurl + "' is a file while a directory was expected.");
+                return false;
+            }
+        } catch (SVNException svne) {
+            debug("error while listing entries: " + svne.getMessage());
+            return false;
+        }
+        return true;
+     }
+ 
+
+     public listFiles() {
+        def str = ""
+        try {
+           /*
+             * getRepositoryRoot() returns the actual root directory where the
+             * repository was created. 'true' forces to connect to the repository 
+             * if the root url is not cached yet. 
+             */
+            str += "Repository Root: " + repository.getRepositoryRoot(true).toString() + "\n";
+            /*
+             * getRepositoryUUID() returns Universal Unique IDentifier (UUID) of the 
+             * repository. 'true' forces to connect to the repository 
+             * if the UUID is not cached yet.
+             */
+            str += "Repository UUID: " + repository.getRepositoryUUID(true).toString() + "\n";
+
+            /*
+             * Displays the repository tree at the current path - "" (what means
+             * the path/to/repository directory)
+             */
+            str += listEntries(repository, "");
+            return str;
+        } catch (SVNException svne) {
+            debug("error while listing entries: " + svne.getMessage());
+            return str;
+        }
+    }
+
+    /*
+     * Initializes the library to work with a repository via 
+     * different protocols.
+     */
+    private static void setupLibrary() {
+        /*
+         * For using over http:// and https://
+         */
+        DAVRepositoryFactory.setup();
+        /*
+         * For using over svn:// and svn+xxx://
+         */
+        SVNRepositoryFactoryImpl.setup();
+        
+        /*
+         * For using over file:///
+         */
+        FSRepositoryFactory.setup();
+    }
+
+    /*
+     * Called recursively to obtain all entries that make up the repository tree
+     * repository - an SVNRepository which interface is used to carry out the
+     * request, in this case it's a request to get all entries in the directory
+     * located at the path parameter;
+     * 
+     * path is a directory path relative to the repository location path (that
+     * is a part of the URL used to create an SVNRepository instance);
+     *  
+     */
+    public listEntries(SVNRepository repository, String path) throws SVNException {
+        /*
+         * Gets the contents of the directory specified by path at the latest
+         * revision (for this purpose -1 is used here as the revision number to
+         * mean HEAD-revision) getDir returns a Collection of SVNDirEntry
+         * elements. SVNDirEntry represents information about the directory
+         * entry. Here this information is used to get the entry name, the name
+         * of the person who last changed this entry, the number of the revision
+         * when it was last changed and the entry type to determine whether it's
+         * a directory or a file. If it's a directory listEntries steps into a
+         * next recursion to display the contents of this directory. The third
+         * parameter of getDir is null and means that a user is not interested
+         * in directory properties. The fourth one is null, too - the user
+         * doesn't provide its own Collection instance and uses the one returned
+         * by getDir.
+         */
+        def str = "";
+        Collection entries = repository.getDir(path, -1, null,
+                (Collection) null);
+        Iterator iterator = entries.iterator();
+        while (iterator.hasNext()) {
+            SVNDirEntry entry = (SVNDirEntry) iterator.next();
+            str += entry.getDate().toString() + ": " + path + "/" + entry.getName().toString() + " " + entry.getRevision().toString() + " \n";
+           /* str += "/" + (path.equals("") ? "" : path + "/")
+                    + entry.getName().toString() + " (author: '" + entry.getAuthor().toString()
+                    + "'; revision: " + entry.getRevision().toString() + "; date: " + entry.getDate().toString() + ")" + "\n";
+           */
+            /*
+             * Checking up if the entry is a directory.
+             */
+            if (entry.getKind() == SVNNodeKind.DIR) {
+                str += listEntries(repository, (path.equals("")) ? entry.getName().toString()
+                        : path + "/" + entry.getName().toString());
+            }
+        }
+        return str;
+    }
+
+    public String getFileContentAsString(String space, String page, String language) {
+      def c = getFileContent(space, page, language);
+      if (c==null)
+       return null;
+      else
+       return new String(c);
+    }
+
+    public byte[] getFileContent(String space, String page, String language) {
+        // get page
+        def filePath = space + "/" + page;
+        if (language!=null&amp;amp;&amp;amp;language!="")
+          filePath += "." + language;
+        filePath += ".xml"
+
+        /*
+         * This Map will be used to get the file properties. Each Map key is a
+         * property name and the value associated with the key is the property
+         * value.
+         */
+        SVNProperties fileProperties = new SVNProperties();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try {
+            /*
+             * Checks up if the specified path really corresponds to a file. If
+             * doesn't the program exits. SVNNodeKind is that one who says what is
+             * located at a path in a revision. -1 means the latest revision.
+             */
+            SVNNodeKind nodeKind = repository.checkPath(filePath, -1);
+            
+            if (nodeKind == SVNNodeKind.NONE) {
+                debug("There is no entry at '" + repurl + "'.");
+                return null;
+            } else if (nodeKind == SVNNodeKind.DIR) {
+                debug("The entry at '" + repurl
+                        + "' is a directory while a file was expected.");
+                return null;
+            }
+            /*
+             * Gets the contents and properties of the file located at filePath
+             * in the repository at the latest revision (which is meant by a
+             * negative revision number).
+             */
+            repository.getFile(filePath, -1, fileProperties, baos);
+
+        } catch (SVNException svne) {
+            System.err.println("error while fetching the file contents and properties: " + svne.getMessage());
+            System.exit(1);
+        }
+        return baos.toByteArray();
+    }
+
+    public commitFile(pagedoc, message) {
+        def c = pagedoc.document.toFullXML(context.getContext())
+        return setFileContent(pagedoc.getSpace(), pagedoc.getName(), pagedoc.getLanguage(), c, message)
+    }
+
+    public commitFiles(pagelist, message) {
+        def newSpaces = new ArrayList();
+        def newPages = new ArrayList();
+
+        def currentPageData = new HashMap();
+        def pagesBySpace = new HashMap();
+
+        def pagename2 = "";
+
+        for (pagename in pagelist) {
+           def pagedoc = xwiki.getDocument(pagename);
+           def space = pagedoc.getSpace();
+           def page = pagedoc.getName();
+           def language = pagedoc.getLanguage();
+           if (!newSpaces.contains(space)) {
+               if (repository.checkPath(space, -1) == SVNNodeKind.NONE) {
+                newSpaces.add(space);   
+                debug("Adding to new spaces: ${space}")         
+               }
+           }      
+           
+           // get page
+           def filePath = space + "/" + page;
+           if (language!=null&amp;amp;&amp;amp;language!="")
+                filePath += "." + language;
+           filePath += ".xml"
+
+           if (repository.checkPath(filePath, -1) == SVNNodeKind.NONE) {
+                newPages.add(filePath);                 
+                debug("Adding to new pages: ${filePath}")         
+           } else {
+                debug("Adding to updated pages: ${filePath}")         
+                currentPageData.put(filePath, getFileContent(space, page, language))
+           }
+
+           def pageList = pagesBySpace.get(space);
+           if (pageList==null) {
+              pageList = new ArrayList();
+              pagesBySpace.put(space, pageList);
+           }
+           pageList.add(pagedoc);
+        }
+
+        def editor = repository.getCommitEditor(message, null);
+        def commitInfo = null;
+
+        try {
+         /*
+          * Always called first. Opens the current root directory. It  means  all
+          * modifications will be applied to this directory until  a  next  entry
+          * (located inside the root) is opened/added.
+          * 
+          * -1 - revision is HEAD (actually, for a comit  editor  this number  is 
+          * irrelevant)
+          */
+         editor.openRoot(-1);
+
+         for (space in pagesBySpace.keySet()) {
+           // start by creating the space if necessary and open it if not
+           /*
+            * Adds a new directory (in this  case - to the  root  directory  for 
+            * which the SVNRepository was  created). 
+            * Since this moment all changes will be applied to this new  directory.
+            * 
+            * dirPath is relative to the root directory.
+            * 
+            * copyFromPath (the 2nd parameter) is set to null and  copyFromRevision
+            * (the 3rd) parameter is set to  -1  since  the  directory is not added 
+            * with history (is not copied, in other words).
+            */
+            if (newSpaces.contains(space)) {      
+             editor.addDir(space, null, -1);
+            } else {
+             editor.openDir(space, -1);
+            }
+
+            // loop on each page
+            for (pagedoc in pagesBySpace.get(space)) {  
+              def page = pagedoc.getName();
+              def language = pagedoc.getLanguage();
+
+              // get page path
+              def filePath = space + "/" + page;
+              if (language!=null&amp;amp;&amp;amp;language!="")
+                  filePath += "." + language;
+              filePath += ".xml"
+
+              def newData = pagedoc.document.toFullXML(context.getContext()).getBytes();
+
+              if (newPages.contains(filePath)) {
+                /*
+                 * Adds a new file to the just added  directory. The  file  path is also 
+                 * defined as relative to the root directory.
+                 *
+                 * copyFromPath (the 2nd parameter) is set to null and  copyFromRevision
+                 * (the 3rd parameter) is set to -1 since  the file is  not  added  with 
+                 * history.
+                 */
+                 editor.addFile(filePath, null, -1);
+
+                /*
+                 * The next steps are directed to applying delta to the  file  (that  is 
+                 * the full contents of the file in this case).
+                 */
+                editor.applyTextDelta(filePath, null);
+                /*
+                 * Use delta generator utility class to generate and send delta
+                 * 
+                 * Note that you may use only 'target' data to generate delta when there is no 
+                 * access to the 'base' (previous) version of the file. However, using 'base' 
+                 * data will result in smaller network overhead.
+                 * 
+                 * SVNDeltaGenerator will call editor.textDeltaChunk(...) method for each generated 
+                 * "diff window" and then editor.textDeltaEnd(...) in the end of delta transmission.  
+                 * Number of diff windows depends on the file size. 
+                 *  
+                 */
+                SVNDeltaGenerator deltaGenerator = new SVNDeltaGenerator();
+                String checksum = deltaGenerator.sendDelta(filePath, new ByteArrayInputStream(newData), editor, true);
+
+                /*
+                 * Closes the new added file.
+                 */
+                editor.closeFile(filePath, checksum);
+              } else {
+                def oldData = currentPageData.get(filePath);
+
+                /*
+                 * Opens the file added in the previous commit.
+                 * 
+                 * filePath is also defined as a relative path to the root directory.
+                 */
+                editor.openFile(filePath, -1);
+        
+                /*
+                 * The next steps are directed to applying and writing the file delta.
+                 */
+                editor.applyTextDelta(filePath, null);
+        
+                /*
+                 * Use delta generator utility class to generate and send delta
+                 * 
+                 * Note that you may use only 'target' data to generate delta when there is no 
+                 * access to the 'base' (previous) version of the file. However, here we've got 'base' 
+                 * data, what in case of larger files results in smaller network overhead.
+                 * 
+                 * SVNDeltaGenerator will call editor.textDeltaChunk(...) method for each generated 
+                 * "diff window" and then editor.textDeltaEnd(...) in the end of delta transmission.  
+                 * Number of diff windows depends on the file size. 
+                 *  
+                 */
+                SVNDeltaGenerator deltaGenerator = new SVNDeltaGenerator();
+                String checksum = deltaGenerator.sendDelta(filePath, new ByteArrayInputStream(oldData), 0, new ByteArrayInputStream(newData), editor, true);
+
+                 /*
+                 * Closes the file.
+                 */
+                editor.closeFile(filePath, checksum);
+              }
+            }
+
+            // close the space
+            editor.closeDir();
+         }
+
+         // close root dir
+         editor.closeDir();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            debug("error preparing commit on page ${pagename2}: " + e.getMessage());
+            return null;
+
+        } finally {
+           /*
+            * This is the final point in all editor handling. Only now all that new
+            * information previously described with the editor's methods is sent to
+            * the server for committing. As a result the server sends the new
+            * commit information.
+            */
+            try {
+              commitInfo = editor.closeEdit();  
+            } catch (Throwable e) {
+             e.printStackTrace();
+             debug("error calling closeEdit: " + e.getMessage());
+             return null;
+            }
+         }
+         return commitInfo;
+    }
+
+    public setFileContent(String space, String page, String language, String xml, String message) {
+        def createDir = (repository.checkPath(space, -1) != SVNNodeKind.DIR);
+        setFileContent(space, page, language, xml, message, createDir, true);
+    }
+
+    public setFileContent(String space, String page, String language, String xml, String message, boolean createDir) {
+        // get page
+        def filePath = space + "/" + page;
+        if (language!=null&amp;amp;&amp;amp;language!="")
+          filePath += "." + language;
+        filePath += ".xml"
+
+
+        def c = getFileContentAsString(space, page, language);
+        def changed = false;
+        if (c==null || !c.equals(xml))
+            changed = true;
+
+        if (changed) {
+          def editor = repository.getCommitEditor(message, null);
+          def commitInfo = null;
+
+          try {
+           if (c==null) {
+             // page does not exist we need to add it
+             debug("Ready to add file ${filePath} with createDir ${createDir}")
+             addFile(editor, space, filePath, xml.getBytes(), createDir, true, true)
+           } else {
+             // content is different we can commit
+             // page does not exist we need to add it
+             debug("Ready to update file ${filePath}")
+             modifyFile(editor, space, filePath, c.getBytes(), xml.getBytes())
+           }
+          } catch (Throwable e) {
+             e.printStackTrace();
+             debug("error preparing commit: " + e.getMessage());
+             return null;
+          } finally {
+           /*
+            * This is the final point in all editor handling. Only now all that new
+            * information previously described with the editor's methods is sent to
+            * the server for committing. As a result the server sends the new
+            * commit information.
+            */
+            try {
+              commitInfo = editor.closeEdit();  
+            } catch (Throwable e) {
+             e.printStackTrace();
+             debug("error calling closeEdit: " + e.getMessage());
+             return null;
+            }
+          }
+          return commitInfo;
+        } else {
+          // content is the same. do not commit
+          debug("content is the same. do not commit");
+          return null;
+        }
+    }
+
+    /*
+     * This method performs commiting an addition of a  directory  containing  a
+     * file.
+     */
+    private void addFile(ISVNEditor editor, String dirPath,
+            String filePath, byte[] data, boolean createDir, boolean closeDir, boolean closeRootDir) throws SVNException {
+        /*
+         * Always called first. Opens the current root directory. It  means  all
+         * modifications will be applied to this directory until  a  next  entry
+         * (located inside the root) is opened/added.
+         * 
+         * -1 - revision is HEAD (actually, for a comit  editor  this number  is 
+         * irrelevant)
+         */
+        editor.openRoot(-1);
+        /*
+         * Adds a new directory (in this  case - to the  root  directory  for 
+         * which the SVNRepository was  created). 
+         * Since this moment all changes will be applied to this new  directory.
+         * 
+         * dirPath is relative to the root directory.
+         * 
+         * copyFromPath (the 2nd parameter) is set to null and  copyFromRevision
+         * (the 3rd) parameter is set to  -1  since  the  directory is not added 
+         * with history (is not copied, in other words).
+         */
+         if (createDir) {      
+          editor.addDir(dirPath, null, -1);
+         } else {
+          editor.openDir(dirPath, -1);
+         }
+        /*
+         * Adds a new file to the just added  directory. The  file  path is also 
+         * defined as relative to the root directory.
+         *
+         * copyFromPath (the 2nd parameter) is set to null and  copyFromRevision
+         * (the 3rd parameter) is set to -1 since  the file is  not  added  with 
+         * history.
+         */
+        editor.addFile(filePath, null, -1);
+        /*
+         * The next steps are directed to applying delta to the  file  (that  is 
+         * the full contents of the file in this case).
+         */
+        editor.applyTextDelta(filePath, null);
+        /*
+         * Use delta generator utility class to generate and send delta
+         * 
+         * Note that you may use only 'target' data to generate delta when there is no 
+         * access to the 'base' (previous) version of the file. However, using 'base' 
+         * data will result in smaller network overhead.
+         * 
+         * SVNDeltaGenerator will call editor.textDeltaChunk(...) method for each generated 
+         * "diff window" and then editor.textDeltaEnd(...) in the end of delta transmission.  
+         * Number of diff windows depends on the file size. 
+         *  
+         */
+        SVNDeltaGenerator deltaGenerator = new SVNDeltaGenerator();
+        String checksum = deltaGenerator.sendDelta(filePath, new ByteArrayInputStream(data), editor, true);
+
+        /*
+         * Closes the new added file.
+         */
+        editor.closeFile(filePath, checksum);
+        /*
+         * Closes the new added directory.
+         */
+        if (closeDir)
+         editor.closeDir();
+
+        /*
+         * Closes the root directory.
+         */
+        if (closeRootDir)
+         editor.closeDir();
+    }
+
+    /*
+     * This method performs committing file modifications.
+     */
+    private void modifyFile(ISVNEditor editor, String dirPath,
+            String filePath, byte[] oldData, byte[] newData) throws SVNException {
+        /*
+         * Always called first. Opens the current root directory. It  means  all
+         * modifications will be applied to this directory until  a  next  entry
+         * (located inside the root) is opened/added.
+         * 
+         * -1 - revision is HEAD
+         */
+        editor.openRoot(-1);
+        /*
+         * Opens a next subdirectory (in this example program it's the directory
+         * added  in  the  last  commit).  Since this moment all changes will be
+         * applied to this directory.
+         * 
+         * dirPath is relative to the root directory.
+         * -1 - revision is HEAD
+         */
+        editor.openDir(dirPath, -1);
+        /*
+         * Opens the file added in the previous commit.
+         * 
+         * filePath is also defined as a relative path to the root directory.
+         */
+        editor.openFile(filePath, -1);
+        
+        /*
+         * The next steps are directed to applying and writing the file delta.
+         */
+        editor.applyTextDelta(filePath, null);
+        
+        /*
+         * Use delta generator utility class to generate and send delta
+         * 
+         * Note that you may use only 'target' data to generate delta when there is no 
+         * access to the 'base' (previous) version of the file. However, here we've got 'base' 
+         * data, what in case of larger files results in smaller network overhead.
+         * 
+         * SVNDeltaGenerator will call editor.textDeltaChunk(...) method for each generated 
+         * "diff window" and then editor.textDeltaEnd(...) in the end of delta transmission.  
+         * Number of diff windows depends on the file size. 
+         *  
+         */
+        SVNDeltaGenerator deltaGenerator = new SVNDeltaGenerator();
+        String checksum = deltaGenerator.sendDelta(filePath, new ByteArrayInputStream(oldData), 0, new ByteArrayInputStream(newData), editor, true);
+
+        /*
+         * Closes the file.
+         */
+        editor.closeFile(filePath, checksum);
+
+        /*
+         * Closes the directory.
+         */
+        editor.closeDir();
+
+        /*
+         * Closes the root directory.
+         */
+        editor.closeDir();
+    }
+
+    /*
+     * This method performs committing a deletion of a directory.
+     */
+    private void deleteDir(ISVNEditor editor, String dirPath) throws SVNException {
+        /*
+         * Always called first. Opens the current root directory. It  means  all
+         * modifications will be applied to this directory until  a  next  entry
+         * (located inside the root) is opened/added.
+         * 
+         * -1 - revision is HEAD
+         */
+        editor.openRoot(-1);
+        /*
+         * Deletes the subdirectory with all its contents.
+         * 
+         * dirPath is relative to the root directory.
+         */
+        editor.deleteEntry(dirPath, -1);
+        /*
+         * Closes the root directory.
+         */
+        editor.closeDir();
+    }
+
+
+    public getChangedPages(String spaces) {
+        def changedList = new ArrayList();
+        def sspaces = StringUtils.join(StringUtils.split(spaces," ,"), "','");
+        def sql = "select doc.fullName from XWikiDocument as doc where doc.space in ('${sspaces}')";
+        debug("Searching for ${sql}");
+        def list = xwiki.search(sql)
+        for (page in list) {
+           def pagedoc = xwiki.getDocument(page);
+           def wikicontent = pagedoc.getDocument().toFullXML(context.getContext())
+           def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), "")
+           if (!wikicontent.equals(svncontent))
+            changedList.add(page)
+        }
+        return changedList;
+    }
+
+
+    public getModifiedFiles(rev) {
+        return (getModifiedFiles("", rev, "10"));
+    }
+
+    public getModifiedFiles2(date, hour) {
+        return (getModifiedFiles("", date, hour));
+    }
+    
+    public getModifiedFiles2(dir, date, hour) {
+    }
+
+    public getModifiedFiles(dir, rev, max) {
+    }
+
+    public getRevisions(dir) {
+    }
+    
+    public listFiles(dir, recursive) {
+    }
+}
+
+&lt;/content&gt;&lt;/xwikidoc&gt;@
 
 
 35.1
