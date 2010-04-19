@@ -12,9 +12,9 @@
 <customClass></customClass>
 <contentAuthor>XWiki.LudovicDubost</contentAuthor>
 <creationDate>1271085764000</creationDate>
-<date>1271701642000</date>
-<contentUpdateDate>1271701642000</contentUpdateDate>
-<version>26.1</version>
+<date>1271701909000</date>
+<contentUpdateDate>1271701909000</contentUpdateDate>
+<version>27.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -164,20 +164,25 @@ $msg.get("svn.configsheet.commitmessage"):
 #end
 
 #if($request.action)
-svn.configsheet.debug:
+$msg.get("svn.configsheet.debug"):
 
 $svnr.getDebug()
 #end
 {{/velocity}}</content>
-<versions>head	26.1;
+<versions>head	27.1;
 access;
 symbols;
 locks; strict;
 comment	@# @;
 
 
+27.1
+date	2010.04.19.18.31.49;	author XWiki_2ELudovicDubost;	state full;
+branches;
+next	26.1;
+
 26.1
-date	2010.04.19.18.27.22;	author XWiki_2ELudovicDubost;	state full;
+date	2010.04.19.18.27.22;	author XWiki_2ELudovicDubost;	state diff;
 branches;
 next	25.1;
 
@@ -316,7 +321,7 @@ desc
 @@
 
 
-26.1
+27.1
 log
 @@
 text
@@ -334,9 +339,9 @@ text
 &lt;customClass&gt;&lt;/customClass&gt;
 &lt;contentAuthor&gt;XWiki.LudovicDubost&lt;/contentAuthor&gt;
 &lt;creationDate&gt;1271085764000&lt;/creationDate&gt;
-&lt;date&gt;1271701642000&lt;/date&gt;
-&lt;contentUpdateDate&gt;1271701642000&lt;/contentUpdateDate&gt;
-&lt;version&gt;26.1&lt;/version&gt;
+&lt;date&gt;1271701909000&lt;/date&gt;
+&lt;contentUpdateDate&gt;1271701909000&lt;/contentUpdateDate&gt;
+&lt;version&gt;27.1&lt;/version&gt;
 &lt;title&gt;&lt;/title&gt;
 &lt;template&gt;&lt;/template&gt;
 &lt;defaultTemplate&gt;&lt;/defaultTemplate&gt;
@@ -486,12 +491,27 @@ $msg.get("svn.configsheet.commitmessage"):
 #end
 
 #if($request.action)
-svn.configsheet.debug:
+$msg.get("svn.configsheet.debug"):
 
 $svnr.getDebug()
 #end
 {{/velocity}}&lt;/content&gt;
 &lt;/xwikidoc&gt;
+@
+
+
+26.1
+log
+@@
+text
+@d15 3
+a17 3
+&lt;date&gt;1271701642000&lt;/date&gt;
+&lt;contentUpdateDate&gt;1271701642000&lt;/contentUpdateDate&gt;
+&lt;version&gt;26.1&lt;/version&gt;
+d167 1
+a167 1
+svn.configsheet.debug:
 @
 
 
