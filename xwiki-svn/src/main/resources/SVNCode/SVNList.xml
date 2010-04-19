@@ -2,24 +2,24 @@
 
 <xwikidoc>
 <web>SVNCode</web>
-<name>Sample</name>
+<name>SVNList</name>
 <language></language>
 <defaultLanguage>en</defaultLanguage>
 <translation>0</translation>
 <parent></parent>
-<creator>XWiki.LudovicDubost</creator>
+<creator>XWiki.ludovic</creator>
 <author>XWiki.LudovicDubost</author>
 <customClass></customClass>
 <contentAuthor>XWiki.LudovicDubost</contentAuthor>
-<creationDate>1271699825000</creationDate>
-<date>1271699861000</date>
-<contentUpdateDate>1271699861000</contentUpdateDate>
-<version>2.1</version>
+<creationDate>1270894605000</creationDate>
+<date>1271084824000</date>
+<contentUpdateDate>1271084824000</contentUpdateDate>
+<version>1.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
-<comment></comment>
+<comment>Imported from XAR</comment>
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
@@ -49,29 +49,44 @@
 <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
 </tags>
 </class>
-<name>SVNCode.Sample</name>
+<name>SVNCode.SVNList</name>
 <number>0</number>
 <className>XWiki.TagClass</className>
-<guid>65f0a7b7-1455-49b4-9ba6-80e110b3f108</guid>
+<guid>5738f463-8fe7-475c-92ff-feb30b1662c5</guid>
 <property>
 <tags/>
 </property>
 </object>
-<content>test2</content>
-<versions>head	2.1;
+<content>{{velocity}}
+#set($svnr = $xwiki.parseGroovyFromPage("SVNCode.SVNGroovy"))
+#set($ok = $svnr.setXWiki($xwiki, $context))
+#set($ok = $svnr.setSVNConfig("SVNCode.SVNConfig"))
+#set($ok = $svnr.initRepository())
+#if($request.space)
+ #set($space = $request.space)
+#else
+ #set($space = "Main")
+#end
+
+#set($list = $!svnr.getChangedPages($space))
+#foreach($page in $list)
+* [[Commit page ${page}&gt;&gt;SVNCommit?page=${page}&amp;space=$!{space}]]
+#end
+
+DEBUG:
+
+$svnr.getDebug()
+{{/velocity}}
+
+</content><versions>head	1.1;
 access;
 symbols;
 locks; strict;
 comment	@# @;
 
 
-2.1
-date	2010.04.19.17.57.41;	author XWiki_2ELudovicDubost;	state full;
-branches;
-next	1.1;
-
 1.1
-date	2010.04.19.17.57.10;	author XWiki_2ELudovicDubost;	state diff;
+date	2010.04.12.15.07.04;	author XWiki_2ELudovicDubost;	state full;
 branches;
 next	;
 
@@ -80,32 +95,33 @@ desc
 @@
 
 
-2.1
+1.1
 log
-@@
+@Imported from XAR
+@
 text
 @&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
 &lt;xwikidoc&gt;
 &lt;web&gt;SVNCode&lt;/web&gt;
-&lt;name&gt;Sample&lt;/name&gt;
+&lt;name&gt;SVNList&lt;/name&gt;
 &lt;language&gt;&lt;/language&gt;
 &lt;defaultLanguage&gt;en&lt;/defaultLanguage&gt;
 &lt;translation&gt;0&lt;/translation&gt;
 &lt;parent&gt;&lt;/parent&gt;
-&lt;creator&gt;XWiki.LudovicDubost&lt;/creator&gt;
+&lt;creator&gt;XWiki.ludovic&lt;/creator&gt;
 &lt;author&gt;XWiki.LudovicDubost&lt;/author&gt;
 &lt;customClass&gt;&lt;/customClass&gt;
 &lt;contentAuthor&gt;XWiki.LudovicDubost&lt;/contentAuthor&gt;
-&lt;creationDate&gt;1271699825000&lt;/creationDate&gt;
-&lt;date&gt;1271699861000&lt;/date&gt;
-&lt;contentUpdateDate&gt;1271699861000&lt;/contentUpdateDate&gt;
-&lt;version&gt;2.1&lt;/version&gt;
+&lt;creationDate&gt;1270894605000&lt;/creationDate&gt;
+&lt;date&gt;1271084824000&lt;/date&gt;
+&lt;contentUpdateDate&gt;1271084824000&lt;/contentUpdateDate&gt;
+&lt;version&gt;1.1&lt;/version&gt;
 &lt;title&gt;&lt;/title&gt;
 &lt;template&gt;&lt;/template&gt;
 &lt;defaultTemplate&gt;&lt;/defaultTemplate&gt;
 &lt;validationScript&gt;&lt;/validationScript&gt;
-&lt;comment&gt;&lt;/comment&gt;
+&lt;comment&gt;Imported from XAR&lt;/comment&gt;
 &lt;minorEdit&gt;false&lt;/minorEdit&gt;
 &lt;syntaxId&gt;xwiki/2.0&lt;/syntaxId&gt;
 &lt;hidden&gt;false&lt;/hidden&gt;
@@ -135,30 +151,34 @@ text
 &lt;classType&gt;com.xpn.xwiki.objects.classes.StaticListClass&lt;/classType&gt;
 &lt;/tags&gt;
 &lt;/class&gt;
-&lt;name&gt;SVNCode.Sample&lt;/name&gt;
+&lt;name&gt;SVNCode.SVNList&lt;/name&gt;
 &lt;number&gt;0&lt;/number&gt;
 &lt;className&gt;XWiki.TagClass&lt;/className&gt;
-&lt;guid&gt;65f0a7b7-1455-49b4-9ba6-80e110b3f108&lt;/guid&gt;
+&lt;guid&gt;5738f463-8fe7-475c-92ff-feb30b1662c5&lt;/guid&gt;
 &lt;property&gt;
 &lt;tags/&gt;
 &lt;/property&gt;
 &lt;/object&gt;
-&lt;content&gt;test2&lt;/content&gt;
-&lt;/xwikidoc&gt;
-@
+&lt;content&gt;{{velocity}}
+#set($svnr = $xwiki.parseGroovyFromPage("SVNCode.SVNGroovy"))
+#set($ok = $svnr.setXWiki($xwiki, $context))
+#set($ok = $svnr.setSVNConfig("SVNCode.SVNConfig"))
+#set($ok = $svnr.initRepository())
+#if($request.space)
+ #set($space = $request.space)
+#else
+ #set($space = "Main")
+#end
 
+#set($list = $!svnr.getChangedPages($space))
+#foreach($page in $list)
+* [[Commit page ${page}&amp;gt;&amp;gt;SVNCommit?page=${page}&amp;amp;space=$!{space}]]
+#end
 
-1.1
-log
-@@
-text
-@d15 3
-a17 3
-&lt;date&gt;1271699830000&lt;/date&gt;
-&lt;contentUpdateDate&gt;1271699830000&lt;/contentUpdateDate&gt;
-&lt;version&gt;1.1&lt;/version&gt;
-d60 1
-a60 1
-&lt;content&gt;test&lt;/content&gt;
-@
+DEBUG:
+
+$svnr.getDebug()
+{{/velocity}}
+
+&lt;/content&gt;&lt;/xwikidoc&gt;@
 </versions></xwikidoc>
