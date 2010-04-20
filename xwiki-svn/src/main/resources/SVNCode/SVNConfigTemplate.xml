@@ -11,15 +11,15 @@
 <author>XWiki.LudovicDubost</author>
 <customClass></customClass>
 <contentAuthor>XWiki.LudovicDubost</contentAuthor>
-<creationDate>1271085764000</creationDate>
-<date>1271085906000</date>
-<contentUpdateDate>1271085906000</contentUpdateDate>
-<version>1.2</version>
+<creationDate>1271765542000</creationDate>
+<date>1271765542000</date>
+<contentUpdateDate>1271765542000</contentUpdateDate>
+<version>1.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
-<comment>Added object</comment>
+<comment>Updated class property name</comment>
 <minorEdit>true</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
@@ -33,16 +33,47 @@
 <defaultWeb></defaultWeb>
 <nameField></nameField>
 <validationScript></validationScript>
+<defaultdate>
+<customDisplay></customDisplay>
+<dateFormat>dd/MM/yyyy HH:mm:ss</dateFormat>
+<emptyIsToday>0</emptyIsToday>
+<name>defaultdate</name>
+<number>6</number>
+<picker>1</picker>
+<prettyName>defaultdate</prettyName>
+<size>20</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.DateClass</classType>
+</defaultdate>
 <defaultspace>
+<customDisplay></customDisplay>
 <name>defaultspace</name>
 <number>4</number>
+<picker>0</picker>
 <prettyName>defaultspace</prettyName>
 <size>30</size>
 <unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
 <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
 </defaultspace>
+<defaultuser>
+<customDisplay></customDisplay>
+<name>defaultuser</name>
+<number>7</number>
+<picker>0</picker>
+<prettyName>defaultuser</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultuser>
 <password>
 <algorithm></algorithm>
+<customDisplay></customDisplay>
 <name>password</name>
 <number>3</number>
 <picker>0</picker>
@@ -55,6 +86,7 @@
 <classType>com.xpn.xwiki.objects.classes.PasswordClass</classType>
 </password>
 <repository>
+<customDisplay></customDisplay>
 <name>repository</name>
 <number>1</number>
 <picker>0</picker>
@@ -65,7 +97,31 @@
 <validationRegExp></validationRegExp>
 <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
 </repository>
+<savedlist>
+<cache>0</cache>
+<classname>XWiki.SavedListClass</classname>
+<customDisplay></customDisplay>
+<displayType>input</displayType>
+<idField>doc.fullName</idField>
+<multiSelect>0</multiSelect>
+<name>savedlist</name>
+<number>5</number>
+<picker>0</picker>
+<prettyName>savedlist</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators></separators>
+<size>40</size>
+<sort>value</sort>
+<sql></sql>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<valueField>doc.title</valueField>
+<classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
+</savedlist>
 <username>
+<customDisplay></customDisplay>
 <name>username</name>
 <number>2</number>
 <picker>0</picker>
@@ -95,147 +151,4 @@
 </property>
 </object>
 <content>{{include document="SVNCode.SVNConfigSheet"/}}</content>
-<versions>head	1.2;
-access;
-symbols;
-locks; strict;
-comment	@# @;
-
-
-1.2
-date	2010.04.12.15.25.06;	author XWiki_2ELudovicDubost;	state full;
-branches;
-next	1.1;
-
-1.1
-date	2010.04.12.15.25.04;	author XWiki_2ELudovicDubost;	state diff;
-branches;
-next	;
-
-
-desc
-@@
-
-
-1.2
-log
-@Added object
-@
-text
-@&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-
-&lt;xwikidoc&gt;
-&lt;web&gt;SVNCode&lt;/web&gt;
-&lt;name&gt;SVNConfigTemplate&lt;/name&gt;
-&lt;language&gt;&lt;/language&gt;
-&lt;defaultLanguage&gt;en&lt;/defaultLanguage&gt;
-&lt;translation&gt;0&lt;/translation&gt;
-&lt;parent&gt;SVNCode.SVNConfigClass&lt;/parent&gt;
-&lt;creator&gt;XWiki.LudovicDubost&lt;/creator&gt;
-&lt;author&gt;XWiki.LudovicDubost&lt;/author&gt;
-&lt;customClass&gt;&lt;/customClass&gt;
-&lt;contentAuthor&gt;XWiki.LudovicDubost&lt;/contentAuthor&gt;
-&lt;creationDate&gt;1271085764000&lt;/creationDate&gt;
-&lt;date&gt;1271085906000&lt;/date&gt;
-&lt;contentUpdateDate&gt;1271085906000&lt;/contentUpdateDate&gt;
-&lt;version&gt;1.2&lt;/version&gt;
-&lt;title&gt;&lt;/title&gt;
-&lt;template&gt;&lt;/template&gt;
-&lt;defaultTemplate&gt;&lt;/defaultTemplate&gt;
-&lt;validationScript&gt;&lt;/validationScript&gt;
-&lt;comment&gt;Added object&lt;/comment&gt;
-&lt;minorEdit&gt;true&lt;/minorEdit&gt;
-&lt;syntaxId&gt;xwiki/2.0&lt;/syntaxId&gt;
-&lt;hidden&gt;false&lt;/hidden&gt;
-&lt;object&gt;
-&lt;class&gt;
-&lt;name&gt;SVNCode.SVNConfigClass&lt;/name&gt;
-&lt;customClass&gt;&lt;/customClass&gt;
-&lt;customMapping&gt;&lt;/customMapping&gt;
-&lt;defaultViewSheet&gt;&lt;/defaultViewSheet&gt;
-&lt;defaultEditSheet&gt;&lt;/defaultEditSheet&gt;
-&lt;defaultWeb&gt;&lt;/defaultWeb&gt;
-&lt;nameField&gt;&lt;/nameField&gt;
-&lt;validationScript&gt;&lt;/validationScript&gt;
-&lt;defaultspace&gt;
-&lt;name&gt;defaultspace&lt;/name&gt;
-&lt;number&gt;4&lt;/number&gt;
-&lt;prettyName&gt;defaultspace&lt;/prettyName&gt;
-&lt;size&gt;30&lt;/size&gt;
-&lt;unmodifiable&gt;0&lt;/unmodifiable&gt;
-&lt;classType&gt;com.xpn.xwiki.objects.classes.StringClass&lt;/classType&gt;
-&lt;/defaultspace&gt;
-&lt;password&gt;
-&lt;algorithm&gt;&lt;/algorithm&gt;
-&lt;name&gt;password&lt;/name&gt;
-&lt;number&gt;3&lt;/number&gt;
-&lt;picker&gt;0&lt;/picker&gt;
-&lt;prettyName&gt;password&lt;/prettyName&gt;
-&lt;size&gt;30&lt;/size&gt;
-&lt;storageType&gt;Clear&lt;/storageType&gt;
-&lt;unmodifiable&gt;0&lt;/unmodifiable&gt;
-&lt;validationMessage&gt;&lt;/validationMessage&gt;
-&lt;validationRegExp&gt;&lt;/validationRegExp&gt;
-&lt;classType&gt;com.xpn.xwiki.objects.classes.PasswordClass&lt;/classType&gt;
-&lt;/password&gt;
-&lt;repository&gt;
-&lt;name&gt;repository&lt;/name&gt;
-&lt;number&gt;1&lt;/number&gt;
-&lt;picker&gt;0&lt;/picker&gt;
-&lt;prettyName&gt;repository&lt;/prettyName&gt;
-&lt;size&gt;30&lt;/size&gt;
-&lt;unmodifiable&gt;0&lt;/unmodifiable&gt;
-&lt;validationMessage&gt;&lt;/validationMessage&gt;
-&lt;validationRegExp&gt;&lt;/validationRegExp&gt;
-&lt;classType&gt;com.xpn.xwiki.objects.classes.StringClass&lt;/classType&gt;
-&lt;/repository&gt;
-&lt;username&gt;
-&lt;name&gt;username&lt;/name&gt;
-&lt;number&gt;2&lt;/number&gt;
-&lt;picker&gt;0&lt;/picker&gt;
-&lt;prettyName&gt;username&lt;/prettyName&gt;
-&lt;size&gt;30&lt;/size&gt;
-&lt;unmodifiable&gt;0&lt;/unmodifiable&gt;
-&lt;validationMessage&gt;&lt;/validationMessage&gt;
-&lt;validationRegExp&gt;&lt;/validationRegExp&gt;
-&lt;classType&gt;com.xpn.xwiki.objects.classes.StringClass&lt;/classType&gt;
-&lt;/username&gt;
-&lt;/class&gt;
-&lt;name&gt;SVNCode.SVNConfigTemplate&lt;/name&gt;
-&lt;number&gt;0&lt;/number&gt;
-&lt;className&gt;SVNCode.SVNConfigClass&lt;/className&gt;
-&lt;guid&gt;391c9b04-5fa8-4612-8bf3-005c7a0d834d&lt;/guid&gt;
-&lt;property&gt;
-&lt;defaultspace&gt;&lt;/defaultspace&gt;
-&lt;/property&gt;
-&lt;property&gt;
-&lt;password&gt;&lt;/password&gt;
-&lt;/property&gt;
-&lt;property&gt;
-&lt;repository&gt;&lt;/repository&gt;
-&lt;/property&gt;
-&lt;property&gt;
-&lt;username&gt;&lt;/username&gt;
-&lt;/property&gt;
-&lt;/object&gt;
-&lt;content&gt;{{include document="SVNCode.SVNConfigSheet"/}}&lt;/content&gt;
-&lt;/xwikidoc&gt;
-@
-
-
-1.1
-log
-@@
-text
-@d15 3
-a17 3
-&lt;date&gt;1271085904000&lt;/date&gt;
-&lt;contentUpdateDate&gt;1271085904000&lt;/contentUpdateDate&gt;
-&lt;version&gt;1.1&lt;/version&gt;
-d22 2
-a23 2
-&lt;comment&gt;&lt;/comment&gt;
-&lt;minorEdit&gt;false&lt;/minorEdit&gt;
-d26 71
-@
-</versions></xwikidoc>
+</xwikidoc>
