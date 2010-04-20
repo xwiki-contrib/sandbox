@@ -19,7 +19,7 @@
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
-<comment>Imported from XAR</comment>
+<comment></comment>
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
@@ -771,7 +771,7 @@ public class SVNLogReader {
          debug("Searching for ${sql}");
          list = xwiki.search(sql)
         } else {
-         list = StringUtils.split(xwiki.getDocument(savedlist).getValue("list"), " |");
+         list = StringUtils.split(xwiki.getDocument(savedlist).getValue("list"), "|");
         }
 
         for (page in list) {
