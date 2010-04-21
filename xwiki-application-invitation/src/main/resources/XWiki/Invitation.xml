@@ -1,0 +1,875 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>XWiki</web>
+<name>Invitation</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1271083477000</creationDate>
+<date>1271850308000</date>
+<contentUpdateDate>1271850308000</contentUpdateDate>
+<version>1.1</version>
+<title>$msg.get('xe.invitation.heading')</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<class>
+<name>XWiki.Invitation</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<allowUsersOfOtherWikis>
+<defaultValue></defaultValue>
+<displayFormType>checkbox</displayFormType>
+<displayType></displayType>
+<name>allowUsersOfOtherWikis</name>
+<number>5</number>
+<prettyName>Allow users of other wikis to send mail</prettyName>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</allowUsersOfOtherWikis>
+<emailClass>
+<name>emailClass</name>
+<number>8</number>
+<picker>0</picker>
+<prettyName>Email message XClass</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</emailClass>
+<emailContainer>
+<name>emailContainer</name>
+<number>1</number>
+<picker>0</picker>
+<prettyName>Document containing email XObjects</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</emailContainer>
+<emailRegex>
+<name>emailRegex</name>
+<number>6</number>
+<picker>0</picker>
+<prettyName>Regular expression for validating email addresses</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</emailRegex>
+<from_address>
+<name>from_address</name>
+<number>2</number>
+<picker>0</picker>
+<prettyName>Admin email address (messages will list this as their from address)</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</from_address>
+<javamail_extra_props>
+<editor>---</editor>
+<name>javamail_extra_props</name>
+<number>13</number>
+<picker>0</picker>
+<prettyName>Javamail extra properties</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</javamail_extra_props>
+<messageBodyTemplate>
+<editor>---</editor>
+<name>messageBodyTemplate</name>
+<number>4</number>
+<picker>0</picker>
+<prettyName>Email message body template</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</messageBodyTemplate>
+<sendBcc>
+<defaultValue></defaultValue>
+<displayFormType>checkbox</displayFormType>
+<displayType></displayType>
+<name>sendBcc</name>
+<number>1</number>
+<prettyName>Always send mail to multiple addresses using blind carbon copy</prettyName>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</sendBcc>
+<smtp_port>
+<name>smtp_port</name>
+<number>12</number>
+<picker>0</picker>
+<prettyName>Smtp port</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</smtp_port>
+<smtp_server>
+<name>smtp_server</name>
+<number>11</number>
+<picker>0</picker>
+<prettyName>Smtp server host name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</smtp_server>
+<smtp_server_password>
+<name>smtp_server_password</name>
+<number>10</number>
+<picker>0</picker>
+<prettyName>Smtp password</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</smtp_server_password>
+<smtp_server_username>
+<name>smtp_server_username</name>
+<number>9</number>
+<picker>0</picker>
+<prettyName>Smtp username</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</smtp_server_username>
+<subjectLineTemplate>
+<name>subjectLineTemplate</name>
+<number>3</number>
+<picker>0</picker>
+<prettyName>Email subject line template</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</subjectLineTemplate>
+</class>
+<content>{{velocity}}
+#*
+ * Invitation Application
+ * This page is used for inviting a friend or group of friends to join and participate in the wiki.
+ * It stores and sends email so the email store should be checked from time to time to make sure the service
+ * is not being abused to send spam.
+ *
+ * This script depends on the following variables being set.
+ *
+ * $hasEdit (boolean) true if the current user has edit access on this document.
+ *
+ * This script is affected by the following documents:
+ *
+ * XWiki.InvitationMessages stores all of the mail message objects. If this does not exist it will be created.
+ *                          May be changed in the configuration.
+ *
+ * XWiki.InvitationMailClass the class for mail message objects. May be changed in the configuration.
+ *
+ * XWiki.InvitationConfig configuration for this code. Contains an XObject of the class defined in this document.
+ *
+ *###
+## Pull in the LiveValidation Javascript and CSS files.
+#macro(useLiveValidation)
+  $xwiki.get("jsfx").use('uicomponents/widgets/validation/livevalidation_prototype.js')
+  $xwiki.get("ssfx").use('uicomponents/widgets/validation/livevalidation.css')
+#end
+##
+## If no configuration specified then use hardcoded defaults.
+#set($emailRegex = '/^([^@\s]+)@((?:[-a-zA-Z0-9]+\.)+[a-zA-Z]{2,})$/')
+#set($emailClass = 'XWiki.InvitationMailClass')
+#set($emailContainerName = "XWiki.InvitationMessages")
+#set($subjectLineTemplate = '$xcontext.getUser().replaceAll("^[^\.]*.", "") has invited you to join '
+     + '$xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"): $!subjectLine')
+#set($messageBodyTemplate =
+       'You have received this mail because a user called $xcontext.getUser().replaceAll("^[^\.]*.", "") '
+     + 'has invited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1").' + "\n"
+     + 'This is their message to you:' + "\n\n"
+     + '$!messageBody' + "\n\n"
+     + '{{html}}&lt;a href="$doc.getExternalURL("view", "join=1&amp;messageid=$messageID")"&gt;'
+     + 'Click here to accept the invitation and join.&lt;/a&gt;{{/html}}' + "\n"
+     + 'If this message looks like abuse of our system, you may report it by clicking here.'
+     + '$doc.getExternalURL("view", "reportSpam=1&amp;messageID=$messageID")')
+##
+## Load some parameters from the configuration.
+#set($config = '')
+#set($configDoc = $xwiki.getDocumentAsAuthor("XWiki.InvitationConfig"))
+## If no configuration document exists, create one and save it.
+#if(!$configDoc.isNew())
+  #set($config = $configDoc.getObject($doc.getFullName()))
+#end
+#if("$!config" != '')
+  ## Load configuration from config XObject
+  #set($emailRegex = $config.getProperty('emailRegex').getValue())
+  #set($emailClass = $config.getProperty('emailClass').getValue())
+  #set($emailContainerName = $config.getProperty('emailContainer').getValue())
+  #set($subjectLineTemplate = $config.getProperty('subjectLineTemplate').getValue())
+  #set($messageBodyTemplate = $config.getProperty('messageBodyTemplate').getValue())
+  #if($config.getProperty('allowUsersOfOtherWikis').getValue() == '1')
+    #set($allowUsersOfOtherWikis = true)
+  #else
+    #set($allowUsersOfOtherWikis = false)
+  #end
+#end
+##
+## Load the document containing all of the invitation mail.
+## If this doesn't already exist, it's created.
+#set($emailContainer = $xwiki.getDocumentAsAuthor($emailContainerName))
+#if($emailContainer.isNew())
+  #set($discard = $emailContainer.setContent('{{velocity}}{{info}}$msg.get("xe.invitation.emailContainerInfo"){{/info}}{{/velocity}}'))
+  #disallowViewForAll($emailContainer)
+#end
+##
+## Get the list of email addresses to send to.
+#set($recipientString = $escapetool.html($request.get('recipients')))
+#if($hasEdit)
+  #set($recipients = $recipientString.split(' '))
+#else
+  ## If the user can't edit this page, we won't let them sent to multiple addresses.
+  #set($recipients = [$recipientString])
+#end
+##
+## get the user supplied subject and message content.
+#set($subjectLine = $request.get('subjectLine'))
+#set($messageBody = $request.get('messageBody'))
+##
+##---------------------------------------------------------------------
+## Decide what we should do.
+##---------------------------------------------------------------------
+##
+## This is a hack to get around the fact that the administration application still includeForm's this document
+## when we want to configure the "Invitation" section.
+#if($xcontext.getAction() == 'view')
+  ##
+  ## Joining and reporting spam is available to non-members
+  #if("$!request.get('join')" != '')
+
+    ## A recipient of a message now wants to join the wiki.
+    ##
+    $response.sendRedirect($xwiki.getURL('XWiki.Register', 'register'))
+  #elseif($request.get('reportSpam') == '1' &amp;&amp; "$!request.get('messageID')" != '')
+    ## A user (hopefully the email recipient) is reporting the email message as spam.
+    ##
+    #reportSpam($!request.get('messageID'), $emailClass)
+  #elseif($xcontext.getUser() == 'XWiki.XWikiGuest')
+    ## All functions below are members only.
+    ##
+    $msg.get('xe.invitation.onlyMembersCanSendMail')
+  #elseif(!$hasEdit &amp;&amp; "#isUserReportedSpammer($emailClass, $emailContainer)" != 'false')
+    ## The current user has been reported as a spammer, they are not allowed to send more mail until
+    ## the situation has been investigated.
+
+    ## A message which you sent was reported as spam and your privilege to send mail has suspended...
+    $msg.get('xe.invitation.userIsReportedSpammer')
+    ##
+  #elseif(!$hasEdit
+          &amp;&amp; !$allowUsersOfOtherWikis
+          &amp;&amp; $doc.getWiki() != $xwiki.getDocument($xcontext.getUser()).getWiki())
+    ## Users of other subwikis are not allowed to send mail.
+    $msg.get('xe.invitation.onlyMembersCanSendMail')
+    $msg.get('xe.invitation.youAreAMemberOfOtherWiki', [$xwiki.getDocument($xcontext.getUser()).getWiki()])
+  #elseif("$!request.get('sendMail')" != '')
+    ## We are being asked to send a message.
+    ##
+    #set($mail = '')
+    #generateMailFromTemplate($subjectLineTemplate, $messageBodyTemplate, $emailClass,
+                              $recipients, $emailRegex, $subjectLine, $messageBody, $mail, $emailContainer)
+    #sendMail($mail, $config, $emailContainer)
+  #elseif($request.get('handleSpam') == '1' &amp;&amp; "$!request.get('messageID')" != '' &amp;&amp; $hasEdit)
+    ## An admin is claiming that a spam situation has been handled/investigated.
+    ##
+    #handleSpam($!request.get('messageID'), $emailClass)
+    #displayOldMessage($request.get('messageID'), $emailClass)
+  #elseif($request.get('viewMessage') == '1' &amp;&amp; $hasEdit)
+    ## An administrator wants to look at old email that was sent.
+    ##
+    #if("$!request.get('messageID')" != '')
+      ## The admin wants to view a single messsage
+      #displayOldMessage($request.get('messageID'), $emailClass, $emailContainer)
+    #else
+      ## The admin wants to see a list of messages
+      #displayAllOldMessages($emailClass, $emailContainer)
+    #end
+  #else
+    ## The user wants to write a message.
+    #if($request.get('preview'))
+      ## The user wants to preview a message they wrote.
+      #set($mail = "")
+      #generateMailFromTemplate($subjectLineTemplate, $messageBodyTemplate, $emailClass,
+                                $recipients, $emailRegex, $subjectLine, $messageBody, $mail, $emailContainer)
+      #displayMessage($mail, $recipients, $emailRegex)
+    #end
+    #displayForm($recipientString, $emailRegex, $subjectLine, $messageBody, $hasEdit)
+  #end
+  #if($hasEdit)
+    #displayAdministrativeTools()
+  #end
+  #if("$!request.getQueryString()" != '')
+    ## Return to the main page
+    [[$msg.get('xe.invitation.returnToMainPage')&gt;&gt;$doc.getFullName()]]
+  #end
+#end
+##
+##---------------------------------------------------------------------
+## The macros (Nothing below this point is run directly)
+##---------------------------------------------------------------------
+##
+#*
+ * Send an email message.
+ *
+ * $mail (XObject) an invitation email message.
+ *
+ * $config (XObject) configuration for the inviter.
+ *
+ * $emailContainer (Document) the document contining the mail message.
+ *###
+#macro(sendMail, $mail, $config, $emailContainer)
+  ##
+  ## Get mail sender plugin.
+  #set($sender = $xwiki.get('mailsender'))
+  ##
+  ## If parameters are set in the local config, use them, otherwise use global defaults.
+  #set($senderConfig = $sender.createMailConfiguration($xwiki))
+  #if("$!config.getProperty('smtp_server').getValue()" != '')
+    $senderConfig.setHost($config.getProperty('smtp_server').getValue())##
+  #end
+  #if("$!config.getProperty('smtp_port').getValue()" != '')
+    $senderConfig.setPort($mathtool.toInteger($config.getProperty('smtp_port').getValue()))##
+  #end
+  #if("$!config.getProperty('smtp_server_username').getValue()" != '')
+    $senderConfig.setSmtpUsername($config.getProperty('smtp_server_username').getValue())##
+  #end
+  #if("$!config.getProperty('smtp_server_password').getValue()" != '')
+    $senderConfig.setSmtpPassword($config.getProperty('smtp_server_password').getValue())##
+  #end
+  #if("$!config.getProperty('javamail_extra_props').getValue()" != '')
+    $senderConfig.setExtraProperties($config.getProperty('javamail_extra_props').getValue())##
+  #end
+  ##
+  #set($message = $sender.createMail())
+  ##
+  #if("$!config.getProperty('from_address').getValue()" != '')
+    $message.setFrom($config.getProperty('from_address').getValue())##
+  #end
+  ##
+  ## Set recipients
+  #set($recipients = $mail.getProperty('recipients').getValue())##
+  ## If multiple recipients and sendBcc is true
+  ## then we send the message to ourselves with all recipients in bcc field.
+  #if($recipients.indexOf(',') != -1 &amp;&amp; "$!config.getProperty('sendBcc').getValue()" == '1')##
+    ## Send the message back to ourselves and bcc to all recipients.
+    $message.setTo($config.getProperty('from_address').getValue())##
+    $message.setBcc($recipients)##
+  #else
+    $message.setTo($recipients)##
+  #end
+  ##
+  ## Set the subject line and message body.
+  $message.setSubject($mail.getProperty('subjectLine').getValue())##
+  ##
+  ## If text part is not set then we get an NPE when trying to craft a multipart message.
+  $message.setTextPart('')##
+  $message.setHtmlPart($doc.getRenderedContent($mail.getProperty('messageBody').getValue(),
+                                               $doc.getSyntax().toIdString()))##
+  ##
+  ## Send the message
+  #if("$sender.sendMail($message, $senderConfig)" != 0)
+    ## An error has occured while sending the message.
+    $msg.get('xe.invitation.sendMail.errorWhileSending')
+  #else
+    ## Comment = "Added Email Message."
+    $emailContainer.saveAsAuthor($msg.get('xe.invitation.sendMail.addMessageSaveComment'))
+    ## Your message has been sent.
+    $msg.get('xe.invitation.sendMail.success')
+
+    ## Compose another message
+    [[$msg.get('xe.invitation.sendMail.composeAnotherMessageLink')&gt;&gt;$doc.getFullName()]]
+  #end
+#end
+##
+#*
+ * Display a perticular previously sent message.
+ *
+ * $messageID (String) the unique identifier for this message.
+ *
+ * $emailClass (String) the name of the XClass representing email messages.
+ *
+ * $emailContainer (Document) the document to get the message from.
+ *###
+#macro(displayOldMessage, $messageID, $emailClass, $emailContainer)
+
+  ## Inspect sent message
+  == $msg.get('xe.invitation.displayOldMessage.heading') ==
+  #set($mail = '')
+  #messageForID($messageID, $emailClass, $mail, $emailContainer)
+  #if($mail == '')
+    ## No message by this id was found.
+    $msg.get('xe.invitation.displayOldMessage.noMessageFound')
+  #else
+    #set($reportedAsSpam = $mail.getProperty('reportedAsSpam').getValue())
+    #set($handledBy = $mail.getProperty('handledBy').getValue())
+    #if("$!reportedAsSpam" != '')
+
+      #if("$!handledBy" != '')
+        {{info}}
+          ## Reported as spam - Investigated by [[$handledBy]]
+          $msg.get('xe.invitation.displayOldMessage.reportedAsSpam') - ##
+          $msg.get('xe.invitation.displayOldMessage.investigatedBy', [$handledBy])
+        {{/info}}
+      #else
+        {{warning}}
+          ## Reported as spam - Waiting to be investigated
+          $msg.get('xe.invitation.displayOldMessage.reportedAsSpam') - ##
+          $msg.get('xe.invitation.displayOldMessage.waitingToBeInvestigated')
+        {{/warning}}
+      #end
+
+    #end
+    ## View Message
+    === $msg.get('xe.invitation.displayOldMessage.viewMessage') ===
+    ## Sent by:
+    $msg.get('xe.invitation.displayOldMessage.sentBy') [[$mail.getProperty('sendingUser').getValue()]]
+
+    {{code language="none"}}
+    #displayMessage($mail)
+    {{/code}}
+
+    #if("$!reportedAsSpam" != '' &amp;&amp; "$!handledBy" == '')
+      {{html}}
+       &lt;form action="$doc.getURL()" method="post"&gt;
+        &lt;input type="hidden" name="messageID" value="$messageID" /&gt;
+        &lt;input type="hidden" name="handleSpam" value="1" /&gt;
+        ## Mark this message as investigated.
+        &lt;input type="submit" class="button" value="$msg.get('xe.invitation.displayOldMessage.markThisMessageAsInvestigated')" /&gt;
+       &lt;/form&gt;
+      {{/html}}
+
+    #end
+  #end
+#end
+##
+#*
+ * Display a table of all sent messages.
+ *
+ * $emailClass (String) the name of the XClass representing email messages.
+ *
+ * $emailContainer (Document) the Document to look in for mail objects.
+ *###
+#macro(displayAllOldMessages, $emailClass, $emailContainer)
+  ## View messages sent by users
+  = $msg.get('xe.invitation.displayAllOldMessages.viewMessagesSentByUsers') =
+  ##
+  |=$msg.get('xe.invitation.displayAllOldMessages.reported')##
+  |=$msg.get('xe.invitation.displayAllOldMessages.handledBy')##
+  |=$msg.get('xe.invitation.displayAllOldMessages.sender')##
+  |=$msg.get('xe.invitation.displayAllOldMessages.subject')
+  ##
+  #foreach($obj in $emailContainer.getObjects($emailClass))
+    #if($obj.getProperty('reportedAsSpam').getValue() == '1')
+      |$msg.get('xe.invitation.displayAllOldMessages.reported').toUpperCase()##
+      #if("$!obj.getProperty('handledBy').getValue()" == '')
+        |(%style="background:red"%)$msg.get('xe.invitation.displayAllOldMessages.waiting').toUpperCase()(%%)##
+      #else
+        |$obj.getProperty('handledBy').getValue()##
+      #end
+    #else
+      |$msg.get('xe.invitation.displayAllOldMessages.reported.no')##
+      |$msg.get('xe.invitation.displayAllOldMessages.handledBy.notApplicable')##
+    #end
+    |[[$obj.getProperty('sendingUser').getValue()]]##
+    |[[$obj.getProperty('subjectLine').getValue()&gt;&gt;$doc.getFullName()?##
+       viewMessage=1&amp;messageID=$obj.getProperty('messageID').getValue()]]
+  #end
+#end
+##
+#*
+ * Report a message as spam.
+ *
+ * $messageID (String) a unique number identifying the message. This also serves as a hash to prevent people
+ *                     blindly reporting random id numbers.
+ *
+ * $emailClass (String) the name of a document containing an XClass for an email.
+ *
+ * $emailContainer (Document) the document to look in for mail objects.
+ *###
+#macro(reportSpam, $messageID, $emailClass, $emailContainer)
+  ## Report Abuse
+  == $msg.get('xe.invitation.reportSpam.heading') ==
+  #set($spamMessage = '')
+  #messageForID($messageID, $emailClass, $spamMessage, $emailContainer)
+  #if($spamMessage == '')
+    ## No message found by that id.
+    $msg.get('xe.invitation.reportSpam.noMessageFound')
+  #else
+    $spamMessage.set('reportedAsSpam', '1')
+    $spamMessage.set('handledBy', '')
+    $emailContainer.saveAsAuthor($msg.get('xe.invitation.reportSpam.reportSaveComment'))
+    ## Your report has been logged, sorry for the inconvienence.
+    $msg.get('xe.invitation.reportSpam.success')
+  #end
+#end
+##
+#*
+ * Handle a spam incident. The admin who "handles the incident" puts their name on the spam message
+ * to say that they have investigated the situation and rectified the problem.
+ *
+ * $messageID (String) a unique number identifying the message.
+ *
+ * $emailClass (String) the name of a document containing an XClass for an email.
+ *
+ * $emailContainer (Document) the document to look in for mail objects.
+ *###
+#macro(handleSpam, $messageID, $emailClass, $emailContainer)
+  #set($spamMessage = '')
+  #messageForID($messageID, $emailClass, $spamMessage, $emailContainer)
+  #if($spamMessage == '')
+    ## No message found by that id.
+    $msg.get('xe.invitation.handleSpam.noMessageFound')
+  #else
+    $spamMessage.set('handledBy', $xcontext.getUser())
+    $emailContainer.saveAsAuthor($msg.get('xe.invitation.handleSpam.reportHandledSaveComment'))
+  #end
+#end
+##
+#*
+ * Get a message based on it's ID number. This macro assumes that the email XObject is attached to $doc.
+ *
+ * $messageID (String) the number which should match the ID of a message.
+ *
+ * $emailClass (String) the document name of a XClass for email XObjects.
+ *
+ * $mailOut (reference) the reference which will be pointed to an XObject representing the email or "" if no
+ *                      message by the given ID.
+ *
+ * $emailContainer (Document) the Document to get the message from.
+ *###
+#macro(messageForID, $messageID, $emailClass, $mailOut, $emailContainer)
+  #set($objs = $emailContainer.getObjects($emailClass))
+  #foreach($obj in $objs)
+    #if($obj.getProperty('messageID').getValue() == $messageID)
+      #set($mailOut = $obj)
+    #end
+  #end
+#end
+##
+#*
+ * Check the format of an email address against a regular expression.
+ *
+ * $subjectLineTemplate (String) This will be evaluated as velocity and placed in the email subject line.
+ *                               You may refer to $messageID and $subjectLine in the code.
+ *
+ * $messageBodyTemplate (String) This will be evaluated as velocity and placed in the email message body.
+ *                               You may refer to $messageID, $messageBody, and $messageBodyEscaped (which
+ *                               is the user supplied message but html escaped) You may also use html code
+ *                               in the template.
+ *
+ * $emailClass (String) The document name of the XClass representing email messages.
+ *
+ * $recipients (List&lt;String&gt;) Email addresses to sen this message to.
+ *
+ * $emailRegex (String) The regular expression to validate the email addresses against. Undefined behavior will result
+ *                      from an invalid expression.
+ *
+ * $subjectLine (String) The message subject. This can be modified or ignored by the template.
+ *
+ * $messageBody (String) The message content. This can be modified or ignored by the template.
+ *
+ * $mail (reference) This reference will be set to an XObject which will represent this email message.
+ *
+ * $emailContainer (Document) This document is where the mail object will be stored for later review by admins.
+ *###
+#macro(generateMailFromTemplate, $subjectLineTemplate, $messageBodyTemplate, $emailClass, $recipients, $emailRegex, 
+                                 $subjectLine, $messageBody, $mail, $emailContainer)
+  #set($mail = $emailContainer.newObject($emailClass))
+  $mail.set('sendingUser', $context.getUser())##
+  ## Set the message id to a random number string, set it to $messageID variable so it can be used by the template.
+  #set($messageID = "$mathtool.getRandom().toString().replaceAll('\.','')##
+                     $mathtool.getRandom().toString().replaceAll('\.','')##
+                     $mathtool.getRandom().toString().replaceAll('\.','')")
+  $mail.set('messageID', $messageID)##
+  #set($sendTo = '')
+  #validateAddressFormat($recipients, $emailRegex, $sendTo)
+  #if($sendTo != '')
+    #foreach($address in $sendTo)
+      #set($toString = "$!toString, $address")
+    #end
+    #if($toString.length() &gt; 0)
+      #set($toString = $toString.substring(1))
+    #end
+    $mail.set('recipients', $toString)##
+  #end
+  ## Generate the message from the template - html in the subject line is ignored by the mail client.
+  $mail.set('subjectLine', "#evaluate($subjectLineTemplate)")##
+  ## escape the message body because the template can have html but the input cannot.
+  #set($messageBodyEscaped = $!escapetool.html($!messageBody))
+  $mail.set('messageBody', "#evaluate($messageBodyTemplate)")##
+#end
+##
+#*
+ * Check the format of an email address against a regular expression.
+ *
+ * $allAddresses (List&lt;String&gt;) The list of addresses to validate.
+ *
+ * $emailRegex (String) The regular expression to validate the email addresses agains. Undefined behavior will result
+ *                      from an invalid expression.
+ *
+ * $validAddresses (reference) A reference which will be pointed to a list of email addresses which are valid.
+ *
+ * $invalidAddresses (reference) A reference which will be pointed to a list of email addresses which are invalid.
+ *###
+#macro(validateAddressFormat, $allAddresses, $emailRegex, $validAddresses, $invalidAddresses)
+  #set($validAddresses = [])
+  #set($invalidAddresses = [])
+  #foreach($address in $allAddresses)
+    #if($xcontext.getUtil().match($emailRegex, $address))
+      #set($discard = $validAddresses.add($address))
+    #else
+      #set($discard = $invalidAddresses.add($address))      
+    #end
+  #end
+#end
+##
+#*
+ * Display a message for the sender (preview) or for the admin (review sent messages)
+ *
+ * $mail (XObject representing email message) the message to view
+ *
+ * $recipients (List&lt;String&gt;) (Optional) the list of email addresses to override the list provided by $mail
+ *                                       used for preview because createMailFromTemplate will exclude addresses
+ *                                       which are invalid and we want to show the invalid addresses to the
+ *                                       user to tell them that they need to correct them.
+ *
+ * $emailRegex (String) (Optional) the regular expression for an email message. Required if you wish to override
+ *                                 the recipients list by specifying $recipients. An invalid regular expression
+ *                                 will lead to undefined results.
+ *###
+#macro(displayMessage, $mail, $recipients, $emailRegex)
+  ## get the lists of valid and invalid email addresses.
+  #set($invalidAddresses = [])
+  #if("$!recipients" == '' || "$!emailRegex" == '')
+    ## No override, use values from the message.
+    #set($sendTo = $mail.getProperty('recipients').getValue().split('|'))
+    ## We assume that all addresses are valid and will leave $invalidAddresses empty.
+  #else
+    #set($sendTo = [])
+    #validateAddressFormat($recipients, $emailRegex, $sendTo, $invalidAddresses)
+  #end
+  ## Print the email addresses to be sent to.
+  ## To:
+  **$msg.get('xe.invitation.displayMessage.toLabel')** ##
+  #foreach($recipient in $recipients)
+    #if($invalidAddresses.contains($recipient))
+      (%style="background:red"%)$recipient(%%) ##
+    #else
+      $recipient ##
+    #end
+  #end
+  ## Tell the user that some of the email addresses are invalid.
+  #if($invalidAddresses.size() &gt; 0)
+    #if($recipients.size() == 1)
+      ## The email address given is invalid and will not be sent to.
+      $msg.get('xe.invitation.displayMessage.theAddressIsInvalid')
+    #else
+      #if($invalidAddresses.size() &gt; 1)
+        $msg.get('xe.invitation.displayMessage.someAddressesAreInvalid', [$invalidAddresses.size()])
+      #else
+        $msg.get('xe.invitation.displayMessage.anAddressesIsInvalid')
+      #end
+    #end
+  #end
+
+  ## Subject:
+  **$msg.get('xe.invitation.displayMessage.subjectLabel')** ##
+  $mail.getProperty('subjectLine').getValue()
+
+  ## Message:
+  **$msg.get('xe.invitation.displayMessage.contentLabel')**
+  $mail.getProperty('messageBody').getValue()
+#end
+##
+#*
+ * Display a form for typing up an invitation email.
+ *
+ * $recipientString (String) What should be filled in to the field for recipients.
+ *
+ * $emailRegex (String) Regular expression to validate email address against (If using LiveValidation.)
+ *
+ * $subjectLine (String) What should be put in the subject line by default.
+ *
+ * $messageBody (String) What should be put in the content of the message by default.
+ *
+ * $hasEdit (boolean) True if the current user has permission to edit this page.
+ *                    If so then they can send to multiple addresses at once.
+ *###
+#macro(displayForm, $recipientString, $emailRegex, $subjectLine, $messageBody, $hasEdit)
+  #set($hide = ' class="hidden"')
+  ## Show a form where the user can create their message.
+  #if($request.get('preview'))
+    #set($hideForm = $hide)
+  #else
+    #set($hideBackToEdit = $hide)
+    #set($hideSendMail = $hide)
+  #end
+  {{html clean="false" wiki="false"}}&lt;/p&gt;
+  &lt;form action="$doc.getURL('view')" method="post"&gt;
+   &lt;div$!hideForm&gt;
+    &lt;dl&gt;
+     ## Who you are inviting:
+     &lt;dt&gt;&lt;label for="recipients"&gt;$msg.get('xe.invitation.displayForm.recipientsPrompt')&lt;/label&gt;&lt;/dt&gt;
+     ## If the user has edit access on this document, then we should allow them to send to multiple email addresses.
+     #if($hasEdit)
+       &lt;dd&gt;
+        &lt;textarea cols="75" name="recipients" rows="3" id="recipients"&gt;##
+         $!recipientString##
+        &lt;/textarea&gt;
+       &lt;/dd&gt;
+     #else
+       &lt;dd&gt;&lt;input type="text" size="54" name="recipients" id="recipients" value="$!recipientString" /&gt;&lt;/dd&gt;
+       #emailLiveValidationJs($emailRegex, true)
+     #end
+     ## Subject line:
+     &lt;dt&gt;&lt;label for="subjectLine"&gt;$msg.get('xe.invitation.displayForm.subjectLinePrompt')&lt;/label&gt;&lt;/dt&gt;
+     &lt;dd&gt;
+      &lt;input type="text" size="54" name="subjectLine" id="subjectLine" value="$!escapetool.html($!subjectLine)" /&gt;
+     &lt;/dd&gt;
+     ## Invitation message:
+     &lt;dt&gt;&lt;label for="messageBody"&gt;$msg.get('xe.invitation.displayForm.messagePrompt')&lt;/label&gt;&lt;/dt&gt;
+     &lt;dd&gt;
+      &lt;textarea cols="75" name="messageBody" rows="10" id="messageBody"&gt;##
+       $!escapetool.html($!messageBody)##
+      &lt;/textarea&gt;
+     &lt;/dd&gt;
+    &lt;/dl&gt;
+    &lt;span class="buttonwrapper"&gt;
+     ## Preview
+     &lt;input type="submit" class="button" name="preview" value="$msg.get('xe.invitation.displayForm.preview')" /&gt;
+    &lt;/span&gt;
+   &lt;/div&gt;
+   &lt;span$!hideBackToEdit&gt;
+    &lt;span class="buttonwrapper"&gt;
+     ## Back To Edit
+     &lt;input type="submit" class="button" name="backToEdit" value="$msg.get('xe.invitation.displayForm.backToEdit')" /&gt;
+    &lt;/span&gt;
+   &lt;/span&gt;
+   &lt;span$!hideSendMail&gt;
+    &lt;span class="buttonwrapper"&gt;
+     ## Send Mail
+     &lt;input type="submit" class="button" name="sendMail" value="$msg.get('xe.invitation.displayForm.sendMail')" /&gt;
+    &lt;/span&gt;
+   &lt;/span&gt;
+  &lt;/form&gt;
+  &lt;p&gt;{{/html}}
+#end
+##
+#*
+ * Create a LiveValidation Javascript snippet to validate an email address.
+ * Only works when the user is limited to a single address.
+ *
+ * $regex (String) the regular expression to validate the email address against.
+ *
+ * $inHtmlMacro (boolean) if this macro is being invoked inside of an html macro then use true.
+ *###
+#macro(emailLiveValidationJs $regex, $inHtmlMacro)
+  #useLiveValidation()
+  #if(!$inHtmlMacro)
+    {{html}}
+  #end
+  &lt;script&gt;/* &lt;!-- */
+    Event.observe(document, 'dom:loaded', function() {
+      var emailValidator = new LiveValidation("recipients", {validMessage:"$msg.get('xe.invitation.platform.validation.valid')", wait:500});
+      emailValidator.add( Validate.Presence, {failureMessage:"$msg.get('xe.invitation.platform.validation.fieldMandatory')"});
+      emailValidator.add( Validate.Format, {pattern: $regex,
+                                             failureMessage:"$msg.get('xe.invitation.platform.validation.invalidEmailAddress')"});
+    });
+  // --&gt;&lt;/script&gt;
+  #if(!$inHtmlMacro)
+    {{/html}}
+  #end
+#end
+##
+#*
+ * Display some tools for users who have edit right on this page.
+ * Displays link to the administration application where this page can be configured and also a link to view the
+ * list of messages already sent.
+ *###
+#macro(displayAdministrativeTools)
+  ## Administrative Tools
+  == $msg.get('xe.invitation.adminTools.heading') ==
+  * {{html}}&lt;a href="$xwiki.getURL('XWikiPreferences', 'admin', 'admin=globaladmin&amp;section=Invitation')"&gt;##
+      ## Click here to configure the friend inviter
+      $msg.get('xe.invitation.adminTools.configureLink')##
+    &lt;/a&gt;{{/html}}
+  ## Click here see the list of already sent mail.
+  * [[$msg.get('xe.invitation.adminTools.displayAllOldMessagesLink')&gt;&gt;$doc.getFullName()?viewMessage=1]]
+#end
+##
+#*
+ * Has mail sent by the current user been reported as spam?
+ * will return 'false' if not otherwise will return 'true'
+ * if a message was reported as spam but an admin has marked the situation
+ * as handled then this macro will return 'false'
+ *
+ * $emailClass (String) the name of the document containing the XClass that represents email.
+ *
+ * $emailContainer (Document) the document is where the mail objects are stored.
+ *###
+#macro(isUserReportedSpammer, $emailClass, $emailContainer)
+  #set($out = 'false')
+  #foreach($message in $emailContainer.getObjects($emailClass))
+     #if($message.getProperty('sendingUser').getValue() == $xcontext.getUser()
+          &amp;&amp; $message.getProperty('reportedAsSpam').getValue() != '0'
+          &amp;&amp; $message.getProperty('handledBy').getValue() == '')
+     ##
+       #set($out = 'true')
+     #end
+  #end
+  $out##
+#end
+##
+#*
+ * disallowViewForAll
+ * Block view access for XWikiAllGroup and XWikiGuest.
+ *
+ * $document Document to configure right in.
+ *###
+#macro(disallowViewForAll, $document)
+  #set($rightObj = $document.newObject('XWiki.XWikiRights'))
+  #set($discard = $rightObj.set('groups', 'XWiki.XWikiAllGroup'))
+  #set($discard = $rightObj.set('users', 'XWiki.XWikiGuest'))
+  #set($discard = $rightObj.set('levels', 'view'))
+  #set($discard = $rightObj.set('allow', '0'))
+#end
+{{/velocity}}</content></xwikidoc>
