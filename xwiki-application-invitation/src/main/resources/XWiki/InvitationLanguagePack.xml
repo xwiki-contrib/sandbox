@@ -89,13 +89,13 @@ platform.validation.invalidEmailAddress=Invalid email address.
 #----------------------------------------------------------------------
 
 # XWiki.InvitationMail (Invitation Application) Email XObject
-XWiki.InvitationMail_messageID=Email message identifier
-XWiki.InvitationMail_recipients=Email addresses to whom this message was sent
-XWiki.InvitationMail_sendingUser=User who sent the message
-XWiki.InvitationMail_subjectLine=Subject line
-XWiki.InvitationMail_messageBody=Message content
-XWiki.InvitationMail_reportedAsSpam=Was this message reported as spam
-XWiki.InvitationMail_handledBy=Spam report investigated by
+XWiki.InvitationMailClass_messageID=Email message identifier
+XWiki.InvitationMailClass_recipients=Email addresses to whom this message was sent
+XWiki.InvitationMailClass_sendingUser=User who sent the message
+XWiki.InvitationMailClass_subjectLine=Subject line
+XWiki.InvitationMailClass_messageBody=Message content
+XWiki.InvitationMailClass_reportedAsSpam=Was this message reported as spam
+XWiki.InvitationMailClass_handledBy=Spam report investigated by
 
 # XWiki.Invitation (Invitation application) Configuration
 XWiki.Invitation_from_address=Admin email address (messages will list this as their from address)
