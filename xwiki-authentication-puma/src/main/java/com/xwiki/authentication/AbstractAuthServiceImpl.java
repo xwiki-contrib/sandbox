@@ -143,9 +143,11 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
             // TODO: support more than just string
             String valueStr = convertValueToString(userProfile, key, value);
 
-            String objValue = userObj.getStringValue(key);
-            if (objValue == null || !objValue.equals(value)) {
-                map.put(key, valueStr);
+            if (valueStr != null) {
+                String objValue = userObj.getStringValue(key);
+                if (objValue == null || !objValue.equals(value)) {
+                    map.put(key, valueStr);
+                }
             }
         }
 
@@ -172,7 +174,11 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
             Object value = entry.getValue();
 
             // TODO: support more than just string
-            map.put(key, convertValueToString(userProfile, key, value));
+            String stringValue = convertValueToString(userProfile, key, value);
+
+            if (stringValue != null) {
+                map.put(key, stringValue);
+            }
         }
 
         // Mark user active
@@ -186,7 +192,7 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
 
     protected String convertValueToString(XWikiDocument userProfile, String key, Object value)
     {
-        String valueStr;
+        String valueStr = "";
 
         if (value instanceof String) {
             valueStr = (String) value;
@@ -203,12 +209,10 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
                         + "] in java.util.Collection field [" + key + "] for user [" + userProfile
                         + "] is not supported");
 
-                    valueStr = value.toString();
+                    valueStr = convertValueToString(userProfile, key, value);
                 }
-            } else {
-                valueStr = value.toString();
             }
-        } else {
+        } else if (value != null) {
             LOG.warn("Value [" + (value != null ? (value + " (" + value.getClass() + ")") : null) + "] in field ["
                 + key + "] of user [" + userProfile + "] is for supported");
 
