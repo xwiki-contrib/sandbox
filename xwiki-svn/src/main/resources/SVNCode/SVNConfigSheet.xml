@@ -126,9 +126,24 @@ function tsuggest(field) {
 &lt;li&gt;$status.status &lt;input type="checkbox" name="page" value="${page}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${page}&amp;spaces=$!{spaces}||target=_blank]]
 #end
 &lt;/ul&gt;
-&lt;input type="submit" value="$msg.get("svn.configsheet.commitall")" /&gt;
+&lt;input type="submit" name="commit" value="$msg.get("svn.configsheet.commitall")" /&gt; &lt;input type="submit" name="update" value="$msg.get("svn.configsheet.updateall")" /&gt;
 &lt;/form&gt;
 {{/html}}
+#elseif($request.update)
+#set($pagelist = $xwiki.arrayList)
+#foreach($page in $request.getParameterValues("page"))
+#set($ok = $pagelist.add($page))
+#end
+#set($list = $svnr.updatePages($pagelist))
+
+$msg.get("svn.configsheet.pagesupdated")
+
+#foreach($page in $list.keySet())
+* $page
+#end
+
+[[$msg.get("svn.configsheet.backtolist")&gt;&gt;${doc.fullName}?action=list]] - [[$msg.get("svn.configsheet.backtocustom")&gt;&gt;${doc.fullName}?action=custom]]
+
 ## COMMIT ACTION with confirm
 #elseif($request.action=="commit" &amp;&amp; $request.confirm=="1")
 $msg.get("svn.configsheet.committingpages"):

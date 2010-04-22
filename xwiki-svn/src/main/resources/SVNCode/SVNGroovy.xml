@@ -312,8 +312,9 @@ public class SVNLogReader {
       def c = getFileContent(space, page, language);
       if (c==null)
        return null;
-      else
-       return new String(c);
+      
+      def str = new String(c);
+      return str.trim();
     } 
 
     public byte[] getFileContent(String space, String page, String language) {
@@ -390,7 +391,7 @@ public class SVNLogReader {
         }  
 
         def c = clonedDoc.toXML(true, false, true, false, context.getContext())
-        return c;
+        return c.trim();
     }
 
     public commitFile(pagedoc, message) {
@@ -858,6 +859,7 @@ public class SVNLogReader {
            def pagedoc = xwiki.getDocument(page);
            def wikicontent = getXML(pagedoc);
            def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), "")
+           svncontent = (svncontent == null) ? null : svncontent.trim();
            if (!wikicontent.equals(svncontent)) {
             def filePath = getFilePath(pagedoc);
             def pageStatus = getPageStatus(pagedoc.getFullName());
@@ -922,6 +924,59 @@ public class SVNLogReader {
              }
          }
         }
+        // saveStatus if changed
+        saveStatus();
+        return changedMap;
+    }
+
+    public updatePages(pageList) {
+        def changedMap = new TreeMap();
+        def svnEntries = getEntries();
+
+        for (page in pageList) {
+           def pagedoc = xwiki.getDocument(page);
+           def wikicontent = getXML(pagedoc);
+           def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), "")
+           if (!wikicontent.equals(svncontent)) {
+            def filePath = getFilePath(pagedoc);
+            def pageStatus = getPageStatus(pagedoc.getFullName());
+            if (pageStatus==null) {
+               pageStatus = [ "xwikiversion" : pagedoc.getVersion(), "xwikihash" : "", "svnversion" : "" ];
+            }
+            pageStatus.filePath = filePath;
+            pageStatus.page = page;
+            pageStatus.status = "";
+
+            // debug("Checking page ${page} version ${pagedoc.getVersion()} pageStatus ${pageStatus}")
+            def needUpdate = false
+
+            if (pageStatus.xwikihash=="") {
+               def entry = svnEntries.get(filePath);
+               def svnversion = (entry==null) ? "" : entry.svnversion;
+               if (svnversion!="")
+                needUpdate = true;
+            } else if (pagedoc.getVersion().equals(pageStatus.xwikiversion)) {
+                needUpdate = true;
+            } else {
+               def entry = svnEntries.get(filePath);
+               def svnversion = (entry==null) ? "" : entry.svnversion;
+               if (svnversion!="")
+                needUpdate = true
+               else if(pageStatus.svnversion!=svnversion) 
+                needUpdate = true;
+            }
+ 
+            if (needUpdate) {
+              // updating XWiki document from SVN
+              changedMap.put(page, pageStatus);
+              pagedoc.document.fromXML(svncontent);
+              pagedoc.save();
+              def newwikicontent = getXML(pagedoc);
+              pageStatus.xwikiversion = pagedoc.getVersion();
+              pageStatus.xwikihash = "${newwikicontent.hashCode()}";      
+            }
+           }
+        } 
         // saveStatus if changed
         saveStatus();
         return changedMap;
