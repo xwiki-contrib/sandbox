@@ -92,7 +92,7 @@ public class SVNLogReader {
        def smap = new HashMap();
        for (sline in StringUtils.split(status, "\r\n")) {
           def items = sline.split(";");
-          smap.add(items[0], [ "xwikiversion" : items[1], "xwikihash" : items[2], "svnversion" : items[3] ])
+          smap.put(items[0], [ "xwikiversion" : (items.length&gt;0) ? items[1] : "", "xwikihash" : (items.length&gt;1) ? items[2] : "", "svnversion" : (items.length&gt;2) ? items[3] : "" ])
        }
        return smap;
     }
@@ -102,7 +102,7 @@ public class SVNLogReader {
     }
 
     public saveStatus() {
-       def sstatus;
+       def sstatus = "";
        for (key in status.keySet()) {
          def stat = status.get(key);
          sstatus += "${key};${stat.xwikiversion};${stat.xwikihash};${stat.svnversion}\n";
