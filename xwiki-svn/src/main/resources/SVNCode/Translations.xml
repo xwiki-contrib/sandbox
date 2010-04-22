@@ -45,6 +45,7 @@ svn.configsheet.confirmcommittingpage=Please confirm commiting the following pag
 svn.configsheet.custom.spacelist=Space List (separated by commas)
 svn.configsheet.custom.space=Space
 svn.configsheet.customlist=Custom List of pages
+svn.configsheet.pagesupdated=The following pages have been updated from SVN
 SVNCode.SVNConfigClass_repository=SVN Repository
 SVNCode.SVNConfigClass_repository_tooltip=svn repository url where to commit the wiki pages
 SVNCode.SVNConfigClass_username=Username
