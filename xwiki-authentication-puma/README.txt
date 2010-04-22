@@ -49,10 +49,12 @@ xwiki.authentication.authclass=com.xwiki.authentication.puma.PUMAAuthServiceImpl
 
 = Troubleshoot =
 
+* if the project does not build make sure you provided the proper jar files in lib/ folder
+
 = IDEAS =
 
 * add support for servlet PUMA authentication (looks like PUMA is not only about portlet when i look at the api but i may be wrong)
 
 = TODO =
 
-* support mapping of more than string fields (images as profile photo for example, lists, etc...)
+* support mapping of more than string fields (images as profile photo, lists, etc...)
