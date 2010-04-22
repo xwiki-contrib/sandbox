@@ -973,6 +973,12 @@ public class SVNLogReader {
               changedMap.put(page, pageStatus);
               pagedoc.document.fromXML(svncontent);
               pagedoc.save();
+              // it seems we also need to cleanup duplicate attachments
+              // Attachment saving should not generate additional saving
+              for (xa in pagedoc.document.getAttachmentList()) {
+                    xa.setMetaDataDirty(false);
+                    xa.getAttachment_content().setContentDirty(false);
+              }
               pagedoc.document.saveAllAttachments(false, true, context.getContext());
 
               def newwikicontent = getXML(pagedoc);
