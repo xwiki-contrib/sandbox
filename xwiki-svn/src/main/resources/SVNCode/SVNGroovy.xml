@@ -973,6 +973,8 @@ public class SVNLogReader {
               changedMap.put(page, pageStatus);
               pagedoc.document.fromXML(svncontent);
               pagedoc.save();
+              pagedoc.document.saveAllAttachments(false, true, context.getContext());
+
               def newwikicontent = getXML(pagedoc);
               pageStatus.xwikiversion = pagedoc.getVersion();
               pageStatus.xwikihash = "${newwikicontent.hashCode()}";      
