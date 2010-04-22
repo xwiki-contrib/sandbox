@@ -53,8 +53,7 @@ import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.io.diff.SVNDeltaGenerator;
-
-  
+import com.xpn.xwiki.doc.XWikiDocument;
 
 public class SVNLogReader {
     def xwiki;
@@ -971,16 +970,25 @@ public class SVNLogReader {
             if (needUpdate) {
               // updating XWiki document from SVN
               changedMap.put(page, pageStatus);
-              pagedoc.document.fromXML(svncontent);
-              pagedoc.save();
+              def archive = pagedoc.document.getDocumentArchive();
+
+              // delete previous doc to make sure attachments are deleted
+              pagedoc.delete();
+
+              def newdoc = new XWikiDocument();
+              newdoc.fromXML(svncontent);
+
               // it seems we also need to cleanup duplicate attachments
               // Attachment saving should not generate additional saving
-              for (xa in pagedoc.document.getAttachmentList()) {
+              for (xa in newdoc.getAttachmentList()) {
                     xa.setMetaDataDirty(false);
                     xa.getAttachment_content().setContentDirty(false);
               }
-              pagedoc.document.saveAllAttachments(false, true, context.getContext());
+              newdoc.setDocumentArchive(archive);
+              xwiki.xWiki.saveDocument(newdoc, context.getContext());
+              newdoc.saveAllAttachments(false, true, context.getContext());
 
+              def newpagedoc = xwiki.getDocument(pagedoc.getFullName());
               def newwikicontent = getXML(pagedoc);
               pageStatus.xwikiversion = pagedoc.getVersion();
               pageStatus.xwikihash = "${newwikicontent.hashCode()}";      
