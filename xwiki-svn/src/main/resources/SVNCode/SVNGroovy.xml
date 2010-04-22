@@ -985,10 +985,9 @@ public class SVNLogReader {
                     xa.getAttachment_content().setContentDirty(false);
               }
               newdoc.setDocumentArchive(archive);
-              newdoc.setContentDirty(true);
-              newdoc.setMetaDataDirty(true);
               newdoc.setCreator(pagedoc.getCreator());
-              xwiki.getXWiki().saveDocument(newdoc, context.getContext());
+              newdoc.setContentAuthor(context.getUser());
+              newdoc.setAuthor(context.getUser());
               newdoc.saveAllAttachments(false, true, context.getContext());
 
               def newpagedoc = xwiki.getDocument(pagedoc.getFullName());
