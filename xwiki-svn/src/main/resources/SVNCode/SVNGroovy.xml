@@ -390,6 +390,8 @@ public class SVNLogReader {
           clonedDoc.setVersion("1.1");
         }  
 
+        clonedDoc.setComment("");
+        clonedDoc.setMinorEdit(false);
         def c = clonedDoc.toXML(true, false, true, false, context.getContext())
         return c.trim();
     }
