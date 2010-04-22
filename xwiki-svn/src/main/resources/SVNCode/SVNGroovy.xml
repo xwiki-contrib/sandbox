@@ -104,7 +104,7 @@ public class SVNLogReader {
     public saveStatus() {
        def sstatus;
        for (key in status) {
-         stat = status.get(key);
+         def stat = status.get(key);
          sstatus += "${key};${stat.xwikiversion};${stat.xwikihash};${stat.svnversion}\n";
        }
        configdoc.set("status", sstatus);
