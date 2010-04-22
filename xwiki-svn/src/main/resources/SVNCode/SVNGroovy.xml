@@ -392,7 +392,7 @@ public class SVNLogReader {
         clonedDoc.setComment("");
         clonedDoc.setMinorEdit(false);
         def c = clonedDoc.toXML(true, false, true, false, context.getContext())
-        return c.trim();
+        return c.trim().replaceAll("[\r]","");
     }
 
     public commitFile(pagedoc, message) {
