@@ -34,6 +34,7 @@ svn.configsheet.debug=Debug
 svn.configsheet.commitmessage=Commit Message
 svn.configsheet.listpages=List pages to commit
 svn.configsheet.commitall=Commit All
+svn.configsheet.updateall=Update All
 svn.configsheet.commit=Commit
 svn.configsheet.viewdiff=View Diff
 svn.configsheet.committingpages=Committing the following pages
