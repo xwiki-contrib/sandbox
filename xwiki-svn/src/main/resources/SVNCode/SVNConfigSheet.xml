@@ -123,7 +123,6 @@ function tsuggest(field) {
 #set($cmap = $!svnr.getChangedPages($spaces, $savedlist))
 #foreach($page in $cmap.keySet())
  #set($status = $cmap.get($page))
-$page $status
 &lt;li&gt;$status.status &lt;input type="checkbox" name="page" value="${page}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${page}&amp;spaces=$!{spaces}||target=_blank]]
 #end
 &lt;/ul&gt;

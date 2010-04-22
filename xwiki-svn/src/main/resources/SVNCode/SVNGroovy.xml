@@ -558,6 +558,7 @@ public class SVNLogReader {
                 editor.closeFile(filePath, checksum);
 
                 // updating status
+                committedPages.add(pagedoc.getFullName());
                 def pageStatus = status.get(pagedoc.getFullName());
                 if (pageStatus==null)
                  pageStatus = [ "xwikiversion" : "", "xwikihash" : "", "svnversion" : ""];
@@ -595,8 +596,9 @@ public class SVNLogReader {
          }
 
          // we need to save the status
+         def rev = commitInfo.getNewRevision();
          for (def page in committedPages) {
-           status.get(page).svnversion = "${commitInfo.getNewRevision()}";
+           status.get(page).svnversion = "${rev}";
          }
          saveStatus();
          return commitInfo;
