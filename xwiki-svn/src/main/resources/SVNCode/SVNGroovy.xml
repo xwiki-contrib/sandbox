@@ -1082,7 +1082,6 @@ public class SVNLogReader {
         return entries;
     }
 
-
     public showXMLDiff(pagedoc) {
         def svnxml = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), pagedoc.getLanguage());
         def xml = getXML(pagedoc);
