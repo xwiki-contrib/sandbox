@@ -439,6 +439,7 @@ public class SVNLogReader {
         }
 
         def editor = repository.getCommitEditor(message, null);
+        def committedPages = new ArrayList();
         def commitInfo = null;
 
         try {
@@ -470,8 +471,6 @@ public class SVNLogReader {
             } else {
              editor.openDir(space, -1);
             }
-
-            def committedPages = new ArrayList();
 
             // loop on each page
             for (pagedoc in pagesBySpace.get(space)) {  
