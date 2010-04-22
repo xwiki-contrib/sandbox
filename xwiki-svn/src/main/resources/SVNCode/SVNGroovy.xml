@@ -107,8 +107,11 @@ public class SVNLogReader {
          def stat = status.get(key);
          sstatus += "${key};${stat.xwikiversion};${stat.xwikihash};${stat.svnversion}\n";
        }
-       configdoc.set("status", sstatus);
-       configdoc.save();
+       // only save if changed
+       if (status!=configdoc.getValue("status")) {
+        configdoc.set("status", sstatus);
+        configdoc.save();
+       }
     }
 
     public debug(message) {
@@ -557,7 +560,7 @@ public class SVNLogReader {
                  */
                 editor.closeFile(filePath, checksum);
 
-                // updating status
+                // updating status to check for changes
                 committedPages.add(pagedoc.getFullName());
                 def pageStatus = status.get(pagedoc.getFullName());
                 if (pageStatus==null)
@@ -857,7 +860,7 @@ public class SVNLogReader {
            def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), "")
            if (!wikicontent.equals(svncontent)) {
             def filePath = getFilePath(pagedoc);
-            def pageStatus = getPageStatus(filePath);
+            def pageStatus = getPageStatus(pagedoc.getFullName());
             if (pageStatus==null) {
                pageStatus = [ "xwikiversion" : pagedoc.getVersion(), "xwikihash" : "", "svnversion" : "" ];
             }
@@ -880,7 +883,7 @@ public class SVNLogReader {
                // if the recorded hash is the same then we have a modified version in SVN
                // otherwise it's a bad state so it's a conflict
                if (whash == pageStatus.xwikihash)
-                pageStatus.status = "UU";
+                pageStatus.status = "U";
                else
                 pageStatus.status = "C";
             } else {
@@ -897,6 +900,14 @@ public class SVNLogReader {
            } else {
              def filePath = getFilePath(pagedoc);
              samePages.add(filePath);
+             def pageStatus = getPageStatus(pagedoc.getFullName());
+             if (pageStatus==null) {
+                pageStatus = [ "xwikiversion" : "", "xwikihash" : "", "svnversion" : "" ];
+                status.put(pagedoc.getFullName(), pageStatus);
+             }   
+             pageStatus.xwikiversion = pagedoc.getVersion();
+             pageStatus.xwikihash = wikicontent.hashCode();
+             pageStatus.svnversion = svnEntries.get(filePath).svnversion;
            }
         }
  
@@ -911,6 +922,8 @@ public class SVNLogReader {
              }
          }
         }
+        // saveStatus if changed
+        saveStatus();
         return changedMap;
     }
 
