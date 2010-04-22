@@ -61,6 +61,7 @@ public class SVNLogReader {
     def context;
     def repurl = "";
     def defaultspace = "";
+    def configdoc;
     def savedlist = "";
     def SVNRepository repository = null;
     def username = "";
@@ -68,6 +69,7 @@ public class SVNLogReader {
     def defaultDate = "";
     def defaultUser = "";
     def sdebug = "";
+    def status = new HashMap();
 
     public setXWiki(xwiki, context) {
       this.xwiki = xwiki;
@@ -75,7 +77,7 @@ public class SVNLogReader {
     }
 
     public setSVNConfig(page) {
-       def configdoc = xwiki.getDocument(page)
+       this.configdoc = xwiki.getDocument(page)
        this.username = configdoc.getValue("username")
        this.password = configdoc.getObject("SVNCode.SVNConfigClass").getProperty("password").property.value
        this.repurl = configdoc.getValue("repository");
@@ -83,6 +85,30 @@ public class SVNLogReader {
        this.savedlist = configdoc.getValue("savedlist");
        this.defaultDate = configdoc.getValue("defaultdate");
        this.defaultUser = configdoc.getValue("defaultuser");
+       this.status = getStatus(configdoc.getValue("status"));
+    }
+
+    public getStatus(status) {
+       def smap = new HashMap();
+       for (sline in StringUtils.split(status, "\r\n")) {
+          def items = sline.split(";");
+          smap.add(items[0], [ "xwikiversion" : items[1], "xwikihash" : items[2], "svnversion" : items[3] ])
+       }
+       return smap;
+    }
+
+    public getPageStatus(filePath) {
+      return status.get(filePath);
+    }
+
+    public saveStatus() {
+       def sstatus;
+       for (key in status) {
+         stat = status.get(key);
+         sstatus += "${key};${stat.xwikiversion};${stat.xwikihash};${stat.svnversion}\n";
+       }
+       configdoc.set("status", sstatus);
+       configdoc.save();
     }
 
     public debug(message) {
@@ -105,6 +131,16 @@ public class SVNLogReader {
 
     public getSavedList() {
         return (this.savedlist==null) ? "" : this.savedlist;
+    }
+
+    public getFilePath(pagedoc) {
+       // get page
+        def filePath = pagedoc.getSpace() + "/" + pagedoc.getName();
+        def language = pagedoc.getLanguage();
+        if (language!=null&amp;&amp;language!="")
+          filePath += "." + language;
+        filePath += ".xml"
+        return filePath;
     }
 
     public boolean initRepository() {
@@ -275,7 +311,7 @@ public class SVNLogReader {
        return null;
       else
        return new String(c);
-    }
+    } 
 
     public byte[] getFileContent(String space, String page, String language) {
         // get page
@@ -301,7 +337,7 @@ public class SVNLogReader {
             SVNNodeKind nodeKind = repository.checkPath(filePath, -1);
             
             if (nodeKind == SVNNodeKind.NONE) {
-                // debug("There is no entry at '" + repurl + "'.");
+                debug("There is no entry at '" + filePath + "'.");
                 return null;
             } else if (nodeKind == SVNNodeKind.DIR) {
                 debug("The entry at '" + repurl
@@ -327,7 +363,7 @@ public class SVNLogReader {
 
         // remove Tag object
         if (clonedDoc.getObject("XWiki.TagClass")) {
-          clonedDoc.removeXObject(clonedDoc.getObject("XWiki.TagClass"));
+          clonedDoc.removeObject(clonedDoc.getObject("XWiki.TagClass"));
         }
 
         if (defaultUser &amp;&amp; defaultUser!="") {
@@ -435,8 +471,11 @@ public class SVNLogReader {
              editor.openDir(space, -1);
             }
 
+            def committedPages = new ArrayList();
+
             // loop on each page
             for (pagedoc in pagesBySpace.get(space)) {  
+              pagename2 = pagedoc.getFullName();
               def page = pagedoc.getName();
               def language = pagedoc.getLanguage();
 
@@ -446,7 +485,8 @@ public class SVNLogReader {
                   filePath += "." + language;
               filePath += ".xml"
 
-              def newData = getXML(pagedoc).getBytes();
+              def newXML = getXML(pagedoc);
+              def newData = newXML.getBytes();
 
               if (newPages.contains(filePath)) {
                 /*
@@ -517,6 +557,14 @@ public class SVNLogReader {
                  * Closes the file.
                  */
                 editor.closeFile(filePath, checksum);
+
+                // updating status
+                def pageStatus = status.get(pagedoc.getFullName());
+                if (pageStatus==null)
+                 pageStatus = [ "xwikiversion" : "", "xwikihash" : "", "svnversion" : ""];
+                status.put(pagedoc.getFullName(), pageStatus);
+                pageStatus.xwikiversion = "${pagedoc.getVersion()}";
+                pageStatus.xwikihash = "${newXML.hashCode()}";
               }
             }
 
@@ -546,6 +594,12 @@ public class SVNLogReader {
              return null;
             }
          }
+
+         // we need to save the status
+         for (def page in committedPages) {
+           status.get(page).svnversion = "${commitInfo.getNewRevision()}";
+         }
+         saveStatus();
          return commitInfo;
     }
 
@@ -780,11 +834,15 @@ public class SVNLogReader {
     }
 
     public getChangedPages(String spaces, String savedlist) {
-        def changedList = new ArrayList();
+        def changedMap = new TreeMap();
+        def svnEntries = getEntries();
+        def spaceList = null;
+        def samePages = new ArrayList();
         def list;
 
         if (!savedlist || savedlist=="") {
-         def sspaces = StringUtils.join(StringUtils.split(spaces," ,"), "','");
+         spaceList = Arrays.asList(StringUtils.split(spaces," ,"));
+         def sspaces = StringUtils.join(spaceList, "','");
          def sql = "select doc.fullName from XWikiDocument as doc where doc.space in ('${sspaces}')";
          debug("Searching for ${sql}");
          list = xwiki.search(sql)
@@ -796,10 +854,63 @@ public class SVNLogReader {
            def pagedoc = xwiki.getDocument(page);
            def wikicontent = getXML(pagedoc);
            def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), "")
-           if (!wikicontent.equals(svncontent))
-            changedList.add(page)
+           if (!wikicontent.equals(svncontent)) {
+            def filePath = getFilePath(pagedoc);
+            def pageStatus = getPageStatus(filePath);
+            if (pageStatus==null) {
+               pageStatus = [ "xwikiversion" : pagedoc.getVersion(), "xwikihash" : "", "svnversion" : "" ];
+            }
+            pageStatus.filePath = filePath;
+            pageStatus.page = page;
+            pageStatus.status = "";
+
+            // debug("Checking page ${page} version ${pagedoc.getVersion()} pageStatus ${pageStatus}")
+
+            if (pageStatus.xwikihash=="") {
+               def entry = svnEntries.get(filePath);
+               def svnversion = (entry==null) ? "" : entry.svnversion;
+               if (svnversion=="")
+                pageStatus.status = "A";
+               else
+                pageStatus.status = "?";
+            } else if (pagedoc.getVersion().equals(pageStatus.xwikiversion)) {
+               // version has not changed in the wiki
+               def whash = "${wikicontent.hashCode()}";
+               // if the recorded hash is the same then we have a modified version in SVN
+               // otherwise it's a bad state so it's a conflict
+               if (whash == pageStatus.xwikihash)
+                pageStatus.status = "UU";
+               else
+                pageStatus.status = "C";
+            } else {
+               def entry = svnEntries.get(filePath);
+               def svnversion = (entry==null) ? "" : entry.svnversion;
+               if (svnversion=="")
+                pageStatus.status = "A";
+               else if(pageStatus.svnversion==svnversion) 
+                pageStatus.status = "M";
+               else
+                pageStatus.status = "C";
+            }
+            changedMap.put(page, pageStatus)
+           } else {
+             def filePath = getFilePath(pagedoc);
+             samePages.add(filePath);
+           }
         }
-        return changedList;
+ 
+        if (spaceList!=null) {
+         for (entry in svnEntries.keySet()) {
+             def i1 = entry.indexOf("/");
+             def i2 = entry.indexOf(".xml");
+             def spaceName = (i1==-1) ? entry : entry.substring(0, i1);
+             def pageName = (i2==-1) ? entry : entry.substring(i1+1, i2);
+             if (spaceList.contains(spaceName)&amp;&amp;!samePages.contains(entry)&amp;&amp;!changedMap.keySet().contains(spaceName + "." + pageName)) {
+               changedMap.put(spaceName + "." + pageName, [ "status" : "N", "xwikiversion" : "", "svnversion" : svnEntries.get(entry).svnversion ])
+             }
+         }
+        }
+        return changedMap;
     }
 
 
@@ -822,6 +933,91 @@ public class SVNLogReader {
     
     public listFiles(dir, recursive) {
     }
+
+    public getCommitStatus(prefix, sep, updatedonly) {
+        def str = "";
+        Collection spaceEntries = repository.getDir("", -1, null, (Collection) null);
+        Iterator spaceIterator = spaceEntries.iterator();
+        str += "${prefix}page${sep}language${sep}version${sep}isnew${sep}hash${sep}svnpath${sep}svnversion${sep}svnhash${sep}isdiff\n"
+        while (spaceIterator.hasNext()) {
+            SVNDirEntry entry = (SVNDirEntry) spaceIterator.next();
+            if (entry.getKind() == SVNNodeKind.DIR) {
+              def space = entry.getName().toString();
+              Collection pageEntries = repository.getDir(space, -1, null, (Collection) null);
+              Iterator pageIterator = pageEntries.iterator();
+              while (pageIterator.hasNext()) {
+                 def pageEntry = pageIterator.next();
+                 def fileName = pageEntry.getName().toString();
+                 def i1 = fileName.indexOf(".xml");
+                 def pageName = (i1==-1) ? fileName : fileName.substring(0, i1);
+                 pageName = space + "." + pageName;
+                 def pagedoc = xwiki.getDocument(pageName);
+                 def pagexml = getXML(pagedoc);
+
+                 def fileProperties = new SVNProperties();
+                 def baos = new ByteArrayOutputStream();
+                 debug("reading file: ${space}/${fileName}")
+                 repository.getFile(space + "/" + fileName, -1, fileProperties, baos);
+                 def svncontent = new String(baos.toByteArray())
+
+                 def version = (pagedoc==null) ? "" : pagedoc.getVersion();
+                 def hash = (pagexml==null) ? "" : pagexml.hashCode();
+                 def svnversion = pageEntry.getRevision().toString();
+                 def svnhash = (svncontent==null) ? "" : svncontent.hashCode();
+
+                 def isdiff = !pagexml.equals(svncontent)
+                 if (!updatedonly || !isdiff)
+                  str += "${prefix}${pageName}${sep}${pagedoc.getLanguage()}${sep}${version}${sep}${pagedoc.isNew()}${sep}${hash}${sep}${space}/${fileName}${sep}${svnversion}${sep}${svnhash}${sep}${isdiff}\n"
+              }
+            }
+        }
+        return str;
+    }
+
+    public getEntries() {
+        def entries = new HashMap();
+        Collection spaceEntries = repository.getDir("", -1, null, (Collection) null);
+        Iterator spaceIterator = spaceEntries.iterator();
+        while (spaceIterator.hasNext()) {
+            SVNDirEntry entry = (SVNDirEntry) spaceIterator.next();
+            if (entry.getKind() == SVNNodeKind.DIR) {
+              def space = entry.getName().toString();
+              Collection pageEntries = repository.getDir(space, -1, null, (Collection) null);
+              Iterator pageIterator = pageEntries.iterator();
+              while (pageIterator.hasNext()) {
+                 def pageEntry = pageIterator.next();
+                 def fileName = pageEntry.getName().toString();
+                 def filePath = space + "/" + fileName;
+                 def fileProperties = new SVNProperties();
+                 def baos = new ByteArrayOutputStream();
+                 debug("reading file: ${space}/${fileName}")
+                 repository.getFile(filePath, -1, fileProperties, baos);
+                 def svncontent = new String(baos.toByteArray())
+                 def svnversion = pageEntry.getRevision().toString();
+                 def svnhash = (svncontent==null) ? "" : svncontent.hashCode();
+
+                 entries.put(filePath, [ "svnversion" : svnversion, "svnhash" : svnhash ]);
+              }
+            }
+        }
+        return entries;
+    }
+
+    public showXMLDiff(pagedoc) {
+        def svnxml = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), pagedoc.getLanguage());
+        def xml = getXML(pagedoc);
+        if (pagedoc.isNew() &amp;&amp; svnxml == null)
+         return "Document does not exist";
+        
+        if (pagedoc.isNew())
+         return "Document does not exist in the wiki"
+ 
+        if (svnxml==null)
+         return "Document does not exist in SVN"
+   
+        return xwiki.diff.getDifferencesAsHTML(svnxml, xml, false);
+    }
+
 }
 
 </content></xwikidoc>

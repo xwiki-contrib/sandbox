@@ -19,7 +19,7 @@
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
-<comment>Imported from XAR</comment>
+<comment></comment>
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
@@ -35,9 +35,11 @@ svn.configsheet.commitmessage=Commit Message
 svn.configsheet.listpages=List pages to commit
 svn.configsheet.commitall=Commit All
 svn.configsheet.commit=Commit
+svn.configsheet.viewdiff=View Diff
 svn.configsheet.committingpages=Committing the following pages
 svn.configsheet.committsuccessfull=Commit finished successfully
 svn.configsheet.backtolist=Back to List of pages to commit
+svn.configsheet.backtocustom=Back to Custom list of pages to commit
 svn.configsheet.confirmcommittingpage=Please confirm commiting the following page(s)
 svn.configsheet.custom.spacelist=Space List (separated by commas)
 svn.configsheet.custom.space=Space

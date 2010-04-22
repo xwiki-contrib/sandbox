@@ -120,6 +120,15 @@
 <valueField>doc.title</valueField>
 <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
 </savedlist>
+<status>
+<name>status</name>
+<number>8</number>
+<prettyName>status</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</status>
 <username>
 <customDisplay></customDisplay>
 <name>username</name>
