@@ -19,8 +19,8 @@
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
-<comment>Imported from XAR</comment>
-<minorEdit>false</minorEdit>
+<comment>Added class property</comment>
+<minorEdit>true</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <class>
@@ -119,6 +119,15 @@
 <valueField>doc.title</valueField>
 <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
 </savedlist>
+<status>
+<name>status</name>
+<number>8</number>
+<prettyName>status</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</status>
 <username>
 <customDisplay></customDisplay>
 <name>username</name>
