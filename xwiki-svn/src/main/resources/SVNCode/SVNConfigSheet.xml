@@ -84,7 +84,7 @@ function tsuggest(field) {
 #end
 #end
 #if($request.action)
-#set($svnr = $xwiki.parseGroovyFromPage("SVNCode.SVNGroovy"))
+#set($svnr = $xwiki.parseGroovyFromPage("SVNCode.SVNGroovy","SVNCode.SVNGroovy"))
 #set($ok = $svnr.setXWiki($xwiki, $context))
 #set($ok = $svnr.setSVNConfig($doc.fullName))
 #set($ok = $svnr.initRepository())
