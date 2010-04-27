@@ -47,6 +47,12 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     private StringServletPrintWriter writerWrapper;
 
     /**
+     * Flag indicating if the response output is preserved or not. Once this flag is set to {@code true} it remains so
+     * and the response body is written to the output stream or writer of the original response object.
+     */
+    private boolean outputPreserved;
+
+    /**
      * Wraps the given servlet response that has been dispatched from a portlet's render or serve resource method.
      * 
      * @param response the response object to be wrapped
@@ -74,6 +80,7 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
                 throw new IllegalStateException();
             }
         } else {
+            outputPreserved = true;
             return super.getOutputStream();
         }
     }
@@ -96,14 +103,24 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
                 throw new IllegalStateException();
             }
         } else {
+            outputPreserved = true;
             return super.getWriter();
         }
     }
 
     /**
-     * @return {@code true} if the content type of the response body is HTML, {@code false} otherwise
+     * @return {@code true} if the response output is not preserved and either it was already wrapped or the content
+     *         type is HTML, {@code false} otherwise
      */
     public boolean isHTML()
+    {
+        return !outputPreserved && (outputStreamWrapper != null || writerWrapper != null || hasHTMLContentType());
+    }
+
+    /**
+     * @return {@code true} if this response has HTML content type, {@code false} otherwise
+     */
+    private boolean hasHTMLContentType()
     {
         return getContentType() == null || getContentType().startsWith("text/html");
     }
