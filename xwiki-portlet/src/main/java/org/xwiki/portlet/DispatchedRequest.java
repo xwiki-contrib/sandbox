@@ -20,7 +20,6 @@
 package org.xwiki.portlet;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -31,8 +30,11 @@ import java.util.Set;
 import java.util.Stack;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * Wraps a servlet request object dispatched from a portlet.
@@ -42,16 +44,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 public class DispatchedRequest extends HttpServletRequestWrapper
 {
     /**
-     * The request attribute holding the map of initial get parameters. These are the parameters from the query string
-     * of the URL used to make the request to the portal. The portal hides these parameters but we need to access them
-     * because some query string parameters might have been added through JavaScript. Adding query string parameters
-     * through JavaScript is not recommended when working with portlet URLs but since we can't fully control the
-     * JavaScript code of the servlet application where the request is dispatched to, we have to expose these initial
-     * get parameters.
-     */
-    public static final String ATTRIBUTE_INITIAL_GET_PARAMETERS = "org.xwiki.portlet.attribute.initialGetParameters";
-
-    /**
      * The character encoding set through {@link #setCharacterEncoding(String)}.
      */
     private String settedCharacterEncoding;
@@ -59,24 +51,58 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     /**
      * The stack that holds the information about all the dispatches that affected this request.
      */
-    private Stack<RequestDispatchInfo> dispatchStack = new Stack<RequestDispatchInfo>();
+    private final Stack<RequestDispatchInfo> dispatchStack = new Stack<RequestDispatchInfo>();
 
     /**
-     * The map of query string parameters. We expose only the query string parameters if the request was redirected.
-     * 
-     * @see #isRedirected()
-     * @see #getQueryStringParameterMap()
+     * The stack of dispatch parameters. These parameters are extracted from the dispatch URL query string. If the
+     * request was redirected then only these parameters are exposed.
      */
-    private Map<String, String[]> queryStringParameterMap;
+    private final Stack<Map<String, String[]>> dispatchParametersStack = new Stack<Map<String, String[]>>();
 
     /**
-     * Wraps the given request that has been dispatched from a portlet.
+     * Flag indicating if the request was redirected, i.e. if the HTTP POST parameters are available or not.
+     */
+    private final boolean redirected;
+
+    /**
+     * The object used to parse the query string of dispatch URLs.
+     */
+    private final QueryStringParser queryStringParser = new QueryStringParser();
+
+    /**
+     * Wraps the given request that has been dispatched from a portlet, exposing the query string parameters of the
+     * initial request.
      * 
      * @param request the request to be wrapped
+     * @param exposeInitialQueryStringParameters {@code true} to expose the initial query string parameters, {@code
+     *            false} otherwise
+     * @throws ServletException if wrapping the given request fails
      */
-    public DispatchedRequest(HttpServletRequest request)
+    public DispatchedRequest(HttpServletRequest request, boolean exposeInitialQueryStringParameters)
+        throws ServletException
     {
         super(request);
+
+        redirected = false;
+
+        if (exposeInitialQueryStringParameters) {
+            dispatchParametersStack.push(listToArray(parseInitialQueryString()));
+        }
+    }
+
+    /**
+     * Wraps the given request and behaves as if it was redirected to the specified URL.
+     * 
+     * @param request the request to be wrapped
+     * @param redirectURL the redirect URL
+     * @throws ServletException if wrapping the given request fails
+     */
+    public DispatchedRequest(HttpServletRequest request, String redirectURL) throws ServletException
+    {
+        super(request);
+
+        redirected = true;
+        pushDispatch(new Dispatch(DispatchType.FORWARD, redirectURL));
     }
 
     /**
@@ -237,24 +263,15 @@ public class DispatchedRequest extends HttpServletRequestWrapper
      * 
      * @see HttpServletRequestWrapper#getParameter(String)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public String getParameter(String name)
     {
-        if (isRedirected()) {
-            String[] values = getQueryStringParameterMap().get(name);
+        String value = redirected ? null : super.getParameter(name);
+        if (value == null) {
+            String[] values = dispatchParametersStack.isEmpty() ? null : dispatchParametersStack.peek().get(name);
             return values != null ? values[0] : null;
-        } else {
-            String value = super.getParameter(name);
-            if (value == null && getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS) != null) {
-                Map<String, List<String>> initialGetParameters =
-                    (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
-                if (initialGetParameters.containsKey(name)) {
-                    value = initialGetParameters.get(name).get(0);
-                }
-            }
-            return value;
         }
+        return value;
     }
 
     /**
@@ -266,24 +283,16 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     @Override
     public Map<String, String[]> getParameterMap()
     {
-        if (isRedirected()) {
-            return Collections.unmodifiableMap(getQueryStringParameterMap());
-        } else {
-            Map<String, List<String>> initialGetParameters =
-                (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
-            if (initialGetParameters != null) {
-                Map<String, String[]> map =
-                    new HashMap<String, String[]>((Map<String, String[]>) super.getParameterMap());
-                for (Map.Entry<String, List<String>> entry : initialGetParameters.entrySet()) {
-                    if (!map.containsKey(entry.getKey())) {
-                        map.put(entry.getKey(), entry.getValue().toArray(new String[] {}));
-                    }
-                }
-                return Collections.unmodifiableMap(map);
-            } else {
-                return super.getParameterMap();
+        Map<String, String[]> parameterMap = new HashMap<String, String[]>();
+        if (!redirected) {
+            parameterMap.putAll(super.getParameterMap());
+        }
+        if (!dispatchParametersStack.isEmpty()) {
+            for (String parameter : dispatchParametersStack.peek().keySet()) {
+                parameterMap.put(parameter, getParameterValues(parameter));
             }
         }
+        return Collections.unmodifiableMap(parameterMap);
     }
 
     /**
@@ -295,23 +304,14 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     @Override
     public Enumeration<String> getParameterNames()
     {
-        if (isRedirected()) {
-            return Collections.enumeration(getQueryStringParameterMap().keySet());
-        } else {
-            Map<String, List<String>> initialGetParameters =
-                (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
-            if (initialGetParameters != null) {
-                Set<String> allNames = new HashSet<String>();
-                Enumeration<String> names = (Enumeration<String>) super.getParameterNames();
-                while (names.hasMoreElements()) {
-                    allNames.add(names.nextElement());
-                }
-                allNames.addAll(initialGetParameters.keySet());
-                return Collections.enumeration(allNames);
-            } else {
-                return super.getParameterNames();
-            }
+        Set<String> parameterNames = new HashSet<String>();
+        if (!redirected) {
+            parameterNames.addAll(super.getParameterMap().keySet());
         }
+        if (!dispatchParametersStack.isEmpty()) {
+            parameterNames.addAll(dispatchParametersStack.peek().keySet());
+        }
+        return Collections.enumeration(parameterNames);
     }
 
     /**
@@ -319,35 +319,31 @@ public class DispatchedRequest extends HttpServletRequestWrapper
      * 
      * @see HttpServletRequestWrapper#getParameterValues(String)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public String[] getParameterValues(String name)
     {
-        if (isRedirected()) {
-            String[] values = getQueryStringParameterMap().get(name);
-            return values != null ? Arrays.copyOf(values, values.length) : null;
-        } else {
-            String[] values = super.getParameterValues(name);
-            if (values == null && getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS) != null) {
-                Map<String, List<String>> initialGetParameters =
-                    (Map<String, List<String>>) getAttribute(ATTRIBUTE_INITIAL_GET_PARAMETERS);
-                if (initialGetParameters.containsKey(name)) {
-                    values = initialGetParameters.get(name).toArray(new String[] {});
-                }
-            }
-            return values;
-        }
+        String[] values = redirected ? null : super.getParameterValues(name);
+        String[] dispatchValues = dispatchParametersStack.isEmpty() ? null : dispatchParametersStack.peek().get(name);
+        return (String[]) ArrayUtils.addAll(values, dispatchValues);
     }
 
     /**
      * Push the given dispatch info on the top of the dispatch stack and update the request path info accordingly.
      * 
      * @param dispatch the dispatch to put on the top of the dispatch stack
+     * @throws ServletException if pushing the given dispatch fails
      */
-    void pushDispatch(Dispatch dispatch)
+    void pushDispatch(Dispatch dispatch) throws ServletException
     {
-        // TODO: Handle includes and forwards differently as per servlet specification.
         dispatchStack.push(parseDispatchPath(dispatch.getPath()));
+        try {
+            dispatchParametersStack
+                .push(listToArray(queryStringParser.parse(getQueryString(), getCharacterEncoding())));
+        } catch (UnsupportedEncodingException e) {
+            // Roll back.
+            dispatchStack.pop();
+            throw new ServletException("Failed to decode the query string parameters of the dispatch.", e);
+        }
     }
 
     /**
@@ -356,6 +352,7 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     void popDispatch()
     {
         dispatchStack.pop();
+        dispatchParametersStack.pop();
     }
 
     /**
@@ -393,34 +390,43 @@ public class DispatchedRequest extends HttpServletRequestWrapper
     }
 
     /**
-     * @return {@code true} if this request was redirected, {@code false} otherwise
+     * Utility method for converting a map of lists into a map of arrays.
+     * 
+     * @param mapOfList the map of lists to be converted
+     * @return the map of arrays
      */
-    private boolean isRedirected()
+    private Map<String, String[]> listToArray(Map<String, List<String>> mapOfList)
     {
-        return Boolean.valueOf((String) getAttribute(DispatchPortlet.ATTRIBUTE_REDIRECTED_REQUEST));
+        Map<String, String[]> mapOfArray = new HashMap<String, String[]>();
+        for (Map.Entry<String, List<String>> entry : mapOfList.entrySet()) {
+            mapOfArray.put(entry.getKey(), entry.getValue().toArray(new String[] {}));
+        }
+        return mapOfArray;
     }
 
     /**
-     * @return the map of query string parameters
+     * Parses the query string of the initial request that reached the portal. The request received by the dispatch
+     * filter wraps the initial request and hides the initial query string which usually contains only portal related
+     * information. In some cases the initial query string contains parameters set through JavaScript. The reason for
+     * parsing the initial query string is to expose those parameters set from JavaScript.
+     * 
+     * @return the map of initial query string parameters
+     * @throws ServletException if decoding the parameters fails
      */
-    private Map<String, String[]> getQueryStringParameterMap()
+    private Map<String, List<String>> parseInitialQueryString() throws ServletException
     {
-        if (queryStringParameterMap == null) {
-            String queryString = getQueryString();
-            if (queryString == null) {
-                queryStringParameterMap = Collections.emptyMap();
-            } else {
-                try {
-                    Map<String, List<String>> map = new QueryStringParser().parse(queryString, getCharacterEncoding());
-                    queryStringParameterMap = new HashMap<String, String[]>();
-                    for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-                        queryStringParameterMap.put(entry.getKey(), entry.getValue().toArray(new String[] {}));
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    queryStringParameterMap = Collections.emptyMap();
-                }
-            }
+        HttpServletRequest initialRequest = (HttpServletRequest) getRequest();
+        while (initialRequest instanceof HttpServletRequestWrapper) {
+            initialRequest = (HttpServletRequest) ((HttpServletRequestWrapper) initialRequest).getRequest();
         }
-        return queryStringParameterMap;
+        if (initialRequest.getQueryString() != null) {
+            try {
+                return queryStringParser.parse(initialRequest.getQueryString(), initialRequest.getCharacterEncoding());
+            } catch (UnsupportedEncodingException e) {
+                throw new ServletException("Failed to decode the initial query string parameters.", e);
+            }
+        } else {
+            return Collections.emptyMap();
+        }
     }
 }
