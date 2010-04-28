@@ -22,18 +22,21 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
-<content># This is here for testing while the application is in the sandbox. I propose to add the translations in the current way (add to ApplicationResources.properties)
-#----------------------------------------------------------------------
+<content>#----------------------------------------------------------------------
 # Translations for Invitation Application
 #----------------------------------------------------------------------
 admin.invitation=Invitation Application
-xe.invitation.heading=Email Invitation Messenger
+xe.invitation.heading=Email Invitation
 xe.invitation.userIsReportedSpammer=A message which you sent was reported as spam and your privilege to send mail has suspended pending investigation, we apologize for the inconvenience.
 xe.invitation.returnToMainPage=Return to the main page
 xe.invitation.configInfo=This document contains configuration for the [[invitation application&gt;&gt;XWiki.Invitation]]
 xe.invitation.emailContainerInfo=This document contains email messages for the [[invitation application&gt;&gt;XWiki.Invitation]]
 xe.invitation.onlyMembersCanSendMail=Sorry, only members of this wiki can send mail.
 xe.invitation.youAreAMemberOfOtherWiki=You seem to be a member of {0} which is a different wiki.
+xe.invitation.toLabel=To:
+xe.invitation.subjectLabel=Subject:
+xe.invitation.contentLabel=Message:
+xe.invitation.previewLabel=Preview:
 xe.invitation.sendMail.errorWhileSending=An error has occured while sending the message.
 xe.invitation.sendMail.addMessageSaveComment=Added Email Message.
 xe.invitation.sendMail.composeAnotherMessageLink=Compose another message
@@ -63,15 +66,9 @@ xe.invitation.handleSpam.reportHandledSaveComment=Investigated spam report.
 xe.invitation.displayMessage.anAddressesIsInvalid=One of the given email addresses is invalid and will not be sent to.
 xe.invitation.displayMessage.someAddressesAreInvalid={0} of the given email addresses are invalid and will not be sent to.
 xe.invitation.displayMessage.theAddressIsInvalid=The email address given is invalid and will not be sent to.
-xe.invitation.displayMessage.toLabel=To:
-xe.invitation.displayMessage.subjectLabel=Subject:
-xe.invitation.displayMessage.contentLabel=Message:
 xe.invitation.displayForm.sendMail=Send Mail
 xe.invitation.displayForm.backToEdit=Back To Edit
 xe.invitation.displayForm.preview=Preview
-xe.invitation.displayForm.messagePrompt=Invitation message:
-xe.invitation.displayForm.subjectLinePrompt=Subject line:
-xe.invitation.displayForm.recipientsPrompt=Who you are inviting:
 xe.invitation.adminTools.heading=Administrative Tools
 xe.invitation.adminTools.configureLink=Click here to configure the friend inviter
 xe.invitation.adminTools.displayAllOldMessagesLink=Click here see the list of already sent mail messages
@@ -89,13 +86,13 @@ platform.validation.invalidEmailAddress=Invalid email address.
 #----------------------------------------------------------------------
 
 # XWiki.InvitationMail (Invitation Application) Email XObject
-XWiki.InvitationMailClass_messageID=Email message identifier
-XWiki.InvitationMailClass_recipients=Email addresses to whom this message was sent
-XWiki.InvitationMailClass_sendingUser=User who sent the message
-XWiki.InvitationMailClass_subjectLine=Subject line
-XWiki.InvitationMailClass_messageBody=Message content
-XWiki.InvitationMailClass_reportedAsSpam=Was this message reported as spam
-XWiki.InvitationMailClass_handledBy=Spam report investigated by
+XWiki.InvitationMail_messageID=Email message identifier
+XWiki.InvitationMail_recipients=Email addresses to whom this message was sent
+XWiki.InvitationMail_sendingUser=User who sent the message
+XWiki.InvitationMail_subjectLine=Subject line
+XWiki.InvitationMail_messageBody=Message content
+XWiki.InvitationMail_reportedAsSpam=Was this message reported as spam
+XWiki.InvitationMail_handledBy=Spam report investigated by
 
 # XWiki.Invitation (Invitation application) Configuration
 XWiki.Invitation_from_address=Admin email address (messages will list this as their from address)

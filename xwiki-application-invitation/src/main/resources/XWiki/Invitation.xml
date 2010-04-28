@@ -14,7 +14,7 @@
 <date>1271850308000</date>
 <contentUpdateDate>1271850308000</contentUpdateDate>
 <version>1.1</version>
-<title>$msg.get('xe.invitation.heading')</title>
+<title>$msg.get("xe.invitation.heading")</title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
@@ -181,6 +181,175 @@
 <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
 </subjectLineTemplate>
 </class>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>XWiki.Invitation</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>c042f28e-20f8-4fdd-b335-89928ef5f1d5</guid>
+<property>
+<cache>default</cache>
+</property>
+<property>
+<code>/* Hide unwanted page stuff */
+#contentmenu *, #hierarchy *, #document-info *, #xdocFooter {
+  display: none;
+}
+
+.invitation, .invitation input[type='text'], .invitation textarea {
+  float: left;
+  width: 450px; 
+}
+
+.invitation-preview {
+  background-color: rgb(252, 252, 252);
+  border: 1px solid rgb(214, 225, 231);
+  padding: 3px;
+  margin-left: 30px;
+}
+
+.invitation-preview .field {
+  background-color: rgb(255, 255, 255);
+  margin-left: 20px;
+  margin-bottom: 10px;
+  padding: 10px;
+  overflow: hidden;
+
+  /* Makes the field fit with padding and margins. */
+  width: 390px;
+}
+
+.clearboth {
+  clear:both;
+}
+
+.invitation input[type='text'], .invitation textarea {
+  margin-bottom: 10px;
+}
+
+/* Labels */
+.invitation strong, .invitation label {
+  text-transform: uppercase;
+}
+
+/* "Preview:" label */
+.invitation strong {
+  padding-left: 30px;
+}
+
+.invitation-preview strong {
+  padding-left: 20px;
+}</code>
+</property>
+<property>
+<name>Invitation Application</name>
+</property>
+<property>
+<parse>0</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator>|</separator>
+<separators>|,</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>XWiki.Invitation</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>4ec1354e-d3b8-4190-abf6-4b6f02f6a39c</guid>
+<property>
+<tags/>
+</property>
+</object>
 <content>{{velocity}}
 #*
  * Invitation Application
@@ -202,6 +371,12 @@
  * XWiki.InvitationConfig configuration for this code. Contains an XObject of the class defined in this document.
  *
  *###
+## Get CSS for this page
+$xwiki.get('ssx').use($doc.getFullName())
+##
+## Don't load comments, history, etc.
+#set($docextras = [])
+##
 ## Pull in the LiveValidation Javascript and CSS files.
 #macro(useLiveValidation)
   $xwiki.get("jsfx").use('uicomponents/widgets/validation/livevalidation_prototype.js')
@@ -324,15 +499,13 @@
       #displayAllOldMessages($emailClass, $emailContainer)
     #end
   #else
-    ## The user wants to write a message.
-    #if($request.get('preview'))
-      ## The user wants to preview a message they wrote.
-      #set($mail = "")
-      #generateMailFromTemplate($subjectLineTemplate, $messageBodyTemplate, $emailClass,
-                                $recipients, $emailRegex, $subjectLine, $messageBody, $mail, $emailContainer)
-      #displayMessage($mail, $recipients, $emailRegex)
-    #end
+    ## The user wants to write and preview a message.
+    ## The user wants to preview a message they wrote.
     #displayForm($recipientString, $emailRegex, $subjectLine, $messageBody, $hasEdit)
+    #set($mail = "")
+    #generateMailFromTemplate($subjectLineTemplate, $messageBodyTemplate, $emailClass,
+                              $recipients, $emailRegex, $subjectLine, $messageBody, $mail, $emailContainer)
+    #displayMessage($mail, $recipients, $emailRegex)
   #end
   #if($hasEdit)
     #displayAdministrativeTools()
@@ -626,7 +799,7 @@
     #foreach($address in $sendTo)
       #set($toString = "$!toString, $address")
     #end
-    #if($toString.length() &gt; 0)
+    #if($toString)
       #set($toString = $toString.substring(1))
     #end
     $mail.set('recipients', $toString)##
@@ -677,47 +850,62 @@
  *                                 will lead to undefined results.
  *###
 #macro(displayMessage, $mail, $recipients, $emailRegex)
-  ## get the lists of valid and invalid email addresses.
-  #set($invalidAddresses = [])
-  #if("$!recipients" == '' || "$!emailRegex" == '')
-    ## No override, use values from the message.
-    #set($sendTo = $mail.getProperty('recipients').getValue().split('|'))
-    ## We assume that all addresses are valid and will leave $invalidAddresses empty.
-  #else
-    #set($sendTo = [])
-    #validateAddressFormat($recipients, $emailRegex, $sendTo, $invalidAddresses)
-  #end
-  ## Print the email addresses to be sent to.
-  ## To:
-  **$msg.get('xe.invitation.displayMessage.toLabel')** ##
-  #foreach($recipient in $recipients)
-    #if($invalidAddresses.contains($recipient))
-      (%style="background:red"%)$recipient(%%) ##
+
+  {{html wiki=true}}
+  &lt;div class="invitation"&gt;
+   &lt;strong&gt;$msg.get('xe.invitation.previewLabel')&lt;/strong&gt;
+   &lt;div class="invitation invitation-preview"&gt;
+    ## get the lists of valid and invalid email addresses.
+    #set($invalidAddresses = [])
+    #if("$!recipients" == '' || "$!emailRegex" == '')
+      ## No override, use values from the message.
+      #set($sendTo = $mail.getProperty('recipients').getValue().split('|'))
+      ## We assume that all addresses are valid and will leave $invalidAddresses empty.
     #else
-      $recipient ##
+      #set($sendTo = [])
+      #validateAddressFormat($recipients, $emailRegex, $sendTo, $invalidAddresses)
     #end
-  #end
-  ## Tell the user that some of the email addresses are invalid.
-  #if($invalidAddresses.size() &gt; 0)
-    #if($recipients.size() == 1)
-      ## The email address given is invalid and will not be sent to.
-      $msg.get('xe.invitation.displayMessage.theAddressIsInvalid')
-    #else
-      #if($invalidAddresses.size() &gt; 1)
-        $msg.get('xe.invitation.displayMessage.someAddressesAreInvalid', [$invalidAddresses.size()])
+    ## Print the email addresses to be sent to.
+    ## To:
+    **$msg.get('xe.invitation.toLabel')** ##
+    &lt;div class="invitation-preview field"&gt;
+     #foreach($recipient in $recipients)
+       #if($invalidAddresses.contains($recipient))
+         &lt;span style="background:red"&gt;$escapetool.html($recipient)&lt;/span&gt; ##
+       #else
+         $escapetool.html($recipient) ##
+       #end
+     #end
+    &amp;nbsp; ## used to make the field the correct size if it's empty.
+    &lt;/div&gt;
+    ## Tell the user that some of the email addresses are invalid.
+    #if($invalidAddresses.size() &gt; 0)
+      #if($recipients.size() == 1)
+        ## The email address given is invalid and will not be sent to.
+        $msg.get('xe.invitation.displayMessage.theAddressIsInvalid')
       #else
-        $msg.get('xe.invitation.displayMessage.anAddressesIsInvalid')
+        #if($invalidAddresses.size() &gt; 1)
+          $msg.get('xe.invitation.displayMessage.someAddressesAreInvalid', [$invalidAddresses.size()])
+        #else
+          $msg.get('xe.invitation.displayMessage.anAddressesIsInvalid')
+        #end
       #end
     #end
-  #end
+     ## Subject:
+     **$msg.get('xe.invitation.subjectLabel')** ##
+    &lt;div class="invitation-preview field"&gt;
+     $escapetool.html($mail.getProperty('subjectLine').getValue())
+    &lt;/div&gt;
+    ## Message:
+    **$msg.get('xe.invitation.contentLabel')**
+    &lt;div class="invitation-preview field"&gt;
+     $mail.getProperty('messageBody').getValue()
+    &lt;/div&gt;
+   &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="wikimodel-emptyline clearboth"&gt;&lt;/div&gt;
+  {{/html}}
 
-  ## Subject:
-  **$msg.get('xe.invitation.displayMessage.subjectLabel')** ##
-  $mail.getProperty('subjectLine').getValue()
-
-  ## Message:
-  **$msg.get('xe.invitation.displayMessage.contentLabel')**
-  $mail.getProperty('messageBody').getValue()
 #end
 ##
 #*
@@ -735,63 +923,51 @@
  *                    If so then they can send to multiple addresses at once.
  *###
 #macro(displayForm, $recipientString, $emailRegex, $subjectLine, $messageBody, $hasEdit)
-  #set($hide = ' class="hidden"')
-  ## Show a form where the user can create their message.
-  #if($request.get('preview'))
-    #set($hideForm = $hide)
-  #else
-    #set($hideBackToEdit = $hide)
-    #set($hideSendMail = $hide)
-  #end
-  {{html clean="false" wiki="false"}}&lt;/p&gt;
-  &lt;form action="$doc.getURL('view')" method="post"&gt;
-   &lt;div$!hideForm&gt;
-    &lt;dl&gt;
-     ## Who you are inviting:
-     &lt;dt&gt;&lt;label for="recipients"&gt;$msg.get('xe.invitation.displayForm.recipientsPrompt')&lt;/label&gt;&lt;/dt&gt;
-     ## If the user has edit access on this document, then we should allow them to send to multiple email addresses.
-     #if($hasEdit)
-       &lt;dd&gt;
-        &lt;textarea cols="75" name="recipients" rows="3" id="recipients"&gt;##
-         $!recipientString##
-        &lt;/textarea&gt;
-       &lt;/dd&gt;
-     #else
-       &lt;dd&gt;&lt;input type="text" size="54" name="recipients" id="recipients" value="$!recipientString" /&gt;&lt;/dd&gt;
-       #emailLiveValidationJs($emailRegex, true)
-     #end
-     ## Subject line:
-     &lt;dt&gt;&lt;label for="subjectLine"&gt;$msg.get('xe.invitation.displayForm.subjectLinePrompt')&lt;/label&gt;&lt;/dt&gt;
-     &lt;dd&gt;
-      &lt;input type="text" size="54" name="subjectLine" id="subjectLine" value="$!escapetool.html($!subjectLine)" /&gt;
-     &lt;/dd&gt;
-     ## Invitation message:
-     &lt;dt&gt;&lt;label for="messageBody"&gt;$msg.get('xe.invitation.displayForm.messagePrompt')&lt;/label&gt;&lt;/dt&gt;
-     &lt;dd&gt;
-      &lt;textarea cols="75" name="messageBody" rows="10" id="messageBody"&gt;##
-       $!escapetool.html($!messageBody)##
-      &lt;/textarea&gt;
-     &lt;/dd&gt;
-    &lt;/dl&gt;
-    &lt;span class="buttonwrapper"&gt;
-     ## Preview
-     &lt;input type="submit" class="button" name="preview" value="$msg.get('xe.invitation.displayForm.preview')" /&gt;
-    &lt;/span&gt;
+
+  {{html clean="false" wiki="false"}}
+  &lt;form action="$doc.getURL('view')" method="post" class="invitation"&gt;
+   &lt;dl&gt;
+    ## Who you are inviting:
+    &lt;dt&gt;&lt;label for="recipients"&gt;$msg.get('xe.invitation.toLabel')&lt;/label&gt;&lt;/dt&gt;
+    ## If the user has edit access on this document, then we should allow them to send to multiple email addresses.
+    #if($hasEdit)
+      &lt;dd&gt;
+       &lt;textarea cols="75" name="recipients" rows="3" id="recipients"&gt;##
+        $!recipientString##
+       &lt;/textarea&gt;
+      &lt;/dd&gt;
+    #else
+      &lt;dd&gt;&lt;input type="text" size="54" name="recipients" id="recipients" value="$!recipientString" /&gt;&lt;/dd&gt;
+      #emailLiveValidationJs($emailRegex, true)
+    #end
+    ## Subject line:
+    &lt;dt&gt;&lt;label for="subjectLine"&gt;$msg.get('xe.invitation.subjectLabel')&lt;/label&gt;&lt;/dt&gt;
+    &lt;dd&gt;
+     &lt;input type="text" size="54" name="subjectLine" id="subjectLine" value="$!escapetool.html($!subjectLine)" /&gt;
+    &lt;/dd&gt;
+    ## Invitation message:
+    &lt;dt&gt;&lt;label for="messageBody"&gt;$msg.get('xe.invitation.contentLabel')&lt;/label&gt;&lt;/dt&gt;
+    &lt;dd&gt;
+     &lt;textarea cols="75" name="messageBody" rows="10" id="messageBody"&gt;##
+      $!escapetool.html($!messageBody)##
+     &lt;/textarea&gt;
+    &lt;/dd&gt;
+   &lt;/dl&gt;
+   &lt;div class="bottombuttons"&gt;
+    &lt;div class="buttons"&gt;
+     &lt;span class="buttonwrapper"&gt;
+      ## Preview
+      &lt;input type="submit" class="button" name="preview" value="$msg.get('xe.invitation.displayForm.preview')" /&gt;
+     &lt;/span&gt;
+     &lt;span class="buttonwrapper"&gt;
+      ## Send Mail
+      &lt;input type="submit" class="button" name="sendMail" value="$msg.get('xe.invitation.displayForm.sendMail')" /&gt;
+     &lt;/span&gt;
+    &lt;/div&gt;
    &lt;/div&gt;
-   &lt;span$!hideBackToEdit&gt;
-    &lt;span class="buttonwrapper"&gt;
-     ## Back To Edit
-     &lt;input type="submit" class="button" name="backToEdit" value="$msg.get('xe.invitation.displayForm.backToEdit')" /&gt;
-    &lt;/span&gt;
-   &lt;/span&gt;
-   &lt;span$!hideSendMail&gt;
-    &lt;span class="buttonwrapper"&gt;
-     ## Send Mail
-     &lt;input type="submit" class="button" name="sendMail" value="$msg.get('xe.invitation.displayForm.sendMail')" /&gt;
-    &lt;/span&gt;
-   &lt;/span&gt;
   &lt;/form&gt;
-  &lt;p&gt;{{/html}}
+  {{/html}}
+
 #end
 ##
 #*
