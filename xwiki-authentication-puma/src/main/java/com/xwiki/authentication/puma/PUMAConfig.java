@@ -48,6 +48,11 @@ public class PUMAConfig extends Config
         super("puma", "xwiki.authentication.puma");
     }
 
+    public String getUserUidField(XWikiContext context)
+    {
+        return getParam("userUidField", null, context);
+    }
+    
     public Map<String, String> getUserMapping(XWikiContext context)
     {
         return getMapParam("userMapping", ',', null, context);

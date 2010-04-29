@@ -21,6 +21,9 @@ Put them in the /lib folder and that's all you can build with maven (mvn package
 
 == xwiki.cfg file ==
 
+#-# Indicate the name of the PUMA profile field where the user uid can be found. If none is provided request remote user is used.
+# xwiki.authentication.puma.userUidField=cn
+
 #-# Retrieve the following fields from PUMA and store them in the XWiki user object (puma-attribute=xwiki-attribute)
 # xwiki.authentication.puma.userMapping=sn=last_name,givenName=first_name,mail=email
 
@@ -37,6 +40,7 @@ It's also possible to put any of theses configuration in the XWiki.XWikiPreferen
 
 The fields names are not exactly the same, you have to change "xwiki.authentication.puma." prefix to "puma_":
 
+xwiki.authentication.puma.userUidField -> puma_userUidField
 xwiki.authentication.puma.userMapping -> puma_userMapping
 xwiki.authentication.puma.groupsMapping -> puma_groupsMapping
 xwiki.authentication.puma.fallback -> puma_fallback

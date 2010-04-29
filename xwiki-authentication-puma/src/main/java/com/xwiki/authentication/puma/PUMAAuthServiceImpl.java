@@ -24,6 +24,7 @@ package com.xwiki.authentication.puma;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,12 +102,6 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
         LOG.debug("Request remote user: " + request.getRemoteUser());
 
-        String ssoUser = request.getRemoteUser();
-
-        XWikiDocument userProfile = getUserProfileByUid(ssoUser.replace(".", ""), ssoUser, context);
-
-        LOG.debug("XWiki user resolved profile name: " + userProfile.getFullName());
-
         // //////////////////////////////////////////////
         // Get PUMA profile
         // //////////////////////////////////////////////
@@ -116,12 +111,26 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
         PumaProfile pumaProfile = pumaHome.getProfile(request);
 
         User user;
+        String ssoUser = null;
         try {
             user = pumaProfile.getCurrentUser();
+            String userUidField = getConfig().getUserUidField(context);
+            if (userUidField != null) {
+                Map<String, Object> fields = pumaProfile.getAttributes(user, Collections.singletonList(userUidField));
+                ssoUser = (String) fields.get(userUidField);
+            }
         } catch (PumaException e) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                 "Can't get current user uid.", e);
         }
+
+        if (ssoUser == null) {
+            ssoUser = request.getRemoteUser();
+        }
+
+        XWikiDocument userProfile = getUserProfileByUid(ssoUser.replaceAll("[\\. ,]", ""), ssoUser, context);
+
+        LOG.debug("XWiki user resolved profile name: " + userProfile.getFullName());
 
         // ////////////////////////////////////////////////////////////////////////
         // Synch user
