@@ -284,7 +284,7 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
 
                 Map<String, Collection<String>> groupsToRemove = new HashMap<String, Collection<String>>(groupMappings);
 
-                List<Group> pumaUserGroups = pl.findGroupsByPrincipal(user, false);
+                List<Group> pumaUserGroups = pl.findGroupsByPrincipal(user, true);
 
                 LOG.debug("The user belongs to following PUMA groups: ");
 
