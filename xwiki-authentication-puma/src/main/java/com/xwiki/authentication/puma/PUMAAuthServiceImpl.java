@@ -128,6 +128,10 @@ public class PUMAAuthServiceImpl extends AbstractSSOAuthServiceImpl
             ssoUser = request.getRemoteUser();
         }
 
+        // Workaround a rights management bug that does not properly support some characters
+        // See http://jira.xwiki.org/jira/browse/XWIKI-5149 for white space and comma characters
+        // Dot is a more general issue at document name level handling that should be fixed when all the code will
+        // manipulate proper model references objects
         XWikiDocument userProfile = getUserProfileByUid(ssoUser.replaceAll("[\\. ,]", ""), ssoUser, context);
 
         LOG.debug("XWiki user resolved profile name: " + userProfile.getFullName());
