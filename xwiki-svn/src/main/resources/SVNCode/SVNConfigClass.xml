@@ -120,12 +120,17 @@
 <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
 </savedlist>
 <status>
+<customDisplay></customDisplay>
+<editor>Text</editor>
 <name>status</name>
 <number>8</number>
+<picker>0</picker>
 <prettyName>status</prettyName>
 <rows>5</rows>
 <size>40</size>
 <unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
 <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
 </status>
 <username>
