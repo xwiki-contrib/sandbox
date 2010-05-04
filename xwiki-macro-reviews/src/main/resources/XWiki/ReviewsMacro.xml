@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>XWiki</web>
+<name>ReviewsMacro</name>
+<language></language>
+<defaultLanguage></defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>xwiki:XWiki.JeromeVelociter</author>
+<customClass></customClass>
+<contentAuthor>xwiki:XWiki.JeromeVelociter</contentAuthor>
+<creationDate>1272488742000</creationDate>
+<date>1272906807000</date>
+<contentUpdateDate>1272906807000</contentUpdateDate>
+<version>11.1</version>
+<title>Reviews Macro</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>onDemand=On demand|always=Always</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>XWiki.ReviewsMacro</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>79a940d8-6f8e-482b-a30e-b2a15cca2e6b</guid>
+<property>
+<cache>default</cache>
+</property>
+<property>
+<code>## Use the current ColorTheme
+#template('colorThemeInit.vm')
+
+## Generate reference to background image
+#macro(imgURL $name) url($xwiki.getSkinFile("icons/silk/${name}.gif")) #end
+
+## Generate reference to background image
+#macro(attImgURL $name) url($doc.getAttachmentURL("${name}.png")) #end
+
+ul.reviews div.head {
+  font-size:1.2em;
+  margin-bottom:3px;	
+}
+
+ul.reviews li.reviewedItem {
+  margin-bottom:15px;
+  border-bottom:1px solid #E9E9E9;
+}
+
+ul.reviews div.reviewAuthor {
+  float:left;
+  width:60px;
+  text-align:right;
+  margin-right:10px;
+}
+ul.reviews div.reviewAuthor img {
+  max-width:50px; 
+  max-height:50px;
+}
+
+ul.reviews .reviewTime {
+  color:grey;
+  font-family:serif
+}
+
+ul.reviews div.annotationContainer {
+  margin-bottom:5px;
+  text-align:justify;	
+}
+
+ul.reviews div.commentContainer {
+  border:none;	
+  display:table-cell;
+  text-align:justify;
+  background:none;
+}
+
+ul.reviews .review div.comment p,
+ul.reviews .review div.annotation p {
+  padding:0px;
+  margin:0px;
+}
+
+ul.reviews span.annotatedContent {
+  background:url($xwiki.getSkinFile('icons/silk/note.gif')) no-repeat;
+  background-color:$theme.highlightColor;
+  padding-left:20px;
+  color:grey;
+  font-size:0.9em;
+  font-style:italic;
+}
+
+ul.reviews .review span.wikilink {
+  font-weight: bold;
+}
+
+ul.reviews .otherReviews img {
+  max-width:35px; 
+  max-height:35px;
+}
+
+ul.reviews div.otherReviews {
+  font-style:italic;
+  text-align:right;
+  font-size:0.8em;
+  margin-top:5px;
+}
+
+ul.reviews div.reviewsContainer {
+  float:left;
+  width:100%;
+}</code>
+</property>
+<property>
+<name></name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>XWiki.ReviewsMacro</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>c1c5254b-6a27-4670-b824-c9c1b78ec3fc</guid>
+<property>
+<tags/>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<code>
+<name>code</name>
+<number>8</number>
+<prettyName>Macro code</prettyName>
+<rows>20</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<contentDescription>
+<name>contentDescription</name>
+<number>7</number>
+<prettyName>Content description (Not applicable for "No content" type)</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</contentDescription>
+<contentType>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>contentType</name>
+<number>6</number>
+<prettyName>Macro content type</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator>|</separator>
+<separators>|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Mandatory|Optional|No content</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</contentType>
+<defaultCategory>
+<name>defaultCategory</name>
+<number>4</number>
+<prettyName>Default category</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultCategory>
+<description>
+<name>description</name>
+<number>3</number>
+<prettyName>Macro description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<id>
+<name>id</name>
+<number>1</number>
+<prettyName>Macro id</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</id>
+<name>
+<name>name</name>
+<number>2</number>
+<prettyName>Macro name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<supportsInlineMode>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>supportsInlineMode</name>
+<number>5</number>
+<prettyName>Supports inline mode</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</supportsInlineMode>
+<visibility>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>visibility</name>
+<number>9</number>
+<prettyName>Macro visibility</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator>|</separator>
+<separators>|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Current User|Current Wiki|Global</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</visibility>
+</class>
+<name>XWiki.ReviewsMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroClass</className>
+<guid>df726cfd-8a2d-475a-9ca3-fd52597eb3e2</guid>
+<property>
+<code>{{velocity}}
+{{html wiki=true}}
+#macro(displayAvatar $user $size)
+  {{html wiki=false}}
+  #set($userDoc = $xwiki.getDocument($user))
+  #if(!$userDoc.isNew())    
+    #set($avatar = $userDoc.getValue("avatar"))
+    #if("$!avatar" != '')
+      #set($avatarURL = $userDoc.getAttachmentURL($avatar,"download","height=40&amp;amp;height=${size}"))  
+    #else       
+      #set($avatarURL = $xwiki.getSkinFile("noavatar.png"))
+    #end
+    &lt;img class="avatar" src="${avatarURL}" height="${size}" alt="avatar" /&gt;
+  #end
+  {{/html}}
+#end
+#set($ok = $xwiki.ssx.use('XWiki.ReviewsMacro'))
+#set($ok = $xwiki.ssx.use('Main.RecentChanges'))
+#if("${context.macro.params.limit}" != '' &amp;&amp; $mathtool.toInteger($context.macro.params.limit))
+  #set($limit = $mathtool.toInteger($context.macro.params.limit))
+#else
+  #set($limit = 5)
+#end
+#set($queryFrom = ", BaseObject as review")
+#set($queryWhere = " where review.name=doc.fullName and review.className in ('XWiki.XWikiComments', 'AnnotationCode.AnnotationClass')")
+#if("$!{context.macro.params.className}" != '')
+  #set($queryFrom = "${queryFrom} , BaseObject as obj")
+  #set($queryWhere = "${queryWhere} and doc.fullName=obj.name and obj.className='${context.macro.params.className}'") 
+#end
+&lt;ul class="xlist xhighlight reviews"&gt;
+#foreach($documentName in $xwiki.searchDocuments("$queryFrom $queryWhere order by doc.date desc", $limit, 0))
+#set($articleDoc=$xwiki.getDocument($documentName))
+#set($comments = $articleDoc.getObjects('XWiki.XWikiComments'))
+#set($annotations = $articleDoc.getObjects('AnnotationCode.AnnotationClass'))
+## Let's manually build a map of all reviews (comments + annotations).
+## (We need to do that since building just a collection by adding all comments 
+## and annotations would be a PITA to sort by date)
+#set($reviews = {})
+#foreach($comment in $comments)
+  #set($ok = $reviews.put($comment.getProperty('date').value.time, $comment))
+#end
+#foreach($anno in $annotations)
+  #set($ok = $reviews.put($anno.getProperty('date').value.time, $anno))
+#end
+&lt;li class="xitem reviewedItem xhighlight"&gt;
+&lt;div class="head"&gt;
+&lt;a href="$articleDoc.getURL('view')"&gt;$articleDoc.displayTitle&lt;/a&gt;
+&lt;/div&gt;
+#set($latest = $reviews.get($listtool.get($sorttool.sort($reviews.keySet()), $mathtool.sub($reviews.keySet().size(), 1))))
+&lt;div class="reviewsContainer"&gt;
+&lt;div class="latestReview"&gt;
+#if($latest.getxWikiClass().name == 'AnnotationCode.AnnotationClass')
+  ## We've got an annotation type of review
+  &lt;div class="annotationContainer"&gt;
+    &lt;span class="annotatedContent"&gt;$latest.getProperty('selection').value&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="review"&gt;
+	  &lt;div class="reviewAuthor"&gt;
+	  #displayAvatar($latest.author, 50)
+	  &lt;/div&gt;	
+  &lt;div class="commentContainer"&gt;
+	  &lt;div&gt;
+      {{html wiki=false}}$xwiki.getUserName($latest.author){{/html}}
+      &lt;span class="reviewTime"&gt;{{timeAgo}}$latest.getProperty('date').value.time{{/timeAgo}}&lt;/span&gt;
+  &lt;/div&gt;
+	  &lt;div class="commentQuote lQuo"&gt;&amp;nbsp;&lt;/div&gt;
+      &lt;div class="commentQuote rQuo"&gt;&amp;nbsp;&lt;/div&gt;
+      &lt;div class="annotation comment"&gt;$latest.annotation&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;/div&gt;
+#else
+  ## We've got a comment type of review
+  &lt;div class="review"&gt;
+	  &lt;div class="reviewAuthor"&gt;
+	  #displayAvatar($latest.author)
+	  &lt;/div&gt;
+  &lt;div class="commentContainer"&gt;
+	  &lt;div&gt;
+      {{html wiki=false}}$xwiki.getUserName($latest.author){{/html}}
+      &lt;span class="reviewTime"&gt;{{timeAgo}}$latest.getProperty('date').value.time{{/timeAgo}}&lt;/span&gt;
+      &lt;/div&gt;
+	  &lt;div class="commentQuote lQuo"&gt;&amp;nbsp;&lt;/div&gt;
+      &lt;div class="commentQuote rQuo"&gt;&amp;nbsp;&lt;/div&gt;
+      &lt;div class="comment"&gt;$latest.comment&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;/div&gt;
+#end
+&lt;/div&gt;
+#if($reviews.size() &gt; 1)
+#set($ok = $listtool.remove($sorttool.sort($reviews.keySet(), "date:desc"), 0))
+#set($otherReviewers = [])
+#foreach($review in $reviews.keySet())
+#if(!$otherReviewers.contains($reviews.get($review).author))
+#set($ok = $otherReviewers.add($reviews.get($review).author))
+#end
+#end
+&lt;div class="otherReviews"&gt;
+&lt;div&gt;and  $mathtool.sub($reviews.size(), 1) other review(s) by $otherReviewers.size() authors&lt;/div&gt;
+#foreach($reviewer in $otherReviewers) #displayAvatar($reviewer, 35) #end
+&lt;/div&gt;
+&lt;div class="clearfloats"&gt;&lt;/div&gt;
+&lt;/div&gt;
+#end
+&lt;/li&gt;
+#end
+&lt;/ul&gt;
+{{/html}}
+{{/velocity}}</code>
+</property>
+<property>
+<contentDescription></contentDescription>
+</property>
+<property>
+<contentType>No content</contentType>
+</property>
+<property>
+<defaultCategory></defaultCategory>
+</property>
+<property>
+<description>Display a list of the latest reviews (comments or annotations).</description>
+</property>
+<property>
+<id>reviews</id>
+</property>
+<property>
+<name>Reviews</name>
+</property>
+<property>
+<supportsInlineMode></supportsInlineMode>
+</property>
+<property>
+<visibility>Current Wiki</visibility>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.ReviewsMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>2f7cc4af-4350-493f-9179-0a7a4b1e4ff3</guid>
+<property>
+<defaultValue>5</defaultValue>
+</property>
+<property>
+<description>The number of reviewed pages to display</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>limit</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.ReviewsMacro</name>
+<number>1</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>c2831631-8a60-43c5-8655-ff6126abc497</guid>
+<property>
+<defaultValue></defaultValue>
+</property>
+<property>
+<description>An optional className to limit the displayed reviewed to only pages that have an object of such class</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>className</name>
+</property>
+</object>
+<content>{{reviews /}}
+</content></xwikidoc>
