@@ -26,7 +26,7 @@
 # Translations for Invitation Application
 #----------------------------------------------------------------------
 admin.invitation=Invitation Application
-xe.invitation.heading=Email Invitation
+xe.invitation.heading=Invitation Messenger
 xe.invitation.userIsReportedSpammer=A message which you sent was reported as spam and your privilege to send mail has suspended pending investigation, we apologize for the inconvenience.
 xe.invitation.returnToMainPage=Return to the main page
 xe.invitation.configInfo=This document contains configuration for the [[invitation application&gt;&gt;XWiki.Invitation]]
@@ -44,25 +44,22 @@ xe.invitation.sendMail.success=Your message has been sent.
 xe.invitation.displayOldMessage.heading=Inspect sent message
 xe.invitation.displayOldMessage.noMessageFound=No message by this id was found.
 xe.invitation.displayOldMessage.reportedAsSpam=Reported as spam
-xe.invitation.displayOldMessage.investigatedBy=Investigated by [[{0}]]
 xe.invitation.displayOldMessage.waitingToBeInvestigated=Waiting to be investigated
 xe.invitation.displayOldMessage.viewMessage=View Message
 xe.invitation.displayOldMessage.sentBy=Sent by: 
 xe.invitation.displayOldMessage.markThisMessageAsInvestigated=Mark this message as investigated.
+xe.invitation.displayAllOldMessages.status=Message Status
 xe.invitation.displayAllOldMessages.viewMessagesSentByUsers=View messages sent by users
-xe.invitation.displayAllOldMessages.reported=Reported
-xe.invitation.displayAllOldMessages.handledBy=Investigated By
 xe.invitation.displayAllOldMessages.sender=Sender
 xe.invitation.displayAllOldMessages.subject=Subject
-xe.invitation.displayAllOldMessages.waiting=Waiting
-xe.invitation.displayAllOldMessages.reported.no=No
-xe.invitation.displayAllOldMessages.handledBy.notApplicable=N/A
+xe.invitation.displayAllOldMessages.memo=Notes:
 xe.invitation.reportSpam.heading=Report Abuse
 xe.invitation.reportSpam.noMessageFound=There was no message found by the given ID. Maybe an administrator deleted the message from our system.
 xe.invitation.reportSpam.success=Your report has been logged and the situation will be investigated as soon as possible, we apologize for the inconvenience.
 xe.invitation.reportSpam.reportSaveComment=Reported message as spam.
 xe.invitation.handleSpam.noMessageFound=No message found by that id.
 xe.invitation.handleSpam.reportHandledSaveComment=Investigated spam report.
+xe.invitation.handleSpam.memo=[[{0}]] has investigated this incident.
 xe.invitation.displayMessage.anAddressesIsInvalid=One of the given email addresses is invalid and will not be sent to.
 xe.invitation.displayMessage.someAddressesAreInvalid={0} of the given email addresses are invalid and will not be sent to.
 xe.invitation.displayMessage.theAddressIsInvalid=The email address given is invalid and will not be sent to.
