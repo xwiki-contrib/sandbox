@@ -26,21 +26,23 @@
 # Translations for Invitation Application
 #----------------------------------------------------------------------
 admin.invitation=Invitation Application
-xe.invitation.heading=Invitation Messenger
+xe.invitation.heading=Email Invitation Messenger
 xe.invitation.userIsReportedSpammer=A message which you sent was reported as spam and your privilege to send mail has suspended pending investigation, we apologize for the inconvenience.
 xe.invitation.returnToMainPage=Return to the main page
 xe.invitation.configInfo=This document contains configuration for the [[invitation application&gt;&gt;XWiki.Invitation]]
 xe.invitation.emailContainerInfo=This document contains email messages for the [[invitation application&gt;&gt;XWiki.Invitation]]
+xe.invitation.emailClassInfo=This document contains the class definition for email message XObjects for the [[invitation application&gt;&gt;XWiki.Invitation]]
 xe.invitation.onlyMembersCanSendMail=Sorry, only members of this wiki can send mail.
 xe.invitation.youAreAMemberOfOtherWiki=You seem to be a member of {0} which is a different wiki.
 xe.invitation.toLabel=To:
 xe.invitation.subjectLabel=Subject:
 xe.invitation.contentLabel=Message:
 xe.invitation.previewLabel=Preview:
-xe.invitation.sendMail.errorWhileSending=An error has occured while sending the message.
+xe.invitation.errorWhileSending=An error has occurred while sending the message.
+xe.invitation.successSending=Your message has been sent.
+
 xe.invitation.sendMail.addMessageSaveComment=Added Email Message.
-xe.invitation.sendMail.composeAnotherMessageLink=Compose another message
-xe.invitation.sendMail.success=Your message has been sent.
+
 xe.invitation.displayOldMessage.heading=Inspect sent message
 xe.invitation.displayOldMessage.noMessageFound=No message by this id was found.
 xe.invitation.displayOldMessage.reportedAsSpam=Reported as spam
@@ -48,28 +50,88 @@ xe.invitation.displayOldMessage.waitingToBeInvestigated=Waiting to be investigat
 xe.invitation.displayOldMessage.viewMessage=View Message
 xe.invitation.displayOldMessage.sentBy=Sent by: 
 xe.invitation.displayOldMessage.markThisMessageAsInvestigated=Mark this message as investigated.
+
 xe.invitation.displayAllOldMessages.status=Message Status
 xe.invitation.displayAllOldMessages.viewMessagesSentByUsers=View messages sent by users
 xe.invitation.displayAllOldMessages.sender=Sender
 xe.invitation.displayAllOldMessages.subject=Subject
 xe.invitation.displayAllOldMessages.memo=Notes:
-xe.invitation.reportSpam.heading=Report Abuse
-xe.invitation.reportSpam.noMessageFound=There was no message found by the given ID. Maybe an administrator deleted the message from our system.
-xe.invitation.reportSpam.success=Your report has been logged and the situation will be investigated as soon as possible, we apologize for the inconvenience.
-xe.invitation.reportSpam.reportSaveComment=Reported message as spam.
-xe.invitation.handleSpam.noMessageFound=No message found by that id.
-xe.invitation.handleSpam.reportHandledSaveComment=Investigated spam report.
-xe.invitation.handleSpam.memo=[[{0}]] has investigated this incident.
+
+xe.invitation.displayMessageTable.sentDate=Date
+xe.invitation.displayMessageTable.sendingUser=Sender
+xe.invitation.displayMessageTable.subjectLine=Subject
+xe.invitation.displayMessageTable.statusCode=Status
+xe.invitation.displayMessageTable.memo=Memo
+xe.invitation.displayMessageTable.recipient=Email
+
+xe.invitation.doAction.confirmLabel=Confirm
+xe.invitation.doAction.noMessageFound=No message found by that id.
+xe.invitation.doAction.lackingPermission=You do not have permission to do this action.
+xe.invitation.doAction.incorrectMessageStatus=The requested action cannot be performed on this message because it's status is {0}
+xe.invitation.doAction.invitationCanceledMemo={0} left you this message when canceling the invitation.
+xe.invitation.doAction.invalidStatus=This request cannot be processed because the status of this invitation is {0}.
+
+xe.invitation.doAction.reportSpam.heading=Report Abuse
+xe.invitation.doAction.reportSpam.noMessageFound=There was no message found by the given ID. Maybe an administrator deleted the message from our system.
+xe.invitation.doAction.reportSpam.success=Your report has been logged and the situation will be investigated as soon as possible, we apologize for the inconvenience.
+xe.invitation.doAction.reportSpam.reportSaveComment=Reported message as spam.
+xe.invitation.doAction.reportSpam.areYouSure=Are you sure you would like to report this message as abuse.
+xe.invitation.doAction.reportSpam.memoLabel=Note to the administrator who investigates this report (optional)
+
+xe.invitation.doAction.handleSpam.memoLabel=Synopsis of findings, action taken
+xe.invitation.doAction.handleSpam.confirmLabel=Return email privilege
+xe.invitation.doAction.handleSpam.reportHandledSaveComment={0} investigated spam report.
+
+xe.invitation.doAction.accept.saveComment=Invitation accepted.
+xe.invitation.doAction.accept.noMessageFound=No message was found by that ID, maybe it was deleted accidentally or the system is experiencing problems.
+xe.invitation.doAction.accept.invitationCanceled=We're sorry but this invitation has been canceled.
+xe.invitation.doAction.accept.alreadyReportedAsSpam=This invitation has been reported as spam and is no longer valid.
+xe.invitation.doAction.accept.alreadyDeclined=This invitation has been declined and cannot be accepted now.
+xe.invitation.doAction.accept.alreadyAccepted=This invitation has already been accepted and the offer is no longer valid.
+
+
+xe.invitation.doAction.decline.heading=Decline invitation
+xe.invitation.doAction.decline.memoLabel=Message to {0} (optional)
+xe.invitation.doAction.decline.confirmLabel=Decline invitation
+xe.invitation.doAction.decline.saveComment=Invitation Declined
+xe.invitation.doAction.decline.alreadyReportedAsSpam=This invitation has already been reported as spam and thus cannot be declined.
+xe.invitation.doAction.decline.invitationCanceled=This invitation has been canceled and thus cannot be declined.
+xe.invitation.doAction.decline.alreadyDeclined=This invitation has already been declined and cannot be declined again.
+xe.invitation.doAction.decline.alreadyAccepted=This invitation has already been accepted and now cannot be declined.
+xe.invitation.doAction.decline.noMessageFound=No invitation was found by the given id. It might have been deleted or maybe the system is experiencing difficulties.
+xe.invitation.doAction.decline.success=This invitation has successfully been declined.
+
+xe.invitation.doAction.cancel.heading
+xe.invitation.doAction.cancel.noMessageFound
+xe.invitation.doAction.cancel.saveComment
+xe.invitation.doAction.cancel.success
+xe.invitation.doAction.cancel.areYouSure
+xe.invitation.doAction.cancel.memoLabel
+
 xe.invitation.displayMessage.anAddressesIsInvalid=One of the given email addresses is invalid and will not be sent to.
 xe.invitation.displayMessage.someAddressesAreInvalid={0} of the given email addresses are invalid and will not be sent to.
 xe.invitation.displayMessage.theAddressIsInvalid=The email address given is invalid and will not be sent to.
 xe.invitation.displayForm.sendMail=Send Mail
 xe.invitation.displayForm.backToEdit=Back To Edit
 xe.invitation.displayForm.preview=Preview
+
+xe.invitation.tools.heading=Tools
+xe.invitation.tools.myInvitationsLink=My invitations
+
 xe.invitation.adminTools.heading=Administrative Tools
-xe.invitation.adminTools.configureLink=Click here to configure the friend inviter
-xe.invitation.adminTools.displayAllOldMessagesLink=Click here see the list of already sent mail messages
+xe.invitation.adminTools.configureLink=Configure the invitation application
+xe.invitation.adminTools.allInvitationsLink=View all invitations
+
 xe.invitation.configuration.smtpHeading=SMTP Settings:
+
+xe.invitation.messageStatus.unsent=Unsent
+xe.invitation.messageStatus.pending=Pending
+xe.invitation.messageStatus.accepted=Accepted
+xe.invitation.messageStatus.declined=Declined
+xe.invitation.messageStatus.canceled=Canceled
+xe.invitation.messageStatus.reported=Reported as spam
+xe.invitation.messageStatus.investigated=Spam report investigated
+xe.invitation.messageStatus.unknown=Unknown status
 
 #----------------------------------------------------------------------
 # Translations for LiveValidation javascript validator
@@ -83,13 +145,14 @@ platform.validation.invalidEmailAddress=Invalid email address.
 #----------------------------------------------------------------------
 
 # XWiki.InvitationMail (Invitation Application) Email XObject
-XWiki.InvitationMail_messageID=Email message identifier
-XWiki.InvitationMail_recipients=Email addresses to whom this message was sent
-XWiki.InvitationMail_sendingUser=User who sent the message
-XWiki.InvitationMail_subjectLine=Subject line
-XWiki.InvitationMail_messageBody=Message content
-XWiki.InvitationMail_reportedAsSpam=Was this message reported as spam
-XWiki.InvitationMail_handledBy=Spam report investigated by
+XWiki.InvitationMailClass_messageID=Email message identifier
+XWiki.InvitationMailClass_messageGroupID=Message group identifier
+XWiki.InvitationMailClass_recipient=Email address which this message was sent to
+XWiki.InvitationMailClass_sendingUser=User who sent the message
+XWiki.InvitationMailClass_subjectLine=Subject line
+XWiki.InvitationMailClass_messageBody=Message content
+XWiki.InvitationMailClass_statusCode=Number indicating the message status
+XWiki.InvitationMailClass_memo=Memo attached to this message
 
 # XWiki.Invitation (Invitation application) Configuration
 XWiki.Invitation_from_address=Admin email address (messages will list this as their from address)
@@ -103,5 +166,4 @@ XWiki.Invitation_messageBodyTemplate=Email message body template
 XWiki.Invitation_emailClass=Email message XClass
 XWiki.Invitation_emailContainer=Document containing email XObjects
 XWiki.Invitation_emailRegex=Regular expression for validating email addresses
-XWiki.Invitation_allowUsersOfOtherWikis=Allow users of other wikis to send mail
-XWiki.Invitation_sendBcc=Always send mail to multiple addresses using blind carbon copy</content></xwikidoc>
+XWiki.Invitation_allowUsersOfOtherWikis=Allow users of other wikis to send mail</content></xwikidoc>

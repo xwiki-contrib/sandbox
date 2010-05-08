@@ -45,7 +45,7 @@
 </allowUsersOfOtherWikis>
 <emailClass>
 <name>emailClass</name>
-<number>8</number>
+<number>7</number>
 <picker>0</picker>
 <prettyName>Email message XClass</prettyName>
 <size>30</size>
@@ -56,7 +56,7 @@
 </emailClass>
 <emailContainer>
 <name>emailContainer</name>
-<number>1</number>
+<number>8</number>
 <picker>0</picker>
 <prettyName>Document containing email XObjects</prettyName>
 <size>30</size>
@@ -261,7 +261,7 @@
   display: none;
 }
 
-.invitation, .invitation input[type='text'], .invitation textarea {
+.invitation, .invitation input[type='text'], .invitation textarea, .invitation table {
   float: left;
   width: 450px; 
 }
@@ -382,32 +382,60 @@ $xwiki.get('ssx').use($doc.getFullName())
 #set($emailRegex = '/^([^@\s]+)@((?:[-a-zA-Z0-9]+\.)+[a-zA-Z]{2,})$/')
 #set($emailClass = 'XWiki.InvitationMailClass')
 #set($emailContainerName = "XWiki.InvitationMessages")
-#set($subjectLineTemplate = '$xcontext.getUser().replaceAll("^[^\.]*.", "") has invited you to join '
-     + '$xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"): $!subjectLine')
+#set($subjectLineTemplate = '{{velocity}}$xcontext.getUser().replaceAll("^[^\.]*.", "") has invited you to join '
+     + '$xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"): $!subjectLine{{/velocity}}')
 #set($n = $util.getNewline())
 #set($messageBodyTemplate = '{{velocity}}You have received this mail because $xwiki.getUserName($xcontext.getUser(),'
                           + ' false) has invited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$",'
                           + ' "$1").' + "$n$n" + '{{html}}&lt;p class="user-message"&gt;' + "$n" + '$!escapetool.html($!me'
                           + 'ssageBody)&lt;/p&gt;{{/html}}' + "$n$n" + '[[Accept the invitation and join&gt;&gt;$doc.getExternal'
-                          + 'URL("view", "join=1&amp;messageid=$messageID")||class="join-link"]] [[Decline&gt;&gt;$doc.getExte'
-                          + 'rnalURL("view", "decline=1&amp;messageid=$messageID")||class="decline-link"]]' + "$n" + '--'
-                          + '--' + "$n" + 'If this message looks like abuse of our system, please [[report it&gt;&gt;$doc.'
-                          + 'getExternalURL("view", "reportSpam=1&amp;messageID=$messageID")]].' + "$n" + '{{/velocity}}'
-                          + "$n$n" + '{{html clean=false}}&lt;style&gt;&lt;!--p.user-message, a.join-link, a.decline-link {fo'
-                          + 'nt-size: 130%}/* Necessary because colibri.css is not available in email client. */ a {'
-                          + 'color: #4791BC;text-decoration: none;}div.email * {font-size:87.5%;}/* End of colibri.c'
-                          + 'ss stuff */a.join-link {float: left;}a.decline-link {color: #f88;float: right;}hr {clea'
-                          + 'r: both;}--&gt;&lt;/style&gt;{{/html}}')
+                          + 'URL("view", "actionCode=2&amp;messageID=$messageID")||class="join-link"]] [[Decline&gt;&gt;$doc.g'
+                          + 'etExternalURL("view", "actionCode=3&amp;messageID=$messageID")||class="decline-link"]]'
+                          + "$n" + '----' + "$n" + 'If this message looks like abuse of our system, please [[report '
+                          + 'it&gt;&gt;$doc.getExternalURL("view", "actionCode=5&amp;messageID=$messageID")]].' + "$n" + '{{/v'
+                          + 'elocity}}' + "$n$n" + '{{html clean=false}}&lt;style&gt;&lt;!--p.user-message, a.join-link, a.de'
+                          + 'cline-link {font-size: 130%}/* Necessary because colibri.css is not available in email '
+                          + 'client. */ a {color: #4791BC;text-decoration: none;}div.email * {font-size:87.5%;}/* En'
+                          + 'd of colibri.css stuff */a.join-link {float: left;}a.decline-link {color: #f88;float: r'
+                          + 'ight;}hr {clear: both;}--&gt;&lt;/style&gt;{{/html}}')
 ##
 ## Load some parameters from the configuration.
 #set($config = '')
 #set($configDoc = $xwiki.getDocumentAsAuthor("XWiki.InvitationConfig"))
 ## If no configuration document exists, create one and save it.
-#if(!$configDoc.isNew())
-  #set($config = $configDoc.getObject($doc.getFullName()))
-#end
-#if("$!config" != '')
+#if($configDoc.isNew())
+  $configDoc.setContent('{{velocity}}{{info}}$msg.get("xe.invitation.configInfo"){{/info}}{{/velocity}}')##
+  #set($config = $configDoc.newObject($doc.getFullName()))
+  $config.set('emailRegex', $emailRegex)##
+  $config.set('emailClass', $emailClass)##
+  $config.set('emailContainer', $emailContainerName)##
+  $config.set('subjectLineTemplate', $subjectLineTemplate)##
+  $config.set('messageBodyTemplate', $messageBodyTemplate)##
+  $config.set('allowUsersOfOtherWikis', 0)##
+  ## SMTP settings:
+  $config.set('from_address', 'admin@localhost.localdomain')##
+  $config.set('smtp_port', '25')##
+  $config.set('smtp_server', 'localhost')##
+  ## Now create the configurable objects.
+  #set($configurable = $configDoc.newObject('XWiki.ConfigurableClass'))
+  $configurable.set('displayInSection', 'Invitation')##
+  $configurable.set('configurationClass', "$doc.getFullName()")##
+  $configurable.set('configureGlobally', 1)##
+  #set($propsToShow = 'subjectLineTemplate|messageBodyTemplate|emailRegex|from_address|allowUsersOfOtherWikis|emailC'
+                      + 'lass|emailContainer')##
+  $configurable.set('propertiesToShow', $propsToShow)##
+  #set($configurable = $configDoc.newObject('XWiki.ConfigurableClass'))##
+  $configurable.set('displayInSection', 'Invitation')##
+  $configurable.set('heading', '$msg.get("xe.invitation.configuration.smtpHeading")')##
+  $configurable.set('configurationClass', "$doc.getFullName()")##
+  $configurable.set('configureGlobally', 1)##
+  $configurable.set('propertiesToShow',
+                    'smtp_server_password|smtp_server_username|smtp_port|smtp_server|javamail_extra_props')##
+  #disallowViewForAll($configDoc)##
+  $configDoc.saveAsAuthor()##
+#else
   ## Load configuration from config XObject
+  #set($config = $configDoc.getObject($doc.getFullName()))
   #set($emailRegex = $config.getProperty('emailRegex').getValue())
   #set($emailClass = $config.getProperty('emailClass').getValue())
   #set($emailContainerName = $config.getProperty('emailContainer').getValue())
@@ -428,37 +456,25 @@ $xwiki.get('ssx').use($doc.getFullName())
   #disallowViewForAll($emailContainer)
 #end
 ##
-## Get the list of email addresses to send to.
-#set($recipientString = $escapetool.html($request.get('recipients')))
-#if($hasEdit)
-  #set($recipients = $recipientString.split(' '))
-#else
-  ## If the user can't edit this page, we won't let them sent to multiple addresses.
-  #set($recipients = [$recipientString])
+## Load messages into a Map by messageID.
+#set($messages = {})
+#foreach($obj in $emailContainer.getObjects($emailClass))
+  #set($discard = $messages.put($obj.getProperty('messageID').getValue(), $obj))
 #end
-##
-## get the user supplied subject and message content.
-#set($subjectLine = $request.get('subjectLine'))
-#set($messageBody = $request.get('messageBody'))
 ##
 ##---------------------------------------------------------------------
 ## Decide what we should do.
 ##---------------------------------------------------------------------
 ##
-## This is a hack to get around the fact that the administration application still includeForm's this document
+## Get around the fact that the administration application still includeForm's this document
 ## when we want to configure the "Invitation" section.
-#if($xcontext.getAction() == 'view')
-  ##
-  ## Joining and reporting spam is available to non-members
-  #if("$!request.get('join')" != '')
-
-    ## A recipient of a message now wants to join the wiki.
-    ##
-    $response.sendRedirect($xwiki.getURL('XWiki.Register', 'register'))
-  #elseif($request.get('reportSpam') == '1' &amp;&amp; "$!request.get('messageID')" != '')
-    ## A user (hopefully the email recipient) is reporting the email message as spam.
-    ##
-    #reportSpam($!request.get('messageID'), $emailClass)
+#if($xcontext.getAction() != 'admin')
+  #if("$!request.get('actionCode')" != '')
+    #doAction($!request.get('messageID'),
+              $!request.get('actionCode'),
+              $!request.get('memo'),
+              $!request.get('confirm'),
+              $hasEdit, $messages, $emailContainer)
   #elseif($xcontext.getUser() == 'XWiki.XWikiGuest')
     ## All functions below are members only.
     ##
@@ -476,45 +492,78 @@ $xwiki.get('ssx').use($doc.getFullName())
     ## Users of other subwikis are not allowed to send mail.
     $msg.get('xe.invitation.onlyMembersCanSendMail')
     $msg.get('xe.invitation.youAreAMemberOfOtherWiki', [$xwiki.getDocument($xcontext.getUser()).getWiki()])
-  #elseif("$!request.get('sendMail')" != '')
-    ## We are being asked to send a message.
-    ##
-    #set($mail = '')
-    #generateMailFromTemplate($subjectLineTemplate, $messageBodyTemplate, $emailClass,
-                              $recipients, $emailRegex, $subjectLine, $messageBody, $mail, $emailContainer)
-    #sendMail($mail, $config, $emailContainer)
-##    #displayMessageInfo($mail)
-    #displayMessage($mail, '', '')
-  #elseif($request.get('handleSpam') == '1' &amp;&amp; "$!request.get('messageID')" != '' &amp;&amp; $hasEdit)
-    ## An admin is claiming that a spam situation has been handled/investigated.
-    ##
-    #handleSpam($!request.get('messageID'), $emailClass)
-    #displayOldMessage($request.get('messageID'), $emailClass)
-  #elseif($request.get('viewMessage') == '1' &amp;&amp; $hasEdit)
-    ## An administrator wants to look at old email that was sent.
-    ##
-    #if("$!request.get('messageID')" != '')
-      ## The admin wants to view a single messsage
-      #displayOldMessage($request.get('messageID'), $emailClass, $emailContainer)
-    #else
-      ## The admin wants to see a list of messages
-      #displayAllOldMessages($emailClass, $emailContainer)
-    #end
   #else
-    ## The user wants to write and preview a message.
-    ## The user wants to preview a message they wrote.
-    #displayForm($recipientString, $subjectLine, $messageBody, $hasEdit)
-    #set($mail = "")
-    #generateMailFromTemplate($subjectLineTemplate, $messageBodyTemplate, $emailClass,
-                              $recipients, $emailRegex, $subjectLine, $messageBody, $mail, $emailContainer)
-    #displayMessage($mail, $recipients, $emailRegex)
-  #end
-  #if($hasEdit)
-    #displayAdministrativeTools()
-  #end
-  #if("$!request.getQueryString()" != '')
-    ## Return to the main page
-    [[$msg.get('xe.invitation.returnToMainPage')&gt;&gt;$doc.getFullName()]]
+    ## The user is authorized to send mail &lt;-------------------------------------------------------
+    ## Get the list of email addresses to send to.
+    #set($recipientString = $escapetool.html($request.get('recipients')))
+    #if($hasEdit)
+      #set($recipients = $recipientString.split(' '))
+    #else
+      ## If the user can't edit this page, we won't let them sent to multiple addresses.
+      #set($recipients = [$recipientString])
+    #end
+    ##
+    ## get the user supplied subject and message content.
+    #set($subjectLine = $request.get('subjectLine'))
+    #set($messageBody = $request.get('messageBody'))
+
+    #if("$!request.get('sendMail')" != '')
+      ## We are being asked to send a message.
+      ##
+      #set($mail = [])
+      #generateMailFromTemplate($subjectLineTemplate, $messageBodyTemplate, $emailClass,
+                                $recipients, $emailRegex, $subjectLine, $messageBody, $mail, $emailContainer)
+      #sendMail($mail, $config, $emailContainer)
+      #set($errors = [])
+      #foreach($message in $mail)
+        #set($status = $message.getProperty('statusCode').getValue())
+        #if($status == '7' || $status == '0')
+          #set($discard = $errors.add($message))
+        #end
+      #end
+
+      {{html wiki=true}}
+       &lt;div class="invitation"&gt;
+
+        #if($errors.size() &gt; 0)
+          ## An error has occured while sending the message.
+          {{error}}$msg.get('xe.invitation.errorWhileSending'){{/error}}
+        #else
+          ## Your message has been sent.
+          {{info}}$msg.get('xe.invitation.successSending'){{/info}}
+        #end
+
+        #displayMessageTable($mail, ['sentDate', 'recipient', 'statusCode'])
+       &lt;/div&gt;
+      {{/html}}
+
+      #displayMessage($mail.get(0), '', '')
+    #elseif("$!request.get('inspectCode')" != '')
+      ## Either a user wants to inspect their old messages or an admin wants to inspect everyone's messages.
+      #inspectMessages($messages, $request.get('inspectCode'), $hasEdit, $request.get('messageID'))
+    #else
+      ## The user wants to write and preview a message.
+      #displayForm($recipientString, $subjectLine, $messageBody, $hasEdit)
+      #set($mail = [])
+      ## No recipients ('',) because we are just creating it to preview.
+      #generateMailFromTemplate($subjectLineTemplate, $messageBodyTemplate, $emailClass,
+                                '', $emailRegex, $subjectLine, $messageBody, $mail, $emailContainer)
+      #displayMessage($mail.get(0), $recipients, $emailRegex)
+    #end
+    ## Clear the float:left which puts elements side by side.
+
+
+    {{html}}&lt;p class="clearboth"&gt;&lt;/p&gt;{{/html}}
+
+    #displayUserTools($request.get('inspectCode'))
+    #if($hasEdit)
+      #displayAdministrativeTools($request.get('inspectCode'))
+    #end
+    #if("$!request.getQueryString()" != '')
+      ## Return to the main page
+
+      **[[$msg.get('xe.invitation.returnToMainPage')&gt;&gt;$doc.getFullName()]]**
+    #end
   #end
 #end
 ##
@@ -525,7 +574,7 @@ $xwiki.get('ssx').use($doc.getFullName())
 #*
  * Send an email message.
  *
- * $mail (XObject) an invitation email message.
+ * $mail (List&lt;XObject&gt;) a list of invitation email messages.
  *
  * $config (XObject) configuration for the inviter.
  *
@@ -554,199 +603,34 @@ $xwiki.get('ssx').use($doc.getFullName())
     $senderConfig.setExtraProperties($config.getProperty('javamail_extra_props').getValue())##
   #end
   ##
-  #set($message = $sender.createMail())
-  ##
-  #if("$!config.getProperty('from_address').getValue()" != '')
-    $message.setFrom($config.getProperty('from_address').getValue())##
-  #end
-  ##
-  ## Set recipients
-  #set($recipients = $mail.getProperty('recipients').getValue())##
-  ## If multiple recipients and sendBcc is true
-  ## then we send the message to ourselves with all recipients in bcc field.
-  #if($recipients.indexOf(',') != -1 &amp;&amp; "$!config.getProperty('sendBcc').getValue()" == '1')##
-    ## Send the message back to ourselves and bcc to all recipients.
-    $message.setTo($config.getProperty('from_address').getValue())##
-    $message.setBcc($recipients)##
-  #else
-    $message.setTo($recipients)##
-  #end
-  ##
-  ## Set the subject line and message body.
-  $message.setSubject($mail.getProperty('subjectLine').getValue())##
-  ##
-  ## If text part is not set then we get an NPE when trying to craft a multipart message.
-  $message.setTextPart('')##
-  ## Put all in email div so that we can apply CSS only to the email and not to the preview.
-  $message.setHtmlPart("&lt;div class='email'&gt;$mail.getProperty('messageBody').getValue()&lt;/div&gt;")##
-  ##
-  ## Send the message
-  #if("$sender.sendMail($message, $senderConfig)" != 0)
-    ## An error has occured while sending the message.
-    $msg.get('xe.invitation.sendMail.errorWhileSending')
-  #else
+  #foreach($letter in $mail)
+    #set($message = $sender.createMail())
+    ##
+    #if("$!config.getProperty('from_address').getValue()" != '')
+      $message.setFrom($config.getProperty('from_address').getValue())##
+    #end
+    ##
+    ## Set recipients
+    #set($recipient = $letter.getProperty('recipient').getValue())##
+    $message.setTo($recipient)##
+    ##
+    ## Set the subject line and message body.
+    $message.setSubject($letter.getProperty('subjectLine').getValue())##
+    ##
+    ## If text part is not set then we get an NPE when trying to craft a multipart message.
+    $message.setTextPart('')##
+    ## Put all in email div so that we can apply CSS only to the email and not to the preview.
+    $message.setHtmlPart("&lt;div class='email'&gt;$letter.getProperty('messageBody').getValue()&lt;/div&gt;")##
+    ##
+    ## Send the message
+    #if("$sender.sendMail($message, $senderConfig)" != 0)
+      $letter.set('statusCode', 7)
+    #else
+      ## Set this message code to 'sent'
+      $letter.set('statusCode', 1)
+    #end
     ## Comment = "Added Email Message."
     $emailContainer.saveAsAuthor($msg.get('xe.invitation.sendMail.addMessageSaveComment'))
-    ## Your message has been sent.
-    $msg.get('xe.invitation.sendMail.success')
-
-    ## Compose another message
-    [[$msg.get('xe.invitation.sendMail.composeAnotherMessageLink')&gt;&gt;$doc.getFullName()]]
-  #end
-#end
-##
-#*
- * Display a perticular previously sent message.
- *
- * $messageID (String) the unique identifier for this message.
- *
- * $emailClass (String) the name of the XClass representing email messages.
- *
- * $emailContainer (Document) the document to get the message from.
- *###
-#macro(displayOldMessage, $messageID, $emailClass, $emailContainer)
-
-  ## Inspect sent message
-  == $msg.get('xe.invitation.displayOldMessage.heading') ==
-  #set($mail = '')
-  #messageForID($messageID, $emailClass, $mail, $emailContainer)
-  #if($mail == '')
-    ## No message by this id was found.
-    $msg.get('xe.invitation.displayOldMessage.noMessageFound')
-  #else
-    #set($status = $mail.getProperty('statusCode').getValue())
-    #set($memo = $mail.getProperty('memo').getValue())
-
-    #if("$!status" == '5')
-      {{warning}}
-        ## Reported as spam - Waiting to be investigated
-        #messageStatusForCode($status)
-        $msg.get('xe.invitation.displayOldMessage.waitingToBeInvestigated')
-      {{/warning}}
-    #else
-      {{info}}
-        #messageStatusForCode($status)##
-        #if("$!memo" != '')
-          - $memo
-        #end
-      {{/info}}
-    #end
-
-    ## View Message
-    === $msg.get('xe.invitation.displayOldMessage.viewMessage') ===
-    ## Sent by:
-    $msg.get('xe.invitation.displayOldMessage.sentBy') [[$mail.getProperty('sendingUser').getValue()]]
-
-    {{code language="none"}}
-    #displayMessage($mail)
-    {{/code}}
-
-    #if("$!status" == '5')
-      {{html}}
-       &lt;form action="$doc.getURL()" method="post"&gt;
-        &lt;input type="hidden" name="messageID" value="$messageID" /&gt;
-        &lt;input type="hidden" name="handleSpam" value="1" /&gt;
-        ## Mark this message as investigated.
-        &lt;input type="submit" class="button" value="$msg.get('xe.invitation.displayOldMessage.markThisMessageAsInvestigated')" /&gt;
-       &lt;/form&gt;
-      {{/html}}
-
-    #end
-  #end
-#end
-##
-#*
- * Display a table of all sent messages.
- *
- * $emailClass (String) the name of the XClass representing email messages.
- *
- * $emailContainer (Document) the Document to look in for mail objects.
- *###
-#macro(displayAllOldMessages, $emailClass, $emailContainer)
-  ## View messages sent by users
-  = $msg.get('xe.invitation.displayAllOldMessages.viewMessagesSentByUsers') =
-  ##
-  |=$msg.get('xe.invitation.displayAllOldMessages.status')##
-  |=$msg.get('xe.invitation.displayAllOldMessages.memo')##
-  |=$msg.get('xe.invitation.displayAllOldMessages.sender')##
-  |=$msg.get('xe.invitation.displayAllOldMessages.subject')
-  ##
-  #foreach($obj in $emailContainer.getObjects($emailClass))
-    |#messageStatusForCode($obj.getProperty('statusCode').getValue())##
-    |$obj.getProperty('memo').getValue()##
-    |[[$obj.getProperty('sendingUser').getValue()]]##
-    |[[$obj.getProperty('subjectLine').getValue()&gt;&gt;$doc.getFullName()?##
-       viewMessage=1&amp;messageID=$obj.getProperty('messageID').getValue()]]
-  #end
-#end
-##
-#*
- * Report a message as spam.
- *
- * $messageID (String) a unique number identifying the message. This also serves as a hash to prevent people
- *                     blindly reporting random id numbers.
- *
- * $emailClass (String) the name of a document containing an XClass for an email.
- *
- * $emailContainer (Document) the document to look in for mail objects.
- *###
-#macro(reportSpam, $messageID, $emailClass, $emailContainer)
-  ## Report Abuse
-  == $msg.get('xe.invitation.reportSpam.heading') ==
-  #set($spamMessage = '')
-  #messageForID($messageID, $emailClass, $spamMessage, $emailContainer)
-  #if($spamMessage == '')
-    ## No message found by that id.
-    $msg.get('xe.invitation.reportSpam.noMessageFound')
-  #else
-    $spamMessage.set('statusCode', '5')
-    $emailContainer.saveAsAuthor($msg.get('xe.invitation.reportSpam.reportSaveComment'))
-    ## Your report has been logged, sorry for the inconvienence.
-    $msg.get('xe.invitation.reportSpam.success')
-  #end
-#end
-##
-#*
- * Handle a spam incident. The admin who "handles the incident" puts their name on the spam message
- * to say that they have investigated the situation and rectified the problem.
- *
- * $messageID (String) a unique number identifying the message.
- *
- * $emailClass (String) the name of a document containing an XClass for an email.
- *
- * $emailContainer (Document) the document to look in for mail objects.
- *###
-#macro(handleSpam, $messageID, $emailClass, $emailContainer)
-  #set($spamMessage = '')
-  #messageForID($messageID, $emailClass, $spamMessage, $emailContainer)
-  #if($spamMessage == '')
-    ## No message found by that id.
-    $msg.get('xe.invitation.handleSpam.noMessageFound')
-  #else
-    $spamMessage.set('statusCode', '6')
-    $spamMessage.set('memo', $msg.get('xe.invitation.handleSpam.memo', [$xcontext.getUser()]))
-    $emailContainer.saveAsAuthor($msg.get('xe.invitation.handleSpam.reportHandledSaveComment'))
-  #end
-#end
-##
-#*
- * Get a message based on it's ID number. This macro assumes that the email XObject is attached to $doc.
- *
- * $messageID (String) the number which should match the ID of a message.
- *
- * $emailClass (String) the document name of a XClass for email XObjects.
- *
- * $mailOut (reference) the reference which will be pointed to an XObject representing the email or "" if no
- *                      message by the given ID.
- *
- * $emailContainer (Document) the Document to get the message from.
- *###
-#macro(messageForID, $messageID, $emailClass, $mailOut, $emailContainer)
-  #set($objs = $emailContainer.getObjects($emailClass))
-  #foreach($obj in $objs)
-    #if($obj.getProperty('messageID').getValue() == $messageID)
-      #set($mailOut = $obj)
-    #end
   #end
 #end
 ##
@@ -762,7 +646,7 @@ $xwiki.get('ssx').use($doc.getFullName())
  *
  * $emailClass (String) The document name of the XClass representing email messages.
  *
- * $recipients (List&lt;String&gt;) Email addresses to sen this message to.
+ * $recipients (List&lt;String&gt;) Email addresses to send this message to.
  *
  * $emailRegex (String) The regular expression to validate the email addresses against. Undefined behavior will result
  *                      from an invalid expression.
@@ -771,34 +655,38 @@ $xwiki.get('ssx').use($doc.getFullName())
  *
  * $messageBody (String) The message content. This can be modified or ignored by the template.
  *
- * $mail (reference) This reference will be set to an XObject which will represent this email message.
+ * $mail (List&lt;XObject&gt;) This list will be populated with mail objects for each recipient.
  *
  * $emailContainer (Document) This document is where the mail object will be stored for later review by admins.
  *###
 #macro(generateMailFromTemplate, $subjectLineTemplate, $messageBodyTemplate, $emailClass, $recipients, $emailRegex, 
                                  $subjectLine, $messageBody, $mail, $emailContainer)
-  #set($mail = $emailContainer.newObject($emailClass))
-  $mail.set('sendingUser', $context.getUser())##
-  $mail.set('statusCode', 0)##
-  ## Set the message id to a random number string, set it to $messageID variable so it can be used by the template.
-  #set($messageID = "$mathtool.getRandom().toString().replaceAll('\.','')##
-                     $mathtool.getRandom().toString().replaceAll('\.','')##
-                     $mathtool.getRandom().toString().replaceAll('\.','')")
-  $mail.set('messageID', $messageID)##
-  #set($sendTo = '')
-  #validateAddressFormat($recipients, $emailRegex, $sendTo)
-  #if($sendTo != '')
-    #foreach($address in $sendTo)
-      #set($toString = "$!toString, $address")
-    #end
-    #if($toString)
-      #set($toString = $toString.substring(1))
-    #end
-    $mail.set('recipients', $toString)##
+  #if($recipients != '')
+    #set($sendTo = [])
+    #validateAddressFormat($recipients, $emailRegex, $sendTo)
+    #set($messageGroupID = $mathtool.getRandom())
+  #else
+    ## If we're just doing a test run, no recipients but we still want to generate a message.
+    #set($sendTo = [''])
   #end
-  ## Generate the message from the template - html in the subject line is ignored by the mail client.
-  $mail.set('subjectLine', "$doc.getRenderedContent($subjectLineTemplate, 'xwiki/2.0', 'plain/1.0')")##
-  $mail.set('messageBody', "$doc.getRenderedContent($messageBodyTemplate, 'xwiki/2.0')")##
+  ##
+  #foreach($recipient in $sendTo)
+    #set($message = $emailContainer.newObject($emailClass))
+    $message.set('sendingUser', $context.getUser())##
+    $message.set('statusCode', 0)##
+    $message.set('sentDate', '')##
+    $message.set('messageGroupID', $messageGroupID)##
+    $message.set('recipient', $recipient)##
+    ## Set the message id to a random number string, set it to $messageID variable so it can be used by the template.
+    #set($messageID = "$mathtool.getRandom().toString().replaceAll('\.','')##
+                       $mathtool.getRandom().toString().replaceAll('\.','')##
+                       $mathtool.getRandom().toString().replaceAll('\.','')")
+    $message.set('messageID', $messageID)##
+    ## Generate the message from the template - html in the subject line is ignored by the mail client.
+    $message.set('subjectLine', "$doc.getRenderedContent($subjectLineTemplate, 'xwiki/2.0', 'plain/1.0')")##
+    $message.set('messageBody', "$doc.getRenderedContent($messageBodyTemplate, 'xwiki/2.0')")##
+    #set($discard = $mail.add($message))
+  #end
 #end
 ##
 #*
@@ -828,6 +716,165 @@ $xwiki.get('ssx').use($doc.getFullName())
 #end
 ##
 #*
+ * Display a table of messages.
+ *
+ * $mail (Collection&lt;XObject&gt;) the messages to view.
+ *
+ * $fieldsToDisplay (List&lt;String&gt;) fields which should be displayed.
+ *   Options include: sendingUser, subjectLine, statusCode, memo, recipient
+ *
+ * $isAdmin (Boolean) should the links point to displaying for admin or user (NOT FOR SECURITY)
+ *
+ *###
+#macro(displayMessageTable, $mail, $fieldsToDisplay, $isAdmin)
+    #foreach($field in $fieldsToDisplay)
+      |=$msg.get("xe.invitation.displayMessageTable.$field")##
+    #end
+
+    #foreach($message in $mail)
+      #foreach($field in $fieldsToDisplay)
+        #if($field == 'sendingUser')
+          |[[$escapetool.xml($message.getProperty("$field").getValue())]]##
+        #elseif($field == 'subjectLine')
+          |[[$escapetool.xml($message.getProperty('subjectLine').getValue())&gt;&gt;$doc.getFullName()?inspectCode=##
+          ## If the user is an admin they will be linked to a different page.
+          #if($isAdmin)
+            3##
+          #else
+            2##
+          #end
+          &amp;messageID=$message.getProperty('messageID').getValue()]]##
+        #elseif($field == 'statusCode')
+          |#messageStatusForCode($message.getProperty('statusCode').getValue())##
+        #else
+          |$escapetool.xml($message.display($field, 'view'))##
+        #end
+      #end
+
+    #end
+#end
+##
+#*
+ * Display a table of messages, in a div class="invitation" html element.
+ *
+ * $mail (Collection&lt;XObject&gt;) the messages to view.
+ *
+ * $fieldsToDisplay (List&lt;String&gt;) fields which should be displayed.
+ *   Options include: sendingUser, subjectLine, statusCode, memo, recipient
+ *
+ * $isAdmin (Boolean) should the links point to displaying for admin or user (NOT FOR SECURITY)
+ *
+ *###
+#macro(displayMessageTableInDiv, $mail, $fieldsToDisplay, $isAdmin)
+
+  {{html wiki=true}}
+   &lt;div class="invitation"&gt;
+    #displayMessageTable($mail, $fieldsToDisplay, $isAdmin)
+   &lt;/div&gt;
+  {{/html}}
+
+#end
+##
+#*
+ * Get only messages of unique groups. If one message in a group is marked as spam it will be the one included.
+ *
+ * $mail (Collection&lt;XObject&gt;) the messages to search through.
+ *
+ * $mailOut (List&lt;XObject&gt;) will be populated with messages which are each of a different group.
+ *###
+#macro(getMessagesOfUniqueGroups, $mail, $mailOut)
+  #set($messageByGroup = {})
+  #foreach($message in $mail)
+    #set($messageGroup = $message.getProperty('messageGroupID').getValue())
+    #if(!$messageByGroup.containsKey($messageGroup) || $message.getProperty('statusCode').getValue() == '5')
+      #set($discard = $messageByGroup.put($messageGroup, $message))
+    #end
+  #end
+  #set($discard = $mailOut.addAll($messageByGroup.values()))
+#end
+##
+#*
+ * Get only messages of given group.
+ *
+ * $mail (Collection&lt;XObject&gt;) the messages to search though.
+ *
+ * $groupID (Double) the ID of the group to get messages from.
+ *
+ * $mailOut (List&lt;XObject&gt;) will be populated with messages which are from that group and found in $mail
+ *###
+#macro(getMessagesInGroup, $mail, $groupID, $mailOut)
+  #foreach($message in $mail)
+    #if($groupID == $message.getProperty('messageGroupID').getValue())
+      #set($discard = $mailOut.add($message))
+    #end
+  #end
+#end
+##
+#*
+ * Get only messages by a given sender
+ *
+ * $mail (Collection&lt;XObject&gt;) the messages to search though.
+ *
+ * $sender (String) the name of the user (document name) who sent the message.
+ *
+ * $mailOut (List&lt;XObject&gt;) will be populated with messages which are sent by $user
+ *###
+#macro(getMessagesBySender, $mail, $sender, $mailOut)
+  #foreach($message in $mail)
+    #if($sender == $message.getProperty('sendingUser').getValue())
+      #set($discard = $mailOut.add($message))
+    #end
+  #end
+#end
+##
+#*
+ * Either a user wants to inspect their old messages or an admin wants to inspect all old messages.
+ *
+ * Inspection Codes:
+ * 0 - View all message groups (only works if admin.)
+ * 1 - View all of my message groups
+ * 2 - View all messages in group
+ * 3 - View all messages in group as admin
+ *
+ * $mail (Map&lt;String, XObject&gt;) map of messages by their ID.
+ *
+ * $inspectCode the numerical code for what the user wants to do.
+ *
+ * $isAdmin (Boolean) is the current user to be regarded as a mail administrator.
+ *
+ * $messageID (String) ID of a message in the group to show. Only needed if $inspectCode == 2 or 3
+ *###
+#macro(inspectMessages, $mail, $inspectCode, $isAdmin, $messageID)
+  #if($inspectCode == '0' &amp;&amp; $isAdmin)
+    ## All message groups.
+    #set($uniqueMail = [])
+    #getMessagesOfUniqueGroups($mail.values(), $uniqueMail)
+    #displayMessageTableInDiv($uniqueMail, ['sentDate', 'sendingUser', 'subjectLine', 'statusCode'], $isAdmin)
+  #elseif($inspectCode == '1')
+    ## My message groups.
+    #set($myMail = [])
+    #getMessagesBySender($mail.values(), $xcontext.getUser(), $myMail)
+    #set($myUniqueMail = [])
+    #getMessagesOfUniqueGroups($myMail, $myUniqueMail)
+    #displayMessageTableInDiv($myUniqueMail, ['sentDate', 'subjectLine'])
+  #elseif($inspectCode == '2')
+    ## Inspect a single message group
+    #set($myMail = [])
+    #getMessagesBySender($mail.values(), $xcontext.getUser(), $myMail)
+    #set($myMailInGroup = [])
+    #getMessagesInGroup($myMail, $mail.get($messageID).getProperty('messageGroupID').getValue(), $myMailInGroup)
+    #displayMessageTableInDiv($uniqueMail, ['sentDate', 'recipient', 'statusCode'])
+    #displayMessage($myMailInGroup.get(0))
+  #elseif($inspectCode == '3' &amp;&amp; $isAdmin)
+    ## Inspect a single message group as admin
+    #set($mailInGroup = [])
+    #getMessagesInGroup($mail.values(), $mail.get($messageID).getProperty('messageGroupID').getValue(), $mailInGroup)
+    #displayMessageTableInDiv($mailInGroup, ['sentDate', 'sendingUser', 'recipient', 'statusCode'])
+    #displayMessage($mailInGroup.get(0))
+  #end
+#end
+##
+#*
  * Display a message for the sender (preview) or for the admin (review sent messages)
  *
  * $mail (XObject representing email message) the message to view
@@ -850,9 +897,7 @@ $xwiki.get('ssx').use($doc.getFullName())
     ## get the lists of valid and invalid email addresses.
     #set($invalidAddresses = [])
     #if("$!recipients" == '' || "$!emailRegex" == '')
-      ## No override, use values from the message, also lump them together for display.
-      #set($recipients = [$mail.getProperty('recipients').getValue().trim()])
-      ## We assume that all addresses are valid and will leave $invalidAddresses empty.
+      #set($recipients = [$mail.getProperty('recipient').getValue().trim()])
     #else
       #set($sendTo = [])
       #validateAddressFormat($recipients, $emailRegex, $sendTo, $invalidAddresses)
@@ -899,7 +944,6 @@ $xwiki.get('ssx').use($doc.getFullName())
     &lt;/div&gt;
    &lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class="wikimodel-emptyline clearboth"&gt;&lt;/div&gt;
   {{/html}}
 
 #end
@@ -967,16 +1011,38 @@ $xwiki.get('ssx').use($doc.getFullName())
  * Display some tools for users who have edit right on this page.
  * Displays link to the administration application where this page can be configured and also a link to view the
  * list of messages already sent.
+ *
+ * $inspectCode (Integer) Number signifying what the user is looking at.
  *###
 #macro(displayAdministrativeTools)
   ## Administrative Tools
-  == $msg.get('xe.invitation.adminTools.heading') ==
+  = $msg.get('xe.invitation.adminTools.heading') =
   * {{html}}&lt;a href="$xwiki.getURL('XWikiPreferences', 'admin', 'admin=globaladmin&amp;section=Invitation')"&gt;##
       ## Click here to configure the friend inviter
       $msg.get('xe.invitation.adminTools.configureLink')##
     &lt;/a&gt;{{/html}}
-  ## Click here see the list of already sent mail.
-  * [[$msg.get('xe.invitation.adminTools.displayAllOldMessagesLink')&gt;&gt;$doc.getFullName()?viewMessage=1]]
+  ## View all invitations
+  #if("$inspectCode" != '0')
+    * [[$msg.get('xe.invitation.adminTools.allInvitationsLink')&gt;&gt;$doc.getFullName()?inspectCode=0]]
+  #else
+    * **$msg.get('xe.invitation.adminTools.allInvitationsLink')**
+  #end
+#end
+##
+#*
+ * Display some tools for users.
+ *
+ * $inspectCode (Integer) Number signifying what the user is looking at.
+ *###
+#macro(displayUserTools, $inspectCode)
+  ## Administrative Tools
+  = $msg.get('xe.invitation.tools.heading') =
+  ## My invitations
+  #if("$inspectCode" != '1')
+    * [[$msg.get('xe.invitation.tools.myInvitationsLink')&gt;&gt;$doc.getFullName()?inspectCode=1]]
+  #else
+    * **$msg.get('xe.invitation.tools.myInvitationsLink')**
+  #end
 #end
 ##
 #*
@@ -1043,8 +1109,215 @@ $xwiki.get('ssx').use($doc.getFullName())
     $msg.get('xe.invitation.messageStatus.reported')##
   #elseif($sc == 6)
     $msg.get('xe.invitation.messageStatus.investigated')##
+  #elseif($sc == 7)
+    $msg.get('xe.invitation.messageStatus.sendingFailed')##
   #else
     $msg.get('xe.invitation.messageStatus.unknown', [$sc])##
   #end
 #end
-{{/velocity}}</content></xwikidoc>
+##
+#*
+ * Do an action on a message.
+ *
+ * Action codes:
+ * 2 - accept (message status code must be 1)
+ * 3 - decline (message status code must be 1)
+ * 4 - cancel (must be message sender or admin, message status code must be 1)
+ * 5 - report as spam (message status code must not be 6)
+ * 6 - investigate spam report (must be admin and message status code must be 5)
+ * else - unknown status
+ *
+ * $messageID (String) the unique ID for the message to act upon.
+ *
+ * $actionCode (Integer) the numbered code for the status of the message.
+ *
+ * $memo (String) an action specific message to attach to the mail EG: reason for declining, 
+ *                or results of spam investigation.
+ *
+ * $confirm (Boolean) are you sure you want to do this?
+ *
+ * $isAdmin (Boolean) is the current user a mail administrator?
+ *
+ * $messages (Map&lt;String, XObject&gt;) the map of stored messages by their id.
+ *
+ * $emailContainer (Document) the document to look in for mail objects.
+ *###
+#macro(doAction, $messageID, $actionCode, $memo, $confirm, $isAdmin, $messages, $emailContainer)
+  ## 1. validate action code.
+  #set($act = $mathtool.toInteger($actionCode))
+  #if(!$act || $act &lt; 2 || $act &gt; 6)
+    ## This should not happen, not translating.
+    Invalid action.
+  #end
+  ##
+  ## 2. get message. (If it's invalid will be '' and each action handles differently.)
+  #set($message = '')
+  #set($message = $messages.get($messageID))
+  #if($message != '')
+    #set($status = $message.getProperty('statusCode').getValue())
+  #end
+
+  ## 3. Do action.
+  #if($act == 2)
+    ## Accept invitation. &lt;------------------------------------------------------------------------
+    #if("$!message" == '')
+      {{error}}$msg.get('xe.invitation.doAction.accept.noMessageFound'){{/error}}
+    #elseif($status == '2')
+      ## already accepted
+      {{error}}$msg.get('xe.invitation.doAction.accept.alreadyAccepted'){{/error}}
+    #elseif($status == '3')
+      ## already declined
+      {{error}}$msg.get('xe.invitation.doAction.accept.alreadyDeclined'){{/error}}
+    #elseif($status == '4')
+      ## invitation canceled.
+      {{error}}$msg.get('xe.invitation.doAction.accept.invitationCanceled'){{/error}}
+      #if($message.getProperty('memo').getValue() != '')
+        $msg.get('xe.invitation.doAction.invitationCanceledMemo',
+                 [$xwiki.getUserName($message.getProperty('sendingUser').getValue(), false)])
+        $message.getProperty('memo').getValue()
+      #end
+    #elseif($status == '5' || $status == '6')
+      ## reported as spam, nolonger valid.
+      {{error}}$msg.get('xe.invitation.doAction.accept.alreadyReportedAsSpam'){{/error}}
+    #elseif($status != '1')
+      {{error}}$msg.get('xe.invitation.doAction.invalidStatus', ["#messageStatusForCode($status)"]){{/error}}
+    #else
+      $response.sendRedirect($xwiki.getURL('XWiki.Register', 'register'))
+      $message.set('statusCode', '2')##
+      $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.accept.saveComment'))
+    #end
+  #elseif($act == 3)
+    ## Decline Invitation &lt;------------------------------------------------------------------------
+    = $msg.get('xe.invitation.doAction.decline.heading') =
+    #if("$!message" == '')
+      {{error}}$msg.get('xe.invitation.doAction.decline.noMessageFound'){{/error}}
+    #elseif($status == '2')
+      ## already accepted
+      {{error}}$msg.get('xe.invitation.doAction.decline.alreadyAccepted'){{/error}}
+    #elseif($status == '3')
+      ## already declined
+      {{error}}$msg.get('xe.invitation.doAction.decline.alreadyDeclined'){{/error}}
+    #elseif($status == '4')
+      ## invitation canceled.
+      {{error}}$msg.get('xe.invitation.doAction.decline.invitationCanceled'){{/error}}
+
+       #if($message.getProperty('memo').getValue() != '')
+         $msg.get('xe.invitation.doAction.invitationCanceledMemo', 
+                  [$xwiki.getUserName($message.getProperty('sendingUser').getValue(), false)])
+         $message.getProperty('memo').getValue()
+       #end
+    #elseif($status == '5' || $status == '6')
+      ## reported as spam, nolonger valid.
+      {{error}}$msg.get('xe.invitation.doAction.decline.alreadyReportedAsSpam'){{/error}}
+    #elseif($status != '1')
+      {{error}}$msg.get('xe.invitation.doAction.invalidStatus', ["#messageStatusForCode($status)"]){{/error}}
+    #elseif($confirm)
+      $message.set('statusCode', '3')##
+      $message.set('memo', $memo)##
+      $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.decline.saveComment'))
+      {{info}}$msg.get('xe.invitation.doAction.decline.success'){{/info}}
+    #else
+      ## Are you sure?...
+      #displayActionConfirmationForm($messageID, $act, $msg.get('xe.invitation.doAction.decline.memoLabel', 
+                                                                [$xwiki.getUserName($message.getProperty('sendingUser').getValue(),
+                                                                                    false)]),
+                                     $msg.get('xe.invitation.doAction.decline.confirmLabel'))
+    #end
+  #elseif($act == 4)
+    ## Cancel Invitation &lt;-------------------------------------------------------------------------
+    = $msg.get('xe.invitation.doAction.cancel.heading') =
+    #if("$!message" == '')
+      ## No message found by that id.
+      $msg.get('xe.invitation.doAction.cancel.noMessageFound')
+    #elseif($confirm)
+      $message.set('statusCode', '5')##
+      $message.set('memo', $memo)##
+      $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.cancel.saveComment'))
+      ## Your report has been logged, sorry for the inconvienence.
+      $msg.get('xe.invitation.doAction.cancel.success')
+    #else
+      ## Are you sure?...
+      == $msg.get('xe.invitation.doAction.cancel.areYouSure') ==
+      #displayActionConfirmationForm($messageID, $act, $msg.get('xe.invitation.doAction.cancel.memoLabel'),
+                                     $msg.get('xe.invitation.doAction.confirmLabel'))
+      #displayMessage($message, '', '')
+    #end
+  #elseif($act == 5)
+    ## Report Abuse &lt;------------------------------------------------------------------------------
+    = $msg.get('xe.invitation.doAction.reportSpam.heading') =
+    #if("$!message" == '')
+      ## No message found by that id.
+      $msg.get('xe.invitation.doAction.reportSpam.noMessageFound')
+    #elseif($confirm)
+      $message.set('statusCode', '5')##
+      $message.set('memo', $memo)##
+      $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.reportSpam.reportSaveComment'))
+      ## Your report has been logged, sorry for the inconvienence.
+      $msg.get('xe.invitation.doAction.reportSpam.success')
+    #else
+      ## Are you sure?...
+      == $msg.get('xe.invitation.doAction.reportSpam.areYouSure') ==
+      #displayActionConfirmationForm($messageID, $act, $msg.get('xe.invitation.doAction.reportSpam.memoLabel'),
+                                     $msg.get('xe.invitation.doAction.confirmLabel'))
+      #displayMessage($message, '', '')
+    #end
+  #elseif($act == 6)
+    ## Declare spam investigated &lt;-----------------------------------------------------------------
+    #if(!$isAdmin)
+      {{error}}$msg.get('xe.invitation.doAction.lackingPermission'){{/error}}
+    #elseif("$!message" == '')
+      {{error}}$msg.get('xe.invitation.doAction.noMessageFound'){{/error}}
+    #elseif($status != '5')
+      {{error}}$msg.get('xe.invitation.doAction.incorrectMessageStatus', ["#messageStatusForCode($status)"]){{/error}}
+    #elseif($confirm)
+      $message.set('statusCode', '6')##
+      $message.set('memo', "$xcontext.getUser() $memo")##
+      $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.handleSpam.reportHandledSaveComment', 
+                                            [$xcontext.getUser()]))
+    #else
+      ## Are you sure?...
+      #displayActionConfirmationForm($messageID, $act, $msg.get('xe.invitation.doAction.handleSpam.memoLabel'),
+                                     $msg.get('xe.invitation.doAction.handleSpam.confirmLabel'))
+      #displayMessage($message, '', '')
+    #end
+  #else
+    ## 2+2=5
+    Internal error (Invalid action)
+  #end
+#end
+##
+#*
+ * Display a form allowing a user to confirm doing an action.
+ *
+ * $messageID (String) the unique ID for the message to act upon.
+ *
+ * $actionCode (Integer) the numbered code for the status of the message.
+ *
+ * $memoLabel (String) what the memo field should be labeled.
+ *
+ * $confirmLabel (String) what the confirm button should say.
+ *###
+#macro(displayActionConfirmationForm, $messageID, $actionCode, $memoLabel, $confirmLabel)
+  {{html wiki=false clean=false}}
+  &lt;div class="invitation"&gt;
+   &lt;form action="", method="POST"&gt;
+    ##
+    &lt;input type="hidden" name="messageID" value="$escapetool.xml($messageID)" /&gt;
+    &lt;input type="hidden" name="actionCode" value="$escapetool.xml($actionCode)" /&gt;
+    ##
+    &lt;dl&gt;
+     &lt;dt&gt;&lt;label for="memo"&gt;$memoLabel&lt;/label&gt;&lt;/dt&gt;
+     &lt;dd&gt;&lt;input type="text" size="54" name="memo" /&gt;&lt;/dd&gt;
+    &lt;/dl&gt;
+    &lt;div class="bottombuttons"&gt;
+     &lt;div class="buttons"&gt;
+      &lt;span class="buttonwrapper"&gt;
+       &lt;input type="submit" class="button" name="confirm" value="$confirmLabel" /&gt;
+      &lt;/span&gt;
+     &lt;/div&gt;
+    &lt;/div&gt;
+   &lt;/form&gt;
+  &lt;/div&gt;
+  {{/html}}
+#end
+##{{/velocity}}</content></xwikidoc>
