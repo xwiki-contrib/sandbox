@@ -346,18 +346,30 @@
  * It stores and sends email so the email store should be checked from time to time to make sure the service
  * is not being abused to send spam.
  *
- * This script depends on the following variables being set.
+ * $hasEdit (boolean) if this is set true at the start of this script, it is assumed that the user is an admin.
  *
- * $hasEdit (boolean) true if the current user has edit access on this document.
+ * Macros in this script don't rely on any variables except those which are passed to them and the following:
+ *
+ * $doc the com.xpn.xwiki.api.Document object representing the document containing this code.
+ * $msg the internationalization message provider containing a get(String) and a get(String, List) function
+ * $xcontext the com.xpn.xwiki.Context object for this request
+ * $xwiki an object of the com.xpn.xwiki.api.XWiki class.
+ * $escapetool an object of class org.apache.velocity.tools.generic.EscapeTool
+ *
+ * Macros also depend on other macros but only other macros which are contained in this script.
  *
  * This script is affected by the following documents:
  *
- * XWiki.InvitationMessages stores all of the mail message objects. If this does not exist it will be created.
- *                          May be changed in the configuration.
+ * InvitationMessages stores all of the mail message objects. If this does not exist it will be created.
+ *                    May be changed in the configuration.
  *
- * XWiki.InvitationMailClass the class for mail message objects. May be changed in the configuration.
+ * InvitationMailClass the class for mail message objects. May be changed in the configuration.
  *
- * XWiki.InvitationConfig configuration for this code. Contains an XObject of the class defined in this document.
+ * InvitationConfig configuration for this code. Contains an XObject of the class defined in this document.
+ *                  If it does not exist it will be created with default values.
+ *
+ * This script is space agnostic and will create InvitationMessages and InvitationConfig in the same space as
+ * itself. It will also expect to find InvitationMailClass in the same space as itself.
  *
  *###
 ## Get CSS for this page
@@ -368,8 +380,8 @@ $xwiki.get('ssx').use($doc.getFullName())
 ##
 ## If no configuration specified then use hardcoded defaults.
 #set($emailRegex = '/^([^@\s]+)@((?:[-a-zA-Z0-9]+\.)+[a-zA-Z]{2,})$/')
-#set($emailClass = 'XWiki.InvitationMailClass')
-#set($emailContainerName = "XWiki.InvitationMessages")
+#set($emailClass = "${doc.getSpace()}.InvitationMailClass")
+#set($emailContainerName = "${doc.getSpace()}.InvitationMessages")
 #set($subjectLineTemplate = '{{velocity}}$xcontext.getUser().replaceAll("^[^\.]*.", "") has invited you to join '
      + '$xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"): $!subjectLine{{/velocity}}')
 #set($n = $util.getNewline())
@@ -389,7 +401,7 @@ $xwiki.get('ssx').use($doc.getFullName())
 ##
 ## Load some parameters from the configuration.
 #set($config = '')
-#set($configDoc = $xwiki.getDocumentAsAuthor("XWiki.InvitationConfig"))
+#set($configDoc = $xwiki.getDocumentAsAuthor("${doc.getSpace()}.InvitationConfig"))
 ## If no configuration document exists, create one and save it.
 #if($configDoc.isNew())
   $configDoc.setContent('{{velocity}}{{info}}$msg.get("xe.invitation.configInfo"){{/info}}{{/velocity}}')##
@@ -945,10 +957,9 @@ $xwiki.get('ssx').use($doc.getFullName())
  *
  * $messageBody (String) What should be put in the content of the message by default.
  *
- * $hasEdit (boolean) True if the current user has permission to edit this page.
- *                    If so then they can send to multiple addresses at once.
+ * $maySendToMultiple (boolean) True if the current user has permission send to multiple addresses at once.
  *###
-#macro(displayForm, $recipientString, $subjectLine, $messageBody, $hasEdit)
+#macro(displayForm, $recipientString, $subjectLine, $messageBody, $maySendToMultiple)
 
   {{html clean="false" wiki="false"}}
   &lt;form action="$doc.getURL('view')" method="post" class="invitation"&gt;
@@ -956,7 +967,7 @@ $xwiki.get('ssx').use($doc.getFullName())
     ## Who you are inviting:
     &lt;dt&gt;&lt;label for="recipients"&gt;$msg.get('xe.invitation.toLabel')&lt;/label&gt;&lt;/dt&gt;
     ## If the user has edit access on this document, then we should allow them to send to multiple email addresses.
-    #if($hasEdit)
+    #if($maySendToMultiple)
       &lt;dd&gt;
        &lt;textarea cols="75" name="recipients" rows="3" id="recipients"&gt;##
         $!recipientString##
