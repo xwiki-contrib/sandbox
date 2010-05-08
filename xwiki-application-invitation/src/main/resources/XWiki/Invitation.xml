@@ -113,18 +113,6 @@
 <validationRegExp></validationRegExp>
 <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
 </messageBodyTemplate>
-<sendBcc>
-<defaultValue></defaultValue>
-<displayFormType>checkbox</displayFormType>
-<displayType></displayType>
-<name>sendBcc</name>
-<number>1</number>
-<prettyName>Always send mail to multiple addresses using blind carbon copy</prettyName>
-<unmodifiable>0</unmodifiable>
-<validationMessage></validationMessage>
-<validationRegExp></validationRegExp>
-<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-</sendBcc>
 <smtp_port>
 <name>smtp_port</name>
 <number>12</number>
