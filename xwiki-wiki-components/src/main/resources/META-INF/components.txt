@@ -1,0 +1,3 @@
+org.xwiki.component.wiki.internal.DefaultWikiComponentManager
+com.xpn.xwiki.internal.DefaultWikiComponentBuilder
+com.xpn.xwiki.internal.WikiComponentInitializer
