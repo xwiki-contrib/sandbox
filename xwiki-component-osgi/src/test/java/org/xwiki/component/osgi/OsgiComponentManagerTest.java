@@ -1,20 +1,41 @@
 package org.xwiki.component.osgi;
 
+import org.jmock.Expectations;
+import org.jmock.Mock;
+import org.jmock.Mockery;
+import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+import java.io.File;
+import java.net.URL;
+import java.util.Collections;
+
 public class OsgiComponentManagerTest
 {
+    private Mockery mockery = new Mockery();
+
+    private Repository mockLocalRepository;
+
     public interface Interface
     {
+    }
+
+    @Before
+    public void setUp()
+    {
+        this.mockLocalRepository = this.mockery.mock(Repository.class);
+        this.mockery.checking(new Expectations() {{
+            oneOf(mockLocalRepository).getModuleURLs(); will(returnValue(Collections.<URL>emptyList()));
+        }});
     }
 
     @Test
     public void testInitialization()
     {
-        OsgiBootstrap bootstrap = new OsgiBootstrap();
+        OsgiBootstrap bootstrap = new OsgiBootstrap(this.mockLocalRepository);
         bootstrap.initialize(getClass().getClassLoader());
 
         BundleContext bundleContext = bootstrap.getBundleContext();

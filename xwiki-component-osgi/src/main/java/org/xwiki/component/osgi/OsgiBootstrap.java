@@ -3,6 +3,7 @@ package org.xwiki.component.osgi;
 import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
@@ -15,7 +16,14 @@ import java.util.Map;
 
 public class OsgiBootstrap implements BundleActivator
 {
-    protected BundleContext bundleContext;
+    private BundleContext bundleContext;
+
+    private Repository repository;
+
+    public OsgiBootstrap(Repository repository)
+    {
+        this.repository = repository;
+    }
 
     /**
      * Start the OSGi system, load all component annotations and register them as components against the OSGi
@@ -40,7 +48,13 @@ public class OsgiBootstrap implements BundleActivator
         }
 
         // Step 2: Start XWiki Modules
-
+        for (URL moduleURL : this.repository.getModuleURLs()) {
+            try {
+                getBundleContext().installBundle(moduleURL.toExternalForm());
+            } catch (BundleException e) {
+                throw new RuntimeException("Failed to install bundle [" + moduleURL + "]", e);
+            }
+        }
 
         // Step 3: For each XWiki Module, look for component annotations and register components accordingly
         /*
