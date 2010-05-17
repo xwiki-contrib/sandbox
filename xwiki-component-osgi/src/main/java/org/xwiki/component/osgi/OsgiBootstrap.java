@@ -50,6 +50,8 @@ public class OsgiBootstrap implements BundleActivator
         // Step 2: Start XWiki Modules
         for (URL moduleURL : this.repository.getModuleURLs()) {
             try {
+                // InstallBundle will install the module if it's not already installed. If it's already installed
+                // nothing will happen.
                 getBundleContext().installBundle(moduleURL.toExternalForm());
             } catch (BundleException e) {
                 throw new RuntimeException("Failed to install bundle [" + moduleURL + "]", e);
