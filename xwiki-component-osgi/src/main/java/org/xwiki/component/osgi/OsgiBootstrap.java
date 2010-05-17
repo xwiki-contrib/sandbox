@@ -32,10 +32,8 @@ public class OsgiBootstrap implements BundleActivator
     /**
      * Start the OSGi system, load all component annotations and register them as components against the OSGi
      * runtime.
-     *
-     * @param classLoader the class loader to use to look for component definitions
      */
-    public void initialize(ClassLoader classLoader)
+    public void initialize()
     {
         // Step 1: Start the OSGi Framework
         Map configMap = new HashMap();

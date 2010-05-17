@@ -34,7 +34,7 @@ public class OsgiComponentManagerTest
     public void testInitialization()
     {
         OsgiBootstrap bootstrap = new OsgiBootstrap(this.mockLocalModuleRepository);
-        bootstrap.initialize(getClass().getClassLoader());
+        bootstrap.initialize();
 
         BundleContext bundleContext = bootstrap.getBundleContext();
         bundleContext.registerService(Interface.class.getName(), new Interface() {}, null);
