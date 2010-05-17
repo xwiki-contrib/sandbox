@@ -18,11 +18,11 @@ public class OsgiBootstrap implements BundleActivator
 {
     private BundleContext bundleContext;
 
-    private Repository repository;
+    private ModuleRepository moduleRepository;
 
-    public OsgiBootstrap(Repository repository)
+    public OsgiBootstrap(ModuleRepository moduleRepository)
     {
-        this.repository = repository;
+        this.moduleRepository = moduleRepository;
     }
 
     /**
@@ -48,7 +48,7 @@ public class OsgiBootstrap implements BundleActivator
         }
 
         // Step 2: Start XWiki Modules
-        for (URL moduleURL : this.repository.getModuleURLs()) {
+        for (URL moduleURL : this.moduleRepository.getModuleURLs()) {
             try {
                 // InstallBundle will install the module if it's not already installed. If it's already installed
                 // nothing will happen.

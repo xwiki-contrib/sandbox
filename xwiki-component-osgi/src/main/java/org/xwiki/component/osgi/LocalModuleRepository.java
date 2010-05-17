@@ -7,11 +7,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocalRepository implements Repository
+public class LocalModuleRepository implements ModuleRepository
 {
     private File repositoryDirectory;
 
-    public LocalRepository(File repositoryDirectory)
+    public LocalModuleRepository(File repositoryDirectory)
     {
         this.repositoryDirectory = repositoryDirectory;
     }
