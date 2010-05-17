@@ -31,7 +31,7 @@ public abstract class AbstractComponentManager implements ComponentManager
 
     // Delegate storage of components to classes extending this one.
     protected abstract <T> boolean hasComponent(RoleHint<T> roleHint);
-    protected abstract <T> T getComponent(RoleHint<T> roleHint);
+    protected abstract <T> T getComponent(RoleHint<T> roleHint) throws ComponentLookupException;
     protected abstract <T> void registerComponent(RoleHint<T> roleHint, Object instance);
     protected abstract <T> void removeComponent(RoleHint<T> roleHint);
 

@@ -1,11 +1,15 @@
 package org.xwiki.component.osgi;
 
 import org.apache.felix.framework.util.FelixConstants;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
+import org.xwiki.component.annotation.ComponentAnnotationLoader;
+import org.xwiki.component.logging.CommonsLoggingLogger;
+import org.xwiki.component.manager.ComponentManager;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -59,11 +63,12 @@ public class OsgiBootstrap implements BundleActivator
         }
 
         // Step 3: For each XWiki Module, look for component annotations and register components accordingly
-        /*
         ComponentAnnotationLoader loader = new ComponentAnnotationLoader();
         loader.enableLogging(new CommonsLoggingLogger(loader.getClass()));
-        loader.initialize(this, classLoader);
-        */
+        for (Bundle bundle : getBundleContext().getBundles()) {
+            ComponentManager cm = new OsgiComponentManager(bundle.getBundleContext());
+            loader.initialize(cm, new BundleProxyClassLoader(bundle));
+        }
     }
 
     public void start(BundleContext bundleContext) throws Exception
