@@ -3,8 +3,6 @@ package org.xwiki.extension.repository.internal.maven;
 import org.apache.maven.artifact.repository.ArtifactRepositoryFactory;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
-import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.repository.legacy.WagonManager;
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
@@ -26,11 +24,7 @@ public class MavenRepositoryFactory extends AbstractLogEnabled implements Reposi
      */
     private MutablePlexusContainer plexus;
 
-    private WagonManager wagonManager;
-
     private ArtifactRepositoryFactory artifactRepositoryFactory;
-
-    private RepositorySystem repositorySystem;
 
     public void initialize() throws InitializationException
     {
@@ -41,21 +35,9 @@ public class MavenRepositoryFactory extends AbstractLogEnabled implements Reposi
         }
 
         try {
-            this.wagonManager = this.plexus.lookup(WagonManager.class);
-        } catch (ComponentLookupException e) {
-            throw new InitializationException("Failed to lookup WagonManager", e);
-        }
-
-        try {
             this.artifactRepositoryFactory = this.plexus.lookup(ArtifactRepositoryFactory.class);
         } catch (ComponentLookupException e) {
             throw new InitializationException("Failed to lookup ArtifactRepositoryFactory", e);
-        }
-
-        try {
-            this.repositorySystem = this.plexus.lookup(RepositorySystem.class);
-        } catch (ComponentLookupException e) {
-            throw new InitializationException("Failed to lookup RepositorySystem", e);
         }
     }
 
@@ -72,8 +54,8 @@ public class MavenRepositoryFactory extends AbstractLogEnabled implements Reposi
 
     public Repository createRepository(RepositoryId repositoryId)
     {
-        return new MavenRepository(this.artifactRepositoryFactory.createArtifactRepository(repositoryId.getId(),
-            repositoryId.getUrl().toExternalForm(), (ArtifactRepositoryLayout) null, new ArtifactRepositoryPolicy(),
-            new ArtifactRepositoryPolicy()), this.wagonManager);
+        return new MavenRepository(repositoryId, this.artifactRepositoryFactory.createArtifactRepository(repositoryId
+            .getId(), repositoryId.getUrl().toExternalForm(), (ArtifactRepositoryLayout) null,
+            new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy()), this.plexus);
     }
 }

@@ -1,41 +1,61 @@
 package org.xwiki.extension.repository.internal.maven;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+
 import org.xwiki.extension.repository.Artifact;
+import org.xwiki.extension.repository.ArtifactId;
 import org.xwiki.extension.repository.ArtifactType;
-import org.xwiki.extension.repository.Repository;
+import org.xwiki.extension.repository.LocalRepository;
 
 public class MavenArtifact implements Artifact
 {
-    private org.apache.maven.artifact.Artifact artifact;
+    private ArtifactId artifactId;
 
     private ArtifactType type;
 
+    private org.apache.maven.artifact.Artifact artifact;
+
     private MavenRepository repository;
 
-    public MavenArtifact(org.apache.maven.artifact.Artifact artifact, ArtifactType type, MavenRepository repository)
+    public MavenArtifact(ArtifactId artifactId, org.apache.maven.artifact.Artifact artifact, ArtifactType type,
+        MavenRepository repository)
     {
         this.artifact = artifact;
         this.type = type;
         this.repository = repository;
     }
 
-    public String getName()
+    public ArtifactId getId()
     {
-        return this.artifact.getId();
-    }
-
-    public String getVersion()
-    {
-        return this.artifact.getVersion();
+        return this.artifactId;
     }
 
     public ArtifactType getType()
     {
-        return type;
+        return this.type;
     }
 
-    public Repository getRepository()
+    public List<Artifact> getDependencies()
     {
-        return repository;
+        // TODO
+        return Collections.emptyList();
+    }
+
+    public void download(LocalRepository localRepository, boolean dependencies)
+    {
+        File file = localRepository.getFile(this.artifactId);
+
+        download(file);
+
+        for (Artifact artifact : getDependencies()) {
+            artifact.download(localRepository, dependencies);
+        }
+    }
+
+    private void download(File file)
+    {
+        // TODO
     }
 }

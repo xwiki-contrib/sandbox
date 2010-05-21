@@ -1,12 +1,14 @@
 package org.xwiki.extension.repository;
 
+import java.util.List;
+
 public interface Artifact
 {
-    String getName();
-
-    String getVersion();
+    ArtifactId getId();
 
     ArtifactType getType();
-    
-    Repository getRepository();
+
+    List<Artifact> getDependencies();
+
+    void download(LocalRepository localRepository, boolean dependencies);
 }
