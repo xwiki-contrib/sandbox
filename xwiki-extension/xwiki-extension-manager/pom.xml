@@ -69,6 +69,14 @@
       <artifactId>maven-settings</artifactId>
       <version>3.0-SNAPSHOT</version>
     </dependency>
+    
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-shared-tests</artifactId>
+      <version>${pom.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
     <repositories>
     <repository>

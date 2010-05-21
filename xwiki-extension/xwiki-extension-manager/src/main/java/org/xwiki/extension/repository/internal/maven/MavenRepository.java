@@ -3,7 +3,11 @@ package org.xwiki.extension.repository.internal.maven;
 import java.io.File;
 import java.util.List;
 
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.repository.legacy.WagonManager;
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
@@ -12,6 +16,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.extension.repository.Artifact;
+import org.xwiki.extension.repository.ArtifactId;
 import org.xwiki.extension.repository.Repository;
 
 public class MavenRepository implements Repository
@@ -19,6 +24,8 @@ public class MavenRepository implements Repository
     private WagonManager wagonManager;
 
     private ArtifactRepository repository;
+    
+    private RepositorySystem repositorySystem;
 
     public MavenRepository(ArtifactRepository repository, WagonManager wagonManager)
     {
@@ -26,13 +33,22 @@ public class MavenRepository implements Repository
         this.wagonManager = wagonManager;
     }
 
-    public List<Artifact> getArtefacts(int offset, int nb)
+    public Artifact findArtifact(ArtifactId actifactId)
     {
-        return null;
-    }
-
-    void getRemoteFile(Artifact artifact, File destination)
-    {
-        this.wagonManager.getRemoteFile(this.repository, destination, remotePath, downloadMonitor, checksumPolicy, false);
+        Artifact artifact = null;
+        
+        // TODO: parse actifactId id to get group and artifact ids
+        
+        org.apache.maven.artifact.Artifact pomArtifact = this.repositorySystem.createProjectArtifact(groupId, artifactId, actifactId.getVersion());
+        
+        pomArtifact = this.repository.find(pomArtifact);
+        
+        // TODO: RepositorySystem#find does not really seems to try to find anything but just construct the the remote path, need to be checked
+        
+        if (pomArtifact != null) {
+            artifact = new MavenArtifact(pomArtifact, this);
+        }
+        
+        return artifact;
     }
 }
