@@ -1,5 +1,6 @@
 package org.xwiki.extension.repository;
 
+import java.io.File;
 import java.util.List;
 
 public interface Artifact
@@ -8,7 +9,7 @@ public interface Artifact
 
     ArtifactType getType();
 
-    List<Artifact> getDependencies();
+    List<ArtifactId> getDependencies();
 
-    void download(LocalRepository localRepository, boolean dependencies);
+    void download(File file);
 }

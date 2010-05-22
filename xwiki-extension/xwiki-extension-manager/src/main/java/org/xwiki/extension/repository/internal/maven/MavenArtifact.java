@@ -37,21 +37,10 @@ public class MavenArtifact implements Artifact
         return this.type;
     }
 
-    public List<Artifact> getDependencies()
+    public List<ArtifactId> getDependencies()
     {
         // TODO
         return Collections.emptyList();
-    }
-
-    public void download(LocalRepository localRepository, boolean dependencies)
-    {
-        File file = localRepository.getFile(this.artifactId);
-
-        download(file);
-
-        for (Artifact artifact : getDependencies()) {
-            artifact.download(localRepository, dependencies);
-        }
     }
 
     private void download(File file)
