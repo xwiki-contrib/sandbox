@@ -1,20 +1,20 @@
 package org.xwiki.extension.repository;
 
-import java.net.URL;
+import java.net.URI;
 
-public class RepositoryId
+public class ExtensionRepositoryId
 {
     private String id;
 
     private String type;
 
-    private URL url;
+    private URI uri;
 
-    public RepositoryId(String id, String type, URL url)
+    public ExtensionRepositoryId(String id, String type, URI uri)
     {
         this.id = id;
         this.type = type;
-        this.url = url;
+        this.uri = uri;
     }
 
     public String getId()
@@ -27,8 +27,8 @@ public class RepositoryId
         return type;
     }
 
-    public URL getUrl()
+    public URI getURI()
     {
-        return url;
+        return uri;
     }
 }

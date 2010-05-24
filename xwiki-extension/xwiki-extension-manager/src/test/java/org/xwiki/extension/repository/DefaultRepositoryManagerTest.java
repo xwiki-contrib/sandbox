@@ -4,26 +4,28 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.extension.Extension;
+import org.xwiki.extension.ExtensionId;
 import org.xwiki.test.AbstractComponentTestCase;
 
 public class DefaultRepositoryManagerTest extends AbstractComponentTestCase
 {
-    private RepositoryManager repositoryManager;
+    private ExtensionRepositoryManager repositoryManager;
 
     @Before
     public void setUp() throws Exception
     {
         super.setUp();
 
-        this.repositoryManager = getComponentManager().lookup(RepositoryManager.class);
+        this.repositoryManager = getComponentManager().lookup(ExtensionRepositoryManager.class);
     }
 
     @Test
     public void testFindArtifact() throws InterruptedException
     {
-        ArtifactId artifactId = new ArtifactId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.4-SNAPSHOT");
+        ExtensionId artifactId = new ExtensionId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.4-SNAPSHOT");
 
-        Artifact artifact = this.repositoryManager.findArtifact(artifactId);
+        Extension artifact = this.repositoryManager.resolve(artifactId);
 
         Assert.assertNotNull(artifact);
     }

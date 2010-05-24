@@ -1,12 +1,12 @@
-package org.xwiki.extension.repository;
+package org.xwiki.extension;
 
-public class ArtifactId
+public class ExtensionId
 {
     private String name;
 
     private String version;
 
-    public ArtifactId(String name, String version)
+    public ExtensionId(String name, String version)
     {
         this.name = name;
         this.version = version;
