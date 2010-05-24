@@ -237,7 +237,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         // action becomes available.
         XWikiContext xcontext = getContext();
         try {
-            return xcontext.getWiki().getURL(null, "charting", xcontext) + "/" + fileName;
+            return xcontext.getWiki().getURL(attachRef.getDocumentReference(), "charting", xcontext) + "/" + fileName;
         } catch (Exception ex) {
             getLogger().error("Unexpected error.", ex);
         }

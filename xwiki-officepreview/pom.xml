@@ -24,12 +24,12 @@
   <parent>
     <artifactId>xwiki-core-parent</artifactId>
     <groupId>org.xwiki.platform</groupId>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.4-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xwiki.platform</groupId>
   <artifactId>xwiki-core-officepreview</artifactId>
-  <version>2.2-SNAPSHOT</version>
+  <version>2.4-SNAPSHOT</version>
   <name>XWiki Platform - Core - Office Preview</name>
   <description>A module providing support for previewing office documents attached to wiki pages.</description>
   <dependencies>
