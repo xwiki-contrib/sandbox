@@ -16,5 +16,5 @@ public interface LocalExtensionRepository extends ExtensionRepository
 
     void installExtension(Extension extension);
 
-    void uninstallExtension(Extension extension);
+    void uninstallExtension(LocalExtension extension);
 }

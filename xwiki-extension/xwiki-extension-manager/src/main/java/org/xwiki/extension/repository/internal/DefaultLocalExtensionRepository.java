@@ -29,10 +29,15 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     public void initialize() throws InitializationException
     {
-        // TODO: resolve local repository path/uri
+        // TODO: resolve local repository path/uri based on configuration
 
         this.repositoryId = new ExtensionRepositoryId("local", "xwiki", uri);
         this.rootFolder = new File(uri);
+    }
+
+    public File getRootFolder()
+    {
+        return this.rootFolder;
     }
 
     // Repository
@@ -57,7 +62,20 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     public LocalExtension getLocalExtension(ExtensionId extensionId)
     {
+        return getLocalExtension(extensionId.getName(), extensionId.getVersion());
+    }
 
+    private LocalExtension getLocalExtension(String name, String version)
+    {
+        // TODO: search the extension in the local filesystem
+        return null;
+    }
+
+    private LocalExtension createExtension(Extension extension)
+    {
+        // TODO: create a local extension descriptor and export in a file in the in local repository
+
+        return null;
     }
 
     public List<Extension> getExtensions(int nb, int offset)
@@ -65,24 +83,18 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
         return (List) getLocalExtensions(nb, offset);
     }
 
-    public File getFile(Extension extension)
-    {
-        return new File(this.rootFolder, extension.getName() + "-" + extension.getVersion() + "."
-            + extension.getType().getFileExtension());
-    }
-
     public void installExtension(Extension extension)
     {
-        File artifactFile = getFile(extension);
+        LocalExtension localExtension = getLocalExtension(extension.getName(), extension.getVersion());
 
-        if (!artifactFile.exists()) {
-            extension.download(artifactFile);
+        if (localExtension == null) {
+            localExtension = createExtension(extension);
 
-            // TODO: write descriptor, need to decide the descriptor format
+            extension.download(localExtension.getFile());
         }
     }
 
-    public void uninstallExtension(Extension extension)
+    public void uninstallExtension(LocalExtension extension)
     {
         // TODO: delete artifact file and descriptor
     }

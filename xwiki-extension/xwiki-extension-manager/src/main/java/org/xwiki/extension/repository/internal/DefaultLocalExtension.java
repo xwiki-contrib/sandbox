@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.LocalExtension;
@@ -31,7 +32,26 @@ public class DefaultLocalExtension implements LocalExtension
 
     private List<ExtensionId> dependencies = new ArrayList<ExtensionId>();
 
-    private LocalExtensionRepository repository;
+    private DefaultLocalExtensionRepository repository;
+
+    public DefaultLocalExtension(DefaultLocalExtensionRepository repository, String name, String version,
+        ExtensionType type)
+    {
+        this.repository = repository;
+
+        this.name = name;
+        this.version = version;
+        this.type = type;
+
+        this.file = new File(repository.getRootFolder(), name + "-" + version + "." + type.getFileExtension());
+    }
+
+    public DefaultLocalExtension(DefaultLocalExtensionRepository repository, Extension extension)
+    {
+        this(repository, extension.getName(), extension.getVersion(), extension.getType());
+
+        // TODO
+    }
 
     public void setFile(File file)
     {

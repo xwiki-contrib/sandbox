@@ -9,10 +9,11 @@ import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManager;
+import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryFactory;
-import org.xwiki.extension.repository.LocalExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
+import org.xwiki.extension.repository.LocalExtensionRepository;
 
 @Component
 public class DefaultExtensionManager implements ExtensionManager, Initializable
@@ -66,19 +67,10 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
         this.localExtensionRepository.installExtension(extension);
     }
 
-    public void installExtension(Extension extension)
-    {
-        this.localExtensionRepository.installExtension(extension);
-    }
-
     public void uninstallExtension(ExtensionId extensionId)
     {
-        Extension extension = this.localExtensionRepository.resolve(extensionId);
-    }
+        LocalExtension extension = this.localExtensionRepository.getLocalExtension(extensionId);
 
-    public void uninstallExtension(Extension extension)
-    {
         this.localExtensionRepository.uninstallExtension(extension);
     }
-
 }

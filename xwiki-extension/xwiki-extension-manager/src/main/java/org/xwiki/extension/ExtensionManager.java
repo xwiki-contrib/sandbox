@@ -17,9 +17,5 @@ public interface ExtensionManager
 
     void installExtension(ExtensionId extensionId);
 
-    void installExtension(Extension extension);
-
     void uninstallExtension(ExtensionId extensionId);
-    
-    void uninstallExtension(Extension extension);
 }
