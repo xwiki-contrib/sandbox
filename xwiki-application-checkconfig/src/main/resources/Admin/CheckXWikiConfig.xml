@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Admin</web>
+<name>CheckXWikiConfig</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Admin.CheckConfig</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1262300400000</creationDate>
+<date>1262300400000</date>
+<contentUpdateDate>1262300400000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/1.0</syntaxId>
+<hidden>false</hidden>
+<content>1 XWiki Configuration Check
+
+#if (!$context.context)
+#warning("This application is not fully installed. Please visit [CheckConfigInstall] to complete it's installation")
+#end
+
+
+&lt;%
+ import com.xpn.xwiki.util.Util;
+ //
+ //
+ // Sets the tomcat path to use
+ //
+ //
+ def appserverpath = ".."
+ //
+ //
+ //
+
+def printCacheMaxNodes(message, cache, wiki) {
+ def evictionregionconfig = wiki.getPrivateField(cache,"jbosscacheConfiguration").getJBossCacheConfiguration().getEvictionConfig().getEvictionRegionConfig("/")
+ def maxnodes = (evictionregionconfig==null) ? null : evictionregionconfig.getEvictionAlgorithmConfig().getMaxNodes()
+ println "* ${message}: ${maxnodes}"
+}
+
+def wiki = context.getContext().getWiki()
+if (wiki!=null) {
+println "1.1 Memory Configuration"
+
+println "This lists the memory settings of the Java VM and the current memory usage. An XWiki instance should be installed with at least 300Mb. A large one with at least 700Mb, especially if the cache settings are boosted. If after *flushing the cache*, the current free memory is low and the current total close to the maximum the instance might be running out of memory. "
+println "* Max Memory: ${wiki.maxMemory()}" 
+println "* Current Total: ${wiki.totalMemory()}" 
+println "* Current Free: ${wiki.freeMemory()}"
+
+println "1.1 Database configuration"
+
+println "This lists the database settings of the Java VM and the current pool usage. An XWiki instance is set by default to 2 connections in the pool, which is ok for a very small instance. A large one with at least 10 or 20. If there is no activiy on the server, the active setting should be zero."
+def provider = wiki.getStore().getStore().sessionFactory.connectionProvider
+def ds = wiki.getPrivateField(provider,"ds")
+def pool = wiki.getPrivateField(ds,"connectionPool")
+
+println "* Max Active (number of possible connections to the DB): $pool.maxActive"
+println "* Max Idle (number of possible idle connections to the DB): $pool.maxIdle"
+println "* Active (current active connections to the DB): $pool.numActive"
+println "* Idle (current idle connections to the DB): $pool.numIdle"
+
+println "1.1 Cache configuration"
+
+println "This lists the main cache settings. An XWiki instance is set by default to 100 for the main cache which is ok for a small instance. A large one with at least 1000 (large XE) to 3000 (very large XE or large XEM). The page exist cache is set by default to 10000 which is good for any instance size."
+
+printCacheMaxNodes("Store Cache Eviction Policy Max nodes", wiki.store.cache, wiki)
+printCacheMaxNodes("Store Page Cache Eviction Policy Max nodes", wiki.store.pageExistCache, wiki)
+}
+
+println "1.1 Encoding Configuration"
+
+println "This lists ALL the encoding configuration of tomcat, xwiki, java. All should return UTF-8 except mail.mime.charset which can also return null (the file.encoding config will then be used)"
+
+def getEnvVars() {
+  Process p = null;
+  Properties envVars = new Properties();
+  Runtime r = Runtime.getRuntime();
+  String OS = System.getProperty("os.name").toLowerCase();
+  // System.out.println(OS);
+  if (OS.indexOf("windows 9") &gt; -1) {
+    p = r.exec( "command.com /c set" );
+    }
+  else if ( (OS.indexOf("nt") &gt; -1)
+         || (OS.indexOf("windows 2000") &gt; -1 )
+         || (OS.indexOf("windows xp") &gt; -1) ) {
+    // thanks to JuanFran for the xp fix!
+    p = r.exec( "cmd.exe /c set" );
+    }
+  else {
+    // our last hope, we assume Unix (thanks to H. Ware for the fix)
+    p = r.exec( "env" );
+    }
+  BufferedReader br = new BufferedReader
+     ( new InputStreamReader( p.getInputStream() ) );
+  String line;
+  while( (line = br.readLine()) != null ) {
+   int idx = line.indexOf( '=' );
+   String key = line.substring( 0, idx );
+   String value = line.substring( idx+1 );
+   envVars.setProperty( key, value );
+   // System.out.println( key + " = " + value );
+   }
+  return envVars;
+  }
+
+
+println "1.1.1 System environment"
+
+def envvars = getEnvVars();
+def lang = envvars.get("LANG")
+println "* LANG: ${lang}"
+
+
+println "1.1.1 Java command line"
+
+def fileenc = System.getProperty("file.encoding")
+println "* file.encoding: ${fileenc}"
+def mimecharset = System.getProperty("mail.mime.charset")
+println "* mail.mime.charset: ${mimecharset}"
+
+def tomcatconffile = new File("${appserverpath}/conf/server.xml")
+if (tomcatconffile.exists()) {
+ def node = new XmlParser().parse(tomcatconffile)
+
+println "1.1.1 Tomcat configuration"
+for (connector in node.Service.Connector) {
+ urienc = connector.'@URIEncoding'
+ prot = connector.'@protocol'
+ println "* Procotol ${prot} has encoding ${urienc}" 
+}
+} else {
+ println "The tomcat configuration file could not be found. You might not be using tomcat or the app server path (appserverpath) variable need to be set (you can edit the page to set it)"
+}
+
+println "1.1.1 XWiki Configuration"
+
+def xwikicfgdir = new File("${appserverpath}/webapps/xwiki/WEB-INF/xwiki.cfg")
+if (xwikicfgdir.exists()) {
+def content = Util.getFileContent(xwikicfgdir)
+def is = new ByteArrayInputStream(content.getBytes());
+def props = new Properties();
+props.load(is);
+
+println "* XWiki encoding: ${props.get("xwiki.encoding")}";
+} else {
+ println "The XWiki configuration file could not be found. The app server path (appserverpath) variable need to be set (you can edit the page to set it)"
+}
+
+
+println "1.1.1 XWiki web.xml"
+
+def xwikiwebxml = new File("${appserverpath}/webapps/xwiki/WEB-INF/web.xml")
+
+if (xwikiwebxml.exists()) {
+def wnode = new XmlParser().parse(xwikiwebxml)
+def found = false;
+for (filter in wnode.filter) {
+ def filterclass = filter.'filter-class'
+ if (filterclass.text().equals("com.xpn.xwiki.web.SetCharacterEncodingFilter")) {
+   for (initparam in  filter.'init-param') {
+   def paramname = initparam.'param-name'.text();
+   def paramvalue = initparam.'param-value'.text();
+   if (paramname=="encoding") {
+     println "* web.xml encoding: ${paramvalue}"
+     found = true
+   }
+  }
+ }
+}
+if (found==false) {
+     println "The web.xml encoding param could not be found"
+}
+} else {
+ println "The XWiki web.xml could not be found. The app server path (appserverpath) variable need to be set (you can edit the page to set it)"
+}
+%&gt;</content></xwikidoc>

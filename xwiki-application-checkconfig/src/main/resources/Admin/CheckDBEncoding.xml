@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Admin</web>
+<name>CheckDBEncoding</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Admin.CheckConfig</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1262300400000</creationDate>
+<date>1262300400000</date>
+<contentUpdateDate>1262300400000</contentUpdateDate>
+<version>1.1</version>
+<title>MySQL Encoding Check</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/1.0</syntaxId>
+<hidden>false</hidden>
+<content>
+#if (!$context.context)
+#warning("This application is not fully installed. Please visit [CheckConfigInstall] to complete it's installation")
+#end
+
+
+&lt;%
+
+println context.getDatabase()
+println context.getOriginalDatabase()
+def context2 = context.getContext();
+def store = xwiki.getXWiki().getStore().getStore();
+def wikilist =  xwiki.isVirtual() ? xwiki.wikimanager.getAllWikis() : [ context.getOriginalDatabase() ];
+def indexes = xwiki.getDocument("Admin.CheckIndexesSQL").getContent().split("\n")
+
+println "1.1 General db settings"
+
+try {
+  store.beginTransaction(context2);
+  def session = store.getSession(context2);
+  def connection = session.connection();
+  def stmt = connection.createStatement();
+  stmt.execute("show variables like 'character_set_%'");
+  def rset = stmt.getResultSet();
+  def result = null;
+  
+  while (rset.next()) {
+    def varname = rset.getString(1);
+    def varvalue = rset.getString(2);
+    if (varname!="character_sets_dir") {
+      println "* MYSQL encoding setting ${varname}: ${varvalue}"
+    }
+  }
+  stmt.close();
+} catch (Exception e) {
+   println "* &lt;font color='red'&gt;Failed to check mysql encoding&lt;/font&gt;: " + e.getMessage()
+} finally { 
+  store.endTransaction(context2, false);
+}
+
+println "1.1 General db collation settings"
+
+try {
+  store.beginTransaction(context2);
+  def session = store.getSession(context2);
+  def connection = session.connection();
+  def stmt = connection.createStatement();
+  stmt.execute("show variables like 'collation%'");
+  def rset = stmt.getResultSet();
+  def result = null;
+  
+  while (rset.next()) {
+    def varname = rset.getString(1);
+    def varvalue = rset.getString(2);
+      println "* MYSQL collation setting ${varname}: ${varvalue}"
+  }
+  stmt.close();
+} catch (Exception e) {
+   println "* &lt;font color='red'&gt;Failed to check mysql encoding&lt;/font&gt;: " + e.getMessage()
+} finally { 
+  store.endTransaction(context2, false);
+}
+
+println "1.1 Encoding settings by wiki"
+
+if (!wikilist.contains("xwiki"))
+ wikilist.add(0, "xwiki")
+for(wiki in wikilist) {
+// check database encoding
+try {
+  store.beginTransaction(context2);
+  def session = store.getSession(context2);
+  def connection = session.connection();
+  def stmt = connection.createStatement();
+  stmt.execute("show create database ${wiki}");
+  def rset = stmt.getResultSet();
+  def result = null;
+  try {
+    rset.first();
+    result = rset.getString(2);
+  } catch (Exception e2) {}
+
+  // println result
+  def i1 = result.indexOf("DEFAULT CHARACTER SET")
+  def i2 = result.indexOf("*", i1)
+  if (result!=null &amp;&amp; i1!=-1) {
+   def enc = result.substring(i1 + 22, i2);
+   println "* database encoding of ${wiki} is ${enc}" 
+  } else {
+   println "* &lt;font color='red'&gt;Could not find xwikidoc encoding for wiki ${wiki}&lt;/font&gt;"
+  }
+  stmt.close();
+} catch (Exception e) {
+   println "* &lt;font color='red'&gt;Failed to check xwikidoc encoding for wiki ${wiki}&lt;/font&gt;: " + e.getMessage()
+} finally { 
+  store.endTransaction(context2, false);
+}
+
+// check xwikidoc table encoding
+try {
+  store.beginTransaction(context2);
+  def session = store.getSession(context2);
+  def connection = session.connection();
+  def stmt = connection.createStatement();
+  stmt.execute("show create table ${wiki}.xwikidoc");
+  def rset = stmt.getResultSet();
+  def result = null;
+  try {
+    rset.first();
+    result = rset.getString(2);
+  } catch (Exception e2) {}
+
+  // println result
+  def i1 = -1;
+  def i2 = -1;
+  i1 = result.indexOf("DEFAULT CHARSET=");
+  if (i1!=-1)
+   i2 = result.indexOf(" ", i1 + 16);
+  if (result!=null &amp;&amp; i1!=-1) {
+   def enc = (i2==-1) ? result.substring(i1 + 16) : result.substring(i1 + 8, i2);
+   println "* encoding of xwikidoc of ${wiki} is ${enc}" 
+  } else {
+   println "* &lt;font color='red'&gt;Could not find xwikidoc encoding for wiki ${wiki}&lt;/font&gt;"
+  }
+
+  i1 = result.indexOf("COLLATE=")
+  if (i1!=-1)
+   i2 = result.indexOf(" ", i1+8)
+  if (result!=null &amp;&amp; i1!=-1) {
+   def enc = (i2==-1) ? result.substring(i1 + 8) : result.substring(i1 + 8, i2);
+   println "* collation of xwikidoc of ${wiki} is ${enc}" 
+  } else {
+   println "* &lt;font color='red'&gt;Could not find xwikidoc collation for wiki ${wiki}&lt;/font&gt;"
+  }
+
+  stmt.close();
+} catch (Exception e) {
+   println "* &lt;font color='red'&gt;Failed to check xwikidoc encoding or collation for wiki ${wiki}&lt;/font&gt;: " + e.getMessage()
+} finally { 
+  store.endTransaction(context2, false);
+}
+}
+%&gt;</content></xwikidoc>

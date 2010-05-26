@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Admin</web>
+<name>CheckIndexesSQL</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1262300400000</creationDate>
+<date>1262300400000</date>
+<contentUpdateDate>1262300400000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>create index xwd_name on xwikidoc (xwd_name);
+create index xwd_fullname on xwikidoc (xwd_fullname);
+create index xwd_web on xwikidoc (xwd_web);
+create index xwo_name on xwikiobjects (xwo_name);  
+create index xwl_value on xwikilongs (xwl_value);
+create index xwi_value on xwikiintegers (xwi_value);
+create index xws_value on xwikistrings (xws_value);
+create index xwl_value on xwikilargestrings (xwl_value(50));
+create index xwo_classname on xwikiobjects (xwo_classname);
+create index xwd_creation_date on xwikidoc (xwd_creation_date);
+create index xwd_date on xwikidoc (xwd_date);
+create index xwd_content_update_date on xwikidoc (xwd_content_update_date);
+create index xwd_content_author on xwikidoc (xwd_content_author);
+create index xwd_author on xwikidoc (xwd_author);
+create index xwd_creator on xwikidoc (xwd_creator);
+create index xwd_language on xwikidoc (xwd_language);
+create index xwd_default_language on xwikidoc (xwd_default_language);
+create index xwd_title on xwikidoc (xwd_title);
+create index xwd_parent on xwikidoc (xwd_parent(50));
+create index xwd_class_xml on xwikidoc (xwd_class_xml(20));
+create index xwr_isdiff on xwikircs(xwr_isdiff);
+create index xws_name on xwikistatsdoc (XWS_NAME);
+create index xws_number on xwikistatsdoc (XWS_NUMBER);
+create index xws_classname on xwikistatsdoc (XWS_CLASSNAME);
+create index xws_action on xwikistatsdoc (XWS_ACTION);
+create index xws_page_views on xwikistatsdoc (XWS_PAGE_VIEWS);
+create index xws_unique_visitors on xwikistatsdoc (XWS_UNIQUE_VISITORS);
+create index xws_period on xwikistatsdoc (XWS_PERIOD);
+create index xws_visits on xwikistatsdoc (XWS_VISITS);
+create index xwr_number on xwikistatsreferer (XWR_NUMBER);
+create index xwr_name on xwikistatsreferer (XWR_NAME);
+create index xwr_classname on xwikistatsreferer (XWR_CLASSNAME);
+create index xwr_referer on xwikistatsreferer (XWR_REFERER(50));
+create index xwr_page_views on xwikistatsreferer (XWR_PAGE_VIEWS);
+create index xwr_period on xwikistatsreferer (XWR_PERIOD);
+create index xwv_start_date on xwikistatsvisit (XWV_START_DATE);
+create index xwv_name on xwikistatsvisit (XWV_NAME);
+create index xwv_page_views on xwikistatsvisit (XWV_PAGE_VIEWS);
+create index xwv_page_saves on xwikistatsvisit (XWV_PAGE_SAVES);
+create index xwv_downloads on xwikistatsvisit (XWV_DOWNLOADS);
+create index xwv_end_date on xwikistatsvisit (XWV_END_DATE);
+create index xwv_ip on xwikistatsvisit (XWV_IP);
+create index xwv_user_agent on xwikistatsvisit (XWV_USER_AGENT(255));
+create index xwv_cookie on xwikistatsvisit (XWV_COOKIE(255));
+create index xwv_unique_id on xwikistatsvisit (XWV_UNIQUE_ID);
+create index xwv_classname on xwikistatsvisit (XWV_CLASSNAME);
+create index xwv_number on xwikistatsvisit (XWV_NUMBER);
+create index ase_requestid on  activitystream_events (ase_requestid(200));
+create index ase_stream on  activitystream_events (ase_stream);
+create index ase_date on  activitystream_events (ase_date);
+create index ase_priority on  activitystream_events (ase_priority);
+create index ase_type on  activitystream_events (ase_type);
+create index ase_application on  activitystream_events (ase_application);
+create index ase_user on  activitystream_events (ase_user);
+create index ase_wiki on  activitystream_events (ase_wiki);
+create index ase_space on  activitystream_events (ase_space);
+create index ase_page on  activitystream_events (ase_page);
+create index ase_param1 on  activitystream_events (ase_param1(200));
+create index ase_param2 on  activitystream_events (ase_param2(200));
+create index ase_param3 on  activitystream_events (ase_param3(200));
+create index ase_param4 on  activitystream_events (ase_param4(200));
+create index ase_param5 on  activitystream_events (ase_param5(200));
+create index xdd_fullname1 on xwikirecyclebin (xdd_fullname);
+create index xdd_language on xwikirecyclebin (xdd_language);
+create index xdd_date on xwikirecyclebin (xdd_date);
+create index xdd_deleter on xwikirecyclebin (xdd_deleter);
+create index xda_docid1 on xwikiattrecyclebin (xda_docid);
+create index xda_doc_name on xwikiattrecyclebin (xda_doc_name);
+create index xda_filename on xwikiattrecyclebin (xda_filename);
+create index xda_date on xwikiattrecyclebin (xda_date);
+create index xda_deleter on xwikiattrecyclebin (xda_deleter);
+</content></xwikidoc>
