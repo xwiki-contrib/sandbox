@@ -26,6 +26,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.objects.BaseProperty;
 import com.xpn.xwiki.user.api.XWikiUser;
 import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
 
@@ -98,9 +101,35 @@ public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
                 context.getWiki().createUser(validUserName, extended, "XWiki.XWikiUsers",
                     "#includeForm(\"XWiki.XWikiUserSheet\")", "edit", context);
 
+                // mark that we have created the user in the session
+                context.getRequest().getSession().setAttribute("xwikiheadersauthenticator", validUserFullName);
+                
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("User " + validUserName + " has been successfully created");
                 }
+            } else if (!validUserFullName.equals(context.getRequest().getSession().getAttribute("xwikiheadersauthenticator"))) {
+                Map<String, String> extended = getExtendedInformations(context);
+                XWikiDocument userDoc = context.getWiki().getDocument(validUserFullName, context);                
+                BaseObject userObj = userDoc.getObject("XWiki.XWikiUsers");
+                boolean updated = false;
+
+                for (Map.Entry<String, String> entry : extended.entrySet()) {
+                   String field = entry.getKey();
+                   String value = entry.getValue();
+                   BaseProperty prop = (BaseProperty)userObj.get(field);
+                   String currentValue = (prop==null || prop.getValue()==null) ? null : prop.getValue().toString();
+                   if (value!=null && !value.equals(currentValue)) {
+                     userObj.set(field, value, context);
+                     updated = true;
+                   }                
+                }
+
+                if (updated==true) {
+                   context.getWiki().saveDocument(userDoc, context);
+                }
+
+                // mark that we have checked the user in the session
+                context.getRequest().getSession().setAttribute("xwikiheadersauthenticator", validUserFullName);
             }
         } finally {
             context.setDatabase(database);
