@@ -51,7 +51,7 @@ try {
     rset.first();
     result = rset.getObject(1);
   } catch (Exception e2) {}
-  if (result!=null &amp;&amp; result.equals("xwikidoc")) {
+  if (result!=null &amp;&amp; result.equals("activitystream_events")) {
    println "* Indexes created for wiki ${wiki}" 
   } else {
    println "* &lt;font color='red'&gt;Indexes not created for wiki ${wiki}&lt;/font&gt;"
