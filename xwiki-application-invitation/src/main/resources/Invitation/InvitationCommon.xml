@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Invitation</web>
+<name>InvitationCommon</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Invitation.Invitation</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1273964657000</creationDate>
+<date>1274346990000</date>
+<contentUpdateDate>1274346990000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity}}
+#*
+ * Invitation Application
+ * This document contains common macros used by all documents in the Invitation Application.
+ *
+ * Macros in this script don't rely on any variables except those which are passed to them and the following:
+ *
+ * $doc the com.xpn.xwiki.api.Document object representing the document containing this code.
+ * $msg the internationalization message provider containing a get(String) and a get(String, List) function
+ * $xcontext the com.xpn.xwiki.Context object for this request
+ * $xwiki an object of the com.xpn.xwiki.api.XWiki class.
+ * $escapetool an object of class org.apache.velocity.tools.generic.EscapeTool
+ * $util used to get a newline character ($util.getNewLine())
+ *
+ * No macros in this script depend on any other macros.
+ *###
+##
+#if($request.getParameter('test') == '1')
+  {{info}}testLoadInvitationConfig{{/info}}
+  #testLoadInvitationConfig()
+#end
+##
+#*
+ * Display a message for the sender (preview) or for the admin (review sent messages)
+ *
+ * $mail (XObject representing email message) the message to view
+ *
+ * $recipients (List&lt;String&gt;) (Optional) the list of email addresses to override the list provided by $mail
+ *                                       used for preview because createMailFromTemplate will exclude addresses
+ *                                       which are invalid and we want to show the invalid addresses to the
+ *                                       user to tell them that they need to correct them.
+ *
+ * $invalidAddresses (List&lt;String&gt;) (Optional) List of invalid email addresses in recipients. Needed if you want to
+ *                                             show the user that they made a mistake on some addresses.
+ *                                             For each email in $invalidEmails, if it is also in $recipients, then it
+ *                                             will be marked but left in the same order, emails in $invlaidEmails but
+ *                                             not found in $recipients will end up at the end of the list.
+ *###
+#macro(displayMessage, $mail, $recipients, $invalidAddresses)
+
+  {{html wiki=false clean=false}}
+  &lt;div id="invitation-displaymessage" class="invitation"&gt;
+   &lt;strong&gt;$msg.get('xe.invitation.previewLabel')&lt;/strong&gt;
+   &lt;div class="invitation invitation-preview"&gt;
+    #set($recips = [])
+    #set($invalid = [])
+    ## get the lists of valid and invalid email addresses.
+    #if("$!invalidAddresses" == '')
+      #set($invalid = [])
+      #if("$!recipients" == '')
+        #set($recips = [$mail.getProperty('recipient').getValue().trim()])
+      #else
+        #set($discard = $recips.addAll($recipients))
+      #end
+    #else
+      ## Set to local variables to prevent altering input values.
+      #set($discard = $recips.addAll($recipients))
+      #set($discard = $invalid.addAll($invalidAddresses))
+    #end
+    ## Print the email addresses to be sent to.
+    ## To:
+    &lt;strong&gt;$msg.get('xe.invitation.toLabel')&lt;/strong&gt;
+    &lt;div id="preview-to-field" class="invitation-preview field"&gt;
+     #foreach($recip in $recips)
+       #if($invalid.contains($recip))
+         &lt;span class="invalid-address"&gt;$!escapetool.xml($!recip)&lt;/span&gt; ##
+         #set($discard = $invalid.remove($recip))
+       #else
+         &lt;span class="valid-address"&gt;$!escapetool.xml($!recip)&lt;/span&gt; ##
+       #end
+     #end
+     #foreach($recip in $invalid)
+       &lt;span class="invalid-address"&gt;$!escapetool.xml($!recip)&lt;/span&gt; ##       
+     #end
+     &amp;nbsp; ## used to make the field the correct size if it's empty.
+    &lt;/div&gt;
+    ## Tell the user that some of the email addresses are invalid.
+    #if($invalidAddresses.size() &gt; 0)
+      &lt;p class="invalid-address-message"&gt;
+       &lt;span class="errormessage"&gt;
+        #if($recips.size() == 1)
+          ## The email address given is invalid and will not be sent to.
+          $msg.get('xe.invitation.displayMessage.theAddressIsInvalid')
+        #else
+          #if($invalid.size() &gt; 1)
+            $msg.get('xe.invitation.displayMessage.someAddressesAreInvalid', [$invalidAddresses.size()])
+          #else
+            $msg.get('xe.invitation.displayMessage.anAddressesIsInvalid')
+          #end
+        #end
+       &lt;/span&gt;
+      &lt;/p&gt;
+    #end
+     ## Subject:
+     &lt;strong&gt;$msg.get('xe.invitation.subjectLabel')&lt;/strong&gt;
+    &lt;div id="preview-subjectline-field" class="invitation-preview field"&gt;
+     $escapetool.xml($mail.getProperty('subjectLine').getValue())
+    &lt;/div&gt;
+    ## Message:
+    &lt;strong&gt;$msg.get('xe.invitation.contentLabel')&lt;/strong&gt;
+    &lt;div id="preview-messagebody-field" class="invitation-preview field"&gt;
+     $mail.getProperty('messageBody').getValue()
+    &lt;/div&gt;
+   &lt;/div&gt;
+  &lt;/div&gt;
+  {{/html}}
+
+#end
+##
+#*
+ * Load the configuration.
+ * Only works if the script calling this macro has permission to view InvitationConfig 
+ * (or create it if it doesn't exist)
+ *
+ * $config (Map&lt;String, String&gt;) will be populated with invitation configuration.
+ *
+ * $configDocName (String) (Optional) will load configuration from this document, if not specified will use
+ *                                    'InvitationConfig' in the same space as $doc.
+ *
+ * $configClassName (String) (Optional) will load configuration from object of this class, if not specified will use
+ *                                      'Invitation' in the same space as $doc.
+ *###
+#macro(loadInvitationConfig, $config, $configDocName, $configClassName)
+  #define($discard)
+    #if("$!configDocName" == '')
+      #set($configDocNameInternal = "${doc.getSpace()}.InvitationConfig")
+    #else
+      #set($configDocNameInternal = $configDocName)
+    #end
+    #if("$!configClassName" == '')
+      #set($configClassNameInternal = "${doc.getSpace()}.Invitation")
+    #else
+      #set($configClassNameInternal = $configClassName)
+    #end
+    ## If no configuration specified then use hardcoded defaults.
+    $config.put('emailRegex', '/^([^@\s]+)@((?:[-a-zA-Z0-9]+\.)+[a-zA-Z]{2,})$/')
+    $config.put('emailClass', "${doc.getSpace()}.InvitationMailClass")
+    $config.put('emailContainer', "${doc.getSpace()}.InvitationMessages")
+    ## working documents.
+    $config.put('guestsActionsPage', "${doc.getSpace()}.InvitationGuestsActions")
+    $config.put('membersActionsPage', "${doc.getSpace()}.InvitationMembersActions")
+    $config.put('membersCommonPage', "${doc.getSpace()}.InvitationMembersCommon")
+    $config.put('commonPage', "${doc.getSpace()}.InvitationCommon")
+    $config.put('mainPage', "${doc.getSpace()}.Invitation")
+    ##
+    #set($subjectLineTemplate = '{{velocity}}$xcontext.getUser().replaceAll("^[^\.]*.", "") has i'
+                                + 'nvited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"): $!s'
+                                + 'ubjectLine{{/velocity}}')
+    $config.put('subjectLineTemplate', $subjectLineTemplate)
+    #set($n = $util.getNewline())
+    #set($messageBodyTemplate =
+                '{{velocity}}You have received this mail because $xwiki.getUserName($xcontext.getUser(),'
+                + ' false) has invited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$",'
+                + ' "$1").' + "$n$n" + '{{html}}&lt;p class="user-message"&gt;' + "$n" + '$!escapetool.html($!me'
+                + 'ssageBody)&lt;/p&gt;{{/html}}' + "$n$n" + '[[Accept the invitation and join&gt;&gt;'
+                + '$config.get("guestsActionsPage")?doAction_accept=y&amp;messageID=$messageID||class="join-link"]] [[Decline&gt;&gt;'
+                + '$config.get("guestsActionsPage")?doAction_decline=y&amp;messageID=$messageID||class="decline-link"]]'
+                + "$n" + '----' + "$n" + 'If this message looks like abuse of our system, please [[report '
+                + 'it&gt;&gt;$config.get("guestsActionsPage")?doAction_report&amp;messageID=$messageID]].' + "$n" + '{{/v'
+                + 'elocity}}' + "$n$n" + '{{html clean=false}}&lt;style&gt;&lt;!--p.user-message, a.join-link, a.de'
+                + 'cline-link {font-size: 130%}/* Necessary because colibri.css is not available in email '
+                + 'client. */ a {color: #4791BC;text-decoration: none;}div.email * {font-size:87.5%;}/* En'
+                + 'd of colibri.css stuff */a.join-link {float: left;}a.decline-link {color: #f88;float: r'
+                + 'ight;}hr {clear: both;}--&gt;&lt;/style&gt;{{/html}}')
+    $config.put('messageBodyTemplate', $messageBodyTemplate)
+    $config.put('allowUsersOfOtherWikis', 0)
+    $config.put('usersMayPersonalizeMessage', 1)
+    $config.put('usersMaySendToMultiple', 0)
+    $config.put('from_address', 'no-reply@localhost.localdomain')
+    $config.put('smtp_port', '25')
+    $config.put('smtp_server', 'localhost')
+    ##
+    ## Load some parameters from the configuration.
+    #set($configDoc = $xwiki.getDocumentAsAuthor($configDocNameInternal))
+    ## If no configuration document exists, create one and save it.
+    #if($configDoc.isNew())
+      $configDoc.setContent('{{velocity}}{{info}}$msg.get("xe.invitation.configInfo"){{/info}}{{/velocity}}')
+      #set($configObj = $configDoc.newObject($configClassNameInternal))
+      #foreach($key in $config.keySet())
+        $configObj.set($key, $config.get($key))
+      #end
+      ## Now create the configurable objects.
+      #set($cfgable = $configDoc.newObject('XWiki.ConfigurableClass'))
+      $cfgable.set('displayInSection', 'Invitation')
+      $cfgable.set('configurationClass', $configClassNameInternal)
+      $cfgable.set('configureGlobally', 1)
+      #set($propsToShow = 'subjectLineTemplate|messageBodyTemplate|emailRegex|from_address|allowUsersOfOtherWikis'
+                        + 'usersMayPersonalizeMessage|usersMaySendToMultiple|emailClass|emailContainer')
+      $cfgable.set('propertiesToShow', $propsToShow)
+      #set($cfgable = $configDoc.newObject('XWiki.ConfigurableClass'))
+      $cfgable.set('displayInSection', 'Invitation')
+      $cfgable.set('heading', '$msg.get("xe.invitation.configuration.smtpHeading")')
+      $cfgable.set('configurationClass', $configClassNameInternal)
+      $cfgable.set('configureGlobally', 1)
+      $cfgable.set('propertiesToShow',
+                        'smtp_server_password|smtp_server_username|smtp_port|smtp_server|javamail_extra_props')
+      $configDoc.saveAsAuthor()
+    #else
+      ## load the configuration object...
+      #set($configObj = $configDoc.getObject($configClassNameInternal))
+      #foreach($element in $configObj.getProperties())
+        $config.put($element.getName(), $configObj.getProperty($element.getName()).getValue())
+      #end
+    #end
+  #end## define $discard
+  ## Now invoke the defined code...
+  #set($discard = $discard.toString())
+#end
+##
+#*
+ * Basic unit testing of the macro above.
+ *###
+#macro(testLoadInvitationConfig)
+  #set($configDoc = $xwiki.getDocumentAsAuthor("${doc.getSpace()}.InvitationConfig"))
+  #if(!$configDoc.isNew())
+    $configDoc.deleteAsAuthor()
+  #end
+  #set($configClass = $xwiki.getDocumentAsAuthor("${doc.getSpace()}.Invitation"))
+  #if($configClass.isNew())
+    {{error}}Class document [[${doc.getSpace()}.Invitation]] not found. can't run test.{{/error}}
+  #else
+    #set($config = {})
+    #loadInvitationConfig($config, 'HopefullyNonexistantSpace')
+    #if($config.size() &lt; 9)
+      {{error}}Config map too small{{/error}}
+    #end
+    #if($config.get('from_address') != 'no-reply@localhost.localdomain')
+      {{error}}form_address incorrect, expecting "no-reply@localhost.localdomain" got "$config.get('from_address')"{{/error}}
+    #end
+    #set($configDoc = $xwiki.getDocumentAsAuthor("${doc.getSpace()}.InvitationConfig"))
+    #if($configDoc.isNew())
+      {{error}}Config document not created{{/error}}
+    #else
+      #set($configObj = $configDoc.getObject("${doc.getSpace()}.Invitation"))
+      $configObj.set('from_address', 'thisisatest@localhost.localdomain')
+      $configDoc.saveAsAuthor()
+      $config.clear()
+      #loadInvitationConfig($config, 'HopefullyNonexistantSpace')
+      #if($config.get('from_address') != 'thisisatest@localhost.localdomain')
+        {{error}}altering config parameter failed.{{/error}}
+      #end
+    #end
+  #end
+  #set($configDoc = $xwiki.getDocumentAsAuthor("${doc.getSpace()}.InvitationConfig"))
+  #if(!$configDoc.isNew())
+    $configDoc.deleteAsAuthor()
+  #end
+#end
+##
+#**
+ * Load mail from mail containing document.
+ *
+ * $config (Map&lt;String, String&gt;) will be used to get 'emailContainer' which should be the document name of a
+ *                               document containing email XObjects.
+ *
+ * $mail (Map&lt;String, XObject&gt;) will be populated with email message XObjects by their messageID.
+ *###
+#macro(loadInvitationMail, $config, $mail)
+  ## Load the document containing all of the invitation mail.
+  ## If this doesn't already exist, it's created.
+  #set($emailContainer = $xwiki.getDocumentAsAuthor($config.get('emailContainer')))
+  #if($emailContainer.isNew())
+    #set($discard = $emailContainer.setContent('{{velocity}}{{info}}$msg.get("xe.invitation.emailContainerInfo"){{/info}}{{/velocity}}'))
+  #end
+  ##
+  ## Load messages into a Map by messageID.
+  #foreach($obj in $emailContainer.getObjects($config.get('emailClass')))
+    #set($discard = $mail.put($obj.getProperty('messageID').getValue(), $obj))
+  #end
+#end
+##
+#**
+ * Is a guest allowed to accept an invitation?
+ *
+ * $guestActionsDoc (Document) the document which guests will use to register.
+ *###
+#macro(canGuestAcceptInvitation, $guestActionsDoc)
+  #set($out = 'true')
+  #if(!$guestActionsDoc)
+    #set($guestActionsDoc = $doc)
+  #end
+  #if(!$xwiki.hasAccessLevel('register', 'XWiki.XWikiGuest', 'XWiki.XWikiPreferences')
+      &amp;&amp; !$guestActionDoc.hasProgrammingRights())
+  ##
+    #set($out = 'false')
+  #end
+  $out##
+#end
+##
+#**
+ * Get the action taken by the user.
+ * This will interpret actions taken using displayActionConfirmationForm
+ *
+ * $parameterMap (Map&lt;String, String&gt;) the parameter map gotten by calling getParameterMap on the servlet request.
+ *
+ * $actionOutList (List&lt;String&gt;) will be populated with a single value (the action)
+ *###
+#macro(getUserAction, $parameterMap, $actionOutList)
+  #set($actionInternal = 0)
+  #foreach($param in $parameterMap.keySet())
+    #if($param.indexOf('doAction_') != -1)
+      ## Strip 'doAction_'
+      #set($actionInternal = $param.substring(9))
+    #end
+  #end
+  #if($actionInternal != 0)
+    #set($discard = $actionOutList.add($actionInternal))
+  #end
+#end
+##
+#*
+ * Display a form allowing a user to confirm doing an action.
+ *
+ * $messageIDs (List&lt;String&gt;) the unique IDs of the invitations to act upon.
+ *
+ * $action (String) the action to do.
+ *
+ * $memoLabel (String) what the memo field should be labeled.
+ *
+ * $confirmLabel (String) what the confirm button should say.
+ *
+ * $additionalParameters (Map&lt;String, String&gt;) these parameters will be xml escaped and placed in hidden input fields.
+ *###
+#macro(displayActionConfirmationForm, $messageIDs, $action, $memoLabel, $confirmLabel, $additionalParameters)
+  {{html wiki=false clean=false}}
+  &lt;div class="invitation action-confirm"&gt;
+   &lt;form action="$doc.getURL()" method="POST"&gt;
+    ##
+    #foreach($id in $messageIDs)
+      &lt;input type="hidden" name="messageID" value="$escapetool.xml($id)" /&gt;
+    #end
+    &lt;input type="hidden" name="confirm" value="y" /&gt;
+    #if($additionalParameters &amp;&amp; $additionalParameters.size() &gt; 0)
+      #foreach($param in $additionalParameters.keySet())
+        &lt;input type="hidden" name="$escapetool.xml($param)" value="$escapetool.xml($additionalParameters.get($param))" /&gt;
+      #end
+    #end
+    ##
+    &lt;dl&gt;
+     &lt;dt&gt;&lt;label for="memo"&gt;$memoLabel&lt;/label&gt;&lt;/dt&gt;
+     &lt;dd&gt;&lt;input type="text" size="54" name="memo" /&gt;&lt;/dd&gt;
+    &lt;/dl&gt;
+    &lt;div class="bottombuttons"&gt;
+     &lt;div class="buttons"&gt;
+      &lt;span class="buttonwrapper"&gt;
+       &lt;input type="submit" class="button" name="doAction_$escapetool.xml($action)" value="$confirmLabel" /&gt;
+      &lt;/span&gt;
+     &lt;/div&gt;
+    &lt;/div&gt;
+   &lt;/form&gt;
+  &lt;/div&gt;
+  {{/html}}
+#end
+##
+#*
+ * Set the status of a message and log the memo.
+ *
+ * $message (Xobject) the message to act on.
+ *
+ * $status (String) the status to set the message to.
+ *
+ * $memo (String) what to enter in the log.
+ *###
+#macro(setMessageStatus, $message, $status, $memo)
+   $message.set('status', $status)##
+   #set($history = $message.getProperty('history').getValue())
+   #set($canceledMessage = "#messageStatusForCode('canceled')")
+   #set($entry = "$msg.get('xe.invitation.setMessageStatus', [$xcontext.getUser(), $canceledMessage])")
+   $message.set('history', "$history$util.getNewLine()${entry}|$memo.replaceAll('\n', ' ')")##
+#end
+##
+#*
+ * Get the last memo from the message history.
+ *
+ * $message (Xobject) the message to act on.
+ *###
+#macro(getLastMemo, $message)
+  #set($history = $message.getProperty('history').getValue())
+  $history.substring($history.lastIndexOf('|'))##
+#end
+##
+#*
+ * Get the status of the current message for it's code.
+ * unsent - not sent yet.
+ * pending - sent and awating a response
+ * accepted - sent and accepted by recipient
+ * declined - sent and declined by recipient
+ * canceled - sent then canceled by sender
+ * reported - as spam (by recipient)
+ * notSpam - reported as spam and investigated (by admin)
+ * sendingFailed - failed to send message
+ * else - unknown status
+ *
+ * $status (String) the status of the message.
+ *###
+#macro(messageStatusForCode, $status)
+  #if($status == 'unsent')
+    $msg.get('xe.invitation.messageStatus.unsent')##
+  #elseif($status == 'pending')
+    $msg.get('xe.invitation.messageStatus.pending')##
+  #elseif($status == 'accepted')
+    $msg.get('xe.invitation.messageStatus.accepted')##
+  #elseif($status == 'declined')
+    $msg.get('xe.invitation.messageStatus.declined')##
+  #elseif($status == 'canceled')
+    $msg.get('xe.invitation.messageStatus.canceled')##
+  #elseif($status == 'reported')
+    $msg.get('xe.invitation.messageStatus.reported')##
+  #elseif($status == 'notSpam')
+    $msg.get('xe.invitation.messageStatus.investigated')##
+  #elseif($status == 'sendingFailed')
+    $msg.get('xe.invitation.messageStatus.sendingFailed')##
+  #else
+    $msg.get('xe.invitation.messageStatus.unknown', [$escapetool.xml($status)])##
+  #end
+#end
+## TODO: Something seems to be wrong with the renderer because it fails if there is a {{/velocity}} here</content></xwikidoc>
