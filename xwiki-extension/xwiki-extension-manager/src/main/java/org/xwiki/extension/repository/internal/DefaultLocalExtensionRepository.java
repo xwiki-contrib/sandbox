@@ -11,6 +11,7 @@ import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionId;
+import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
@@ -36,11 +37,9 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     // Repository
 
-    public Extension resolve(ExtensionId actifactId)
+    public Extension resolve(ExtensionId extensionId)
     {
-        // TODO: search artifact descriptor in the local repository
-
-        return null;
+        return getLocalExtension(extensionId);
     }
 
     public ExtensionRepositoryId getId()
@@ -50,10 +49,20 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     // LocalRepository
 
-    public List<Extension> getExtensions(int nb, int offset)
+    public List<LocalExtension> getLocalExtensions(int nb, int offset)
     {
         // TODO
         return Collections.emptyList();
+    }
+
+    public LocalExtension getLocalExtension(ExtensionId extensionId)
+    {
+
+    }
+
+    public List<Extension> getExtensions(int nb, int offset)
+    {
+        return (List) getLocalExtensions(nb, offset);
     }
 
     public File getFile(Extension extension)

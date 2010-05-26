@@ -68,14 +68,14 @@ public class MavenExtensionRepository implements ExtensionRepository
         return null;
     }
 
-    public Extension resolve(ExtensionId actifactId)
+    public Extension resolve(ExtensionId extensionId)
     {
         Extension artifact = null;
 
         // TODO: parse actifactId id to get group and artifact ids
 
         org.apache.maven.artifact.Artifact pomArtifact =
-            this.repositorySystem.createProjectArtifact(groupId, artifactId, actifactId.getVersion());
+            this.repositorySystem.createProjectArtifact(groupId, artifactId, extensionId.getVersion());
 
         ProjectBuildingRequest projectBuildingRequest = new DefaultProjectBuildingRequest();
 
@@ -89,6 +89,6 @@ public class MavenExtensionRepository implements ExtensionRepository
 
         ProjectBuildingResult result = this.projectBuilder.build(pomArtifact, projectBuildingRequest);
 
-        return new MavenExtension(actifactId, result.getProject(), this, this.mavenComponentManager);
+        return new MavenExtension(extensionId, result.getProject(), this, this.mavenComponentManager);
     }
 }

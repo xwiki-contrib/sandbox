@@ -2,8 +2,22 @@ package org.xwiki.extension;
 
 public enum ExtensionType
 {
+    /**
+     * A "virtual" extension representing a top level application with a set of dependencies.
+     */
+    EMPTY(null),
+
+    /**
+     * A jar file.
+     */
     JAR("jar"),
-    PAGES("xar");
+
+    /**
+     * A package containing a set of wiki pages.
+     */
+    PAGES("xar"),
+
+    SKIN("zip");
 
     private String fileExtension;
 
