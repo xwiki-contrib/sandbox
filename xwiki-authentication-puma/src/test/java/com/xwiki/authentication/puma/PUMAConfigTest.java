@@ -14,9 +14,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.xpn.xwiki.XWiki;
-import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.test.AbstractBridgedComponentTestCase;
 
-public class PUMAConfigTest
+public class PUMAConfigTest extends AbstractBridgedComponentTestCase
 {
     private Mockery mockery = new Mockery()
     {
@@ -29,15 +29,14 @@ public class PUMAConfigTest
 
     private XWiki xwikiMock;
 
-    private XWikiContext context;
-
     @Before
     public void setUp() throws Exception
     {
+        super.setUp();
+        
         this.xwikiMock = this.mockery.mock(XWiki.class);
 
-        this.context = new XWikiContext();
-        this.context.setWiki(this.xwikiMock);
+        getContext().setWiki(this.xwikiMock);
 
         this.config = new PUMAConfig();
     }
@@ -52,16 +51,12 @@ public class PUMAConfigTest
     public void testGetGroupMappingsWithoutProperty() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", context);
-                will(returnValue(null));
-                allowing(xwikiMock).Param("xwiki.authentication.puma.groupsMapping");
-                will(returnValue(null));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", getContext()); will(returnValue(null));
+            allowing(xwikiMock).Param("xwiki.authentication.puma.groupsMapping"); will(returnValue(null));
+        }});
 
-        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(this.context);
+        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(getContext());
 
         Assert.assertNull(groupMapping);
     }
@@ -70,16 +65,12 @@ public class PUMAConfigTest
     public void testGetGroupMappingsWithEmptyProperty() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", context);
-                will(returnValue(""));
-                allowing(xwikiMock).Param("xwiki.authentication.puma.groupsMapping");
-                will(returnValue(""));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", getContext()); will(returnValue(""));
+            allowing(xwikiMock).Param("xwiki.authentication.puma.groupsMapping"); will(returnValue(""));
+        }});
 
-        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(this.context);
+        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(getContext());
 
         Assert.assertTrue(groupMapping.isEmpty());
     }
@@ -88,14 +79,11 @@ public class PUMAConfigTest
     public void testGetGroupMappingsWithOneCouple() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", context);
-                will(returnValue("xwikigroup=pumagroup"));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", getContext()); will(returnValue("xwikigroup=pumagroup"));
+        }});
 
-        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(this.context);
+        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(getContext());
 
         Assert.assertEquals(new HashSet<String>(Arrays.asList("xwikigroup")), groupMapping.get("pumagroup"));
     }
@@ -104,14 +92,11 @@ public class PUMAConfigTest
     public void testGetGroupMappingsWithTwoCouples() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", context);
-                will(returnValue("xwikigroup=pumagroup|xwikigroup2=pumagroup2"));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", getContext()); will(returnValue("xwikigroup=pumagroup|xwikigroup2=pumagroup2"));
+        }});
 
-        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(this.context);
+        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(getContext());
 
         Assert.assertEquals(new HashSet<String>(Arrays.asList("xwikigroup")), groupMapping.get("pumagroup"));
         Assert.assertEquals(new HashSet<String>(Arrays.asList("xwikigroup2")), groupMapping.get("pumagroup2"));
@@ -121,14 +106,11 @@ public class PUMAConfigTest
     public void testGetGroupMappingsWithTwoCouplesMixed() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", context);
-                will(returnValue("xwikigroup=pumagroup|xwikigroup2=pumagroup|xwikigroup=pumagroup2|xwikigroup2=pumagroup2"));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_groupsMapping", getContext()); will(returnValue("xwikigroup=pumagroup|xwikigroup2=pumagroup|xwikigroup=pumagroup2|xwikigroup2=pumagroup2"));
+        }});
 
-        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(this.context);
+        Map<String, Collection<String>> groupMapping = this.config.getGroupMapping(getContext());
 
         Assert.assertEquals(new HashSet<String>(Arrays.asList("xwikigroup", "xwikigroup2")), groupMapping
             .get("pumagroup"));
@@ -140,16 +122,12 @@ public class PUMAConfigTest
     public void testGetUserMappingsWithoutProperty() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_userMapping", context);
-                will(returnValue(null));
-                allowing(xwikiMock).Param("xwiki.authentication.puma.userMapping");
-                will(returnValue(null));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_userMapping", getContext()); will(returnValue(null));
+            allowing(xwikiMock).Param("xwiki.authentication.puma.userMapping"); will(returnValue(null));
+        }});
 
-        Map<String, String> userMapping = this.config.getUserMapping(this.context);
+        Map<String, String> userMapping = this.config.getUserMapping(getContext());
 
         Assert.assertNull(userMapping);
     }
@@ -158,16 +136,12 @@ public class PUMAConfigTest
     public void testGetUserMappingsWithEmptyProperty() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_userMapping", context);
-                will(returnValue(""));
-                allowing(xwikiMock).Param("xwiki.authentication.puma.userMapping");
-                will(returnValue(""));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_userMapping", getContext()); will(returnValue(""));
+            allowing(xwikiMock).Param("xwiki.authentication.puma.userMapping"); will(returnValue(""));
+        }});
 
-        Map<String, String> userMapping = this.config.getUserMapping(this.context);
+        Map<String, String> userMapping = this.config.getUserMapping(getContext());
 
         Assert.assertTrue(userMapping.isEmpty());
     }
@@ -176,14 +150,11 @@ public class PUMAConfigTest
     public void testGetUserMappingsWithOneCouple() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_userMapping", context);
-                will(returnValue("xwikifield=pumagfield"));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_userMapping", getContext()); will(returnValue("xwikifield=pumagfield"));
+        }});
 
-        Map<String, String> userMapping = this.config.getUserMapping(this.context);
+        Map<String, String> userMapping = this.config.getUserMapping(getContext());
 
         Assert.assertEquals("pumagfield", userMapping.get("xwikifield"));
     }
@@ -192,14 +163,11 @@ public class PUMAConfigTest
     public void testGetUserMappingsWithTwoCouples() throws Exception
     {
         this.mockery.checking(new Expectations()
-        {
-            {
-                allowing(xwikiMock).getXWikiPreference("puma_userMapping", context);
-                will(returnValue("xwikifield=pumagfield,xwikifield2=pumagfield2"));
-            }
-        });
+        {{
+            allowing(xwikiMock).getXWikiPreference("puma_userMapping", getContext()); will(returnValue("xwikifield=pumagfield,xwikifield2=pumagfield2"));
+        }});
 
-        Map<String, String> userMapping = this.config.getUserMapping(this.context);
+        Map<String, String> userMapping = this.config.getUserMapping(getContext());
 
         Assert.assertEquals("pumagfield", userMapping.get("xwikifield"));
         Assert.assertEquals("pumagfield2", userMapping.get("xwikifield2"));
