@@ -233,10 +233,9 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
             context.getWiki().getGroupService(context).getAllGroupsNamesForMember(fullName, 0, 0, context);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("The user belongs to following XWiki groups: ");
-            for (String userGroupName : xwikiUserGroupList) {
-                LOG.debug(userGroupName);
-            }
+            LOG.debug("XWiki groups the use is supposed to be member: " + xwikiGroupsIn);
+            LOG.debug("XWiki groups the use is supposed to be not member: " + xwikiGroupsOut);
+            LOG.debug("The user belongs to following XWiki groups: " + xwikiUserGroupList);
         }
 
         for (String xwikiGroupName : xwikiGroupsIn) {
