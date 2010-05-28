@@ -110,15 +110,11 @@ public class PUMAAuthServiceImplTest extends AbstractBridgedComponentTestCase
         this.mockery.checking(new Expectations()
         {{
             // PUMAAuthServiceImpl#syncGroupsMembershipFromPUMA
-            allowing(xwikiMock).getXWikiPreference(with(any(String.class)), with(any(XWikiContext.class))); will(returnValue(group.getFullName() + "=cn=wpsadmins,o=defaultWIMFileBasedRealm" +
-            		"|XWiki.AllForumsAdmins=cn=PORT_ADMIN_TOUS,ou=groupes,o=edf,c=fr" +
-            		"|XWiki.AllForumsModerators=cn=PORT_WCM_VALIDEURS,ou=groupes,o=edf,c=fr" +
-            		"|XWiki.GroupeNiveau1=cn=GroupeNiveau1,o=defaultWIMFileBasedRealm" +
-            		"|XWiki.NewGroup=cn=NewGroup,o=defaultWIMFileBasedRealm" +
-            		"|XWiki.NewGroup2=cn=NewGroup2,o=defaultWIMFileBasedRealm"));
+            allowing(xwikiMock).getXWikiPreference(with(any(String.class)), with(any(XWikiContext.class))); will(returnValue(group.getFullName() + "=cn=group,ou=groups,o=xwiki,c=org"
+                    + "|XWiki.group2=cn=group2,ou=groups,o=xwiki,c=org"));
             allowing(pumaLocatorMock).findGroupsByPrincipal(pumaUserMock, true); will(returnValue(Arrays.asList(pumaGroup1, pumaGroup2)));
-            allowing(pumaProfileMock).getIdentifier(pumaGroup1); will(returnValue("cn=wpsadmins,o=defaultWIMFileBasedRealm"));
-            allowing(pumaProfileMock).getIdentifier(pumaGroup2); will(returnValue("cn=contentAuthors,o=defaultWIMFileBasedRealm"));
+            allowing(pumaProfileMock).getIdentifier(pumaGroup1); will(returnValue("cn=group,ou=groups,o=xwiki,c=org"));
+            allowing(pumaProfileMock).getIdentifier(pumaGroup2); will(returnValue("cn=group3,ou=groups,o=xwiki,c=org"));
             // AbstractAuthServiceImpl#syncGroupsMembership
             allowing(xwikiMock).getGroupService(getContext()); will(returnValue(xwikiGroupServiceMock));
             allowing(xwikiMock).getXClass(groupClass.getDocumentReference(), getContext()); will(returnValue(groupClass));
@@ -141,15 +137,11 @@ public class PUMAAuthServiceImplTest extends AbstractBridgedComponentTestCase
         this.mockery.checking(new Expectations()
         {{
             // PUMAAuthServiceImpl#syncGroupsMembershipFromPUMA
-            allowing(xwikiMock).getXWikiPreference(with(any(String.class)), with(any(XWikiContext.class))); will(returnValue(group.getFullName() + "=cn=wpsadmins,o=defaultWIMFileBasedRealm" +
-                "|XWiki.AllForumsAdmins=cn=PORT_ADMIN_TOUS,ou=groupes,o=edf,c=fr" +
-                "|XWiki.AllForumsModerators=cn=PORT_WCM_VALIDEURS,ou=groupes,o=edf,c=fr" +
-                "|XWiki.GroupeNiveau1=cn=GroupeNiveau1,o=defaultWIMFileBasedRealm" +
-                "|XWiki.NewGroup=cn=NewGroup,o=defaultWIMFileBasedRealm" +
-                "|XWiki.NewGroup2=cn=NewGroup2,o=defaultWIMFileBasedRealm"));
+            allowing(xwikiMock).getXWikiPreference(with(any(String.class)), with(any(XWikiContext.class))); will(returnValue(group.getFullName() + "=cn=group,ou=groups,o=xwiki,c=org"
+                + "|XWiki.group2=cn=group2,ou=groups,o=xwiki,c=org"));
             allowing(pumaLocatorMock).findGroupsByPrincipal(pumaUserMock, true); will(returnValue(Arrays.asList(pumaGroup1, pumaGroup2)));
-            allowing(pumaProfileMock).getIdentifier(pumaGroup1); will(returnValue("cn=wpsadmins,o=defaultWIMFileBasedRealm"));
-            allowing(pumaProfileMock).getIdentifier(pumaGroup2); will(returnValue("cn=contentAuthors,o=defaultWIMFileBasedRealm"));
+            allowing(pumaProfileMock).getIdentifier(pumaGroup1); will(returnValue("cn=group,ou=groups,o=xwiki,c=org"));
+            allowing(pumaProfileMock).getIdentifier(pumaGroup2); will(returnValue("cn=group3,ou=groups,o=xwiki,c=org"));
             // AbstractAuthServiceImpl#syncGroupsMembership
             allowing(xwikiMock).getGroupService(getContext()); will(returnValue(xwikiGroupServiceMock));
             allowing(xwikiMock).getXClass(groupClass.getDocumentReference(), getContext()); will(returnValue(groupClass));
