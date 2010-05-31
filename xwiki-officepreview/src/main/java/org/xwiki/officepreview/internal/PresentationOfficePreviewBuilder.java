@@ -21,19 +21,12 @@ package org.xwiki.officepreview.internal;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.velocity.VelocityContext;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.AttachmentReference;
@@ -42,8 +35,6 @@ import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.transformation.TransformationManager;
-import org.xwiki.velocity.VelocityEngine;
-import org.xwiki.velocity.VelocityManager;
 
 /**
  * Implementation of {@link OfficePreviewBuilder} which is responsible for building previews of office presentations.
@@ -55,16 +46,15 @@ import org.xwiki.velocity.VelocityManager;
 public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuilder
 {
     /**
+     * Name of the office converter output file.
+     */
+    private static final String OUTPUT_FILE_NAME = "output.html";
+    
+    /**
      * Used for converting presentation files.
      */
     @Requirement
     private OpenOfficeManager officeManager;
-
-    /**
-     * Used to parse the presentation template.
-     */
-    @Requirement
-    private VelocityManager velocityManager;
 
     /**
      * Used to build the presentation xdom.
@@ -86,101 +76,38 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
     {
         Map<String, InputStream> inputs = Collections.singletonMap(attachmentReference.getName(), data);
         Map<String, byte[]> artifacts =
-            officeManager.getConverter().convert(inputs, attachmentReference.getName(), "output.html");
-
-        // First extract all the image slides.
-        List<String> slideNames = new ArrayList<String>();
+            officeManager.getConverter().convert(inputs, attachmentReference.getName(), OUTPUT_FILE_NAME);
+        Set<File> temporaryFiles = new HashSet<File>();
         for (Map.Entry<String, byte[]> entry : artifacts.entrySet()) {
-            String key = entry.getKey();
-            // TODO: Verify if this pattern is a constant or not. I've checked most of the openoffice configuration
-            // options but could not find a way to change the output image format or the file naming convention.
-            if (key.matches("img\\d+\\.jpg")) {
-                slideNames.add(key);
-            }
-        }
-
-        // Sort the slide names in order.
-        Collections.sort(slideNames, new Comparator<String>()
-        {
-            public int compare(String name1, String name2)
-            {
-                return extractSlideIndex(name1).compareTo(extractSlideIndex(name2));
-            }
-        });
-
-        // Write the image slides in order.
-        List<String> slideUrls = new ArrayList<String>();
-        Set<File> slideFiles = new HashSet<File>();
-        for (String slideName : slideNames) {
             try {
-                // Write the slide into a temporary file.
-                File tempFile = saveTemporaryFile(attachmentReference, slideName, artifacts.get(slideName));
-
-                // Collect the external URL which refers this temporary file.
-                String url = buildURL(attachmentReference, tempFile.getName());
-                if (null != url) {
-                    slideUrls.add(url);
-                }
-
-                // Collect the temporary file so that it can be cleaned when the preview is disposed.
-                slideFiles.add(tempFile);
+                temporaryFiles.add(saveTemporaryFile(attachmentReference, entry.getKey(), entry.getValue()));
             } catch (Exception ex) {
-                String message = "Error while processing slide [%s].";
-                getLogger().error(String.format(message, slideName), ex);
+                String message = "Error while saving temporary file [%s] for presentation preview [%s].";
+                getLogger().error(String.format(message, entry.getKey()), attachmentReference.getName(), ex);
             }
         }
-
-        XDOM presentation = buildPresentationXDOM(slideUrls);
-
-        return new OfficeDocumentPreview(attachmentReference, version, presentation, slideFiles);
+        String firstSlideURL = buildURL(attachmentReference, OUTPUT_FILE_NAME);
+        XDOM presentationXDOM = buildPresentationXDOM(firstSlideURL);
+        return new OfficeDocumentPreview(attachmentReference, version, presentationXDOM, temporaryFiles);
     }
 
     /**
-     * Builds a presentation which refers the slides pointed by <b>slideUrls</b> argument.
+     * Builds a presentation XDOM which simply contains an html macro (iframe) pointing to the specified slide.
      * 
-     * @param slideUrls list of urls which point to presentation slides.
-     * @return {@link XDOM} containing a slide show.
-     * @throws Exception if an error occurs while building the presentation xdom.
+     * @param firstSlideURL URL of the first slide to which this presentation should link to.
+     * @return XDOM containing a html macro which holds the presentation iframe code.
+     * @throws Exception if an error occurs while transforming the XDOM.
      */
-    private XDOM buildPresentationXDOM(List<String> slideUrls) throws Exception
+    private XDOM buildPresentationXDOM(String firstSlideURL) throws Exception
     {
-        // TODO: Make this configurable.
-        String template = "/org/xwiki/officepreview/internal/presentation.vm";
-
-        InputStreamReader templateReader = null;
-
-        try {
-            VelocityEngine vEngine = velocityManager.getVelocityEngine();
-            VelocityContext vContext = new VelocityContext();
-            vContext.put("slides", slideUrls);
-
-            StringWriter outputWriter = new StringWriter();
-            templateReader = new InputStreamReader(getClass().getResourceAsStream(template));
-
-            vEngine.evaluate(vContext, outputWriter, template, templateReader);
-
-            XDOM xdom = xwiki20Parser.parse(new StringReader(outputWriter.toString()));
-
-            transformationManager.performTransformations(xdom, Syntax.XWIKI_2_0);
-
-            return xdom;
-        } catch (Exception ex) {
-            throw new Exception("Error while building presentation XDOM.", ex);
-        } finally {
-            IOUtils.closeQuietly(templateReader);
-        }
-    }
-
-    /**
-     * Extracts the index of a presentation slide given it's name.
-     * 
-     * @param slideName name of the image representing the slide.
-     * @return index of the slide in the slide show.
-     */
-    private Integer extractSlideIndex(String slideName)
-    {
-        int dot = slideName.indexOf('.');
-        String strIndex = slideName.substring(3, dot);
-        return Integer.parseInt(strIndex);
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("{{html wiki=\"false\" clean=\"false\"}}");
+        buffer.append(String.format("<iframe src=\"%s\" frameborder=0 width=800px height=600px></iframe>",
+            firstSlideURL));
+        buffer.append("{{/html}}");
+        XDOM xdom = this.xwiki20Parser.parse(new StringReader(buffer.toString()));
+        // Transform XDOM
+        this.transformationManager.performTransformations(xdom, Syntax.XWIKI_2_0);
+        return xdom;
     }
 }

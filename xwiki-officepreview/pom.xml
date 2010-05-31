@@ -94,7 +94,6 @@
            -->          
           <excludes>
               org/xwiki/officepreview/internal/AbstractOfficePreviewBuilder.java,
-              org/xwiki/officepreview/internal/PresentationOfficePreviewBuilder.java
           </excludes>
         </configuration>
       </plugin>

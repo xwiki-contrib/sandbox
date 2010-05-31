@@ -164,13 +164,13 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     }
 
     /**
-     * Builds a {@link OfficeDocumentPreview} of the specified attachment.
+     * Builds a preview of the specified attachment.
      * 
      * @param attachmentReference reference to the attachment to be previewed.
      * @param version version of the attachment for which the preview should be generated for.
-     * @param data content stream of the attachment.
-     * @return {@link OfficeDocumentPreview} corresponding to the specified attachment.
-     * @throws Exception if an error occurs while building the attachment.
+     * @param data content of the attachment.
+     * @return {@link OfficeDocumentPreview} corresponding to the preview of the specified attachment.
+     * @throws Exception if an error occurs while building the preview.
      */
     protected abstract OfficeDocumentPreview build(AttachmentReference attachmentReference, String version,
         InputStream data) throws Exception;
