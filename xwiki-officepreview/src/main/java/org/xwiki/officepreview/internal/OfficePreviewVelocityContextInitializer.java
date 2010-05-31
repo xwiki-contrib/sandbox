@@ -30,6 +30,7 @@ import org.xwiki.velocity.VelocityContextInitializer;
 /**
  * Initializes velocity contexts with a reference to {@link OfficePreviewVelocityBridge}.
  * 
+ * @since 2.4M1
  * @version $Id$
  */
 @Component("officepreview")

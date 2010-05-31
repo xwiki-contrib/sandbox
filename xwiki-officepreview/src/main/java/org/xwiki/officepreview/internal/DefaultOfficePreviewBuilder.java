@@ -41,31 +41,31 @@ import org.xwiki.rendering.listener.URLImage;
 /**
  * Default implementation of {@link OfficePreviewBuilder}.
  * 
+ * @since 2.4M1
  * @version $Id$
  */
 @Component
 public class DefaultOfficePreviewBuilder extends AbstractOfficePreviewBuilder
-{        
+{
     /**
      * Used to build xdom documents from office documents.
      */
     @Requirement
-    private XDOMOfficeDocumentBuilder xdomOfficeDocumentBuilder;    
-    
+    private XDOMOfficeDocumentBuilder builder;
+
     /**
      * {@inheritDoc}
      */
-    protected OfficeDocumentPreview build(AttachmentReference attachRef, String version,
-        InputStream data) throws Exception
+    protected OfficeDocumentPreview build(AttachmentReference attachmentReference, String version, InputStream data)
+        throws Exception
     {
-        DocumentReference docRef = attachRef.getDocumentReference();
-        
-        XDOMOfficeDocument xdomOfficeDoc = xdomOfficeDocumentBuilder.build(data, attachRef.getName(),
-            docRef, true);
-        
+        DocumentReference documentReference = attachmentReference.getDocumentReference();
+
+        XDOMOfficeDocument xdomOfficeDoc = builder.build(data, attachmentReference.getName(), documentReference, true);
+
         XDOM xdom = xdomOfficeDoc.getContentDocument();
         Map<String, byte[]> artifacts = xdomOfficeDoc.getArtifacts();
-        Set<File> tempFiles = new HashSet<File>();
+        Set<File> temporaryFiles = new HashSet<File>();
 
         // Process all image blocks.
         List<ImageBlock> imgBlocks = xdom.getChildrenByType(ImageBlock.class, true);
@@ -73,20 +73,20 @@ public class DefaultOfficePreviewBuilder extends AbstractOfficePreviewBuilder
             String imageName = imgBlock.getImage().getName();
 
             // Check whether there is a corresponding artifact.
-            if (artifacts.containsKey(imageName)) {             
+            if (artifacts.containsKey(imageName)) {
                 try {
                     // Write the image into a temporary file.
-                    File tempFile = writeArtifact(attachRef, imageName, artifacts.get(imageName));
+                    File tempFile = saveTemporaryFile(attachmentReference, imageName, artifacts.get(imageName));
 
                     // Build a URLImage which links to above temporary image file.
-                    URLImage urlImage = new URLImage(getURL(attachRef, tempFile.getName()));
+                    URLImage urlImage = new URLImage(buildURL(attachmentReference, tempFile.getName()));
 
                     // Replace the old image block with new one backed by the URLImage.
                     Block newImgBlock = new ImageBlock(urlImage, false, imgBlock.getParameters());
                     imgBlock.getParent().replaceChild(Arrays.asList(newImgBlock), imgBlock);
 
                     // Collect the temporary file so that it can be cleaned up when the preview is disposed.
-                    tempFiles.add(tempFile);
+                    temporaryFiles.add(tempFile);
                 } catch (Exception ex) {
                     String message = "Error while processing artifact image [%s].";
                     getLogger().error(String.format(message, imageName), ex);
@@ -94,6 +94,6 @@ public class DefaultOfficePreviewBuilder extends AbstractOfficePreviewBuilder
             }
         }
 
-        return new OfficeDocumentPreview(attachRef, version, xdom, tempFiles);
-    }   
+        return new OfficeDocumentPreview(attachmentReference, version, xdom, temporaryFiles);
+    }
 }

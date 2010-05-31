@@ -37,12 +37,13 @@ import org.xwiki.rendering.renderer.printer.WikiPrinter;
 /**
  * Exposes office preview utility methods to velocity scripts.
  * 
+ * @since 2.4M1
  * @version $Id$
  */
 public class OfficePreviewVelocityBridge
 {
     /**
-     * File extensions corresponding to slide presentations.
+     * File extensions corresponding to presentations.
      */
     private static final List<String> PRESENTATION_FORMAT_EXTENSIONS = Arrays.asList("ppt", "pptx", "odp");
 
@@ -69,7 +70,7 @@ public class OfficePreviewVelocityBridge
     /**
      * Used for constructing {@link AttachmentReference} instances from strings.
      */
-    private AttachmentReferenceResolver<String> attachRefResolver;
+    private AttachmentReferenceResolver<String> resolver;
 
     /**
      * For building previews of non-presentation office documents.
@@ -102,7 +103,7 @@ public class OfficePreviewVelocityBridge
 
         // Lookup other required components.
         this.execution = componentManager.lookup(Execution.class);
-        this.attachRefResolver = componentManager.lookup(AttachmentReferenceResolver.class);
+        this.resolver = componentManager.lookup(AttachmentReferenceResolver.class);
         this.defaultOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class);
         this.presentationOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class, "presentation");
         this.docBridge = componentManager.lookup(DocumentAccessBridge.class);
@@ -111,17 +112,17 @@ public class OfficePreviewVelocityBridge
     /**
      * Builds a preview of the specified office attachment in xhtml/1.0 syntax.
      * 
-     * @param attachmentNameString string identifying the office attachment.
+     * @param attachmentReferenceString string identifying the office attachment.
      * @return preview of the specified office attachment or null if an error occurs.
      */
-    public String preview(String attachmentNameString)
+    public String preview(String attachmentReferenceString)
     {
-        AttachmentReference attachRef = attachRefResolver.resolve(attachmentNameString);
+        AttachmentReference attachmentReference = resolver.resolve(attachmentReferenceString);
         try {
-            return preview(attachRef);
+            return preview(attachmentReference);
         } catch (Exception ex) {
             String message = "Could not preview office document [%s] - %s";
-            message = String.format(message, attachmentNameString, ex.getMessage());
+            message = String.format(message, attachmentReferenceString, ex.getMessage());
             setErrorMessage(message);
             logger.error(message, ex);
         }
@@ -131,23 +132,23 @@ public class OfficePreviewVelocityBridge
     /**
      * Builds a preview of the specified office attachment in xhtml/1.0 syntax.
      * 
-     * @param attachRef reference to the attachment to be previewed.
+     * @param attachmentReference reference to the attachment to be previewed.
      * @return preview of the specified office attachment in xhtml/1.0 syntax.
      * @throws Exception if current user does not have enough privileges to view the requested attachment or if an error
      *             occurs while generating the preview.
      */
-    private String preview(AttachmentReference attachRef) throws Exception
+    private String preview(AttachmentReference attachmentReference) throws Exception
     {
         // Check whether current user has view rights on the document containing the attachment.
-        if (!docBridge.isDocumentViewable(attachRef.getDocumentReference())) {
+        if (!docBridge.isDocumentViewable(attachmentReference.getDocumentReference())) {
             throw new Exception("Inadequate privileges.");
         }
 
         XDOM preview;
-        if (isPresentation(attachRef.getName())) {
-            preview = presentationOfficePreviewBuilder.build(attachRef);
+        if (isPresentation(attachmentReference.getName())) {
+            preview = presentationOfficePreviewBuilder.build(attachmentReference);
         } else {
-            preview = defaultOfficePreviewBuilder.build(attachRef);
+            preview = defaultOfficePreviewBuilder.build(attachmentReference);
         }
 
         // Build the preview and render the result.
@@ -157,12 +158,12 @@ public class OfficePreviewVelocityBridge
     /**
      * Utility method for checking if a file name corresponds to an office presentation.
      * 
-     * @param officeFileName office file name.
+     * @param fileName attachment file name.
      * @return true if the file name / extension represents an office presentation format.
      */
-    private boolean isPresentation(String officeFileName)
+    private boolean isPresentation(String fileName)
     {
-        String extension = officeFileName.substring(officeFileName.lastIndexOf('.') + 1);
+        String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         return PRESENTATION_FORMAT_EXTENSIONS.contains(extension);
     }
 
@@ -181,7 +182,7 @@ public class OfficePreviewVelocityBridge
         renderer.render(block, printer);
         return printer.toString();
     }
-    
+
     /**
      * @return an error message set inside current execution or null.
      */

@@ -25,18 +25,19 @@ import org.xwiki.rendering.block.XDOM;
 
 /**
  * Interface for the component responsible for building previews of office attachments.
- *
+ * 
+ * @since 2.4M1
  * @version $Id$
  */
 @ComponentRole
 public interface OfficePreviewBuilder
 {
     /**
-     * Builds a preview {@link XDOM} of the specified office attachment. 
+     * Builds a preview {@link XDOM} of the specified office attachment.
      * 
-     * @param attachRef office attachment reference.
+     * @param attachmentReference office attachment reference.
      * @return {@link XDOM} containing a preview of the specified attachment.
      * @throws Exception if an error occurs while accessing the attachment or building the preview.
      */
-    XDOM build(AttachmentReference attachRef) throws Exception;
+    XDOM build(AttachmentReference attachmentReference) throws Exception;
 }

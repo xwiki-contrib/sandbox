@@ -22,7 +22,7 @@ package org.xwiki.officepreview.internal;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.UUID;
+import java.net.URLEncoder;
 
 import org.apache.commons.io.IOUtils;
 import org.xwiki.bridge.DocumentAccessBridge;
@@ -41,8 +41,6 @@ import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
-import org.xwiki.officeimporter.openoffice.OpenOfficeManager;
-import org.xwiki.officeimporter.openoffice.OpenOfficeManager.ManagerState;
 import org.xwiki.officepreview.OfficePreviewBuilder;
 import org.xwiki.officepreview.OfficePreviewConfiguration;
 import org.xwiki.rendering.block.XDOM;
@@ -54,11 +52,17 @@ import com.xpn.xwiki.doc.XWikiDocument;
 /**
  * An abstract implementation of {@link OfficePreviewBuilder} which provides caching and other utility functions.
  * 
+ * @since 2.4M1
  * @version $Id$
  */
 public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled implements OfficePreviewBuilder,
     Initializable
 {
+    /**
+     * Default encoding used for encodng wiki, space, page and attachment names.
+     */
+    private static final String DEFAULT_ENCODING = "UTF-8";
+
     /**
      * Used to access the temporary directory.
      */
@@ -76,19 +80,13 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
      */
     @Requirement
     private DocumentAccessBridge docBridge;
-    
+
     /**
      * Used for serialzing {@link EntityReference} instances.
      */
     @Requirement
-    private EntityReferenceSerializer<String> refSerializer;
+    private EntityReferenceSerializer<String> serializer;
 
-    /**
-     * Used to query openoffice server state.
-     */
-    @Requirement
-    protected OpenOfficeManager officeManager;
-    
     /**
      * Used to read configuration details.
      */
@@ -113,9 +111,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     {
         CacheConfiguration config = new CacheConfiguration();
         LRUEvictionConfiguration lec = new LRUEvictionConfiguration();
-        
-        lec.setMaxEntries(conf.getMaxCachedPreviewsCount());
-        
+        lec.setMaxEntries(conf.getCacheSize());
         config.put(LRUEvictionConfiguration.CONFIGURATIONID, lec);
         try {
             previewsCache = cacheManager.createNewCache(config);
@@ -127,16 +123,16 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     /**
      * {@inheritDoc}
      */
-    public XDOM build(AttachmentReference attachRef) throws Exception
+    public XDOM build(AttachmentReference attachmentReference) throws Exception
     {
-        String strAttachRef = refSerializer.serialize(attachRef);
-        DocumentReference docRef = attachRef.getDocumentReference();
+        String strAttachRef = serializer.serialize(attachmentReference);
+        DocumentReference documentReference = attachmentReference.getDocumentReference();
 
         // Search the cache.
         OfficeDocumentPreview preview = previewsCache.get(strAttachRef);
 
         // It's possible that the attachment has been deleted. We need to catch such events and cleanup the cache.
-        if (!docBridge.getAttachmentReferences(docRef).contains(attachRef)) {
+        if (!docBridge.getAttachmentReferences(documentReference).contains(attachmentReference)) {
             // If a cached preview exists, flush it.
             if (null != preview) {
                 previewsCache.remove(strAttachRef);
@@ -145,7 +141,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         }
 
         // Query the current version of the attachment.
-        String currentVersion = getAttachmentVersion(attachRef);
+        String currentVersion = getAttachmentVersion(attachmentReference);
 
         // Check if the preview has been expired.
         if (null != preview && !currentVersion.equals(preview.getVersion())) {
@@ -156,122 +152,119 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
 
         // If a preview in not available, build one.
         if (null == preview) {
-            // Make sure an openoffice server is available.
-            connect();
-
             // Build preview.
-            preview = build(attachRef, currentVersion, docBridge.getAttachmentContent(attachRef));
+            preview = build(attachmentReference, currentVersion, docBridge.getAttachmentContent(attachmentReference));
 
             // Cache the preview.
             previewsCache.set(strAttachRef, preview);
         }
 
         // Done.
-        return preview.getXdom();
+        return preview.getXDOM();
     }
 
     /**
      * Builds a {@link OfficeDocumentPreview} of the specified attachment.
      * 
-     * @param attachRef reference to the attachment to be previewed.
+     * @param attachmentReference reference to the attachment to be previewed.
      * @param version version of the attachment for which the preview should be generated for.
      * @param data content stream of the attachment.
      * @return {@link OfficeDocumentPreview} corresponding to the specified attachment.
      * @throws Exception if an error occurs while building the attachment.
      */
-    protected abstract OfficeDocumentPreview build(AttachmentReference attachRef, String version,
+    protected abstract OfficeDocumentPreview build(AttachmentReference attachmentReference, String version,
         InputStream data) throws Exception;
 
     /**
-     * Writes specified artifact into a temporary file.
+     * Saves a temporary file associated with the given attachment.
      * 
-     * @param attachRef reference of the attachment to which this artifact belongs.
-     * @param artifactName original name of the artifact.
-     * @param fileData artifact data.
+     * @param attachmentReference reference to the attachment to which this temporary file belongs.
+     * @param fileName name of the temporary file.
+     * @param fileData file data.
      * @return file that was just written.
      * @throws Exception if an error occurs while writing the temporary file.
      */
-    protected File writeArtifact(AttachmentReference attachRef, String artifactName, byte[] fileData) throws Exception
+    protected File saveTemporaryFile(AttachmentReference attachmentReference, String fileName, byte[] fileData)
+        throws Exception
     {
-        String extension = artifactName.substring(artifactName.indexOf('.') + 1);
-        String tempFileName = String.format("%s.%s", UUID.randomUUID().toString(), extension);
-        File tempFile = new File(getTempDir(attachRef), tempFileName);
-
+        File tempFile = new File(getTemporaryDirectory(attachmentReference), fileName);
         FileOutputStream fos = null;
         try {
-            // Write the slide image into a temporary file.
             fos = new FileOutputStream(tempFile);
             IOUtils.write(fileData, fos);
+            tempFile.deleteOnExit();
             return tempFile;
         } finally {
             IOUtils.closeQuietly(fos);
-        }            
+        }
     }
 
     /**
-     * Utility method for obtaining a temporary storage directory for holding preview artifacts for a given attachment.
+     * Utility method for obtaining a temporary storage directory for an attachment.
      * 
-     * @param attachRef reference to the attachment.
-     * @return directory used to hold temporary files belonging to the office preview of the specified attachment.
+     * @param attachmentReference reference to the attachment.
+     * @return temporary directory for the specified attachment.
      */
-    protected File getTempDir(AttachmentReference attachRef)
+    protected File getTemporaryDirectory(AttachmentReference attachmentReference) throws Exception
     {
-        // TODO: For the moment we're using the charting directory to store office preview images. We need to change
-        // this when a generic temporary-resource action becomes available.
-        File tempDir = container.getApplicationContext().getTemporaryDirectory();
-        return new File(tempDir, "charts");
+        // Extract wiki, space, page and attachment name.
+        String wiki = attachmentReference.getDocumentReference().getWikiReference().getName();
+        String space = attachmentReference.getDocumentReference().getParent().getName();
+        String page = attachmentReference.getDocumentReference().getName();
+        String attachmentName = attachmentReference.getName();
+
+        // Encode to avoid illegal characters in file paths.
+        wiki = URLEncoder.encode(wiki, DEFAULT_ENCODING);
+        space = URLEncoder.encode(space, DEFAULT_ENCODING);
+        page = URLEncoder.encode(page, DEFAULT_ENCODING);
+        attachmentName = URLEncoder.encode(attachmentName, DEFAULT_ENCODING);
+
+        // Create temporary directory.
+        String path = String.format("temp/officepreview/%s/%s/%s/%s/", wiki, space, page, attachmentName);
+        File rootDir = container.getApplicationContext().getTemporaryDirectory();
+        File tempDir = new File(rootDir, path);
+        boolean success = tempDir.exists() ? true : tempDir.mkdirs();
+        success = success && tempDir.isDirectory();
+        success = success && tempDir.canWrite();
+        if (!success) {
+            String message = "Error while creating temporary directory for attachment [%s].";
+            throw new Exception(String.format(message, attachmentName));
+        }
+        return tempDir;
     }
 
     /**
-     * Utility method for building a URL for the specified temporary file belonging to the office preview of the given
-     * attachment.
+     * Utility method for building a URL to the specified temporary file.
      * 
-     * @param attachRef reference to the attachment being previewed.
+     * @param attachmentReference attachment to which the temporary file is associated.
      * @param fileName name of the temporary file.
      * @return URL string that refers the specified temporary file.
      */
-    protected String getURL(AttachmentReference attachRef, String fileName)
+    protected String buildURL(AttachmentReference attachmentReference, String fileName)
     {
-        // TODO: Since we are using the charting directory for holding temporary image files, here also we have to use
-        // the charting action so that we have valid URL references. This needs to be updated when a temporary-resource
-        // action becomes available.
-        XWikiContext xcontext = getContext();
-        try {
-            return xcontext.getWiki().getURL(attachRef.getDocumentReference(), "charting", xcontext) + "/" + fileName;
-        } catch (Exception ex) {
-            getLogger().error("Unexpected error.", ex);
-        }
-        return null;
+        String prefix = docBridge.getDocumentURL(attachmentReference.getDocumentReference(), "temp", null, null);
+        String attachmentName = attachmentReference.getName();
+        return String.format("%s/officepreview/%s/%s", prefix, attachmentName, fileName);
     }
 
     /**
-     * Attempts to connect to an openoffice server for conversions.
+     * Utility method for querying the current version of an attachment.
      * 
-     * @throws Exception if an openoffice server is not available.
-     */
-    private void connect() throws Exception
-    {
-        if (!officeManager.getState().equals(ManagerState.CONNECTED)) {
-            throw new Exception("OpenOffice server unavailable.");
-        }
-    }
-
-    /**
-     * Utility method for finding the current version of the specified attachment.
-     * 
-     * @param attachRef office attachment reference.
-     * @return current version of the specified attachment.
+     * @param attachmentReference reference to an attachment.
+     * @return current version of the attachment.
      * @throws Exception if an error occurs while accessing attachment details.
      */
-    private String getAttachmentVersion(AttachmentReference attachRef) throws Exception
+    private String getAttachmentVersion(AttachmentReference attachmentReference) throws Exception
     {
         XWikiContext xcontext = getContext();
-        XWikiDocument doc = xcontext.getWiki().getDocument(attachRef.getDocumentReference(), xcontext);
-        XWikiAttachment attach = doc.getAttachment(attachRef.getName());
-        return attach.getVersion();
+        XWikiDocument doc = xcontext.getWiki().getDocument(attachmentReference.getDocumentReference(), xcontext);
+        XWikiAttachment attachment = doc.getAttachment(attachmentReference.getName());
+        return attachment.getVersion();
     }
 
     /**
+     * Used to retrieve a reference to {@link XWikiContext}.
+     * 
      * @return {@link XWikiContext} instance.
      */
     private XWikiContext getContext()

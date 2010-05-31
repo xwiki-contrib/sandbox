@@ -27,6 +27,7 @@ import org.xwiki.officepreview.OfficePreviewConfiguration;
 /**
  * Default implementation of {@link OfficePreviewConfiguration}.
  * 
+ * @since 2.4M1
  * @version $Id$
  */
 @Component
@@ -51,8 +52,8 @@ public class DefaultOfficePreviewConfiguration implements OfficePreviewConfigura
     /**
      * {@inheritDoc}
      */
-    public int getMaxCachedPreviewsCount()
+    public int getCacheSize()
     {
-        return configuration.getProperty(PREFIX + "maxCachedPreviewsCount", DEFAULT_CACHE_SIZE);
+        return configuration.getProperty(PREFIX + "cacheSize", DEFAULT_CACHE_SIZE);
     }
 }

@@ -37,6 +37,7 @@ import org.apache.velocity.VelocityContext;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.AttachmentReference;
+import org.xwiki.officeimporter.openoffice.OpenOfficeManager;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.syntax.Syntax;
@@ -47,11 +48,18 @@ import org.xwiki.velocity.VelocityManager;
 /**
  * Implementation of {@link OfficePreviewBuilder} which is responsible for building previews of office presentations.
  * 
+ * @since 2.4M1
  * @version $Id$
  */
 @Component("presentation")
 public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuilder
 {
+    /**
+     * Used for converting presentation files.
+     */
+    @Requirement
+    private OpenOfficeManager officeManager;
+
     /**
      * Used to parse the presentation template.
      */
@@ -63,7 +71,7 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
      */
     @Requirement("xwiki/2.0")
     private Parser xwiki20Parser;
-    
+
     /**
      * Used to transform the XDOM.
      */
@@ -73,12 +81,12 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
     /**
      * {@inheritDoc}
      */
-    protected OfficeDocumentPreview build(AttachmentReference attachRef, String version, InputStream data)
+    protected OfficeDocumentPreview build(AttachmentReference attachmentReference, String version, InputStream data)
         throws Exception
     {
-        Map<String, InputStream> inputs = Collections.singletonMap(attachRef.getName(), data);
+        Map<String, InputStream> inputs = Collections.singletonMap(attachmentReference.getName(), data);
         Map<String, byte[]> artifacts =
-            officeManager.getConverter().convert(inputs, attachRef.getName(), "output.html");
+            officeManager.getConverter().convert(inputs, attachmentReference.getName(), "output.html");
 
         // First extract all the image slides.
         List<String> slideNames = new ArrayList<String>();
@@ -106,10 +114,10 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
         for (String slideName : slideNames) {
             try {
                 // Write the slide into a temporary file.
-                File tempFile = writeArtifact(attachRef, slideName, artifacts.get(slideName));
+                File tempFile = saveTemporaryFile(attachmentReference, slideName, artifacts.get(slideName));
 
                 // Collect the external URL which refers this temporary file.
-                String url = getURL(attachRef, tempFile.getName());
+                String url = buildURL(attachmentReference, tempFile.getName());
                 if (null != url) {
                     slideUrls.add(url);
                 }
@@ -124,7 +132,7 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
 
         XDOM presentation = buildPresentationXDOM(slideUrls);
 
-        return new OfficeDocumentPreview(attachRef, version, presentation, slideFiles);
+        return new OfficeDocumentPreview(attachmentReference, version, presentation, slideFiles);
     }
 
     /**
@@ -152,9 +160,9 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
             vEngine.evaluate(vContext, outputWriter, template, templateReader);
 
             XDOM xdom = xwiki20Parser.parse(new StringReader(outputWriter.toString()));
-            
+
             transformationManager.performTransformations(xdom, Syntax.XWIKI_2_0);
-                        
+
             return xdom;
         } catch (Exception ex) {
             throw new Exception("Error while building presentation XDOM.", ex);

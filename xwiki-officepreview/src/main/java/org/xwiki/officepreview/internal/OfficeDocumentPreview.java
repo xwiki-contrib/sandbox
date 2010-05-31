@@ -29,6 +29,7 @@ import org.xwiki.rendering.block.XDOM;
 /**
  * Used for holding all the information belonging to an office attachment preview.
  * 
+ * @since 2.4M1
  * @version $Id$
  */
 public class OfficeDocumentPreview implements DisposableCacheValue
@@ -51,7 +52,7 @@ public class OfficeDocumentPreview implements DisposableCacheValue
     /**
      * Temporary files used by this preview.
      */
-    private Set<File> tempFiles;
+    private Set<File> temporaryFiles;
 
     /**
      * Creates a new {@link OfficeDocumentPreview} instance.
@@ -59,15 +60,15 @@ public class OfficeDocumentPreview implements DisposableCacheValue
      * @param attachmentReference reference to the attachment to which this preview belongs.
      * @param version version of the attachment to which this preview corresponds.
      * @param xdom {@link XDOM} holding the preview document syntax.
-     * @param tempFiles temporary files that belongs to this preview.
+     * @param temporaryFiles temporary files that belongs to this preview.
      */
     public OfficeDocumentPreview(AttachmentReference attachmentReference, String version, XDOM xdom,
-        Set<File> tempFiles)
+        Set<File> temporaryFiles)
     {
         this.attachmentReference = attachmentReference;
         this.version = version;
         this.xdom = xdom;
-        this.tempFiles = tempFiles;
+        this.temporaryFiles = temporaryFiles;
     }
 
     /**
@@ -76,13 +77,13 @@ public class OfficeDocumentPreview implements DisposableCacheValue
     public void dispose() throws Exception
     {
         // Cleanup all the temporary files.
-        for (File tempFile : tempFiles) {
-            tempFile.delete();
+        for (File file : temporaryFiles) {
+            file.delete();
         }
     }
 
     /**
-     * @return name of the attachment to which this preview belongs.
+     * @return reference to the attachment to which this preview belongs to.
      */
     public AttachmentReference getAttachmentReference()
     {
@@ -100,7 +101,7 @@ public class OfficeDocumentPreview implements DisposableCacheValue
     /**
      * @return {@link XDOM} holding the preview document syntax.
      */
-    public XDOM getXdom()
+    public XDOM getXDOM()
     {
         return this.xdom;
     }
