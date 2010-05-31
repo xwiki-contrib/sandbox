@@ -20,6 +20,11 @@
 
 package com.xpn.xwiki.watch.client.annotation;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -29,51 +34,50 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class Annotation implements IsSerializable
 {
-    /**
-     * The target on which this annotation is added, the target content of the annotation. <br />
-     * TODO: is this really needed here?
-     */
-    protected String target;
+    public static final String ANNOTATION = "annotation";
 
     /**
-     * The username of the author of this annotation, e.g. xwiki:XWiki.Admin.
-     */
-    protected String author;
-
-    /**
-     * The addition date to display for this annotation.
-     */
-    protected String displayDate;
-
-    /**
-     * The metadata associated with this annotation.
-     */
-    protected String annotation;
-
-    /**
+     * The name of the field of this annotation selection. <br />
      * The text on which this annotation is added.
      */
-    protected String selection;
+    public static final String SELECTION_FIELD = "selection";
 
     /**
-     * The context of the selection of this annotation. Should be used to uniquely localize an annotation on the content
-     * where is added. Or, if the context appears twice, semantically speaking it shouldn't make any difference if the
-     * annotation is displayed & handled in one or other of the occurrences.
+     * The name of the field of this annotation selection context to the left of the annotation. <br />
+     * The context of the selection is used to uniquely localize an annotation on the content where is added. Or, if the
+     * context appears twice, semantically speaking it shouldn't make any difference if the annotation is displayed &
+     * handled in one or other of the occurrences.
      */
-    protected String selectionContext;
+    public static final String SELECTION_LEFT_CONTEXT_FIELD = "selectionLeftContext";
 
     /**
-     * The state of this annotation, with respect to the content evolution. <br />
-     * TODO: find out if it's the right place to put this, as it's a maintainer particular information.
+     * The name of the field of this annotation selection context to the right of the annotation. <br />
+     * The context of the selection is used to uniquely localize an annotation on the content where is added. Or, if the
+     * context appears twice, semantically speaking it shouldn't make any difference if the annotation is displayed &
+     * handled in one or other of the occurrences.
      */
-    protected AnnotationState state;
+    public static final String SELECTION_RIGHT_CONTEXT_FIELD = "selectionRightContext";
 
     /**
-     * The original selection of this annotation, if it's an automatically updated annotation (its state is
-     * {@link AnnotationState#UPDATED}). <br />
-     * TODO: find out if it's the right place to put this, as it's a maintainer particular information.
+     * The name of the field of this annotation state. <br />
+     * TODO: find out if it's the right place to put the state information, as it's a maintainer particular information.
      */
-    protected String originalSelection;
+    public static final String STATE_FIELD = "state";
+
+    /**
+     * The name of the field of this annotation original selection.
+     */
+    public static final String ORIGINAL_SELECTION_FIELD = "originalSelection";
+
+    /**
+     * The name of the field of this annotation author.
+     */
+    public static final String AUTHOR_FIELD = "author";
+
+    /**
+     * The name of the field of this annotation serialized date.
+     */
+    public static final String DATE_FIELD = "date";
 
     /**
      * The unique identifier of this annotation, which should be unique among all the annotations on the same target.
@@ -81,89 +85,46 @@ public class Annotation implements IsSerializable
     protected String id;
 
     /**
-     * The offset of this annotation in the content on which it is added.
-     * 
-     * @deprecated this field doesn't hold correct information any longer, selection and selectionContext should be used
-     *             to map the annotation on the source if needed
+     * The values of the fields of this annotation.
      */
-    protected int offset = -1;
+    protected Map<String, Object> fields = new HashMap<String, Object>();
 
     /**
-     * The length of this annotation in the content on which it is added.
-     * 
-     * @deprecated this field doesn't hold correct information any longer, selection and selectionContext should be used
-     *             to map the annotation on the source if needed
-     */
-    protected int length = -1;
-    
-    /**
-     * Default no-parameters constructor that will make Annotation serializable. And all my problems will be fixed.
+     * Default no-parameters constructor that will make Annotation serializable.
      */
     public Annotation()
     {
-        target = "";
-        id = "";
-        author = "";
+        this.id = "";
+        this.setAuthor("");
     }
 
     /**
-     * @param target the document where the annotation is added
-     * @param author the author of the annotation
-     * @param date the date of the annotation
-     * @param state the state of the annotation, whether it was safely updated upon further edits of the document or not
-     * @param annotation the text of the annotation
-     * @param initialSelection the initial selection of the annotation
-     * @param selectionContext the context of the annotation selection
-     * @param id the id of the annotation
-     * @param offset the offset of the annotation inside the context
-     * @param length the length of the selection of this annotation
-     * @deprecated use the {@link Annotation#Annotation(String, String, String, String, String, String)} constructor
-     */
-    public Annotation(String target, String author, String date, AnnotationState state, String annotation,
-        String initialSelection, String selectionContext, String id, int offset, int length)
-    {
-        this.target = target;
-        this.author = author;
-        this.displayDate = date;
-        this.state = state;
-        this.annotation = annotation;
-        this.selection = initialSelection;
-        this.selectionContext = selectionContext;
-        this.id = id;
-        this.offset = offset;
-        this.length = length;
-    }
-
-    /**
-     * Build an annotation from the selection and selection context with invalid values for the offset and length which
-     * are deprecated.
+     * Builds an annotation description for the annotation with the passed id: used for annotation updates where only a
+     * part of the fields my need to be set.
      * 
-     * @param target the document where the annotation is added
-     * @param author the author of the annotation
-     * @param annotation the text of the annotation
-     * @param initialSelection the initial selection of the annotation
-     * @param selectionContext the context of the annotation selection
-     * @param id the id of the annotation
+     * @param id the id of this annotation
      */
-    public Annotation(String target, String author, String annotation, String initialSelection,
-        String selectionContext, String id)
+    public Annotation(String id)
     {
-        this.target = target;
-        this.author = author;
-        this.annotation = annotation;
-        this.selection = initialSelection;
-        this.selectionContext = selectionContext;
         this.id = id;
-        this.state = AnnotationState.SAFE;
-        this.displayDate = "";
     }
 
     /**
-     * @return target of annotation.
+     * Builds an annotation for the passed selection in the context, used to pass an annotation to be added (which does
+     * not have an id yet since it hasn't been stored yet).
+     * 
+     * @param initialSelection the selected text of this annotation
+     * @param leftContext the context to the left of the selection, which makes the selection uniquely identifiable in
+     *            the content on which this annotation is added. Can be void if selection itself is unique
+     * @param rightContext the context to the right of the selection, which makes the selection uniquely identifiable in
+     *            the content on which this annotation is added. Can be void if selection itself is unique
      */
-    public String getTarget()
+    public Annotation(String initialSelection, String leftContext, String rightContext)
     {
-        return target;
+        this(null);
+        setSelection(initialSelection, leftContext, rightContext);
+        // also initialize the state of this annotation to safe
+        setState(AnnotationState.SAFE);
     }
 
     /**
@@ -171,15 +132,33 @@ public class Annotation implements IsSerializable
      */
     public String getAuthor()
     {
-        return author;
+        return (String) fields.get(AUTHOR_FIELD);
+    }
+
+    /**
+     * Sets the author of this annotation.
+     * 
+     * @param author the author of this annotation.
+     */
+    public void setAuthor(String author)
+    {
+        fields.put(AUTHOR_FIELD, author);
     }
 
     /**
      * @return date of annotation
      */
-    public String getDisplayDate()
+    public Date getDate()
     {
-        return displayDate;
+        return (Date) fields.get(DATE_FIELD);
+    }
+
+    /**
+     * @param date the serialized date to set
+     */
+    public void setDate(Date date)
+    {
+        fields.put(DATE_FIELD, date);
     }
 
     /**
@@ -187,7 +166,24 @@ public class Annotation implements IsSerializable
      */
     public AnnotationState getState()
     {
-        return state;
+        // have a little bit of mercy, try to parse this from string if it's a string
+        Object stateField = fields.get(STATE_FIELD);
+        if (stateField == null) {
+            // null stays null no matter what
+            return null;
+        }
+        if (stateField instanceof AnnotationState) {
+            return (AnnotationState) stateField;
+        } else if (stateField instanceof String) {
+            try {
+                return AnnotationState.valueOf((String) stateField);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+
+        // return no state, can't actually make sense of the value in the map. Hopefully this will never happen
+        return null;
     }
 
     /**
@@ -195,55 +191,70 @@ public class Annotation implements IsSerializable
      */
     public void setState(AnnotationState state)
     {
-        this.state = state;
+        fields.put(STATE_FIELD, state);
     }
 
     /**
-     * @return annotation content.
-     */
-    public String getAnnotation()
-    {
-        return annotation;
-    }
-
-    /**
-     * @return initial selection of selection
+     * @return selected text of this annotation
      */
     public String getSelection()
     {
-        return selection;
+        return (String) fields.get(SELECTION_FIELD);
     }
 
     /**
-     * Sets the selection of this annotation through its context, the offset of the selection inside the context and its
-     * length. Setting this value is done in this manner to make sure it's kept consistent.
+     * Helper method to get the selection of this annotation in its context, with the context left to the left and
+     * context right to the right. This method ensures that a non-null value will be returned, even if some of the
+     * components of the selection are missing.
      * 
-     * @param selectionContext the context of the selection
-     * @param selectionOffset the offset of the actual selection in the context
-     * @param selectionLength the length of the selection in the context. Note that context must be at least offset +
-     *            length in size, otherwise the selection will be set to the rest of the context starting from the
-     *            specified offset
+     * @return the selection of this annotation in its context, with the context left to the left and context right to
+     *         the right
      */
-    public void setSelection(String selectionContext, int selectionOffset, int selectionLength)
+    public String getSelectionInContext()
     {
-        String newSelection;
-        if (selectionOffset < 0 || selectionOffset > selectionContext.length()) {
-            newSelection = selectionContext;
-        } else if (selectionLength < 0 || selectionOffset + selectionLength > selectionContext.length()) {
-            newSelection = selectionContext.substring(selectionOffset);
-        } else {
-            newSelection = selectionContext.substring(selectionOffset, selectionOffset + selectionLength);
-        }
-        this.selectionContext = selectionContext;
-        this.selection = newSelection;
+        return (getSelectionLeftContext() == null ? "" : getSelectionLeftContext())
+            + (getSelection() == null ? "" : getSelection())
+            + (getSelectionRightContext() == null ? "" : getSelectionRightContext());
     }
 
     /**
-     * @return selection context of annotation
+     * Sets the selection of this annotation and the context along with it.
+     * 
+     * @param selection the selection of this annotation
+     * @param contextLeft the context to the left of the annotation
+     * @param contextRight the context to the right of the annotation
      */
-    public String getSelectionContext()
+    public void setSelection(String selection, String contextLeft, String contextRight)
     {
-        return selectionContext;
+        fields.put(SELECTION_FIELD, selection);
+        fields.put(SELECTION_LEFT_CONTEXT_FIELD, contextLeft);
+        fields.put(SELECTION_RIGHT_CONTEXT_FIELD, contextRight);
+    }
+
+    /**
+     * Sets the selection of this annotation.
+     * 
+     * @param selection the selection of the annotation
+     */
+    public void setSelection(String selection)
+    {
+        setSelection(selection, "", "");
+    }
+
+    /**
+     * @return selection context to the left of annotation
+     */
+    public String getSelectionLeftContext()
+    {
+        return (String) fields.get(SELECTION_LEFT_CONTEXT_FIELD);
+    }
+
+    /**
+     * @return selection context to the right of annotation
+     */
+    public String getSelectionRightContext()
+    {
+        return (String) fields.get(SELECTION_RIGHT_CONTEXT_FIELD);
     }
 
     /**
@@ -255,38 +266,6 @@ public class Annotation implements IsSerializable
     }
 
     /**
-     * @return offset of annotation's selection
-     * @deprecated this will be removed, don't use it. Use the selection and selection context of the annotation to
-     *             compute offset if needed
-     */
-    public int getOffset()
-    {
-        return offset;
-    }
-
-    /**
-     * modify offset of annotation's selection.
-     * 
-     * @param offset to set
-     * @deprecated this will be removed, don't use it. Use the selection and selection context of the annotation to
-     *             compute offset if needed
-     */
-    public void setOffset(int offset)
-    {
-        this.offset = offset;
-    }
-
-    /**
-     * @return length of annotation's selection.
-     * @deprecated this will be removed, don't use it. Use the selection and selection context of the annotation to
-     *             compute length if needed
-     */
-    public int getLength()
-    {
-        return length;
-    }
-
-    /**
      * {@inheritDoc}
      * 
      * @see java.lang.Object#toString()
@@ -294,14 +273,13 @@ public class Annotation implements IsSerializable
     @Override
     public String toString()
     {
-        return "annotation: " + getAnnotation() + " | author: " + getAuthor() + " | selection: " + getSelection()
-            + " | selection context: " + getSelectionContext();
+        return "id: " + getId() + " | author: " + getAuthor() + " | selection left context: "
+            + getSelectionLeftContext() + " | selection: " + getSelection() + " | selection right context: "
+            + getSelectionRightContext();
     }
 
     /**
-     * {@inheritDoc} <br />
-     * TODO: fix the implementation of the equals function, it should test id, author, target and selection or smth, not
-     * the offsets since they are totally irrelevant now.
+     * {@inheritDoc}
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -312,9 +290,15 @@ public class Annotation implements IsSerializable
             return false;
         }
         Annotation other = (Annotation) obj;
-        // compare serializations, it's easier to test nulls
-        return ("" + getAnnotation() + " " + getAuthor() + " " + getSelectionContext()).equals(""
-            + other.getAnnotation() + " " + other.getAuthor() + " " + other.getSelectionContext());
+        if (other.getId() != null || getId() != null) {
+            // if they have ids, compare ids
+            return ("" + getId()).equals(other.getId());
+        } else {
+            // else compare selection and selection context
+            return ("" + getSelection()).equals(other.getSelection())
+                && ("" + getSelectionLeftContext()).equals(other.getSelectionLeftContext())
+                && ("" + getSelectionRightContext()).equals(other.getSelectionRightContext());
+        }
     }
 
     /**
@@ -325,15 +309,8 @@ public class Annotation implements IsSerializable
     @Override
     public int hashCode()
     {
-        return (getAnnotation() + getAuthor() + getSelectionContext()).hashCode();
-    }
-
-    /**
-     * @param displayDate the displayDate to set
-     */
-    public void setDisplayDate(String displayDate)
-    {
-        this.displayDate = displayDate;
+        return (getId() != null ? getId() : getSelectionLeftContext() + getSelection() + getSelectionRightContext())
+            .hashCode();
     }
 
     /**
@@ -341,7 +318,7 @@ public class Annotation implements IsSerializable
      */
     public String getOriginalSelection()
     {
-        return originalSelection;
+        return (String) fields.get(ORIGINAL_SELECTION_FIELD);
     }
 
     /**
@@ -349,6 +326,46 @@ public class Annotation implements IsSerializable
      */
     public void setOriginalSelection(String originalSelection)
     {
-        this.originalSelection = originalSelection;
+        fields.put(ORIGINAL_SELECTION_FIELD, originalSelection);
+    }
+
+    /**
+     * @param key the key of the field to get
+     * @return the value of the field
+     */
+    public Object get(String key)
+    {
+        return fields.get(key);
+    }
+
+    /**
+     * Sets / adds a value in the fields of this annotation.
+     * 
+     * @param key the key of the field
+     * @param value the value to set for the field
+     * @return the old value of this field, or null if none was set
+     */
+    public Object set(String key, Object value)
+    {
+        return fields.put(key, value);
+    }
+
+    /**
+     * @return a set of names of the fields set in this annotation object
+     */
+    public Set<String> getFieldNames()
+    {
+        return fields.keySet();
+    }
+
+    public String getAnnotation()
+    {
+        return (String) fields.get(ANNOTATION);
+    }
+
+    public void setAnnotation(String annotation)
+    {
+        fields.put(ANNOTATION, annotation);
+
     }
 }

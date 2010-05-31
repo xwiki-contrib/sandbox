@@ -65,7 +65,7 @@ public class XWatchServiceImpl extends XWikiServiceImpl implements XWatchService
             XWikiContext context = getXWikiContext();
             List<Document> documents = getDocumentsFromObjects(sql, nb, start, context);
             List<FeedArticle> articles = new ArrayList<FeedArticle>();
-            for(Document doc : documents) {
+            for (Document doc : documents) {
                 FeedArticle current = new FeedArticle(doc);
                 // now set the content to the annotated content and the annotations in the annotations list
                 current.setContent(getAnnotatedEntryFeed(doc.getFullName()));
@@ -77,7 +77,7 @@ public class XWatchServiceImpl extends XWikiServiceImpl implements XWatchService
             throw getXWikiGWTException(e);
         }
     }
-    
+
     public FeedArticle getArticle(String documentName) throws XWikiGWTException
     {
         Document apiDoc = getDocument(documentName, true, true, false);
@@ -88,7 +88,8 @@ public class XWatchServiceImpl extends XWikiServiceImpl implements XWatchService
         return article;
     }
 
-    private List<Document> getDocumentsFromObjects(String sql, int nb, int start, XWikiContext context) throws XWikiGWTException
+    private List<Document> getDocumentsFromObjects(String sql, int nb, int start, XWikiContext context)
+        throws XWikiGWTException
     {
         List<Document> docList = new ArrayList<Document>();
         try {
@@ -111,7 +112,7 @@ public class XWatchServiceImpl extends XWikiServiceImpl implements XWatchService
             throw getXWikiGWTException(e);
         }
     }
-    
+
     public List getConfigDocuments(String watchSpace) throws XWikiGWTException
     {
         try {
@@ -264,9 +265,11 @@ public class XWatchServiceImpl extends XWikiServiceImpl implements XWatchService
         try {
             // get the annotation service and ask for the annotated field
             AnnotationService service = Utils.getComponent(AnnotationService.class);
+
+            String target = getFeedEntryContentReference(documentName);
+            Collection<org.xwiki.annotation.Annotation> annotations = service.getValidAnnotations(target);
             // force html syntax on the content of the feed
-            return service.getAnnotatedRenderedContent(getFeedEntryContentReference(documentName), "html/4.01",
-                "xhtml/1.0");
+            return service.getAnnotatedRenderedContent(target, "html/4.01", "xhtml/1.0", annotations);
         } catch (AnnotationServiceException e) {
             throw getXWikiGWTException(e);
         }
@@ -300,8 +303,10 @@ public class XWatchServiceImpl extends XWikiServiceImpl implements XWatchService
             WATCHLOG.warn("Couldn't get the current user in the context, saving annotation as XWiki.XWikiGuest");
         }
         try {
-            service
-                .addAnnotation(getFeedEntryContentReference(documentName), selection, selection, 0, userID, metadata);
+            Map<String, Object> meta = new HashMap<String, Object>();
+            meta.put(Annotation.ANNOTATION, metadata);
+
+            service.addAnnotation(getFeedEntryContentReference(documentName), selection, selection, 0, userID, meta);
         } catch (AnnotationServiceException e) {
             throw getXWikiGWTException(e);
         }
@@ -316,9 +321,10 @@ public class XWatchServiceImpl extends XWikiServiceImpl implements XWatchService
             throw getXWikiGWTException(e);
         }
     }
-    
+
     /**
      * Helper function to marshal a set of annotations to gwt serializable annotations to send to the watch client.
+     * 
      * @param annotations the annotations collection to convert
      * @return the list of gwt serializable annotations
      */
@@ -326,15 +332,17 @@ public class XWatchServiceImpl extends XWikiServiceImpl implements XWatchService
     {
         List<Annotation> result = new ArrayList<Annotation>();
         for (org.xwiki.annotation.Annotation annotation : annotations) {
-            Annotation watchAnnotation =
-                new Annotation(annotation.getTarget(), annotation.getAuthor(), annotation.getAnnotation(), annotation
-                    .getSelection(), annotation.getSelectionContext(), annotation.getId());
+            Annotation watchAnnotation = new Annotation(annotation.getId());
+            watchAnnotation.setAuthor(annotation.getAuthor());
+            watchAnnotation.setAnnotation((String) annotation.get("annotation"));
+            watchAnnotation.setSelection(annotation.getSelection(), annotation.getSelectionLeftContext(), annotation
+                .getSelectionRightContext());
             watchAnnotation.setOriginalSelection(annotation.getOriginalSelection());
             watchAnnotation.setState(AnnotationState.valueOf(annotation.getState().toString()));
-            watchAnnotation.setDisplayDate(annotation.getDisplayDate());
+            watchAnnotation.setDate(annotation.getDate());
             result.add(watchAnnotation);
         }
-        
+
         return result;
     }
 

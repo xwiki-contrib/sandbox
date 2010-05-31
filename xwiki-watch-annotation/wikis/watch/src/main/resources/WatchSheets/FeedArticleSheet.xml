@@ -201,8 +201,9 @@
   #end
   &lt;div&gt;
     #if ($annotations)
-      #set($contentRef = "OBJECT_PROPERTY://${doc.fullName}^XWiki.FeedEntryClass#content")
-      $annotations.getAnnotatedRenderedContent($contentRef, "html/4.01", "xhtml/1.0")
+      #set($contentRef = "OBJECT_PROPERTY://${doc.fullName}^XWiki.FeedEntryClass.content")
+      #set($annotationsForCurrentDocument = $annotations.getValidAnnotations($contentRef))
+      $annotations.getAnnotatedRenderedContent($contentRef, "html/4.01", "xhtml/1.0", $annotationsForCurrentDocument)
       $xwiki.ssx.use("WatchSheets.FeedArticleSheet")
     #else
       $feedArticle.content

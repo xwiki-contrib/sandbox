@@ -52,8 +52,8 @@
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-annotation-core</artifactId>
-      <version>1.0-SNAPSHOT</version>  	
+      <artifactId>xwiki-core-annotations-core</artifactId>
+      <version>2.3</version>  	
     </dependency>
   </dependencies>
   <build>
@@ -72,10 +72,10 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>1.1</version>
-        <configuration>
-          <module>com.xpn.xwiki.watch.Watch</module>
-        </configuration>
+        <version>1.2</version>
+<!--        <configuration>-->
+<!--          <module>com.xpn.xwiki.watch.Watch</module>-->
+<!--        </configuration>-->
         <executions>
           <execution>
             <id>compile-gwt</id>
@@ -84,6 +84,10 @@
             </goals>
             <configuration>
               <style>${gwt.js.style}</style>
+              <disableCastChecking>true</disableCastChecking>
+              <disableClassMetadata>true</disableClassMetadata>
+              <soyc>false</soyc>
+              
               <!--
                 In order to prevent the "java.lang.InternalError: Can't connect to X11 window server using ':1.0' as the
                 value of the DISPLAY variable." error message we have to run the GWT compiler with the headless AWT
@@ -129,7 +133,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!-- Skip tests because they are failing tests. They're there just because of refactoring -->
+          <!-- Skip tests because they are failing tests. They're there just because of refactoring
+-->
           <skip>true</skip>
         </configuration>
       </plugin>
@@ -166,51 +171,5 @@
         </plugins>
       </build>
     </profile>
-
-   <!--
-      We have to define the following profiles because gwt-dev is platform dependent. These profiles set the value of
-      the ${platform} property which is used as a classifier for loading the proper gwt-dev jar. This jar is needed by
-      the GWT modules that have unit tests extending GWTTestCase.
-    -->
-    <profile>
-      <id>gwt-dev-windows</id>
-      <properties>
-        <platform>windows</platform>
-      </properties>
-      <activation>
-        <os>
-          <family>windows</family>
-        </os>
-      </activation>
-    </profile>
-    <profile>
-      <id>gwt-dev-mac</id>
-      <properties>
-        <platform>mac</platform>
-      </properties>
-      <activation>
-        <os>
-          <family>mac</family>
-        </os>
-      </activation>
-    </profile>
-    <profile>
-      <id>gwt-dev-linux</id>
-      <properties>
-        <platform>linux</platform>
-      </properties>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-        <os>
-          <name>linux</name>
-        </os>
-      </activation>
-    </profile>
   </profiles>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>gwt-maven</id>
-      <url>http://gwt-maven.googlecode.com/svn/trunk/mavenrepo/</url>
-    </pluginRepository>
-  </pluginRepositories>
 </project>
