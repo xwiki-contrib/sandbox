@@ -29,7 +29,6 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.AttachmentReferenceResolver;
 import org.xwiki.rendering.block.Block;
-import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
@@ -73,16 +72,6 @@ public class OfficePreviewVelocityBridge
     private AttachmentReferenceResolver<String> resolver;
 
     /**
-     * For building previews of non-presentation office documents.
-     */
-    private OfficePreviewBuilder defaultOfficePreviewBuilder;
-
-    /**
-     * For building previews of presentation office documents.
-     */
-    private OfficePreviewBuilder presentationOfficePreviewBuilder;
-
-    /**
      * Used to query current document syntax.
      */
     private DocumentAccessBridge docBridge;
@@ -104,8 +93,6 @@ public class OfficePreviewVelocityBridge
         // Lookup other required components.
         this.execution = componentManager.lookup(Execution.class);
         this.resolver = componentManager.lookup(AttachmentReferenceResolver.class);
-        this.defaultOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class);
-        this.presentationOfficePreviewBuilder = componentManager.lookup(OfficePreviewBuilder.class, "presentation");
         this.docBridge = componentManager.lookup(DocumentAccessBridge.class);
     }
 
@@ -113,13 +100,14 @@ public class OfficePreviewVelocityBridge
      * Builds a preview of the specified office attachment in xhtml/1.0 syntax.
      * 
      * @param attachmentReferenceString string identifying the office attachment.
+     * @param filterStyles whether office document styles should be filtered.
      * @return preview of the specified office attachment or null if an error occurs.
      */
-    public String preview(String attachmentReferenceString)
+    public String preview(String attachmentReferenceString, boolean filterStyles)
     {
         AttachmentReference attachmentReference = resolver.resolve(attachmentReferenceString);
         try {
-            return preview(attachmentReference);
+            return preview(attachmentReference, filterStyles);
         } catch (Exception ex) {
             String message = "Could not preview office document [%s] - %s";
             message = String.format(message, attachmentReferenceString, ex.getMessage());
@@ -133,26 +121,25 @@ public class OfficePreviewVelocityBridge
      * Builds a preview of the specified office attachment in xhtml/1.0 syntax.
      * 
      * @param attachmentReference reference to the attachment to be previewed.
+     * @param filterStyles whether office document styles should be filtered.
      * @return preview of the specified office attachment in xhtml/1.0 syntax.
      * @throws Exception if current user does not have enough privileges to view the requested attachment or if an error
      *             occurs while generating the preview.
      */
-    private String preview(AttachmentReference attachmentReference) throws Exception
+    private String preview(AttachmentReference attachmentReference, boolean filterStyles) throws Exception
     {
         // Check whether current user has view rights on the document containing the attachment.
         if (!docBridge.isDocumentViewable(attachmentReference.getDocumentReference())) {
             throw new Exception("Inadequate privileges.");
         }
 
-        XDOM preview;
+        OfficePreviewBuilder builder = componentManager.lookup(OfficePreviewBuilder.class);      
         if (isPresentation(attachmentReference.getName())) {
-            preview = presentationOfficePreviewBuilder.build(attachmentReference);
-        } else {
-            preview = defaultOfficePreviewBuilder.build(attachmentReference);
+            builder = componentManager.lookup(OfficePreviewBuilder.class, "presentation");
         }
 
         // Build the preview and render the result.
-        return render(preview, "xhtml/1.0");
+        return render(builder.build(attachmentReference, filterStyles), "xhtml/1.0");
     }
 
     /**

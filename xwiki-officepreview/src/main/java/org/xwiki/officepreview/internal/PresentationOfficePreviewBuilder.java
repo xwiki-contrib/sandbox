@@ -50,7 +50,7 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
      * Name of the office converter output file.
      */
     private static final String OUTPUT_FILE_NAME = "output.html";
-    
+
     /**
      * Used for converting presentation files.
      */
@@ -72,8 +72,8 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
     /**
      * {@inheritDoc}
      */
-    protected OfficeDocumentPreview build(AttachmentReference attachmentReference, String version, InputStream data)
-        throws Exception
+    protected OfficeDocumentPreview build(AttachmentReference attachmentReference, String version, InputStream data,
+        boolean filterStyles) throws Exception
     {
         Map<String, InputStream> inputs = Collections.singletonMap(attachmentReference.getName(), data);
         Map<String, byte[]> artifacts =
@@ -106,8 +106,8 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
         buffer.append(String.format("<iframe src=\"%s\" frameborder=0 width=800px height=600px></iframe>",
             firstSlideURL));
         buffer.append("{{/html}}");
-        XDOM xdom = this.xwiki20Parser.parse(new StringReader(buffer.toString()));        
-        
+        XDOM xdom = this.xwiki20Parser.parse(new StringReader(buffer.toString()));
+
         // Transform XDOM
         TransformationContext context = new TransformationContext();
         context.setXDOM(xdom);

@@ -36,8 +36,9 @@ public interface OfficePreviewBuilder
      * Builds a preview {@link XDOM} of the specified office attachment.
      * 
      * @param attachmentReference office attachment reference.
+     * @param filterStyles whether office document styles should be filtered.
      * @return {@link XDOM} containing a preview of the specified attachment.
      * @throws Exception if an error occurs while accessing the attachment or building the preview.
      */
-    XDOM build(AttachmentReference attachmentReference) throws Exception;
+    XDOM build(AttachmentReference attachmentReference, boolean filterStyles) throws Exception;
 }

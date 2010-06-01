@@ -56,12 +56,13 @@ public class DefaultOfficePreviewBuilder extends AbstractOfficePreviewBuilder
     /**
      * {@inheritDoc}
      */
-    protected OfficeDocumentPreview build(AttachmentReference attachmentReference, String version, InputStream data)
-        throws Exception
+    protected OfficeDocumentPreview build(AttachmentReference attachmentReference, String version, InputStream data,
+        boolean filterStyles) throws Exception
     {
         DocumentReference documentReference = attachmentReference.getDocumentReference();
 
-        XDOMOfficeDocument xdomOfficeDoc = builder.build(data, attachmentReference.getName(), documentReference, true);
+        XDOMOfficeDocument xdomOfficeDoc =
+            builder.build(data, attachmentReference.getName(), documentReference, filterStyles);
 
         XDOM xdom = xdomOfficeDoc.getContentDocument();
         Map<String, byte[]> artifacts = xdomOfficeDoc.getArtifacts();

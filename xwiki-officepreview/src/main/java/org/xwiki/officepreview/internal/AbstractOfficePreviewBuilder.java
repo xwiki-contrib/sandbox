@@ -123,7 +123,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     /**
      * {@inheritDoc}
      */
-    public XDOM build(AttachmentReference attachmentReference) throws Exception
+    public XDOM build(AttachmentReference attachmentReference, boolean filterStyles) throws Exception
     {
         String strAttachRef = serializer.serialize(attachmentReference);
         DocumentReference documentReference = attachmentReference.getDocumentReference();
@@ -153,7 +153,9 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         // If a preview in not available, build one.
         if (null == preview) {
             // Build preview.
-            preview = build(attachmentReference, currentVersion, docBridge.getAttachmentContent(attachmentReference));
+            preview =
+                build(attachmentReference, currentVersion, docBridge.getAttachmentContent(attachmentReference),
+                    filterStyles);
 
             // Cache the preview.
             previewsCache.set(strAttachRef, preview);
@@ -169,11 +171,12 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
      * @param attachmentReference reference to the attachment to be previewed.
      * @param version version of the attachment for which the preview should be generated for.
      * @param data content of the attachment.
+     * @param filterStyles whether office document styles should be filtered.
      * @return {@link OfficeDocumentPreview} corresponding to the preview of the specified attachment.
      * @throws Exception if an error occurs while building the preview.
      */
     protected abstract OfficeDocumentPreview build(AttachmentReference attachmentReference, String version,
-        InputStream data) throws Exception;
+        InputStream data, boolean filterStyles) throws Exception;
 
     /**
      * Saves a temporary file associated with the given attachment.
