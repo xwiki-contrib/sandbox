@@ -1,3 +1,22 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
 package org.xwiki.extension.internal;
 
 import java.util.List;
@@ -9,7 +28,11 @@ import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManager;
+import org.xwiki.extension.ExtensionType;
+import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
+import org.xwiki.extension.ResolveException;
+import org.xwiki.extension.UninstallException;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryFactory;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
@@ -50,27 +73,55 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
 
     public List<Extension> getAvailableExtensions(int nb, int offset)
     {
-        // TODO Auto-generated method stub
+        // TODO
         return null;
     }
 
     public List<Extension> getInstalledExtensions(int nb, int offset)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return this.localExtensionRepository.getExtensions(nb, offset);
     }
 
-    public void installExtension(ExtensionId extensionId)
+    public void installExtension(ExtensionId extensionId) throws InstallException
     {
-        Extension extension = this.repositoryManager.resolve(extensionId);
-
-        this.localExtensionRepository.installExtension(extension);
+        installExtension(extensionId, false);
     }
 
-    public void uninstallExtension(ExtensionId extensionId)
+    private void installExtension(ExtensionId extensionId, boolean dependency) throws InstallException
     {
-        LocalExtension extension = this.localExtensionRepository.getLocalExtension(extensionId);
+        try {
+            Extension extension = this.repositoryManager.resolve(extensionId);
 
-        this.localExtensionRepository.uninstallExtension(extension);
+            for (ExtensionId dependencyId : extension.getDependencies()) {
+                installExtension(dependencyId, true);
+            }
+
+            this.localExtensionRepository.installExtension(extension, dependency);
+
+            // TODO: inject extension, what about some kind of ExtensionLoader with the ExtensionType string as role
+            // hint ?
+            // We should probably change the type for a plain String to make possible to support any "type" of
+            // extension,
+            // pretty sure we would have use case for this
+            if (extension.getType() == ExtensionType.PAGES) {
+                // TODO import xar
+            } else if (extension.getType() == ExtensionType.JAR) {
+                // TODO load jar components
+            }
+            // etc.
+        } catch (ResolveException e) {
+            throw new InstallException("Failed to resolve extension", e);
+        }
+    }
+
+    public void uninstallExtension(ExtensionId extensionId) throws UninstallException
+    {
+        try {
+            LocalExtension extension = this.localExtensionRepository.getLocalExtension(extensionId);
+
+            this.localExtensionRepository.uninstallExtension(extension);
+        } catch (ResolveException e) {
+            throw new UninstallException("Failed to resolve extension", e);
+        }
     }
 }
