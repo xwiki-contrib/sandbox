@@ -96,16 +96,16 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
                 installExtension(dependencyId, true);
             }
 
-            this.localExtensionRepository.installExtension(extension, dependency);
+            LocalExtension localExtension = this.localExtensionRepository.installExtension(extension, dependency);
 
             // TODO: inject extension, what about some kind of ExtensionLoader with the ExtensionType string as role
             // hint ?
             // We should probably change the type for a plain String to make possible to support any "type" of
             // extension,
             // pretty sure we would have use case for this
-            if (extension.getType() == ExtensionType.PAGES) {
+            if (localExtension.getType() == ExtensionType.PAGES) {
                 // TODO import xar
-            } else if (extension.getType() == ExtensionType.JAR) {
+            } else if (localExtension.getType() == ExtensionType.JAR) {
                 // TODO load jar components
             }
             // etc.

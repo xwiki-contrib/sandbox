@@ -111,7 +111,7 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
         return (List) getLocalExtensions(nb, offset);
     }
 
-    public void installExtension(Extension extension, boolean dependency) throws InstallException
+    public LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException
     {
         LocalExtension localExtension = getLocalExtension(extension.getName(), extension.getVersion());
 
@@ -120,6 +120,8 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
             extension.download(localExtension.getFile());
         }
+
+        return localExtension;
     }
 
     public void uninstallExtension(LocalExtension extension) throws UninstallException

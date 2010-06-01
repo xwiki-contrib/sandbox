@@ -36,7 +36,7 @@ public interface LocalExtensionRepository extends ExtensionRepository
 
     LocalExtension getLocalExtension(ExtensionId extensionId) throws ResolveException;
 
-    void installExtension(Extension extension, boolean dependency) throws InstallException;
+    LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException;
 
     void uninstallExtension(LocalExtension extension) throws UninstallException;
 }
