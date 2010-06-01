@@ -34,6 +34,7 @@ import org.xwiki.officeimporter.openoffice.OpenOfficeManager;
 import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.rendering.transformation.TransformationContext;
 import org.xwiki.rendering.transformation.TransformationManager;
 
 /**
@@ -105,9 +106,13 @@ public class PresentationOfficePreviewBuilder extends AbstractOfficePreviewBuild
         buffer.append(String.format("<iframe src=\"%s\" frameborder=0 width=800px height=600px></iframe>",
             firstSlideURL));
         buffer.append("{{/html}}");
-        XDOM xdom = this.xwiki20Parser.parse(new StringReader(buffer.toString()));
+        XDOM xdom = this.xwiki20Parser.parse(new StringReader(buffer.toString()));        
+        
         // Transform XDOM
-        this.transformationManager.performTransformations(xdom, Syntax.XWIKI_2_0);
+        TransformationContext context = new TransformationContext();
+        context.setXDOM(xdom);
+        context.setSyntax(Syntax.XWIKI_2_0);
+        transformationManager.performTransformations(xdom, context);
         return xdom;
     }
 }
