@@ -22,6 +22,85 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.XWikiRights</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<allow>
+<defaultValue>1</defaultValue>
+<displayFormType>select</displayFormType>
+<displayType>allow</displayType>
+<name>allow</name>
+<number>4</number>
+<prettyName>Allow/Deny</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</allow>
+<groups>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>groups</name>
+<number>1</number>
+<prettyName>Groups</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>5</size>
+<unmodifiable>0</unmodifiable>
+<usesList>1</usesList>
+<classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
+</groups>
+<levels>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>levels</name>
+<number>2</number>
+<prettyName>Levels</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>3</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.LevelsClass</classType>
+</levels>
+<users>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>users</name>
+<number>3</number>
+<prettyName>Users</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>5</size>
+<unmodifiable>0</unmodifiable>
+<usesList>1</usesList>
+<classType>com.xpn.xwiki.objects.classes.UsersClass</classType>
+</users>
+</class>
+<name>Invitation.InvitationMembersCommon</name>
+<number>0</number>
+<className>XWiki.XWikiRights</className>
+<guid>f4fbe6c4-36dc-46c6-9264-5fda011275e8</guid>
+<property>
+<allow>1</allow>
+</property>
+<property>
+<groups>XWiki.XWikiAllGroup,</groups>
+</property>
+<property>
+<levels>view</levels>
+</property>
+<property>
+<users></users>
+</property>
+</object>
 <content>{{velocity}}
 #*
  * Invitation Application
@@ -119,7 +198,7 @@
   #end
 
 
-  {{html}}&lt;p class="clearboth"&gt;&lt;/p&gt;{{/html}}
+  {{html clean=false}}&lt;p class="clearboth"&gt;&lt;/p&gt;&lt;div id=invitation-footer&gt;{{/html}}
 
   ## User Tools
   = $msg.get('xe.invitation.tools.heading') =
@@ -176,6 +255,9 @@
 
     **[[$msg.get('xe.invitation.returnToMainPage')&gt;&gt;$config.get('mainPage')]]**
   #end
+
+  {{html clean=false}}&lt;div id=invitation-footer&gt;{{/html}}
+
 #end
 ##
 #*

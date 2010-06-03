@@ -22,6 +22,85 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.XWikiRights</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<allow>
+<defaultValue>1</defaultValue>
+<displayFormType>select</displayFormType>
+<displayType>allow</displayType>
+<name>allow</name>
+<number>4</number>
+<prettyName>Allow/Deny</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</allow>
+<groups>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>groups</name>
+<number>1</number>
+<prettyName>Groups</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>5</size>
+<unmodifiable>0</unmodifiable>
+<usesList>1</usesList>
+<classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
+</groups>
+<levels>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>levels</name>
+<number>2</number>
+<prettyName>Levels</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>3</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.LevelsClass</classType>
+</levels>
+<users>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>users</name>
+<number>3</number>
+<prettyName>Users</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>5</size>
+<unmodifiable>0</unmodifiable>
+<usesList>1</usesList>
+<classType>com.xpn.xwiki.objects.classes.UsersClass</classType>
+</users>
+</class>
+<name>Invitation.InvitationCommon</name>
+<number>0</number>
+<className>XWiki.XWikiRights</className>
+<guid>f5e4ea78-756b-46a6-87e2-8a79d9ea6cee</guid>
+<property>
+<allow>1</allow>
+</property>
+<property>
+<groups>XWiki.XWikiAllGroup,</groups>
+</property>
+<property>
+<levels>view</levels>
+</property>
+<property>
+<users>XWiki.XWikiGuest</users>
+</property>
+</object>
 <content>{{velocity}}
 #*
  * Invitation Application
@@ -167,13 +246,13 @@
     $config.put('commonPage', "${doc.getSpace()}.InvitationCommon")
     $config.put('mainPage', "${doc.getSpace()}.Invitation")
     ##
-    #set($subjectLineTemplate = '{{velocity}}$xcontext.getUser().replaceAll("^[^\.]*.", "") has i'
+    #set($subjectLineTemplate = '{{velo' + 'city}}$xcontext.getUser().replaceAll("^[^\.]*.", "") has i'
                                 + 'nvited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"): $!s'
-                                + 'ubjectLine{{/velocity}}')
+                                + 'ubjectLine{{/velo' + 'city}}')
     $config.put('subjectLineTemplate', $subjectLineTemplate)
     #set($n = $util.getNewline())
     #set($messageBodyTemplate =
-                '{{velocity}}You have received this mail because $xwiki.getUserName($xcontext.getUser(),'
+                '{{velo' + 'city}}You have received this mail because $xwiki.getUserName($xcontext.getUser(),'
                 + ' false) has invited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$",'
                 + ' "$1").' + "$n$n" + '{{html}}&lt;p class="user-message"&gt;' + "$n" + '$!escapetool.html($!me'
                 + 'ssageBody)&lt;/p&gt;{{/html}}' + "$n$n" + '[[Accept the invitation and join&gt;&gt;'
@@ -198,7 +277,9 @@
     #set($configDoc = $xwiki.getDocumentAsAuthor($configDocNameInternal))
     ## If no configuration document exists, create one and save it.
     #if($configDoc.isNew())
-      $configDoc.setContent('{{velocity}}{{info}}$msg.get("xe.invitation.configInfo"){{/info}}{{/velocity}}')
+      #set($configDocContent = '{{velo' + 'city}}{{info}}$msg.get("xe.invitation.configInfo"){{/info}}{{/velo' 
+                + 'city}}')
+      $configDoc.setContent($configDocContent)
       #set($configObj = $configDoc.newObject($configClassNameInternal))
       #foreach($key in $config.keySet())
         $configObj.set($key, $config.get($key))
@@ -284,7 +365,9 @@
   ## If this doesn't already exist, it's created.
   #set($emailContainer = $xwiki.getDocumentAsAuthor($config.get('emailContainer')))
   #if($emailContainer.isNew())
-    #set($discard = $emailContainer.setContent('{{velocity}}{{info}}$msg.get("xe.invitation.emailContainerInfo"){{/info}}{{/velocity}}'))
+    #set($emailContainerContent = '{{velo' + 'city}}{{info}}$msg.get("xe.invitation.emailContainerInfo"){{/info}}{{/velo'
+                + 'city}}')
+    #set($discard = $emailContainer.setContent($emailContainerContent))
   #end
   ##
   ## Load messages into a Map by messageID.
@@ -438,4 +521,4 @@
     $msg.get('xe.invitation.messageStatus.unknown', [$escapetool.xml($status)])##
   #end
 #end
-## TODO: Something seems to be wrong with the renderer because it fails if there is a {{/velocity}} here</content></xwikidoc>
+{{/velocity}}</content></xwikidoc>

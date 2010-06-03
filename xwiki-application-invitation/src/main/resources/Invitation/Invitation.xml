@@ -383,8 +383,87 @@
 <use>onDemand</use>
 </property>
 </object>
-<content>{{include document="InvitationCommon"/}}
-{{include document="InvitationMembersCommon"/}}
+<object>
+<class>
+<name>XWiki.XWikiRights</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<allow>
+<defaultValue>1</defaultValue>
+<displayFormType>select</displayFormType>
+<displayType>allow</displayType>
+<name>allow</name>
+<number>4</number>
+<prettyName>Allow/Deny</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</allow>
+<groups>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>groups</name>
+<number>1</number>
+<prettyName>Groups</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>5</size>
+<unmodifiable>0</unmodifiable>
+<usesList>1</usesList>
+<classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
+</groups>
+<levels>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>levels</name>
+<number>2</number>
+<prettyName>Levels</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>3</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.LevelsClass</classType>
+</levels>
+<users>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>1</multiSelect>
+<name>users</name>
+<number>3</number>
+<prettyName>Users</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<size>5</size>
+<unmodifiable>0</unmodifiable>
+<usesList>1</usesList>
+<classType>com.xpn.xwiki.objects.classes.UsersClass</classType>
+</users>
+</class>
+<name>Invitation.Invitation</name>
+<number>0</number>
+<className>XWiki.XWikiRights</className>
+<guid>649d5273-d662-4248-abf0-94953088e98a</guid>
+<property>
+<allow>1</allow>
+</property>
+<property>
+<groups>XWiki.XWikiAllGroup,</groups>
+</property>
+<property>
+<levels>view</levels>
+</property>
+<property>
+<users></users>
+</property>
+</object>
+<content>{{include document="Invitation.InvitationCommon"/}}
+{{include document="Invitation.InvitationMembersCommon"/}}
 {{velocity}}
 #*
  * Invitation Application
@@ -459,11 +538,10 @@ $xwiki.get('ssx').use($config.get('mainPage'))
 #else
   ## The user is authorized to send mail &lt;-------------------------------------------------------
   ## Get the list of email addresses to send to.
+  #set($userMaySendToMultiple = ($isAdmin || $config.get('usersMaySendToMultiple') == '1'))
   #set($recipientString = $escapetool.xml("$!request.get('recipients')"))
   #set($recipients = [])
   #getRecipients($recipientString, $userMaySendToMultiple, $recipients)
-  ##
-  #set($userMaySendToMultiple = ($isAdmin || $config.get('usersMaySendToMultiple') == '1'))
   ##
   ## get subject line and message body if allowed...
   #set($userMayPersonalizeMessage = ($isAdmin || $config.get('usersMayPersonalizeMessage') == '1'))
@@ -544,6 +622,7 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     #end
   #end
 
+
   {{html wiki=true}}
    &lt;div class="invitation"&gt;
 
@@ -558,6 +637,7 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     #displayMessageTable($messages, ['sentDate', 'recipient', 'status'])
    &lt;/div&gt;
   {{/html}}
+
 
   #if($messages.size() &gt; 0)
     #displayMessage($messages.get(0), $recipients)
