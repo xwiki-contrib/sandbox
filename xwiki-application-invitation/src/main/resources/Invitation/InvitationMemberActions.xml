@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xwikidoc>
 <web>Invitation</web>
-<name>InvitationMembersActions</name>
+<name>InvitationMemberActions</name>
 <language></language>
 <defaultLanguage>en</defaultLanguage>
 <translation>0</translation>
@@ -84,7 +84,7 @@
 <classType>com.xpn.xwiki.objects.classes.UsersClass</classType>
 </users>
 </class>
-<name>Invitation.InvitationMembersActions</name>
+<name>Invitation.InvitationMemberActions</name>
 <number>0</number>
 <className>XWiki.XWikiRights</className>
 <guid>09cf0119-1b3b-44a6-a38d-50fd539331b7</guid>
