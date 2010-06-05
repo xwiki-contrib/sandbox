@@ -220,7 +220,7 @@
       #set($myPendingInvitations = [])
       #getMessagesByStatus($messagesByMe, 'pending', $myPendingInvitations)
       #if($myPendingInvitations.size() &gt; 0)
-        {{info}}$myPendingInvitations.size() pending{{/info}}
+        (%id="my-pending-invitations"%){{info}}$myPendingInvitations.size() pending{{/info}}(%%)
       #end
     #end
   #else
@@ -241,7 +241,7 @@
       #set($spamReports = [])
       #getMessagesByStatus($mail.values(), 'reported', $spamReports)
       #if($spamReports.size() &gt; 0)
-        {{warning}}$spamReports.size() reported as spam{{/warning}}
+        (%id="spam-reports"%){{warning}}$spamReports.size() reported as spam{{/warning}}(%%)
       #end
       #if($inspect == 'groupAsAdmin')
         ** **$msg.get('xe.invitation.tools.invitationsInGroup')**

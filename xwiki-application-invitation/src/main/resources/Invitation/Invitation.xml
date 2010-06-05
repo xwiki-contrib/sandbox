@@ -247,6 +247,19 @@
 <validationRegExp></validationRegExp>
 <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
 </usersMaySendToMultiple>
+<messageBodyTemplatePlain>
+<editor>---</editor>
+<name>messageBodyTemplatePlain</name>
+<number>20</number>
+<picker>0</picker>
+<prettyName>Email message body template for non-html email clients.</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</messageBodyTemplatePlain>
 </class>
 <object>
 <class>
@@ -574,7 +587,7 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     #generateMailFromTemplate($config.get('subjectLineTemplate'),
                               $config.get('messageBodyTemplate'),
                               $config.get('emailClass'),
-                              '',
+                              [],
                               $config.get('emailRegex'),
                               $subjectLine,
                               $messageBody,
@@ -613,34 +626,38 @@ $xwiki.get('ssx').use($config.get('mainPage'))
                             $messages,
                             $emailContainer)
   ##
-  #sendMail($messages, $config, $emailContainer)
-  #set($errors = [])
-  #foreach($message in $messages)
-    #set($status = $message.getProperty('status').getValue())
-    #if($status != 'pending')
-      #set($discard = $errors.add($message))
-    #end
-  #end
-
-
-  {{html wiki=true}}
-   &lt;div class="invitation"&gt;
-
-    #if($errors.size() &gt; 0)
-      ## An error has occured while sending the message.
-      {{error}}$msg.get('xe.invitation.errorWhileSending'){{/error}}
-    #else
-      ## Your message has been sent.
-      {{info}}$msg.get('xe.invitation.successSending'){{/info}}
+  #if($messages.size() > 0)
+    #sendMail($messages, $config, $emailContainer)
+    #set($errors = [])
+    #foreach($message in $messages)
+      #set($status = $message.getProperty('status').getValue())
+      #if($status != 'pending')
+        #set($discard = $errors.add($message))
+      #end
     #end
 
-    #displayMessageTable($messages, ['sentDate', 'recipient', 'status'])
-   &lt;/div&gt;
-  {{/html}}
+
+    {{html wiki=true}}
+     &lt;div class="invitation"&gt;
+
+      #if($errors.size() &gt; 0)
+        ## An error has occured while sending the message.
+        {{error}}$msg.get('xe.invitation.errorWhileSending'){{/error}}
+      #else
+        ## Your message has been sent.
+        {{info}}$msg.get('xe.invitation.successSending'){{/info}}
+      #end
+
+      #displayMessageTable($messages, ['sentDate', 'recipient', 'status'])
+     &lt;/div&gt;
+    {{/html}}
 
 
-  #if($messages.size() &gt; 0)
     #displayMessage($messages.get(0), $recipients)
+  #else
+
+    {{error}}$msg.get('xe.invitation.noValidMessagesToSend'){{/error}}
+
   #end
 #end
 #*
@@ -692,7 +709,7 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     ## If text part is not set then we get an NPE when trying to craft a multipart message.
     $mailObj.setTextPart('')##
     ## Put all in email div so that we can apply CSS only to the email and not to the preview.
-    $mailObj.setHtmlPart("&lt;div class='email'&gt;$message.getProperty('messageBody').getValue()&lt;/div&gt;")##
+    $mailObj.setHtmlPart("&lt;div style='font-size:87.5%;'&gt;$message.getProperty('messageBody').getValue()&lt;/div&gt;")##
     ##
     ## Send the message
     #if("$sender.sendMail($mailObj, $senderConfig)" != 0)

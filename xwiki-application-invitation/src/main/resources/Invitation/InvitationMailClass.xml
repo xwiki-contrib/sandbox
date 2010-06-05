@@ -115,6 +115,17 @@
 <unmodifiable>0</unmodifiable>
 <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
 </subjectLine>
+<messageBodyPlain>
+<editor>---</editor>
+<name>messageBodyPlain</name>
+<number>5</number>
+<picker>0</picker>
+<prettyName>messageBodyPlain</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</messageBodyPlain>
 </class>
 <content>
 </content></xwikidoc>

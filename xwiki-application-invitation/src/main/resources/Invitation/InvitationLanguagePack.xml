@@ -40,8 +40,15 @@ xe.invitation.contentLabel=Message:
 xe.invitation.previewLabel=Preview:
 xe.invitation.errorWhileSending=An error has occurred while sending the message.
 xe.invitation.successSending=Your message has been sent.
+xe.invitation.noValidMessagesToSend=Your message couldn't be sent because there were no valid email addresses to send to.
 xe.invitation.noMessageFound=No message found by that id.
 xe.invitation.guestsCanNotJoin=Guests are blocked from joining and {0} was not saved by a user with proper permission to override. Invitations will not be able to be accepted.
+
+xe.invitation.emailContent.userHasInvitedYouToJoinWiki=You have received this mail because {0} has invited you to join {1}.
+xe.invitation.emailContent.joinLink=Accept the invitation and join
+xe.invitation.emailContent.declineLink=Decline
+# reportMessage expects the opening link tag to be passed as the parameter.
+xe.invitation.emailContent.reportMessage=If this message looks like abuse of our system, please {0}report it{1}
 
 xe.invitation.sendMail.addMessageSaveComment=Added Email Message.
 
@@ -180,6 +187,7 @@ XWiki.Invitation_smtp_server=Smtp server host name
 XWiki.Invitation_javamail_extra_props=Javamail extra properties
 XWiki.Invitation_subjectLineTemplate=Email subject line template
 XWiki.Invitation_messageBodyTemplate=Email message body template
+XWiki.Invitation_messageBodyTemplatePlain=Email message body template for non-html email clients.
 XWiki.Invitation_emailClass=Email message XClass
 XWiki.Invitation_emailContainer=Document containing email XObjects
 XWiki.Invitation_emailRegex=Regular expression for validating email addresses

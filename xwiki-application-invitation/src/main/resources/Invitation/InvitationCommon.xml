@@ -178,7 +178,7 @@
      &amp;nbsp; ## used to make the field the correct size if it's empty.
     &lt;/div&gt;
     ## Tell the user that some of the email addresses are invalid.
-    #if($invalidAddresses.size() &gt; 0)
+    #if($invalidAddresses &amp;&amp; $invalidAddresses.size() &gt; 0)
       &lt;p class="invalid-address-message"&gt;
        &lt;span class="errormessage"&gt;
         #if($recips.size() == 1)
@@ -240,8 +240,8 @@
     $config.put('emailClass', "${doc.getSpace()}.InvitationMailClass")
     $config.put('emailContainer', "${doc.getSpace()}.InvitationMessages")
     ## working documents.
-    $config.put('guestsActionsPage', "${doc.getSpace()}.InvitationGuestsActions")
-    $config.put('membersActionsPage', "${doc.getSpace()}.InvitationMembersActions")
+    $config.put('guestsActionsPage', "${doc.getSpace()}.InvitationGuestActions")
+    $config.put('membersActionsPage', "${doc.getSpace()}.InvitationMemberActions")
     $config.put('membersCommonPage', "${doc.getSpace()}.InvitationMembersCommon")
     $config.put('commonPage', "${doc.getSpace()}.InvitationCommon")
     $config.put('mainPage', "${doc.getSpace()}.Invitation")
@@ -251,21 +251,46 @@
                                 + 'ubjectLine{{/velo' + 'city}}')
     $config.put('subjectLineTemplate', $subjectLineTemplate)
     #set($n = $util.getNewline())
-    #set($messageBodyTemplate =
-                '{{velo' + 'city}}You have received this mail because $xwiki.getUserName($xcontext.getUser(),'
-                + ' false) has invited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$",'
-                + ' "$1").' + "$n$n" + '{{html}}&lt;p class="user-message"&gt;' + "$n" + '$!escapetool.html($!me'
-                + 'ssageBody)&lt;/p&gt;{{/html}}' + "$n$n" + '[[Accept the invitation and join&gt;&gt;'
-                + '$config.get("guestsActionsPage")?doAction_accept=y&amp;messageID=$messageID||class="join-link"]] [[Decline&gt;&gt;'
-                + '$config.get("guestsActionsPage")?doAction_decline=y&amp;messageID=$messageID||class="decline-link"]]'
-                + "$n" + '----' + "$n" + 'If this message looks like abuse of our system, please [[report '
-                + 'it&gt;&gt;$config.get("guestsActionsPage")?doAction_report&amp;messageID=$messageID]].' + "$n" + '{{/v'
-                + 'elocity}}' + "$n$n" + '{{html clean=false}}&lt;style&gt;&lt;!--p.user-message, a.join-link, a.de'
-                + 'cline-link {font-size: 130%}/* Necessary because colibri.css is not available in email '
-                + 'client. */ a {color: #4791BC;text-decoration: none;}div.email * {font-size:87.5%;}/* En'
-                + 'd of colibri.css stuff */a.join-link {float: left;}a.decline-link {color: #f88;float: r'
-                + 'ight;}hr {clear: both;}--&gt;&lt;/style&gt;{{/html}}')
+    #set($messageBodyTemplate = '{{velo' + 'city}}' + "$n" + '#set($userName = $xwiki.getUserName($xco'
+                              + 'ntext.getUser(), false))' + "$n" + '#set($wikiName = $xwiki.getReques'
+                              + 'tURL().replaceAll("http://([^/:]*).*$", "$1"))' + "$n" + '#set($guest'
+                              + 'ActionsURL = $xwiki.getDocumentAsAuthor($config.get("guestsActionsPag'
+                              + 'e")).getExternalURL())' + "$n" + '#set($linkStyle = "color:#4791BC;te'
+                              + 'xt-decoration:none;")' + "$n" + '#set($bigText = "font-size:130%;")'
+                              + "$n" + '#set($joinLink = "float:left;")' + "$n" + '#set($declineLink '
+                              + '= "color:#f88;float:right;")' + "$n" + '' + "$n" + '$msg.get("xe.invi'
+                              + 'tation.emailContent.userHasInvitedYouToJoinWiki", [$userName, $wikiNa'
+                              + 'me])' + "$n" + '' + "$n" + '{{html clean=false}}' + "$n" + '#if("$!me'
+                              + 'ssageBody" != "")' + "$n" + '  &lt;p style="$bigText"&gt;' + "$n" + '  $!'
+                              + 'escapetool.html($!messageBody)' + "$n" + '  &lt;/p&gt;' + "$n" + '#end'
+                              + "$n" + '&lt;br/&gt;&lt;br/&gt;' + "$n" + '&lt;a href="${guestActionsURL}?doAction_ac'
+                              + 'cept=y&amp;messageID=$messageID" style="$bigText$joinLink"&gt;' + "$n" + ' $'
+                              + 'msg.get("xe.invitation.emailContent.joinLink")' + "$n" + '&lt;/a&gt;'
+                              + "$n" + '&lt;a href="${guestActionsURL}?doAction_decline=y&amp;messageID=$mes'
+                              + 'sageID" style="$bigText$declineLink"&gt;' + "$n" + ' $msg.get("xe.invita'
+                              + 'tion.emailContent.declineLink")' + "$n" + '&lt;/a&gt;' + "$n" + '&lt;hr style='
+                              + '"clear:both"&gt;' + "$n" + '$msg.get("xe.invitation.emailContent.reportM'
+                              + 'essage", ["&lt;a href=$escapetool.getQ()${guestActionsURL}?doA'
+                              + 'ction_report=y&amp;messageID=$messageID$escapetool.getQ() style=$escapetool.getQ()$linkStyle$escapetool.getQ()&gt;'
+                              + '", "&lt;/a&gt;"])' + "$n" + '{{/html}}' + "$n" + '{{/'
+                              + 'velocity}}')
     $config.put('messageBodyTemplate', $messageBodyTemplate)
+    #set($messageBodyTemplatePlain = 
+                                '{{velo' + 'city}}' + "$n" + '#set($userName = $xwiki.getUserName($xco'
+                              + 'ntext.getUser(), false))#set($wikiName = $xwiki.getRequestURL().repla'
+                              + 'ceAll("http://([^/:]*).*$", "$1"))#set($guestActionsURL = $xwiki.getD'
+                              + 'ocumentAsAuthor($config.get("guestsActionsPage")).getExternalURL())#s'
+                              + 'et($linkStyle = "color:#4791BC;text-decoration:none;")#set($bigText ='
+                              + ' "font-size:130%;")#set($joinLink = "float:left;")#set($declineLink ='
+                              + ' "color:#f88;float:right;")$msg.get("xe.invitation.emailContent.userH'
+                              + 'asInvitedYouToJoinWiki", [$userName, $wikiName])#if("$!messageBody" !'
+                              + '= "")  $messageBody#end$msg.get("xe.invitation.emailContent.joinLink"'
+                              + ')${guestActionsURL}?doAction_accept=y&amp;messageID=$messageID$msg.get("x'
+                              + 'e.invitation.emailContent.declineLink")${guestActionsURL}?doAction_de'
+                              + 'cline=y&amp;messageID=$messageID$msg.get("xe.invitation.emailContent.repo'
+                              + 'rtMessage", ["", "$util.getNewline()${guestActionsURL}?doAction_decli'
+                              + 'ne=y&amp;messageID=$messageID"]){{/velo' + 'city}}')
+    $config.put('messageBodyTemplatePlain', $messageBodyTemplatePlain)
     $config.put('allowUsersOfOtherWikis', 0)
     $config.put('usersMayPersonalizeMessage', 1)
     $config.put('usersMaySendToMultiple', 0)
