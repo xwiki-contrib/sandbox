@@ -43,4 +43,12 @@ public interface WikiComponentBuilder
      */
     WikiComponent build(DocumentReference reference) throws InvalidComponentDefinitionException, WikiComponentException;
 
+    /**
+     * Checks if the document corresponding to the passed reference contains a wiki component definition.
+     * 
+     * @param reference the reference of the document to check
+     * @return true if the document contains a wiki component definition, false otherwise
+     */
+    boolean containsWikiComponent(DocumentReference reference);
+    
 }

@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.xwiki.component.wiki.WikiComponent;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.rendering.block.XDOM;
 
 /**
  * Default implementation of a wiki component definition.
@@ -41,7 +42,7 @@ public class DefaultWikiComponent implements WikiComponent
     /**
      * @see {@link #getHandledMethods()}
      */
-    private Map<String, String> handledMethods = new HashMap<String, String>();
+    private Map<String, XDOM> handledMethods = new HashMap<String, XDOM>();
 
     /**
      * @see {@link #getRole()}
@@ -83,7 +84,7 @@ public class DefaultWikiComponent implements WikiComponent
     /**
      * {@inheritDoc}
      */
-    public Map<String, String> getHandledMethods()
+    public Map<String, XDOM> getHandledMethods()
     {
         return this.handledMethods;
     }
@@ -119,7 +120,7 @@ public class DefaultWikiComponent implements WikiComponent
      * 
      * @param methods the methods this component will handle
      */
-    public void setHandledMethods(Map<String, String> methods)
+    public void setHandledMethods(Map<String, XDOM> methods)
     {
         this.handledMethods = methods;
     }

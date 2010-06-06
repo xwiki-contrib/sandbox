@@ -19,7 +19,6 @@
  */
 package org.xwiki.component.wiki;
 
-import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -29,9 +28,7 @@ import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.wiki.internal.DefaultMethodOutputHandler;
 import org.xwiki.context.Execution;
-import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.block.XDOM;
-import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
@@ -47,6 +44,11 @@ import org.xwiki.rendering.transformation.Transformation;
  */
 public class WikiComponentInvocationHandler implements InvocationHandler
 {
+    /**
+     * The key under which the component reference (a virtual "this") is kept in the method invocation context. 
+     */
+    private static final String METHOD_CONTEXT_COMPONENT_KEY = "component";
+
     /**
      * The key under which the output is kept in the method invocation context.
      */
@@ -89,20 +91,15 @@ public class WikiComponentInvocationHandler implements InvocationHandler
     }
 
     /**
-     * Map hosting handled methods. Keys are method names and values are wiki code to "execute".
-     */
-    private Map<String, String> handledMethods;
-
-    /**
      * Our component manager.
      */
     private ComponentManager componentManager;
 
     /**
-     * The reference to the document.
+     * The proxied wiki component.
      */
-    private DocumentReference componentReference;
-
+    private WikiComponent wikiComponent;
+    
     /**
      * Constructor of this invocation handler.
      * 
@@ -110,11 +107,10 @@ public class WikiComponentInvocationHandler implements InvocationHandler
      * @param methods the map of methods handled by the component instance
      * @param componentManager the component manager
      */
-    public WikiComponentInvocationHandler(DocumentReference componentReference, Map<String, String> methods,
+    public WikiComponentInvocationHandler(WikiComponent wikiComponent,
         ComponentManager componentManager)
     {
-        this.componentReference = componentReference;
-        this.handledMethods = methods;
+        this.wikiComponent = wikiComponent;
         this.componentManager = componentManager;
     }
 
@@ -123,14 +119,14 @@ public class WikiComponentInvocationHandler implements InvocationHandler
      */
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
     {
-        if (!this.handledMethods.containsKey(method.getName())) {
+        if (!this.wikiComponent.getHandledMethods().containsKey(method.getName())) {
             if (method.getDeclaringClass() == Object.class) {
                 return this.proxyObjectMethod(proxy, method, args);
             } else {
                 throw new NoSuchMethodException();
             }
         } else {
-            return this.executeWikiContent(method);
+            return this.executeWikiContent(proxy, method);
         }
 
     }
@@ -143,14 +139,12 @@ public class WikiComponentInvocationHandler implements InvocationHandler
      * @throws Exception when an error occurs during execution
      */
     @SuppressWarnings("unchecked")
-    private Object executeWikiContent(Method method) throws Exception
+    private Object executeWikiContent(Object proxy, Method method) throws Exception
     {
-        XDOM xdom;
         Map xwikiContext = null;
         Object contextDoc = null;
 
-        Parser parser = componentManager.lookup(Parser.class, Syntax.XWIKI_2_0.toIdString());
-        xdom = parser.parse(new StringReader(this.handledMethods.get(method.getName())));
+        XDOM xdom = this.wikiComponent.getHandledMethods().get(method.getName());
 
         Execution execution = componentManager.lookup(Execution.class);
         Transformation macroTransformation = componentManager.lookup(Transformation.class, "macro");
@@ -158,6 +152,7 @@ public class WikiComponentInvocationHandler implements InvocationHandler
 
         Map<String, Object> methodContext = new HashMap<String, Object>();
         methodContext.put(METHOD_CONTEXT_OUTPUT_KEY, new DefaultMethodOutputHandler());
+        methodContext.put(METHOD_CONTEXT_COMPONENT_KEY, proxy);
 
         // Place macro context inside xwiki context ($context.macro).
         xwikiContext = (Map) execution.getContext().getProperty("xwikicontext");
@@ -165,7 +160,7 @@ public class WikiComponentInvocationHandler implements InvocationHandler
         // Save current context document.
         contextDoc = xwikiContext.get(XWIKI_CONTEXT_DOC_KEY);
         // Make sure has prog rights
-        xwikiContext.put(XWIKI_CONTEXT_DOC_KEY, docBridge.getDocument(this.componentReference));
+        xwikiContext.put(XWIKI_CONTEXT_DOC_KEY, docBridge.getDocument(this.wikiComponent.getDocumentReference()));
 
         // Perform internal macro transformations.
         macroTransformation.transform(xdom, Syntax.XWIKI_2_0);

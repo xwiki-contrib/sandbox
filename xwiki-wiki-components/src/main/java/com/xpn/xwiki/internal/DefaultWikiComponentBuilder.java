@@ -19,6 +19,7 @@
  */
 package com.xpn.xwiki.internal;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.wiki.InvalidComponentDefinitionException;
 import org.xwiki.component.wiki.WikiComponent;
 import org.xwiki.component.wiki.WikiComponentBuilder;
@@ -34,6 +36,9 @@ import org.xwiki.component.wiki.WikiComponentException;
 import org.xwiki.component.wiki.internal.DefaultWikiComponent;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.rendering.block.XDOM;
+import org.xwiki.rendering.parser.ParseException;
+import org.xwiki.rendering.parser.Parser;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -47,8 +52,13 @@ import com.xpn.xwiki.objects.BaseObject;
  * @version $Id$
  */
 @Component
-public class DefaultWikiComponentBuilder implements WikiComponentBuilder
+public class DefaultWikiComponentBuilder extends AbstractLogEnabled implements WikiComponentBuilder
 {
+
+    /**
+     * The name of the document that holds the XClass definition of a wiki component.
+     */
+    private static final String XWIKI_COMPONENT_CLASS = "XWiki.ComponentClass";
 
     /**
      * The name of the document that holds the XClass definition of an implementation of an interface by a component.
@@ -71,6 +81,12 @@ public class DefaultWikiComponentBuilder implements WikiComponentBuilder
     private static final String COMPONENT_INTERFACE_NAME_FIELD = COMPONENT_METHOD_NAME_FIELD;
 
     /**
+     * Parser. Used to load code as XDOM from XObject string.
+     */
+    @Requirement("xwiki/2.0")
+    private Parser parser;
+    
+    /**
      * Execution, needed to access the XWiki context map.
      */
     @Requirement
@@ -84,7 +100,7 @@ public class DefaultWikiComponentBuilder implements WikiComponentBuilder
     {
         try {
             XWikiDocument componentDocument = getXWikiContext().getWiki().getDocument(reference, getXWikiContext());
-            BaseObject componentObject = componentDocument.getObject("XWiki.ComponentClass");
+            BaseObject componentObject = componentDocument.getObject(XWIKI_COMPONENT_CLASS);
 
             if (componentObject == null) {
                 throw new InvalidComponentDefinitionException("No component object could be found");
@@ -117,21 +133,41 @@ public class DefaultWikiComponentBuilder implements WikiComponentBuilder
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public boolean containsWikiComponent(DocumentReference reference) 
+    {
+        XWikiDocument componentDocument;
+        try {
+            componentDocument = getXWikiContext().getWiki().getDocument(reference, getXWikiContext());
+            return componentDocument.getObject(XWIKI_COMPONENT_CLASS) != null;        
+        } catch (XWikiException e) {
+            getLogger().error("Failed to verify if document holds a wiki component", e);
+            // assume false
+            return false;
+        }
+    }
+    
+    /**
      * @param componentDocument the document holding the component description
      * @return the map of component handled methods/method body
      */
-    private Map<String, String> getHandledMethods(XWikiDocument componentDocument)
+    private Map<String, XDOM> getHandledMethods(XWikiDocument componentDocument)
     {
-        Map<String, String> handledMethods = new HashMap<String, String>();
+        Map<String, XDOM> handledMethods = new HashMap<String, XDOM>();
         if (componentDocument.getObjectNumbers(XWIKI_COMPONENT_METHOD_CLASS) > 0) {
             for (BaseObject iface : componentDocument.getObjects(XWIKI_COMPONENT_METHOD_CLASS)) {
                 if (!StringUtils.isBlank(iface.getStringValue(COMPONENT_METHOD_NAME_FIELD))) {
-                    handledMethods.put(iface.getStringValue(COMPONENT_METHOD_NAME_FIELD), iface.getStringValue("code"));
+                    try {
+                        XDOM xdom = parser.parse(new StringReader(iface.getStringValue("code")));
+                        handledMethods.put(iface.getStringValue(COMPONENT_METHOD_NAME_FIELD), xdom);
+                    } catch (ParseException e) {
+                        // this method will just not be handled
+                    }
                 }
             }
         }
         return handledMethods;
-
     }
 
     /**

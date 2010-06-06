@@ -20,6 +20,7 @@
 package org.xwiki.component.wiki;
 
 import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.model.reference.DocumentReference;
 
 /**
  * A WikiComponentManager is responsible for registering and unregistering components that are defined as wiki pages.
@@ -43,4 +44,12 @@ public interface WikiComponentManager
      */
     void registerWikiComponent(WikiComponent component) throws WikiComponentException;
 
+    /**
+     * Unregisters the wiki component associated with the passed reference.
+     * 
+     * @param reference the reference to the document holding the component to unregister
+     * @throws WikiComponentException when failed to unregister the component from the CM.
+     */
+    void unregisterWikiComponent(DocumentReference reference) throws WikiComponentException;
+    
 }

@@ -21,6 +21,8 @@ package org.xwiki.component.wiki.internal;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -35,6 +37,7 @@ import org.xwiki.component.wiki.WikiComponent;
 import org.xwiki.component.wiki.WikiComponentException;
 import org.xwiki.component.wiki.WikiComponentInvocationHandler;
 import org.xwiki.component.wiki.WikiComponentManager;
+import org.xwiki.model.reference.DocumentReference;
 
 /**
  * Default implementation of {@link WikiComponentManager}. Creates proxy objects which method invocation handler keeps a
@@ -53,19 +56,26 @@ public class DefaultWikiComponentManager extends AbstractLogEnabled implements W
     private ComponentManager mainComponentManager;
 
     /**
+     * Reference on all registered components.
+     */
+    private Set<WikiComponent> registeredComponents = new HashSet<WikiComponent>();
+    
+    /**
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     public void registerWikiComponent(WikiComponent component) throws WikiComponentException
     {
+        if (registeredComponents.contains(component)) {
+            throw new WikiComponentException("Component already registered. Try unregistering it first.");
+        }
+        
         try {
             // Get the component role interface
             Class< ? > role = component.getRole();
 
             // Create the method invocation handler of the proxy
-            InvocationHandler handler =
-                new WikiComponentInvocationHandler(component.getDocumentReference(), component.getHandledMethods(),
-                    mainComponentManager);
+            InvocationHandler handler = new WikiComponentInvocationHandler(component, mainComponentManager);
 
             // Prepare array of all interfaces the component implementation declares, that is the interface declared as
             // component role
@@ -75,7 +85,7 @@ public class DefaultWikiComponentManager extends AbstractLogEnabled implements W
                 .getImplementedInterfaces().length);
             allImplementedInterfaces[component.getImplementedInterfaces().length] = role;
 
-            // Create the component instance and its descritor
+            // Create the component instance and its descriptor
             Object instance = Proxy.newProxyInstance(role.getClassLoader(), allImplementedInterfaces, handler);
             ComponentDescriptor componentDescriptor = this.createComponentDescriptor(role, component.getRoleHint());
 
@@ -91,11 +101,30 @@ public class DefaultWikiComponentManager extends AbstractLogEnabled implements W
 
             // Finally, register the component against the CM
             this.mainComponentManager.registerComponent(componentDescriptor, role.cast(instance));
+            
+            // And hold a reference to it.
+            this.registeredComponents.add(component);
+            
         } catch (ComponentRepositoryException e) {
             throw new WikiComponentException("Failed to register wiki component against component repository", e);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void unregisterWikiComponent(DocumentReference reference) throws WikiComponentException
+    {
+        for (WikiComponent registered : this.registeredComponents) {
+            if (registered.getDocumentReference().equals(reference)) {
+                // Unregister component
+                this.mainComponentManager.unregisterComponent(registered.getRole(), registered.getRoleHint());
+                // Remove reference
+                this.registeredComponents.remove(registered);
+            }
+        }
+    }
+    
     /**
      * Helper method to create a component descriptor from role and hint.
      * 

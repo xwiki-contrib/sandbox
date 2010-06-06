@@ -22,6 +22,7 @@ package org.xwiki.component.wiki;
 import java.util.Map;
 
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.rendering.block.XDOM;
 
 /**
  * Represents the definition of a wiki component implementation.
@@ -54,5 +55,5 @@ public interface WikiComponent
     /**
      * @return the map of method name/wiki code this component implementation handles. 
      */
-    Map<String, String> getHandledMethods();
+    Map<String, XDOM> getHandledMethods();
 }
