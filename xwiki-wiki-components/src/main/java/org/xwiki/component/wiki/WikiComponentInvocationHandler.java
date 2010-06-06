@@ -21,11 +21,15 @@ package org.xwiki.component.wiki;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.xwiki.bridge.DocumentAccessBridge;
+import org.xwiki.component.logging.AbstractLogEnabled;
+import org.xwiki.component.logging.CommonsLoggingLogger;
 import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.component.phase.LogEnabled;
 import org.xwiki.component.wiki.internal.DefaultMethodOutputHandler;
 import org.xwiki.context.Execution;
 import org.xwiki.rendering.block.XDOM;
@@ -34,6 +38,7 @@ import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.transformation.Transformation;
+import org.xwiki.rendering.transformation.TransformationException;
 
 /**
  * Method invocation handler for wiki component proxy instances. Has a reference on a map of name/body wiki code of
@@ -42,13 +47,18 @@ import org.xwiki.rendering.transformation.Transformation;
  * @since 2.4-M2
  * @version $Id$
  */
-public class WikiComponentInvocationHandler implements InvocationHandler
+public class WikiComponentInvocationHandler extends AbstractLogEnabled implements InvocationHandler
 {
     /**
      * The key under which the component reference (a virtual "this") is kept in the method invocation context. 
      */
     private static final String METHOD_CONTEXT_COMPONENT_KEY = "component";
 
+    /**
+     * The key under which inputs are kept in the method invocation context.
+     */
+    private static final String METHOD_CONTEXT_INPUT_KEY = "input";
+    
     /**
      * The key under which the output is kept in the method invocation context.
      */
@@ -112,6 +122,9 @@ public class WikiComponentInvocationHandler implements InvocationHandler
     {
         this.wikiComponent = wikiComponent;
         this.componentManager = componentManager;
+        
+        // This class is not used as a component, so we replace the void logger manually since the CM doesn't do it for us.
+        this.enableLogging(new CommonsLoggingLogger(this.getClass()));
     }
 
     /**
@@ -126,7 +139,7 @@ public class WikiComponentInvocationHandler implements InvocationHandler
                 throw new NoSuchMethodException();
             }
         } else {
-            return this.executeWikiContent(proxy, method);
+            return this.executeWikiContent(proxy, method, args);
         }
 
     }
@@ -139,7 +152,7 @@ public class WikiComponentInvocationHandler implements InvocationHandler
      * @throws Exception when an error occurs during execution
      */
     @SuppressWarnings("unchecked")
-    private Object executeWikiContent(Object proxy, Method method) throws Exception
+    private Object executeWikiContent(Object proxy, Method method, Object[] args) throws Exception
     {
         Map xwikiContext = null;
         Object contextDoc = null;
@@ -154,6 +167,17 @@ public class WikiComponentInvocationHandler implements InvocationHandler
         methodContext.put(METHOD_CONTEXT_OUTPUT_KEY, new DefaultMethodOutputHandler());
         methodContext.put(METHOD_CONTEXT_COMPONENT_KEY, proxy);
 
+        Map<Integer, Object> inputs = new HashMap<Integer, Object>();
+        
+        if (args != null && args.length > 0) {
+            for (int i=0;i<args.length;i++) {
+                // Start with "0" as first input key.
+                inputs.put(i, args[i]);
+            }
+        }
+        
+        methodContext.put(METHOD_CONTEXT_INPUT_KEY, inputs);
+        
         // Place macro context inside xwiki context ($context.macro).
         xwikiContext = (Map) execution.getContext().getProperty("xwikicontext");
         xwikiContext.put("method", methodContext);
@@ -163,7 +187,13 @@ public class WikiComponentInvocationHandler implements InvocationHandler
         xwikiContext.put(XWIKI_CONTEXT_DOC_KEY, docBridge.getDocument(this.wikiComponent.getDocumentReference()));
 
         // Perform internal macro transformations.
-        macroTransformation.transform(xdom, Syntax.XWIKI_2_0);
+        try {
+            macroTransformation.transform(xdom, Syntax.XWIKI_2_0);
+        } catch (TransformationException e) {
+            this.getLogger().error(
+                MessageFormat.format("Error while executing wiki component macro transformation for method {0}",
+                    new Object[] {method.getName()}), e);
+        }
 
         if (methodContext.get(METHOD_CONTEXT_OUTPUT_KEY) != null
             && ((MethodOutputHandler) methodContext.get(METHOD_CONTEXT_OUTPUT_KEY)).getReturnValue() != null) {
