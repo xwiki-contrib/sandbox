@@ -29,7 +29,6 @@ import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.logging.CommonsLoggingLogger;
 import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.component.phase.LogEnabled;
 import org.xwiki.component.wiki.internal.DefaultMethodOutputHandler;
 import org.xwiki.context.Execution;
 import org.xwiki.rendering.block.XDOM;
