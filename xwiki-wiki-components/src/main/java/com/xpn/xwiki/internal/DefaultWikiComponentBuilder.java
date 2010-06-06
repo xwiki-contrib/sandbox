@@ -156,11 +156,11 @@ public class DefaultWikiComponentBuilder extends AbstractLogEnabled implements W
     {
         Map<String, XDOM> handledMethods = new HashMap<String, XDOM>();
         if (componentDocument.getObjectNumbers(XWIKI_COMPONENT_METHOD_CLASS) > 0) {
-            for (BaseObject iface : componentDocument.getObjects(XWIKI_COMPONENT_METHOD_CLASS)) {
-                if (!StringUtils.isBlank(iface.getStringValue(COMPONENT_METHOD_NAME_FIELD))) {
+            for (BaseObject method : componentDocument.getObjects(XWIKI_COMPONENT_METHOD_CLASS)) {
+                if (!StringUtils.isBlank(method.getStringValue(COMPONENT_METHOD_NAME_FIELD))) {
                     try {
-                        XDOM xdom = parser.parse(new StringReader(iface.getStringValue("code")));
-                        handledMethods.put(iface.getStringValue(COMPONENT_METHOD_NAME_FIELD), xdom);
+                        XDOM xdom = parser.parse(new StringReader(method.getStringValue("code")));
+                        handledMethods.put(method.getStringValue(COMPONENT_METHOD_NAME_FIELD), xdom);
                     } catch (ParseException e) {
                         // this method will just not be handled
                     }
