@@ -272,7 +272,9 @@ $xwiki.get('ssx').use($config.get('commonPage'))
     #if($mailInGroup.size() &gt; 0)
       #displayMessage($mailInGroup.get(0))
     #end
-  #elseif($inspect == 'history')
+  ## NOTE: we are not checking for admin status to view history as an admin. If the user knows the messageID then they
+  ## can see it's history.
+  #elseif($inspect == 'history' || $inspect == 'historyAsAdmin')
     #displayMessageHistory($mail.get($messageID))
   #end
 #end

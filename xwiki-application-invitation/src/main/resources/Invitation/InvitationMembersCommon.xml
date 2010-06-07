@@ -182,7 +182,12 @@
           /&gt;##
         #elseif($field == '_history')
           |[[$msg.get('xe.invitation.displayMessageTable.history')>>##
-             $doc.getFullName()?inspect=history&amp;messageID=$message.getProperty('messageID').getValue()]]
+             $doc.getFullName()?inspect=history##
+             ## If we are looking as an admin then go to historyAsAdmin
+             #if($asAdmin)
+               AsAdmin##
+             #end
+             &amp;messageID=$message.getProperty('messageID').getValue()]]
         #else
           |$escapetool.xml($message.display($field, 'view'))##
         #end
@@ -236,7 +241,7 @@
        #if($inspect == 'history')
 
          ** [[$msg.get('xe.invitation.tools.invitationsInGroup')&gt;&gt;$config.get('membersActionsPage')?##
-               inspect=group&amp;messageID=$escapetool.xml($parameterMap.get('messageID'))]]
+               inspect=group&amp;messageID=$escapetool.xml($parameterMap.get('messageID').get(0))]]
          *** **$msg.get('xe.invitation.tools.invitationHistory')**##
        #end
 
@@ -264,8 +269,13 @@
 
        #if($inspect == 'groupAsAdmin')
          ** **$msg.get('xe.invitation.tools.invitationsInGroup')**
+       #elseif($inspect == 'historyAsAdmin')
+         ** [[$msg.get('xe.invitation.tools.invitationsInGroup')&gt;&gt;$config.get('membersActionsPage')?##
+               inspect=groupAsAdmin&amp;messageID=$escapetool.xml($parameterMap.get('messageID').get(0))]]
+         *** **$msg.get('xe.invitation.tools.invitationHistory')**
        #end
      #else
+       ## Inspect all as admin is selected.
        * **$msg.get('xe.invitation.adminTools.allInvitationsLink')**
      #end
    #end

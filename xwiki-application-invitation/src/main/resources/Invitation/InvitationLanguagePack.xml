@@ -194,6 +194,6 @@ Invitation.Invitation_messageBodyTemplatePlain=Message body plain text template
 Invitation.Invitation_emailClass=Email message XClass
 Invitation.Invitation_emailContainer=Document containing email XObjects
 Invitation.Invitation_emailRegex=Regular expression for validating email addresses
-Invitation.Invitation_allowUsersOfOtherWikis=Let users of other wikis to send mail
+Invitation.Invitation_allowUsersOfOtherWikis=Let users of other wikis send
 Invitation.Invitation_usersMayPersonalizeMessage=Let users personalize messages
 Invitation.Invitation_usersMaySendToMultiple=Let users send to multiple addresses</content></xwikidoc>

@@ -37,7 +37,7 @@
 <displayType></displayType>
 <name>allowUsersOfOtherWikis</name>
 <number>4</number>
-<prettyName>Let users of other wikis to send mail</prettyName>
+<prettyName>Let users of other wikis send</prettyName>
 <unmodifiable>0</unmodifiable>
 <validationMessage></validationMessage>
 <validationRegExp></validationRegExp>

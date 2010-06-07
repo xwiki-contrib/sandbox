@@ -97,7 +97,8 @@
 <cache>forbid</cache>
 </property>
 <property>
-<code>/* Hide unwanted page stuff */
+<code>#template("colorThemeInit.vm")
+/* Hide unwanted page stuff */
 #contentmenu *, #hierarchy *, #document-info *, #xdocFooter, #document-title * {
   display: none;
 }
@@ -108,14 +109,14 @@
 }
 
 .invitation-preview {
-  background-color: rgb(252, 252, 252);
-  border: 1px solid rgb(214, 225, 231);
+  background-color: #FCFCFC;
+  border: 1px solid $theme.get('menuSelectedEntryBackgroundColor');
   padding: 3px;
   margin-left: 30px;
 }
 
 .invitation-preview .field {
-  background-color: rgb(255, 255, 255);
+  background-color: $theme.get('pageContentBackgroundColor');
   margin-left: 20px;
   margin-bottom: 10px;
   padding: 10px;
@@ -151,7 +152,7 @@
 <name>Invitation Style Sheet</name>
 </property>
 <property>
-<parse></parse>
+<parse>1</parse>
 </property>
 <property>
 <use>onDemand</use>
@@ -386,16 +387,18 @@
                                 + 'ubjectLine{{/velo' + 'city}}')
     $config.put('subjectLineTemplate', $subjectLineTemplate)
     #set($n = $util.getNewline())
-    #set($messageBodyTemplate = '{{velo' + 'city}}' + "$n" + '#set($userName = $xwiki.getUserName($xco'
+    #set($messageBodyTemplate = '{{velo' + 'city}}' + "$n" + '#template("colorThemeInit.vm")' + "$n" 
+                              + '#set($userName = $xwiki.getUserName($xco'
                               + 'ntext.getUser(), false))' + "$n" + '#set($wikiName = $xwiki.getReques'
                               + 'tURL().replaceAll("http://([^/:]*).*$", "$1"))' + "$n" + '#set($guest'
                               + 'ActionsURL = $xwiki.getDocumentAsAuthor($config.get("guestsActionsPag'
-                              + 'e")).getExternalURL())' + "$n" + '#set($linkStyle = "color:#4791BC;te'
+                              + 'e")).getExternalURL())' + "$n" + '#set($linkStyle = "color:$theme.get('
+                              + "$escapetool.getS()" + 'linkColor' + "$escapetool.getS()" + ');te'
                               + 'xt-decoration:none;")' + "$n" + '#set($bigText = "font-size:130%;")'
                               + "$n" + '#set($joinLink = "float:left;")' + "$n" + '#set($declineLink '
-                              + '= "color:#f88;float:right;")' + "$n" + '' + "$n" + '$msg.get("xe.invi'
+                              + '= "color:#f88;float:right;")' + "$n$n" + '$msg.get("xe.invi'
                               + 'tation.emailContent.userHasInvitedYouToJoinWiki", [$userName, $wikiNa'
-                              + 'me])' + "$n" + '' + "$n" + '{{html clean=false}}' + "$n" + '#if("$!me'
+                              + 'me])' + "$n$n" + '{{html clean=false}}' + "$n" + '#if("$!me'
                               + 'ssageBody" != "")' + "$n" + '  &lt;p style="$bigText"&gt;' + "$n" + '  $!'
                               + 'escapetool.html($!messageBody)' + "$n" + '  &lt;/p&gt;' + "$n" + '#end'
                               + "$n" + '&lt;br/&gt;&lt;br/&gt;' + "$n" + '&lt;a href="${guestActionsURL}?doAction_ac'
@@ -414,10 +417,8 @@
                                 '{{velo' + 'city}}' + "$n" + '#set($userName = $xwiki.getUserName($xco'
                               + 'ntext.getUser(), false))#set($wikiName = $xwiki.getRequestURL().repla'
                               + 'ceAll("http://([^/:]*).*$", "$1"))#set($guestActionsURL = $xwiki.getD'
-                              + 'ocumentAsAuthor($config.get("guestsActionsPage")).getExternalURL())#s'
-                              + 'et($linkStyle = "color:#4791BC;text-decoration:none;")#set($bigText ='
-                              + ' "font-size:130%;")#set($joinLink = "float:left;")#set($declineLink ='
-                              + ' "color:#f88;float:right;")$msg.get("xe.invitation.emailContent.userH'
+                              + 'ocumentAsAuthor($config.get("guestsActionsPage")).getExternalURL())'
+                              + '$msg.get("xe.invitation.emailContent.userH'
                               + 'asInvitedYouToJoinWiki", [$userName, $wikiName])#if("$!messageBody" !'
                               + '= "")  $messageBody#end$msg.get("xe.invitation.emailContent.joinLink"'
                               + ')${guestActionsURL}?doAction_accept=y&amp;messageID=$messageID$msg.get("x'
