@@ -24,6 +24,141 @@
 <hidden>false</hidden>
 <object>
 <class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>Invitation.Invitation</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>57002efd-3fd9-45a9-bedf-d9741dcc1ac9</guid>
+<property>
+<cache>forbid</cache>
+</property>
+<property>
+<code>/* Hide unwanted page stuff */
+#contentmenu *, #hierarchy *, #document-info *, #xdocFooter, #document-title * {
+  display: none;
+}
+
+.invitation, .invitation input[type='text'], .invitation textarea, .invitation table {
+  float: left;
+  width: 450px; 
+}
+
+.invitation-preview {
+  background-color: rgb(252, 252, 252);
+  border: 1px solid rgb(214, 225, 231);
+  padding: 3px;
+  margin-left: 30px;
+}
+
+.invitation-preview .field {
+  background-color: rgb(255, 255, 255);
+  margin-left: 20px;
+  margin-bottom: 10px;
+  padding: 10px;
+  overflow: hidden;
+
+  /* Makes the field fit with padding and margins. */
+  width: 390px;
+}
+
+.clearboth {
+  clear:both;
+}
+
+.invitation input[type='text'], .invitation textarea {
+  margin-bottom: 10px;
+}
+
+/* Labels */
+.invitation strong, .invitation label {
+  text-transform: uppercase;
+}
+
+/* "Preview:" label */
+.invitation strong {
+  padding-left: 30px;
+}
+
+.invitation-preview strong {
+  padding-left: 20px;
+}</code>
+</property>
+<property>
+<name>Invitation Style Sheet</name>
+</property>
+<property>
+<parse></parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
 <name>XWiki.XWikiRights</name>
 <customClass></customClass>
 <customMapping></customMapping>

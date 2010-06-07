@@ -144,7 +144,7 @@
   #loadInvitationMail($config, $mail)
   ##
   ## Load CSS
-  $xwiki.get('ssx').use($config.get('mainPage'))
+  $xwiki.get('ssx').use($config.get('commonPage'))
   ##
   ## Don't load comments, history, etc.
   #set($docextras = [])
