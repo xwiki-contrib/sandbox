@@ -42,33 +42,38 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <version>3.0-beta-1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model-builder</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <version>3.0-beta-1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-compat</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <version>3.0-beta-1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-http</artifactId>
+      <version>1.0-beta-6</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <version>3.0-beta-1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <version>3.0-beta-1</version>
     </dependency>
-    <!-- <dependency>
+    <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-settings</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency> -->
+      <version>3.0-beta-1</version>
+    </dependency>
     
     <!-- Test dependencies -->
     <dependency>

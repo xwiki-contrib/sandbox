@@ -20,7 +20,7 @@
 package org.xwiki.extension.repository.internal;
 
 import java.io.File;
-import java.util.Collection;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,32 +29,40 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
+import org.xwiki.extension.ExtensionException;
 import org.xwiki.extension.ExtensionId;
+import org.xwiki.extension.ExtensionManagerConfiguration;
+import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.UninstallException;
-import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
-import org.xwiki.extension.repository.ExtensionRepositoryManager;
 import org.xwiki.extension.repository.LocalExtensionRepository;
 
 /**
  * TODO: decide local repository format (probably maven-like)
+ * TODO: make it threadsafe bulletproof
  */
 @Component
 public class DefaultLocalExtensionRepository implements LocalExtensionRepository, Initializable
 {
+    @Requirement
+    private ExtensionManagerConfiguration configuration;
+
     private ExtensionRepositoryId repositoryId;
 
     private File rootFolder;
 
     public void initialize() throws InitializationException
     {
-        // TODO: resolve local repository path/uri based on configuration
+        try {
+            this.rootFolder = this.configuration.getLocalRepository();
+        } catch (IOException e) {
+            new InitializationException("Failed to access local repository", e);
+        }
 
-        this.repositoryId = new ExtensionRepositoryId("local", "xwiki", uri);
-        this.rootFolder = new File(uri);
+        this.repositoryId = new ExtensionRepositoryId("local", "xwiki", this.rootFolder.toURI());
     }
 
     public File getRootFolder()
@@ -95,15 +103,16 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     private LocalExtension getLocalExtension(String name, String version)
     {
-        // TODO: search the extension descriptor in the local filesystem
-        return null;
+        // FIXME: generate a DefaultLocalExtension from a descriptor file
+
+        return new DefaultLocalExtension(this, name, version, ExtensionType.JAR);
     }
 
     private LocalExtension createExtension(Extension extension, boolean dependency)
     {
-        // TODO: create a local extension descriptor and export it in a file in the local repository
+        // FIXME: create a local extension descriptor and export it in a file in the local repository
 
-        return null;
+        return new DefaultLocalExtension(this, extension);
     }
 
     public List<Extension> getExtensions(int nb, int offset)
@@ -118,7 +127,13 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
         if (localExtension == null) {
             localExtension = createExtension(extension, dependency);
 
-            extension.download(localExtension.getFile());
+            try {
+                extension.download(localExtension.getFile());
+            } catch (ExtensionException e) {
+                // TODO: clean
+                
+                throw new InstallException("Failed to download extension [" + extension + "]", e);
+            }
         }
 
         return localExtension;

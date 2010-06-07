@@ -21,10 +21,12 @@ package org.xwiki.extension;
 
 public enum ExtensionType
 {
+    UNKNOWN(null),
+    
     /**
-     * A "virtual" extension representing a top level application with a set of dependencies.
+     * A "meta extension" representing a top level application with a set of dependencies.
      */
-    EMPTY(null),
+    META(null),
 
     /**
      * A jar file.

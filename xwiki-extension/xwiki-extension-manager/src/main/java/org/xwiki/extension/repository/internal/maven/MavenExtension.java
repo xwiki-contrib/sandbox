@@ -23,9 +23,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.legacy.WagonManager;
 import org.xwiki.extension.Extension;
+import org.xwiki.extension.ExtensionException;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.repository.ExtensionRepository;
@@ -42,12 +46,25 @@ public class MavenExtension implements Extension
 
     private MavenComponentManager mavenComponentManager;
 
+    private List<ExtensionId> dependencies;
+
+    private List<ExtensionId> suggested;
+
     public MavenExtension(ExtensionId artifactId, MavenProject project, MavenExtensionRepository repository,
         MavenComponentManager mavenComponentManager)
     {
+        this.artifactId = artifactId;
         this.project = project;
         this.repository = repository;
         this.mavenComponentManager = mavenComponentManager;
+
+        if (project.getPackaging().equals("jar")) {
+            this.extensionType = ExtensionType.JAR;
+        } else if (project.getPackaging().equals("xar")) {
+            this.extensionType = ExtensionType.PAGES;
+        } else {
+            this.extensionType = ExtensionType.UNKNOWN;
+        }
     }
 
     public String getName()
@@ -62,7 +79,7 @@ public class MavenExtension implements Extension
 
     public String getAuthor()
     {
-        // TODO Auto-generated method stub
+        // TODO
         return null;
     }
 
@@ -83,19 +100,53 @@ public class MavenExtension implements Extension
 
     public List<ExtensionId> getDependencies()
     {
-        List<ExtensionId> dependencies = new ArrayList<ExtensionId>();
+        if (this.dependencies == null) {
+            this.dependencies = new ArrayList<ExtensionId>();
 
-        for (Dependency mavenDependency : this.project.getDependencies()) {
-            dependencies.add(new ExtensionId(mavenDependency.getGroupId() + ":" + mavenDependency.getArtifactId(),
-                mavenDependency.getVersion()));
+            for (Dependency mavenDependency : this.project.getDependencies()) {
+                if (!mavenDependency.isOptional()
+                    && (mavenDependency.getScope().equals("compile") || mavenDependency.getScope().equals("runtime") || mavenDependency
+                        .getScope().equals("provided"))) {
+                    this.dependencies.add(new ExtensionId(mavenDependency.getGroupId() + ":"
+                        + mavenDependency.getArtifactId(), mavenDependency.getVersion()));
+                }
+            }
         }
 
-        return dependencies;
+        return this.dependencies;
     }
 
-    public void download(File file)
+    // IDEA
+    public List<ExtensionId> getSuggestedExtensions()
     {
-        // TODO
+        if (this.suggested == null) {
+            this.suggested = new ArrayList<ExtensionId>();
+
+            for (Dependency mavenDependency : this.project.getDependencies()) {
+                if (mavenDependency.isOptional()) {
+                    this.suggested.add(new ExtensionId(mavenDependency.getGroupId() + ":"
+                        + mavenDependency.getArtifactId(), mavenDependency.getVersion()));
+                }
+            }
+        }
+
+        return this.suggested;
+    }
+
+    public void download(File file) throws ExtensionException
+    {
+        try {
+            WagonManager wagonManager = this.mavenComponentManager.getPlexus().lookup(WagonManager.class);
+
+            Artifact fileArtifact =
+                new DefaultArtifact(this.project.getGroupId(), this.project.getArtifactId(), this.project.getVersion(),
+                    null, this.project.getPackaging(), null, null);
+
+            wagonManager.getRemoteFile(this.repository.getRepository(), file, this.repository.getRepository().pathOf(
+                fileArtifact), null/* downloadMonitor */, null/* checksumPolicy */, true);
+        } catch (Exception e) {
+            throw new ExtensionException("Failed to download extension", e);
+        }
     }
 
     public ExtensionRepository getRepository()

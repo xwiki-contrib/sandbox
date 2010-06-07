@@ -19,44 +19,32 @@
  */
 package org.xwiki.extension.repository.internal.maven;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.handler.ArtifactHandler;
-import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.artifact.InvalidRepositoryException;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.repository.legacy.WagonManager;
-import org.codehaus.plexus.ContainerConfiguration;
-import org.codehaus.plexus.DefaultContainerConfiguration;
-import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.MutablePlexusContainer;
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.component.annotation.Requirement;
-import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionId;
+import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.internal.maven.configuration.MavenConfiguration;
 
-@ComponentRole
 public class MavenExtensionRepository implements ExtensionRepository
 {
-    @Requirement
-    private MavenConfiguration mavenConfiguration;
-    
     private ExtensionRepositoryId repositoryId;
+
+    private ArtifactRepository repository;
+
+    private MavenConfiguration mavenConfiguration;
 
     private MavenComponentManager mavenComponentManager;
 
@@ -64,16 +52,24 @@ public class MavenExtensionRepository implements ExtensionRepository
 
     private RepositorySystem repositorySystem;
 
-    private org.apache.maven.artifact.repository.ArtifactRepository repository;
-
-    public MavenExtensionRepository(ExtensionRepositoryId repositoryId,
-        org.apache.maven.artifact.repository.ArtifactRepository repository, MavenComponentManager mavenComponentManager)
+    public MavenExtensionRepository(ExtensionRepositoryId repositoryId, ArtifactRepository repository,
+        MavenConfiguration mavenConfiguration, MavenComponentManager mavenComponentManager)
+        throws ComponentLookupException
     {
         this.repositoryId = repositoryId;
-        this.mavenComponentManager = mavenComponentManager;
         this.repository = repository;
 
+        this.mavenConfiguration = mavenConfiguration;
+
+        this.mavenComponentManager = mavenComponentManager;
+
         this.projectBuilder = this.mavenComponentManager.getPlexus().lookup(ProjectBuilder.class);
+        this.repositorySystem = this.mavenComponentManager.getPlexus().lookup(RepositorySystem.class);
+    }
+
+    public ArtifactRepository getRepository()
+    {
+        return repository;
     }
 
     public ExtensionRepositoryId getId()
@@ -84,14 +80,13 @@ public class MavenExtensionRepository implements ExtensionRepository
     public List<Extension> getExtensions(int nb, int offset)
     {
         // TODO
-        return null;
+        return Collections.emptyList();
     }
 
-    public Extension resolve(ExtensionId extensionId)
+    public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
-        Extension artifact = null;
-
-        // TODO: parse actifactId id to get group and artifact ids
+        String groupId = extensionId.getName().substring(0, extensionId.getName().indexOf(':'));
+        String artifactId = extensionId.getName().substring(groupId.length() + 1);
 
         org.apache.maven.artifact.Artifact pomArtifact =
             this.repositorySystem.createProjectArtifact(groupId, artifactId, extensionId.getVersion());
@@ -99,18 +94,27 @@ public class MavenExtensionRepository implements ExtensionRepository
         ProjectBuildingRequest projectBuildingRequest = new DefaultProjectBuildingRequest();
 
         projectBuildingRequest.setRemoteRepositories(Collections.singletonList(this.repository));
-        projectBuildingRequest.setLocalRepository(this.mavenConfiguration.getLocalRepository());
-        projectBuildingRequest.setRepositoryCache(repositoryCache);
+        try {
+            projectBuildingRequest.setLocalRepository(this.mavenConfiguration.getLocalRepository());
+        } catch (InvalidRepositoryException e) {
+            throw new ResolveException("Failed to get local maven repository", e);
+        }
+        // projectBuildingRequest.setRepositoryCache(repositoryCache);
         projectBuildingRequest.setResolveDependencies(false);
         projectBuildingRequest.setOffline(false);
         projectBuildingRequest.setForceUpdate(false);
-        projectBuildingRequest.setTransferListener(transferListener);
+        // projectBuildingRequest.setTransferListener(transferListener);
 
-        ProjectBuildingResult result = this.projectBuilder.build(pomArtifact, projectBuildingRequest);
+        ProjectBuildingResult result;
+        try {
+            result = this.projectBuilder.build(pomArtifact, projectBuildingRequest);
+        } catch (ProjectBuildingException e) {
+            throw new ResolveException("Failed to resolve extension [" + extensionId + "]", e);
+        }
 
         return new MavenExtension(extensionId, result.getProject(), this, this.mavenComponentManager);
     }
-    
+
     public boolean exists(ExtensionId extensionId)
     {
         // TODO

@@ -28,15 +28,15 @@ import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionId;
-import org.xwiki.extension.InstallException;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.repository.ExtensionRepository;
+import org.xwiki.extension.repository.ExtensionRepositoryException;
 import org.xwiki.extension.repository.ExtensionRepositoryFactory;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
 
 @Component
-public class DefaultArtifactRepositoryManager implements ExtensionRepositoryManager
+public class DefaultExtensionRepositoryManager implements ExtensionRepositoryManager
 {
     @Requirement
     private ComponentManager componentManager;
@@ -44,7 +44,7 @@ public class DefaultArtifactRepositoryManager implements ExtensionRepositoryMana
     Map<ExtensionRepositoryId, ExtensionRepository> repositories =
         new ConcurrentHashMap<ExtensionRepositoryId, ExtensionRepository>();
 
-    public void addRepository(ExtensionRepositoryId repositoryId)
+    public void addRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException
     {
         try {
             ExtensionRepositoryFactory repositoryFactory =
@@ -52,7 +52,7 @@ public class DefaultArtifactRepositoryManager implements ExtensionRepositoryMana
 
             addRepository(repositoryFactory.createRepository(repositoryId));
         } catch (ComponentLookupException e) {
-            // TODO: throw exception
+            new ExtensionRepositoryException("Unsupported repository type[" + repositoryId.getType() + "]", e);
         }
     }
 

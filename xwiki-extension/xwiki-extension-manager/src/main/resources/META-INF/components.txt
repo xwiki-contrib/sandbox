@@ -1,6 +1,7 @@
 org.xwiki.extension.internal.DefaultExtensionManager
-org.xwiki.extension.repository.internal.DefaultArtifactRepositoryManager
+org.xwiki.extension.internal.DefaultExtensionManagerConfiguration
+org.xwiki.extension.repository.internal.DefaultExtensionRepositoryManager
+org.xwiki.extension.repository.internal.DefaultLocalExtensionRepository
 org.xwiki.extension.repository.internal.maven.DefaultMavenComponentManager
-org.xwiki.extension.repository.internal.maven.MavenExtensionRepository
 org.xwiki.extension.repository.internal.maven.MavenExtensionRepositoryFactory
 org.xwiki.extension.repository.internal.maven.configuration.DefaultMavenConfiguration

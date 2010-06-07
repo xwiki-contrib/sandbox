@@ -40,4 +40,43 @@ public class ExtensionId
     {
         return version;
     }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof ExtensionId) {
+            ExtensionId extensionId = (ExtensionId) obj;
+
+            return getName().equals(extensionId.getName()) && getVersion().equals(extensionId.getVersion());
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        return toString().hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return getName() + '-' + getVersion();
+    }
 }

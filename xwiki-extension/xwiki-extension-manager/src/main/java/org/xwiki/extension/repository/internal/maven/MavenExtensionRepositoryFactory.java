@@ -20,26 +20,26 @@
 package org.xwiki.extension.repository.internal.maven;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.maven.artifact.repository.ArtifactRepositoryFactory;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
-import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Repository;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.repository.ExtensionRepository;
+import org.xwiki.extension.repository.ExtensionRepositoryException;
 import org.xwiki.extension.repository.ExtensionRepositoryFactory;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.internal.maven.configuration.MavenConfiguration;
 
-@ComponentRole
+@Component("maven")
 public class MavenExtensionRepositoryFactory extends AbstractLogEnabled implements ExtensionRepositoryFactory,
     Initializable
 {
@@ -66,15 +66,13 @@ public class MavenExtensionRepositoryFactory extends AbstractLogEnabled implemen
     {
         List<ExtensionRepository> repositories = new ArrayList<ExtensionRepository>();
 
-        // TODO: get maven default repositories
-
         // Get configured repositories
         for (Profile profile : this.mavenConfiguration.getSettings().getProfiles()) {
             for (Repository repository : profile.getRepositories()) {
                 try {
                     repositories.add(createRepository(new ExtensionRepositoryId(repository.getId(), "maven", new URI(
                         repository.getUrl()))));
-                } catch (URISyntaxException e) {
+                } catch (Exception e) {
                     getLogger().error("Failed to create maven repository from maven settings", e);
                 }
             }
@@ -83,10 +81,15 @@ public class MavenExtensionRepositoryFactory extends AbstractLogEnabled implemen
         return repositories;
     }
 
-    public ExtensionRepository createRepository(ExtensionRepositoryId repositoryId)
+    public ExtensionRepository createRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException
     {
-        return new MavenExtensionRepository(repositoryId, this.artifactRepositoryFactory.createArtifactRepository(
-            repositoryId.getId(), repositoryId.getURI().toString(), (ArtifactRepositoryLayout) null,
-            new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy()), this.mavenComponentManager);
+        try {
+            return new MavenExtensionRepository(repositoryId, this.artifactRepositoryFactory.createArtifactRepository(
+                repositoryId.getId(), repositoryId.getURI().toString(), ArtifactRepositoryFactory.DEFAULT_LAYOUT_ID,
+                new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy()), this.mavenConfiguration,
+                this.mavenComponentManager);
+        } catch (Exception e) {
+            throw new ExtensionRepositoryException("Failed to create repository [" + repositoryId + "]", e);
+        }
     }
 }

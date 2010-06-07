@@ -27,7 +27,7 @@ import org.xwiki.extension.ResolveException;
 @ComponentRole
 public interface ExtensionRepositoryManager
 {
-    void addRepository(ExtensionRepositoryId repositoryId);
+    void addRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException;
 
     void addRepository(ExtensionRepository repository);
 

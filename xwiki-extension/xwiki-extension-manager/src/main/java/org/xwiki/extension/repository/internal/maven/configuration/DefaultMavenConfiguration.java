@@ -35,6 +35,12 @@ public class DefaultMavenConfiguration extends AbstractLogEnabled implements Mav
         } catch (ComponentLookupException e) {
             throw new InitializationException("Failed to lookup ArtifactRepositoryFactory", e);
         }
+        
+        try {
+            this.settingsBuilder = this.mavenComponentManager.getPlexus().lookup(SettingsBuilder.class);
+        } catch (ComponentLookupException e) {
+            throw new InitializationException("Failed to lookup SettingsBuilder", e);
+        }
     }
 
     public ArtifactRepository getLocalRepository() throws InvalidRepositoryException
@@ -50,8 +56,8 @@ public class DefaultMavenConfiguration extends AbstractLogEnabled implements Mav
     public Settings getSettings()
     {
         SettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
-        request.setGlobalSettingsFile(new File(globalPath));
-        request.setUserSettingsFile(new File(userPath));
+        // request.setGlobalSettingsFile(new File(globalPath));
+        request.setUserSettingsFile(new File(System.getProperty("HOME") + "/.m2/setting.xml"));
 
         try {
             return this.settingsBuilder.build(request).getEffectiveSettings();

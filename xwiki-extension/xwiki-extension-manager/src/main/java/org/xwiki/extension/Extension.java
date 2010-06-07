@@ -37,14 +37,14 @@ public interface Extension
     String getWebSite();
 
     String getAuthor();
-    
+
     /**
-     * TODO: introduce ArtifactDependency when we will need version range, for now {@link ExtensionId#getVersion()} is
+     * TODO: introduce ExtensionDependency when we will need version range, for now {@link ExtensionId#getVersion()} is
      * the minimum version (maven-like rule)
      */
     List<ExtensionId> getDependencies();
-    
-    void download(File file);
-    
+
+    void download(File file) throws ExtensionException;
+
     ExtensionRepository getRepository();
 }
