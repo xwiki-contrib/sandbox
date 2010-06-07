@@ -2,3 +2,4 @@
 * link to components registration and xar import
 * uninstall
 * local repository descriptors standard
+* create install/uninstall plans
