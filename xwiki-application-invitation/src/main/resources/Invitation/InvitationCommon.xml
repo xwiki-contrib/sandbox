@@ -315,7 +315,7 @@
       $cfgable.set('configurationClass', $configClassNameInternal)
       $cfgable.set('configureGlobally', 1)
       #set($propsToShow = 'subjectLineTemplate|messageBodyTemplate|emailRegex|from_address|allowUsersOfOtherWikis'
-                        + 'usersMayPersonalizeMessage|usersMaySendToMultiple|emailClass|emailContainer')
+                        + '|usersMayPersonalizeMessage|usersMaySendToMultiple|emailClass|emailContainer')
       $cfgable.set('propertiesToShow', $propsToShow)
       #set($cfgable = $configDoc.newObject('XWiki.ConfigurableClass'))
       $cfgable.set('displayInSection', 'Invitation')
@@ -496,9 +496,15 @@
 #macro(setMessageStatus, $message, $status, $memo)
    $message.set('status', $status)##
    #set($history = $message.getProperty('history').getValue())
-   #set($canceledMessage = "#messageStatusForCode('canceled')")
-   #set($entry = "$msg.get('xe.invitation.setMessageStatus', [$xcontext.getUser(), $canceledMessage])")
-   $message.set('history', "$history$util.getNewLine()${entry}|$memo.replaceAll('\n', ' ')")##
+   #set($statusWord = "#messageStatusForCode($status)")
+   ## disallow injection of \n which starts a new line or { which may be used for macros.
+   #set($log = $memo.replaceAll('\n', ' ').replaceAll('\{', '~{'))
+   #set($entry = "|$statusWord|[[$xcontext.getUser()]]|$!log")
+   #if("$!history" != '')
+     $message.set('history', "$!history$util.getNewline()$entry")##
+   #else
+     $message.set('history', $entry)##
+   #end
 #end
 ##
 #*
@@ -507,8 +513,15 @@
  * $message (Xobject) the message to act on.
  *###
 #macro(getLastMemo, $message)
-  #set($history = $message.getProperty('history').getValue())
-  $history.substring($history.lastIndexOf('|'))##
+  #set($history = "$!message.getProperty('history').getValue()")
+  #set($indexAfterLastNewline = $mathtool.add($history.lastIndexOf($util.getNewline()), 1))
+  #if($indexAfterLastNewline &lt; $history.length())
+    #set($entry = "$!history.substring($indexAfterLastNewline)")
+    #set($indexAfterLastPipe = $mathtool.add($entry.lastIndexOf('|'), 1))
+    #if($indexAfterLastPipe &lt; $entry.length())
+        $entry.substring($indexAfterLastPipe)##
+    #end
+  #end
 #end
 ##
 #*

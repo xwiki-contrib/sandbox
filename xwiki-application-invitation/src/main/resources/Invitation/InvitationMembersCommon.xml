@@ -126,6 +126,7 @@
  * $fieldsToDisplay (List&lt;String&gt;) fields which should be displayed.
  *   Options include: sendingUser, subjectLine, status, memo, recipient and _checkbox
  *   using the _checkbox option will create a checkbox which is named the message id number.
+ *   the _history option will provide a link to view the memo log for the message.
  *
  * $asAdmin (Boolean) should the links point to displaying for admin or user (NOT FOR SECURITY)
  *
@@ -139,7 +140,9 @@
     {{info}}$msg.get('xe.invitation.displayMessageTable.noMessages'){{/info}}
   #else
     #foreach($field in $fieldsToDisplay)
-      #if($field != '_checkbox')
+      #if($field == '_history')
+        |=$msg.get("xe.invitation.displayMessageTable.history")##
+      #elseif($field != '_checkbox')
         |=$msg.get("xe.invitation.displayMessageTable.$field")##
       #else
         |=##
@@ -157,10 +160,16 @@
             AsAdmin##
           #end
           &amp;messageID=$message.getProperty('messageID').getValue()]]##
+        #elseif($field == 'status'
+                &amp;&amp; $numberOfRecipientsByMessage
+                &amp;&amp; $numberOfRecipientsByMessage.get($message.get('recipient'))
+                &amp;&amp; $numberOfRecipientsByMessage.get($message.get('recipient')) &gt; 1)
+          |$msg.get('xe.invitation.displayMessageTable.various')
         #elseif($field == 'status')
           |#messageStatusForCode($message.getProperty('status').getValue())##
         #elseif($field == 'recipient'
                 &amp;&amp; $numberOfRecipientsByMessage
+                &amp;&amp; $numberOfRecipientsByMessage.get($message.get('recipient'))
                 &amp;&amp; $numberOfRecipientsByMessage.get($message.get('recipient')) &gt; 1)
           |$msg.get('xe.invitation.displayMessageTable.multipleRecipients',
                     [$numberOfRecipientsByMessage.get($message.get('recipient'))])
@@ -171,6 +180,9 @@
             checked="checked" ##
           #end
           /&gt;##
+        #elseif($field == '_history')
+          |[[$msg.get('xe.invitation.displayMessageTable.history')>>##
+             $doc.getFullName()?inspect=history&amp;messageID=$message.getProperty('messageID').getValue()]]
         #else
           |$escapetool.xml($message.display($field, 'view'))##
         #end
@@ -220,8 +232,16 @@
       #set($myPendingInvitations = [])
       #getMessagesByStatus($messagesByMe, 'pending', $myPendingInvitations)
       #if($myPendingInvitations.size() &gt; 0)
-        (%id="my-pending-invitations"%){{info}}$myPendingInvitations.size() pending{{/info}}(%%)
+        (%id="my-pending-invitations"%){{info}}$myPendingInvitations.size() pending{{/info}}(%%)##
       #end
+      ## If viewing message history then show history brelow group.
+      #if($inspect == 'history')
+
+        ** [[$msg.get('xe.invitation.tools.invitationsInGroup')&gt;&gt;$config.get('membersActionsPage')?##
+              inspect=group&amp;messageID=$escapetool.xml($parameterMap.get('messageID'))]]
+        *** **$msg.get('xe.invitation.tools.invitationHistory')**##
+      #end
+
     #end
   #else
     * **$msg.get('xe.invitation.tools.myInvitationsLink')**

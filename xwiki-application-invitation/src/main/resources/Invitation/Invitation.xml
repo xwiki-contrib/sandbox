@@ -37,7 +37,7 @@
 <displayType></displayType>
 <name>allowUsersOfOtherWikis</name>
 <number>4</number>
-<prettyName>Allow users of other wikis to send mail</prettyName>
+<prettyName>Let users of other wikis to send mail</prettyName>
 <unmodifiable>0</unmodifiable>
 <validationMessage></validationMessage>
 <validationRegExp></validationRegExp>
@@ -56,7 +56,7 @@
 </commonPage>
 <emailClass>
 <name>emailClass</name>
-<number>8</number>
+<number>5</number>
 <picker>0</picker>
 <prettyName>Email message XClass</prettyName>
 <size>30</size>
@@ -91,7 +91,7 @@
 <name>from_address</name>
 <number>1</number>
 <picker>0</picker>
-<prettyName>Admin email address (messages will list this as their from address)</prettyName>
+<prettyName>Email "from" address</prettyName>
 <size>30</size>
 <unmodifiable>0</unmodifiable>
 <validationMessage></validationMessage>
@@ -160,7 +160,7 @@
 <name>messageBodyTemplate</name>
 <number>3</number>
 <picker>0</picker>
-<prettyName>Email message body template</prettyName>
+<prettyName>Email message body HTML template</prettyName>
 <rows>5</rows>
 <size>40</size>
 <unmodifiable>0</unmodifiable>
@@ -228,8 +228,8 @@
 <displayFormType>checkbox</displayFormType>
 <displayType></displayType>
 <name>usersMayPersonalizeMessage</name>
-<number>5</number>
-<prettyName>usersMayPersonalizeMessage</prettyName>
+<number>8</number>
+<prettyName>Let users personalize messages</prettyName>
 <unmodifiable>0</unmodifiable>
 <validationMessage></validationMessage>
 <validationRegExp></validationRegExp>
@@ -241,7 +241,7 @@
 <displayType></displayType>
 <name>usersMaySendToMultiple</name>
 <number>6</number>
-<prettyName>usersMaySendToMultiple</prettyName>
+<prettyName>Let users send to multiple addresses</prettyName>
 <unmodifiable>0</unmodifiable>
 <validationMessage></validationMessage>
 <validationRegExp></validationRegExp>
@@ -252,7 +252,7 @@
 <name>messageBodyTemplatePlain</name>
 <number>20</number>
 <picker>0</picker>
-<prettyName>Email message body template for non-html email clients.</prettyName>
+<prettyName>Message body plain text template</prettyName>
 <rows>5</rows>
 <size>40</size>
 <unmodifiable>0</unmodifiable>
@@ -535,7 +535,9 @@ $xwiki.get('ssx').use($config.get('mainPage'))
 ## Decide what we should do.
 ##---------------------------------------------------------------------
 ##
-#if(!$isAdmin &amp;&amp; "#isUserReportedSpammer($mail.values())" != 'false')
+#if($xcontext.getAction() != 'view')
+  ## The administration application includes this page so we will not do anything.
+#elseif(!$isAdmin &amp;&amp; "#isUserReportedSpammer($mail.values())" != 'false')
   ## The current user has been reported as a spammer, they are not allowed to send more mail until
   ## the situation has been investigated.
 
@@ -713,9 +715,9 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     ##
     ## Send the message
     #if("$sender.sendMail($mailObj, $senderConfig)" != 0)
-      $message.set('status', 'sendingFailed')##
+      #setMessageStatus($message, 'sendingFailed')##
     #else
-      $message.set('status', 'pending')##
+      #setMessageStatus($message, 'pending', $msg.get('xe.invitation.messageSentLogEntry'))##
     #end
     ## Comment = "Added Email Message."
     $emailContainer.saveAsAuthor($msg.get('xe.invitation.sendMail.addMessageSaveComment'))

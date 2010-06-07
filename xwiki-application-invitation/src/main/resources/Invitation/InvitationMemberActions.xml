@@ -211,10 +211,10 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     #set($uniqueMail = [])
     #set($numberOfMessagesByGroup = {})
     #getMessagesOfUniqueGroups($mail.values(), $uniqueMail, $numberOfMessagesByGroup)
-    #displayMessageTableInDiv($uniqueMail,
-                              ['sentDate', 'sendingUser', 'subjectLine', 'status'],
-                              true,
-                              $numberOfMessagesByGroup)
+    #displayMessageTable($uniqueMail,
+                         ['sentDate', 'sendingUser', 'subjectLine', 'status'],
+                         true,
+                         $numberOfMessagesByGroup)
   #elseif($inspect == 'all')
     ## My message groups.
     #set($myMail = [])
@@ -223,21 +223,37 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     #set($numberOfMessagesByGroup = {})
     #getMessagesOfUniqueGroups($myMail, $myUniqueMail, true, $numberOfMessagesByGroup)
     #displayMessageTableInForm($myUniqueMail,
-                               ['_checkbox', 'sentDate', 'subjectLine', 'recipient'],
+                               ['_checkbox', 'sentDate', 'subjectLine', 'recipient', 'status'],
                                false,
                                $numberOfMessagesByGroup,
-                               ['cancel'])
+                               ['cancel', 'noClass'])
   #elseif($inspect == 'group')
     ## Inspect a single message group
     #set($myMail = [])
     #getMessagesBySender($mail.values(), $xcontext.getUser(), $myMail)
     #set($myMailInGroup = [])
     #getMessagesInGroup($myMail, $mail.get($messageID).getProperty('messageGroupID').getValue(), $myMailInGroup)
-    #displayMessageTableInForm($myMailInGroup,
-                               ['_checkbox', 'sentDate', 'recipient', 'status'],
-                               false,
-                               '',
-                               ['cancel'])
+    ## If any messages are pending then we add the cancel button.
+    #set($showCancelButton = false)
+    #foreach($message in $myMailInGroup)
+      #if($message.getProperty('status').getValue() == 'pending')
+        #set($showCancelButton = true)
+        #break
+      #end
+    #end
+    ## if there is only one message and there is a memo, show the memo.
+    #if($myMailInGroup.size() == 1)
+      #displayStatusAndMemo($myMailInGroup.get(0))
+    #end
+    #if($showCancelButton)
+      #displayMessageTableInForm($myMailInGroup,
+                                 ['_checkbox', 'sentDate', 'recipient', 'status', '_history'],
+                                 false,
+                                 '',
+                                 ['cancel'])
+    #else
+      #displayMessageTableInDiv($myMailInGroup, ['sentDate', 'recipient', 'status', '_history'], false, '')
+    #end
     #if($myMailInGroup.size() &gt; 0)
       #displayMessage($myMailInGroup.get(0))
     #end
@@ -245,15 +261,58 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     ## Inspect a single message group as admin
     #set($mailInGroup = [])
     #getMessagesInGroup($mail.values(), $mail.get($messageID).getProperty('messageGroupID').getValue(), $mailInGroup)
+    #if($mailInGroup.size() == 1)
+      #displayStatusAndMemo($mailInGroup.get(0))
+    #end
     #displayMessageTableInForm($mailInGroup,
-                               ['_checkbox', 'sentDate', 'sendingUser', 'recipient', 'status'],
+                               ['_checkbox', 'sentDate', 'sendingUser', 'recipient', 'status', '_history'],
                                true,
                                '',
                                ['notSpam'])
     #if($mailInGroup.size() &gt; 0)
       #displayMessage($mailInGroup.get(0))
     #end
+  #elseif($inspect == 'history')
+    #displayMessageHistory($mail.get($messageID))
   #end
+#end
+##
+#*
+ * Display an info box with the message status and last memo.
+ *
+ * $message (XObject) the message to display.
+ *###
+#macro(displayStatusAndMemo, $message)
+  #set($lastMemo = "#getLastMemo($message)")
+  #if("$!lastMemo" != '')
+
+
+    {{info}}##
+     (%id="message-status-and-memo"%)##
+      $msg.get('xe.invitation.inspectMessages.lastEntryInfoBox',
+               ["#messageStatusForCode($message.getProperty('status').getValue())", $lastMemo])##
+    {{/info}}
+
+  #end
+#end
+##
+#*
+ * Display a table of the history of a message
+ *
+ * $message (XObject) the message to display history for.
+ *###
+#macro(displayMessageHistory, $message)
+
+    {{html clean=false}}&lt;div id="message-history-table" class="invitation"&gt;{{/html}}
+
+    |=$msg.get('xe.invitation.displayMessageHistory.messageStatusSetTo')##
+      |=$msg.get('xe.invitation.displayMessageHistory.setByUser')##
+        |=$msg.get('xe.invitation.displayMessageHistory.logEntry')
+    $message.getProperty('history').getValue()
+
+    {{html clean=false}}&lt;/div&gt;{{/html}}
+
+    #displayMessage($mail.get($messageID))  
 #end
 ##
 #*
@@ -388,7 +447,7 @@ $xwiki.get('ssx').use($config.get('mainPage'))
                                      {'inspect': $inspect})
       #if($messages.size() &gt; 0)
         ## should always be true.
-        #displayMessage($messages.get(0), '', '')
+        #displayMessage($messages.get(0))
       #end
     #end
   #else
@@ -444,7 +503,8 @@ $xwiki.get('ssx').use($config.get('mainPage'))
  * $numberOfRecipientsByMessage (Map&lt;Integer, XObject&gt;) the number of recipients for a given message (Optional)
  *                                                      if specified and recipient field is set in $fieldsToDisplay
  *                                                      then messages with multiple recipients will say "X recipients".
- * $formOptions (List&lt;String&gt;) the options which should be presented to the user. Options include: "cancel", "notSpam"
+ * $formOptions (List&lt;String&gt;) the options which should be presented to the user. 
+ *                                   Options include: "cancel", "notSpam", "noClass"
  *###
 #macro(displayMessageTableInForm, $mail, $fieldsToDisplay, $isAdmin, $numberOfRecipientsByMessage, $formOptions)
 
@@ -454,7 +514,11 @@ $xwiki.get('ssx').use($config.get('mainPage'))
     {{info}}$msg.get('xe.invitation.displayMessageTable.noMessages'){{/info}}
   #else
     {{html wiki=true}}
-     &lt;form class="invitation" action="$doc.getURL()" method="POST"&gt;
+     &lt;form ##
+      #if("$!formOptions.get('noClass')" == '')
+        class="invitation" ##
+      #end
+      action="$doc.getURL()" method="POST"&gt;
       #displayMessageTable($mail, $fieldsToDisplay, $isAdmin,  $numberOfRecipientsByMessage)##
 
       #if($formOptions &amp;&amp; $formOptions.size() &gt; 0)

@@ -192,7 +192,7 @@
   #set($message = '')
   #set($message = $mail.get($messageID))
   #if($message != '')
-    #set($status = $message.getProperty('statusCode').getValue())
+    #set($status = $message.getProperty('status').getValue())
   #end
   #set($oldMemo = "#getLastMemo($message)")
 
@@ -200,33 +200,33 @@
   #if($action == 'accept')
     ## Accept invitation. &lt;------------------------------------------------------------------------
     #if("$!message" == '')
-      {{error}}$msg.get('xe.invitation.doAction.accept.noMessageFound'){{/error}}
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.noMessageFound'){{/error}}
     #elseif($status == 'accepted')
       ## already accepted
-      {{error}}$msg.get('xe.invitation.doAction.accept.alreadyAccepted'){{/error}}
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.alreadyAccepted'){{/error}}
     #elseif($status == 'declined')
       ## already declined
-      {{error}}$msg.get('xe.invitation.doAction.accept.alreadyDeclined'){{/error}}
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.alreadyDeclined'){{/error}}
     #elseif($status == 'canceled')
       ## invitation canceled.
-      {{error}}$msg.get('xe.invitation.doAction.accept.invitationCanceled'){{/error}}
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.invitationCanceled'){{/error}}
       #if("$!oldMemo" != '')
         $msg.get('xe.invitation.doAction.invitationCanceledMemo',
                  [$xwiki.getUserName($message.getProperty('sendingUser').getValue(), false)])
         $oldMemo
       #end
-    #elseif($status == '5' || $status == '6')
+    #elseif($status == 'reported' || $status == 'notSpam')
       ## reported as spam, nolonger valid.
-      {{error}}$msg.get('xe.invitation.doAction.accept.alreadyReportedAsSpam'){{/error}}
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.alreadyReportedAsSpam'){{/error}}
     #elseif($status != '1')
-      {{error}}$msg.get('xe.invitation.doAction.invalidStatus', ["#messageStatusForCode($status)"]){{/error}}
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.invalidStatus', ["#messageStatusForCode($status)"]){{/error}}
     #else
       #if("#canGuestAcceptInvitation($doc)" != 'true')
       ##
-        {{error}}$msg.get('xe.invitation.doAction.accept.improperConfiguration'){{/error}}
+        {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.improperConfiguration'){{/error}}
       #else
         #define($doAfterRegistration)
-          $message.set('statusCode', '2')##
+          #setMessageStatus($message, 'accepted')
           $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.accept.saveComment'))
         #end
         #set($invited = true)
@@ -237,31 +237,31 @@
     ## Decline Invitation &lt;------------------------------------------------------------------------
     = $msg.get('xe.invitation.doAction.decline.heading') =
     #if("$!message" == '')
-      {{error}}$msg.get('xe.invitation.doAction.decline.noMessageFound'){{/error}}
-    #elseif($status == '2')
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.noMessageFound'){{/error}}
+    #elseif($status == 'accepted')
       ## already accepted
-      {{error}}$msg.get('xe.invitation.doAction.decline.alreadyAccepted'){{/error}}
-    #elseif($status == '3')
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.alreadyAccepted'){{/error}}
+    #elseif($status == 'declined')
       ## already declined
-      {{error}}$msg.get('xe.invitation.doAction.decline.alreadyDeclined'){{/error}}
-    #elseif($status == '4')
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.alreadyDeclined'){{/error}}
+    #elseif($status == 'canceled')
       ## invitation canceled.
-      {{error}}$msg.get('xe.invitation.doAction.decline.invitationCanceled'){{/error}}
-
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.invitationCanceled')
        #if("$!oldMemo" != '')
          $msg.get('xe.invitation.doAction.invitationCanceledMemo', 
                   [$xwiki.getUserName($message.getProperty('sendingUser').getValue(), false)])
          $oldMemo
        #end
-    #elseif($status == '5' || $status == '6')
+      {{/error}}
+    #elseif($status == 'reported' || $status == 'notSpam')
       ## reported as spam, nolonger valid.
-      {{error}}$msg.get('xe.invitation.doAction.decline.alreadyReportedAsSpam'){{/error}}
-    #elseif($status != '1')
-      {{error}}$msg.get('xe.invitation.doAction.invalidStatus', ["#messageStatusForCode($status)"]){{/error}}
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.alreadyReportedAsSpam'){{/error}}
+    #elseif($status != 'pending')
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.invalidStatus', ["#messageStatusForCode($status)"]){{/error}}
     #elseif($confirm)
       #setMessageStatus($message, 'declined', $memo)##
       $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.decline.saveComment'))
-      {{info}}$msg.get('xe.invitation.doAction.decline.success'){{/info}}
+      {{info}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.success'){{/info}}
     #else
       ## Are you sure?...
       #displayActionConfirmationForm([$messageID],
@@ -276,12 +276,12 @@
     = $msg.get('xe.invitation.doAction.reportSpam.heading') =
     #if("$!message" == '')
       ## No message found by that id.
-      $msg.get('xe.invitation.doAction.reportSpam.noMessageFound')
+      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.reportSpam.noMessageFound'){{/error}}
     #elseif($confirm)
       #setMessageStatus($message, 'reported', $memo)##
       $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.reportSpam.reportSaveComment'))
       ## Your report has been logged, sorry for the inconvienence.
-      $msg.get('xe.invitation.doAction.reportSpam.success')
+      {{info}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.reportSpam.success'){{/info}}
     #else
       ## Are you sure?...
       == $msg.get('xe.invitation.doAction.reportSpam.areYouSure') ==
@@ -292,6 +292,7 @@
                                      {})
       #displayMessage($message)
     #end
+
   #else
     ## Should not happen
     Invalid action

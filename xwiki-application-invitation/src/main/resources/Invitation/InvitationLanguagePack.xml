@@ -40,6 +40,7 @@ xe.invitation.contentLabel=Message:
 xe.invitation.previewLabel=Preview:
 xe.invitation.errorWhileSending=An error has occurred while sending the message.
 xe.invitation.successSending=Your message has been sent.
+xe.invitation.messageSentLogEntry=Message sent
 xe.invitation.noValidMessagesToSend=Your message couldn't be sent because there were no valid email addresses to send to.
 xe.invitation.noMessageFound=No message found by that id.
 xe.invitation.guestsCanNotJoin=Guests are blocked from joining and {0} was not saved by a user with proper permission to override. Invitations will not be able to be accepted.
@@ -72,7 +73,10 @@ xe.invitation.displayMessageTable.subjectLine=Subject
 xe.invitation.displayMessageTable.status=Status
 xe.invitation.displayMessageTable.memo=Memo
 xe.invitation.displayMessageTable.recipient=Email
+xe.invitation.displayMessageTable.history=Message History
+xe.invitation.displayMessageTable.showHistory=Show History
 xe.invitation.displayMessageTable.multipleRecipients={0} Recipients
+xe.invitation.displayMessageTable.various=&lt;various&gt;
 xe.invitation.displayMessageTable.noMessages=No messages to display
 
 xe.invitation.displayMessageTableInForm.buttonLabel.cancel=Cancel
@@ -80,7 +84,6 @@ xe.invitation.displayMessageTableInForm.buttonLabel.notSpam=Mark as not spam
 
 xe.invitation.doAction.confirmLabel=Confirm
 xe.invitation.doAction.lackingPermission=You do not have permission to do this action.
-xe.invitation.doAction.incorrectMessageStatus=The requested action cannot be performed on this message because it's status is {0}
 xe.invitation.doAction.invitationCanceledMemo={0} left you this message when canceling the invitation.
 xe.invitation.doAction.invalidStatus=This request cannot be processed because the status of this invitation is {0}.
 
@@ -139,6 +142,7 @@ xe.invitation.displayForm.preview=Preview
 xe.invitation.tools.heading=Tools
 xe.invitation.tools.myInvitationsLink=My invitations
 xe.invitation.tools.invitationsInGroup=Invitations in this message group
+xe.invitation.tools.invitationHistory=History of this invitation
 xe.invitation.tools.senderLink=Invite friends
 
 xe.invitation.adminTools.heading=Administrative Tools
@@ -147,6 +151,12 @@ xe.invitation.adminTools.allInvitationsLink=View all invitations
 
 xe.invitation.configuration.smtpHeading=SMTP Settings:
 
+xe.invitation.setMessageStatus=Message status set to {0} by user {1}. Log: {2}
+xe.invitation.displayMessageHistory.messageStatusSetTo=Message status set to
+xe.invitation.displayMessageHistory.setByUser=By user
+xe.invitation.displayMessageHistory.logEntry=Log Entry
+xe.invitation.inspectMessages.lastEntryInfoBox={0} with message: {1}
+
 xe.invitation.messageStatus.unsent=Unsent
 xe.invitation.messageStatus.pending=Pending
 xe.invitation.messageStatus.accepted=Accepted
@@ -154,41 +164,36 @@ xe.invitation.messageStatus.declined=Declined
 xe.invitation.messageStatus.canceled=Canceled
 xe.invitation.messageStatus.reported=Reported as spam
 xe.invitation.messageStatus.investigated=Spam report investigated
-xe.invitation.messageStatus.unknown=Unknown status
+xe.invitation.messageStatus.unknown=Unknown status ({0})
 xe.invitation.messageStatus.sendingFailed=Failed to send message
-
-#----------------------------------------------------------------------
-# Translations for LiveValidation javascript validator
-#----------------------------------------------------------------------
-platform.validation.valid=Ok.
-platform.validation.fieldMandatory=This Field is mandatory.
-platform.validation.invalidEmailAddress=Invalid email address.
 
 #----------------------------------------------------------------------
 # Translations for Classes
 #----------------------------------------------------------------------
 
 # XWiki.InvitationMail (Invitation Application) Email XObject
-XWiki.InvitationMailClass_messageID=Email message identifier
-XWiki.InvitationMailClass_messageGroupID=Message group identifier
-XWiki.InvitationMailClass_recipient=Email address which this message was sent to
-XWiki.InvitationMailClass_sendingUser=User who sent the message
-XWiki.InvitationMailClass_subjectLine=Subject line
-XWiki.InvitationMailClass_messageBody=Message content
-XWiki.InvitationMailClass_statusCode=Number indicating the message status
-XWiki.InvitationMailClass_memo=Memo attached to this message
+Invitation.InvitationMailClass_messageID=Email message identifier
+Invitation.InvitationMailClass_messageGroupID=Message group identifier
+Invitation.InvitationMailClass_recipient=Email address which this message was sent to
+Invitation.InvitationMailClass_sendingUser=User who sent the message
+Invitation.InvitationMailClass_subjectLine=Subject line
+Invitation.InvitationMailClass_messageBody=Message content
+Invitation.InvitationMailClass_statusCode=Number indicating the message status
+Invitation.InvitationMailClass_memo=Memo attached to this message
 
 # XWiki.Invitation (Invitation application) Configuration
-XWiki.Invitation_from_address=Admin email address (messages will list this as their from address)
-XWiki.Invitation_smtp_server_password=Smtp password
-XWiki.Invitation_smtp_server_username=Smtp username
-XWiki.Invitation_smtp_port=Smtp port
-XWiki.Invitation_smtp_server=Smtp server host name
-XWiki.Invitation_javamail_extra_props=Javamail extra properties
-XWiki.Invitation_subjectLineTemplate=Email subject line template
-XWiki.Invitation_messageBodyTemplate=Email message body template
-XWiki.Invitation_messageBodyTemplatePlain=Email message body template for non-html email clients.
-XWiki.Invitation_emailClass=Email message XClass
-XWiki.Invitation_emailContainer=Document containing email XObjects
-XWiki.Invitation_emailRegex=Regular expression for validating email addresses
-XWiki.Invitation_allowUsersOfOtherWikis=Allow users of other wikis to send mail</content></xwikidoc>
+Invitation.Invitation_from_address=Email "from" address
+Invitation.Invitation_smtp_server_password=Smtp password
+Invitation.Invitation_smtp_server_username=Smtp username
+Invitation.Invitation_smtp_port=Smtp port
+Invitation.Invitation_smtp_server=Smtp server host name
+Invitation.Invitation_javamail_extra_props=Javamail extra properties
+Invitation.Invitation_subjectLineTemplate=Email subject line template
+Invitation.Invitation_messageBodyTemplate=Email message body HTML template
+Invitation.Invitation_messageBodyTemplatePlain=Message body plain text template
+Invitation.Invitation_emailClass=Email message XClass
+Invitation.Invitation_emailContainer=Document containing email XObjects
+Invitation.Invitation_emailRegex=Regular expression for validating email addresses
+Invitation.Invitation_allowUsersOfOtherWikis=Let users of other wikis to send mail
+Invitation.Invitation_usersMayPersonalizeMessage=Let users personalize messages
+Invitation.Invitation_usersMaySendToMultiple=Let users send to multiple addresses</content></xwikidoc>
