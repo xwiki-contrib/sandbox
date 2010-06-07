@@ -90,24 +90,24 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
     private void installExtension(ExtensionId extensionId, boolean dependency) throws InstallException
     {
         try {
-            Extension extension = this.repositoryManager.resolve(extensionId);
+            Extension remoteExtension = this.repositoryManager.resolve(extensionId);
 
-            for (ExtensionId dependencyId : extension.getDependencies()) {
+            for (ExtensionId dependencyId : remoteExtension.getDependencies()) {
                 installExtension(dependencyId, true);
             }
 
-            LocalExtension localExtension = this.localExtensionRepository.installExtension(extension, dependency);
+            LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);
 
             // TODO: inject extension, what about some kind of ExtensionLoader with the ExtensionType string as role
             // hint ?
             // We should probably change the type for a plain String to make possible to support any "type" of
-            // extension,
-            // pretty sure we would have use case for this
+            // extension, pretty sure we would have use case for this.
             if (localExtension.getType() == ExtensionType.PAGES) {
                 // TODO import xar
             } else if (localExtension.getType() == ExtensionType.JAR) {
                 // TODO load jar components
             }
+
             // etc.
         } catch (ResolveException e) {
             throw new InstallException("Failed to resolve extension", e);

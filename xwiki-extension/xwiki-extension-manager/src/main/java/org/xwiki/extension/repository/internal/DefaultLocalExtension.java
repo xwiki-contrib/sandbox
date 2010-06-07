@@ -20,11 +20,18 @@
 package org.xwiki.extension.repository.internal;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.lf5.util.StreamUtils;
 import org.xwiki.extension.Extension;
+import org.xwiki.extension.ExtensionException;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.LocalExtension;
@@ -33,6 +40,8 @@ import org.xwiki.extension.repository.ExtensionRepository;
 public class DefaultLocalExtension implements LocalExtension
 {
     private File file;
+
+    private boolean enabled = true;
 
     private boolean isDependency;
 
@@ -76,6 +85,11 @@ public class DefaultLocalExtension implements LocalExtension
         this.file = file;
     }
 
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+
     public void setDependency(boolean isDependency)
     {
         this.isDependency = isDependency;
@@ -83,9 +97,41 @@ public class DefaultLocalExtension implements LocalExtension
 
     // Extension
 
-    public void download(File file)
+    public void download(File file) throws ExtensionException
     {
-        // TODO: copy #getFile() into provided File
+        InputStream sourceStream = null;
+        OutputStream targetStream = null;
+
+        try {
+            sourceStream = new FileInputStream(getFile());
+            targetStream = new FileOutputStream(file);
+
+            StreamUtils.copy(sourceStream, targetStream);
+        } catch (Exception e) {
+            throw new ExtensionException("Failed to copy file", e);
+        } finally {
+            IOException closeException = null;
+
+            if (sourceStream != null) {
+                try {
+                    sourceStream.close();
+                } catch (IOException e) {
+                    closeException = e;
+                }
+            }
+
+            if (targetStream != null) {
+                try {
+                    targetStream.close();
+                } catch (IOException e) {
+                    closeException = e;
+                }
+            }
+
+            if (closeException != null) {
+                throw new ExtensionException("Failed to close file", closeException);
+            }
+        }
     }
 
     public String getName()
@@ -132,11 +178,16 @@ public class DefaultLocalExtension implements LocalExtension
 
     public File getFile()
     {
-        return file;
+        return this.file;
+    }
+
+    public boolean isEnabled()
+    {
+        return this.enabled;
     }
 
     public boolean isDependency()
     {
-        return isDependency;
+        return this.isDependency;
     }
 }

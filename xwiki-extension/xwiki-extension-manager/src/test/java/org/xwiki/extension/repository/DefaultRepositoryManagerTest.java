@@ -2,7 +2,6 @@ package org.xwiki.extension.repository;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.zip.ZipEntry;
@@ -10,7 +9,6 @@ import java.util.zip.ZipInputStream;
 
 import junit.framework.Assert;
 
-import org.apache.tools.ant.types.resources.ZipResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.extension.Extension;
@@ -57,6 +55,10 @@ public class DefaultRepositoryManagerTest extends AbstractComponentTestCase
         Extension artifact = this.repositoryManager.resolve(this.rubyArtifactId);
 
         File file = new File("target/downloaded/rubymacro.jar");
+
+        if (file.exists()) {
+            file.delete();
+        }
 
         artifact.download(file);
 
