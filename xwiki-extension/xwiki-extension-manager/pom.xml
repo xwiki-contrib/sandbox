@@ -76,7 +76,7 @@
       <version>${maven.version}</version>
     </dependency>
     
-    <!-- Wagin providers -->
+    <!-- Wagon providers -->
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-file</artifactId>
