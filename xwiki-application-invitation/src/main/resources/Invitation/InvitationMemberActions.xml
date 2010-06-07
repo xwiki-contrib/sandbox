@@ -302,16 +302,14 @@ $xwiki.get('ssx').use($config.get('commonPage'))
  * $message (XObject) the message to display history for.
  *###
 #macro(displayMessageHistory, $message)
-
-    {{html clean=false}}&lt;div id="message-history-table" class="invitation"&gt;{{/html}}
+    (%id="message-history-table" class="invitation"%)(((
 
     |=$msg.get('xe.invitation.displayMessageHistory.messageStatusSetTo')##
       |=$msg.get('xe.invitation.displayMessageHistory.setByUser')##
         |=$msg.get('xe.invitation.displayMessageHistory.logEntry')
     $message.getProperty('history').getValue()
 
-    {{html clean=false}}&lt;/div&gt;{{/html}}
-
+    )))
     #displayMessage($mail.get($messageID))  
 #end
 ##
@@ -481,11 +479,9 @@ $xwiki.get('ssx').use($config.get('commonPage'))
   #if(!$mail || $mail.size() &lt; 1)
     {{info}}$msg.get('xe.invitation.displayMessageTable.noMessages'){{/info}}
   #else
-    {{html wiki=true}}
-     &lt;div class="invitation"&gt;
-      #displayMessageTable($mail, $fieldsToDisplay, $isAdmin,  $numberOfRecipientsByMessage)
-     &lt;/div&gt;
-    {{/html}}
+    (%class="invitation"%)(((
+     #displayMessageTable($mail, $fieldsToDisplay, $isAdmin,  $numberOfRecipientsByMessage)
+    )))
   #end
 
 #end

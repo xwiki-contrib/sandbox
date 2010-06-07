@@ -502,10 +502,7 @@ $xwiki.get('ssx').use($config.get('commonPage'))
         #set($discard = $errors.add($message))
       #end
     #end
-
-
-    {{html wiki=true}}
-     &lt;div class="invitation"&gt;
+    (%class="invitation"%)(((
 
       #if($errors.size() &gt; 0)
         ## An error has occured while sending the message.
@@ -516,10 +513,7 @@ $xwiki.get('ssx').use($config.get('commonPage'))
       #end
 
       #displayMessageTable($messages, ['sentDate', 'recipient', 'status'])
-     &lt;/div&gt;
-    {{/html}}
-
-
+     )))
     #displayMessage($messages.get(0), $recipients)
   #else
 
