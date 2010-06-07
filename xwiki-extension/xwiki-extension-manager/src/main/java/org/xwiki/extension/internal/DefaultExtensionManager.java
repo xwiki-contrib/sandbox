@@ -19,7 +19,9 @@
  */
 package org.xwiki.extension.internal;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -38,6 +40,10 @@ import org.xwiki.extension.repository.ExtensionRepositoryFactory;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
 import org.xwiki.extension.repository.LocalExtensionRepository;
 
+/**
+ * 
+ * TODO: cut installation process in steps (create and validate an install plan, install, etc.)
+ */
 @Component
 public class DefaultExtensionManager implements ExtensionManager, Initializable
 {
@@ -49,6 +55,12 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
 
     @Requirement
     private LocalExtensionRepository localExtensionRepository;
+
+    /**
+     * extensions than can't be upgraded (generally because it's "core module" and not part of the extension management
+     * system)
+     */
+    private Map<String, ExtensionId> lockedExtensions = new HashMap<String, ExtensionId>();
 
     public void initialize() throws InitializationException
     {
