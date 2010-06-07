@@ -112,7 +112,11 @@ public class MavenExtensionRepository implements ExtensionRepository
             throw new ResolveException("Failed to resolve extension [" + extensionId + "]", e);
         }
 
-        return new MavenExtension(extensionId, result.getProject(), this, this.mavenComponentManager);
+        try {
+            return new MavenExtension(extensionId, result.getProject(), this, this.mavenComponentManager);
+        } catch (ComponentLookupException e) {
+            throw new ResolveException("Failed to resolve extension [" + extensionId + "]", e);
+        }
     }
 
     public boolean exists(ExtensionId extensionId)

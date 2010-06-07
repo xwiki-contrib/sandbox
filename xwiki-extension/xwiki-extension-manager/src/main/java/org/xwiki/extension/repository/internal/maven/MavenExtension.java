@@ -27,7 +27,9 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.repository.legacy.WagonManager;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionException;
 import org.xwiki.extension.ExtensionId;
@@ -46,17 +48,22 @@ public class MavenExtension implements Extension
 
     private MavenComponentManager mavenComponentManager;
 
+    private RepositorySystem repositorySystem;
+
     private List<ExtensionId> dependencies;
 
     private List<ExtensionId> suggested;
 
     public MavenExtension(ExtensionId artifactId, MavenProject project, MavenExtensionRepository repository,
-        MavenComponentManager mavenComponentManager)
+        MavenComponentManager mavenComponentManager) throws ComponentLookupException
     {
         this.artifactId = artifactId;
         this.project = project;
         this.repository = repository;
+
         this.mavenComponentManager = mavenComponentManager;
+
+        this.repositorySystem = this.mavenComponentManager.getPlexus().lookup(RepositorySystem.class);
 
         if (project.getPackaging().equals("jar")) {
             this.extensionType = ExtensionType.JAR;
@@ -139,8 +146,8 @@ public class MavenExtension implements Extension
             WagonManager wagonManager = this.mavenComponentManager.getPlexus().lookup(WagonManager.class);
 
             Artifact fileArtifact =
-                new DefaultArtifact(this.project.getGroupId(), this.project.getArtifactId(), this.project.getVersion(),
-                    null, this.project.getPackaging(), null, null);
+                this.repositorySystem.createArtifact(this.project.getGroupId(), this.project.getArtifactId(),
+                    this.project.getVersion(), this.project.getPackaging());
 
             wagonManager.getRemoteFile(this.repository.getRepository(), file, this.repository.getRepository().pathOf(
                 fileArtifact), null/* downloadMonitor */, null/* checksumPolicy */, true);
