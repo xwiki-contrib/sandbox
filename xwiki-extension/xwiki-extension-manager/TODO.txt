@@ -1,0 +1,4 @@
+* asynchronous install (resolve, download, etc...) with events
+* link to components registration and xar import
+* uninstall
+* local repository descriptors standard
