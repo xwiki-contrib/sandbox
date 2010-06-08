@@ -407,7 +407,7 @@ $xwiki.get('ssx').use($config.get('commonPage'))
   ## the situation has been investigated.
 
   ## A message which you sent was reported as spam and your privilege to send mail has been suspended...
-  $msg.get('xe.invitation.userIsReportedSpammer')
+  (%id="invitation-permission-error"%)((({{error}}$msg.get('xe.invitation.userIsReportedSpammer'){{/error}})))
   ##
 #elseif(!$isAdmin
         &amp;&amp; $config.get('allowUsersOfOtherWikis') != '1'
@@ -516,6 +516,7 @@ $xwiki.get('ssx').use($config.get('commonPage'))
      )))
     #displayMessage($messages.get(0), $recipients)
   #else
+
 
     {{error}}$msg.get('xe.invitation.noValidMessagesToSend'){{/error}}
 

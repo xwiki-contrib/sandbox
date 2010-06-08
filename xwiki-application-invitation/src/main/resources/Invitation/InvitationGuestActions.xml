@@ -199,6 +199,7 @@
   ## 3. Do action.
   #if($action == 'accept')
     ## Accept invitation. &lt;------------------------------------------------------------------------
+    = $msg.get('xe.invitation.doAction.accept.heading') =
     #if("$!message" == '')
       {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.noMessageFound'){{/error}}
     #elseif($status == 'accepted')
@@ -218,7 +219,7 @@
     #elseif($status == 'reported' || $status == 'notSpam')
       ## reported as spam, nolonger valid.
       {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.alreadyReportedAsSpam'){{/error}}
-    #elseif($status != '1')
+    #elseif($status != 'pending')
       {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.invalidStatus', ["#messageStatusForCode($status)"]){{/error}}
     #else
       #if("#canGuestAcceptInvitation($doc)" != 'true')

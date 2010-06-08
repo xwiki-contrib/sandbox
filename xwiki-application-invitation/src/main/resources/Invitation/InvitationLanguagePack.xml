@@ -45,6 +45,7 @@ xe.invitation.noValidMessagesToSend=Your message couldn't be sent because there 
 xe.invitation.noMessageFound=No message found by that id.
 xe.invitation.guestsCanNotJoin=Guests are blocked from joining and {0} was not saved by a user with proper permission to override. Invitations will not be able to be accepted.
 
+xe.invitation.emailContent.subjectLine={0} has invited you to join {1} {2}
 xe.invitation.emailContent.userHasInvitedYouToJoinWiki=You have received this mail because {0} has invited you to join {1}.
 xe.invitation.emailContent.joinLink=Accept the invitation and join
 xe.invitation.emailContent.declineLink=Decline
@@ -94,6 +95,7 @@ xe.invitation.doAction.reportSpam.reportSaveComment=Reported message as spam.
 xe.invitation.doAction.reportSpam.areYouSure=Are you sure you would like to report this message as abuse.
 xe.invitation.doAction.reportSpam.memoLabel=Note to the administrator who investigates this report (optional)
 
+xe.invitation.doAction.accept.heading=Accept invitation
 xe.invitation.doAction.accept.saveComment=Invitation accepted.
 xe.invitation.doAction.accept.noMessageFound=No message was found by that ID, maybe it was deleted accidentally or the system is experiencing problems.
 xe.invitation.doAction.accept.invitationCanceled=We're sorry but this invitation has been canceled.

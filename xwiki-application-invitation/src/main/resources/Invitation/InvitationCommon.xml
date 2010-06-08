@@ -99,13 +99,13 @@
 <property>
 <code>#template("colorThemeInit.vm")
 /* Hide unwanted page stuff */
-#contentmenu *, #hierarchy *, #document-info *, #xdocFooter, #document-title * {
+#contentmenu *, #hierarchy, #document-info, #xdocFooter, #document-title {
   display: none;
 }
 
 .invitation, .invitation input[type='text'], .invitation textarea, .invitation table {
   float: left;
-  width: 450px; 
+  width: 450px;
 }
 
 .invitation-preview {
@@ -382,13 +382,15 @@
     $config.put('commonPage', "${doc.getSpace()}.InvitationCommon")
     $config.put('mainPage', "${doc.getSpace()}.WebHome")
     ##
-    #set($subjectLineTemplate = '{{velo' + 'city}}$xcontext.getUser().replaceAll("^[^\.]*.", "") has i'
-                                + 'nvited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"): $!s'
-                                + 'ubjectLine{{/velo' + 'city}}')
+    #set($subjectLineTemplate = '{{velo' + 'city}}$msg.get("xe.invitation.emailContent.subjectLine", ['
+                                + '$xcontext.getUser().replaceAll("^[^\.]*.", ""), '
+                                + '$xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"), '
+                                + '$!subjectLine]){{/velo' + 'city}}')
     $config.put('subjectLineTemplate', $subjectLineTemplate)
     #set($n = $util.getNewline())
-    #set($messageBodyTemplate = '{{velo' + 'city}}' + "$n" + '#template("colorThemeInit.vm")' + "$n" 
-                              + '#set($userName = $xwiki.getUserName($xco'
+    #set($messageBodyTemplate = '{{velo' + 'city}}' + "$n" + '#set($discard = "#template('
+                              + "$escapetool.getS()" + 'colorThemeInit.vm' + "$escapetool.getS()"
+                              + ')")' + "$n" + '#set($userName = $xwiki.getUserName($xco'
                               + 'ntext.getUser(), false))' + "$n" + '#set($wikiName = $xwiki.getReques'
                               + 'tURL().replaceAll("http://([^/:]*).*$", "$1"))' + "$n" + '#set($guest'
                               + 'ActionsURL = $xwiki.getDocumentAsAuthor($config.get("guestsActionsPag'

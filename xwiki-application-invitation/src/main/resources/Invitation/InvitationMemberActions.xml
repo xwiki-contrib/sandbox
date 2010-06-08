@@ -513,7 +513,7 @@ $xwiki.get('ssx').use($config.get('commonPage'))
   #else
     {{html wiki=true}}
      &lt;form ##
-      #if("$!formOptions.get('noClass')" == '')
+      #if(!$formOptions.contains('noClass'))
         class="invitation" ##
       #end
       action="$doc.getURL()" method="POST"&gt;
