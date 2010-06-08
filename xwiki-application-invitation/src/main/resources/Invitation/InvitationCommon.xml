@@ -5,7 +5,7 @@
 <language></language>
 <defaultLanguage>en</defaultLanguage>
 <translation>0</translation>
-<parent>Invitation.Invitation</parent>
+<parent>Invitation.WebHome</parent>
 <creator>XWiki.Admin</creator>
 <author>XWiki.Admin</author>
 <customClass></customClass>
@@ -89,7 +89,7 @@
 <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
 </use>
 </class>
-<name>Invitation.Invitation</name>
+<name>Invitation.InvitationCommon</name>
 <number>0</number>
 <className>XWiki.StyleSheetExtension</className>
 <guid>57002efd-3fd9-45a9-bedf-d9741dcc1ac9</guid>
@@ -367,7 +367,7 @@
       #set($configDocNameInternal = $configDocName)
     #end
     #if("$!configClassName" == '')
-      #set($configClassNameInternal = "${doc.getSpace()}.Invitation")
+      #set($configClassNameInternal = "${doc.getSpace()}.WebHome")
     #else
       #set($configClassNameInternal = $configClassName)
     #end
@@ -380,7 +380,7 @@
     $config.put('membersActionsPage', "${doc.getSpace()}.InvitationMemberActions")
     $config.put('membersCommonPage', "${doc.getSpace()}.InvitationMembersCommon")
     $config.put('commonPage', "${doc.getSpace()}.InvitationCommon")
-    $config.put('mainPage', "${doc.getSpace()}.Invitation")
+    $config.put('mainPage', "${doc.getSpace()}.WebHome")
     ##
     #set($subjectLineTemplate = '{{velo' + 'city}}$xcontext.getUser().replaceAll("^[^\.]*.", "") has i'
                                 + 'nvited you to join $xwiki.getRequestURL().replaceAll("http://([^/:]*).*$", "$1"): $!s'
@@ -481,9 +481,9 @@
   #if(!$configDoc.isNew())
     $configDoc.deleteAsAuthor()
   #end
-  #set($configClass = $xwiki.getDocumentAsAuthor("${doc.getSpace()}.Invitation"))
+  #set($configClass = $xwiki.getDocumentAsAuthor("${doc.getSpace()}.WebHome"))
   #if($configClass.isNew())
-    {{error}}Class document [[${doc.getSpace()}.Invitation]] not found. can't run test.{{/error}}
+    {{error}}Class document [[${doc.getSpace()}.WebHome]] not found. can't run test.{{/error}}
   #else
     #set($config = {})
     #loadInvitationConfig($config, 'HopefullyNonexistantSpace')

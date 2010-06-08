@@ -5,7 +5,7 @@
 <language></language>
 <defaultLanguage>en</defaultLanguage>
 <translation>0</translation>
-<parent>Invitation.Invitation</parent>
+<parent>Invitation.WebHome</parent>
 <creator>XWiki.Admin</creator>
 <author>XWiki.Admin</author>
 <customClass></customClass>
@@ -181,19 +181,19 @@ Invitation.InvitationMailClass_messageBody=Message content
 Invitation.InvitationMailClass_statusCode=Number indicating the message status
 Invitation.InvitationMailClass_memo=Memo attached to this message
 
-# XWiki.Invitation (Invitation application) Configuration
-Invitation.Invitation_from_address=Email "from" address
-Invitation.Invitation_smtp_server_password=Smtp password
-Invitation.Invitation_smtp_server_username=Smtp username
-Invitation.Invitation_smtp_port=Smtp port
-Invitation.Invitation_smtp_server=Smtp server host name
-Invitation.Invitation_javamail_extra_props=Javamail extra properties
-Invitation.Invitation_subjectLineTemplate=Email subject line template
-Invitation.Invitation_messageBodyTemplate=Email message body HTML template
-Invitation.Invitation_messageBodyTemplatePlain=Message body plain text template
-Invitation.Invitation_emailClass=Email message XClass
-Invitation.Invitation_emailContainer=Document containing email XObjects
-Invitation.Invitation_emailRegex=Regular expression for validating email addresses
-Invitation.Invitation_allowUsersOfOtherWikis=Let users of other wikis send
-Invitation.Invitation_usersMayPersonalizeMessage=Let users personalize messages
-Invitation.Invitation_usersMaySendToMultiple=Let users send to multiple addresses</content></xwikidoc>
+# XWiki.WebHome (Invitation application) Configuration
+Invitation.WebHome_from_address=Email "from" address
+Invitation.WebHome_smtp_server_password=Smtp password
+Invitation.WebHome_smtp_server_username=Smtp username
+Invitation.WebHome_smtp_port=Smtp port
+Invitation.WebHome_smtp_server=Smtp server host name
+Invitation.WebHome_javamail_extra_props=Javamail extra properties
+Invitation.WebHome_subjectLineTemplate=Email subject line template
+Invitation.WebHome_messageBodyTemplate=Email message body HTML template
+Invitation.WebHome_messageBodyTemplatePlain=Message body plain text template
+Invitation.WebHome_emailClass=Email message XClass
+Invitation.WebHome_emailContainer=Document containing email XObjects
+Invitation.WebHome_emailRegex=Regular expression for validating email addresses
+Invitation.WebHome_allowUsersOfOtherWikis=Let users of other wikis send
+Invitation.WebHome_usersMayPersonalizeMessage=Let users personalize messages
+Invitation.WebHome_usersMaySendToMultiple=Let users send to multiple addresses</content></xwikidoc>

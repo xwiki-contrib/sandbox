@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xwikidoc>
 <web>Invitation</web>
-<name>Invitation</name>
+<name>WebHome</name>
 <language></language>
 <defaultLanguage>en</defaultLanguage>
 <translation>0</translation>
@@ -23,7 +23,7 @@
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <class>
-<name>Invitation.Invitation</name>
+<name>Invitation.WebHome</name>
 <customClass></customClass>
 <customMapping></customMapping>
 <defaultViewSheet></defaultViewSheet>
