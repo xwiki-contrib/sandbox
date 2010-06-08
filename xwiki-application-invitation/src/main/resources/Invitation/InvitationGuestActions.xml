@@ -231,7 +231,7 @@
           $emailContainer.saveAsAuthor($msg.get('xe.invitation.doAction.accept.saveComment'))
         #end
         #set($invited = true)
-        {{include document="XWiki.Registration"}}
+        {{include document="XWiki.Registration"/}}
       #end
     #end
   #elseif($action == 'decline')
