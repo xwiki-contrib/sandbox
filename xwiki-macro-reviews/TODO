@@ -1,2 +1,1 @@
 * extract the time macro to a java macro based on prettyTime library (http://ocpsoft.com/prettytime/)
-* change the document request so that it orders by latest review (comment or annotation) date, not by last modification date

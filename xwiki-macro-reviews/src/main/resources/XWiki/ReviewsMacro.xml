@@ -11,15 +11,15 @@
 <customClass></customClass>
 <contentAuthor>xwiki:XWiki.JeromeVelociter</contentAuthor>
 <creationDate>1272488742000</creationDate>
-<date>1272906807000</date>
-<contentUpdateDate>1272906807000</contentUpdateDate>
-<version>11.1</version>
+<date>1276126960000</date>
+<contentUpdateDate>1276126960000</contentUpdateDate>
+<version>13.17</version>
 <title>Reviews Macro</title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
 <comment></comment>
-<minorEdit>false</minorEdit>
+<minorEdit>true</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <object>
@@ -192,6 +192,40 @@ ul.reviews div.reviewsContainer {
 </object>
 <object>
 <class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>XWiki.ReviewsMacro</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>c1c5254b-6a27-4670-b824-c9c1b78ec3fc</guid>
+<property>
+<tags/>
+</property>
+</object>
+<object>
+<class>
 <name>XWiki.WikiMacroClass</name>
 <customClass></customClass>
 <customMapping></customMapping>
@@ -308,7 +342,7 @@ ul.reviews div.reviewsContainer {
     #else       
       #set($avatarURL = $xwiki.getSkinFile("noavatar.png"))
     #end
-    &lt;img class="avatar" src="${avatarURL}" height="${size}" alt="avatar" /&gt;
+    &lt;img class="avatar" src="${avatarURL}" height="${size}" alt="$xwiki.getUserName($user, false)" title="$xwiki.getUserName($user, false)" /&gt;
   #end
   {{/html}}
 #end
@@ -319,14 +353,16 @@ ul.reviews div.reviewsContainer {
 #else
   #set($limit = 5)
 #end
-#set($queryFrom = ", BaseObject as review")
-#set($queryWhere = " where review.name=doc.fullName and review.className in ('XWiki.XWikiComments', 'AnnotationCode.AnnotationClass')")
+#set($queryFrom = ", BaseObject as review, DateProperty as reviewDate")
+#set($queryWhere = " review.name=doc.fullName and review.className in ('XWiki.XWikiComments', 'AnnotationCode.AnnotationClass') and reviewDate.id.id=review.id and reviewDate.id.name='date'")
 #if("$!{context.macro.params.className}" != '')
   #set($queryFrom = "${queryFrom} , BaseObject as obj")
   #set($queryWhere = "${queryWhere} and doc.fullName=obj.name and obj.className='${context.macro.params.className}'") 
 #end
 &lt;ul class="xlist xhighlight reviews"&gt;
-#foreach($documentName in $xwiki.searchDocuments("$queryFrom $queryWhere order by doc.date desc", $limit, 0))
+#set($query = "select max(reviewDate.value) as lastReview, doc.fullName from XWikiDocument as doc $queryFrom where $queryWhere group by doc.fullName order by max(reviewDate.value) desc")
+#foreach($result in $xwiki.search($query, $limit, 0))
+#set($documentName = $listtool.get($result, 1))
 #set($articleDoc=$xwiki.getDocument($documentName))
 #set($comments = $articleDoc.getObjects('XWiki.XWikiComments'))
 #set($annotations = $articleDoc.getObjects('AnnotationCode.AnnotationClass'))
@@ -344,7 +380,7 @@ ul.reviews div.reviewsContainer {
 &lt;div class="head"&gt;
 &lt;a href="$articleDoc.getURL('view')"&gt;$articleDoc.displayTitle&lt;/a&gt;
 &lt;/div&gt;
-#set($latest = $reviews.get($listtool.get($sorttool.sort($reviews.keySet()), $mathtool.sub($reviews.keySet().size(), 1))))
+#set($latest = $reviews.remove($listtool.get($sorttool.sort($reviews.keySet()), $mathtool.sub($reviews.keySet().size(), 1))))
 &lt;div class="reviewsContainer"&gt;
 &lt;div class="latestReview"&gt;
 #if($latest.getxWikiClass().name == 'AnnotationCode.AnnotationClass')
@@ -384,7 +420,7 @@ ul.reviews div.reviewsContainer {
   &lt;/div&gt;
 #end
 &lt;/div&gt;
-#if($reviews.size() &gt; 1)
+#if($reviews.size() &gt; 0)
 #set($ok = $listtool.remove($sorttool.sort($reviews.keySet(), "date:desc"), 0))
 #set($otherReviewers = [])
 #foreach($review in $reviews.keySet())
@@ -393,7 +429,7 @@ ul.reviews div.reviewsContainer {
 #end
 #end
 &lt;div class="otherReviews"&gt;
-&lt;div&gt;and  $mathtool.sub($reviews.size(), 1) other review(s) by $otherReviewers.size() authors&lt;/div&gt;
+&lt;div&gt;and $reviews.size() other review(s) by $otherReviewers.size() authors&lt;/div&gt;
 #foreach($reviewer in $otherReviewers) #displayAvatar($reviewer, 35) #end
 &lt;/div&gt;
 &lt;div class="clearfloats"&gt;&lt;/div&gt;
@@ -480,7 +516,7 @@ ul.reviews div.reviewsContainer {
 <className>XWiki.WikiMacroParameterClass</className>
 <guid>2f7cc4af-4350-493f-9179-0a7a4b1e4ff3</guid>
 <property>
-<defaultValue>5</defaultValue>
+<defaultValue></defaultValue>
 </property>
 <property>
 <description>The number of reviewed pages to display</description>
