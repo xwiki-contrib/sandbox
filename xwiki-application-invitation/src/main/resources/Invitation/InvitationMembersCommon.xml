@@ -253,7 +253,13 @@
      ## Administrative Tools
 
      = $msg.get('xe.invitation.adminTools.heading') =
-         ## Click here to configure the friend inviter
+     ##
+     ## Warn the user if guests are unable to be invited.
+     #if("#canGuestAcceptInvitation($xwiki.getDocument($config.get('guestsActionsPage')))" != 'true')
+       {{error}}$msg.get('xe.invitation.guestsCanNotJoin', [$config.get('guestsActionsPage')]){{/error}}
+
+     #end
+     ## Click here to configure the friend inviter
      * {{html}}&lt;a href="$xwiki.getURL('XWiki.XWikiPreferences', 'admin', 'admin=globaladmin&amp;section=Invitation')"&gt;##
          $msg.get('xe.invitation.adminTools.configureLink')##
        &lt;/a&gt;{{/html}}

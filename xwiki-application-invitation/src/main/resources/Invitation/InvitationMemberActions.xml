@@ -158,11 +158,6 @@ $xwiki.get('ssx').use($config.get('commonPage'))
 ## Don't load comments, history, etc.
 #set($docextras = [])
 ##
-## Warn the user if guests are unable to be invited.
-#if("#canGuestAcceptInvitation($doc)" != 'true')
-  {{error}}$msg.get('xe.invitation.guestsCanNotJoin', [$config.get('guestActionsPage')]){{/error}}
-#end
-##
 #set($inspect = $request.getParameter('inspect'))
 ## Decide what we should do.
 #if("$!inspect" != '')

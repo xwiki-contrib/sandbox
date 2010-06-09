@@ -546,11 +546,8 @@
  *###
 #macro(canGuestAcceptInvitation, $guestActionsDoc)
   #set($out = 'true')
-  #if(!$guestActionsDoc)
-    #set($guestActionsDoc = $doc)
-  #end
   #if(!$xwiki.hasAccessLevel('register', 'XWiki.XWikiGuest', 'XWiki.XWikiPreferences')
-      &amp;&amp; !$guestActionDoc.hasProgrammingRights())
+      &amp;&amp; !$guestActionsDoc.hasProgrammingRights())
   ##
     #set($out = 'false')
   #end
