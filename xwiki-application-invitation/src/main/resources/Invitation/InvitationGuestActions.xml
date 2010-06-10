@@ -210,12 +210,13 @@
       {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.alreadyDeclined'){{/error}}
     #elseif($status == 'canceled')
       ## invitation canceled.
-      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.invitationCanceled'){{/error}}
+      (%id="guest-action-message"%)((({{error}}$msg.get('xe.invitation.doAction.accept.invitationCanceled')
       #if("$!oldMemo" != '')
         $msg.get('xe.invitation.doAction.invitationCanceledMemo',
                  [$xwiki.getUserName($message.getProperty('sendingUser').getValue(), false)])
         $oldMemo
       #end
+      {{/error}}
     #elseif($status == 'reported' || $status == 'notSpam')
       ## reported as spam, nolonger valid.
       {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.accept.alreadyReportedAsSpam'){{/error}}
@@ -247,13 +248,13 @@
       {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.alreadyDeclined'){{/error}}
     #elseif($status == 'canceled')
       ## invitation canceled.
-      {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.invitationCanceled')
+      (%id="guest-action-message"%)((({{error}}$msg.get('xe.invitation.doAction.decline.invitationCanceled')
        #if("$!oldMemo" != '')
          $msg.get('xe.invitation.doAction.invitationCanceledMemo', 
                   [$xwiki.getUserName($message.getProperty('sendingUser').getValue(), false)])
          $oldMemo
        #end
-      {{/error}}
+      {{/error}})))
     #elseif($status == 'reported' || $status == 'notSpam')
       ## reported as spam, nolonger valid.
       {{error}}(%id="guest-action-message"%)$msg.get('xe.invitation.doAction.decline.alreadyReportedAsSpam'){{/error}}

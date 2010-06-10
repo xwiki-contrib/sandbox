@@ -252,6 +252,7 @@
    #if($isAdmin)
      ## Administrative Tools
 
+
      = $msg.get('xe.invitation.adminTools.heading') =
      ##
      ## Warn the user if guests are unable to be invited.

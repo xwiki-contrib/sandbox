@@ -112,7 +112,7 @@ xe.invitation.doAction.decline.alreadyReportedAsSpam=This invitation has already
 xe.invitation.doAction.decline.invitationCanceled=This invitation has been canceled and thus cannot be declined.
 xe.invitation.doAction.decline.alreadyDeclined=This invitation has already been declined and cannot be declined again.
 xe.invitation.doAction.decline.alreadyAccepted=This invitation has already been accepted and now cannot be declined.
-xe.invitation.doAction.decline.noMessageFound=No invitation was found by the given id. It might have been deleted or maybe the system is experiencing difficulties.
+xe.invitation.doAction.decline.noMessageFound=No invitation was found by the given ID. It might have been deleted or maybe the system is experiencing difficulties.
 xe.invitation.doAction.decline.success=This invitation has successfully been declined.
 
 xe.invitation.doUserActionOnMultipleMessages.notPossibleOnMultipleMessages=This action is not possible on multiple messages.
