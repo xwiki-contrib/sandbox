@@ -1,0 +1,15 @@
+*.log
+*.class
+*.jar
+*.war
+target/
+.svn/
+.classpath
+.project
+.settings/
+target-eclipse/
+*.log.?
+.checkstyle
+*.swp
+*.swo
+.externalToolBuilders/
