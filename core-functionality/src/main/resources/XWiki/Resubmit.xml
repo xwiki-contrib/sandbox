@@ -30,6 +30,7 @@
 ###
 $!msg.get('csrftoken.confirmation')
 #set($xredirect = "$!{escapetool.xml($request.getParameter('xredirect'))}")
+#set($xback = "$!{escapetool.xml($request.getParameter('xback'))}")
 &lt;form action="$xredirect" method="post"&gt;
   &lt;div class="hidden"&gt;
     ## Valid CSRF token
@@ -37,7 +38,7 @@ $!msg.get('csrftoken.confirmation')
   &lt;/div&gt;
   &lt;div class="bottombuttons"&gt;
     &lt;input type="submit" class="button" value="$msg.get('yes')"/&gt;
-    &lt;a href="$doc.getURL()" class="buttonwrapper"&gt;&lt;input type="button" class="button" value="$msg.get('no')"  onclick="location='$doc.getURL()'; return false;"/&gt;&lt;/a&gt;
+    &lt;a href="$xback" class="buttonwrapper"&gt;&lt;input type="button" class="button" value="$msg.get('no')"/&gt;&lt;/a&gt;
   &lt;/div&gt;
 &lt;/form&gt;
 {{/html}}
