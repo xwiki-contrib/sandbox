@@ -435,6 +435,9 @@ $xwiki.get('ssx').use($config.get('commonPage'))
       #if($changed)
         $emailContainer.saveAsAuthor($msg.get('xe.invitation.doUserActionOnMultipleMessages.notSpam.reportHandledSaveComment', 
                                               [$xcontext.getUser()]))
+        (%id="invitation-action-message"%)((({{info}}##
+          $msg.get('xe.invitation.doUserActionOnMultipleMessages.notSpam.successMessage', [$memo])
+        {{/info}})))
       #else
         (%id="invitation-action-message"%)((({{error}}##
             $msg.get('xe.invitation.doUserActionOnMultipleMessages.noMessagesAffected'){{/error}})))

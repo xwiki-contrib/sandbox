@@ -120,6 +120,7 @@ xe.invitation.doUserActionOnMultipleMessages.confirmLabel=Confirm
 xe.invitation.doUserActionOnMultipleMessages.noMessagesFound=No messages were found by the ids given.
 xe.invitation.doUserActionOnMultipleMessages.noMessagesAffected=This action cannot be carried out because all of the messages selected are of the wrong status.
 
+xe.invitation.doUserActionOnMultipleMessages.notSpam.successMessage=Invitation successfully marked as not spam. Log entry: {0}
 xe.invitation.doUserActionOnMultipleMessages.notSpam.heading=Mark message as not spam or situation handled.
 xe.invitation.doUserActionOnMultipleMessages.notSpam.memoLabel=Synopsis of findings and/or action taken
 xe.invitation.doUserActionOnMultipleMessages.notSpam.confirmLabel=Return email privilege
