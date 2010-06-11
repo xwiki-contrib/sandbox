@@ -355,19 +355,22 @@ $xwiki.get('ssx').use($config.get('commonPage'))
     = $msg.get('xe.invitation.doUserActionOnMultipleMessages.cancel.heading') =
     #if($messages.size() == 0)
       ## No message found by that id.
+      (%id="invitation-action-message"%)((({{error}}##
       #if(!$messageIDs || $messageIDs.size() &lt; 2)
-        {{error}}$msg.get('xe.invitation.noMessageFound'){{/error}}
+        $msg.get('xe.invitation.noMessageFound')##
       #else
-        {{error}}$msg.get('xe.invitation.doUserActionOnMultipleMessages.noMessagesFound'){{/error}}
+        $msg.get('xe.invitation.doUserActionOnMultipleMessages.noMessagesFound')##
       #end
+      {{/error}})))
     #elseif($messages.size() != $messageIDs.size())
       #if($messages.size() &gt; $messageIDs.size())
         ## this should not happen.
         Internal error: Too many messages for the number of ids given. In #doUserActionOnMultipleMessages
       #else
         ## x of the y messages to cancel could not be found.
-        {{error}}$msg.get('xe.invitation.doUserActionOnMultipleMessages.cancel.someMessagesNotFound',
-                 [$mathtool.sub($messageIDs.size(), $messages.size()), $messageIDs.size()]){{error}}
+        (%id="invitation-action-message"%)((({{error}}##
+            $msg.get('xe.invitation.doUserActionOnMultipleMessages.cancel.someMessagesNotFound',
+                     [$mathtool.sub($messageIDs.size(), $messages.size()), $messageIDs.size()]){{error}})))
       #end
     #elseif($confirm)
       ## If the user accidently selected messages to which this action cannot be done, just skip over them.
@@ -381,9 +384,11 @@ $xwiki.get('ssx').use($config.get('commonPage'))
       #if($changed)
         $emailContainer.saveAsAuthor($msg.get('xe.invitation.doUserActionOnMultipleMessages.cancel.saveComment'))
         ## Invitations canceled successfully.
-        {{info}}$msg.get('xe.invitation.doUserActionOnMultipleMessages.cancel.success'){{/info}}
+        (%id="invitation-action-message"%)((({{info}}##
+            $msg.get('xe.invitation.doUserActionOnMultipleMessages.cancel.success'){{/info}})))
       #else
-        {{warning}}$msg.get('xe.invitation.doUserActionOnMultipleMessages.noMessagesAffected'){{/warning}}
+        (%id="invitation-action-message"%)((({{warning}}##
+            $msg.get('xe.invitation.doUserActionOnMultipleMessages.noMessagesAffected'){{/warning}})))
       #end
     #else
       ## Are you sure?...
@@ -411,13 +416,13 @@ $xwiki.get('ssx').use($config.get('commonPage'))
 
     #if($messages.size() == 0)
       ## No message found by that id.
-      {{error}}##
+      (%id="invitation-action-message"%)((({{error}}##
       #if(!$messageIDs || $messageIDs.size() &lt; 2)
         $msg.get('xe.invitation.noMessageFound')
       #else
         $msg.get('xe.invitation.doUserActionOnMultipleMessages.noMessagesFound')
       #end
-      {{/error}}
+      {{/error}})))
     #elseif($confirm)
       ## If the user accidently selected messages to which this action cannot be done, just skip over them.
       #set($changed = false)
@@ -431,7 +436,8 @@ $xwiki.get('ssx').use($config.get('commonPage'))
         $emailContainer.saveAsAuthor($msg.get('xe.invitation.doUserActionOnMultipleMessages.notSpam.reportHandledSaveComment', 
                                               [$xcontext.getUser()]))
       #else
-        {{error}}$msg.get('xe.invitation.doUserActionOnMultipleMessages.noMessagesAffected'){{/error}}
+        (%id="invitation-action-message"%)((({{error}}##
+            $msg.get('xe.invitation.doUserActionOnMultipleMessages.noMessagesAffected'){{/error}})))
       #end
     #else
       ## Are you sure?...
@@ -447,7 +453,8 @@ $xwiki.get('ssx').use($config.get('commonPage'))
     #end
   #else
 
-    {{error}}$msg.get('xe.invitation.doUserActionOnMultipleMessages.notPossibleOnMultipleMessages'){{/error}}
+    (%id="invitation-action-message"%)((({{error}}##
+        $msg.get('xe.invitation.doUserActionOnMultipleMessages.notPossibleOnMultipleMessages'){{/error}})))
   #end
 
   #if($confirm)

@@ -413,8 +413,8 @@ $xwiki.get('ssx').use($config.get('commonPage'))
         &amp;&amp; $config.get('allowUsersOfOtherWikis') != '1'
         &amp;&amp; $doc.getWiki() != $xwiki.getDocument($xcontext.getUser()).getWiki())
   ## Users of other subwikis are not allowed to send mail.
-  $msg.get('xe.invitation.onlyMembersCanSendMail')
-  $msg.get('xe.invitation.youAreAMemberOfOtherWiki', [$xwiki.getDocument($xcontext.getUser()).getWiki()])
+  (%id="invitation-permission-error"%)((({{error}}$msg.get('xe.invitation.onlyMembersCanSendMail')
+  $msg.get('xe.invitation.youAreAMemberOfOtherWiki', [$xwiki.getDocument($xcontext.getUser()).getWiki()]){{/error}})))
 #else
   ## The user is authorized to send mail &lt;-------------------------------------------------------
   ## Get the list of email addresses to send to.
@@ -504,13 +504,15 @@ $xwiki.get('ssx').use($config.get('commonPage'))
     #end
     (%class="invitation"%)(((
 
+      (%id="invitation-action-message"%)(((##
       #if($errors.size() &gt; 0)
         ## An error has occured while sending the message.
-        {{error}}$msg.get('xe.invitation.errorWhileSending'){{/error}}
+        {{error}}$msg.get('xe.invitation.errorWhileSending'){{/error}}##
       #else
         ## Your message has been sent.
-        {{info}}$msg.get('xe.invitation.successSending'){{/info}}
+        {{info}}$msg.get('xe.invitation.successSending'){{/info}}##
       #end
+      )))
 
       #displayMessageTable($messages, ['sentDate', 'recipient', 'status'])
      )))
@@ -518,7 +520,7 @@ $xwiki.get('ssx').use($config.get('commonPage'))
   #else
 
 
-    {{error}}$msg.get('xe.invitation.noValidMessagesToSend'){{/error}}
+    (%id="invitation-action-message"%)((({{error}}$msg.get('xe.invitation.noValidMessagesToSend'){{/error}})))
 
   #end
 #end
