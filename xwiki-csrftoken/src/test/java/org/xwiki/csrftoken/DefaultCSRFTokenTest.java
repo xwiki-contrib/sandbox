@@ -34,7 +34,9 @@ import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.container.Container;
 import org.xwiki.container.servlet.ServletRequest;
 import org.xwiki.csrftoken.internal.DefaultCSRFToken;
+import org.xwiki.model.ModelContext;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.WikiReference;
 import org.xwiki.test.AbstractMockingComponentTest;
 import org.xwiki.test.annotation.ComponentTest;
 
@@ -48,6 +50,9 @@ import org.xwiki.test.annotation.ComponentTest;
 @ComponentTest(value = DefaultCSRFToken.class)
 public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
 {
+    /** Resubmission URL. */
+    private static final String resubmitUrl = "http://host/xwiki/bin/view/XWiki/Resubmit";
+
     /** URL of the current document. */
     private static final String mockDocumentUrl = "http://host/xwiki/bin/save/Main/Test";
 
@@ -71,15 +76,13 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
 
         // document access bridge
         final DocumentAccessBridge mockDocumentAccessBridge = getComponentManager().lookup(DocumentAccessBridge.class);
-        final CopyStringMatcher someValue = new CopyStringMatcher(mockDocumentUrl + "?", "");
+        final CopyStringMatcher someValue = new CopyStringMatcher(resubmitUrl + "?", "");
         getMockery().checking(new Expectations() {{
             allowing(mockDocumentAccessBridge).getCurrentUser();
                 will(returnValue("XWiki.Admin"));
             allowing(mockDocumentAccessBridge).getDocumentURL(with(any(DocumentReference.class)), with("view"),
                     with(someValue), with(aNull(String.class)));
                 will(someValue);
-            allowing(mockDocumentAccessBridge).getCurrentDocumentReference();
-                will(returnValue(null));
         }});
         // configuration
         final CSRFTokenConfiguration mockConfiguration = getComponentManager().lookup(CSRFTokenConfiguration.class);
@@ -101,6 +104,12 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
         getMockery().checking(new Expectations() {{
             allowing(mockContainer).getRequest();
                 will(returnValue(servletRequest));
+        }});
+        // model
+        final ModelContext mockModel = getComponentManager().lookup(ModelContext.class);
+        getMockery().checking(new Expectations() {{
+            allowing(mockModel).getCurrentEntityReference();
+                will(returnValue(new WikiReference("wiki")));
         }});
 
         this.csrf = getComponentManager().lookup(CSRFToken.class);
@@ -182,7 +191,7 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
         try {
             String redirect;
             redirect = URLEncoder.encode(mockDocumentUrl + "?a=b&c=d", "utf-8");
-            String expected = mockDocumentUrl + "?xpage=resubmit&xredirect=" + redirect;
+            String expected = resubmitUrl + "?xredirect=" + redirect;
             Assert.assertEquals("Invalid resubmission URL", expected, url);
         } catch (UnsupportedEncodingException exception) {
             Assert.fail("Should not happen: " + exception.getMessage());

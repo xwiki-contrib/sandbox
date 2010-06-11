@@ -42,6 +42,10 @@ import org.xwiki.container.Request;
 import org.xwiki.container.servlet.ServletRequest;
 import org.xwiki.csrftoken.CSRFToken;
 import org.xwiki.csrftoken.CSRFTokenConfiguration;
+import org.xwiki.model.EntityType;
+import org.xwiki.model.ModelContext;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 
 /**
  * Concrete implementation of the {@link CSRFToken} component.
@@ -63,6 +67,12 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     /** Length of the random string in bytes. */
     private static final int TOKEN_LENGTH = 16;
 
+    /** Space where resubmission page is located. */
+    private static final String RESUBMIT_SPACE = "XWiki";
+
+    /** Resubmission page name. */
+    private static final String RESUBMIT_PAGE = "Resubmit";
+
     /** Token storage (one token per user). */
     private Map<String, String> tokens;
 
@@ -76,6 +86,10 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     /** Needed to access the current request. */
     @Requirement
     private Container container;
+
+    /** Needed to find out the current wiki reference. */
+    @Requirement
+    private ModelContext model;
 
     /** CSRFToken component configuration. */
     @Requirement
@@ -141,11 +155,17 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     public String getResubmissionURL()
     {
-        String template = "resubmit";
         String currentUrl = getRequestURLWithoutToken();
         try {
-            String query = "xpage=" + template + "&xredirect=" + URLEncoder.encode(currentUrl, "utf-8");
-            return docBridge.getDocumentURL(docBridge.getCurrentDocumentReference(), "view", query, null);
+            String query = "xredirect=" + URLEncoder.encode(currentUrl, "utf-8");
+            EntityReference wiki = model.getCurrentEntityReference();
+            EntityReference space = new EntityReference(RESUBMIT_SPACE, EntityType.SPACE);
+            if (wiki != null) {
+                space.setParent(wiki.extractReference(EntityType.WIKI));
+            }
+            EntityReference doc = new EntityReference(RESUBMIT_PAGE, EntityType.DOCUMENT, space);
+            DocumentReference resubmitDoc = new DocumentReference(doc);
+            return docBridge.getDocumentURL(resubmitDoc, "view", query, null);
         } catch (UnsupportedEncodingException exception) {
             // shouldn't happen
         }
