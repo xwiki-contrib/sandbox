@@ -76,13 +76,18 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
 
         // document access bridge
         final DocumentAccessBridge mockDocumentAccessBridge = getComponentManager().lookup(DocumentAccessBridge.class);
-        final CopyStringMatcher someValue = new CopyStringMatcher(resubmitUrl + "?", "");
+        final CopyStringMatcher returnValue = new CopyStringMatcher(resubmitUrl + "?", "");
         getMockery().checking(new Expectations() {{
             allowing(mockDocumentAccessBridge).getCurrentUser();
                 will(returnValue("XWiki.Admin"));
-            allowing(mockDocumentAccessBridge).getDocumentURL(with(any(DocumentReference.class)), with("view"),
-                    with(someValue), with(aNull(String.class)));
-                will(someValue);
+            allowing(mockDocumentAccessBridge).getDocumentURL(with(aNonNull(DocumentReference.class)), with("view"),
+                    with(returnValue), with(aNull(String.class)));
+                will(returnValue);
+            allowing(mockDocumentAccessBridge).getDocumentURL(with(aNull(DocumentReference.class)), with("view"),
+                    with(aNull(String.class)), with(aNull(String.class)));
+                will(returnValue(mockDocumentUrl));
+            allowing(mockDocumentAccessBridge).getCurrentDocumentReference();
+                will(returnValue(null));
         }});
         // configuration
         final CSRFTokenConfiguration mockConfiguration = getComponentManager().lookup(CSRFTokenConfiguration.class);
@@ -189,9 +194,9 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
     {
         String url = csrf.getResubmissionURL();
         try {
-            String redirect;
-            redirect = URLEncoder.encode(mockDocumentUrl + "?a=b&c=d", "utf-8");
-            String expected = resubmitUrl + "?xredirect=" + redirect;
+            String redirect = URLEncoder.encode(mockDocumentUrl + "?a=b&c=d", "utf-8");
+            String back = URLEncoder.encode(mockDocumentUrl, "utf-8");
+            String expected = resubmitUrl + "?xredirect=" + redirect + "&xback=" + back;
             Assert.assertEquals("Invalid resubmission URL", expected, url);
         } catch (UnsupportedEncodingException exception) {
             Assert.fail("Should not happen: " + exception.getMessage());

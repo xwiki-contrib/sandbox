@@ -72,7 +72,7 @@ public final class CopyStringMatcher extends BaseMatcher<String> implements Acti
      */
     public void describeTo(Description d)
     {
-        d.appendText("value: ");
+        d.appendText("COPY VALUE: ");
         d.appendValue(value);
     }
 
@@ -81,6 +81,8 @@ public final class CopyStringMatcher extends BaseMatcher<String> implements Acti
      */
     public String invoke(Invocation invocation) throws Throwable
     {
+        if (value == null)
+            return prefix + suffix;
         return prefix + value + suffix;
     }
 }

@@ -155,9 +155,20 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     public String getResubmissionURL()
     {
-        String currentUrl = getRequestURLWithoutToken();
         try {
-            String query = "xredirect=" + URLEncoder.encode(currentUrl, "utf-8");
+            // TODO find out which encoding is used for responce
+            String encoding = "utf-8";
+
+            // request URL is the one that performs the modification
+            String requestUrl = getRequestURLWithoutToken();
+            String query = "xredirect=" + URLEncoder.encode(requestUrl, encoding);
+
+            // back URL is the URL of the document that was about to be modified, so in most
+            // cases we can redirect back to the correct document (if the user clicks "no")
+            String backUrl = getDocumentURL(docBridge.getCurrentDocumentReference(), null);
+            query += "&xback=" + URLEncoder.encode(backUrl, encoding);
+
+            // construct the URL of the resubmission page
             EntityReference wiki = model.getCurrentEntityReference();
             EntityReference space = new EntityReference(RESUBMIT_SPACE, EntityType.SPACE);
             if (wiki != null) {
@@ -165,11 +176,23 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
             }
             EntityReference doc = new EntityReference(RESUBMIT_PAGE, EntityType.DOCUMENT, space);
             DocumentReference resubmitDoc = new DocumentReference(doc);
-            return docBridge.getDocumentURL(resubmitDoc, "view", query, null);
+            return getDocumentURL(resubmitDoc, query);
         } catch (UnsupportedEncodingException exception) {
             // shouldn't happen
         }
         return "";
+    }
+
+    /**
+     * Satisfy checkstyle ("view" used twice).
+     * 
+     * @param reference reference of the current document
+     * @param query query part of the URL
+     * @return URL of the given document
+     */
+    private String getDocumentURL(DocumentReference reference, String query)
+    {
+        return docBridge.getDocumentURL(reference, "view", query, null);
     }
 
     /**
