@@ -23,8 +23,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -74,7 +74,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     private static final String RESUBMIT_PAGE = "Resubmit";
 
     /** Token storage (one token per user). */
-    private Map<String, String> tokens;
+    private ConcurrentMap<String, String> tokens;
 
     /** Random number generator. */
     private SecureRandom random;
@@ -128,7 +128,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
             byte[] bytes = new byte[TOKEN_LENGTH];
             random.nextBytes(bytes);
             token = Base64.encodeBase64URLSafeString(bytes);
-            tokens.put(user, token);
+            return tokens.putIfAbsent(user, token);
         }
         return token;
     }
