@@ -122,15 +122,20 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     {
         String user = docBridge.getCurrentUser();
         String token = tokens.get(user);
+        if (token != null) {
+            return token;
+        }
 
         // create fresh token if needed
-        if (token == null) {
-            byte[] bytes = new byte[TOKEN_LENGTH];
-            random.nextBytes(bytes);
-            token = Base64.encodeBase64URLSafeString(bytes);
-            return tokens.putIfAbsent(user, token);
+        synchronized (tokens) {
+            if (!tokens.containsKey(user)) {
+                byte[] bytes = new byte[TOKEN_LENGTH];
+                random.nextBytes(bytes);
+                token = Base64.encodeBase64URLSafeString(bytes);
+                tokens.put(user, token);
+            }
+            return tokens.get(user);
         }
-        return token;
     }
 
     /**

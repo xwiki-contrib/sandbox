@@ -50,12 +50,7 @@ public class DefaultCSRFTokenConfiguration extends AbstractLogEnabled implements
     public boolean isEnabled()
     {
         String key = PREFIX + "enabled";
-        Boolean result = configuration.getProperty(key, Boolean.class);
-        if (result == null) {
-            // default
-            return false;
-        }
-        return result.booleanValue();
+        return configuration.getProperty(key, Boolean.FALSE).booleanValue();
     }
 }
 
