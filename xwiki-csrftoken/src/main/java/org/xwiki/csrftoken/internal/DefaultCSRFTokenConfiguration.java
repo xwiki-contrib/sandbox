@@ -28,7 +28,7 @@ import org.xwiki.csrftoken.CSRFTokenConfiguration;
 /**
  * Get configuration data from the XWiki properties file. Supported options:
  * <ul>
- *   <li>"enabled", default = 0</li>
+ *   <li>"core.csrftoken.enabled", default = false</li>
  * </ul>
  *
  * @version $Id: $
