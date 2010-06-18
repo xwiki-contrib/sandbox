@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>XWiki</web>
+<name>Translations</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>XWiki.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1276850765000</creationDate>
+<date>1276851137000</date>
+<contentUpdateDate>1276851137000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>
+csrftoken.confirmation=&lt;p&gt;This request contains an invalid authentication information.&lt;/p&gt;&lt;p&gt;This might happen in the following situations:&lt;ul&gt;&lt;li&gt;You left the editor open in another window/tab and logged off and on again&lt;/li&gt;&lt;li&gt;Your authentication token exipired after a long period of inactivity&lt;/li&gt;&lt;li&gt;Somebody tried to perform a CSRF attack&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;&lt;p&gt;If you are sure that none of these situations apply in your case, you might have found a bug. We are sorry about that, please report it on &lt;a href="http://jira.xwiki.org/"&gt;XWiki JIRA&lt;/a&gt;&lt;/p&gt;&lt;p&gt;If you are unsure, say &lt;strong&gt;No&lt;/strong&gt;.&lt;/p&gt;&lt;br/&gt;&lt;p&gt;Do you want to resend the request?&lt;/p&gt;
+</content></xwikidoc>
