@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
+
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
@@ -120,22 +121,30 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     public String getToken()
     {
-        String user = docBridge.getCurrentUser();
-        String token = tokens.get(user);
+        String key = getTokenKey();
+        String token = tokens.get(key);
         if (token != null) {
             return token;
         }
 
         // create fresh token if needed
         synchronized (tokens) {
-            if (!tokens.containsKey(user)) {
+            if (!tokens.containsKey(key)) {
                 byte[] bytes = new byte[TOKEN_LENGTH];
                 random.nextBytes(bytes);
                 token = Base64.encodeBase64URLSafeString(bytes);
-                tokens.put(user, token);
+                tokens.put(key, token);
             }
-            return tokens.get(user);
+            return tokens.get(key);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void clearToken()
+    {
+        tokens.remove(getTokenKey());
     }
 
     /**
@@ -161,7 +170,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     public String getResubmissionURL()
     {
         try {
-            // TODO find out which encoding is used for responce
+            // TODO find out which encoding is used for response
             String encoding = "utf-8";
 
             // request URL is the one that performs the modification
@@ -208,23 +217,42 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     private String getRequestURLWithoutToken()
     {
+        HttpServletRequest httpRequest = getRequest();
+        StringBuffer url = httpRequest.getRequestURL();
+        String query = httpRequest.getQueryString();
+        if (query != null) {
+            query = query.replaceAll("(^|&)form_token=[^&]*", "");
+            query = query.replaceFirst("^&", "");
+            if (query != null && query.trim().length() != 0) {
+                url.append("?");
+                url.append(query);
+            }
+        }
+        return url.toString();
+    }
+
+    /**
+     * Get the underlying HTTP request. Throws a runtime error if it is not a servlet request.
+     * 
+     * @return HTTP servlet request
+     */
+    private HttpServletRequest getRequest()
+    {
         Request request = container.getRequest();
         if (request instanceof ServletRequest) {
-            ServletRequest srequest = (ServletRequest) request;
-            HttpServletRequest httpRequest = srequest.getHttpServletRequest();
-            StringBuffer url = httpRequest.getRequestURL();
-            String query = httpRequest.getQueryString();
-            if (query != null) {
-                query = query.replaceAll("(^|&)form_token=[^&]*", "");
-                query = query.replaceFirst("^&", "");
-                if (query != null && query.trim().length() != 0) {
-                    url.append("?");
-                    url.append(query);
-                }
-            }
-            return url.toString();
+            return ((ServletRequest) request).getHttpServletRequest();
         }
         throw new RuntimeException("Not supported request type");
+    }
+
+    /**
+     * Get the token map key for the current user. Constructs a string from user name.
+     * 
+     * @return key for the token map
+     */
+    private String getTokenKey()
+    {
+        return docBridge.getCurrentUser();
     }
 }
 

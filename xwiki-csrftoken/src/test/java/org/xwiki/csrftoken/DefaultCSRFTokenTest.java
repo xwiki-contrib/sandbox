@@ -25,11 +25,12 @@ import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 
-import junit.framework.Assert;
-
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.Assert;
+
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.container.Container;
 import org.xwiki.container.servlet.ServletRequest;

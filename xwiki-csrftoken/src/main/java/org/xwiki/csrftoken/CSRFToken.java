@@ -46,6 +46,12 @@ public interface CSRFToken
     String getToken();
 
     /**
+     * Removes the anti-CSRF token associated with the current user. Current token is invalidated
+     * immediately, a subsequent call of {@link #getToken()} will generate a fresh token.
+     */
+    void clearToken();
+
+    /**
      * Check if the given <code>token</code> matches the internally stored token associated with the
      * current user.
      * 
