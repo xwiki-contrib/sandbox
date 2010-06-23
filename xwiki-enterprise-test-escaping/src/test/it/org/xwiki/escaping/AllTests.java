@@ -31,14 +31,14 @@ import org.xwiki.test.XWikiExecutor;
  * and stops it afterwards.
  * 
  * TODO
- * 5. exclude false positive errors (like 404 for pagedoesnotexist)
- * 6. implement regex file excludes
- * 7. implement some manual test (copy requiring 2 parameters is a good example)
- * 8. add more sophisticated escaping tests -> parsing
- * 9. check that the fixed templates are fixed
- * 10. add over-escaping test
- * 11. add a way to specify which action to use with some parameters
- * 12. test for escaping of action
+ * 1. exclude false positive error codes (like 404 for pagedoesnotexist)
+ * 2. implement some manual test (copy requiring 2 parameters is a good example)
+ * 3. also test applications
+ * 4. check that the fixed templates are fixed
+ * 5. add over-escaping test
+ * 6. add a way to specify which action to use with some parameters
+ * 7. test for escaping of action
+ * 8. extra parameter for skin-specific templates
  * 
  * @version $Id$
  * @since 2.5

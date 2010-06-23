@@ -49,6 +49,9 @@ public class XMLEscapingValidator implements Validator
     /** Test for unescaped quote. */
     private static final String TEST_QUOT = "aaa\"bbb";
 
+    /** Expect an empty or non-empty document. */
+    private boolean shouldBeEmpty = false;
+
     /** Source of the XML document to validate. */
     private List<String> document = new ArrayList<String>();
 
@@ -97,8 +100,11 @@ public class XMLEscapingValidator implements Validator
     public List<ValidationError> validate()
     {
         clear();
-        if (document.size() == 0) {
-            throw new EscapingError("Content is empty");
+        if (document.size() == 0 && !shouldBeEmpty) {
+            errors.add(new ValidationError(Type.WARNING, 0, 0, "Unexpected empty response"));
+        }
+        if (document.size() > 0 && shouldBeEmpty) {
+            errors.add(new ValidationError(Type.WARNING, 0, 0, "Unexpected non-empty content"));
         }
         int lineNr = 1;
         for (String line : document) {
@@ -142,6 +148,17 @@ public class XMLEscapingValidator implements Validator
     public String getName()
     {
         return "XML ESCAPING";
+    }
+
+    /**
+     * Set to true if empty document is valid. A validation error will be thrown if document is empty,
+     * but {@link #shouldBeEmpty} is false and vice versa.
+     * 
+     * @param value new value
+     */
+    public void setShouldBeEmpty(boolean value)
+    {
+        this.shouldBeEmpty = value;
     }
 }
 

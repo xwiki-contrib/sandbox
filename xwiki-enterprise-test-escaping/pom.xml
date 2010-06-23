@@ -81,6 +81,39 @@
           <reportFormat>plain</reportFormat>
           <!-- FIXME must be added to ../pom.xml
           <systemProperties>
+              <property>
+                <name>filesProduceNoOutput</name>
+                <value>
+                    templates/xpart.vm
+                    <!- -
+                    skins/colibri/menuview.vm
+                    templates/adduorg.vm
+                    templates/colorThemeInit.vm
+                    templates/comments2.vm
+                    templates/editmodes.vm
+                    templates/editpanelsvars.vm
+                    templates/global.vm
+                    templates/layoutvars.vm
+                    templates/leftpanels.vm
+                    templates/macros.vm
+                    templates/menuadmin.vm
+                    templates/menuview.vm
+                    templates/plain.vm
+                    templates/recyclebinlist.vm
+                    templates/rendercontent.vm
+                    templates/rightpanels.vm
+                    templates/textarea_wysiwyg.vm
+                    templates/watch.vm
+                    - ->
+                    templates/xwikivars.vm
+                </value>
+              </property>
+              <property>
+                <name>patternExcludeFiles</name>
+                <value>
+                  <!- - False positives - ->
+                </value>
+              </property>
             <property>
               <name>pathToXWikiWar</name>
               <value>com/xpn/xwiki/products/xwiki-enterprise-web/${pom.version}/xwiki-enterprise-web-${pom.version}.war</value>

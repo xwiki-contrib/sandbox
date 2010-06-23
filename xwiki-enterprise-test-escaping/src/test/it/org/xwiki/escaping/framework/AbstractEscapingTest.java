@@ -46,6 +46,14 @@ import org.xwiki.escaping.suite.FileTest;
  * <p>
  * Note: JUnit4 requires tests to have one public default constructor, subclasses will need to implement
  * it and pass pattern matcher to match file names they can handle.</p>
+ * <p>
+ * The following configuration properties are supported (set in maven):
+ * <ul>
+ * <li>localRepository: Path to maven repository, where XWiki files can be found</li>
+ * <li>pathToXWikiXar: Used to read all documents</li>
+ * <li>filesProduceNoOutput (optional): List of files that are expected to produce empty response</li>
+ * <li>patternExcludeFiles (optional): List of RegEx patterns to exclude files from the tests</li>
+ * </ul></p>
  * 
  * @version $Id$
  * @since 2.5
@@ -65,6 +73,12 @@ public abstract class AbstractEscapingTest implements FileTest
     private Pattern namePattern;
 
     /**
+     * Test fails if response is empty, but output is expected and vice versa.
+     * To set to false, add file name to "filesProduceNoOutput" 
+     */
+    protected boolean shouldProduceOutput = true;
+
+    /**
      * Create new AbstractEscapingTest
      * 
      * @param fileNameMatcher regex pattern used to filter files by name
@@ -80,15 +94,30 @@ public abstract class AbstractEscapingTest implements FileTest
      */
     public boolean initialize(String name, final Reader reader)
     {
-        if (namePattern != null && namePattern.matcher(name).matches()) {
-            this.userInput = parse(reader);
-            if (!userInput.isEmpty()) {
-                this.name = name;
-                // TODO do something
-                return true;
+        // match file name
+        if (namePattern == null || !namePattern.matcher(name).matches()) {
+            return false;
+        }
+
+        // check exclude list
+        for (String pattern : System.getProperty("patternExcludeFiles", "").split("\\s+")) {
+            Pattern exclude = Pattern.compile(pattern);
+            if (exclude.matcher(name).matches()) {
+                return false;
             }
         }
-        return false;
+
+        // check if output should be produced
+        for (String fileName : System.getProperty("filesProduceNoOutput", "").split("\\s+")) {
+            if (fileName.trim().equals(name)) {
+                this.shouldProduceOutput = false;
+            }
+        }
+
+        // finally parse the content
+        this.name = name;
+        this.userInput = parse(reader);
+        return !userInput.isEmpty();
     }
 
     /**
@@ -177,6 +206,6 @@ public abstract class AbstractEscapingTest implements FileTest
     @Override
     public String toString()
     {
-        return name + " " + userInput;
+        return name + (shouldProduceOutput ? " " : " (NO OUTPUT) ") + userInput;
     }
 }

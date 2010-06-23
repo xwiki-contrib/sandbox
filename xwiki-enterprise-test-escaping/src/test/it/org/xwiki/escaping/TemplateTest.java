@@ -31,7 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,6 +44,12 @@ import org.xwiki.validator.ValidationError;
 
 /**
  * Runs the automatically generated escaping tests for all velocity templates found in XWiki enterprise WAR file.
+ * <p>
+ * The following configuration properties are supported (set in maven):
+ * <ul>
+ * <li>localRepository: Path to maven repository, where XWiki files can be found</li>
+ * <li>pathToXWikiWar: Used to read all templates</li>
+ * </ul></p>
  * 
  * @version $Id$
  * @since 2.5
@@ -112,6 +117,7 @@ public class TemplateTest extends AbstractEscapingTest
         String where = "  Template: " + name + "\n  URL: " + url;
         Assert.assertNotNull("Response is null\n" + where, content);
         XMLEscapingValidator validator = new XMLEscapingValidator();
+        validator.setShouldBeEmpty(!this.shouldProduceOutput);
         validator.setDocument(content);
         List<ValidationError> errors;
         try {
@@ -137,13 +143,14 @@ public class TemplateTest extends AbstractEscapingTest
         // TODO match if user name, space name or action is used
         Set<String> input = new HashSet<String>();
         BufferedReader data = new BufferedReader(reader);
-        Pattern pattern = Pattern.compile("\\$\\{?request\\.get\\((?:\"|')(\\w+)(?:\"|')\\)|"
-                                        + "\\$\\{?request\\.getParameter\\((?:\"|')(\\w+)(?:\"|')\\)|"
-                                        + "\\$\\{?request\\.(\\w+)[^(a-zA-Z_0-9]|"
+        Pattern pattern = Pattern.compile("\\$!?\\{?request\\.get\\((?:\"|')(\\w+)(?:\"|')\\)|"
+                                        + "\\$!?\\{?request\\.getParameter\\((?:\"|')(\\w+)(?:\"|')\\)|"
+                                        + "\\$!?\\{?request\\.(\\w+)[^(a-zA-Z_0-9]|"
                                         + "\\b(editor)\\b|"
                                         + "\\b(viewer)\\b|"
                                         + "\\b(section)\\b|"
-                                        + "\\b(template)\\b|"
+                                        + "\\$!?\\{?(template)\\b|"
+                                        + "\\$!?\\{?(revparams)\\b|"
                                         + "\\b(xredirect)\\b|"
                                         + "\\b(x-maximized)\\b|"
                                         + "\\b(xnotification)\\b|"
