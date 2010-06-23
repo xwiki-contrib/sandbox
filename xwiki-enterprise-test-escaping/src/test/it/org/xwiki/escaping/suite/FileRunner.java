@@ -73,6 +73,8 @@ public class FileRunner extends Runner
     @Override
     public Description getDescription()
     {
+        if (test != null)
+            return Description.createSuiteDescription(test.toString());
         return Description.createSuiteDescription(name);
     }
 

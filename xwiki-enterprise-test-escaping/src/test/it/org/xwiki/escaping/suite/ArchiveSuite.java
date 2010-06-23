@@ -30,14 +30,18 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
+import org.junit.runner.manipulation.Sorter;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.FrameworkMethod;
@@ -122,6 +126,12 @@ public class ArchiveSuite extends ParentRunner<Runner>
         super(klass);
         validateTestClass();
         this.runners = createRunners();
+        sort(new Sorter(new Comparator<Description>() {
+            public int compare(Description o1, Description o2)
+            {
+                return o1.getDisplayName().compareTo(o2.getDisplayName());
+            }
+        }));
     }
 
     /**

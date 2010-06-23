@@ -100,14 +100,16 @@ public class XMLEscapingValidator implements Validator
         }
         int lineNr = 1;
         for (String line : document) {
-            int idx = 0;
-            while (line.indexOf(TEST_APOS, idx) >= 0) {
+            int idx = -1;
+            while ((idx = line.indexOf(TEST_APOS, idx + 1)) >= 0) {
                 errors.add(new ValidationError(Type.FATAL, lineNr, idx+1, "Unescaped apostrophe character"));
             }
-            idx = 0;
-            while (line.indexOf(TEST_QUOT, idx) >= 0) {
+            idx = -1;
+            while ((idx = line.indexOf(TEST_QUOT, idx + 1)) >= 0) {
                 errors.add(new ValidationError(Type.FATAL, lineNr, idx+1, "Unescaped quote character"));
             }
+            if (lineNr < 11)
+            System.out.println(lineNr + ": " + line);
             // TODO also check <> and \ for JavaScript
             // TODO check for overescaping
             lineNr++;

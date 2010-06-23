@@ -71,7 +71,7 @@ public class TemplateTest extends AbstractEscapingTest
      */
     public TemplateTest()
     {
-        super(Pattern.compile(".*\\.vm"));
+        super(Pattern.compile(".*/editactions\\.vm"));
     }
 
     @Test

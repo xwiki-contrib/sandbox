@@ -120,9 +120,12 @@ public abstract class AbstractEscapingTest implements FileTest
                 throw new EscapingException("HTTP GET request returned status " + statusCode + " for URL: " + url);
             }
 
-            // get the data
-            byte[] body = get.getResponseBody();
-            return new ByteArrayInputStream(body);
+            // get the data, converting to utf-8
+            String str = get.getResponseBodyAsString();
+            if (str == null) {
+                return null;
+            }
+            return new ByteArrayInputStream(str.getBytes("utf-8"));
         } catch (Exception exception) {
             throw new EscapingException(exception);
         } finally {
@@ -165,5 +168,15 @@ public abstract class AbstractEscapingTest implements FileTest
             AbstractEscapingTest.client = adminClient;
         }
         return AbstractEscapingTest.client;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return name + " [space, page, parameters: " + userInput + "]";
     }
 }
