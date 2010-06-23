@@ -21,13 +21,13 @@ public class Dir2xml
 {
     private final String lineBreak = System.getProperty("line.separator");
 
-    // some MacOS stuff doesn't like the ':' char
-    private final char[] filenameEntities = new char[] {'/', '\u0000', ':', '&'};
-
-    private final String[] filenameEscapeTo = new String[] {"&#47;", "&#0;", "&#58;", "&amp;"};
-
     // Keep track of attributes for each tag so that they can be made into &!attributes files
     private final Map<String, String> attributesByTag = new HashMap<String, String>();
+
+    private final List<List<String>> paths = new ArrayList<List<String>>();
+
+    /** Keep track of the order of elements in the document. */
+    private final int[] numbersByStackDepth = new int[100];
 
     public static void main(String[] args) throws Exception
     {
@@ -75,18 +75,36 @@ public class Dir2xml
     public void toXML(final File fileOrDir, final SchlemielsStringBuilder appendTo, final int nestDepth)
         throws Exception
     {
-        if (fileOrDir.getName().startsWith("&!")) {
+        String fileName = fileOrDir.getName();
+
+        if (fileName.startsWith("&!")) {
             // special files have to be handled seperately.
             return;
         }
-        String XMLfilename = StringEscapeUtils.escapeXml(fileOrDir.getName());
+
+        // remove the file number and change the escaping...
+        String XMLfilename = fileNameToXML(fileName.substring(1 + fileName.indexOf('.')));
         this.addSpaces(appendTo, nestDepth);
         appendTo.append("<").append(XMLfilename);
         this.addAttributes(fileOrDir, appendTo);
         appendTo.append(">");
 
         if (fileOrDir.isDirectory()) {
-            for (File subFile : fileOrDir.listFiles()) {
+            // Sort files by number...
+            File[] subFiles = fileOrDir.listFiles();
+            // This will blow up if the files are sparasely numbered. TODO?
+            File[] sortedFiles = new File[subFiles.length + 1];
+            for (int i = 0; i < subFiles.length; i++) {
+                String subFileName = subFiles[i].getName();
+                sortedFiles[Integer.parseInt(subFileName.substring(0, subFileName.indexOf('.')))] = subFiles[i];
+            }
+
+            for (int i = 0; i < sortedFiles.length; i++) {
+                File subFile = sortedFiles[i];
+                if (subFile == null) {
+                    continue;
+                }
+System.out.println(subFile.getName());
                 this.toXML(subFile, appendTo, nestDepth + 1);
             }
             this.addSpaces(appendTo, nestDepth);
@@ -164,6 +182,7 @@ public class Dir2xml
 
         int lastEntityIndex  = 0;
         int lastClosingBracketIndex = 0;
+        int number = 0;
         ArrayList<String> tagList = new ArrayList<String>();
         SchlemielsStringBuilder meta = new SchlemielsStringBuilder();
 
@@ -188,8 +207,16 @@ public class Dir2xml
             } else if (ch == '>') {
                 // tag closed. If meta then write to meta file, otherwise, push to stack.
                 if (state == 2) {
+
+                    // Advance the number of tags in this element.
+                    number++;
+                    numbersByStackDepth[tagList.size()] = number;
+
                     // opening tag, push to stack.
-                    tagList.add(content.substring(lastEntityIndex + 1, i));
+                    tagList.add(number + "." + XMLToFileName(content.substring(lastEntityIndex + 1, i)));
+
+                    // Switch to a new number since we are now parsing a subelement.
+                    number = 0;
                     lastEntityIndex = i;
                     lastClosingBracketIndex = i;
                     state = 0;
@@ -205,19 +232,30 @@ public class Dir2xml
                     state = 0;
                 } else if (state == 4) {
                     // Empty <tag/>
-                    tagList.add(content.substring(lastEntityIndex + 2, i));
+                    tagList.add(number + "." + XMLToFileName(content.substring(lastEntityIndex + 2, i)));
+                    number++;
                     createFile("", tagList, outDir);
                     tagList.remove(tagList.size() - 1);
                     lastEntityIndex = i;
                     lastClosingBracketIndex = i;
                 } else if (state == 5) {
                     // An </end> tag
-                    if (content.substring(lastEntityIndex + 2, i).equals(tagList.get(tagList.size() - 1))) {
+                    String lastTag = tagList.get(tagList.size() - 1);
+
+                    // Test is the content from the last < to the current position (>)
+                    // the same (when converted to filename format) as the last opened tag? (without it's number)
+                    if (XMLToFileName(content.substring(lastEntityIndex + 2, i)).equals(
+                            lastTag.substring(1 + lastTag.indexOf(".")))) 
+                    {
                         createFile(
                             StringEscapeUtils.unescapeXml(
                                 content.substring(lastClosingBracketIndex + 1, lastEntityIndex)),
                                     tagList, outDir);
+
+                        // drop back one level on the stack.
                         tagList.remove(tagList.size() - 1);
+                        number = numbersByStackDepth[tagList.size()];
+
                         state = 0;
                         lastEntityIndex = i;
                         lastClosingBracketIndex = i;
@@ -278,7 +316,7 @@ public class Dir2xml
                 content = attributesByTag.get(tag);
             } else {
                 // nothing special, just a <tag>
-                ssb.append(escapeFileName(tag)).append("/");
+                ssb.append(tag).append("/");
             }
         }
 
@@ -311,14 +349,20 @@ public class Dir2xml
         }
     }
 
-    public String escapeFileName(String fileName)
+    public String XMLToFileName(String xml)
     {
-        return fileName.replaceAll("&", "&amp;").replaceAll(":", "&#58;").replaceAll("/", "&#47;");
+        return StringEscapeUtils.unescapeXml(xml)
+                   .replaceAll("&", "&amp;")
+                       .replaceAll(":", "&#58;")
+                           .replaceAll("/", "&#47;");
     }
 
-    public String unescapeFileName(String fileName)
+    public String fileNameToXML(String fileName)
     {
-        return fileName.replaceAll("&#47;", "/").replaceAll("&#58;", ":").replaceAll("&amp;", "&");
+        return StringEscapeUtils.escapeXml(
+                   fileName.replaceAll("&#47;", "/")
+                       .replaceAll("&#58;", ":")
+                           .replaceAll("&amp;", "&"));
     }
 
     public static class SchlemielsStringBuilder implements CharSequence

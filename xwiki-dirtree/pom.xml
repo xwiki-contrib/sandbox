@@ -2,7 +2,6 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                         http://maven.apache.org/maven-v4_0_0.xsd">
-
   <artifactId>xwiki-dirtree-runner</artifactId>
   <description>Create java object from directory tree.</description>
   <parent>
@@ -12,34 +11,34 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <build>
-    <defaultGoal>package</defaultGoal>
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.2-beta-5</version>
         <executions>
           <execution>
-            <id>xwiki-dirtree-runner-with-dependencies</id>
+            <configuration>
+              <finalName>dir2xml</finalName>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+              <appendAssemblyId>false</appendAssemblyId>
+              <archive>
+                <manifest>
+                  <mainClass>org.xwiki.tool.dirtree.Dir2xml</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
             <phase>package</phase>
+            <id>xwiki-dirtree-runner-with-dependencies</id>
             <goals>
               <goal>single</goal>
             </goals>
-              <configuration>
-                <descriptorRefs>
-                  <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
-                <finalName>dir2xml</finalName>
-                <appendAssemblyId>false</appendAssemblyId>
-                <archive>
-                  <manifest>
-                    <mainClass>org.xwiki.tool.dirtree.Dir2xml</mainClass>
-                  </manifest>
-                </archive>
-              </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
+    <defaultGoal>package</defaultGoal>
   </build>
   <dependencies>
     <dependency>

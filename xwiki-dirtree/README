@@ -24,18 +24,20 @@ Tag attributes will be output into a file inside the tag directory called &!attr
   <aTag>
     <anotherTag>Content</anotherTag>
   </aTag>
+  <aTag>moreContent</aTag>
 </root>
 
 will produce:
 
-root (directory)
+1.root (directory)
  |
  +-&!attributes (file containing 'attribute="value"')
  |
- +-aTag (directory)
-    |
-    +-anotherTag (file containing 'Content')
-
+ +-1.aTag (directory)
+ |  |
+ |  +-1.anotherTag (file containing 'Content')
+ |  
+ +-2.aTag (file containing 'moreContent')
 
 What doesn't work:
 
@@ -49,7 +51,5 @@ It will try to make aTag into a directory and seeing it has content will throw a
 Same problem.
 
 - XML comments are not treated correctly.
-- When converting an XML document to a dir tree and back, 
-  order is mangled although the XML document remains the same.
 
 Have fun!
