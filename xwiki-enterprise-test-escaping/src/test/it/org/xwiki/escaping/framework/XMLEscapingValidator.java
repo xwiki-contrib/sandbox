@@ -1,0 +1,141 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+package org.xwiki.escaping.framework;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.xwiki.validator.ValidationError;
+import org.xwiki.validator.ValidationError.Type;
+import org.xwiki.validator.Validator;
+
+
+/**
+ * A validator that checks for proper XML escaping. The document must be constructed using the special
+ * test input string (see {@link #getTestInputString()}).
+ * 
+ * @version $Id$
+ * @since 2.5
+ */
+public class XMLEscapingValidator implements Validator
+{
+    /** Unescaped test string containing XML significant characters. */
+    protected static final String INPUT_STRING = "aaa\"bbb'ccc>ddd<eee";
+
+    /** Test for unescaped apostrophe. */
+    protected static final String TEST_APOS = "bbb'ccc";
+
+    /** Test for unescaped quote. */
+    protected static final String TEST_QUOT = "aaa\"bbb";
+
+    /** Source of the XML document to validate. */
+    private List<String> document = new ArrayList<String>();
+
+    /** List of validation errors. */
+    private List<ValidationError> errors = new ArrayList<ValidationError>();
+
+    /**
+     * Get the input string containing XML significant characters that should be used.
+     * 
+     * @return input string to use
+     */
+    public String getTestInputString()
+    {
+        return INPUT_STRING;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.validator.Validator#setDocument(java.io.InputStream)
+     */
+    public void setDocument(InputStream document)
+    {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(document));
+        String line;
+        this.document = new ArrayList<String>();
+        try {
+            while ((line = reader.readLine()) != null) {
+                this.document.add(line);
+            }
+        } catch (IOException exception) {
+            throw new RuntimeException("Could not read document: ", exception);
+        }
+        clear();
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.validator.Validator#validate()
+     */
+    public List<ValidationError> validate()
+    {
+        clear();
+        int lineNr = 1;
+        for (String line : document) {
+            int idx = 0;
+            while (line.indexOf(TEST_APOS, idx) >= 0) {
+                errors.add(new ValidationError(Type.FATAL, lineNr, idx+1, "Unescaped apostrophe character"));
+            }
+            idx = 0;
+            while (line.indexOf(TEST_QUOT, idx) >= 0) {
+                errors.add(new ValidationError(Type.FATAL, lineNr, idx+1, "Unescaped quote character"));
+            }
+            // TODO also check <> and \ for JavaScript
+            // TODO check for overescaping
+            lineNr++;
+        }
+        return errors;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.validator.Validator#getErrors()
+     */
+    public List<ValidationError> getErrors()
+    {
+        return errors;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.validator.Validator#clear()
+     */
+    public void clear()
+    {
+        if (errors == null) {
+            errors = new ArrayList<ValidationError>();
+        }
+        errors.clear();
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.validator.Validator#getName()
+     */
+    public String getName()
+    {
+        return "XML ESCAPING";
+    }
+}
+
