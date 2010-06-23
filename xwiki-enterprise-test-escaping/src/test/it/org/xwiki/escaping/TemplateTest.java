@@ -20,16 +20,20 @@
 
 package org.xwiki.escaping;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Reader;
-import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.EscapingException;
-import org.xwiki.escaping.framework.UserInput;
 import org.xwiki.escaping.suite.ArchiveSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
 
@@ -43,6 +47,9 @@ import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
 @RunWith(ArchiveSuite.class)
 public class TemplateTest extends AbstractEscapingTest
 {
+    /** Static part of the test URL. */
+    private static final String URL_START = "http://127.0.0.1:8080/xwiki/bin/view/";
+
     /**
      * Get the path to the archive from system properties defined in the maven build configuration.
      * 
@@ -63,30 +70,63 @@ public class TemplateTest extends AbstractEscapingTest
     }
 
     @Test
-    public void testBla()
+    public void testEscaping() throws EscapingException
     {
-        System.out.println(name + ": bla");
-    }
-
-    @Test
-    public void testFailRandomly() throws EscapingException
-    {
-        if (new Random().nextInt(10) == 7) {
-            String page = getUrlContent("http://localhost:8080/xwiki/bin/view/Main/");
-            System.out.println(page);
-        }
+        String content = getUrlContent(createUrl("Main", "", null, null));
+        Assert.assertNotNull("Response is null", content);
+        Assert.assertTrue("Not logged in", content.contains("Log-out"));
+        System.out.println(name + ": " + userInput);
     }
 
     /**
-     * 
-     * 
-     * @param reader
-     * @return
+     * {@inheritDoc}
+     * <p>
+     * This implementation does some approximate regex matching to find used parameters and other
+     * common user-controlled things like user name.</p>
      */
     @Override
-    protected UserInput parse(Reader reader)
+    protected Set<String> parse(Reader reader)
     {
-        return new UserInput();
+        Set<String> input = new HashSet<String>();
+        BufferedReader data = new BufferedReader(reader);
+        Pattern pattern = Pattern.compile("\\$\\{?request\\.get\\((?:\"|')(\\w+)(?:\"|')\\)|"
+                                        + "\\$\\{?request\\.getParameter\\((?:\"|')(\\w+)(?:\"|')\\)|"
+                                        + "\\$\\{?request\\.(\\w+)[^(]|"
+                                        + "\\b(editor)\\b|"
+                                        + "\\b(xredirect)\\b|"
+                                        + "\\.(fullName|name)\\b");
+        try {
+            String line;
+            while ((line = data.readLine()) != null) {
+                Matcher match = pattern.matcher(line);
+                while (match.find()) {
+                    for (int i = 1; i <= match.groupCount(); i++) {
+                        input.add(match.group(i));
+                    }
+                }
+            }
+        } catch (IOException exception) {
+            // ignore, use what was already found
+        }
+        return input;
+    }
+
+    /**
+     * Create a target URL from given parameters, adding the template name. URL-escapes everything.
+     * 
+     * @param space space name to use, "Main" is used if null
+     * @param page page name to use, "WebHome" is used if null
+     * @param parameter parameter name to add, omitted if null or empty string
+     * @param value parameter value, empty string is used if null
+     * @return the resulting absolute URL
+     */
+    private String createUrl(String space, String page, String parameter, String value)
+    {
+        String url = URL_START + escapeUrl(space) + "/" + escapeUrl(page) + "?xpage=" + escapeUrl(name);
+        if (parameter != null && !parameter.equals("")) {
+            url += "&" + escapeUrl(parameter) + "=" + (value == null ? "" : escapeUrl(value));
+        }
+        return url;
     }
 }
 

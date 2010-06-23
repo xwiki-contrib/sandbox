@@ -21,6 +21,9 @@
 package org.xwiki.escaping.framework;
 
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.Credentials;
@@ -49,7 +52,7 @@ public abstract class AbstractEscapingTest implements FileTest
     protected String name;
 
     /** User provided data found in the file. */
-    private UserInput userInput;
+    protected Set<String> userInput;
 
     /** Pattern used to match files by name. */
     private Pattern namePattern;
@@ -88,7 +91,7 @@ public abstract class AbstractEscapingTest implements FileTest
      * @param reader the reader associated with the file
      * @return collection of user-controlled input parameters
      */
-    protected abstract UserInput parse(Reader reader);
+    protected abstract Set<String> parse(Reader reader);
 
     /**
      * Download a page from the server and return its content.
@@ -112,10 +115,28 @@ public abstract class AbstractEscapingTest implements FileTest
             }
 
             // get the data
-            return get.getResponseBodyAsString();
+            String result = get.getResponseBodyAsString();
+            get.releaseConnection();
+            return result;
         } catch (Exception exception) {
             get.releaseConnection();
             throw new EscapingException(exception);
+        }
+    }
+
+    /**
+     * URL-escape given string.
+     * 
+     * @param str string to escape
+     * @return URL-escaped {@code str}
+     */
+    protected final String escapeUrl(String str)
+    {
+        try {
+            return URLEncoder.encode(str, "utf-8");
+        } catch (UnsupportedEncodingException exception) {
+            // should not happen
+            throw new RuntimeException("Should not happen: ", exception);
         }
     }
 
