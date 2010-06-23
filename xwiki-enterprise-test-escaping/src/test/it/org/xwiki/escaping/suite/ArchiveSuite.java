@@ -205,7 +205,7 @@ public class ArchiveSuite extends ParentRunner<Runner>
             if (result instanceof FileTest) {
                 FileTest test = (FileTest) result;
                 if (test.initialize(name, reader)) {
-                    list.add(new FileRunner(name, test, getTestClass().getAnnotatedMethods(Test.class)));
+                    list.add(new FileTestRunner(name, test, getTestClass().getAnnotatedMethods(Test.class)));
                 }
                 return;
             }

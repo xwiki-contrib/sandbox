@@ -41,7 +41,7 @@ import org.junit.runners.model.FrameworkMethod;
  * @version $Id$
  * @since 2.4
  */
-public class FileRunner extends Runner
+public class FileTestRunner extends Runner
 {
     /** Name of the tested file. */
     private final String name;
@@ -53,13 +53,13 @@ public class FileRunner extends Runner
     private final List<FrameworkMethod> methods;
 
     /**
-     * Create new FileRunner for the given file.
+     * Create new FileTestRunner for the given file.
      * 
      * @param fileName name of the file to test
      * @param fileTest the test to run
      * @param testMethods a list of test methods from <code>fileTest</code> to run
      */
-    public FileRunner(String fileName, FileTest fileTest, List<FrameworkMethod> testMethods)
+    public FileTestRunner(String fileName, FileTest fileTest, List<FrameworkMethod> testMethods)
     {
         this.name = fileName;
         this.test = fileTest;
