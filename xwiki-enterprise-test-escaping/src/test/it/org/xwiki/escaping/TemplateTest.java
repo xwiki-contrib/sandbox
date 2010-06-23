@@ -24,11 +24,11 @@ import java.io.Reader;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.xwiki.escaping.framework.AbstractEscapingTest;
+import org.xwiki.escaping.framework.EscapingException;
 import org.xwiki.escaping.framework.UserInput;
 import org.xwiki.escaping.suite.ArchiveSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
@@ -69,10 +69,11 @@ public class TemplateTest extends AbstractEscapingTest
     }
 
     @Test
-    public void testFailRandomly()
+    public void testFailRandomly() throws EscapingException
     {
         if (new Random().nextInt(10) == 7) {
-            Assert.fail("buh");
+            String page = getUrlContent("http://localhost:8080/xwiki/bin/view/Main/");
+            System.out.println(page);
         }
     }
 
