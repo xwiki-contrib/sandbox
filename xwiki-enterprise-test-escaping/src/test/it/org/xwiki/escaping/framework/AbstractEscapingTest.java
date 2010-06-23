@@ -28,6 +28,7 @@ import java.net.URLEncoder;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -140,6 +141,7 @@ public abstract class AbstractEscapingTest implements FileTest
         GetMethod get = new GetMethod(url);
         get.setFollowRedirects(true);
         get.setDoAuthentication(true);
+        get.addRequestHeader("Authorization", "Basic " + new String(Base64.encodeBase64("Admin:admin".getBytes())));
 
         // make the request
         HttpClient client = AbstractEscapingTest.getClient();
