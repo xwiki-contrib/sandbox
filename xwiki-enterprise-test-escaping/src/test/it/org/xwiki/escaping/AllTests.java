@@ -19,27 +19,31 @@
  */
 package org.xwiki.escaping;
 
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.extensions.cpsuite.ClasspathSuite;
-import org.junit.extensions.cpsuite.ClasspathSuite.ClassnameFilters;
-import org.junit.extensions.cpsuite.ClasspathSuite.SuiteTypes;
-import org.junit.extensions.cpsuite.SuiteType;
 import org.junit.runner.RunWith;
 
 /**
  * Runs all functional escaping tests.
- * <p>
- * Note: Class names of the test suites should end with Test (otherwise this test is recursively included)</p>
  * 
- * TODO: Use ExcludeBaseTypeFilter instead of filtering by name as soon as it is implemented.
- *
+ * TODO
+ * 1. start and stop the server
+ * 2. actually download something from it
+ * 3. add some basic escaping checks
+ * 4. implement file excludes
+ * 5. implement some manual test (copy requiring 2 parameters is a good example)
+ * 6. add more sophisticated escaping tests -> parsing
+ * 7. add over-escaping test
+ * 
  * @version $Id$
  * @since 2.5
  */
 @RunWith(ClasspathSuite.class)
-@ClassnameFilters({"org\\.xwiki\\.escaping\\..*Test"})
-@SuiteTypes({SuiteType.TEST_CLASSES, SuiteType.RUN_WITH_CLASSES})
 public class AllTests
 {
     /** Because junit disallows any references which persist between tests, there is a context which is static. */
@@ -48,6 +52,9 @@ public class AllTests
     @BeforeClass
     public static void init() throws Exception
     {
+        HttpClient adminClient = new HttpClient();
+        Credentials defaultcreds = new UsernamePasswordCredentials("Admin", "admin");
+        adminClient.getState().setCredentials(AuthScope.ANY, defaultcreds);
 //        context = new PersistentTestContext();
 //        AbstractTest.setContext(context.getUnstoppable());
     }

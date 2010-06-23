@@ -22,14 +22,16 @@ package org.xwiki.escaping;
 
 import java.io.Reader;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.UserInput;
 import org.xwiki.escaping.suite.ArchiveSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
-import org.xwiki.escaping.suite.FileTest;
 
 
 /**
@@ -39,14 +41,8 @@ import org.xwiki.escaping.suite.FileTest;
  * @since 2.5
  */
 @RunWith(ArchiveSuite.class)
-public class TemplateTest implements FileTest
+public class TemplateTest extends AbstractEscapingTest
 {
-    /** File name of the template to use. */
-    private String name;
-
-    /** User provided data found in the file. */
-    private UserInput userInput;
-
     /**
      * Get the path to the archive from system properties defined in the maven build configuration.
      * 
@@ -56,6 +52,14 @@ public class TemplateTest implements FileTest
     public static String getArchivePath()
     {
         return System.getProperty("localRepository") + "/" + System.getProperty("pathToXWikiWar");
+    }
+
+    /**
+     * Create new TemplateTest
+     */
+    public TemplateTest()
+    {
+        super(Pattern.compile(".*\\.vm"));
     }
 
     @Test
@@ -73,40 +77,12 @@ public class TemplateTest implements FileTest
     }
 
     /**
-     * {@inheritDoc}
-     * @see org.xwiki.escaping.suite.FileTest#initialize(java.lang.String, java.io.Reader)
-     */
-    public boolean initialize(String name, final Reader reader)
-    {
-        this.name = name;
-        if (matchName(name)) {
-            this.userInput = parse(reader);
-            if (!userInput.isEmpty()) {
-                // TODO do something
-                return true;
-            }
-        }
-        this.name = null;
-        return false;
-    }
-
-    /**
-     * 
-     * 
-     * @param name
-     * @return
-     */
-    protected boolean matchName(String name)
-    {
-        return (name != null && name.endsWith(".vm"));
-    }
-
-    /**
      * 
      * 
      * @param reader
      * @return
      */
+    @Override
     protected UserInput parse(Reader reader)
     {
         return new UserInput();
