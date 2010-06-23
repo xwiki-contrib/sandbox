@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
@@ -50,6 +51,21 @@ import org.junit.runners.model.TestClass;
  * <p>
  * The path to the archive must be specified using &#064;{@link ArchivePath} or
  * &#064;{@link ArchivePathGetter}.</p>
+ * <p>
+ * This test suite requires the test class to implement {@link FileTest}. It defines an initialization
+ * method to set up the test case for each file based on the file content. The test methods should be
+ * annotated with &#064;{@link Test}, similar to default JUnit4 behavior.</p>
+ * <p>
+ * Note that custom attributes of &#064;{@link Test} annotation are currently ignored. Other JUnit4 annotations
+ * like &#064;{@link Before} and &#064;{@link After} are not supported.</p>
+ * <p>
+ * The lifetime of each {@link FileTest} is guaranteed to be as follows:
+ * <ul>
+ * <li>An instance of the file test class is created.</li>
+ * <li>The method {@link #initialize(String, Reader)} is called.</li>
+ * <li>The stream associated with the {@link Reader} that was used to initialize the test is closed.</li>
+ * <li>All methods marked with the &#064;{@link Test} annotation are called.</li>
+ * </ul></p>
  * 
  * @version $Id$
  * @since 2.5
@@ -101,7 +117,7 @@ public class ArchiveSuite extends ParentRunner<Runner>
      * @param builder default junit builder
      * @throws InitializationError on errors
      */
-    public ArchiveSuite(Class<? extends FileTest> klass, RunnerBuilder builder) throws InitializationError
+    public ArchiveSuite(Class<?> klass, RunnerBuilder builder) throws InitializationError
     {
         super(klass);
         validateTestClass();
@@ -179,7 +195,7 @@ public class ArchiveSuite extends ParentRunner<Runner>
             if (result instanceof FileTest) {
                 FileTest test = (FileTest) result;
                 if (test.initialize(name, reader)) {
-                    list.add(new FileRunner(name, test));
+                    list.add(new FileRunner(name, test, getTestClass().getAnnotatedMethods(Test.class)));
                 }
                 return;
             }
@@ -198,11 +214,16 @@ public class ArchiveSuite extends ParentRunner<Runner>
     private void validateTestClass() throws InitializationError
     {
         TestClass test = getTestClass();
+        List<Throwable> errors= new ArrayList<Throwable>();
         if (!FileTest.class.isAssignableFrom(test.getJavaClass())) {
-            throw new InitializationError("The test class \"" + test.getName() + "\" should implement FileTest");
+            errors.add(new Exception("The test class " + test.getName() + " should implement FileTest"));
         }
         if (test.getOnlyConstructor().getParameterTypes().length != 0) {
-            throw new InitializationError("Constructor of \"" + test.getName() + "\" should have no parameters");
+            errors.add(new Exception("Constructor of " + test.getName() + " should have no parameters"));
+        }
+        validatePublicVoidNoArgMethods(Test.class, false, errors);
+        if (errors.size() != 0) {
+            throw new InitializationError(errors);
         }
     }
 

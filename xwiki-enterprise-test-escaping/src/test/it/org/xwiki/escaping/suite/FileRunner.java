@@ -20,15 +20,23 @@
 
 package org.xwiki.escaping.suite;
 
+import java.util.List;
+
+import org.junit.Ignore;
 import org.junit.internal.AssumptionViolatedException;
+import org.junit.internal.runners.statements.InvokeMethod;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
+import org.junit.runners.model.FrameworkMethod;
 
 
 /**
- * 
+ * A custom runner that runs all tests methods found in the given {@link FileTest} in one block.
+ * <p>
+ * The test fails if one of the test methods fail. The test fails with an error, if one of the methods
+ * produces an error.  The failure message will contain a list of errors and failures.</p>
  * 
  * @version $Id$
  * @since 2.4
@@ -39,18 +47,23 @@ public class FileRunner extends Runner
     private final String name;
 
     /** The test to run. */
-    private FileTest test;
+    private final FileTest test;
+
+    /** The list of tests to run. */
+    private final List<FrameworkMethod> methods;
 
     /**
      * Create new FileRunner for the given file.
      * 
      * @param fileName name of the file to test
      * @param fileTest the test to run
+     * @param testMethods a list of test methods from <code>fileTest</code> to run
      */
-    public FileRunner(String fileName, FileTest fileTest)
+    public FileRunner(String fileName, FileTest fileTest, List<FrameworkMethod> testMethods)
     {
         this.name = fileName;
         this.test = fileTest;
+        this.methods = testMethods;
     }
 
     /**
@@ -70,9 +83,18 @@ public class FileRunner extends Runner
     @Override
     public void run(RunNotifier notifier)
     {
+        if (methods == null || methods.size() == 0) {
+            return;
+        }
         notifier.fireTestStarted(getDescription());
+        // TODO make a list of all errors
         try {
-            
+            for (FrameworkMethod method : methods) {
+                if (method.getAnnotation(Ignore.class) != null) {
+                    continue;
+                }
+                new InvokeMethod(method, test).evaluate();
+            }
         } catch (AssumptionViolatedException exception) {
             notifier.fireTestAssumptionFailed(new Failure(getDescription(), exception));
         } catch (Throwable exception) {

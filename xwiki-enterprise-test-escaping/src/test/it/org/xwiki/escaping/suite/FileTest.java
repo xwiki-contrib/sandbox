@@ -22,8 +22,6 @@ package org.xwiki.escaping.suite;
 
 import java.io.Reader;
 
-import org.junit.Test;
-
 
 /**
  * Defines a file test that can be run by the {@link ArchiveSuite}.
@@ -31,15 +29,12 @@ import org.junit.Test;
  * {@link ArchiveSuite} reads files from an archive and generates a {@link FileTest} for each of them.
  * The implementations can decide whether the given file can be tested and how it should be tested.</p>
  * <p>
- * All test implementations should have one default constructor. The lifetime of a {@link FileTest} is
- * guaranteed to be as follows:
- * <ul>
- * <li>An instance of the file test class is created.</li>
- * <li>The method {@link #initialize(String, Reader)} is called.</li>
- * <li>The stream associated with the {@link Reader} that was used to initialize the test is closed.</li>
- * <li>All methods marked with the &#064;{@link Test} annotation are called.</li>
- * <li>All references to the file test instance are cleared immediately thereafter.</li>
- * </ul></p>
+ * All test implementations should have one default constructor. The initialization method
+ * {@link #initialize(String, Reader)} is guaranteed to be called only once, before any other public methods
+ * are called.</p>
+ * <p>
+ * Note that the {@link Reader} passed to {@link #initialize(String, Reader)} is invalidated right after the
+ * initialization phase.</p>
  * 
  * @version $Id$
  * @since 2.5
@@ -50,10 +45,10 @@ public interface FileTest
      * Initialize the test. If this method returns false, the test is not run at all (is not counted
      * as a success or failure).
      * 
-     * @param name
-     * @param reader
+     * @param name file name to use
+     * @param reader the reader associated with the file data, should not be used after initialization
      * @return true if the test was initialized successfully and should be executed, false otherwise
      */
-    boolean initialize(String name, Reader reader);
+    boolean initialize(String name, final Reader reader);
 }
 
