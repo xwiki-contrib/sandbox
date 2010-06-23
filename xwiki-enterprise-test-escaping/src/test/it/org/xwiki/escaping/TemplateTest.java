@@ -20,10 +20,9 @@
 
 package org.xwiki.escaping;
 
-import org.junit.Test;
+import org.junit.experimental.theories.suppliers.TestedOn;
 import org.junit.runner.RunWith;
 import org.xwiki.escaping.framework.ArchiveSuite;
-import org.xwiki.escaping.framework.ArchiveSuite.ArchivePath;
 import org.xwiki.escaping.framework.ArchiveSuite.ArchivePathGetter;
 
 
@@ -34,15 +33,13 @@ import org.xwiki.escaping.framework.ArchiveSuite.ArchivePathGetter;
  * @since 2.5
  */
 @RunWith(ArchiveSuite.class)
-@ArchivePath("test")
 public class TemplateTest
 {
-    @Test
-    public void testAuto()
-    {
-        System.out.println("\nAutomatic test");
-    }
-
+    /**
+     * The templates are read from the XWiki XAR, defined in a maven property.
+     * 
+     * @return local path to the XAR archive to use
+     */
     @ArchivePathGetter
     public static String getArchivePath()
     {

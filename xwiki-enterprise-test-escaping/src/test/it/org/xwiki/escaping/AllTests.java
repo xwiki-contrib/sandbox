@@ -22,16 +22,22 @@ package org.xwiki.escaping;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.extensions.cpsuite.ClasspathSuite;
+import org.junit.extensions.cpsuite.ClasspathSuite.ClassnameFilters;
+import org.junit.extensions.cpsuite.ClasspathSuite.SuiteTypes;
+import org.junit.extensions.cpsuite.SuiteType;
 import org.junit.runner.RunWith;
-import org.xwiki.escaping.framework.ArchiveSuite;
 
 /**
  * Runs all functional escaping tests.
+ * <p>
+ * Note: Class names of the test suites should end with Test (otherwise this test is recursively included)</p>
  *
  * @version $Id$
  * @since 2.5
  */
 @RunWith(ClasspathSuite.class)
+@ClassnameFilters({"org\\.xwiki\\.escaping\\..*Test"})
+@SuiteTypes({SuiteType.TEST_CLASSES, SuiteType.RUN_WITH_CLASSES})
 public class AllTests
 {
     /** Because junit disallows any references which persist between tests, there is a context which is static. */

@@ -25,6 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -64,7 +66,8 @@ public class ArchiveSuite extends ParentRunner<Runner>
      * Marks the method that should be used to retrieve the path to the archive to use. Overrides
      * &#064;{@link ArchivePath}.
      * <p>
-     * This should be a public static method without parameters and returning String, for example:
+     * The getter method should be a public static method returning String and not taking any arguments.
+     * Only one method should have this annotation. Example:
      * <pre>
      *     &#064;ArchivePathMethod
      *     public static String getPath() {
@@ -78,7 +81,13 @@ public class ArchiveSuite extends ParentRunner<Runner>
     @Documented
     public @interface ArchivePathGetter
     {
+        // no attributes
     }
+
+
+    /** Path to the archive to use. */
+    private final String archivePath;
+
 
     /**
      * Create new ArchiveSuite
@@ -90,32 +99,9 @@ public class ArchiveSuite extends ParentRunner<Runner>
     public ArchiveSuite(Class< ? > klass, RunnerBuilder builder) throws InitializationError
     {
         super(klass);
+        this.archivePath = getArchivePathFromAnnotation();
         System.out.println("\nArchiveSuite(class: " + klass.getCanonicalName() + ", builder: " + builder.toString() + ")");
-        
-        ArchivePath archivePath = klass.getAnnotation(ArchivePath.class);
-        if (archivePath != null) {
-            System.out.println("  Archive path: " + archivePath.value());
-        }
-
-        List<FrameworkMethod> getters = getTestClass().getAnnotatedMethods(ArchivePathGetter.class);
-        if (getters.size() != 1) {
-            // bad
-        }
-        try {
-            Object path = getters.get(0).getMethod().invoke(null);
-            if (path instanceof String) {
-                System.out.println("  Archive path (get): " + (String) path);
-            }
-        } catch (IllegalArgumentException exception) {
-            // TODO Auto-generated catch block
-            exception.printStackTrace();
-        } catch (IllegalAccessException exception) {
-            // TODO Auto-generated catch block
-            exception.printStackTrace();
-        } catch (InvocationTargetException exception) {
-            // TODO Auto-generated catch block
-            exception.printStackTrace();
-        }
+        System.out.println("  Archive path: " + archivePath);
     }
 
     /**
@@ -154,5 +140,84 @@ public class ArchiveSuite extends ParentRunner<Runner>
     }
 
 
+
+    /**
+     * Retrieve the path to the archive form annotations. Throws an exception if no annotations can
+     * be found, when the annotation is used incorrectly or the path is invalid.
+     * 
+     * @return path to the archive
+     * @throws InitializationError when an error occurs
+     */
+    private String getArchivePathFromAnnotation() throws InitializationError
+    {
+        String path = null;
+
+        // try class annotation first
+        ArchivePath classAnnotation = getTestClass().getJavaClass().getAnnotation(ArchivePath.class);
+        if (classAnnotation != null) {
+            path = classAnnotation.value();
+        }
+
+        // override by getter method, if present
+        List<FrameworkMethod> getters = getTestClass().getAnnotatedMethods(ArchivePathGetter.class);
+        if (getters.size() > 1) {
+            throw new InitializationError("Only one method should be annotated with @ArchivePathGetter. "
+                + "The test case \"" + getTestClass().getName() + "\" has " + getters.size() + " annotated methods.");
+        }
+        if (classAnnotation == null && getters.size() == 0) {
+            throw new InitializationError("No archive path annotations found. The test case \""
+                + getTestClass().getName() + "\" should be annotated with @ArchivePath or @ArchivePathGetter");
+        }
+        if (getters.size() == 1) {
+            path = invokeGetter(getters.get(0).getMethod());
+        }
+
+        // validate the path
+        if (path == null) {
+            throw new InitializationError("Archive path is null.");
+        }
+        return path;
+    }
+
+    /**
+     * Check that the archive getter method has the expected type and invoke it.
+     * 
+     * @param getter the getter method to use
+     * @return the resulting archive path
+     * @throws InitializationError on errors
+     */
+    private String invokeGetter(Method getter) throws InitializationError
+    {
+        List<Throwable> errors = new LinkedList<Throwable>();
+        Class<?> getterClass = getter.getDeclaringClass();
+        String getterName = getterClass.getName() + "." + getter.getName();
+        if (!Modifier.isPublic(getterClass.getModifiers())) {
+            errors.add(new Exception("The class " + getterClass.getName() + " should be public."));
+        }
+        if (!Modifier.isPublic(getter.getModifiers())) {
+            errors.add(new Exception("The method " + getterName + " should be public."));
+        }
+        if (!Modifier.isStatic(getter.getModifiers())) {
+            errors.add(new Exception("The method " + getterName + " should be static."));
+        }
+        if (!getter.getReturnType().equals(String.class)) {
+            errors.add(new Exception("The method " + getterName + " should return String."));
+        }
+        if (getter.getParameterTypes().length != 0) {
+            errors.add(new Exception("The method " + getterName + " should have no parameters."));
+        }
+        if (errors.size() != 0) {
+            throw new InitializationError(errors);
+        }
+        try {
+            Object result = getter.invoke(null);
+            if (result instanceof String) {
+                return (String) result;
+            }
+        } catch (Exception exception) {
+            throw new InitializationError(exception);
+        }
+        return null;
+    }
 }
 
