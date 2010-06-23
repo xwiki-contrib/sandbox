@@ -17,31 +17,36 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.escaping.framework;
+package org.xwiki.escaping.suite;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
-import org.junit.runners.Suite;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.RunnerBuilder;
+import org.junit.runners.model.TestClass;
 
 
 /**
- * JUnit4 test suite that generates tests based on files found in a zip/war/xar/jar archive.
+ * JUnit4 test suite that generates tests based on files found in a Zip (i.e. also war/xar/jar) archive.
  * <p>
  * The path to the archive must be specified using &#064;{@link ArchivePath} or
  * &#064;{@link ArchivePathGetter}.</p>
@@ -85,23 +90,22 @@ public class ArchiveSuite extends ParentRunner<Runner>
     }
 
 
-    /** Path to the archive to use. */
-    private final String archivePath;
+    /** List of test runners build, one for each matching file found in the archive. */
+    private final List<Runner> runners;
 
 
     /**
-     * Create new ArchiveSuite
+     * Create new ArchiveSuite.
      * 
-     * @param klass
-     * @param builder
-     * @throws InitializationError
+     * @param klass the annotated test class
+     * @param builder default junit builder
+     * @throws InitializationError on errors
      */
-    public ArchiveSuite(Class< ? > klass, RunnerBuilder builder) throws InitializationError
+    public ArchiveSuite(Class<? extends FileTest> klass, RunnerBuilder builder) throws InitializationError
     {
         super(klass);
-        this.archivePath = getArchivePathFromAnnotation();
-        System.out.println("\nArchiveSuite(class: " + klass.getCanonicalName() + ", builder: " + builder.toString() + ")");
-        System.out.println("  Archive path: " + archivePath);
+        validateTestClass();
+        this.runners = createRunners();
     }
 
     /**
@@ -111,9 +115,7 @@ public class ArchiveSuite extends ParentRunner<Runner>
     @Override
     protected List<Runner> getChildren()
     {
-        System.out.println("ArchiveSuite.getChildren()");
-        // TODO Auto-generated method stub
-        return new LinkedList<Runner>();
+        return runners;
     }
 
     /**
@@ -123,8 +125,7 @@ public class ArchiveSuite extends ParentRunner<Runner>
     @Override
     protected Description describeChild(Runner child)
     {
-        System.out.println("ArchiveSuite.describeChild(child: " + child + ")");
-        return Description.createSuiteDescription(getClass());
+        return child.getDescription();
     }
 
     /**
@@ -134,21 +135,85 @@ public class ArchiveSuite extends ParentRunner<Runner>
     @Override
     protected void runChild(Runner child, RunNotifier notifier)
     {
-        System.out.println("ArchiveSuite.runChild(child: " + child + ", notifier: " + notifier + ")");
-        // TODO Auto-generated method stub
-        
+        child.run(notifier);
     }
 
+    /**
+     * Read the archive and build a list of runners for its content.
+     * 
+     * @return a list of test runners
+     * @throws InitializationError on errors
+     */
+    private List<Runner> createRunners() throws InitializationError
+    {
+        final ZipFile archive = getArchiveFromAnnotation();
+        List<Runner> list = new ArrayList<Runner>();
+        Enumeration< ? extends ZipEntry> entries = archive.entries();
+        try {
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                if (entry.isDirectory()) {
+                    continue;
+                }
+                Reader reader = new InputStreamReader(archive.getInputStream(entry));
+                addTest(list, entry.getName(), reader);
+            }
+            archive.close();
+        } catch (IOException exception) {
+            throw new InitializationError(exception);
+        }
+        return list;
+    }
 
+    /**
+     * Create and initialize an instance of the test class for given file.
+     * 
+     * @param name file name to use
+     * @param reader the reader associated with the file data
+     * @throws InitializationError on errors
+     */
+    private void addTest(List<Runner> list, String name, Reader reader) throws InitializationError
+    {
+        try {
+            Object result = getTestClass().getOnlyConstructor().newInstance();
+            if (result instanceof FileTest) {
+                FileTest test = (FileTest) result;
+                if (test.initialize(name, reader)) {
+                    list.add(new FileRunner(name, test));
+                }
+                return;
+            }
+        } catch (Exception exception) {
+            // should not happen, since the test class was validated before
+            throw new InitializationError(exception);
+        }
+        throw new InitializationError("Failed to initialize the test for \"" + name + "\"");
+    }
+
+    /**
+     * Validate that the test class implements {@link FileTest} and has the expected default constructor.
+     * 
+     * @throws InitializationError
+     */
+    private void validateTestClass() throws InitializationError
+    {
+        TestClass test = getTestClass();
+        if (!FileTest.class.isAssignableFrom(test.getJavaClass())) {
+            throw new InitializationError("The test class \"" + test.getName() + "\" should implement FileTest");
+        }
+        if (test.getOnlyConstructor().getParameterTypes().length != 0) {
+            throw new InitializationError("Constructor of \"" + test.getName() + "\" should have no parameters");
+        }
+    }
 
     /**
      * Retrieve the path to the archive form annotations. Throws an exception if no annotations can
      * be found, when the annotation is used incorrectly or the path is invalid.
      * 
-     * @return path to the archive
+     * @return the Zip archive to use
      * @throws InitializationError when an error occurs
      */
-    private String getArchivePathFromAnnotation() throws InitializationError
+    private ZipFile getArchiveFromAnnotation() throws InitializationError
     {
         String path = null;
 
@@ -176,7 +241,11 @@ public class ArchiveSuite extends ParentRunner<Runner>
         if (path == null) {
             throw new InitializationError("Archive path is null.");
         }
-        return path;
+        try {
+            return new ZipFile(path);
+        } catch (IOException exception) {
+            throw new InitializationError(exception);
+        }
     }
 
     /**
@@ -188,7 +257,7 @@ public class ArchiveSuite extends ParentRunner<Runner>
      */
     private String invokeGetter(Method getter) throws InitializationError
     {
-        List<Throwable> errors = new LinkedList<Throwable>();
+        List<Throwable> errors = new ArrayList<Throwable>();
         Class<?> getterClass = getter.getDeclaringClass();
         String getterName = getterClass.getName() + "." + getter.getName();
         if (!Modifier.isPublic(getterClass.getModifiers())) {

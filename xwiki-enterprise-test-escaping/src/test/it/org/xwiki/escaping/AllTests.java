@@ -31,6 +31,8 @@ import org.junit.runner.RunWith;
  * Runs all functional escaping tests.
  * <p>
  * Note: Class names of the test suites should end with Test (otherwise this test is recursively included)</p>
+ * 
+ * TODO: Use ExcludeBaseTypeFilter instead of filtering by name as soon as it is implemented.
  *
  * @version $Id$
  * @since 2.5

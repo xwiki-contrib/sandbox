@@ -20,14 +20,16 @@
 
 package org.xwiki.escaping;
 
-import org.junit.experimental.theories.suppliers.TestedOn;
+import java.io.Reader;
+
 import org.junit.runner.RunWith;
-import org.xwiki.escaping.framework.ArchiveSuite;
-import org.xwiki.escaping.framework.ArchiveSuite.ArchivePathGetter;
+import org.xwiki.escaping.framework.UserInput;
+import org.xwiki.escaping.suite.ArchiveSuite;
+import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
 
 
 /**
- * Runs the automatically generated escaping tests for all velocity templates found in XWiki enterprise war.
+ * Runs the automatically generated escaping tests for all velocity templates found in XWiki enterprise WAR file.
  * 
  * @version $Id$
  * @since 2.5
@@ -36,14 +38,34 @@ import org.xwiki.escaping.framework.ArchiveSuite.ArchivePathGetter;
 public class TemplateTest
 {
     /**
-     * The templates are read from the XWiki XAR, defined in a maven property.
+     * Get the path to the archive from system properties defined in the maven build configuration.
      * 
-     * @return local path to the XAR archive to use
+     * @return local path to the WAR archive to use
      */
     @ArchivePathGetter
     public static String getArchivePath()
     {
-        return System.getProperty("localRepository") + "/" + System.getProperty("pathToXWikiXar");
+        return System.getProperty("localRepository") + "/" + System.getProperty("pathToXWikiWar");
+    }
+
+    public void create(String name, Reader reader)
+    {
+        if (matchName(name)) {
+            UserInput input = parse(reader);
+            if (!input.isEmpty()) {
+                // TODO do something
+            }
+        }
+    }
+
+    protected boolean matchName(String name)
+    {
+        return (name != null && name.endsWith(".vm"));
+    }
+
+    protected UserInput parse(Reader reader)
+    {
+        return new UserInput();
     }
 }
 

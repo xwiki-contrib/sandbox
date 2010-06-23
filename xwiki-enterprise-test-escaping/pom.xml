@@ -105,6 +105,12 @@
           <!-- Display report on screen when all tests are completed -->  
           <useFile>false</useFile>
           <reportFormat>plain</reportFormat>
+          <systemProperties>
+            <property>
+              <name>pathToXWikiWar</name>
+              <value>com/xpn/xwiki/products/xwiki-enterprise-web/${pom.version}/xwiki-enterprise-web-${pom.version}.war</value>
+            </property>
+          </systemProperties>
         </configuration>
       </plugin>
     </plugins>
