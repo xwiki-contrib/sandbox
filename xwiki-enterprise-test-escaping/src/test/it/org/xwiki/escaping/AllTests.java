@@ -38,7 +38,7 @@ import org.xwiki.test.XWikiExecutor;
  * 5. add over-escaping test
  * 6. add a way to specify which action to use with some parameters
  * 7. test for escaping of action
- * 8. extra parameter for skin-specific templates
+ * 8. add variable names that are bound to request parameters to the parsing regex (might need to use another URL)
  * 
  * @version $Id$
  * @since 2.5

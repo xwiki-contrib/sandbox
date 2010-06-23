@@ -193,13 +193,18 @@ public class TemplateTest extends AbstractEscapingTest
     private String createUrl(String space, String page, String parameter, String value)
     {
         String template = name.replaceAll("^.+/", "").replaceAll("\\.\\w+$", "");
+        String skin = "default";
+        if (name.startsWith("skins")) {
+            skin = name.replaceFirst("^\\w+/", "").replaceAll("/.+$", "");
+        }
         if (space == null) {
             space = "Main";
         }
         if (page == null) {
             page = "WebHome";
         }
-        String url = URL_START + escapeUrl(space) + "/" + escapeUrl(page) + "?xpage=" + escapeUrl(template);
+        String url = URL_START + escapeUrl(space) + "/" + escapeUrl(page);
+        url += "?skin=" + skin + "&xpage=" + escapeUrl(template);
         if (parameter != null && !parameter.equals("")) {
             url += "&" + escapeUrl(parameter) + "=" + (value == null ? "" : escapeUrl(value));
         }
