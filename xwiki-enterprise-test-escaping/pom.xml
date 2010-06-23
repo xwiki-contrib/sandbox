@@ -40,32 +40,19 @@
       <version>1.2.5</version>
       <scope>test</scope>
     </dependency>
-    <!-- probably not needed
-    <dependency>
-      <groupId>com.xpn.xwiki.platform</groupId>
-      <artifactId>xwiki-core</artifactId>
-      <version>${platform.core.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.xpn.xwiki.products</groupId>
-      <artifactId>xwiki-enterprise-wiki</artifactId>
-      <version>${pom.version}</version>
-      <type>xar</type>
-      <scope>test</scope>
-    </dependency>
-    -->
-    <!-- TODO probably needed -->
+    <!-- TODO maybe needed
     <dependency>
       <groupId>org.xwiki.platform.tools</groupId>
       <artifactId>xwiki-standards-validator</artifactId>
       <version>${platform.tool.standards-validator.version}</version>
     </dependency>
+    -->
     <!-- TODO cleanup -->
     <dependency>
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
     </dependency>
+    <!-- TODO maybe needed
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -75,6 +62,7 @@
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
     </dependency>
+    -->
   </dependencies>
   <build>
     <plugins>
@@ -105,12 +93,14 @@
           <!-- Display report on screen when all tests are completed -->  
           <useFile>false</useFile>
           <reportFormat>plain</reportFormat>
+          <!-- FIXME must be added to ../pom.xml
           <systemProperties>
             <property>
               <name>pathToXWikiWar</name>
               <value>com/xpn/xwiki/products/xwiki-enterprise-web/${pom.version}/xwiki-enterprise-web-${pom.version}.war</value>
             </property>
           </systemProperties>
+          -->
         </configuration>
       </plugin>
     </plugins>

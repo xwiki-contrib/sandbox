@@ -19,21 +19,18 @@
  */
 package org.xwiki.escaping;
 
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.extensions.cpsuite.ClasspathSuite;
 import org.junit.runner.RunWith;
 
+import org.xwiki.test.XWikiExecutor;
+
 /**
- * Runs all functional escaping tests.
+ * Parent test suite that runs all functional escaping tests.
+ * We start and stop XWiki here.
  * 
  * TODO
- * 1. start and stop the server
- * 2. actually download something from it
  * 3. add some basic escaping checks
  * 4. implement file excludes
  * 5. implement some manual test (copy requiring 2 parameters is a good example)
@@ -46,22 +43,22 @@ import org.junit.runner.RunWith;
 @RunWith(ClasspathSuite.class)
 public class AllTests
 {
-    /** Because junit disallows any references which persist between tests, there is a context which is static. */
-//    private static PersistentTestContext context;
+    /** Executes XWiki server. */
+    private static XWikiExecutor executor;
 
+    /**
+     * Start XWiki server.
+     */
     @BeforeClass
     public static void init() throws Exception
     {
-        HttpClient adminClient = new HttpClient();
-        Credentials defaultcreds = new UsernamePasswordCredentials("Admin", "admin");
-        adminClient.getState().setCredentials(AuthScope.ANY, defaultcreds);
-//        context = new PersistentTestContext();
-//        AbstractTest.setContext(context.getUnstoppable());
+        AllTests.executor = new XWikiExecutor(0);
+        AllTests.executor.start();
     }
 
     @AfterClass
     public static void shutdown() throws Exception
     {
-//        context.shutdown();
+        AllTests.executor.stop();
     }
 }
