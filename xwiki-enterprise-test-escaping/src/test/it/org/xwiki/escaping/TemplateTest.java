@@ -29,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -62,7 +63,7 @@ public class TemplateTest extends AbstractEscapingTest
     }
 
     /**
-     * Create new TemplateTest
+     * Create new TemplateTest.
      */
     public TemplateTest()
     {
@@ -70,12 +71,49 @@ public class TemplateTest extends AbstractEscapingTest
     }
 
     @Test
-    public void testEscaping() throws EscapingException
+    @Ignore
+    public void testSpaceEscaping() throws EscapingException
     {
-        String content = getUrlContent(createUrl("Main", "", null, null));
-        Assert.assertNotNull("Response is null", content);
-        Assert.assertTrue("Not logged in", content.contains("Log-out"));
-        System.out.println(name + ": " + userInput);
+        // space name
+        String url = createUrl(INPUT_STRING, null, null, null);
+        String content = getUrlContent(url);
+        checkUnderEscaping(content, "space name", url);
+    }
+
+    @Test
+    @Ignore
+    public void testPageEscaping() throws EscapingException
+    {
+        // page name
+        String url = createUrl("Main", INPUT_STRING, null, null);
+        String content = getUrlContent(url);
+        checkUnderEscaping(content, "page name", url);
+    }
+
+    @Test
+    public void testParameterEscaping() throws EscapingException
+    {
+        // all found parameters
+        for (String parameter : userInput) {
+            String url = createUrl("Main", null, parameter, INPUT_STRING);
+            String content = getUrlContent(url);
+            checkUnderEscaping(content, "\"" + parameter + "\"", url);
+        }
+    }
+
+    /**
+     * Check for unescaped data in the given {@code content}.
+     * 
+     * @param content content of the {@code url}
+     * @param description description of the test
+     * @param url URL used in the test
+     */
+    private void checkUnderEscaping(String content, String description, String url)
+    {
+        String where = "template: " + name + ", URL: " + url;
+        Assert.assertNotNull("Response is null, " + where, content);
+        Assert.assertFalse("Unescaped apostrophe in " + description + ", " + where, content.contains(TEST_APOS));
+        Assert.assertFalse("Unescaped quote in " + description + ", " + where, content.contains(TEST_QUOT));
     }
 
     /**
@@ -87,21 +125,37 @@ public class TemplateTest extends AbstractEscapingTest
     @Override
     protected Set<String> parse(Reader reader)
     {
+        // TODO match if user name, space name or action is used
         Set<String> input = new HashSet<String>();
         BufferedReader data = new BufferedReader(reader);
         Pattern pattern = Pattern.compile("\\$\\{?request\\.get\\((?:\"|')(\\w+)(?:\"|')\\)|"
                                         + "\\$\\{?request\\.getParameter\\((?:\"|')(\\w+)(?:\"|')\\)|"
-                                        + "\\$\\{?request\\.(\\w+)[^(]|"
+                                        + "\\$\\{?request\\.(\\w+)[^(a-zA-Z_0-9]|"
                                         + "\\b(editor)\\b|"
+                                        + "\\b(viewer)\\b|"
+                                        + "\\b(section)\\b|"
+                                        + "\\b(template)\\b|"
                                         + "\\b(xredirect)\\b|"
-                                        + "\\.(fullName|name)\\b");
+                                        + "\\b(x-maximized)\\b|"
+                                        + "\\b(xnotification)\\b|"
+                                        + "\\b(classname)\\b|"
+                                        + "\\b(comment)\\b|"
+                                        + "\\b(rev1)\\b|"
+                                        + "\\b(rev2)\\b|"
+                                        + "\\b(sourcedoc)\\b|"
+                                        + "\\b(targetdoc)\\b|"
+                                        + "\\b(srid)\\b|"
+                                        + "\\b(language)\\b");
         try {
             String line;
             while ((line = data.readLine()) != null) {
                 Matcher match = pattern.matcher(line);
                 while (match.find()) {
-                    for (int i = 1; i <= match.groupCount(); i++) {
-                        input.add(match.group(i));
+                    for (int i = 1; i < match.groupCount(); i++) {
+                        String parameter = match.group(i);
+                        if (parameter != null && !parameter.matches("\\s*")) {
+                            input.add(parameter);
+                        }
                     }
                 }
             }
@@ -122,7 +176,14 @@ public class TemplateTest extends AbstractEscapingTest
      */
     private String createUrl(String space, String page, String parameter, String value)
     {
-        String url = URL_START + escapeUrl(space) + "/" + escapeUrl(page) + "?xpage=" + escapeUrl(name);
+        String template = name.replaceAll("^.+/", "").replaceAll("\\.\\w+$", "");
+        if (space == null) {
+            space = "Main";
+        }
+        if (page == null) {
+            page = "WebHome";
+        }
+        String url = URL_START + escapeUrl(space) + "/" + escapeUrl(page) + "?xpage=" + escapeUrl(template);
         if (parameter != null && !parameter.equals("")) {
             url += "&" + escapeUrl(parameter) + "=" + (value == null ? "" : escapeUrl(value));
         }

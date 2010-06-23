@@ -45,6 +45,15 @@ import org.xwiki.escaping.suite.FileTest;
  */
 public abstract class AbstractEscapingTest implements FileTest
 {
+    /** Unescaped test string containing XML significant characters. */
+    protected static final String INPUT_STRING = "aaa\"bbb'ccc>ddd<eee";
+
+    /** Test for unescaped apostrophe. */
+    protected static final String TEST_APOS = "bbb'ccc";
+
+    /** Test for unescaped quote. */
+    protected static final String TEST_QUOT = "aaa\"bbb";
+
     /** HTTP client shared between all subclasses. */
     private static HttpClient client;
 

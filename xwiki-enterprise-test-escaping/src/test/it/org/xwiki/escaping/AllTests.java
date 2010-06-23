@@ -31,11 +31,18 @@ import org.xwiki.test.XWikiExecutor;
  * We start and stop XWiki here.
  * 
  * TODO
- * 3. add some basic escaping checks
- * 4. implement file excludes
- * 5. implement some manual test (copy requiring 2 parameters is a good example)
- * 6. add more sophisticated escaping tests -> parsing
- * 7. add over-escaping test
+ * 1. sort templates by file name
+ * 2. run each test method as a separate test
+ * 3. add description to template name to se what is tested
+ * 4. test all parameters and fail with an error summary
+ * 5. exclude false positive errors (like 404 for pagedoesnotexist)
+ * 6. implement regex file excludes
+ * 7. implement some manual test (copy requiring 2 parameters is a good example)
+ * 8. add more sophisticated escaping tests -> parsing
+ * 9. check that the fixed templates are fixed
+ * 10. add over-escaping test
+ * 11. add a way to specify which action to use with some parameters
+ * 12. test for escaping of action
  * 
  * @version $Id$
  * @since 2.5
