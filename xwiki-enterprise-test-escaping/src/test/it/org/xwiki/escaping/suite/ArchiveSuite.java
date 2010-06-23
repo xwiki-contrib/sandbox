@@ -112,6 +112,9 @@ public class ArchiveSuite extends ParentRunner<Runner>
     /** List of test runners build, one for each matching file found in the archive. */
     private final List<Runner> runners;
 
+    /** Path to the archive. */
+    private final String archivePath;
+
 
     /**
      * Create new ArchiveSuite.
@@ -124,13 +127,8 @@ public class ArchiveSuite extends ParentRunner<Runner>
     {
         super(klass);
         validateTestClass();
-        this.runners = createRunners();
-        sort(new Sorter(new Comparator<Description>() {
-            public int compare(Description o1, Description o2)
-            {
-                return o1.getDisplayName().compareTo(o2.getDisplayName());
-            }
-        }));
+        this.archivePath = getArchiveFromAnnotation();
+        this.runners = createRunners(this.archivePath);
     }
 
     /**
@@ -164,17 +162,47 @@ public class ArchiveSuite extends ParentRunner<Runner>
     }
 
     /**
+     * {@inheritDoc}
+     * @see org.junit.runners.ParentRunner#getName()
+     */
+    @Override
+    protected String getName()
+    {
+        String fileName = archivePath;
+        int idx = archivePath.lastIndexOf("/");
+        if (idx >= 0 && idx < archivePath.length() - 2) {
+            fileName = archivePath.substring(idx + 1);
+        }
+        return getClass().getSimpleName() + "(" + fileName + ")\n";
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.junit.runners.ParentRunner#sort(org.junit.runner.manipulation.Sorter)
+     */
+    @Override
+    public void sort(Sorter sorter)
+    {
+        super.sort(new Sorter(new Comparator<Description>() {
+            public int compare(Description o1, Description o2) {
+                return o1.getDisplayName().compareTo(o2.getDisplayName());
+            }
+        }));
+    }
+
+    /**
      * Read the archive and build a list of runners for its content.
      * 
+     * @param archivePath path to the archive to use
      * @return a list of test runners
      * @throws InitializationError on errors
      */
-    private List<Runner> createRunners() throws InitializationError
+    private List<Runner> createRunners(String archivePath) throws InitializationError
     {
-        final ZipFile archive = getArchiveFromAnnotation();
         List<Runner> list = new ArrayList<Runner>();
-        Enumeration< ? extends ZipEntry> entries = archive.entries();
         try {
+            final ZipFile archive = new ZipFile(archivePath);
+            Enumeration< ? extends ZipEntry> entries = archive.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 if (entry.isDirectory()) {
@@ -240,10 +268,10 @@ public class ArchiveSuite extends ParentRunner<Runner>
      * Retrieve the path to the archive form annotations. Throws an exception if no annotations can
      * be found, when the annotation is used incorrectly or the path is invalid.
      * 
-     * @return the Zip archive to use
+     * @return path to the archive to use
      * @throws InitializationError when an error occurs
      */
-    private ZipFile getArchiveFromAnnotation() throws InitializationError
+    private String getArchiveFromAnnotation() throws InitializationError
     {
         String path = null;
 
@@ -271,11 +299,7 @@ public class ArchiveSuite extends ParentRunner<Runner>
         if (path == null) {
             throw new InitializationError("Archive path is null.");
         }
-        try {
-            return new ZipFile(path);
-        } catch (IOException exception) {
-            throw new InitializationError(exception);
-        }
+        return path;
     }
 
     /**

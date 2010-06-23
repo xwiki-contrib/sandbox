@@ -62,6 +62,16 @@ public class FileTestRunner extends BlockJUnit4ClassRunner
 
     /**
      * {@inheritDoc}
+     * @see org.junit.runners.ParentRunner#getName()
+     */
+    @Override
+    protected String getName()
+    {
+        return test.toString();
+    }
+
+    /**
+     * {@inheritDoc}
      * @see org.junit.runners.BlockJUnit4ClassRunner#testName(org.junit.runners.model.FrameworkMethod)
      */
     @Override

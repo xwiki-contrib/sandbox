@@ -27,14 +27,10 @@ import org.junit.runner.RunWith;
 import org.xwiki.test.XWikiExecutor;
 
 /**
- * Parent test suite that runs all functional escaping tests.
- * We start and stop XWiki here.
+ * Parent test suite that runs all functional escaping tests. Starts XWiki server before other tests
+ * and stops it afterwards.
  * 
  * TODO
- * 1. sort templates by file name
- * 2. run each test method as a separate test
- * 3. add description to template name to se what is tested
- * 4. test all parameters and fail with an error summary
  * 5. exclude false positive errors (like 404 for pagedoesnotexist)
  * 6. implement regex file excludes
  * 7. implement some manual test (copy requiring 2 parameters is a good example)
@@ -55,6 +51,8 @@ public class AllTests
 
     /**
      * Start XWiki server.
+     * 
+     * @throws Exception on errors
      */
     @BeforeClass
     public static void init() throws Exception
@@ -63,6 +61,11 @@ public class AllTests
         AllTests.executor.start();
     }
 
+    /**
+     * Stop XWiki server.
+     * 
+     * @throws Exception on errors
+     */
     @AfterClass
     public static void shutdown() throws Exception
     {
