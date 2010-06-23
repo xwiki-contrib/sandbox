@@ -177,6 +177,6 @@ public abstract class AbstractEscapingTest implements FileTest
     @Override
     public String toString()
     {
-        return name + " [space, page, parameters: " + userInput + "]";
+        return name + " " + userInput;
     }
 }

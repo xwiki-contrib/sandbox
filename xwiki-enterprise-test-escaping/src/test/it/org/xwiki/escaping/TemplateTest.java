@@ -75,7 +75,6 @@ public class TemplateTest extends AbstractEscapingTest
     }
 
     @Test
-    @Ignore
     public void testSpaceEscaping()
     {
         // space name
@@ -84,7 +83,6 @@ public class TemplateTest extends AbstractEscapingTest
     }
 
     @Test
-    @Ignore
     public void testPageEscaping()
     {
         // page name

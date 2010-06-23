@@ -57,13 +57,12 @@ import org.junit.runners.model.TestClass;
  * &#064;{@link ArchivePathGetter}.</p>
  * <p>
  * This test suite requires the test class to implement {@link FileTest}. It defines an initialization
- * method to set up the test case for each file based on the file content. The test methods should be
- * annotated with &#064;{@link Test}, similar to default JUnit4 behavior.</p>
+ * method to set up the test case for each file based on the file content.</p>
  * <p>
- * Note that custom attributes of &#064;{@link Test} annotation are currently ignored. Other JUnit4 annotations
- * like &#064;{@link Before} and &#064;{@link After} are not supported.</p>
+ * The test methods should be annotated with &#064;{@link Test} as usual. All custom JUnit4 annotations
+ * like &#064;{@link Before} and &#064;{@link After} and &#064;{@link Test} attributes are supported.</p>
  * <p>
- * The lifetime of each {@link FileTest} is guaranteed to be as follows:
+ * The lifetime of each {@link FileTest} is as follows:
  * <ul>
  * <li>An instance of the file test class is created.</li>
  * <li>The method {@link #initialize(String, Reader)} is called.</li>
@@ -205,7 +204,7 @@ public class ArchiveSuite extends ParentRunner<Runner>
             if (result instanceof FileTest) {
                 FileTest test = (FileTest) result;
                 if (test.initialize(name, reader)) {
-                    list.add(new FileTestRunner(name, test, getTestClass().getAnnotatedMethods(Test.class)));
+                    list.add(new FileTestRunner(test));
                 }
                 return;
             }

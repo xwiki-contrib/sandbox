@@ -20,90 +20,54 @@
 
 package org.xwiki.escaping.suite;
 
-import java.util.List;
-
-import org.junit.Ignore;
-import org.junit.internal.AssumptionViolatedException;
-import org.junit.internal.runners.statements.InvokeMethod;
-import org.junit.runner.Description;
-import org.junit.runner.Runner;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunNotifier;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.InitializationError;
 
 
 /**
- * A custom runner that runs all tests methods found in the given {@link FileTest} in one block.
- * <p>
- * The test fails if one of the test methods fail. The test fails with an error, if one of the methods
- * produces an error.  The failure message will contain a list of errors and failures.</p>
+ * A custom runner that runs all tests methods found in the given {@link FileTest}. The most important
+ * difference to the default JUnit4 test runner is that the tests are created and initialized by the parent
+ * test suite.
  * 
  * @version $Id$
- * @since 2.4
+ * @since 2.5
  */
-public class FileTestRunner extends Runner
+public class FileTestRunner extends BlockJUnit4ClassRunner
 {
-    /** Name of the tested file. */
-    private final String name;
-
     /** The test to run. */
     private final FileTest test;
 
-    /** The list of tests to run. */
-    private final List<FrameworkMethod> methods;
-
     /**
-     * Create new FileTestRunner for the given file.
+     * Create new FileTestRunner for the given file test.
      * 
-     * @param fileName name of the file to test
      * @param fileTest the test to run
-     * @param testMethods a list of test methods from <code>fileTest</code> to run
+     * @throws InitializationError on errors
      */
-    public FileTestRunner(String fileName, FileTest fileTest, List<FrameworkMethod> testMethods)
+    public FileTestRunner(FileTest fileTest) throws InitializationError
     {
-        this.name = fileName;
+        super(fileTest.getClass());
         this.test = fileTest;
-        this.methods = testMethods;
     }
 
     /**
      * {@inheritDoc}
-     * @see org.junit.runner.Runner#getDescription()
+     * @see org.junit.runners.BlockJUnit4ClassRunner#createTest()
      */
     @Override
-    public Description getDescription()
+    protected Object createTest() throws Exception
     {
-        if (test != null)
-            return Description.createSuiteDescription(test.toString());
-        return Description.createSuiteDescription(name);
+        return test;
     }
 
     /**
      * {@inheritDoc}
-     * @see org.junit.runner.Runner#run(org.junit.runner.notification.RunNotifier)
+     * @see org.junit.runners.BlockJUnit4ClassRunner#testName(org.junit.runners.model.FrameworkMethod)
      */
     @Override
-    public void run(RunNotifier notifier)
+    protected String testName(FrameworkMethod method)
     {
-        if (methods == null || methods.size() == 0) {
-            return;
-        }
-        notifier.fireTestStarted(getDescription());
-        // TODO make a list of all errors
-        try {
-            for (FrameworkMethod method : methods) {
-                if (method.getAnnotation(Ignore.class) != null) {
-                    continue;
-                }
-                new InvokeMethod(method, test).evaluate();
-            }
-        } catch (AssumptionViolatedException exception) {
-            notifier.fireTestAssumptionFailed(new Failure(getDescription(), exception));
-        } catch (Throwable exception) {
-            notifier.fireTestFailure(new Failure(getDescription(), exception));
-        } finally {
-            notifier.fireTestFinished(getDescription());
-        }
+        return String.format("%-60s  %s", test.toString(), method.getName());
     }
 }
 
