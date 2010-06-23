@@ -1,0 +1,55 @@
+Directory tree runner.
+
+This will take an XML file and convert it to a directory tree sutable for easy editing.
+It will also take a directory tree and convert to an XML file.
+
+To Build type:
+mvn
+
+To use:
+cd ./target/
+java -jar ./dir2xml.jar ../pom.xml
+(notice a new directory /target/pom/)
+java -jar ./dir2xml.jar ./pom/
+(now there is a new file: /target/pom.xml)
+You have converted an XML file to a dir tree and back.
+
+
+How it works:
+Converts tag names into filenames and inner content into file content.
+Elements with child elements will be made into directorys.
+Tag attributes will be output into a file inside the tag directory called &!attributes
+
+<root attribute="value">
+  <aTag>
+    <anotherTag>Content</anotherTag>
+  </aTag>
+</root>
+
+will produce:
+
+root (directory)
+ |
+ +-&!attributes (file containing 'attribute="value"')
+ |
+ +-aTag (directory)
+    |
+    +-anotherTag (file containing 'Content')
+
+
+What doesn't work:
+
+<aTag>
+  content
+  <anotherTag>moreContent</anotherTag>
+</aTag>
+It will try to make aTag into a directory and seeing it has content will throw an error.
+
+<aTag attribute="value">content</aTag>
+Same problem.
+
+- XML comments are not treated correctly.
+- When converting an XML document to a dir tree and back, 
+  order is mangled although the XML document remains the same.
+
+Have fun!
