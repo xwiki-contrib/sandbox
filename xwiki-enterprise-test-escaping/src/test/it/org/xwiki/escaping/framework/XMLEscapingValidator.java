@@ -89,14 +89,16 @@ public class XMLEscapingValidator implements Validator
 
     /**
      * {@inheritDoc}
+     * <p>
+     * Throws {@link EscapingError} on errors</p>
+     * 
      * @see org.xwiki.validator.Validator#validate()
      */
     public List<ValidationError> validate()
     {
         clear();
         if (document.size() == 0) {
-            errors.add(new ValidationError(Type.WARNING, 0, 0, "Content is empty"));
-            return errors;
+            throw new EscapingError("Content is empty");
         }
         int lineNr = 1;
         for (String line : document) {
@@ -108,8 +110,6 @@ public class XMLEscapingValidator implements Validator
             while ((idx = line.indexOf(TEST_QUOT, idx + 1)) >= 0) {
                 errors.add(new ValidationError(Type.FATAL, lineNr, idx+1, "Unescaped quote character"));
             }
-            if (lineNr < 11)
-            System.out.println(lineNr + ": " + line);
             // TODO also check <> and \ for JavaScript
             // TODO check for overescaping
             lineNr++;

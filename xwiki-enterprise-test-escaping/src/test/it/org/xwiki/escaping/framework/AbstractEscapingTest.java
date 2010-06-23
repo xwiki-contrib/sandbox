@@ -100,13 +100,13 @@ public abstract class AbstractEscapingTest implements FileTest
     protected abstract Set<String> parse(Reader reader);
 
     /**
-     * Download a page from the server and return its content.
+     * Download a page from the server and return its content. Throws a {@link RuntimeException}
+     * on connection problems etc.
      * 
      * @param url URL of the page
      * @return content of the page
-     * @throws EscapingException on connection problems
      */
-    protected InputStream getUrlContent(String url) throws EscapingException
+    protected InputStream getUrlContent(String url)
     {
         GetMethod get = new GetMethod(url);
         get.setFollowRedirects(true);
@@ -117,7 +117,7 @@ public abstract class AbstractEscapingTest implements FileTest
         try {
             int statusCode = client.executeMethod(get);
             if (statusCode != HttpStatus.SC_OK) {
-                throw new EscapingException("HTTP GET request returned status " + statusCode + " for URL: " + url);
+                throw new RuntimeException("HTTP GET request returned status " + statusCode + " for URL: " + url);
             }
 
             // get the data, converting to utf-8
@@ -127,7 +127,7 @@ public abstract class AbstractEscapingTest implements FileTest
             }
             return new ByteArrayInputStream(str.getBytes("utf-8"));
         } catch (Exception exception) {
-            throw new EscapingException(exception);
+            throw new RuntimeException(exception);
         } finally {
             get.releaseConnection();
         }

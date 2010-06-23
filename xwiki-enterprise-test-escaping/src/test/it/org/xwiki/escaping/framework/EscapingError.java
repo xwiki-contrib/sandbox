@@ -25,56 +25,45 @@ import org.xwiki.validator.ValidationError;
 
 
 /**
- * Exception thrown on various escaping errors. Can handle a list of errors.
+ * Error thrown in various escaping tests. Can handle a list of validation errors.
  * 
  * @version $Id$
  * @since 2.5
  */
-public class EscapingException extends Exception
+public class EscapingError extends AssertionError
 {
     /** Serial version ID. */
     private static final long serialVersionUID = 7784831403359592333L;
 
     /**
-     * Create new EscapingException.
+     * Create new EscapingError.
      * 
      * @param message error message
      */
-    public EscapingException(String message)
+    public EscapingError(String message)
     {
         super(message);
     }
 
     /**
-     * Create new EscapingException.
+     * Create new EscapingError.
      * 
      * @param cause error cause
      */
-    public EscapingException(Throwable cause)
+    public EscapingError(Throwable cause)
     {
         super(cause);
     }
 
     /**
-     * Create new EscapingException.
-     * 
-     * @param message error message
-     * @param cause error cause
-     */
-    public EscapingException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
-
-    /**
-     * Create new EscapingException listing a list of validation errors.
+     * Create new EscapingError listing a list of validation errors.
      * 
      * @param message
      * @param fileName
      * @param url
      * @param errors
      */
-    public EscapingException(String message, String fileName, String url, List<ValidationError> errors)
+    public EscapingError(String message, String fileName, String url, List<ValidationError> errors)
     {
         super(formatMessage(message, fileName, url, errors));
     }
@@ -88,7 +77,7 @@ public class EscapingException extends Exception
      * @param errors list of validation errors
      * @return formatted message
      */
-    private static final String formatMessage(String message, String fileName, String url, List<ValidationError> errors)
+    public static final String formatMessage(String message, String fileName, String url, List<ValidationError> errors)
     {
         StringBuilder result = new StringBuilder(message);
         result.append("\n  Tested file: ").append(fileName);

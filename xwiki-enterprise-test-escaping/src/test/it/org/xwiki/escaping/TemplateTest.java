@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.xwiki.escaping.framework.AbstractEscapingTest;
-import org.xwiki.escaping.framework.EscapingException;
+import org.xwiki.escaping.framework.EscapingError;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
 import org.xwiki.escaping.suite.ArchiveSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
@@ -71,55 +71,59 @@ public class TemplateTest extends AbstractEscapingTest
      */
     public TemplateTest()
     {
-        super(Pattern.compile(".*/editactions\\.vm"));
+        super(Pattern.compile(".*\\.vm"));
     }
 
     @Test
     @Ignore
-    public void testSpaceEscaping() throws EscapingException
+    public void testSpaceEscaping()
     {
         // space name
         String url = createUrl(XMLEscapingValidator.getTestString(), null, null, null);
-        checkUnderEscaping(getUrlContent(url), "space name", url);
+        checkUnderEscaping(url, "space name");
     }
 
     @Test
     @Ignore
-    public void testPageEscaping() throws EscapingException
+    public void testPageEscaping()
     {
         // page name
         String url = createUrl("Main", XMLEscapingValidator.getTestString(), null, null);
-        checkUnderEscaping(getUrlContent(url), "page name", url);
+        checkUnderEscaping(url, "page name");
     }
 
     @Test
-    public void testParameterEscaping() throws EscapingException
+    public void testParameterEscaping()
     {
         // all found parameters
         for (String parameter : userInput) {
             String url = createUrl("Main", null, parameter, XMLEscapingValidator.getTestString());
-            checkUnderEscaping(getUrlContent(url), "\"" + parameter + "\"", url);
+            checkUnderEscaping(url, "\"" + parameter + "\"");
         }
     }
 
     /**
      * Check for unescaped data in the given {@code content}.
      * 
-     * @param content content of the {@code url}
-     * @param description description of the test
      * @param url URL used in the test
-     * @throws EscapingException on escaping errors
+     * @param description description of the test
      */
-    private void checkUnderEscaping(InputStream content, String description, String url) throws EscapingException
+    private void checkUnderEscaping(String url, String description)
     {
+        InputStream content = getUrlContent(url);
         String where = "  Template: " + name + "\n  URL: " + url;
         Assert.assertNotNull("Response is null\n" + where, content);
         XMLEscapingValidator validator = new XMLEscapingValidator();
         validator.setDocument(content);
-        List<ValidationError> errors = validator.validate();
-        validator.clear();
+        List<ValidationError> errors;
+        try {
+            errors = validator.validate();
+        } catch (EscapingError error) {
+            // most probably false positive, generate an error instead of failing the test
+            throw new RuntimeException(EscapingError.formatMessage(error.getMessage(), name, url, null));
+        }
         if (!errors.isEmpty()) {
-            throw new EscapingException("Escaping test failed.", name, url, errors);
+            throw new EscapingError("Escaping test failed.", name, url, errors);
         }
     }
 
