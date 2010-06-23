@@ -33,7 +33,7 @@ import org.xwiki.validator.Validator;
 
 /**
  * A validator that checks for proper XML escaping. The document must be constructed using the special
- * test input string (see {@link #getTestInputString()}).
+ * test input string (see {@link #getTestString()}).
  * 
  * @version $Id$
  * @since 2.5
@@ -41,13 +41,13 @@ import org.xwiki.validator.Validator;
 public class XMLEscapingValidator implements Validator
 {
     /** Unescaped test string containing XML significant characters. */
-    protected static final String INPUT_STRING = "aaa\"bbb'ccc>ddd<eee";
+    private static final String INPUT_STRING = "aaa\"bbb'ccc>ddd<eee";
 
     /** Test for unescaped apostrophe. */
-    protected static final String TEST_APOS = "bbb'ccc";
+    private static final String TEST_APOS = "bbb'ccc";
 
     /** Test for unescaped quote. */
-    protected static final String TEST_QUOT = "aaa\"bbb";
+    private static final String TEST_QUOT = "aaa\"bbb";
 
     /** Source of the XML document to validate. */
     private List<String> document = new ArrayList<String>();
@@ -58,15 +58,18 @@ public class XMLEscapingValidator implements Validator
     /**
      * Get the input string containing XML significant characters that should be used.
      * 
-     * @return input string to use
+     * @return test string to use
      */
-    public String getTestInputString()
+    public static String getTestString()
     {
         return INPUT_STRING;
     }
 
     /**
      * {@inheritDoc}
+     * <p>
+     * Clears previous list of validation errors.</p>
+     * 
      * @see org.xwiki.validator.Validator#setDocument(java.io.InputStream)
      */
     public void setDocument(InputStream document)
@@ -91,6 +94,10 @@ public class XMLEscapingValidator implements Validator
     public List<ValidationError> validate()
     {
         clear();
+        if (document.size() == 0) {
+            errors.add(new ValidationError(Type.WARNING, 0, 0, "Content is empty"));
+            return errors;
+        }
         int lineNr = 1;
         for (String line : document) {
             int idx = 0;
@@ -123,10 +130,7 @@ public class XMLEscapingValidator implements Validator
      */
     public void clear()
     {
-        if (errors == null) {
-            errors = new ArrayList<ValidationError>();
-        }
-        errors.clear();
+        errors = new ArrayList<ValidationError>();
     }
 
     /**

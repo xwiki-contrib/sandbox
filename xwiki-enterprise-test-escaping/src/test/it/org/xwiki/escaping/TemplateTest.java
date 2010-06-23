@@ -22,8 +22,10 @@ package org.xwiki.escaping;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,8 +37,10 @@ import org.junit.runner.RunWith;
 
 import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.EscapingException;
+import org.xwiki.escaping.framework.XMLEscapingValidator;
 import org.xwiki.escaping.suite.ArchiveSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
+import org.xwiki.validator.ValidationError;
 
 
 /**
@@ -75,9 +79,8 @@ public class TemplateTest extends AbstractEscapingTest
     public void testSpaceEscaping() throws EscapingException
     {
         // space name
-        String url = createUrl(INPUT_STRING, null, null, null);
-        String content = getUrlContent(url);
-        checkUnderEscaping(content, "space name", url);
+        String url = createUrl(XMLEscapingValidator.getTestString(), null, null, null);
+        checkUnderEscaping(getUrlContent(url), "space name", url);
     }
 
     @Test
@@ -85,9 +88,8 @@ public class TemplateTest extends AbstractEscapingTest
     public void testPageEscaping() throws EscapingException
     {
         // page name
-        String url = createUrl("Main", INPUT_STRING, null, null);
-        String content = getUrlContent(url);
-        checkUnderEscaping(content, "page name", url);
+        String url = createUrl("Main", XMLEscapingValidator.getTestString(), null, null);
+        checkUnderEscaping(getUrlContent(url), "page name", url);
     }
 
     @Test
@@ -95,9 +97,8 @@ public class TemplateTest extends AbstractEscapingTest
     {
         // all found parameters
         for (String parameter : userInput) {
-            String url = createUrl("Main", null, parameter, INPUT_STRING);
-            String content = getUrlContent(url);
-            checkUnderEscaping(content, "\"" + parameter + "\"", url);
+            String url = createUrl("Main", null, parameter, XMLEscapingValidator.getTestString());
+            checkUnderEscaping(getUrlContent(url), "\"" + parameter + "\"", url);
         }
     }
 
@@ -107,13 +108,19 @@ public class TemplateTest extends AbstractEscapingTest
      * @param content content of the {@code url}
      * @param description description of the test
      * @param url URL used in the test
+     * @throws EscapingException on escaping errors
      */
-    private void checkUnderEscaping(String content, String description, String url)
+    private void checkUnderEscaping(InputStream content, String description, String url) throws EscapingException
     {
-        String where = "template: " + name + ", URL: " + url;
-        Assert.assertNotNull("Response is null, " + where, content);
-        Assert.assertFalse("Unescaped apostrophe in " + description + ", " + where, content.contains(TEST_APOS));
-        Assert.assertFalse("Unescaped quote in " + description + ", " + where, content.contains(TEST_QUOT));
+        String where = "  Template: " + name + "\n  URL: " + url;
+        Assert.assertNotNull("Response is null\n" + where, content);
+        XMLEscapingValidator validator = new XMLEscapingValidator();
+        validator.setDocument(content);
+        List<ValidationError> errors = validator.validate();
+        validator.clear();
+        if (!errors.isEmpty()) {
+            throw new EscapingException("Escaping test failed.", name, url, errors);
+        }
     }
 
     /**

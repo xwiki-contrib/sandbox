@@ -19,6 +19,10 @@
  */
 package org.xwiki.escaping.framework;
 
+import java.util.List;
+
+import org.xwiki.validator.ValidationError;
+
 
 /**
  * Exception thrown on various escaping errors. Can handle a list of errors.
@@ -62,5 +66,62 @@ public class EscapingException extends Exception
         super(message, cause);
     }
 
+    /**
+     * Create new EscapingException listing a list of validation errors.
+     * 
+     * @param message
+     * @param fileName
+     * @param url
+     * @param errors
+     */
+    public EscapingException(String message, String fileName, String url, List<ValidationError> errors)
+    {
+        super(formatMessage(message, fileName, url, errors));
+    }
+
+    /**
+     * Compose a nice error message from the given data.
+     * 
+     * @param message error description
+     * @param fileName file name that was tested
+     * @param url URL to reproduce
+     * @param errors list of validation errors
+     * @return formatted message
+     */
+    private static final String formatMessage(String message, String fileName, String url, List<ValidationError> errors)
+    {
+        StringBuilder result = new StringBuilder(message);
+        result.append("\n  Tested file: ").append(fileName);
+        result.append("\n  URL: ").append(url);
+
+        if (errors == null || errors.size() == 0) {
+            result.append('\n');
+            return result.toString();
+        }
+        StringBuilder fatalBuilder = new StringBuilder();
+        StringBuilder errorBuilder = new StringBuilder();
+        StringBuilder warningBuilder = new StringBuilder();
+        final String format = "\n    line %4d  column %3d  %s";
+        for (ValidationError error : errors) {
+            String str = String.format(format, error.getLine(), error.getColumn(), error.toString());
+            switch (error.getType()) {
+                case FATAL:
+                    fatalBuilder.append(str);
+                    break;
+                case ERROR:
+                    errorBuilder.append(str);
+                    break;
+                case WARNING:
+                    warningBuilder.append(str);
+                    break;
+            }
+        }
+        result.append("\n  List of validation errors:");
+        result.append(fatalBuilder);
+        result.append(errorBuilder);
+        result.append(warningBuilder);
+        result.append('\n');
+        return result.toString();
+    }
 }
 

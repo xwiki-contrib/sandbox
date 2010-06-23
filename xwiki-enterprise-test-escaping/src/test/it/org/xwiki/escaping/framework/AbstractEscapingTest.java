@@ -20,6 +20,8 @@
 
 package org.xwiki.escaping.framework;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -38,22 +40,18 @@ import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.xwiki.escaping.suite.FileTest;
 
 /**
- * 
+ * Abstract base class for escaping tests. Implements common initialization pattern and some utility methods
+ * like URL escaping, retrieving page content by URL etc. Subclasses need to implement parsing
+ * and custom tests.
+ * <p>
+ * Note: JUnit4 requires tests to have one public default constructor, subclasses will need to implement
+ * it and pass pattern matcher to match file names they can handle.</p>
  * 
  * @version $Id$
- * @since 2.4
+ * @since 2.5
  */
 public abstract class AbstractEscapingTest implements FileTest
 {
-    /** Unescaped test string containing XML significant characters. */
-    protected static final String INPUT_STRING = "aaa\"bbb'ccc>ddd<eee";
-
-    /** Test for unescaped apostrophe. */
-    protected static final String TEST_APOS = "bbb'ccc";
-
-    /** Test for unescaped quote. */
-    protected static final String TEST_QUOT = "aaa\"bbb";
-
     /** HTTP client shared between all subclasses. */
     private static HttpClient client;
 
@@ -69,11 +67,11 @@ public abstract class AbstractEscapingTest implements FileTest
     /**
      * Create new AbstractEscapingTest
      * 
-     * @param matcher regex pattern used to filter files by name
+     * @param fileNameMatcher regex pattern used to filter files by name
      */
-    protected AbstractEscapingTest(Pattern matcher)
+    protected AbstractEscapingTest(Pattern fileNameMatcher)
     {
-        namePattern = matcher;
+        namePattern = fileNameMatcher;
     }
 
     /**
@@ -82,15 +80,14 @@ public abstract class AbstractEscapingTest implements FileTest
      */
     public boolean initialize(String name, final Reader reader)
     {
-        this.name = name;
         if (namePattern != null && namePattern.matcher(name).matches()) {
             this.userInput = parse(reader);
             if (!userInput.isEmpty()) {
+                this.name = name;
                 // TODO do something
                 return true;
             }
         }
-        this.name = null;
         return false;
     }
 
@@ -109,11 +106,11 @@ public abstract class AbstractEscapingTest implements FileTest
      * @return content of the page
      * @throws EscapingException on connection problems
      */
-    protected String getUrlContent(String url) throws EscapingException
+    protected InputStream getUrlContent(String url) throws EscapingException
     {
         GetMethod get = new GetMethod(url);
         get.setFollowRedirects(true);
-        get.setDoAuthentication(false);
+        get.setDoAuthentication(true);
 
         // make the request
         HttpClient client = AbstractEscapingTest.getClient();
@@ -124,12 +121,12 @@ public abstract class AbstractEscapingTest implements FileTest
             }
 
             // get the data
-            String result = get.getResponseBodyAsString();
-            get.releaseConnection();
-            return result;
+            byte[] body = get.getResponseBody();
+            return new ByteArrayInputStream(body);
         } catch (Exception exception) {
-            get.releaseConnection();
             throw new EscapingException(exception);
+        } finally {
+            get.releaseConnection();
         }
     }
 

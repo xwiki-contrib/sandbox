@@ -47,10 +47,10 @@ public class FileRunner extends Runner
     private final String name;
 
     /** The test to run. */
-    private final FileTest test;
+    private FileTest test;
 
     /** The list of tests to run. */
-    private final List<FrameworkMethod> methods;
+    private List<FrameworkMethod> methods;
 
     /**
      * Create new FileRunner for the given file.
@@ -101,6 +101,8 @@ public class FileRunner extends Runner
             notifier.fireTestFailure(new Failure(getDescription(), exception));
         } finally {
             notifier.fireTestFinished(getDescription());
+            methods = null;
+            test = null;
         }
     }
 }
