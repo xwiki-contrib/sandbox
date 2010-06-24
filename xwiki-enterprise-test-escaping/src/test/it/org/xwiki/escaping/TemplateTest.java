@@ -22,24 +22,19 @@ package org.xwiki.escaping;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.xwiki.escaping.framework.AbstractEscapingTest;
-import org.xwiki.escaping.framework.EscapingError;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
 import org.xwiki.escaping.suite.ArchiveSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
-import org.xwiki.validator.ValidationError;
 
 
 /**
@@ -57,9 +52,6 @@ import org.xwiki.validator.ValidationError;
 @RunWith(ArchiveSuite.class)
 public class TemplateTest extends AbstractEscapingTest
 {
-    /** Static part of the test URL. */
-    private static final String URL_START = "http://127.0.0.1:8080/xwiki/bin/view/";
-
     /**
      * Get the path to the archive from system properties defined in the maven build configuration.
      * 
@@ -83,7 +75,7 @@ public class TemplateTest extends AbstractEscapingTest
     public void testSpaceEscaping()
     {
         // space name
-        String url = createUrl(XMLEscapingValidator.getTestString(), null, null, null);
+        String url = createUrl(XMLEscapingValidator.getTestString(), null, null, "");
         checkUnderEscaping(url, "space name");
     }
 
@@ -91,7 +83,7 @@ public class TemplateTest extends AbstractEscapingTest
     public void testPageEscaping()
     {
         // page name
-        String url = createUrl("Main", XMLEscapingValidator.getTestString(), null, null);
+        String url = createUrl("Main", XMLEscapingValidator.getTestString(), null, "");
         checkUnderEscaping(url, "page name");
     }
 
@@ -102,32 +94,6 @@ public class TemplateTest extends AbstractEscapingTest
         for (String parameter : userInput) {
             String url = createUrl("Main", null, parameter, XMLEscapingValidator.getTestString());
             checkUnderEscaping(url, "\"" + parameter + "\"");
-        }
-    }
-
-    /**
-     * Check for unescaped data in the given {@code content}.
-     * 
-     * @param url URL used in the test
-     * @param description description of the test
-     */
-    private void checkUnderEscaping(String url, String description)
-    {
-        InputStream content = getUrlContent(url);
-        String where = "  Template: " + name + "\n  URL: " + url;
-        Assert.assertNotNull("Response is null\n" + where, content);
-        XMLEscapingValidator validator = new XMLEscapingValidator();
-        validator.setShouldBeEmpty(!this.shouldProduceOutput);
-        validator.setDocument(content);
-        List<ValidationError> errors;
-        try {
-            errors = validator.validate();
-        } catch (EscapingError error) {
-            // most probably false positive, generate an error instead of failing the test
-            throw new RuntimeException(EscapingError.formatMessage(error.getMessage(), name, url, null));
-        }
-        if (!errors.isEmpty()) {
-            throw new EscapingError("Escaping test failed.", name, url, errors);
         }
     }
 
@@ -182,33 +148,27 @@ public class TemplateTest extends AbstractEscapingTest
     }
 
     /**
-     * Create a target URL from given parameters, adding the template name. URL-escapes everything.
+     * Create a target URL from given parameters, adding the template name.
      * 
      * @param space space name to use, "Main" is used if null
      * @param page page name to use, "WebHome" is used if null
      * @param parameter parameter name to add, omitted if null or empty string
      * @param value parameter value, empty string is used if null
      * @return the resulting absolute URL
+     * @see #createUrl(String, String, String, java.util.Map)
      */
-    private String createUrl(String space, String page, String parameter, String value)
+    protected String createUrl(String space, String page, String parameter, String value)
     {
         String template = name.replaceAll("^.+/", "").replaceAll("\\.\\w+$", "");
         String skin = "default";
         if (name.startsWith("skins")) {
             skin = name.replaceFirst("^\\w+/", "").replaceAll("/.+$", "");
         }
-        if (space == null) {
-            space = "Main";
-        }
-        if (page == null) {
-            page = "WebHome";
-        }
-        String url = URL_START + escapeUrl(space) + "/" + escapeUrl(page);
-        url += "?skin=" + skin + "&xpage=" + escapeUrl(template);
-        if (parameter != null && !parameter.equals("")) {
-            url += "&" + escapeUrl(parameter) + "=" + (value == null ? "" : escapeUrl(value));
-        }
-        return url;
+        HashMap<String, String> parameters = new HashMap<String, String>();
+        parameters.put("skin", skin);
+        parameters.put("xpage", template);
+        parameters.put(parameter, value);
+        return createUrl(null, space, page, parameters);
     }
 }
 

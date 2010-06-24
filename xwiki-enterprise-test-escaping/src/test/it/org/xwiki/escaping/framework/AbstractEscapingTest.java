@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -37,8 +39,9 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
-
+import org.junit.Assert;
 import org.xwiki.escaping.suite.FileTest;
+import org.xwiki.validator.ValidationError;
 
 /**
  * Abstract base class for escaping tests. Implements common initialization pattern and some utility methods
@@ -61,6 +64,9 @@ import org.xwiki.escaping.suite.FileTest;
  */
 public abstract class AbstractEscapingTest implements FileTest
 {
+    /** Static part of the test URL. */
+    private static final String URL_START = "http://127.0.0.1:8080/xwiki/bin/";
+
     /** HTTP client shared between all subclasses. */
     private static HttpClient client;
 
@@ -95,30 +101,60 @@ public abstract class AbstractEscapingTest implements FileTest
      */
     public boolean initialize(String name, final Reader reader)
     {
-        // match file name
-        if (namePattern == null || !namePattern.matcher(name).matches()) {
+        this.name = name;
+        if (!fileNameMatches(name) || isExcludedFile(name)) {
             return false;
         }
 
-        // check exclude list
+        this.shouldProduceOutput = isOutputProducingFile(name);
+        this.userInput = parse(reader);
+        return !userInput.isEmpty();
+    }
+
+    /**
+     * Check if the internal file name pattern matches the given file name.
+     * 
+     * @param fileName file name to check
+     * @return true if the name matches, false otherwise
+     */
+    protected boolean fileNameMatches(String fileName)
+    {
+        return namePattern != null && namePattern.matcher(fileName).matches();
+    }
+
+    /**
+     * Check if the given file should be excluded from the tests. The default implementation checks
+     * "patternExcludeFiles" property (set in maven build configuration).
+     * 
+     * @param fileName file name to check
+     * @return true if the file should be excluded, false otherwise
+     */
+    protected boolean isExcludedFile(String fileName)
+    {
         for (String pattern : System.getProperty("patternExcludeFiles", "").split("\\s+")) {
             Pattern exclude = Pattern.compile(pattern);
-            if (exclude.matcher(name).matches()) {
+            if (exclude.matcher(fileName).matches()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the given file name should produce output. The default implementation checks
+     * "filesProduceNoOutput" property (set in maven build configuration).
+     * 
+     * @param fileName file name to check
+     * @return true if the file is expected to produce some output when requested from the server, false otherwise
+     */
+    protected boolean isOutputProducingFile(String fileName)
+    {
+        for (String file : System.getProperty("filesProduceNoOutput", "").split("\\s+")) {
+            if (file.trim().equals(fileName)) {
                 return false;
             }
         }
-
-        // check if output should be produced
-        for (String fileName : System.getProperty("filesProduceNoOutput", "").split("\\s+")) {
-            if (fileName.trim().equals(name)) {
-                this.shouldProduceOutput = false;
-            }
-        }
-
-        // finally parse the content
-        this.name = name;
-        this.userInput = parse(reader);
-        return !userInput.isEmpty();
+        return true;
     }
 
     /**
@@ -167,13 +203,13 @@ public abstract class AbstractEscapingTest implements FileTest
     /**
      * URL-escape given string.
      * 
-     * @param str string to escape
+     * @param str string to escape, "" is used if null
      * @return URL-escaped {@code str}
      */
     protected final String escapeUrl(String str)
     {
         try {
-            return URLEncoder.encode(str, "utf-8");
+            return URLEncoder.encode(str == null ? "" : str, "utf-8");
         } catch (UnsupportedEncodingException exception) {
             // should not happen
             throw new RuntimeException("Should not happen: ", exception);
@@ -209,5 +245,67 @@ public abstract class AbstractEscapingTest implements FileTest
     public String toString()
     {
         return name + (shouldProduceOutput ? " " : " (NO OUTPUT) ") + userInput;
+    }
+
+    /**
+     * Check for unescaped data in the given {@code content}. Throws {@link EscapingError} on failure,
+     * {@link RuntimeException} on errors.
+     * 
+     * @param url URL used in the test
+     * @param description description of the test
+     */
+    protected void checkUnderEscaping(String url, String description)
+    {
+        InputStream content = getUrlContent(url);
+        String where = "  Template: " + name + "\n  URL: " + url;
+        Assert.assertNotNull("Response is null\n" + where, content);
+        XMLEscapingValidator validator = new XMLEscapingValidator();
+        validator.setShouldBeEmpty(!this.shouldProduceOutput);
+        validator.setDocument(content);
+        List<ValidationError> errors;
+        try {
+            errors = validator.validate();
+        } catch (EscapingError error) {
+            // most probably false positive, generate an error instead of failing the test
+            throw new RuntimeException(EscapingError.formatMessage(error.getMessage(), name, url, null));
+        }
+        if (!errors.isEmpty()) {
+            throw new EscapingError("Escaping test failed.", name, url, errors);
+        }
+    }
+
+    /**
+     * Create the target URL from the given parameters. URL-escapes everything.
+     * 
+     * @param action action to use, "view" is used if null
+     * @param space space name to use, "Main" is used if null
+     * @param page page name to use, "WebHome" is used if null
+     * @param parameters list of parameters with values, parameters are omitted if null, "" is used is a value is null
+     * @return the resulting absolute URL
+     */
+    protected final String createUrl(String action, String space, String page, Map<String, String> parameters)
+    {
+        if (action == null) {
+            action = "view";
+        }
+        if (space == null) {
+            space = "Main";
+        }
+        if (page == null) {
+            page = "WebHome";
+        }
+        String url = URL_START + escapeUrl(action) + "/" + escapeUrl(space) + "/" + escapeUrl(page);
+        if (parameters == null) {
+            return url;
+        }
+        String delimiter = "?";
+        for (String parameter : parameters.keySet()) {
+            if (parameter != null && !parameter.equals("")) {
+                String value = parameters.get(parameter);
+                url += delimiter + escapeUrl(parameter) + "=" + escapeUrl(value);
+            }
+            delimiter = "&";
+        }
+        return url;
     }
 }

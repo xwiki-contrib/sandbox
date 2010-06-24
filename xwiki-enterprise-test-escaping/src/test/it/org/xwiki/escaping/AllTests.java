@@ -31,7 +31,6 @@ import org.xwiki.test.XWikiExecutor;
  * and stops it afterwards.
  * 
  * TODO
- * 1. exclude false positive error codes (like 404 for pagedoesnotexist)
  * 2. implement some manual test (copy requiring 2 parameters is a good example)
  * 3. also test applications
  * 4. check that the fixed templates are fixed
@@ -39,6 +38,7 @@ import org.xwiki.test.XWikiExecutor;
  * 6. add a way to specify which action to use with some parameters
  * 7. test for escaping of action
  * 8. add variable names that are bound to request parameters to the parsing regex (might need to use another URL)
+ * 9. add a multilanguage test (switch to multilanguage, test language escaping everywhere, switch back)
  * 
  * @version $Id$
  * @since 2.5
