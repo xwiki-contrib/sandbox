@@ -31,7 +31,6 @@ import org.xwiki.test.XWikiExecutor;
  * and stops it afterwards.
  * 
  * TODO
- * 2. implement some manual test (copy requiring 2 parameters is a good example)
  * 3. also test applications
  * 4. check that the fixed templates are fixed
  * 5. add over-escaping test
