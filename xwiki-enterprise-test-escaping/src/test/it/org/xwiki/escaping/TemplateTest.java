@@ -20,25 +20,19 @@
 
 package org.xwiki.escaping;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.xwiki.escaping.framework.AbstractEscapingTest;
+import org.xwiki.escaping.framework.AbstractVelocityEscapingTest;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
 import org.xwiki.escaping.suite.ArchiveSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
 
 
 /**
- * Runs the automatically generated escaping tests for all velocity templates found in XWiki enterprise WAR file.
+ * Runs automatically generated escaping tests for all velocity templates found in XWiki Enterprise WAR file.
  * <p>
  * The following configuration properties are supported (set in maven):
  * <ul>
@@ -50,7 +44,7 @@ import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
  * @since 2.5
  */
 @RunWith(ArchiveSuite.class)
-public class TemplateTest extends AbstractEscapingTest
+public class TemplateTest extends AbstractVelocityEscapingTest
 {
     /**
      * Get the path to the archive from system properties defined in the maven build configuration.
@@ -64,7 +58,7 @@ public class TemplateTest extends AbstractEscapingTest
     }
 
     /**
-     * Create new TemplateTest.
+     * Create new TemplateTest for all *.vm files.
      */
     public TemplateTest()
     {
@@ -95,56 +89,6 @@ public class TemplateTest extends AbstractEscapingTest
             String url = createUrl("Main", null, parameter, XMLEscapingValidator.getTestString());
             checkUnderEscaping(url, "\"" + parameter + "\"");
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This implementation does some approximate regex matching to find used parameters and other
-     * common user-controlled things like user name.</p>
-     */
-    @Override
-    protected Set<String> parse(Reader reader)
-    {
-        // TODO match if user name, space name or action is used
-        Set<String> input = new HashSet<String>();
-        BufferedReader data = new BufferedReader(reader);
-        Pattern pattern = Pattern.compile("\\$!?\\{?request\\.get\\((?:\"|')(\\w+)(?:\"|')\\)|"
-                                        + "\\$!?\\{?request\\.getParameter\\((?:\"|')(\\w+)(?:\"|')\\)|"
-                                        + "\\$!?\\{?request\\.(\\w+)[^(a-zA-Z_0-9]|"
-                                        + "\\b(editor)\\b|"
-                                        + "\\b(viewer)\\b|"
-                                        + "\\b(section)\\b|"
-                                        + "\\$!?\\{?(template)\\b|"
-                                        + "\\$!?\\{?(revparams)\\b|"
-                                        + "\\b(xredirect)\\b|"
-                                        + "\\b(x-maximized)\\b|"
-                                        + "\\b(xnotification)\\b|"
-                                        + "\\b(classname)\\b|"
-                                        + "\\b(comment)\\b|"
-                                        + "\\b(rev1)\\b|"
-                                        + "\\b(rev2)\\b|"
-                                        + "\\b(sourcedoc)\\b|"
-                                        + "\\b(targetdoc)\\b|"
-                                        + "\\b(srid)\\b|"
-                                        + "\\b(language)\\b");
-        try {
-            String line;
-            while ((line = data.readLine()) != null) {
-                Matcher match = pattern.matcher(line);
-                while (match.find()) {
-                    for (int i = 1; i < match.groupCount(); i++) {
-                        String parameter = match.group(i);
-                        if (parameter != null && !parameter.matches("\\s*")) {
-                            input.add(parameter);
-                        }
-                    }
-                }
-            }
-        } catch (IOException exception) {
-            // ignore, use what was already found
-        }
-        return input;
     }
 
     /**
