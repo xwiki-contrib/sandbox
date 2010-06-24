@@ -43,7 +43,7 @@ import org.xwiki.escaping.framework.XMLEscapingValidator;
 public class ManualTemplateTest extends AbstractEscapingTest
 {
     /**
-     * Create new ManualTemplateTest
+     * Create new ManualTemplateTest, needed for JUnit.
      */
     public ManualTemplateTest()
     {
@@ -71,12 +71,28 @@ public class ManualTemplateTest extends AbstractEscapingTest
     {
         // copy.vm does not display the form if targetdoc is not set
         Assert.assertTrue("Initialization failed", initialize("templates/copy.vm", null));
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("xpage", "copy");
-        params.put("targetdoc", "bla");
+        HashMap<String, String> params = getParamsFor("copy", "targetdoc", "bla");
         params.put(parameter, XMLEscapingValidator.getTestString());
         String url = createUrl(null, null, null, params);
         checkUnderEscaping(url, "\"" + parameter + "\"");
+    }
+
+    @Test
+    public void testRename()
+    {
+        // rename.vm is only used with step=2, otherwise renameStep1.vm is used
+        Assert.assertTrue("Initialization failed", initialize("templates/rename.vm", null));
+        for (String parameter : userInput) {
+            HashMap<String, String> params = getParamsFor("rename", "step", "2");
+            // HTTP 400 is returned if newPageName is empty, 409 if the new page exist
+            if (!params.containsKey("newPageName")) {
+                // TODO cleanup
+                params.put("newPageName", "testRename" + System.nanoTime());
+            }
+            params.put(parameter, XMLEscapingValidator.getTestString());
+            String url = createUrl(null, null, null, params);
+            checkUnderEscaping(url, "\"" + parameter + "\"");
+        }
     }
 
     /**
@@ -93,11 +109,28 @@ public class ManualTemplateTest extends AbstractEscapingTest
         parameters.add("language");
         parameters.add("sourcedoc");
         parameters.add("targetdoc");
-        parameters.add("step"); // = 2
         parameters.add("newPageName");
         parameters.add("newSpaceName");
         parameters.add("parameterNames");
         return parameters;
+    }
+
+    /**
+     * Create a parameter map for the given template and one optional parameter.
+     * 
+     * @param template template name
+     * @param parameter parameter name, ignored if null
+     * @param value value of the parameter
+     * @return new parameter map
+     */
+    private HashMap<String, String> getParamsFor(String template, String parameter, String value)
+    {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("xpage", template);
+        if (parameter != null) {
+            params.put(parameter, value);
+        }
+        return params;
     }
 }
 
