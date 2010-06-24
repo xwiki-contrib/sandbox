@@ -29,42 +29,90 @@ public class Dir2xml
     /** Keep track of the order of elements in the document. */
     private final int[] numbersByStackDepth = new int[100];
 
+    /** If true then we try to make XML which is exactly the same as XWiki export. */
+    private boolean conformMode;
+
+    /** If true then avoid outputting characters which are not ascii lower 128. */
+    private boolean asciiOnly;
+
     public static void main(String[] args) throws Exception
     {
         if (args.length < 1) {
             System.out.println("Call with a file name to convert an XML file to a directory tree.");
             System.out.println("Call with a directory name to a directory tree to an XML file.");
+            System.out.println("-o Directory to output to");
+            System.out.println("-c Try to conform to XWiki export format for escaping and do not tab in sub-elements");
+            System.out.println("-a When generating XML, escape any character which is not ascii (characters 0-127)");
             return;
         }
         File dir = null;
-        dir = new File(args[0]);
+        File output = new File(".");
+        Dir2xml d = new Dir2xml();
 
-        if (dir == null) {
-            System.out.println("ERROR: No recognizable file name entered.");
+        // Get output directory if specified.
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-o") && args.length > i + 1) {
+                i++;
+                output = new File(args[i]);
+            } else if (args[i].equals("-c")) {
+                d.conformMode = true;
+            } else if (args[i].equals("-a")) {
+                d.asciiOnly = true;
+            }
         }
-        if (!dir.exists()) {
-            System.out.println("ERROR: No directory found named: " + dir.getAbsolutePath());
-            return;
-        }
 
-        SchlemielsStringBuilder appendTo = new SchlemielsStringBuilder();
+        // Cycle through files.
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].startsWith("-")) {
+                if (args[i].equals("-o")) {
+                    // Skip -o and the argument after it.
+                    i++;
+                }
+            } else {
 
-        if (dir.isDirectory()) {
-            Dir2xml d = new Dir2xml();
-            for (File subFile : dir.listFiles()) {
-                if (subFile.getName().equals("&!metaData")) {
-                    appendTo.append(d.readContent(subFile));
+                dir = new File(args[i]);
+
+                if (!dir.exists()) {
+                    System.out.println("ERROR: No directory found named: " + dir.getAbsolutePath());
+                    return;
+                }
+
+                if (dir.isDirectory()) {
+                    SchlemielsStringBuilder appendTo = new SchlemielsStringBuilder();
+                    for (File subFile : dir.listFiles()) {
+                        if (subFile.getName().equals("&!metaData")) {
+                            appendTo.append(d.readContent(subFile));
+                        }
+                    }
+                    for (File subFile : dir.listFiles()) {
+                        d.toXML(subFile, appendTo);
+                    }
+                    final String fileName = dir.getName() + ".xml";
+                    d.createFile(appendTo.toString().trim(), new ArrayList<String>(){{add(fileName);}}, output);
+
+                } else {
+                    File out = new File(output, dir.getName().replaceAll("\\.[^.]*$", ""));
+                    if (out.exists()) {
+                        d.deleteRecursive(out);
+                    }
+                    d.fromXML(dir, out);
                 }
             }
-            for (File subFile : dir.listFiles()) {
-                d.toXML(subFile, appendTo);
-            }
-            final String fileName = dir.getName() + ".xml";
-            d.createFile(appendTo.toString().trim(), new ArrayList<String>(){{add(fileName);}}, new File("./"));
-        } else {
-            new Dir2xml().fromXML(dir, new File(dir.getName().replaceAll("\\.[^.]*$", "")));
         }
-        return;
+    }
+
+    private void deleteRecursive(File f)
+    {
+        if (f.isDirectory()) {
+            File[] subFiles = f.listFiles();
+            for (int i = 0; i < subFiles.length; i++) {
+                deleteRecursive(subFiles[i]);
+            }
+        }
+        f.delete();
+        if(f.exists()) {
+            throw new RuntimeException("Couldn't delete file " + f.getAbsolutePath());
+        }
     }
 
     public void toXML(final File fileOrDir, final SchlemielsStringBuilder appendTo) throws Exception
@@ -84,6 +132,9 @@ public class Dir2xml
 
         // remove the file number and change the escaping...
         String XMLfilename = fileNameToXML(fileName.substring(1 + fileName.indexOf('.')));
+        if (asciiOnly) {
+            XMLfilename = escapeNonAscii(XMLfilename);
+        }
         this.addSpaces(appendTo, nestDepth);
         appendTo.append("<").append(XMLfilename);
         this.addAttributes(fileOrDir, appendTo);
@@ -104,12 +155,22 @@ public class Dir2xml
                 if (subFile == null) {
                     continue;
                 }
-System.out.println(subFile.getName());
                 this.toXML(subFile, appendTo, nestDepth + 1);
             }
             this.addSpaces(appendTo, nestDepth);
         } else {
-            appendTo.append(StringEscapeUtils.escapeXml(this.readContent(fileOrDir)));
+            String content = this.readContent(fileOrDir);
+            if (this.conformMode) {
+                // If we are trying to conform exactly to XWiki format, use our own escaper.
+                content = escapeXML(content);
+            } else {
+                content = StringEscapeUtils.escapeXml(content);
+            }
+            if (asciiOnly) {
+                // If we're trying to only output ascii characters, escape again...
+                content = escapeNonAscii(content);
+            }
+            appendTo.append(content);
         }
 
         appendTo.append("</").append(XMLfilename).append(">");
@@ -130,8 +191,10 @@ System.out.println(subFile.getName());
     private void addSpaces(final SchlemielsStringBuilder appendTo, final int nestDepth)
     {
         appendTo.append(this.lineBreak);
-        for (int i = 0; i < nestDepth; i++) {
-            appendTo.append("  ");
+        if (!this.conformMode) {
+            for (int i = 0; i < nestDepth; i++) {
+                appendTo.append("  ");
+            }
         }
     }
 
@@ -143,13 +206,6 @@ System.out.println(subFile.getName());
             // This will be over sized because of encoding.
             char[] fileBuffer = new char[(int) file.length()];
             int numberOfCharactersInBuffer = in.read(fileBuffer);
-            if (numberOfCharactersInBuffer > 0 && fileBuffer[numberOfCharactersInBuffer - 1] == '\n') {
-                numberOfCharactersInBuffer--;
-                // Windxws compatabulity...
-                if (numberOfCharactersInBuffer > 0 && fileBuffer[numberOfCharactersInBuffer - 1] == '\r') {
-                    numberOfCharactersInBuffer--;
-                }
-            }
             return String.copyValueOf(fileBuffer, 0, numberOfCharactersInBuffer);
         } finally {
             try {
@@ -158,6 +214,27 @@ System.out.println(subFile.getName());
                 // If it couldn't be opened then it can't be closed.
             }
         }
+    }
+
+    /** Keeps track of the state for fromXML psudo xml parser. */
+    enum State {
+        /** Outside of any tag, in regular content. */
+        IN_CONTENT,
+
+        /** On < character */
+        ON_LT_BRACKET,
+
+        /** Inside tag */
+        INSIDE_TAG,
+
+        /** Inside <?tag?> or <!tag!> */
+        INSIDE_META_TAG,
+
+        /** found / in tag, if next char is a > then it's a self closing tag. */
+        ON_SLASH_IN_TAG,
+
+        /** Found < followed by / so tag is an </end> tag. */
+        INSIDE_END_TAG
     }
 
     /**
@@ -172,41 +249,45 @@ System.out.println(subFile.getName());
      */
     public void fromXML(File xmlFile, File outDir) throws Exception
     {
-        // 0 = out of tag.
-        // 1 = on <
-        // 2 = inside tag.
-        // 3 = inside meta data (? or !) tag.
-        // 4 = detected a possible close of a tag.
-        // 5 = detected a < followed by a /
-        int state = 0;
+        State currentState = State.IN_CONTENT;
 
+        // The index of the last <, / or >
         int lastEntityIndex  = 0;
+
+        // The index of the last >
         int lastClosingBracketIndex = 0;
+
+        // The "stack depth" of the element currently being parsed.
         int number = 0;
         ArrayList<String> tagList = new ArrayList<String>();
         SchlemielsStringBuilder meta = new SchlemielsStringBuilder();
 
         String content = readContent(xmlFile);
+
         for (int i = 0; i < content.length(); i++) {
             char ch = content.charAt(i);
-            if (state == 0) {
+
+            if (currentState == State.IN_CONTENT) {
                 if (ch == '<') {
-                    state = 1;
+                    currentState = State.ON_LT_BRACKET;
                     lastEntityIndex = i;
                 }
-            } else if (state == 1 && (ch == '?' || ch == '!')) {
-                state = 3;
-            } else if (ch == '/' && (state == 2 || state == 1)) {
-                if (state == 2) {
+
+            } else if (currentState == State.ON_LT_BRACKET && (ch == '?' || ch == '!')) {
+                currentState = State.INSIDE_META_TAG;
+
+            } else if (ch == '/' && (currentState == State.INSIDE_TAG || currentState == State.ON_LT_BRACKET)) {
+                if (currentState == State.INSIDE_TAG) {
                     // Expecting <tag/>
-                    state = 4;
+                    currentState = State.ON_SLASH_IN_TAG;
                 } else {
                     // Expecting </tag>
-                    state = 5;
+                    currentState = State.INSIDE_END_TAG;
                 }
+
             } else if (ch == '>') {
                 // tag closed. If meta then write to meta file, otherwise, push to stack.
-                if (state == 2) {
+                if (currentState == State.INSIDE_TAG) {
 
                     // Advance the number of tags in this element.
                     number++;
@@ -219,8 +300,9 @@ System.out.println(subFile.getName());
                     number = 0;
                     lastEntityIndex = i;
                     lastClosingBracketIndex = i;
-                    state = 0;
-                } else if (state == 3) {
+                    currentState = State.IN_CONTENT;
+
+                } else if (currentState == State.INSIDE_META_TAG) {
                     if (tagList.size() != 0) {
                         throw new UnsupportedOperationException("Can't have meta data inside of a tag.\n"
                                                                 + "This is the problem: "
@@ -229,21 +311,31 @@ System.out.println(subFile.getName());
                     meta.append(content.substring(lastEntityIndex, i + 1));
                     lastEntityIndex = i;
                     lastClosingBracketIndex = i;
-                    state = 0;
-                } else if (state == 4) {
+                    currentState = State.IN_CONTENT;
+
+                } else if (currentState == State.ON_SLASH_IN_TAG) {
                     // Empty <tag/>
-                    tagList.add(number + "." + XMLToFileName(content.substring(lastEntityIndex + 2, i)));
+
+                    // Increment the number first because there is no open tag.
                     number++;
+
+                    // <thisIsATag/>
+                    // "lastEntityIndex + 1" skips the < and "i - 1" skips > substring skips last character (/)
+                    tagList.add(number + "." + XMLToFileName(content.substring(lastEntityIndex + 1, i - 1)));
                     createFile("", tagList, outDir);
                     tagList.remove(tagList.size() - 1);
+
                     lastEntityIndex = i;
                     lastClosingBracketIndex = i;
-                } else if (state == 5) {
+                    currentState = State.IN_CONTENT;
+
+                } else if (currentState == State.INSIDE_END_TAG) {
                     // An </end> tag
                     String lastTag = tagList.get(tagList.size() - 1);
 
                     // Test is the content from the last < to the current position (>)
                     // the same (when converted to filename format) as the last opened tag? (without it's number)
+                    // +2 is because we want to skip '</'
                     if (XMLToFileName(content.substring(lastEntityIndex + 2, i)).equals(
                             lastTag.substring(1 + lastTag.indexOf(".")))) 
                     {
@@ -256,17 +348,17 @@ System.out.println(subFile.getName());
                         tagList.remove(tagList.size() - 1);
                         number = numbersByStackDepth[tagList.size()];
 
-                        state = 0;
+                        currentState = State.IN_CONTENT;
                         lastEntityIndex = i;
                         lastClosingBracketIndex = i;
                     }
                 }
-            } else if (state == 1) {
+            } else if (currentState == State.ON_LT_BRACKET) {
                 // if we were on a < now we're in a tag.
-                state = 2;
-            } else if (state == 4) {
+                currentState = State.INSIDE_TAG;
+            } else if (currentState == State.ON_SLASH_IN_TAG) {
                 // <tag with a / in it is not a self closed tag>
-                state = 2;
+                currentState = State.INSIDE_TAG;
             }
         }
         if (meta.length() > 0) {
@@ -363,6 +455,55 @@ System.out.println(subFile.getName());
                    fileName.replaceAll("&#47;", "/")
                        .replaceAll("&#58;", ":")
                            .replaceAll("&amp;", "&"));
+    }
+
+    public String escapeNonAscii(String content)
+    {
+        SchlemielsStringBuilder out = new SchlemielsStringBuilder();
+        int charAfterLastNonAscii = 0;
+        for (int i = 0; i < content.length(); i++) {
+            if (content.charAt(i) > (char) 127) {
+                out.append(content.substring(charAfterLastNonAscii, i));
+                // This might mangle charactes not representable by a single UTF-16 entity...
+                out.append("&#" + (int) content.charAt(i) + ";");
+                charAfterLastNonAscii = i + 1;
+            }
+        }
+        if (charAfterLastNonAscii < content.length()) {
+            out.append(content.substring(charAfterLastNonAscii));
+        }
+        return out.toString();
+    }
+
+    /**
+     * An escape xml implementation which matches XWiki export escaping.
+     * This should only be used for content, not for inside of tags.
+     */
+    public String escapeXML(String content)
+    {
+        SchlemielsStringBuilder ssb = new SchlemielsStringBuilder();
+
+        // The index of the last non xml entity.
+        int lastContent = 0;
+
+        for (int i = 0; i < content.length(); i++) {
+            char ch = content.charAt(i);
+            if (ch == '&') {
+                ssb.append(content.substring(lastContent, i)).append("&amp;");
+            } else if (ch == '<') {
+                ssb.append(content.substring(lastContent, i)).append("&lt;");                
+            } else if (ch == '>') {
+                ssb.append(content.substring(lastContent, i)).append("&gt;");
+            } else {
+                continue;
+            }
+            // if any of the above (not continue;)
+            lastContent = i + 1;
+        }
+        if (lastContent < content.length()) {
+            ssb.append(content.substring(lastContent));
+        }
+        return ssb.toString();
     }
 
     public static class SchlemielsStringBuilder implements CharSequence

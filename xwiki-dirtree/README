@@ -14,6 +14,33 @@ java -jar ./dir2xml.jar ./pom/
 (now there is a new file: /target/pom.xml)
 You have converted an XML file to a dir tree and back.
 
+Flags:
+-o Directory to output to
+-c Try to conform to XWiki export format for escaping and do not tab in sub-elements
+-a When generating XML, escape any character which is not ascii (characters 0-127)
+
+Example:
+java -jar ~/java/xwikiSrc/contrib/sandbox/xwiki-dirtree/target/dir2xml.jar ./src/main/resources/Invitation/*.xml -a -c -o ./src/main/dirtree/Invitation/
+Will create a directory tree for each xml file in ./src/main/dirtree/Invitaion
+
+java -jar ~/java/xwikiSrc/contrib/sandbox/xwiki-dirtree/target/dir2xml.jar ./src/main/dirtree/Invitation/* -a -c -o ./src/main/resources/Invitation/
+Will take the content of the directory tree and rebuild the XML files ensuring that there is no non ascii characters and trying to match the XWiki xml format.
+
+* There are slight format differences such as:
+XWiki will generate this:
+</content></xwikidoc>
+
+Dirtree will convert it to this:
+</content>
+</xwikidoc>
+
+Also dirtree will convert this:
+<propertiesToShow/>
+To this:
+<propertiesToShow></propertiesToShow>
+
+Any changes which materially alter the XML file are a bug and can be reported to:
+calebdelisle @t lavabit d0t com
 
 How it works:
 Converts tag names into filenames and inner content into file content.
