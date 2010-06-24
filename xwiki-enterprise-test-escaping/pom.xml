@@ -100,39 +100,39 @@
               <property>
                 <name>patternExcludeFiles</name>
                 <value>
-                  <!-- TODO Must be tested manually
-                    -->
-                    templates/changemyavatar\.vm <!-- target page must be user page -->
-                    templates/deleteversionsconfirm\.vm <!-- needs both rev1 and rev2 to be present -->
-                    templates/login\.vm <!-- expects xredirect to be a valid URL -->
-                    templates/comments2.vm <!-- need some comments on the page -->
-                    templates/leftpanels.vm <!-- empty responce if parameter "forceLeftPanels" is not set -->
-                    templates/rightpanels.vm <!-- empty responce if parameter "forceRightPanels" is not set -->
-                    templates/plain.vm <!-- need ?raw=1 -->
-                    templates/recyclebinlist.vm <!-- page must have been deleted -->
-                    templates/rendercontent.vm <!-- page must exist, otherwise empty -->
-                    templates/textarea_wysiwyg.vm <!-- probably need to set default editor to wysiwyg -->
-                    <!-- rely on $isInServletMode set in xwikivars.vm, need URL: ?xpage=xpart&vm=global.vm TODO maybe change for all? -->
+                  <!- - TODO Must be tested manually
+                    - ->
+                    templates/changemyavatar\.vm <!- - target page must be user page - ->
+                    templates/deleteversionsconfirm\.vm <!- - needs both rev1 and rev2 to be present - ->
+                    templates/login\.vm <!- - expects xredirect to be a valid URL - ->
+                    templates/comments2.vm <!- - need some comments on the page - ->
+                    templates/leftpanels.vm <!- - empty responce if parameter "forceLeftPanels" is not set - ->
+                    templates/rightpanels.vm <!- - empty responce if parameter "forceRightPanels" is not set - ->
+                    templates/plain.vm <!- - need ?raw=1 - ->
+                    templates/recyclebinlist.vm <!- - page must have been deleted - ->
+                    templates/rendercontent.vm <!- - page must exist, otherwise empty - ->
+                    templates/textarea_wysiwyg.vm <!- - probably need to set default editor to wysiwyg - ->
+                    <!- - rely on $isInServletMode set in xwikivars.vm, need URL: ?xpage=xpart&vm=global.vm TODO maybe change for all? - ->
                     templates/global.vm
                     templates/menuadmin.vm
                     templates/menuview.vm
                     skins/colibri/menuview.vm
-                    <!-- space and page must exist, return 404 otherwise -->
+                    <!- - space and page must exist, return 404 otherwise - ->
                     templates/attach\.vm
                     templates/comments\.vm
                     templates/copy\.vm
                     templates/rename\.vm
-                  <!-- False positives
-                    -->
-                    templates/accessdenied\.vm <!-- simply returns 403 -->
-                    templates/watch.vm <!-- expects xredirect to be a valid URL, does not display anything -->
+                  <!- - False positives
+                    - ->
+                    templates/accessdenied\.vm <!- - simply returns 403 - ->
+                    templates/watch.vm <!- - expects xredirect to be a valid URL, does not display anything - ->
                 </value>
               </property>
               <property>
                 <name>pathToXWikiWar</name>
                 <value>com/xpn/xwiki/products/xwiki-enterprise-web/${pom.version}/xwiki-enterprise-web-${pom.version}.war</value>
               </property>
-              <!-- Used only in webstandards tests and escaping tests -->
+              <!- - Used only in webstandards tests and escaping tests - ->
               <property>
                 <name>pathToXWikiXar</name>
                 <value>com/xpn/xwiki/products/xwiki-enterprise-wiki/${pom.version}/xwiki-enterprise-wiki-${pom.version}.xar</value>
