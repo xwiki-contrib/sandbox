@@ -85,6 +85,7 @@
           <reportFormat>plain</reportFormat>
           <!-- FIXME must be added to ../pom.xml
           <systemProperties>
+              <!- - Used only in escaping tests - ->
               <property>
                 <name>filesProduceNoOutput</name>
                 <value>
@@ -93,7 +94,6 @@
                     templates/editpanelsvars.vm
                     templates/layoutvars.vm
                     templates/macros.vm
-                    templates/xpart.vm
                     templates/xwikivars.vm
                 </value>
               </property>
@@ -105,27 +105,19 @@
                     templates/changemyavatar\.vm <!- - target page must be user page - ->
                     templates/deleteversionsconfirm\.vm <!- - needs both rev1 and rev2 to be present - ->
                     templates/login\.vm <!- - expects xredirect to be a valid URL - ->
-                    templates/comments2.vm <!- - need some comments on the page - ->
                     templates/leftpanels.vm <!- - empty responce if parameter "forceLeftPanels" is not set - ->
                     templates/rightpanels.vm <!- - empty responce if parameter "forceRightPanels" is not set - ->
-                    templates/plain.vm <!- - need ?raw=1 - ->
-                    templates/recyclebinlist.vm <!- - page must have been deleted - ->
+                    templates/plain.vm <!- - need raw=1 - ->
+                    templates/recyclebinlist.vm <!- - page must have been deleted before - ->
                     templates/rendercontent.vm <!- - page must exist, otherwise empty - ->
                     templates/textarea_wysiwyg.vm <!- - probably need to set default editor to wysiwyg - ->
-                    <!- - rely on $isInServletMode set in xwikivars.vm, need URL: ?xpage=xpart&vm=global.vm TODO maybe change for all? - ->
-                    templates/global.vm
-                    templates/menuadmin.vm
-                    templates/menuview.vm
-                    skins/colibri/menuview.vm
-                    <!- - space and page must exist, return 404 otherwise - ->
-                    templates/attach\.vm
-                    templates/comments\.vm
-                    templates/copy\.vm
-                    templates/rename\.vm
                   <!- - False positives
                     - ->
                     templates/accessdenied\.vm <!- - simply returns 403 - ->
+                    templates/attach\.vm <!- - only redirects to attachments.vm - ->
                     templates/watch.vm <!- - expects xredirect to be a valid URL, does not display anything - ->
+                    templates/wysiwyg.vm <!- - redirects to editwysiwyg.vm, recursive redirection error with some parameters - ->
+                    templates/xpart.vm <!- - avoid recursive include - ->
                 </value>
               </property>
               <property>

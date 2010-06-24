@@ -159,15 +159,24 @@ public class TemplateTest extends AbstractEscapingTest
      */
     protected String createUrl(String space, String page, String parameter, String value)
     {
-        String template = name.replaceAll("^.+/", "").replaceAll("\\.\\w+$", "");
+        String template = name.replaceAll("^.+/", "");
         String skin = "default";
         if (name.startsWith("skins")) {
             skin = name.replaceFirst("^\\w+/", "").replaceAll("/.+$", "");
         }
         HashMap<String, String> parameters = new HashMap<String, String>();
         parameters.put("skin", skin);
-        parameters.put("xpage", template);
-        parameters.put(parameter, value);
+        if ("xpart".equals(parameter)) {
+            // xpart=something must be tested differently
+            parameters.put("xpage", template).replaceAll("\\.\\w+$", "");
+        } else {
+            // this variant initializes some commonly used variables
+            parameters.put("xpage", "xpart");
+            parameters.put("vm", template);
+        }
+        if (parameter != null) {
+            parameters.put(parameter, value);
+        }
         return createUrl(null, space, page, parameters);
     }
 }

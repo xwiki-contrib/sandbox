@@ -21,6 +21,7 @@
 package org.xwiki.escaping.framework;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
@@ -183,7 +184,8 @@ public abstract class AbstractEscapingTest implements FileTest
         HttpClient client = AbstractEscapingTest.getClient();
         try {
             int statusCode = client.executeMethod(get);
-            if (statusCode != HttpStatus.SC_OK) {
+            // ignore 404 (the page is still rendered)
+            if (statusCode != HttpStatus.SC_OK && statusCode != HttpStatus.SC_NOT_FOUND) {
                 throw new RuntimeException("HTTP GET request returned status " + statusCode + " for URL: " + url);
             }
 
@@ -193,8 +195,8 @@ public abstract class AbstractEscapingTest implements FileTest
                 return null;
             }
             return new ByteArrayInputStream(str.getBytes("utf-8"));
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
+        } catch (IOException exception) {
+            throw new RuntimeException("Error retrieving URL: " + url + "\n" + exception);
         } finally {
             get.releaseConnection();
         }
