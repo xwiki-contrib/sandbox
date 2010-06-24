@@ -40,7 +40,9 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.xwiki.escaping.suite.FileTest;
 import org.xwiki.validator.ValidationError;
 
@@ -51,6 +53,10 @@ import org.xwiki.validator.ValidationError;
  * <p>
  * Note: JUnit4 requires tests to have one public default constructor, subclasses will need to implement
  * it and pass pattern matcher to match file names they can handle.</p>
+ * <p>
+ * Starting and stopping XWiki server is handled transparently for all subclasses, tests can be run
+ * alone using -Dtest=ClassName, a parent test suite should start XWiki server before running all
+ * tests for efficiency using {@link SingleXWikiExecutor}.</p>
  * <p>
  * The following configuration properties are supported (set in maven):
  * <ul>
@@ -85,6 +91,28 @@ public abstract class AbstractEscapingTest implements FileTest
      * To set to false, add file name to "filesProduceNoOutput" 
      */
     protected boolean shouldProduceOutput = true;
+
+    /**
+     * Start XWiki server if run alone.
+     * 
+     * @throws Exception
+     */
+    @BeforeClass
+    public static void init() throws Exception
+    {
+        SingleXWikiExecutor.getExecutor().start();
+    }
+
+    /**
+     * Stop XWiki server if run alone.
+     * 
+     * @throws Exception on errors
+     */
+    @AfterClass
+    public static void shutdown() throws Exception
+    {
+        SingleXWikiExecutor.getExecutor().stop();
+    }
 
     /**
      * Create new AbstractEscapingTest

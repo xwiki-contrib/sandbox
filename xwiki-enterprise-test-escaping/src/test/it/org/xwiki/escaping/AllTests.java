@@ -23,8 +23,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.extensions.cpsuite.ClasspathSuite;
 import org.junit.runner.RunWith;
+import org.xwiki.escaping.framework.SingleXWikiExecutor;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
-import org.xwiki.test.XWikiExecutor;
 
 /**
  * Parent test suite that runs all functional escaping tests. Starts XWiki server before other tests
@@ -48,9 +48,6 @@ import org.xwiki.test.XWikiExecutor;
 @RunWith(ClasspathSuite.class)
 public class AllTests
 {
-    /** Executes XWiki server. */
-    private static XWikiExecutor executor;
-
     /**
      * Start XWiki server.
      * 
@@ -59,8 +56,7 @@ public class AllTests
     @BeforeClass
     public static void init() throws Exception
     {
-        AllTests.executor = new XWikiExecutor(0);
-        AllTests.executor.start();
+        SingleXWikiExecutor.getExecutor().start();
     }
 
     /**
@@ -71,6 +67,6 @@ public class AllTests
     @AfterClass
     public static void shutdown() throws Exception
     {
-        AllTests.executor.stop();
+        SingleXWikiExecutor.getExecutor().stop();
     }
 }
