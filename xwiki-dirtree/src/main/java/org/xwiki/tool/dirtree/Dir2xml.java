@@ -206,6 +206,13 @@ public class Dir2xml
             // This will be over sized because of encoding.
             char[] fileBuffer = new char[(int) file.length()];
             int numberOfCharactersInBuffer = in.read(fileBuffer);
+
+            // Text editors will introduce a \n at the end of the file if there isn't one.
+            // createFile adds one and it is removed here.
+            if (fileBuffer[numberOfCharactersInBuffer - 1] == '\n') {
+                numberOfCharactersInBuffer--;
+            }
+
             return String.copyValueOf(fileBuffer, 0, numberOfCharactersInBuffer);
         } finally {
             try {
@@ -257,7 +264,7 @@ public class Dir2xml
         // The index of the last >
         int lastClosingBracketIndex = 0;
 
-        // The "stack depth" of the element currently being parsed.
+        // which number element are we on.
         int number = 0;
         ArrayList<String> tagList = new ArrayList<String>();
         SchlemielsStringBuilder meta = new SchlemielsStringBuilder();
@@ -431,6 +438,8 @@ public class Dir2xml
                 file.getParentFile().mkdirs();
                 out = new BufferedWriter(new FileWriter(file));
                 out.write(content);
+                // Text editors all want a \n at the end of a file so we will add it here and remove it when reading.
+                out.write("\n");
             } finally {
                 try {
                     out.close();
