@@ -16,4 +16,4 @@ See http://docs.sun.com/source/817-7649/clientSDK.html for more details.
 
 * copy this authenticator jar file into WEB_INF/lib/
 * setup xwiki.cfg with:
-xwiki.authentication.authclass=com.xwiki.authentication.puma.PUMAAuthServiceImpl
+xwiki.authentication.authclass=com.xwiki.authentication.sunsso.XWikiSunSSOAuthenticator
