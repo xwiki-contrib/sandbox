@@ -60,8 +60,6 @@ import org.xwiki.validator.ValidationError;
  * <p>
  * The following configuration properties are supported (set in maven):
  * <ul>
- * <li>localRepository: Path to maven repository, where XWiki files can be found</li>
- * <li>pathToXWikiXar: Used to read all documents</li>
  * <li>filesProduceNoOutput (optional): List of files that are expected to produce empty response</li>
  * <li>patternExcludeFiles (optional): List of RegEx patterns to exclude files from the tests</li>
  * </ul></p>
