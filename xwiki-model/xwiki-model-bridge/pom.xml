@@ -26,15 +26,34 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-core-parent</artifactId>
+    <artifactId>xwiki-core-newmodel</artifactId>
     <version>2.4-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-core-newmodel</artifactId>
-  <name>XWiki Platform - Core - Model - Parent POM</name>
-  <packaging>pom</packaging>
-  <description>XWiki Platform - Core - Model - Parent POM</description>
-  <modules>
-    <module>xwiki-model-api</module>
-    <module>xwiki-model-bridge</module>
-  </modules>
+  <artifactId>xwiki-core-newmodel-bridge</artifactId>
+  <name>XWiki Platform - Core - Model - Implementation based on old Model</name>
+  <packaging>jar</packaging>
+  <description>XWiki Platform - Core - Model - Implementation based on old Model</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-newmodel-api</artifactId>
+      <version>2.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.xpn.xwiki.platform</groupId>
+      <artifactId>xwiki-core</artifactId>
+      <version>2.4-SNAPSHOT</version>
+    </dependency>
+    <!-- Testing dependencies -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-shared-tests</artifactId>
+      <version>2.4-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>  
+  <properties>
+    <!-- Skip Clirr execution since this is the first release of this module. Remove once it's been relased once. -->
+    <xwiki.clirr.skip>true</xwiki.clirr.skip>
+  </properties>
 </project>
