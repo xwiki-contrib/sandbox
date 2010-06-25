@@ -33,7 +33,7 @@ public interface Entity extends Persistable
     String getDescription();
 
     // Add:
-    // - author
-    // - creation date
+    // - last modification author
     // - last modified date
+    // - pretty name
 }
