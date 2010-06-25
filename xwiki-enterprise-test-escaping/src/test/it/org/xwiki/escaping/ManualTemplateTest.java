@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
@@ -70,7 +68,9 @@ public class ManualTemplateTest extends AbstractEscapingTest
     private void testCopy(String parameter)
     {
         // copy.vm does not display the form if targetdoc is not set
-        Assert.assertTrue("Initialization failed", initialize("templates/copy.vm", null));
+        if (!initialize("templates/copy.vm", null)) {
+            return;
+        }
         HashMap<String, String> params = getParamsFor("copy", "targetdoc", "bla");
         params.put(parameter, XMLEscapingValidator.getTestString());
         String url = createUrl(null, null, null, params);
@@ -81,7 +81,9 @@ public class ManualTemplateTest extends AbstractEscapingTest
     public void testRename()
     {
         // rename.vm is only used with step=2, otherwise renameStep1.vm is used
-        Assert.assertTrue("Initialization failed", initialize("templates/rename.vm", null));
+        if (!initialize("templates/rename.vm", null)) {
+            return;
+        }
         for (String parameter : userInput) {
             HashMap<String, String> params = getParamsFor("rename", "step", "2");
             // HTTP 400 is returned if newPageName is empty, 409 if the new page exist

@@ -60,6 +60,8 @@ import org.xwiki.validator.ValidationError;
  * <p>
  * The following configuration properties are supported (set in maven):
  * <ul>
+ * <li>pattern (optional): Additional pattern to select files to be tested (use -Dpattern="substring-regex").
+ *                         Matches all files if empty.</li>
  * <li>filesProduceNoOutput (optional): List of files that are expected to produce empty response</li>
  * <li>patternExcludeFiles (optional): List of RegEx patterns to exclude files from the tests</li>
  * </ul></p>
@@ -129,7 +131,7 @@ public abstract class AbstractEscapingTest implements FileTest
     public boolean initialize(String name, final Reader reader)
     {
         this.name = name;
-        if (!fileNameMatches(name) || isExcludedFile(name)) {
+        if (!fileNameMatches(name) || !patternMatches(name) || isExcludedFile(name)) {
             return false;
         }
 
@@ -147,6 +149,22 @@ public abstract class AbstractEscapingTest implements FileTest
     protected boolean fileNameMatches(String fileName)
     {
         return namePattern != null && namePattern.matcher(fileName).matches();
+    }
+
+    /**
+     * Check if the system property "pattern" matches (substring regular expression) the file name.
+     * Empty pattern matches everything.
+     * 
+     * @param fileName file nmae to check
+     * @return true if the pattern matches, false otherwise
+     */
+    protected boolean patternMatches(String fileName)
+    {
+        String pattern = System.getProperty("pattern", "");
+        if (pattern == null || pattern.equals("")) {
+            return true;
+        }
+        return Pattern.matches(".*" + pattern + ".*", fileName);
     }
 
     /**
@@ -284,6 +302,9 @@ public abstract class AbstractEscapingTest implements FileTest
      */
     protected void checkUnderEscaping(String url, String description)
     {
+        // TODO better use log4j
+        System.out.println("Testing URL: " + url);
+
         InputStream content = getUrlContent(url);
         String where = "  Template: " + name + "\n  URL: " + url;
         Assert.assertNotNull("Response is null\n" + where, content);

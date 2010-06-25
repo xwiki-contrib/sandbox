@@ -85,7 +85,6 @@ public class ApplicationTest extends AbstractVelocityEscapingTest
         // TODO need to also consider parameters from page header templates bound to variables
         for (String parameter : userInput) {
             String url = createUrl(space, page, parameter, XMLEscapingValidator.getTestString(), skin);
-            System.out.println(url);
             checkUnderEscaping(url, "\"" + parameter + "\"");
         }
     }
