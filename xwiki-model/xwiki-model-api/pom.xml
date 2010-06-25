@@ -26,14 +26,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-core-parent</artifactId>
+    <artifactId>xwiki-core-newmodel</artifactId>
     <version>2.4-SNAPSHOT</version>
   </parent>
-  <groupId>org.xwiki.platform</groupId>
-  <artifactId>xwiki-core-newmodel</artifactId>
-  <name>XWiki Platform - Core - Model</name>
+  <artifactId>xwiki-core-newmodel-api</artifactId>
+  <name>XWiki Platform - Core - Model - API</name>
   <packaging>jar</packaging>
-  <description>XWiki Platform - Core - Model</description>
+  <description>XWiki Platform - Core - Model - API</description>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
@@ -63,5 +62,8 @@
       <scope>test</scope>
     </dependency>
   </dependencies>  
+  <properties>
+    <!-- Skip Clirr execution since this is the first release of this module. Remove once it's been relased once. -->
+    <xwiki.clirr.skip>true</xwiki.clirr.skip>
+  </properties>
 </project>
-       
