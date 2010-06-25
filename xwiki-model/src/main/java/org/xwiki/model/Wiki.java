@@ -4,12 +4,12 @@ import org.xwiki.model.reference.WikiReference;
 
 import java.util.List;
 
-public interface Wiki extends Persistable
+public interface Wiki extends Entity
 {
     /**
-     * @return the list of all space names in this wiki including nested spaces
+     * @return the list of top level Space objects in this wiki (excluding nested spaces)
      */
-    List<String> getSpaceNames();
+    List<Space> getSpaces();
 
     /**
      * @param spaceName the name of the space
@@ -17,13 +17,12 @@ public interface Wiki extends Persistable
      */
     Space getSpace(String spaceName);
 
-    Space createSpace(String spaceName);
-
-    void addSpace(Space space);
+    Space addSpace(String spaceName);
 
     void removeSpace(String spaceName);
 
     boolean hasSpace(String spaceName);
 
+    // Q: Should this be here? Should it return the "main" Reference only? What about aliases?
     WikiReference getWikiReference();
 }

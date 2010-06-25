@@ -1,6 +1,6 @@
 package org.xwiki.model;
 
-public interface Object extends Persistable
+public interface Object extends Entity
 {
 
 }

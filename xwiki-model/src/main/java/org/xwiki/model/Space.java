@@ -4,7 +4,7 @@ import org.xwiki.model.reference.SpaceReference;
 
 import java.util.List;
 
-public interface Space extends Persistable
+public interface Space extends Entity
 {
     /**
      * @return the space's description
@@ -13,9 +13,9 @@ public interface Space extends Persistable
     String getDescription();
 
     /**
-     * @return the names of all nested spaces
+     * @return the list of top level Space objects in this Space (excluding nested spaces)
      */
-    List<String> getSpaceNames();
+    List<Space> getSpaces();
 
     /**
      * @param spaceName the name of the nested space to look for
@@ -26,12 +26,7 @@ public interface Space extends Persistable
     /**
      * @todo Should not be implemented with the old model
      */
-    void addSpace(String spaceName);
-
-    /**
-     * @todo Should not be implemented with the old model
-     */
-    Space createSpace(String spaceName);
+    Space addSpace(String spaceName);
 
     /**
      * @todo Should not be implemented with the old model
@@ -40,17 +35,16 @@ public interface Space extends Persistable
 
     boolean hasSpace(String spaceName);
 
-    List<String> getDocumentNames();
+    List<Document> getDocuments();
 
     boolean hasDocument(String documentName);
 
     Document getDocument(String documentName);
 
-    void addDocument(Document document);
+    Document addDocument(String documentName);
 
     void removeDocument(String documentName);
 
-    Document createDocument(String documentName);
-
+    // Q: Should this be here? Should it return the "main" Reference only? What about aliases?
     SpaceReference getSpaceReference();
 }

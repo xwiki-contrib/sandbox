@@ -1,6 +1,6 @@
 package org.xwiki.model;
 
-public interface Attachment extends Persistable
+public interface Attachment extends Entity
 {
 
 }
