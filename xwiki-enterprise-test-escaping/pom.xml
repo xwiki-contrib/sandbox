@@ -83,9 +83,9 @@
           <!-- Display report on screen when all tests are completed -->  
           <useFile>false</useFile>
           <reportFormat>plain</reportFormat>
-          <!-- FIXME must be added to ../pom.xml
+          <!-- FIXME these properties must be moved to ../pom.xml -->
           <systemProperties>
-              <!- - Used only in escaping tests - ->
+              <!-- Used only in escaping tests -->
               <property>
                 <name>filesProduceNoOutput</name>
                 <value>
@@ -100,37 +100,65 @@
               <property>
                 <name>patternExcludeFiles</name>
                 <value>
-                  <!- - TODO Must be tested manually
-                    - ->
-                    templates/changemyavatar\.vm <!- - target page must be user page - ->
-                    templates/deleteversionsconfirm\.vm <!- - needs both rev1 and rev2 to be present - ->
-                    templates/login\.vm <!- - expects xredirect to be a valid URL - ->
-                    templates/leftpanels.vm <!- - empty response if parameter "forceLeftPanels" is not set - ->
-                    templates/rightpanels.vm <!- - empty response if parameter "forceRightPanels" is not set - ->
-                    templates/plain.vm <!- - need raw=1 - ->
-                    templates/recyclebinlist.vm <!- - page must have been deleted before - ->
-                    templates/rendercontent.vm <!- - page must exist, otherwise empty - ->
-                    templates/textarea_wysiwyg.vm <!- - probably need to set default editor to wysiwyg - ->
-                  <!- - False positives
-                    - ->
-                    templates/accessdenied\.vm <!- - simply returns 403 - ->
-                    templates/attach\.vm <!- - only redirects to attachments.vm - ->
-                    templates/watch.vm <!- - expects xredirect to be a valid URL, does not display anything - ->
-                    templates/wysiwyg.vm <!- - redirects to editwysiwyg.vm, recursive redirection error with some parameters - ->
-                    templates/xpart.vm <!- - avoid recursive include - ->
+                  <!-- TODO Files that must be tested manually
+                    -->
+                    templates/changemyavatar\.vm <!-- target page must be user page -->
+                    templates/deleteversionsconfirm\.vm <!-- needs both rev1 and rev2 to be present -->
+                    templates/login\.vm <!-- expects xredirect to be a valid URL -->
+                    templates/leftpanels.vm <!-- empty response if parameter "forceLeftPanels" is not set -->
+                    templates/rightpanels.vm <!-- empty response if parameter "forceRightPanels" is not set -->
+                    templates/plain.vm <!-- need raw=1 -->
+                    templates/recyclebinlist.vm <!-- page must have been deleted before -->
+                    templates/rendercontent.vm <!-- page must exist, otherwise empty -->
+                    templates/textarea_wysiwyg.vm <!-- probably need to set default editor to wysiwyg -->
+                  <!-- False positives
+                    -->
+                    templates/accessdenied\.vm <!-- simply returns 403 -->
+                    templates/attach\.vm <!-- only redirects to attachments.vm -->
+                    templates/watch.vm <!-- expects xredirect to be a valid URL, does not display anything -->
+                    templates/wysiwyg.vm <!-- redirects to editwysiwyg.vm, recursive redirection error with some parameters -->
+                    templates/xpart.vm <!-- avoid recursive include -->
                 </value>
               </property>
               <property>
                 <name>pathToXWikiWar</name>
                 <value>com/xpn/xwiki/products/xwiki-enterprise-web/${pom.version}/xwiki-enterprise-web-${pom.version}.war</value>
               </property>
-              <!- - Used only in webstandards tests and escaping tests - ->
+              <!-- Used in webstandards tests and escaping tests -->
               <property>
                 <name>pathToXWikiXar</name>
                 <value>com/xpn/xwiki/products/xwiki-enterprise-wiki/${pom.version}/xwiki-enterprise-wiki-${pom.version}.xar</value>
               </property>
+              <!-- FIXME remove once moved to parent pom.xml (duplicated) -->
+              <property>
+                <name>pattern</name>
+                <value>${pattern}</value>
+              </property>
+              <property>
+                <name>xwikiPort</name>
+                <value>${port}</value>
+              </property>
+              <property>
+                <name>xwikiStopPort</name>
+                <value>${stopport}</value>
+              </property>
+              <property>
+                <name>seleniumPort</name>
+                <value>${seleniumPort}</value>
+              </property>
+               <property>
+                <name>xwikiExecutionDirectory</name>
+                <value>${basedir}/target/xwiki-enterprise-jetty-${xwiki.db}-${pom.version}</value>
+              </property>
+              <property>
+                <name>xwikiExecutionStartCommand</name>
+                <value>${xwikiExecutionStartCommand}</value>
+              </property>
+              <property>
+                <name>xwikiExecutionStopCommand</name>
+                <value>${xwikiExecutionStopCommand}</value>
+              </property>
           </systemProperties>
-          -->
         </configuration>
       </plugin>
     </plugins>
