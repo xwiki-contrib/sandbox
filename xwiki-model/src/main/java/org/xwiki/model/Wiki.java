@@ -1,7 +1,5 @@
 package org.xwiki.model;
 
-import org.xwiki.model.reference.WikiReference;
-
 import java.util.List;
 
 public interface Wiki extends Entity
@@ -22,7 +20,4 @@ public interface Wiki extends Entity
     void removeSpace(String spaceName);
 
     boolean hasSpace(String spaceName);
-
-    // Q: Should this be here? Should it return the "main" Reference only? What about aliases?
-    WikiReference getWikiReference();
 }

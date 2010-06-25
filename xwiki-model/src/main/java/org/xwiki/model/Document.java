@@ -1,13 +1,18 @@
 package org.xwiki.model;
 
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.rendering.block.XDOM;
+import org.xwiki.rendering.syntax.Syntax;
 
 import java.util.List;
 import java.util.Locale;
 
 public interface Document extends Entity
 {
+    Locale getLocale();
+
+    // Q: Should we have instead: setContent(Content content) with Content encapsulating the syntax?
+    Syntax getSyntax();
+    void setSyntax(Syntax syntax);
+
     /**
      * @return the list of object definitions defined inside this document
      */
@@ -35,24 +40,13 @@ public interface Document extends Entity
 
     void removeAttachment(String attachmentName);
 
-    // Note: In order to make modifications to the document's content, modify the returned XDOM
-    // Default language
-    XDOM getContent();
-    XDOM getContent(Locale locale);
-
-    // get/setSyntax(Syntax syntax)
-
-    // Q: Should we have this or should we force users to use a Parser for a given syntax, ie make Document
-    // independent of the Syntax?
-    // Note: If we make them independent then we have the question of converting existing docs in the DB.
-    //String setContent(String content);
+    // Note: returning a XDOM is a problem because it would require Renderers for all syntaxes (for example).
+    String getContent();
+    void setContent(String content);
 
     boolean hasObject(String objectName);
 
     boolean hasObjectDefinition(String objectDefinitionName);
 
     boolean hasAttachment(String attachmentName);
-
-    //Q: What about aliases?
-    DocumentReference getDocumentReference();
 }

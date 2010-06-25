@@ -1,5 +1,9 @@
 package org.xwiki.model;
 
+import org.xwiki.model.reference.EntityReference;
+
+import java.util.List;
+
 public interface Entity extends Persistable
 {
     /**
@@ -10,11 +14,26 @@ public interface Entity extends Persistable
     EntityType getType();
 
     /**
-     * All Entities have a name.
+     * Represents a link to another Entity.
+     *
+     * @return the targetted entity or null if the current Entity isn't a link but an actual object  
      */
-    String getName();
+    Entity getTarget();
 
-    // Q: Do we need this? Should this be typed instead, ie for example Space getParent() in a Document Entity? 
-    void setParent(Entity parentEntity);
+    EntityReference getReference();
+
     Entity getParent();
+
+    List<Entity> getChildren();
+
+    /**
+     * @return the space's description
+     * @todo Should not be implemented with the old model
+     */
+    String getDescription();
+
+    // Add:
+    // - author
+    // - creation date
+    // - last modified date
 }
