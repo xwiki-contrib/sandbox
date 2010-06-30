@@ -21,16 +21,18 @@
 
 package com.xwiki.authentication.trustedldap;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xwiki.authentication.Config;
 
-public class TrustedLDAPConfig
+public class TrustedLDAPConfig extends Config
 {
     /** LogFactory <code>LOGGER</code>. */
     private static final Log LOG = LogFactory.getLog(TrustedLDAPConfig.class);
@@ -39,55 +41,25 @@ public class TrustedLDAPConfig
 
     protected static final String CONF_KEY = "xwiki.authentication.trustedldap";
 
-    public String getParam(String name, XWikiContext context)
+    public TrustedLDAPConfig()
     {
-        return getParam(name, "", context);
+        super(PREF_KEY, CONF_KEY);
     }
 
-    public String getParam(String name, String def, XWikiContext context)
+    public Pattern getRemoteUserParser(XWikiContext context)
     {
-        String param = null;
-        try {
-            param = context.getWiki().getXWikiPreference(PREF_KEY + "_" + name, context);
-        } catch (Exception e) {
-        }
+        String param = getParam("remoteUserParser", null, context);
 
-        if (param == null || param.length() == 0) {
-            try {
-                param = context.getWiki().Param(CONF_KEY + "." + name);
-            } catch (Exception e) {
-            }
-        }
-
-        if (param == null) {
-            return def;
-        }
-
-        return param;
+        return param != null ? Pattern.compile(param) : null;
     }
 
-    public Map<String, String> getMapParam(String name, Map<String, String> def, XWikiContext context)
+    public List<String> getRemoteUserMapping(int groupId, XWikiContext context)
     {
-        Map<String, String> mappings = new HashMap<String, String>();
+        return getListParam("remoteUserMapping." + groupId, ',', Collections.<String> emptyList(), context);
+    }
 
-        String str = getParam(name, null, context);
-
-        if (!StringUtils.isEmpty(str)) {
-            String[] fields = StringUtils.split(str, '|');
-
-            for (int i = 0; i < fields.length; i++) {
-                String[] field = StringUtils.split(fields[i], '=');
-                if (2 == field.length) {
-                    String key = field[0];
-                    String value = field[1];
-
-                    mappings.put(key, value);
-                } else {
-                    LOG.error("Error parsing " + name + " attribute in xwiki.cfg: " + fields[i]);
-                }
-            }
-        }
-
-        return mappings;
+    public Map<String, String> getRemoteUserMapping(String propertyName, XWikiContext context)
+    {
+        return getMapParam("remoteUserMapping." + propertyName, '|', Collections.<String, String> emptyMap(), context);
     }
 }

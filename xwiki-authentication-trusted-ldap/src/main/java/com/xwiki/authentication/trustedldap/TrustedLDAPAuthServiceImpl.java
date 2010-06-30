@@ -22,7 +22,11 @@
 package com.xwiki.authentication.trustedldap;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -38,6 +42,7 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.plugin.ldap.XWikiLDAPConfig;
 import com.xpn.xwiki.plugin.ldap.XWikiLDAPConnection;
+import com.xpn.xwiki.plugin.ldap.XWikiLDAPException;
 import com.xpn.xwiki.plugin.ldap.XWikiLDAPSearchAttribute;
 import com.xpn.xwiki.plugin.ldap.XWikiLDAPUtils;
 import com.xpn.xwiki.user.api.XWikiUser;
@@ -211,7 +216,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
 
         XWikiUser user;
-        
+
         // Authenticate
         if (principal == null) {
             principal = authenticate(username, password, context);
@@ -225,7 +230,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             usernameCookie.setMaxAge(-1);
             usernameCookie.setPath("/");
             context.getResponse().addCookie(usernameCookie);
-            
+
             user = new XWikiUser(principal.getName());
         } else {
             user =
@@ -263,6 +268,82 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         return principal;
     }
 
+    protected Map<String, String> parseRemoteUser(String ssoRemoteUser, XWikiContext context)
+    {
+        Map<String, String> ldapConfiguration = new HashMap<String, String>();
+
+        ldapConfiguration.put("login", ssoRemoteUser);
+
+        Pattern remoteUserParser = getConfig().getRemoteUserParser(context);
+
+        if (remoteUserParser != null) {
+            Matcher marcher = remoteUserParser.matcher(ssoRemoteUser);
+
+            if (marcher.find()) {
+                int groupCount = marcher.groupCount();
+                if (groupCount == 0) {
+                    ldapConfiguration.put("login", marcher.group());
+                } else {
+                    for (int g = 1; g <= groupCount; ++g) {
+                        String groupValue = marcher.group(g);
+
+                        List<String> remoteUserMapping = getConfig().getRemoteUserMapping(g, context);
+
+                        for (String configName : remoteUserMapping) {
+                            ldapConfiguration
+                                .put(configName, convertRemoteUserMapping(configName, groupValue, context));
+                        }
+                    }
+                }
+            }
+        }
+
+        return ldapConfiguration;
+    }
+
+    private String convertRemoteUserMapping(String propertyName, String propertyValue, XWikiContext context)
+    {
+        Map<String, String> hostConvertor = getConfig().getRemoteUserMapping(propertyName, context);
+        String converted = hostConvertor.get(propertyValue);
+
+        return converted != null ? converted : propertyValue;
+    }
+
+    public boolean open(XWikiLDAPConnection connector, Map<String, String> remoteUserLdapConfiguration,
+        XWikiContext context) throws XWikiLDAPException
+    {
+        XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
+
+        // open LDAP
+        int ldapPort = config.getLDAPPort(context);
+        String ldapHost = remoteUserLdapConfiguration.get("ldap_server");
+        if (ldapHost == null) {
+            ldapHost = config.getLDAPParam("ldap_server", "localhost", context);
+        }
+
+        String ldapUserName = remoteUserLdapConfiguration.get("login");
+        String password = remoteUserLdapConfiguration.get("password");
+
+        // allow to use the given user and password also as the LDAP bind user and password
+        String bindDN = config.getLDAPBindDN(ldapUserName, password, context);
+        String bindPassword = config.getLDAPBindPassword(ldapUserName, password, context);
+
+        boolean bind;
+        if ("1".equals(config.getLDAPParam("ldap_ssl", "0", context))) {
+            String keyStore = config.getLDAPParam("ldap_ssl.keystore", "", context);
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connecting to LDAP using SSL");
+            }
+
+            bind = connector.open(ldapHost, ldapPort, bindDN, bindPassword, keyStore, true, context);
+        } else {
+            bind = connector.open(ldapHost, ldapPort, bindDN, bindPassword, null, false, context);
+        }
+
+        return bind;
+    }
+
     public Principal authenticateSSOInContext(boolean local, XWikiContext context) throws XWikiException
     {
         LOG.debug("Authenticate SSO");
@@ -271,15 +352,23 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         Principal principal = null;
 
-        if (request.getRemoteUser() == null) {
+        String ssoRemoteUser = request.getRemoteUser();
+
+        if (ssoRemoteUser == null) {
             LOG.warn("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
 
             return null;
         }
 
-        LOG.debug("request remote user: " + request.getRemoteUser());
+        LOG.debug("request remote user: " + ssoRemoteUser);
 
-        String ldapUid = request.getRemoteUser();
+        // ////////////////////////////////////////////////////////////////////
+        // Extract LDAP informations from remote user
+        // ////////////////////////////////////////////////////////////////////
+
+        Map<String, String> remoteUserLdapConfiguration = parseRemoteUser(ssoRemoteUser, context);
+
+        String ldapUid = remoteUserLdapConfiguration.get("login");
         String validXWikiUserName = ldapUid.replace(".", "");
 
         LOG.debug("ldapUid: " + ldapUid);
@@ -296,14 +385,16 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         ldapUtils.setUidAttributeName(config.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UID, "cn", context));
         ldapUtils.setGroupClasses(config.getGroupClasses(context));
         ldapUtils.setGroupMemberFields(config.getGroupMemberFields(context));
-        ldapUtils.setBaseDN(config.getLDAPParam("ldap_base_DN", "", context));
         ldapUtils.setUserSearchFormatString(config.getLDAPParam("ldap_user_search_fmt", "({0}={1})", context));
+
+        ldapUtils.setBaseDN(remoteUserLdapConfiguration.containsKey("ldap_base_DN") ? remoteUserLdapConfiguration
+            .get("ldap_base_DN") : config.getLDAPParam("ldap_base_DN", "", context));
 
         // ////////////////////////////////////////////////////////////////////
         // bind to LDAP
         // ////////////////////////////////////////////////////////////////////
 
-        if (!connector.open(ldapUid, null, context)) {
+        if (!open(connector, remoteUserLdapConfiguration, context)) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                 "Bind to LDAP server failed.");
         }
