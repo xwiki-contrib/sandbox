@@ -24,10 +24,14 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.AbstractVelocityEscapingTest;
+import org.xwiki.escaping.framework.SingleXWikiExecutor;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
 import org.xwiki.escaping.suite.ArchiveSuite;
+import org.xwiki.escaping.suite.ArchiveSuite.AfterSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
+import org.xwiki.escaping.suite.ArchiveSuite.BeforeSuite;
 
 
 /**
@@ -54,6 +58,24 @@ public class ApplicationTest extends AbstractVelocityEscapingTest
     public static String getArchivePath()
     {
         return System.getProperty("localRepository") + "/" + System.getProperty("pathToXWikiXar");
+    }
+
+    @BeforeSuite
+    public static void init() throws Exception
+    {
+        SingleXWikiExecutor.getExecutor().start();
+
+        // for tests using "language" parameter
+        AbstractEscapingTest.setMultiLanguageMode(true);
+    }
+
+    @AfterSuite
+    public static void shutdown() throws Exception
+    {
+        // restore single language mode
+        AbstractEscapingTest.setMultiLanguageMode(false);
+
+        SingleXWikiExecutor.getExecutor().stop();
     }
 
     /**

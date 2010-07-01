@@ -37,7 +37,6 @@ import org.xwiki.escaping.framework.XMLEscapingValidator;
  * - need to test comments*.vm on a page with comments
  * - create the space and page named {@link XMLEscapingValidator#getTestString()} before running space/page tests
  * - add variable names that are bound to request parameters to the regex in parse() (might need to use another URL)
- * - add a multilanguage test (switch to multilanguage, test language escaping everywhere, switch back)
  * - sometimes, templates need the document to be in syntax 1.0
  * 
  * @version $Id$

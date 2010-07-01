@@ -25,10 +25,14 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.AbstractVelocityEscapingTest;
+import org.xwiki.escaping.framework.SingleXWikiExecutor;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
 import org.xwiki.escaping.suite.ArchiveSuite;
+import org.xwiki.escaping.suite.ArchiveSuite.AfterSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
+import org.xwiki.escaping.suite.ArchiveSuite.BeforeSuite;
 
 
 /**
@@ -55,6 +59,35 @@ public class TemplateTest extends AbstractVelocityEscapingTest
     public static String getArchivePath()
     {
         return System.getProperty("localRepository") + "/" + System.getProperty("pathToXWikiWar");
+    }
+
+    /**
+     * Start XWiki server if needed and switch to multi-language mode.
+     * 
+     * @throws Exception on errors
+     */
+    @BeforeSuite
+    public static void init() throws Exception
+    {
+        System.out.println("TTTT TemplateTest.oinit()");
+        SingleXWikiExecutor.getExecutor().start();
+
+        // for tests using "language" parameter
+        AbstractEscapingTest.setMultiLanguageMode(true);
+    }
+
+    /**
+     * Switch back to single language mode and stop XWiki server if no longer needed.
+     * 
+     * @throws Exception on errors
+     */
+    @AfterSuite
+    public static void shutdown() throws Exception
+    {
+        // restore single language mode
+        AbstractEscapingTest.setMultiLanguageMode(false);
+
+        SingleXWikiExecutor.getExecutor().stop();
     }
 
     /**

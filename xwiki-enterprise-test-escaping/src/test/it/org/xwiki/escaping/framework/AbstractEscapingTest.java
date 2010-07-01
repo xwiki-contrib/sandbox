@@ -115,6 +115,18 @@ public abstract class AbstractEscapingTest implements FileTest
     }
 
     /**
+     * Change multi-language mode. Note: XWiki server must already be started.
+     * 
+     * @param enabled enable the multi-language mode if true, disable otherwise
+     */
+    protected static void setMultiLanguageMode(boolean enabled)
+    {
+        String url = AbstractEscapingTest.URL_START + "save/XWiki/XWikiPreferences?";
+        url += "XWiki.XWikiPreferences_0_languages=&XWiki.XWikiPreferences_0_multilingual=";
+        AbstractEscapingTest.getUrlContent(url + (enabled ? 1 : 0));
+    }
+
+    /**
      * Create new AbstractEscapingTest
      * 
      * @param fileNameMatcher regex pattern used to filter files by name
@@ -217,7 +229,7 @@ public abstract class AbstractEscapingTest implements FileTest
      * @param url URL of the page
      * @return content of the page
      */
-    protected InputStream getUrlContent(String url)
+    protected static InputStream getUrlContent(String url)
     {
         GetMethod get = new GetMethod(url);
         get.setFollowRedirects(true);
@@ -305,7 +317,7 @@ public abstract class AbstractEscapingTest implements FileTest
         // TODO better use log4j
         System.out.println("Testing URL: " + url);
 
-        InputStream content = getUrlContent(url);
+        InputStream content = AbstractEscapingTest.getUrlContent(url);
         String where = "  Template: " + name + "\n  URL: " + url;
         Assert.assertNotNull("Response is null\n" + where, content);
         XMLEscapingValidator validator = new XMLEscapingValidator();
