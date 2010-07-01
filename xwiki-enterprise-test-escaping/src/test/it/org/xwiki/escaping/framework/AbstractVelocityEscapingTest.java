@@ -83,7 +83,7 @@ public abstract class AbstractVelocityEscapingTest extends AbstractEscapingTest
             while ((line = data.readLine()) != null) {
                 Matcher match = pattern.matcher(line);
                 while (match.find()) {
-                    for (int i = 1; i < match.groupCount(); i++) {
+                    for (int i = 1; i <= match.groupCount(); i++) {
                         String parameter = match.group(i);
                         if (parameter != null && !parameter.matches("\\s*")) {
                             input.add(parameter);
