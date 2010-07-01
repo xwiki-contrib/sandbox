@@ -58,10 +58,10 @@ public class EscapingError extends AssertionError
     /**
      * Create new EscapingError listing a list of validation errors.
      * 
-     * @param message
-     * @param fileName
-     * @param url
-     * @param errors
+     * @param message error message
+     * @param fileName file name that was tested
+     * @param url URL to reproduce
+     * @param errors list of validation errors
      */
     public EscapingError(String message, String fileName, String url, List<ValidationError> errors)
     {
@@ -69,7 +69,18 @@ public class EscapingError extends AssertionError
     }
 
     /**
-     * Compose a nice error message from the given data.
+     * Create new EscapingError listing a list of escaping errors.
+     * 
+     * @param message error message
+     * @param errors list of escaping errors
+     */
+    public EscapingError(String message, List<EscapingError> errors)
+    {
+        super(formatMessageList(message, errors));
+    }
+
+    /**
+     * Compose a nice error message from the given list of validation errors.
      * 
      * @param message error description
      * @param fileName file name that was tested
@@ -79,7 +90,7 @@ public class EscapingError extends AssertionError
      */
     public static final String formatMessage(String message, String fileName, String url, List<ValidationError> errors)
     {
-        StringBuilder result = new StringBuilder(message);
+        StringBuilder result = new StringBuilder(message == null ? "" : message);
         result.append("\n  Tested file: ").append(fileName);
         result.append("\n  URL: ").append(url);
 
@@ -110,6 +121,23 @@ public class EscapingError extends AssertionError
         result.append(errorBuilder);
         result.append(warningBuilder);
         result.append('\n');
+        return result.toString();
+    }
+
+    /**
+     * Compose a nice error message from the given list of escaping errors. Each escaping error might
+     * contain a list of validation errors.
+     * 
+     * @param message error description
+     * @param errors list of escaping errors
+     * @return formatted message
+     */
+    public static String formatMessageList(String message, List<EscapingError> errors)
+    {
+        StringBuilder result = new StringBuilder(message == null ? "" : message + "\n");
+        for (EscapingError error : errors) {
+            result.append(error.getMessage());
+        }
         return result.toString();
     }
 }
