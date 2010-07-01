@@ -39,6 +39,8 @@ import java.util.zip.ZipFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.internal.runners.statements.RunAfters;
+import org.junit.internal.runners.statements.RunBefores;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Sorter;
@@ -47,6 +49,7 @@ import org.junit.runners.ParentRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.RunnerBuilder;
+import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestClass;
 
 
@@ -108,6 +111,27 @@ public class ArchiveSuite extends ParentRunner<Runner>
         // no attributes
     }
 
+    /**
+     * Marks a method that should be called before the archive is read.
+     */
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    public @interface BeforeSuite
+    {
+        // no attributes
+    }
+
+    /**
+     * Marks a method that should be called after all tests finished.
+     */
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    public @interface AfterSuite
+    {
+        // no attributes
+    }
 
     /** List of test runners build, one for each matching file found in the archive. */
     private final List<Runner> runners;
@@ -300,6 +324,36 @@ public class ArchiveSuite extends ParentRunner<Runner>
             throw new InitializationError("Archive path is null.");
         }
         return path;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.junit.runners.ParentRunner#withBeforeClasses(org.junit.runners.model.Statement)
+     */
+    @Override
+    protected Statement withBeforeClasses(Statement statement)
+    {
+        Statement result = super.withBeforeClasses(statement);
+        List<FrameworkMethod> methods = getTestClass().getAnnotatedMethods(BeforeSuite.class);
+        if (methods.isEmpty()) {
+            return result;
+        }
+        return new RunBefores(result, methods, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.junit.runners.ParentRunner#withAfterClasses(org.junit.runners.model.Statement)
+     */
+    @Override
+    protected Statement withAfterClasses(Statement statement)
+    {
+        Statement result = super.withAfterClasses(statement);
+        List<FrameworkMethod> methods = getTestClass().getAnnotatedMethods(AfterSuite.class);
+        if (methods.isEmpty()) {
+            return result;
+        }
+        return new RunAfters(result, methods, null);
     }
 
     /**
