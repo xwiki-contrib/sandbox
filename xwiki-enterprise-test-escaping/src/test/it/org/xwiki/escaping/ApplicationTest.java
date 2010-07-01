@@ -19,19 +19,23 @@
  */
 package org.xwiki.escaping;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.AbstractVelocityEscapingTest;
+import org.xwiki.escaping.framework.EscapingError;
 import org.xwiki.escaping.framework.SingleXWikiExecutor;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
 import org.xwiki.escaping.suite.ArchiveSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.AfterSuite;
 import org.xwiki.escaping.suite.ArchiveSuite.ArchivePathGetter;
 import org.xwiki.escaping.suite.ArchiveSuite.BeforeSuite;
+import org.xwiki.validator.ValidationError;
 
 
 /**
@@ -105,9 +109,16 @@ public class ApplicationTest extends AbstractVelocityEscapingTest
 
         // all found parameters
         // TODO need to also consider parameters from page header templates bound to variables
+        List<EscapingError> errors = new ArrayList<EscapingError>();
         for (String parameter : userInput) {
             String url = createUrl(space, page, parameter, XMLEscapingValidator.getTestString(), skin);
-            checkUnderEscaping(url, "\"" + parameter + "\"");
+            List<ValidationError> val_errors = getUnderEscapingErrors(url);
+            if (!val_errors.isEmpty()) {
+                errors.add(new EscapingError("* Parameter: \"" + parameter + "\"", name, url, val_errors));
+            }
+        }
+        if (!errors.isEmpty()) {
+            throw new EscapingError("Escaping test failed.", errors);
         }
     }
 

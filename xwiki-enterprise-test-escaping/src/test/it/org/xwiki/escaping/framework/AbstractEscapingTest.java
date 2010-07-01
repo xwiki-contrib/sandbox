@@ -306,13 +306,12 @@ public abstract class AbstractEscapingTest implements FileTest
     }
 
     /**
-     * Check for unescaped data in the given {@code content}. Throws {@link EscapingError} on failure,
-     * {@link RuntimeException} on errors.
+     * Check for unescaped data in the given {@code content}. Throws {@link RuntimeException} on errors.
      * 
      * @param url URL used in the test
-     * @param description description of the test
+     * @return list of found validation errors
      */
-    protected void checkUnderEscaping(String url, String description)
+    protected List<ValidationError> getUnderEscapingErrors(String url)
     {
         // TODO better use log4j
         System.out.println("Testing URL: " + url);
@@ -323,15 +322,27 @@ public abstract class AbstractEscapingTest implements FileTest
         XMLEscapingValidator validator = new XMLEscapingValidator();
         validator.setShouldBeEmpty(!this.shouldProduceOutput);
         validator.setDocument(content);
-        List<ValidationError> errors;
         try {
-            errors = validator.validate();
+            return validator.validate();
         } catch (EscapingError error) {
             // most probably false positive, generate an error instead of failing the test
             throw new RuntimeException(EscapingError.formatMessage(error.getMessage(), name, url, null));
         }
+    }
+
+    /**
+     * A convenience method that throws an {@link EscapingError} on failure.
+     *
+     * @param url URL used in the test
+     * @param description description of the test
+     * 
+     * @see #checkUnderEscaping(String, String, List)
+     */
+    protected void checkUnderEscaping(String url, String description)
+    {
+        List<ValidationError> errors = getUnderEscapingErrors(url);
         if (!errors.isEmpty()) {
-            throw new EscapingError("Escaping test failed.", name, url, errors);
+            throw new EscapingError("Escaping test for " + description + " failed.", name, url, errors);
         }
     }
 
