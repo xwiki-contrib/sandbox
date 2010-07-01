@@ -43,7 +43,7 @@ public class SingleXWikiExecutor extends XWikiExecutor
      * 
      * @return XWiki server executor
      */
-    public static SingleXWikiExecutor getExecutor()
+    public static synchronized SingleXWikiExecutor getExecutor()
     {
         if (SingleXWikiExecutor.executor == null) {
             SingleXWikiExecutor.executor = new SingleXWikiExecutor();
@@ -66,7 +66,7 @@ public class SingleXWikiExecutor extends XWikiExecutor
      * Starts the server on the first call, subsequent calls only increase the internal counter by one.
      */
     @Override
-    public void start() throws Exception
+    public synchronized void start() throws Exception
     {
         if (counter == 0) {
             super.start();
@@ -80,7 +80,7 @@ public class SingleXWikiExecutor extends XWikiExecutor
      * Decreases the internal counter, stops the server when it reaches 0.
      */
     @Override
-    public void stop() throws Exception
+    public synchronized void stop() throws Exception
     {
         if (counter == 1) {
             super.stop();
