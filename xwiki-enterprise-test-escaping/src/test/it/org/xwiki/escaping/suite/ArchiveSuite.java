@@ -79,14 +79,17 @@ import org.junit.runners.model.TestClass;
 public class ArchiveSuite extends ParentRunner<Runner>
 {
     /**
-     * Path to the archive to use. Is overridden by &#064;{@link ArchivePathGetter}.
+     * Path to the archive. Is overridden by &#064;{@link ArchivePathGetter}.
      */
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
     public @interface ArchivePath
     {
-        public String value();
+        /**
+         * Path to the archive.
+         */
+        String value();
     }
 
     /**

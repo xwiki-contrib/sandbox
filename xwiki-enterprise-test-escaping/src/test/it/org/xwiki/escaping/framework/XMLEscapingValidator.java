@@ -93,7 +93,7 @@ public class XMLEscapingValidator implements Validator
     /**
      * {@inheritDoc}
      * <p>
-     * Throws {@link EscapingError} on errors</p>
+     * Throws {@link EscapingError} on errors.</p>
      * 
      * @see org.xwiki.validator.Validator#validate()
      */
@@ -108,13 +108,15 @@ public class XMLEscapingValidator implements Validator
         }
         int lineNr = 1;
         for (String line : document) {
-            int idx = -1;
-            while ((idx = line.indexOf(TEST_APOS, idx + 1)) >= 0) {
-                errors.add(new ValidationError(Type.FATAL, lineNr, idx+1, "Unescaped apostrophe character"));
+            int idx = 0;
+            while ((idx = line.indexOf(TEST_APOS, idx)) >= 0) {
+                errors.add(new ValidationError(Type.FATAL, lineNr, idx, "Unescaped apostrophe character"));
+                idx++;
             }
-            idx = -1;
-            while ((idx = line.indexOf(TEST_QUOT, idx + 1)) >= 0) {
-                errors.add(new ValidationError(Type.FATAL, lineNr, idx+1, "Unescaped quote character"));
+            idx = 0;
+            while ((idx = line.indexOf(TEST_QUOT, idx)) >= 0) {
+                errors.add(new ValidationError(Type.FATAL, lineNr, idx, "Unescaped quote character"));
+                idx++;
             }
             // TODO also check <> and \ for JavaScript
             // TODO check for overescaping

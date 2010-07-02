@@ -114,6 +114,8 @@ public class EscapingError extends AssertionError
                 case WARNING:
                     warningBuilder.append(str);
                     break;
+                default:
+                    throw new RuntimeException("Should not happen: Error type = " + error.getType());
             }
         }
         result.append("\n  List of validation errors:");

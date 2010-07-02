@@ -30,13 +30,21 @@ import org.xwiki.test.XWikiExecutor;
  * @version $Id$
  * @since 2.5
  */
-public class SingleXWikiExecutor extends XWikiExecutor
+public final class SingleXWikiExecutor extends XWikiExecutor
 {
     /** Singleton instance. */
     private static SingleXWikiExecutor executor = null;
 
     /** Call counter. */
-    static private int counter = 0;
+    private static int counter = 0;
+
+    /**
+     * Create new SingleXWikiExecutor.
+     */
+    private SingleXWikiExecutor()
+    {
+        super(0);
+    }
 
     /**
      * Get the executor instance.
@@ -49,15 +57,6 @@ public class SingleXWikiExecutor extends XWikiExecutor
             SingleXWikiExecutor.executor = new SingleXWikiExecutor();
         }
         return SingleXWikiExecutor.executor;
-    }
-
-    /**
-     * Create new SingleXWikiExecutor
-     */
-    private SingleXWikiExecutor()
-    {
-        super(0);
-        // TODO Auto-generated constructor stub
     }
 
     /**

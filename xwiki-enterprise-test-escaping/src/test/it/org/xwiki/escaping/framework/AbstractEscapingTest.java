@@ -83,19 +83,29 @@ public abstract class AbstractEscapingTest implements FileTest
     /** User provided data found in the file. */
     protected Set<String> userInput;
 
-    /** Pattern used to match files by name. */
-    private Pattern namePattern;
-
     /**
      * Test fails if response is empty, but output is expected and vice versa.
      * To set to false, add file name to "filesProduceNoOutput" 
      */
     protected boolean shouldProduceOutput = true;
 
+    /** Pattern used to match files by name. */
+    private Pattern namePattern;
+
+    /**
+     * Create new AbstractEscapingTest.
+     * 
+     * @param fileNameMatcher regex pattern used to filter files by name
+     */
+    protected AbstractEscapingTest(Pattern fileNameMatcher)
+    {
+        namePattern = fileNameMatcher;
+    }
+
     /**
      * Start XWiki server if run alone.
      * 
-     * @throws Exception
+     * @throws Exception on errors
      */
     @BeforeClass
     public static void init() throws Exception
@@ -124,16 +134,6 @@ public abstract class AbstractEscapingTest implements FileTest
         String url = AbstractEscapingTest.URL_START + "save/XWiki/XWikiPreferences?";
         url += "XWiki.XWikiPreferences_0_languages=&XWiki.XWikiPreferences_0_multilingual=";
         AbstractEscapingTest.getUrlContent(url + (enabled ? 1 : 0));
-    }
-
-    /**
-     * Create new AbstractEscapingTest
-     * 
-     * @param fileNameMatcher regex pattern used to filter files by name
-     */
-    protected AbstractEscapingTest(Pattern fileNameMatcher)
-    {
-        namePattern = fileNameMatcher;
     }
 
     /**
@@ -236,10 +236,8 @@ public abstract class AbstractEscapingTest implements FileTest
         get.setDoAuthentication(true);
         get.addRequestHeader("Authorization", "Basic " + new String(Base64.encodeBase64("Admin:admin".getBytes())));
 
-        // make the request
-        HttpClient client = AbstractEscapingTest.getClient();
         try {
-            int statusCode = client.executeMethod(get);
+            int statusCode = AbstractEscapingTest.getClient().executeMethod(get);
             // ignore 404 (the page is still rendered)
             if (statusCode != HttpStatus.SC_OK && statusCode != HttpStatus.SC_NOT_FOUND) {
                 throw new RuntimeException("HTTP GET request returned status " + statusCode + " ("
@@ -358,16 +356,9 @@ public abstract class AbstractEscapingTest implements FileTest
      */
     protected final String createUrl(String action, String space, String page, Map<String, String> parameters)
     {
-        if (action == null) {
-            action = "view";
-        }
-        if (space == null) {
-            space = "Main";
-        }
-        if (page == null) {
-            page = "WebHome";
-        }
-        String url = URL_START + escapeUrl(action) + "/" + escapeUrl(space) + "/" + escapeUrl(page);
+        String url = URL_START + escapeUrl(action == null ? "view" : action) + "/";
+        url += escapeUrl(space == null ? "Main" : space) + "/";
+        url += escapeUrl(page == null ? "WebHome" : page);
         if (parameters == null) {
             return url;
         }
