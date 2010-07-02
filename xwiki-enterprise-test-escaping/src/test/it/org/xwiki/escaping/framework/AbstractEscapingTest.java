@@ -242,7 +242,8 @@ public abstract class AbstractEscapingTest implements FileTest
             int statusCode = client.executeMethod(get);
             // ignore 404 (the page is still rendered)
             if (statusCode != HttpStatus.SC_OK && statusCode != HttpStatus.SC_NOT_FOUND) {
-                throw new RuntimeException("HTTP GET request returned status " + statusCode + " for URL: " + url);
+                throw new RuntimeException("HTTP GET request returned status " + statusCode + " ("
+                    + get.getStatusText() + ") for URL: " + url);
             }
 
             // get the data, converting to utf-8
