@@ -73,7 +73,6 @@ public class TemplateTest extends AbstractVelocityEscapingTest
     @BeforeSuite
     public static void init() throws Exception
     {
-        System.out.println("TTTT TemplateTest.oinit()");
         SingleXWikiExecutor.getExecutor().start();
 
         // for tests using "language" parameter
