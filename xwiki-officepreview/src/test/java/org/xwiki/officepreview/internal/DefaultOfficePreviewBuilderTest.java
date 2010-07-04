@@ -33,6 +33,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.cache.Cache;
 import org.xwiki.component.util.ReflectionUtils;
+import org.xwiki.container.ApplicationContext;
+import org.xwiki.container.Container;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.officeimporter.builder.XDOMOfficeDocumentBuilder;
@@ -230,5 +232,57 @@ public class DefaultOfficePreviewBuilderTest extends AbstractOfficePreviewTestCa
         
         XDOM preview = defaultOfficePreviewBuilder.build(attachmentReference, true);
         Assert.assertNotNull(preview);
+    }
+ 
+    /**
+     * A test case for testing the {@link AbstractOfficePreviewBuilder#getTemporaryDirectory(AttachmentReference)} 
+     * method.
+     * 
+     * @throws Exception if an error occurs.
+     */
+    @Test
+    public void testGetTemporaryDirectory() throws Exception {
+        AbstractOfficePreviewBuilder builder = (AbstractOfficePreviewBuilder) defaultOfficePreviewBuilder;
+        
+        DocumentReference documentReference = new DocumentReference("xwiki", "Main", "Test");
+        AttachmentReference attachmentReference = new AttachmentReference("Test.doc", documentReference);
+        
+        final ApplicationContext mockApplicationContext = getMockery().mock(ApplicationContext.class);
+        final Container mockContainer = getMockery().mock(Container.class);
+        
+        getMockery().checking(new Expectations(){{
+            oneOf(mockContainer).getApplicationContext();
+            will(returnValue(mockApplicationContext));
+            
+            oneOf(mockApplicationContext).getTemporaryDirectory();
+            will(returnValue(new File(System.getProperty("java.io.tmpdir"))));
+        }});
+        
+        ReflectionUtils.setFieldValue(builder, "container", mockContainer);
+        
+        File tempFile = builder.getTemporaryDirectory(attachmentReference);
+        Assert.assertTrue(tempFile.getAbsolutePath().endsWith("/temp/officepreview/xwiki/Main/Test/Test.doc"));
+    }
+    
+    /**
+     * A test case for testing the {@link AbstractOfficePreviewBuilder#buildURL(AttachmentReference, String)} 
+     * method.
+     * 
+     * @throws Exception if an error occurs.
+     */
+    @Test
+    public void testBuildURL() throws Exception {
+        AbstractOfficePreviewBuilder builder = (AbstractOfficePreviewBuilder) defaultOfficePreviewBuilder;
+        
+        final DocumentReference documentReference = new DocumentReference("xwiki", "Main", "Test");
+        AttachmentReference attachmentReference = new AttachmentReference("Test.doc", documentReference);
+        
+        getMockery().checking(new Expectations(){{
+            oneOf(mockDocumentAccessBridge).getDocumentURL(documentReference, "temp", null, null);
+            will(returnValue("/xwiki/bin/temp/Main/Test"));
+        }});
+        
+        String url = builder.buildURL(attachmentReference, "some_temporary_artifact.gif");
+        Assert.assertEquals("/xwiki/bin/temp/Main/Test/officepreview/Test.doc/some_temporary_artifact.gif", url);
     }
 }
