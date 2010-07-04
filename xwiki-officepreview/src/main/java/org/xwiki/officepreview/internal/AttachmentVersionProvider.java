@@ -19,58 +19,23 @@
  */
 package org.xwiki.officepreview.internal;
 
-import org.xwiki.context.Execution;
 import org.xwiki.model.reference.AttachmentReference;
-
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.doc.XWikiAttachment;
-import com.xpn.xwiki.doc.XWikiDocument;
+import org.xwiki.officepreview.OfficePreviewBuilder;
 
 /**
- * This class is used to separate out the dependency on xwiki-core module so that it is easy to use mock objects for
+ * This interface is used to separate out the dependency on xwiki-core module so that it is easy to use mock objects for
  * testing {@link OfficePreviewBuilder} components based on {@link AbstractOfficePreviewBuilder} class.
  * 
  * @version $Id$
  */
-public class AttachmentVersionProvider
+public interface AttachmentVersionProvider
 {
     /**
-     * Access to current execution.
-     */
-    private Execution execution;
-
-    /**
-     * Creates a new {@link AttachmentVersionProvider} instance.
-     * 
-     * @param execution used to access current execution.
-     */
-    public AttachmentVersionProvider(Execution execution)
-    {
-        this.execution = execution;
-    }
-
-    /**
-     * Utility method for querying the current version of an attachment.
+     * Queries the current version of an attachment.
      * 
      * @param attachmentReference reference to an attachment.
      * @return current version of the attachment.
      * @throws Exception if an error occurs while accessing attachment details.
      */
-    public String getAttachmentVersion(AttachmentReference attachmentReference) throws Exception
-    {
-        XWikiContext xcontext = getContext();
-        XWikiDocument doc = xcontext.getWiki().getDocument(attachmentReference.getDocumentReference(), xcontext);
-        XWikiAttachment attachment = doc.getAttachment(attachmentReference.getName());
-        return attachment.getVersion();
-    }
-    
-    /**
-     * Used to retrieve a reference to {@link XWikiContext}.
-     * 
-     * @return {@link XWikiContext} instance.
-     */
-    private XWikiContext getContext()
-    {
-        return (XWikiContext) execution.getContext().getProperty("xwikicontext");
-    }
+    public String getAttachmentVersion(AttachmentReference attachmentReference) throws Exception;
 }

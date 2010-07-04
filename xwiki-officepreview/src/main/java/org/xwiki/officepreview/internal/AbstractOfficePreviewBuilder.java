@@ -119,7 +119,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         } catch (CacheException ex) {
             throw new InitializationException("Error while initializing previews cache.", ex);
         }
-        this.attachmentVersionProvider = new AttachmentVersionProvider(execution);
+        this.attachmentVersionProvider = new DefaultAttachmentVersionProvider(execution);
     }
 
     /**
