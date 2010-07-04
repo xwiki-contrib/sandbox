@@ -21,7 +21,6 @@ package org.xwiki.officepreview.internal;
 
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.AttachmentReference;
-import org.xwiki.officepreview.OfficePreviewBuilder;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiAttachment;
@@ -70,7 +69,7 @@ public class AttachmentVersionProvider
      * 
      * @return {@link XWikiContext} instance.
      */
-    private XWikiContext getContext() throws Exception
+    private XWikiContext getContext()
     {
         return (XWikiContext) execution.getContext().getProperty("xwikicontext");
     }
