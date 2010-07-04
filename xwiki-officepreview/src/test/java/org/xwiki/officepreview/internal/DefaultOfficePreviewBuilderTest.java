@@ -20,15 +20,18 @@
 package org.xwiki.officepreview.internal;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import junit.framework.Assert;
 
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.cache.Cache;
 import org.xwiki.component.util.ReflectionUtils;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
@@ -118,8 +121,9 @@ public class DefaultOfficePreviewBuilderTest extends AbstractOfficePreviewTestCa
         final DocumentReference documentReference = new DocumentReference("xwiki", "Main", "Test");
         final AttachmentReference attachmentReference = new AttachmentReference("Test.doc", documentReference);
         final String strAttachmentReference = "xwiki:Main.Test@Test.doc";
+        
         final ByteArrayInputStream attachmentContent = new ByteArrayInputStream(new byte [256]);
-        final XDOMOfficeDocument officeDocument = new XDOMOfficeDocument(new XDOM(new ArrayList<Block>()),
+        final XDOMOfficeDocument xdomOfficeDocument = new XDOMOfficeDocument(new XDOM(new ArrayList<Block>()),
             new HashMap<String, byte[]>(), getComponentManager());
         
         getMockery().checking(new Expectations(){{
@@ -136,8 +140,93 @@ public class DefaultOfficePreviewBuilderTest extends AbstractOfficePreviewTestCa
             will(returnValue(attachmentContent));
             
             oneOf(mockOfficeDocumentBuilder).build(attachmentContent, "Test.doc", documentReference, true);
-            will(returnValue(officeDocument));                        
+            will(returnValue(xdomOfficeDocument));                        
         }});
+        
+        XDOM preview = defaultOfficePreviewBuilder.build(attachmentReference, true);
+        Assert.assertNotNull(preview);
+    }
+    
+    /**
+     * Tests the previewing of an office document which has already been previewed and cached.
+     * 
+     * @throws Exception if an error occurs.
+     */
+    @Test
+    public void testOfficePreviewWithCacheHit() throws Exception {
+        final DocumentReference documentReference = new DocumentReference("xwiki", "Main", "Test");
+        final AttachmentReference attachmentReference = new AttachmentReference("Test.doc", documentReference);
+        final String strAttachmentReference = "xwiki:Main.Test@Test.doc";
+        
+        final OfficeDocumentPreview officeDocumentPreview = new OfficeDocumentPreview(attachmentReference, "1.1",
+            new XDOM(new ArrayList<Block>()), new HashSet<File>());
+        final Cache<?> mockPreviewsCache = getMockery().mock(Cache.class);
+        
+        getMockery().checking(new Expectations(){{
+            oneOf(mockDefaultStringEntityReferenceSerializer).serialize(attachmentReference);
+            will(returnValue(strAttachmentReference));
+            
+            oneOf(mockPreviewsCache).get(strAttachmentReference);
+            will(returnValue(officeDocumentPreview));
+            
+            oneOf(mockDocumentAccessBridge).getAttachmentReferences(documentReference);
+            will(returnValue(Arrays.asList(attachmentReference)));
+            
+            oneOf(mockAttachmentVersionProvider).getAttachmentVersion(attachmentReference);
+            will(returnValue("1.1"));                        
+        }});                
+        
+        ReflectionUtils.setFieldValue(defaultOfficePreviewBuilder, "previewsCache", mockPreviewsCache);
+        
+        XDOM preview = defaultOfficePreviewBuilder.build(attachmentReference, true);
+        Assert.assertNotNull(preview);
+    }
+    
+    /**
+     * Tests office attachment previewing where a cached preview exists for an older version of the attachment.
+     * 
+     * @throws Exception if an error occurs.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testOfficePreviewWithExpiredCachedAttachmentPreview() throws Exception {
+        final DocumentReference documentReference = new DocumentReference("xwiki", "Main", "Test");
+        final AttachmentReference attachmentReference = new AttachmentReference("Test.doc", documentReference);
+        final String strAttachmentReference = "xwiki:Main.Test@Test.doc";
+        
+        final OfficeDocumentPreview officeDocumentPreview = new OfficeDocumentPreview(attachmentReference, "1.1",
+            new XDOM(new ArrayList<Block>()), new HashSet<File>());
+        final Cache<OfficeDocumentPreview> mockPreviewsCache = getMockery().mock(Cache.class);
+        
+        final ByteArrayInputStream attachmentContent = new ByteArrayInputStream(new byte [256]);
+        final XDOMOfficeDocument xdomOfficeDocument = new XDOMOfficeDocument(new XDOM(new ArrayList<Block>()),
+            new HashMap<String, byte[]>(), getComponentManager());
+        
+        getMockery().checking(new Expectations(){{
+            oneOf(mockDefaultStringEntityReferenceSerializer).serialize(attachmentReference);
+            will(returnValue(strAttachmentReference));
+            
+            oneOf(mockPreviewsCache).get(strAttachmentReference);
+            will(returnValue(officeDocumentPreview));
+            
+            oneOf(mockDocumentAccessBridge).getAttachmentReferences(documentReference);
+            will(returnValue(Arrays.asList(attachmentReference)));
+            
+            oneOf(mockAttachmentVersionProvider).getAttachmentVersion(attachmentReference);
+            will(returnValue("2.1"));
+            
+            oneOf(mockPreviewsCache).remove(strAttachmentReference);
+            
+            oneOf(mockDocumentAccessBridge).getAttachmentContent(attachmentReference);
+            will(returnValue(attachmentContent));
+            
+            oneOf(mockOfficeDocumentBuilder).build(attachmentContent, "Test.doc", documentReference, true);
+            will(returnValue(xdomOfficeDocument)); 
+            
+            oneOf(mockPreviewsCache).set(with(strAttachmentReference), with(aNonNull(OfficeDocumentPreview.class)));
+        }});
+        
+        ReflectionUtils.setFieldValue(defaultOfficePreviewBuilder, "previewsCache", mockPreviewsCache);
         
         XDOM preview = defaultOfficePreviewBuilder.build(attachmentReference, true);
         Assert.assertNotNull(preview);
