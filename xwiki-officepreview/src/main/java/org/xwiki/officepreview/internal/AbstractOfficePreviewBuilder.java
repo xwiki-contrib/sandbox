@@ -45,10 +45,6 @@ import org.xwiki.officepreview.OfficePreviewBuilder;
 import org.xwiki.officepreview.OfficePreviewConfiguration;
 import org.xwiki.rendering.block.XDOM;
 
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.doc.XWikiAttachment;
-import com.xpn.xwiki.doc.XWikiDocument;
-
 /**
  * An abstract implementation of {@link OfficePreviewBuilder} which provides caching and other utility functions.
  * 
@@ -74,6 +70,11 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
      */
     @Requirement
     private Execution execution;
+    
+    /**
+     * Used to query attachment versions.
+     */
+    private AttachmentVersionProvider attachmentVersionProvider;
 
     /**
      * Used to access attachment content.
@@ -118,6 +119,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         } catch (CacheException ex) {
             throw new InitializationException("Error while initializing previews cache.", ex);
         }
+        this.attachmentVersionProvider = new AttachmentVersionProvider(execution);
     }
 
     /**
@@ -141,7 +143,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         }
 
         // Query the current version of the attachment.
-        String currentVersion = getAttachmentVersion(attachmentReference);
+        String currentVersion = attachmentVersionProvider.getAttachmentVersion(attachmentReference);
 
         // Check if the preview has been expired.
         if (null != preview && !currentVersion.equals(preview.getVersion())) {
@@ -248,30 +250,5 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         String prefix = docBridge.getDocumentURL(attachmentReference.getDocumentReference(), "temp", null, null);
         String attachmentName = attachmentReference.getName();
         return String.format("%s/officepreview/%s/%s", prefix, attachmentName, fileName);
-    }
-
-    /**
-     * Utility method for querying the current version of an attachment.
-     * 
-     * @param attachmentReference reference to an attachment.
-     * @return current version of the attachment.
-     * @throws Exception if an error occurs while accessing attachment details.
-     */
-    private String getAttachmentVersion(AttachmentReference attachmentReference) throws Exception
-    {
-        XWikiContext xcontext = getContext();
-        XWikiDocument doc = xcontext.getWiki().getDocument(attachmentReference.getDocumentReference(), xcontext);
-        XWikiAttachment attachment = doc.getAttachment(attachmentReference.getName());
-        return attachment.getVersion();
-    }
-
-    /**
-     * Used to retrieve a reference to {@link XWikiContext}.
-     * 
-     * @return {@link XWikiContext} instance.
-     */
-    private XWikiContext getContext()
-    {
-        return (XWikiContext) this.execution.getContext().getProperty("xwikicontext");
     }
 }
