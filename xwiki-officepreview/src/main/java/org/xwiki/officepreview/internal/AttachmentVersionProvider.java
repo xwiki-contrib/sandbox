@@ -20,7 +20,6 @@
 package org.xwiki.officepreview.internal;
 
 import org.xwiki.model.reference.AttachmentReference;
-import org.xwiki.officepreview.OfficePreviewBuilder;
 
 /**
  * This interface is used to separate out the dependency on xwiki-core module so that it is easy to use mock objects for
@@ -37,5 +36,5 @@ public interface AttachmentVersionProvider
      * @return current version of the attachment.
      * @throws Exception if an error occurs while accessing attachment details.
      */
-    public String getAttachmentVersion(AttachmentReference attachmentReference) throws Exception;
+    String getAttachmentVersion(AttachmentReference attachmentReference) throws Exception;
 }
