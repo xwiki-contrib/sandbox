@@ -19,16 +19,24 @@
  */
 package org.xwiki.officepreview.internal;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import junit.framework.Assert;
 
 import org.jmock.Expectations;
+import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.component.util.ReflectionUtils;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.officeimporter.builder.XDOMOfficeDocumentBuilder;
+import org.xwiki.officeimporter.document.XDOMOfficeDocument;
 import org.xwiki.officepreview.OfficePreviewBuilder;
+import org.xwiki.rendering.block.Block;
+import org.xwiki.rendering.block.XDOM;
 
 /**
  * Test case for {@link DefaultOfficePreviewBuilder}.
@@ -46,10 +54,16 @@ public class DefaultOfficePreviewBuilderTest extends AbstractOfficePreviewTestCa
      * Mock {@link AttachmentVersionProvider} instance.
      */
     private AttachmentVersionProvider mockAttachmentVersionProvider;
+    
+    /**
+     * Mock {@link XDOMOfficeDocumentBuilder} instance.
+     */
+    private XDOMOfficeDocumentBuilder mockOfficeDocumentBuilder;
 
     /**
      * {@inheritDoc}
      */
+    @Before
     public void setUp() throws Exception
     {
         super.setUp();
@@ -59,7 +73,11 @@ public class DefaultOfficePreviewBuilderTest extends AbstractOfficePreviewTestCa
         // Attachment version provider must be mocked.
         this.mockAttachmentVersionProvider = getMockery().mock(AttachmentVersionProvider.class);
         ReflectionUtils.setFieldValue(defaultOfficePreviewBuilder, "attachmentVersionProvider",
-            mockAttachmentVersionProvider);
+            mockAttachmentVersionProvider);        
+        
+        // Office document builder must be mocked.
+        this.mockOfficeDocumentBuilder = getMockery().mock(XDOMOfficeDocumentBuilder.class);
+        ReflectionUtils.setFieldValue(defaultOfficePreviewBuilder, "builder", mockOfficeDocumentBuilder);
     }
     
     /**
@@ -68,7 +86,7 @@ public class DefaultOfficePreviewBuilderTest extends AbstractOfficePreviewTestCa
      * @throws Exception if an error occurs.
      */
     @Test
-    public void testPreviewWithNonExistingAttachment() throws Exception {
+    public void testOfficePreviewWithNonExistingAttachment() throws Exception {
         final DocumentReference documentReference = new DocumentReference("xwiki", "Main", "Test");
         final AttachmentReference attachmentReference = new AttachmentReference("Test.doc", documentReference);
         final String strAttachmentReference = "xwiki:Main.Test@Test.doc";
@@ -88,5 +106,40 @@ public class DefaultOfficePreviewBuilderTest extends AbstractOfficePreviewTestCa
             Assert.assertEquals(String.format("Attachment [%s] does not exist.", strAttachmentReference),
                 ex.getMessage());
         }
+    }
+
+    /**
+     * Tests the normal office preview function.
+     * 
+     * @throws Exception if an error occurs.
+     */
+    @Test
+    public void testOfficePreviewWithCacheMiss() throws Exception {
+        final DocumentReference documentReference = new DocumentReference("xwiki", "Main", "Test");
+        final AttachmentReference attachmentReference = new AttachmentReference("Test.doc", documentReference);
+        final String strAttachmentReference = "xwiki:Main.Test@Test.doc";
+        final ByteArrayInputStream attachmentContent = new ByteArrayInputStream(new byte [256]);
+        final XDOMOfficeDocument officeDocument = new XDOMOfficeDocument(new XDOM(new ArrayList<Block>()),
+            new HashMap<String, byte[]>(), getComponentManager());
+        
+        getMockery().checking(new Expectations(){{
+            oneOf(mockDefaultStringEntityReferenceSerializer).serialize(attachmentReference);
+            will(returnValue(strAttachmentReference));
+            
+            oneOf(mockDocumentAccessBridge).getAttachmentReferences(documentReference);
+            will(returnValue(Arrays.asList(attachmentReference)));
+            
+            oneOf(mockAttachmentVersionProvider).getAttachmentVersion(attachmentReference);
+            will(returnValue("1.1"));
+            
+            oneOf(mockDocumentAccessBridge).getAttachmentContent(attachmentReference);
+            will(returnValue(attachmentContent));
+            
+            oneOf(mockOfficeDocumentBuilder).build(attachmentContent, "Test.doc", documentReference, true);
+            will(returnValue(officeDocument));                        
+        }});
+        
+        XDOM preview = defaultOfficePreviewBuilder.build(attachmentReference, true);
+        Assert.assertNotNull(preview);
     }
 }
