@@ -25,12 +25,11 @@ import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 
+import junit.framework.Assert;
+
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
-
-import junit.framework.Assert;
-
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.container.Container;
 import org.xwiki.container.servlet.ServletRequest;
@@ -38,18 +37,17 @@ import org.xwiki.csrftoken.internal.DefaultCSRFToken;
 import org.xwiki.model.ModelContext;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
-import org.xwiki.test.AbstractMockingComponentTest;
-import org.xwiki.test.annotation.ComponentTest;
+import org.xwiki.test.AbstractMockingComponentTestCase;
+import org.xwiki.test.annotation.MockingRequirement;
 
 
 /**
- * Tests for the {@link CSRFToken} component.
+ * Tests for the {@link DefaultCSRFToken} component.
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 2.4
  */
-@ComponentTest(value = DefaultCSRFToken.class)
-public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
+public class DefaultCSRFTokenTest extends AbstractMockingComponentTestCase
 {
     /** Resubmission URL. */
     private static final String resubmitUrl = "http://host/xwiki/bin/view/XWiki/Resubmit";
@@ -61,7 +59,8 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
     private static final String mockQuery = "form_token=&a=b&form_token=xyz&c=d&form_token=xyz";
 
     /** Tested CSRF token component. */
-    private CSRFToken csrf;
+    @MockingRequirement
+    private DefaultCSRFToken csrf;
 
     /**
      * {@inheritDoc}
@@ -117,8 +116,6 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTest
             allowing(mockModel).getCurrentEntityReference();
                 will(returnValue(new WikiReference("wiki")));
         }});
-
-        this.csrf = getComponentManager().lookup(CSRFToken.class);
     }
 
     /**
