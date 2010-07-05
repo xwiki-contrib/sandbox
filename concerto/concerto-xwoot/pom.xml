@@ -179,17 +179,6 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
-     <repository>
-      <id>xwiki-snapshots</id>
-      <name>XWiki Maven2 Remote Repository for Snapshots</name>
-      <url>http://maven.xwiki.org/externals</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
   </repositories>
 
   <!-- modules -->

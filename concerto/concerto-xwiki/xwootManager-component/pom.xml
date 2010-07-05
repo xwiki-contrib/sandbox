@@ -26,11 +26,6 @@
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-component</artifactId>
-      <version>1.8.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-context</artifactId>
       <version>1.8.1</version>
     </dependency>
