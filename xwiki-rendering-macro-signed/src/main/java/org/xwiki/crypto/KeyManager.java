@@ -55,7 +55,7 @@ public interface KeyManager
      * 
      * @param certificate the certificate to register
      * @throws GeneralSecurityException on errors or insufficient access rights
-     * @see 
+     * @see #parseCertificate(String)
      */
     void registerCertificate(XWikiCertificate certificate) throws GeneralSecurityException;
 

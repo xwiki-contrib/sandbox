@@ -113,6 +113,10 @@ public class PKCS7SignedScript implements SignedScript
             sanitizedCode += nl;
         }
 
+        // normalize EOL
+        sanitizedCode = sanitizedCode.replaceAll("\r\n", nl);
+        sanitizedCode = sanitizedCode.replaceAll("\r", nl);
+
         set(SignedScriptKey.CODE, sanitizedCode);
         if (!isSet(SignedScriptKey.CODE)) {
             throw new GeneralSecurityException("The script to sign is empty");
