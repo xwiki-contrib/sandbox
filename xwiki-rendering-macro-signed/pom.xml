@@ -39,14 +39,28 @@
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-rendering-macro-script</artifactId>
+      <artifactId>xwiki-core-rendering-api</artifactId>
       <version>${pom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15</artifactId>
+      <version>1.45</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcmail-jdk15</artifactId>
+      <version>1.45</version>
     </dependency>
 
     <!-- Testing dependencies -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-rendering-macro-script</artifactId>
+      <artifactId>xwiki-core-rendering-api</artifactId>
       <version>${pom.version}</version>
       <type>test-jar</type>
       <scope>test</scope>

@@ -1,0 +1,5 @@
+org.xwiki.crypto.internal.Base64Converter
+org.xwiki.crypto.internal.DefaultKeyManager
+org.xwiki.crypto.internal.PKCS7ScriptSigner
+org.xwiki.crypto.internal.PKCS7Signature
+org.xwiki.rendering.internal.macro.signed.SignedMacro
