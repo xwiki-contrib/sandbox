@@ -23,15 +23,12 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -92,7 +89,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         try {
             kpGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
             kpGen.initialize(KEY_SIZE);
-        } catch (NoSuchAlgorithmException exception) {
+        } catch (GeneralSecurityException exception) {
             getLogger().debug(exception.getMessage(), exception);
             throw new InitializationException("Failed to initialize key pair generator.", exception);
         }
@@ -140,9 +137,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         if (expires != null) {
             certGen.setNotAfter(expires);
         } else {
-            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            calendar.add(Calendar.YEAR, 25);
-            certGen.setNotAfter(calendar.getTime());
+            Date now = new Date();
+            long year = 1000 * 3600 * 24 * 365;
+            certGen.setNotAfter(new Date(now.getTime() + year * 25));
         }
 
         certGen.setPublicKey(kp.getPublic());
@@ -211,8 +208,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      */
     public XWikiCertificate parseCertificate(String encoded) throws GeneralSecurityException
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new XWikiCertificate(XWikiCertificate.x509FromString(encoded), null, this);
     }
 
     /**

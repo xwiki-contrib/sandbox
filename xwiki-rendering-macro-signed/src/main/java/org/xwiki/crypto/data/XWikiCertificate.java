@@ -19,10 +19,14 @@
  */
 package org.xwiki.crypto.data;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import org.apache.commons.codec.binary.Base64;
@@ -38,6 +42,9 @@ import org.xwiki.crypto.KeyManager;
  */
 public class XWikiCertificate
 {
+    /** Supported certificate type. */
+    private static final String CERT_TYPE = "X509";
+
     /** Digest algorithm used to generate the fingerprint. */
     private static final String FINGERPRINT_ALGORITHM = "SHA1";
 
@@ -78,13 +85,35 @@ public class XWikiCertificate
      * @param certificate the certificate to use
      * @return certificate fingerprint in hex
      */
-    public static String calculateFingerprint(X509Certificate certificate)
+    public static String calculateFingerprint(Certificate certificate)
     {
         try {
             MessageDigest hash = MessageDigest.getInstance(FINGERPRINT_ALGORITHM);
             return Hex.encodeHexString(hash.digest(certificate.getEncoded()));
         } catch (Exception exception) {
             throw new RuntimeException(exception);
+        }
+    }
+
+    /**
+     * Create a X509 certificate by parsing the given string. The string should contain a certificate
+     * encoded in PEM format.
+     * 
+     * @param encoded X509 certificate in PEM format
+     * @return the parsed certificate
+     * @throws GeneralSecurityException on parse errors
+     */
+    public static X509Certificate x509FromString(String encoded) throws GeneralSecurityException
+    {
+        CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
+        try {
+            Certificate cert = factory.generateCertificate(new ByteArrayInputStream(encoded.getBytes("utf-8")));
+            if (!(cert instanceof X509Certificate)) {
+                throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
+            }
+            return (X509Certificate) cert;
+        } catch (IOException exception) {
+            throw new RuntimeException("Can't happen: " + exception.getMessage(), exception);
         }
     }
 
