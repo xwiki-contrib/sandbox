@@ -29,6 +29,7 @@ import java.security.Security;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -227,6 +228,15 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     public XWikiCertificate getGlobalRootCertificate()
     {
         return this.globalRootCertificate;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.KeyManager#getKnownFingerprints()
+     */
+    public Set<String> getKnownFingerprints()
+    {
+        return this.certMap.keySet();
     }
 
     /**

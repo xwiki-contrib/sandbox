@@ -21,6 +21,7 @@ package org.xwiki.crypto.internal.scripting;
 
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.util.Set;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -124,6 +125,15 @@ public class KeyManagerScriptService implements ScriptService
     public XWikiCertificate getGlobalRootCertificate()
     {
         return keyManager.getGlobalRootCertificate();
+    }
+
+    /**
+     * @return set of all known fingerprints
+     * @see org.xwiki.crypto.KeyManager#getKnownFingerprints()
+     */
+    public Set<String> getKnownFingerprints()
+    {
+        return keyManager.getKnownFingerprints();
     }
 }
 

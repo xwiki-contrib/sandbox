@@ -21,6 +21,7 @@ package org.xwiki.crypto;
 
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.util.Set;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.crypto.data.XWikiCertificate;
@@ -117,5 +118,12 @@ public interface KeyManager
      * @return global root certificate object
      */
     XWikiCertificate getGlobalRootCertificate();
+
+    /**
+     * Get a set of all known trusted certificate fingerprints.
+     * 
+     * @return set of all known fingerprints
+     */
+    Set<String> getKnownFingerprints();
 }
 
