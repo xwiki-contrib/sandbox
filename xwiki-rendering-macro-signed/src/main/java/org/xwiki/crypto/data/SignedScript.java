@@ -19,8 +19,6 @@
  */
 package org.xwiki.crypto.data;
 
-import org.xwiki.crypto.ScriptSigner;
-
 
 /**
  * Represents a signed script object. Signed script can be serialized to string or created from string.
