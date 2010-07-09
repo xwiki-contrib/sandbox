@@ -40,6 +40,7 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.KeyManager;
@@ -55,7 +56,7 @@ import org.xwiki.crypto.data.XWikiKeyPair;
  */
 @Component
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
-public class DefaultKeyManager implements KeyManager, Initializable
+public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager, Initializable
 {
     /** Algorithm to use when generating keys. */
     private static final String KEY_ALGORITHM = "RSA";
@@ -92,42 +93,42 @@ public class DefaultKeyManager implements KeyManager, Initializable
             kpGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
             kpGen.initialize(KEY_SIZE);
         } catch (NoSuchAlgorithmException exception) {
+            getLogger().debug(exception.getMessage(), exception);
             throw new InitializationException("Failed to initialize key pair generator.", exception);
         }
         // FIXME read local and global root certs
         // FIXME DEBUG
         try {
             regenerateLocalRoot();
-            String globalFp = createKeyPair("XWiki.org", null, null);
+            String globalFp = createKeyPair("XWiki.org", null);
             this.globalRootCertificate = getCertificate(globalFp);
             unregister(globalFp);
             registerCertificate(globalRootCertificate);
         } catch (GeneralSecurityException exception) {
+            getLogger().debug(exception.getMessage(), exception);
             throw new InitializationException(exception.getMessage(), exception);
         }
     }
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.KeyManager#createKeyPair(java.lang.String, java.lang.String, java.util.Date)
+     * @see org.xwiki.crypto.KeyManager#createKeyPair(java.lang.String, java.util.Date)
      */
-    public String createKeyPair(String authorName, String signWithFingerprint, Date expires) throws
-        GeneralSecurityException
+    public String createKeyPair(String authorName, Date expires) throws GeneralSecurityException
     {
         KeyPair kp = this.kpGen.generateKeyPair();
 
         // TODO rights and actions
-        XWikiCertificate signCert = null;
-        if (signWithFingerprint != null) {
-            signCert = getCertificate(signWithFingerprint);
-        }
+        // local root certificate might not be present if we are generating it, default to self-signed
         X500Principal author = new X500Principal("CN=" + authorName);
-        // self-signed
         X500Principal issuer = author;
         PrivateKey signKey = kp.getPrivate();
-        if (signCert != null) {
+        String signFingerprint = null;
+        if (this.localRootFingerprint != null) {
+            XWikiCertificate signCert = getLocalRootCertificate();
             issuer = signCert.getCertificate().getSubjectX500Principal();
-            signKey = getKeyPair(signWithFingerprint).getPrivateKey();
+            signKey = getLocalRootKeyPair().getPrivateKey();
+            signFingerprint = signCert.getFingerprint();
         }
 
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
@@ -147,7 +148,7 @@ public class DefaultKeyManager implements KeyManager, Initializable
         certGen.setPublicKey(kp.getPublic());
         certGen.setSignatureAlgorithm(SIGN_ALGORITHM);
 
-        XWikiCertificate cert = new XWikiCertificate(certGen.generate(signKey), signWithFingerprint, this);
+        XWikiCertificate cert = new XWikiCertificate(certGen.generate(signKey), signFingerprint, this);
         String fingerprint = cert.getFingerprint();
         XWikiKeyPair keys = new XWikiKeyPair(kp.getPrivate(), cert);
         this.certMap.put(fingerprint, cert);
@@ -220,11 +221,7 @@ public class DefaultKeyManager implements KeyManager, Initializable
      */
     public XWikiCertificate getLocalRootCertificate()
     {
-        try {
-            return getCertificate(this.localRootFingerprint);
-        } catch (GeneralSecurityException exception) {
-            throw new RuntimeException("Should not happen: " + exception.getMessage(), exception);
-        }
+        return getLocalRootKeyPair().getCertificate();
     }
 
     /**
@@ -245,7 +242,23 @@ public class DefaultKeyManager implements KeyManager, Initializable
     {
         this.certMap.remove(this.localRootFingerprint);
         this.keysMap.remove(this.localRootFingerprint);
-        this.localRootFingerprint = createKeyPair("Local Root", null, null);
+        this.localRootFingerprint = null;
+        this.localRootFingerprint = createKeyPair("Local Root", null);
+    }
+
+    /**
+     * Get the local root key pair.
+     * 
+     * @return local root key pair object
+     */
+    private XWikiKeyPair getLocalRootKeyPair()
+    {
+        try {
+            return getKeyPair(this.localRootFingerprint);
+        } catch (GeneralSecurityException exception) {
+            getLogger().debug(exception.getMessage(), exception);
+            throw new RuntimeException("Should not happen: " + exception.getMessage(), exception);
+        }
     }
 }
 

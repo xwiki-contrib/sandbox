@@ -38,17 +38,15 @@ import org.xwiki.crypto.data.XWikiKeyPair;
 public interface KeyManager
 {
     /**
-     * Create and register a new key pair (private key and a certificate).
-     * TODO should require global admin rights, sign fingerprint should be local xwiki (better remove it)
+     * Create and register a new key pair (private key and a certificate) signed by the local root.
+     * TODO should require global admin rights
      * 
      * @param authorName author name to use
-     * @param signWithFingerprint fingerprint of the certificate to use for signing, self-signed if null
      * @param expires expiration date, never expires if null
      * @return fingerprint of the new key pair
      * @throws GeneralSecurityException on errors or insufficient access rights
      */
-    String createKeyPair(String authorName, String signWithFingerprint, Date expires) throws
-        GeneralSecurityException;
+    String createKeyPair(String authorName, Date expires) throws GeneralSecurityException;
 
     /**
      * Register the given certificate as trusted. Scripts, signed with the corresponding private key
@@ -96,7 +94,8 @@ public interface KeyManager
 
     /**
      * Get a key pair by certificate fingerprint.
-     * TODO should only work for the user's own certificate (user should have PR), i.e. better remove it
+     * TODO should require PR rights
+     * TODO should only work for the user's own certificate, i.e. better remove it
      * 
      * @param fingerprint certificate fingerprint to use
      * @return the corresponding key pair

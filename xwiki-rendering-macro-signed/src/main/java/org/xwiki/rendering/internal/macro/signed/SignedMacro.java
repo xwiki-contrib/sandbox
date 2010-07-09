@@ -72,6 +72,7 @@ public class SignedMacro extends AbstractMacro<Object>
     public SignedMacro()
     {
         super("Signed", DESCRIPTION, new DefaultContentDescriptor(CONTENT_DESCRIPTION));
+        setDefaultCategory(DEFAULT_CATEGORY_DEVELOPMENT);
     }
 
     /**
@@ -106,7 +107,7 @@ public class SignedMacro extends AbstractMacro<Object>
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.DAY_OF_YEAR, 30);
         try {
-            String fp = keyManager.createKeyPair("Test", null, null);
+            String fp = keyManager.createKeyPair("Test", null);
             XWikiCertificate c = keyManager.getCertificate(fp);
             System .out.println("   NEW NEW NEW\n" + c.toString());
 
