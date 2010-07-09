@@ -21,10 +21,14 @@ package org.xwiki.crypto.data;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
+
+import org.apache.commons.codec.binary.Base64;
 
 
 /**
- * Wrapper class storing a {@link PrivateKey} and the corresponding {@link XWikiCertificate}. 
+ * Wrapper class storing a {@link PrivateKey} and the corresponding {@link XWikiCertificate}.
+ * TODO password-protect the private key
  * 
  * @version $Id$
  * @since 2.5
@@ -74,6 +78,21 @@ public class XWikiKeyPair
     }
 
     /**
+     * {@inheritDoc}
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("XWikiKeyPair\n");
+        builder.append("------------\n");
+        builder.append(getCertificate().toString());
+        builder.append(exportPrivateKey());
+        return builder.toString();
+    }
+
+    /**
      * @return the certificate
      */
     public XWikiCertificate getCertificate()
@@ -103,6 +122,29 @@ public class XWikiKeyPair
     public String getFingerprint()
     {
         return certificate.getFingerprint();
+    }
+
+    /**
+     * Get the internal X509 certificate and RSA private key in a standard PEM format.
+     * 
+     * @return the certificate and private key in PEM format
+     * @throws CertificateEncodingException on errors (very unlikely)
+     */
+    public String export() throws CertificateEncodingException
+    {
+        return getCertificate().export() + exportPrivateKey();
+    }
+
+    /**
+     * @return the private key in PKCS#8 PEM format
+     */
+    private String exportPrivateKey()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("-----BEGIN PRIVATE KEY-----\n");
+        builder.append(Base64.encodeBase64String(getPrivateKey().getEncoded()));
+        builder.append("-----END PRIVATE KEY-----\n");
+        return builder.toString();
     }
 }
 

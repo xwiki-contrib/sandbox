@@ -22,8 +22,10 @@ package org.xwiki.crypto.data;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.xwiki.crypto.KeyManager;
 
@@ -120,6 +122,8 @@ public class XWikiCertificate
         final String format = "%20s : %s\n";
         StringBuilder builder = new StringBuilder();
         X509Certificate c = getCertificate();
+        builder.append("XWikiCertificate\n");
+        builder.append("---------------------------------------------------------------\n");
         builder.append(String.format(format, "Fingerprint", getFingerprint()));
         builder.append(String.format(format, "SubjectDN", getAuthorName()));
         builder.append(String.format(format, "IssuerDN", getIssuerName()));
@@ -129,6 +133,11 @@ public class XWikiCertificate
         builder.append(String.format(format, "Final Date", c.getNotAfter()));
         builder.append(String.format(format, "Public Key Algorithm", c.getPublicKey().getAlgorithm()));
         builder.append(String.format(format, "Signature Algorithm", c.getSigAlgName()));
+        try {
+            builder.append(export());
+        } catch (CertificateEncodingException exception) {
+            // ignore
+        }
         return builder.toString();
     }
 
@@ -146,6 +155,21 @@ public class XWikiCertificate
     public String getFingerprint()
     {
         return fingerprint;
+    }
+
+    /**
+     * Get the internal X509 certificate in a standard PEM format.
+     * 
+     * @return the certificate in PEM format
+     * @throws CertificateEncodingException on errors (very unlikely)
+     */
+    public String export() throws CertificateEncodingException
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("-----BEGIN CERTIFICATE-----\n");
+        builder.append(Base64.encodeBase64String(getCertificate().getEncoded()));
+        builder.append("-----END CERTIFICATE-----\n");
+        return builder.toString();
     }
 
     /**
@@ -189,14 +213,13 @@ public class XWikiCertificate
         // check validity
         getCertificate().checkValidity();
 
-        // verify this certificate
+        // verify this certificate. Note that the key manager will throw an error if the parent is not trusted
         XWikiCertificate parentCert = keyManager.getCertificate(getIssuerFingerprint());
         PublicKey key = parentCert.getCertificate().getPublicKey();
         this.getCertificate().verify(key);
 
         // verify the parent
         if (!equals(parentCert)) {
-            // TODO reject self-signed unless trusted
             parentCert.verify();
         }
     }
