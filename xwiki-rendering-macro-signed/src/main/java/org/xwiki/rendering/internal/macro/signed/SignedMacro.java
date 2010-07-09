@@ -21,17 +21,13 @@ package org.xwiki.rendering.internal.macro.signed;
 
 import java.io.StringReader;
 import java.security.GeneralSecurityException;
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.crypto.KeyManager;
 import org.xwiki.crypto.ScriptSigner;
 import org.xwiki.crypto.data.SignedScript;
-import org.xwiki.crypto.data.XWikiCertificate;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.macro.AbstractMacro;
 import org.xwiki.rendering.macro.MacroExecutionException;
@@ -57,10 +53,6 @@ public class SignedMacro extends AbstractMacro<Object>
     /** Used to get the parser for the syntax of the current document. */
     @Requirement
     private ComponentManager componentManager;
-
-    /** Key manager. */
-    @Requirement
-    private KeyManager keyManager;
 
     /** Create and verify signed scripts. */
     @Requirement
@@ -91,35 +83,14 @@ public class SignedMacro extends AbstractMacro<Object>
     public List<Block> execute(Object parameters, String content, MacroTransformationContext context)
         throws MacroExecutionException
     {
-        String code = "{{groovy}}\nprintln(\"Hello world\");\n{{/groovy}}\n";
         try {
             SignedScript script = scriptSigner.getVerifiedCode(content);
             System .out.println("  XXXXX " + script);
-            code = script.getCode();
             // TODO check that the result contains one script macro? (macros are evaluated during parsing though)
+            return evaluate(script.getCode(), context);
         } catch (GeneralSecurityException exception) {
-            // DEBUG
-//            throw new MacroExecutionException("Code verification failed", exception);
+            throw new MacroExecutionException("Code verification failed: " + exception.getMessage(), exception);
         }
-        List<Block> result = evaluate(code, context);
-
-        // DEBUG
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.add(Calendar.DAY_OF_YEAR, 30);
-        try {
-            String fp = keyManager.createKeyPair("Test", null);
-            XWikiCertificate c = keyManager.getCertificate(fp);
-            System .out.println("   NEW NEW NEW\n" + c.toString());
-
-            SignedScript signed = scriptSigner.sign(code, fp);
-            System .out.println("   SIGNED\n" + signed);
-
-            SignedScript verified = scriptSigner.getVerifiedCode(signed.serialize());
-            System .out.println("   OK\n");
-        } catch (GeneralSecurityException exception) {
-            throw new MacroExecutionException(exception.getMessage(), exception);
-        }
-        return result;
     }
 
     /**
