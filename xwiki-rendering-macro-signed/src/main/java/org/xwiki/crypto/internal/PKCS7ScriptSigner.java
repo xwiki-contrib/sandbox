@@ -78,6 +78,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
         // FIXME find out xwiki version
         script.set(SignedScriptKey.XWIKIVERSION, "2.4M2");
+        // FIXME bind to document
 
         try {
             byte[] signature = pkcs7.sign(script.getRawData(), keyPair);

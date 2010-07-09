@@ -96,7 +96,7 @@ public interface KeyManager
     /**
      * Get a key pair by certificate fingerprint.
      * TODO should require PR rights
-     * TODO should only work for the user's own certificate, i.e. better remove it
+     * TODO should only work for the user's own certificate, i.e. better remove parameter
      * 
      * @param fingerprint certificate fingerprint to use
      * @return the corresponding key pair

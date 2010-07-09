@@ -38,6 +38,7 @@ public interface ScriptSigner
     /**
      * Create a signed script object by signing given code with the private key identified by the fingerprint.
      * TODO specify optional parameters, like expiration date
+     * TODO should require PR and work only with user's own fingerprint (i.e. remove parameter)
      * 
      * @param code code to sign
      * @param fingerprint certificate fingerprint identifying the private key to use
