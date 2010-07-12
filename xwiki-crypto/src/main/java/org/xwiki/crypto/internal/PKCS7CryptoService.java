@@ -39,9 +39,11 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
+import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
+import org.xwiki.crypto.Converter;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
@@ -66,6 +68,10 @@ public class PKCS7CryptoService implements CryptoService, Initializable
 
     /** Type of the certificate store to use for PKCS7 encoding/decoding. */
     private static final String CERT_STORE_TYPE = "Collection";
+
+    /** Base64 encoding/decoding tool. */
+    @Requirement("base64")
+    private Converter base64;
 
     /**
      * {@inheritDoc}
@@ -113,9 +119,10 @@ public class PKCS7CryptoService implements CryptoService, Initializable
         try {
             gen.addCertificatesAndCRLs(store);
             gen.addSigner(key, certificate, SHA1_OID);
+            byte[] data = textToSign.getBytes();
             CMSSignedData cmsData = gen.generate(new CMSProcessableByteArray(data), false, PROVIDER);
 
-            return cmsData.getEncoded();
+            return base64.encode(cmsData.getEncoded());
         } catch (GeneralSecurityException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -127,10 +134,12 @@ public class PKCS7CryptoService implements CryptoService, Initializable
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#verifyText(java.lang.String, java.lang.String)
      */
-    public XWikiX509Certificate verifyText(String text, String signature) throws GeneralSecurityException
+    public XWikiX509Certificate verifyText(String signedText, String base64Signature) throws GeneralSecurityException
     {
         try {
-            CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(text), signature);
+            byte[] data = signedText.getBytes();
+            byte[] signature = base64.decode(base64Signature);
+            CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);
             CertStore certStore = cmsData.getCertificatesAndCRLs(CERT_STORE_TYPE, PROVIDER);
             SignerInformationStore signers = cmsData.getSignerInfos();
 

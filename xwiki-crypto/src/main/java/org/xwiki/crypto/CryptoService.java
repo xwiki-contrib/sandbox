@@ -58,8 +58,7 @@ public interface CryptoService
      * @return object containing certificate and private key.
      * @throws GeneralSecurityException if something goes wrong while creating the certificate.
      */
-    XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity)
-        throws GeneralSecurityException;
+    XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity) throws GeneralSecurityException;
 
     /**
      * Produce a pkcs#7 signature for the given text.
@@ -73,38 +72,39 @@ public interface CryptoService
     String signText(final String textToSign, final XWikiX509KeyPair toSignWith) throws GeneralSecurityException;
 
     /**
-     * Verify a pkcs#7 signature and return the name of the user who signed it.
+     * Verify a pkcs#7 signature and return the certificate of the user who signed it.
+     * FIXME can we assume signedText that is in UTF-8?
      *
-     * @param text the text which has been signed.
-     * @param signature the signature on the text in Base64 encoded DER format.
+     * @param signedText the text which has been signed.
+     * @param base64Signature the signature on the text in Base64 encoded DER format.
      * @return the certificate used to sign the text or null if it's invalid.
      * @throws GeneralSecurityException if anything goes wrong.
      */
-    XWikiX509Certificate verifyText(final String text, final String signature) throws GeneralSecurityException;
+    XWikiX509Certificate verifyText(final String signedText, final String base64Signature) throws GeneralSecurityException;
 
     /**
      * Encrypt a piece of text in pkcs#7/CMS/SMIME format with a public key so that only the holder of the matching 
      * private key may read it. The private key need not be on the server and this format is supported by major
      * email clients allowing sensitive data to be stored encrypted and mailed to authorized people.
      *
-     * @param textToEncrypt the text to encrypt.
+     * @param plaintext the text to encrypt.
      * @param certificatesToEncryptFor one or more X509 certificates (in Base64 encoded DER format) belonging to people
      *                                 authorized to read the data.
-     * @return cyphertext (in Base64 format) which can be decrypted back to "textToEncrypt" by any of the private keys
+     * @return Base64 encoded ciphertext which can be decrypted back to plaintext by any of the private keys
      *         matching certificatesToEncryptFor.
      * @throws GeneralSecurityException if something goes wrong.
      */
-    String encryptText(final String textToEncrypt, final XWikiX509Certificate[] certificatesToEncryptFor)
+    String encryptText(final String plaintext, final XWikiX509Certificate[] certificatesToEncryptFor)
         throws GeneralSecurityException;
 
     /**
      * Decrypt a piece of text encrypted with encryptText.
      *
-     * @param textToDecrypt the cyphertext to decrypt.
+     * @param base64Ciphertext Base64 encoded ciphertext to decrypt.
      * @param toDecryptWith the key pair of the user who wants to decrypt the text.
-     * @return the decrypted text or null if the provided key is not sufficent to decrypt (wrong key).
+     * @return the decrypted text or null if the provided key is not sufficient to decrypt (wrong key).
      * @throws GeneralSecurityException if something goes wrong.
      */
-    String decryptText(final String textToDecrypt, final XWikiX509KeyPair toDecryptWith)
+    String decryptText(final String base64Ciphertext, final XWikiX509KeyPair toDecryptWith)
         throws GeneralSecurityException;
 }

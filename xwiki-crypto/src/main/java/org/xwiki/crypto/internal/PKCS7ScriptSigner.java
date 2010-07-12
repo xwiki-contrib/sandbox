@@ -31,7 +31,6 @@ import org.xwiki.crypto.Converter;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.KeyManager;
 import org.xwiki.crypto.ScriptSigner;
-import org.xwiki.crypto.XWikiSignature;
 import org.xwiki.crypto.data.SignedScript;
 import org.xwiki.crypto.data.SignedScriptKey;
 import org.xwiki.crypto.data.XWikiX509Certificate;
@@ -83,7 +82,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
         // FIXME bind to document
 
         try {
-            byte[] signature = pkcs7.sign(script.getRawData(), keyPair);
+            byte[] signature = pkcs7.signText(script.getRawData(), keyPair);
             script.set(SignedScriptKey.SIGNATURE, base64.encode(signature));
             return script;
         } catch (GeneralSecurityException exception) {
@@ -130,7 +129,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
             // DOCUMENT("Document", ""),
 
             byte[] signature = base64.decode(script.get(SignedScriptKey.SIGNATURE));
-            if (!pkcs7.verify(script.getRawData(), signature, certificate)) {
+            if (!pkcs7.verifyText(script.getRawData(), signature, certificate)) {
                 throw new GeneralSecurityException("Signature is incorrect");
             }
             return script;
