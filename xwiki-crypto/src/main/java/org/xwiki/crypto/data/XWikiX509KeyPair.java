@@ -19,6 +19,7 @@
  */
 package org.xwiki.crypto.data;
 
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
@@ -51,6 +52,20 @@ public class XWikiX509KeyPair
     {
         this.key = key;
         this.certificate = certificate;
+    }
+
+    /**
+     * Create a private key by parsing the given string. The string should contain a private key
+     * encoded in PEM format.
+     * 
+     * @param pemEncoded private key in PEM format
+     * @return the parsed private key
+     * @throws GeneralSecurityException on parse errors
+     */
+    public static PrivateKey privateKeyFromString(String pemEncoded) throws GeneralSecurityException
+    {
+        // FIXME implement privateKeyFromString
+        throw new GeneralSecurityException("Not implemented");
     }
 
     /**

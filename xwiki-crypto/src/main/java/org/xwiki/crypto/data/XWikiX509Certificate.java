@@ -47,6 +47,12 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     /** Digest algorithm used to generate the fingerprint. */
     private static final String FINGERPRINT_ALGORITHM = "SHA1";
 
+    /** Marks the beginning of a certificate in PEM format. */
+    private static final String CERT_BEGIN = "-----BEGIN CERTIFICATE-----";
+
+    /** Marks the end of a certificate in PEM format. */
+    private static final String CERT_END = "-----END CERTIFICATE-----";
+
     /** Certificate fingerprint. */
     private final String fingerprint;
 
@@ -90,15 +96,21 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
      * Create a X509 certificate by parsing the given string. The string should contain a certificate
      * encoded in PEM format.
      * 
-     * @param encoded X509 certificate in PEM format
+     * @param pemEncoded X509 certificate in PEM format
      * @return the parsed certificate
      * @throws GeneralSecurityException on parse errors
      */
-    public static X509Certificate x509FromString(String encoded) throws GeneralSecurityException
+    public static X509Certificate x509FromString(String pemEncoded) throws GeneralSecurityException
     {
+        if (!pemEncoded.contains(CERT_BEGIN)) {
+            throw new GeneralSecurityException("No certificate found");
+        }
+        if (!pemEncoded.contains(CERT_END)) {
+            throw new GeneralSecurityException("No end of the certificate found");
+        }
         CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
         try {
-            Certificate cert = factory.generateCertificate(new ByteArrayInputStream(encoded.getBytes("utf-8")));
+            Certificate cert = factory.generateCertificate(new ByteArrayInputStream(pemEncoded.getBytes("utf-8")));
             if (!(cert instanceof X509Certificate)) {
                 throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
             }
@@ -179,10 +191,13 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
      */
     public String export() throws CertificateEncodingException
     {
+        final String NL = "\n";
         StringBuilder builder = new StringBuilder();
-        builder.append("-----BEGIN CERTIFICATE-----\n");
+        builder.append(CERT_BEGIN);
+        builder.append(NL);
         builder.append(Base64.encodeBase64String(this.certificate.getEncoded()));
-        builder.append("-----END CERTIFICATE-----\n");
+        builder.append(CERT_END);
+        builder.append(NL);
         return builder.toString();
     }
 
