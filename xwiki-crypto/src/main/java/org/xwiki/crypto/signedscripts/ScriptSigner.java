@@ -48,6 +48,30 @@ public interface ScriptSigner
     SignedScript sign(String code, String fingerprint) throws GeneralSecurityException;
 
     /**
+     * Construct the string that needs to be signed to construct a valid signature for a {@link SignedScript}.
+     * This data can be transfered to the client and signed using a private key stored in the browser.
+     * 
+     * @param code code to sign
+     * @param fingerprint certificate fingerprint identifying the certificate to use
+     * @return the data to sign represented in a string (not encoded)
+     * @throws GeneralSecurityException on errors
+     * @see #constructSignedScript(String, String)
+     */
+    String getDataToSign(String code, String fingerprint) throws GeneralSecurityException;
+
+    /**
+     * Create a signed script object by combining the given code and signature. The signature must have been
+     * produced by {@link #getDataToSign(String, String)} called with the same code. 
+     * 
+     * @param code signed code
+     * @param base64Signature Base64 encoded signature of the data obtained by {@link #getDataToSign(String, String)}
+     * @return signed script object
+     * @throws GeneralSecurityException on errors
+     * @see {@link #getDataToSign(String, String)}, {@link #sign(String, String)}
+     */
+    SignedScript constructSignedScript(String code, String base64Signature) throws GeneralSecurityException;
+
+    /**
      * Create a signed script by parsing and verifying a serialized signed script.
      * 
      * @param signedScript serialized signed script object 

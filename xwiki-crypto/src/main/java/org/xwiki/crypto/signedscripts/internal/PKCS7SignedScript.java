@@ -20,10 +20,7 @@
 package org.xwiki.crypto.signedscripts.internal;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
@@ -221,31 +218,30 @@ public class PKCS7SignedScript implements SignedScript
     }
 
     /**
-     * Create a byte array with the data that should be signed/verified.
+     * Create a string with the data that should be signed/verified.
      * 
      * @return data to sign/verify
      * @throws IOException on errors
      */
-    byte[] getRawData() throws IOException
+    String getDataToSign() throws IOException
     {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "utf-8"));
+        StringBuilder builder = new StringBuilder();
 
         for (SignedScriptKey key : SignedScriptKey.values()) {
             if (key == SignedScriptKey.SIGNATURE) {
                 continue;
             }
             if (isSet(key)) {
-                writer.write(get(key));
+                builder.append(key.toString());
+                builder.append(get(key));
             } else if (!key.isOptional()) {
                 throw new IOException("Missing mandatory key: " + key);
             }
         }
-        writer.flush();
-        if (out.size() == 0) {
-            throw new IOException("Empty data array");
+        if (builder.length() == 0) {
+            throw new IOException("Data is empty");
         }
-        return out.toByteArray();
+        return builder.toString();
     }
 
     /**
