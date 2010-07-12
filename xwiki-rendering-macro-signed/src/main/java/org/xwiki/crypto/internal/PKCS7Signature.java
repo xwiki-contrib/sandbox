@@ -43,7 +43,7 @@ import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.XWikiSignature;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiKeyPair;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 
 /**
@@ -77,9 +77,9 @@ public class PKCS7Signature implements XWikiSignature, Initializable
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.XWikiSignature#sign(byte[], org.xwiki.crypto.data.XWikiKeyPair)
+     * @see org.xwiki.crypto.XWikiSignature#sign(byte[], org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public byte[] sign(byte[] data, XWikiKeyPair keyPair) throws GeneralSecurityException
+    public byte[] sign(byte[] data, XWikiX509KeyPair keyPair) throws GeneralSecurityException
     {
         XWikiX509Certificate certificate = keyPair.getCertificate();
         PrivateKey key = keyPair.getPrivateKey();

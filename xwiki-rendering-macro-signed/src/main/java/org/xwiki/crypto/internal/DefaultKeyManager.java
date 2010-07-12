@@ -43,7 +43,7 @@ import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.KeyManager;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiKeyPair;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 
 /**
@@ -78,7 +78,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>(); 
 
     /** FIXME. */
-    private Map<String, XWikiKeyPair> keysMap = new HashMap<String, XWikiKeyPair>();
+    private Map<String, XWikiX509KeyPair> keysMap = new HashMap<String, XWikiX509KeyPair>();
 
     /**
      * {@inheritDoc}
@@ -148,7 +148,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
         XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint, this);
         String fingerprint = cert.getFingerprint();
-        XWikiKeyPair keys = new XWikiKeyPair(kp.getPrivate(), cert);
+        XWikiX509KeyPair keys = new XWikiX509KeyPair(kp.getPrivate(), cert);
         this.certMap.put(fingerprint, cert);
         this.keysMap.put(fingerprint, keys);
         return fingerprint;
@@ -171,9 +171,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getKeyPair(java.lang.String)
      */
-    public XWikiKeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
+    public XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
     {
-        XWikiKeyPair kp = this.keysMap.get(fingerprint);
+        XWikiX509KeyPair kp = this.keysMap.get(fingerprint);
         if (kp == null) {
             throw new GeneralSecurityException("Key pair with fingerprint \"" + fingerprint + "\" was not found");
         }
@@ -257,7 +257,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * 
      * @return local root key pair object
      */
-    private XWikiKeyPair getLocalRootKeyPair()
+    private XWikiX509KeyPair getLocalRootKeyPair()
     {
         try {
             return getKeyPair(this.localRootFingerprint);

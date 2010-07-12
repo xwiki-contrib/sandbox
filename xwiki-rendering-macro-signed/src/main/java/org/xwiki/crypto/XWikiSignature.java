@@ -23,7 +23,7 @@ import java.security.GeneralSecurityException;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiKeyPair;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 
 /**
@@ -43,13 +43,13 @@ public interface XWikiSignature
      * @return the signature
      * @throws GeneralSecurityException on errors
      */
-    byte[] sign(byte[] data, XWikiKeyPair keyPair) throws GeneralSecurityException;
+    byte[] sign(byte[] data, XWikiX509KeyPair keyPair) throws GeneralSecurityException;
 
     /**
      * Verify given data.
      * 
      * @param data the data to verify
-     * @param signature the signature produced by {@link #sign(byte[], XWikiKeyPair)}
+     * @param signature the signature produced by {@link #sign(byte[], XWikiX509KeyPair)}
      * @param certificate the certificate to use
      * @return true if the verification succeeds, false otherwise
      * @throws GeneralSecurityException on errors

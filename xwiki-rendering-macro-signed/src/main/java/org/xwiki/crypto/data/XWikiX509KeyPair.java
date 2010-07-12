@@ -33,7 +33,7 @@ import org.apache.commons.codec.binary.Base64;
  * @version $Id$
  * @since 2.5
  */
-public class XWikiKeyPair
+public class XWikiX509KeyPair
 {
     /** Private key. */
     private final PrivateKey key;
@@ -42,12 +42,12 @@ public class XWikiKeyPair
     private final XWikiX509Certificate certificate;
 
     /**
-     * Create new {@link XWikiKeyPair}.
+     * Create new {@link XWikiX509KeyPair}.
      * 
      * @param key the private key to use
      * @param certificate the certificate to use
      */
-    public XWikiKeyPair(PrivateKey key, XWikiX509Certificate certificate)
+    public XWikiX509KeyPair(PrivateKey key, XWikiX509Certificate certificate)
     {
         this.key = key;
         this.certificate = certificate;
@@ -70,8 +70,8 @@ public class XWikiKeyPair
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof XWikiKeyPair) {
-            XWikiKeyPair kp = (XWikiKeyPair) obj;
+        if (obj instanceof XWikiX509KeyPair) {
+            XWikiX509KeyPair kp = (XWikiX509KeyPair) obj;
             return getFingerprint().equals(kp.getFingerprint()) && getPrivateKey().equals(kp.getPrivateKey());
         }
         return false;
@@ -85,7 +85,7 @@ public class XWikiKeyPair
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
-        builder.append("XWikiKeyPair\n");
+        builder.append("XWikiX509KeyPair\n");
         builder.append("------------\n");
         builder.append(getCertificate().toString());
         builder.append(exportPrivateKey());

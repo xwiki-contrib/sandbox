@@ -33,7 +33,7 @@ import org.xwiki.crypto.XWikiSignature;
 import org.xwiki.crypto.data.SignedScript;
 import org.xwiki.crypto.data.SignedScriptKey;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiKeyPair;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 
 /**
@@ -65,7 +65,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
     {
         PKCS7SignedScript script = new PKCS7SignedScript(code, fingerprint);
 
-        XWikiKeyPair keyPair = this.keyManager.getKeyPair(script.get(SignedScriptKey.FINGERPRINT));
+        XWikiX509KeyPair keyPair = this.keyManager.getKeyPair(script.get(SignedScriptKey.FINGERPRINT));
         XWikiX509Certificate certificate = keyPair.getCertificate();
 
         // get certificate data

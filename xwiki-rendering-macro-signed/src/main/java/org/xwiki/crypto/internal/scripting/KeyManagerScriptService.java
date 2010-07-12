@@ -27,7 +27,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.crypto.KeyManager;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiKeyPair;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 import org.xwiki.script.service.ScriptService;
 
 
@@ -104,7 +104,7 @@ public class KeyManagerScriptService implements ScriptService
      * @throws GeneralSecurityException if the key pair does not exist or on insufficient access rights
      * @see org.xwiki.crypto.KeyManager#getKeyPair(java.lang.String)
      */
-    public XWikiKeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
+    public XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
     {
         return keyManager.getKeyPair(fingerprint);
     }

@@ -25,7 +25,7 @@ import java.util.Set;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiKeyPair;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 
 /**
@@ -103,7 +103,7 @@ public interface KeyManager
      * @return the corresponding key pair
      * @throws GeneralSecurityException if the key pair does not exist or on insufficient access rights
      */
-    XWikiKeyPair getKeyPair(String fingerprint) throws GeneralSecurityException;
+    XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException;
 
     /**
      * Get the local root certificate.
