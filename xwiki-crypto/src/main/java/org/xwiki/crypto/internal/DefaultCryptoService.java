@@ -146,10 +146,9 @@ public class DefaultCryptoService implements CryptoService
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.crypto.CryptoService#validateText(String)
+     * @see org.xwiki.crypto.CryptoService#verifyText(String)
      */
-    public String validateText(final String text)
-        throws GeneralSecurityException
+    XWikiX509Certificate verifyText(final String text, final String signature) throws GeneralSecurityException;
     {
         try {
             CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);

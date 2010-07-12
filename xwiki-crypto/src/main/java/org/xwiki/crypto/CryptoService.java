@@ -73,14 +73,14 @@ public interface CryptoService
     String signText(final String textToSign, final XWikiX509KeyPair toSignWith) throws GeneralSecurityException;
 
     /**
-     * Validate a pkcs#7 signature and return the name of the user who signed it.
+     * Verify a pkcs#7 signature and return the name of the user who signed it.
      *
      * @param text the text which has been signed.
      * @param signature the signature on the text in Base64 encoded DER format.
      * @return the certificate used to sign the text or null if it's invalid.
      * @throws GeneralSecurityException if anything goes wrong.
      */
-    XWikiX509Certificate validateText(final String text, final String signature) throws GeneralSecurityException;
+    XWikiX509Certificate verifyText(final String text, final String signature) throws GeneralSecurityException;
 
     /**
      * Encrypt a piece of text in pkcs#7/CMS/SMIME format with a public key so that only the holder of the matching 
