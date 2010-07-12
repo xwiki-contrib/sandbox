@@ -20,9 +20,10 @@
 package org.xwiki.crypto;
 
 import java.security.GeneralSecurityException;
-import java.security.cert.X509Certificate;
 
 import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.crypto.data.XWikiX509Certificate;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 /**
  * Service allowing components to sign text, determine the validity and signer of already signed text,
@@ -57,7 +58,7 @@ public interface CryptoService
      * @return object containing certificate and private key.
      * @throws GeneralSecurityException if something goes wrong while creating the certificate.
      */
-    XWikiX509CertAndPrivateKey newCertAndPrivateKey(final int daysOfValidity)
+    XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity)
         throws GeneralSecurityException;
 
     /**
@@ -65,11 +66,11 @@ public interface CryptoService
      * Text will be signed with the key belonging to the author of the code which calls this.
      *
      * @param textToSign the text which the user wishes to sign.
-     * @param toSignWith the private key to sign the text with.
+     * @param toSignWith the key pair to sign the text with.
      * @return a signature which can be used to validate the signed text.
      * @throws GeneralSecurityException if anything goes wrong during signing.
      */
-    String signText(final String textToSign, final PrivateKey toSignWith) throws GeneralSecurityException;
+    String signText(final String textToSign, final XWikiX509KeyPair toSignWith) throws GeneralSecurityException;
 
     /**
      * Validate a pkcs#7 signature and return the name of the user who signed it.
@@ -100,10 +101,10 @@ public interface CryptoService
      * Decrypt a piece of text encrypted with encryptText.
      *
      * @param textToDecrypt the cyphertext to decrypt.
-     * @param toDecryptWith the private key of the user who wants to decrypt the text.
+     * @param toDecryptWith the key pair of the user who wants to decrypt the text.
      * @return the decrypted text or null if the provided key is not sufficent to decrypt (wrong key).
      * @throws GeneralSecurityException if something goes wrong.
      */
-    String decryptText(final String textToDecrypt, final PrivateKey toDecryptWith)
+    String decryptText(final String textToDecrypt, final XWikiX509KeyPair toDecryptWith)
         throws GeneralSecurityException;
 }
