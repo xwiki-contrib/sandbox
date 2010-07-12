@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.Set;
 
 import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.crypto.data.XWikiCertificate;
+import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiKeyPair;
 
 
@@ -59,7 +59,7 @@ public interface KeyManager
      * @throws GeneralSecurityException on errors or insufficient access rights
      * @see #parseCertificate(String)
      */
-    void registerCertificate(XWikiCertificate certificate) throws GeneralSecurityException;
+    void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException;
 
     /**
      * Unregister the certificate or key pair with the given fingerprint. The code previously signed with
@@ -80,7 +80,7 @@ public interface KeyManager
      * @return the corresponding certificate
      * @throws GeneralSecurityException if the certificate does not exist
      */
-    XWikiCertificate getCertificate(String fingerprint) throws GeneralSecurityException;
+    XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException;
 
     /**
      * Create a certificate by parsing the given string. The string should contain a X509 certificate
@@ -92,7 +92,7 @@ public interface KeyManager
      * @return corresponding certificate object
      * @throws GeneralSecurityException on parse errors
      */
-    XWikiCertificate parseCertificate(String encoded) throws GeneralSecurityException;
+    XWikiX509Certificate parseCertificate(String encoded) throws GeneralSecurityException;
 
     /**
      * Get a key pair by certificate fingerprint.
@@ -110,7 +110,7 @@ public interface KeyManager
      * 
      * @return local root certificate object
      */
-    XWikiCertificate getLocalRootCertificate();
+    XWikiX509Certificate getLocalRootCertificate();
 
     /**
      * Get the global root certificate. Note that this certificate might have been unregistered and
@@ -118,7 +118,7 @@ public interface KeyManager
      * 
      * @return global root certificate object
      */
-    XWikiCertificate getGlobalRootCertificate();
+    XWikiX509Certificate getGlobalRootCertificate();
 
     /**
      * Get a set of all known trusted certificate fingerprints.

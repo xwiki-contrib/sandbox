@@ -27,7 +27,7 @@ import org.apache.commons.codec.binary.Base64;
 
 
 /**
- * Wrapper class storing a {@link PrivateKey} and the corresponding {@link XWikiCertificate}.
+ * Wrapper class storing a {@link PrivateKey} and the corresponding {@link XWikiX509Certificate}.
  * TODO password-protect the private key
  * 
  * @version $Id$
@@ -39,7 +39,7 @@ public class XWikiKeyPair
     private final PrivateKey key;
 
     /** Certificate. */
-    private final XWikiCertificate certificate;
+    private final XWikiX509Certificate certificate;
 
     /**
      * Create new {@link XWikiKeyPair}.
@@ -47,7 +47,7 @@ public class XWikiKeyPair
      * @param key the private key to use
      * @param certificate the certificate to use
      */
-    public XWikiKeyPair(PrivateKey key, XWikiCertificate certificate)
+    public XWikiKeyPair(PrivateKey key, XWikiX509Certificate certificate)
     {
         this.key = key;
         this.certificate = certificate;
@@ -95,7 +95,7 @@ public class XWikiKeyPair
     /**
      * @return the certificate
      */
-    public XWikiCertificate getCertificate()
+    public XWikiX509Certificate getCertificate()
     {
         return certificate;
     }

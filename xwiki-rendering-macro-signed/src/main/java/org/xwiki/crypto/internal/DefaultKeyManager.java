@@ -42,7 +42,7 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.KeyManager;
-import org.xwiki.crypto.data.XWikiCertificate;
+import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiKeyPair;
 
 
@@ -72,10 +72,10 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     private String localRootFingerprint;
 
     /** Global root certificate. */
-    private XWikiCertificate globalRootCertificate;
+    private XWikiX509Certificate globalRootCertificate;
 
     /** FIXME. */
-    private Map<String, XWikiCertificate> certMap = new HashMap<String, XWikiCertificate>(); 
+    private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>(); 
 
     /** FIXME. */
     private Map<String, XWikiKeyPair> keysMap = new HashMap<String, XWikiKeyPair>();
@@ -123,7 +123,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         PrivateKey signKey = kp.getPrivate();
         String signFingerprint = null;
         if (this.localRootFingerprint != null) {
-            XWikiCertificate signCert = getLocalRootCertificate();
+            XWikiX509Certificate signCert = getLocalRootCertificate();
             issuer = signCert.getSubjectX500Principal();
             signKey = getLocalRootKeyPair().getPrivateKey();
             signFingerprint = signCert.getFingerprint();
@@ -146,7 +146,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         certGen.setPublicKey(kp.getPublic());
         certGen.setSignatureAlgorithm(SIGN_ALGORITHM);
 
-        XWikiCertificate cert = new XWikiCertificate(certGen.generate(signKey), signFingerprint, this);
+        XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint, this);
         String fingerprint = cert.getFingerprint();
         XWikiKeyPair keys = new XWikiKeyPair(kp.getPrivate(), cert);
         this.certMap.put(fingerprint, cert);
@@ -158,9 +158,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getCertificate(java.lang.String)
      */
-    public XWikiCertificate getCertificate(String fingerprint) throws GeneralSecurityException
+    public XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
     {
-        XWikiCertificate cert = this.certMap.get(fingerprint);
+        XWikiX509Certificate cert = this.certMap.get(fingerprint);
         if (cert == null) {
             throw new GeneralSecurityException("Certificate with fingerprint \"" + fingerprint + "\" not found");
         }
@@ -182,9 +182,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.KeyManager#registerCertificate(org.xwiki.crypto.data.XWikiCertificate)
+     * @see org.xwiki.crypto.KeyManager#registerCertificate(org.xwiki.crypto.data.XWikiX509Certificate)
      */
-    public void registerCertificate(XWikiCertificate certificate) throws GeneralSecurityException
+    public void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException
     {
         this.certMap.put(certificate.getFingerprint(), certificate);
     }
@@ -207,16 +207,16 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#parseCertificate(java.lang.String)
      */
-    public XWikiCertificate parseCertificate(String encoded) throws GeneralSecurityException
+    public XWikiX509Certificate parseCertificate(String encoded) throws GeneralSecurityException
     {
-        return new XWikiCertificate(XWikiCertificate.x509FromString(encoded), null, this);
+        return new XWikiX509Certificate(XWikiX509Certificate.x509FromString(encoded), null, this);
     }
 
     /**
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getLocalRootCertificate()
      */
-    public XWikiCertificate getLocalRootCertificate()
+    public XWikiX509Certificate getLocalRootCertificate()
     {
         return getLocalRootKeyPair().getCertificate();
     }
@@ -225,7 +225,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getGlobalRootCertificate()
      */
-    public XWikiCertificate getGlobalRootCertificate()
+    public XWikiX509Certificate getGlobalRootCertificate()
     {
         return this.globalRootCertificate;
     }

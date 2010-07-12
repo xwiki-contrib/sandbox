@@ -41,7 +41,7 @@ import org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper;
  * @version $Id$
  * @since 2.5
  */
-public class XWikiCertificate extends AbstractX509CertificateWrapper
+public class XWikiX509Certificate extends AbstractX509CertificateWrapper
 {
     /** Supported certificate type. */
     private static final String CERT_TYPE = "X509";
@@ -59,17 +59,17 @@ public class XWikiCertificate extends AbstractX509CertificateWrapper
     private final KeyManager keyManager;
 
     /**
-     * Create new {@link XWikiCertificate}.
+     * Create new {@link XWikiX509Certificate}.
      * 
      * @param certificate the actual certificate to use
      * @param issuerFp fingerprint of the issuer certificate, null if self-signed
      * @param keyManager the key manager where this certificate and its issuer are stored
      */
-    public XWikiCertificate(X509Certificate certificate, String issuerFp, KeyManager keyManager)
+    public XWikiX509Certificate(X509Certificate certificate, String issuerFp, KeyManager keyManager)
     {
         super(certificate);
         this.keyManager = keyManager;
-        this.fingerprint = XWikiCertificate.calculateFingerprint(certificate);
+        this.fingerprint = XWikiX509Certificate.calculateFingerprint(certificate);
         if (issuerFp == null) {
             this.issuerFingerprint = this.fingerprint;
         } else {
@@ -135,8 +135,8 @@ public class XWikiCertificate extends AbstractX509CertificateWrapper
         if (this == obj) {
             return true;
         }
-        if (obj instanceof XWikiCertificate) {
-            XWikiCertificate cert = (XWikiCertificate) obj;
+        if (obj instanceof XWikiX509Certificate) {
+            XWikiX509Certificate cert = (XWikiX509Certificate) obj;
             return getFingerprint().equals(cert.getFingerprint());
         }
         return false;
@@ -151,7 +151,7 @@ public class XWikiCertificate extends AbstractX509CertificateWrapper
     {
         final String format = "%20s : %s\n";
         StringBuilder builder = new StringBuilder();
-        builder.append("XWikiCertificate\n");
+        builder.append("XWikiX509Certificate\n");
         builder.append("---------------------------------------------------------------\n");
         builder.append(String.format(format, "Fingerprint", getFingerprint()));
         builder.append(String.format(format, "SubjectDN", getAuthorName()));
@@ -235,7 +235,7 @@ public class XWikiCertificate extends AbstractX509CertificateWrapper
         checkValidity();
 
         // verify this certificate. Note that the key manager will throw an error if the parent is not trusted
-        XWikiCertificate parentCert = keyManager.getCertificate(getIssuerFingerprint());
+        XWikiX509Certificate parentCert = keyManager.getCertificate(getIssuerFingerprint());
         PublicKey key = parentCert.getPublicKey();
         verify(key);
 

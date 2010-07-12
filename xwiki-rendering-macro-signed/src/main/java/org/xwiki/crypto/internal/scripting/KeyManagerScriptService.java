@@ -26,7 +26,7 @@ import java.util.Set;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.crypto.KeyManager;
-import org.xwiki.crypto.data.XWikiCertificate;
+import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiKeyPair;
 import org.xwiki.script.service.ScriptService;
 
@@ -59,9 +59,9 @@ public class KeyManagerScriptService implements ScriptService
     /**
      * @param certificate the certificate to register
      * @throws GeneralSecurityException on errors or insufficient access rights
-     * @see org.xwiki.crypto.KeyManager#registerCertificate(org.xwiki.crypto.data.XWikiCertificate)
+     * @see org.xwiki.crypto.KeyManager#registerCertificate(org.xwiki.crypto.data.XWikiX509Certificate)
      */
-    public void registerCertificate(XWikiCertificate certificate) throws GeneralSecurityException
+    public void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException
     {
         keyManager.registerCertificate(certificate);
     }
@@ -82,7 +82,7 @@ public class KeyManagerScriptService implements ScriptService
      * @throws GeneralSecurityException if the certificate does not exist
      * @see org.xwiki.crypto.KeyManager#getCertificate(java.lang.String)
      */
-    public XWikiCertificate getCertificate(String fingerprint) throws GeneralSecurityException
+    public XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
     {
         return keyManager.getCertificate(fingerprint);
     }
@@ -93,7 +93,7 @@ public class KeyManagerScriptService implements ScriptService
      * @throws GeneralSecurityException on parse errors
      * @see org.xwiki.crypto.KeyManager#parseCertificate(java.lang.String)
      */
-    public XWikiCertificate parseCertificate(String encoded) throws GeneralSecurityException
+    public XWikiX509Certificate parseCertificate(String encoded) throws GeneralSecurityException
     {
         return keyManager.parseCertificate(encoded);
     }
@@ -113,7 +113,7 @@ public class KeyManagerScriptService implements ScriptService
      * @return local root certificate object
      * @see org.xwiki.crypto.KeyManager#getLocalRootCertificate()
      */
-    public XWikiCertificate getLocalRootCertificate()
+    public XWikiX509Certificate getLocalRootCertificate()
     {
         return keyManager.getLocalRootCertificate();
     }
@@ -122,7 +122,7 @@ public class KeyManagerScriptService implements ScriptService
      * @return global root certificate object
      * @see org.xwiki.crypto.KeyManager#getGlobalRootCertificate()
      */
-    public XWikiCertificate getGlobalRootCertificate()
+    public XWikiX509Certificate getGlobalRootCertificate()
     {
         return keyManager.getGlobalRootCertificate();
     }

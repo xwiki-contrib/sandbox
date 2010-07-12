@@ -22,7 +22,7 @@ package org.xwiki.crypto;
 import java.security.GeneralSecurityException;
 
 import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.crypto.data.XWikiCertificate;
+import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiKeyPair;
 
 
@@ -54,6 +54,6 @@ public interface XWikiSignature
      * @return true if the verification succeeds, false otherwise
      * @throws GeneralSecurityException on errors
      */
-    boolean verify(byte[] data, byte[] signature, XWikiCertificate certificate) throws GeneralSecurityException;
+    boolean verify(byte[] data, byte[] signature, XWikiX509Certificate certificate) throws GeneralSecurityException;
 }
 

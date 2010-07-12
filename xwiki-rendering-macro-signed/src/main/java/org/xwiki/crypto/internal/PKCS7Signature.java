@@ -42,7 +42,7 @@ import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.XWikiSignature;
-import org.xwiki.crypto.data.XWikiCertificate;
+import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiKeyPair;
 
 
@@ -81,7 +81,7 @@ public class PKCS7Signature implements XWikiSignature, Initializable
      */
     public byte[] sign(byte[] data, XWikiKeyPair keyPair) throws GeneralSecurityException
     {
-        XWikiCertificate certificate = keyPair.getCertificate();
+        XWikiX509Certificate certificate = keyPair.getCertificate();
         PrivateKey key = keyPair.getPrivateKey();
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
@@ -103,9 +103,9 @@ public class PKCS7Signature implements XWikiSignature, Initializable
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.XWikiSignature#verify(byte[], byte[], org.xwiki.crypto.data.XWikiCertificate)
+     * @see org.xwiki.crypto.XWikiSignature#verify(byte[], byte[], org.xwiki.crypto.data.XWikiX509Certificate)
      */
-    public boolean verify(byte[] data, byte[] signature, XWikiCertificate certificate) throws GeneralSecurityException
+    public boolean verify(byte[] data, byte[] signature, XWikiX509Certificate certificate) throws GeneralSecurityException
     {
         try {
             CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);
@@ -120,7 +120,7 @@ public class PKCS7Signature implements XWikiSignature, Initializable
                 SignerInformation signer = (SignerInformation) it.next();
                 Collection< ? extends Certificate> certs = certStore.getCertificates(signer.getSID());
                 for (Iterator<? extends Certificate> cit = certs.iterator(); cit.hasNext();) {
-                    if (!XWikiCertificate.calculateFingerprint(cit.next()).equals(certificate.getFingerprint())) {
+                    if (!XWikiX509Certificate.calculateFingerprint(cit.next()).equals(certificate.getFingerprint())) {
                         throw new GeneralSecurityException("Unknown signer certificate.");
                     }
                     result &= signer.verify(certificate.getPublicKey(), PROVIDER);

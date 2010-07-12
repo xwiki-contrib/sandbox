@@ -32,7 +32,7 @@ import org.xwiki.crypto.ScriptSigner;
 import org.xwiki.crypto.XWikiSignature;
 import org.xwiki.crypto.data.SignedScript;
 import org.xwiki.crypto.data.SignedScriptKey;
-import org.xwiki.crypto.data.XWikiCertificate;
+import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiKeyPair;
 
 
@@ -66,7 +66,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
         PKCS7SignedScript script = new PKCS7SignedScript(code, fingerprint);
 
         XWikiKeyPair keyPair = this.keyManager.getKeyPair(script.get(SignedScriptKey.FINGERPRINT));
-        XWikiCertificate certificate = keyPair.getCertificate();
+        XWikiX509Certificate certificate = keyPair.getCertificate();
 
         // get certificate data
         script.set(SignedScriptKey.AUTHOR, certificate.getAuthorName());
@@ -99,7 +99,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
     {
         try {
             PKCS7SignedScript script = new PKCS7SignedScript(signedScript);
-            XWikiCertificate certificate = this.keyManager.getCertificate(script.get(SignedScriptKey.FINGERPRINT));
+            XWikiX509Certificate certificate = this.keyManager.getCertificate(script.get(SignedScriptKey.FINGERPRINT));
 
             // compare author and authority with the certificate
             String certAuthor = certificate.getAuthorName();
