@@ -25,8 +25,13 @@ import java.security.cert.X509Certificate;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.crypto.ScriptSigner;
-import org.xwiki.crypto.data.SignedScript;
+import org.xwiki.crypto.CryptoService;
+import org.xwiki.crypto.data.XWikiX509Certificate;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
+import org.xwiki.crypto.internal.Keymaker;
+import org.xwiki.crypto.internal.UserDocumentUtils;
+import org.xwiki.crypto.signedscripts.ScriptSigner;
+import org.xwiki.crypto.signedscripts.SignedScript;
 import org.xwiki.script.service.ScriptService;
 
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
@@ -42,12 +47,20 @@ import org.bouncycastle.util.encoders.Base64;
 @Component("crypto")
 public class CryptoScriptService implements ScriptService
 {
+    /** Wrapped crypto service implementing PKCS#7 standard. */
+    @Requirement("pkcs7crypto")
+    private CryptoService pkcs7crypto;
+
     /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
     @Requirement
     private UserDocumentUtils userDocUtils;
 
     /** Used for the actual key making, also holds any secrets. */
     private Keymaker theKeymaker = new Keymaker();
+
+    /** Enclosed script signer. FIXME why in crypto service? */
+    @Requirement
+    private ScriptSigner signer;
 
     /**
      * Creates an array of X509Certificate containing:
@@ -94,25 +107,23 @@ public class CryptoScriptService implements ScriptService
         throws GeneralSecurityException
     {
         throw new GeneralSecurityException("Not implemented yet.");
+//        XWikiX509KeyPair keyPair = null;
+//        return pkcs7crypto.signText(textToSign, keyPair);
     }
 
     /**
-     * Validate a pkcs7 signature and return the name of the user who signed it.
+     * Verify a pkcs7 signature and return the name of the user who signed it.
      *
-     * @param text the text which has been signed.
-     * @param signature the signature on the text in base-64 format.
-     * @return the name of the user who signed the text or null if the signature is invalid.
+     * @param signedText the text which has been signed.
+     * @param base64Signature base64 encoded signature of the text
+     * @return the certificate of the user who signed the text or null if the signature is invalid.
      * @throws GeneralSecurityException if anything goes wrong.
      */
-    public String validateText(String text, String signature)
+    public XWikiX509Certificate verifyText(String signedText, String base64Signature)
         throws GeneralSecurityException
     {
+        return pkcs7crypto.verifyText(signedText, base64Signature);
     }
-
-
-    /** Enclosed script signer. */
-    @Requirement
-    private ScriptSigner signer;
 
     /**
      * @param code code to sign

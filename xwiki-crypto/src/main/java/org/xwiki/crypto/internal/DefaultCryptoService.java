@@ -26,9 +26,8 @@ import java.security.cert.X509Certificate;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.crypto.Converter;
 import org.xwiki.crypto.CryptoService;
-import org.xwiki.crypto.ScriptSigner;
-import org.xwiki.crypto.data.SignedScript;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.script.service.ScriptService;
 
@@ -37,11 +36,11 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
-import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509Store;
 
 /**
  * Service allowing a user to sign text, determine the validity and signer of already signed text, and create keys.
+ * FIXME merge with {@link PKCS7CryptoService}
  * 
  * @version $Id$
  * @since 2.5
@@ -52,6 +51,10 @@ public class DefaultCryptoService implements CryptoService
     /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
     @Requirement
     private UserDocumentUtils userDocUtils;
+
+    /** Base64 encoder. */
+    @Requirement("base64")
+    private Converter base64;
 
     /** Used for the actual key making, also holds any secrets. */
     private final Keymaker theKeymaker = new Keymaker();
@@ -67,7 +70,7 @@ public class DefaultCryptoService implements CryptoService
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(Base64.decode(spkacSerialization));
+        NetscapeCertRequest certRequest = new NetscapeCertRequest(base64.decode(spkacSerialization));
 
         // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();
@@ -80,8 +83,8 @@ public class DefaultCryptoService implements CryptoService
                                                                                       userName);
         return new String[] {
 //XXX
-            Base64.encode(certs[0].getEncoded()),
-            Base64.encode(certs[1].getEncoded())
+            base64.encode(certs[0].getEncoded()),
+            base64.encode(certs[1].getEncoded())
         };
     }
 
@@ -114,22 +117,9 @@ public class DefaultCryptoService implements CryptoService
     {
         KeyPair pair = this.theKeymaker.newKeyPair();
         return new String[] {
-            Base64.encode(pair.getPrivate().getEncoded()),
-            Base64.encode(pair.getPublic().getEncoded())
+            base64.encode(pair.getPrivate().getEncoded()),
+            base64.encode(pair.getPublic().getEncoded())
         };
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.CryptoService#base64Encode(byte[])
-     */
-    public byte[] base64Decode(final String input)
-    {
-        // Why "US-ASCII"?! 
-        // US-ASCII is 7 bit and anything over code point 127 is most definitly not Base64. US-ASCII is defined in 
-        // java.nio.charset.Charset as a character set which must appear in all java implementations.
-        return Base64.decode(input.getBytes("US-ASCII"));
     }
 
     /**
@@ -148,7 +138,7 @@ public class DefaultCryptoService implements CryptoService
      *
      * @see org.xwiki.crypto.CryptoService#verifyText(String)
      */
-    XWikiX509Certificate verifyText(final String text, final String signature) throws GeneralSecurityException;
+    public XWikiX509Certificate verifyText(final String text, final String signature) throws GeneralSecurityException
     {
         try {
             CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);

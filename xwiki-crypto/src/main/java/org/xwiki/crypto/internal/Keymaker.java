@@ -298,7 +298,7 @@ public class Keymaker
 
         // Set up the validity dates.
         this.certGenerator.setNotBefore(new Date(System.currentTimeMillis() - this.anHour));
-        this.certGenerator.setNotAfter(new Date(System.currentTimeMillis() + (this.aDay * this.daysOfValidity)));
+        this.certGenerator.setNotAfter(new Date(System.currentTimeMillis() + (this.aDay * daysOfValidity)));
 
         // Set a random serial number.
         this.certGenerator.setSerialNumber(this.randomBigint());
