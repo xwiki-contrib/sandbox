@@ -1,4 +1,5 @@
-package org.xwiki.crypto.data;
+package org.xwiki.crypto.signedscripts;
+
 
 
 /**

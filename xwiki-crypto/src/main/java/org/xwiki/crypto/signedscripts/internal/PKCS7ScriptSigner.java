@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.internal;
+package org.xwiki.crypto.signedscripts.internal;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -30,11 +30,11 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.crypto.Converter;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.KeyManager;
-import org.xwiki.crypto.ScriptSigner;
-import org.xwiki.crypto.data.SignedScript;
-import org.xwiki.crypto.data.SignedScriptKey;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
+import org.xwiki.crypto.signedscripts.ScriptSigner;
+import org.xwiki.crypto.signedscripts.SignedScript;
+import org.xwiki.crypto.signedscripts.SignedScriptKey;
 
 
 /**
@@ -60,7 +60,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.ScriptSigner#sign(java.lang.String, java.lang.String)
+     * @see org.xwiki.crypto.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String)
      */
     public SignedScript sign(String code, String fingerprint) throws GeneralSecurityException
     {
@@ -94,7 +94,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.ScriptSigner#getVerifiedCode(java.lang.String)
+     * @see org.xwiki.crypto.signedscripts.ScriptSigner#getVerifiedCode(java.lang.String)
      */
     public SignedScript getVerifiedCode(String signedScript) throws GeneralSecurityException
     {

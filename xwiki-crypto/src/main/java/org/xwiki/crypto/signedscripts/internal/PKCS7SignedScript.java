@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.internal;
+package org.xwiki.crypto.signedscripts.internal;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.xwiki.crypto.data.SignedScript;
-import org.xwiki.crypto.data.SignedScriptKey;
+import org.xwiki.crypto.signedscripts.SignedScript;
+import org.xwiki.crypto.signedscripts.SignedScriptKey;
 
 
 /**
@@ -129,7 +129,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.data.SignedScript#toString()
+     * @see org.xwiki.crypto.signedscripts.SignedScript#toString()
      */
     @Override
     public String toString()
@@ -139,7 +139,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.data.SignedScript#serialize()
+     * @see org.xwiki.crypto.signedscripts.SignedScript#serialize()
      */
     public String serialize()
     {
@@ -179,7 +179,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.data.SignedScript#getCode()
+     * @see org.xwiki.crypto.signedscripts.SignedScript#getCode()
      */
     public String getCode()
     {
@@ -188,7 +188,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.data.SignedScript#get(org.xwiki.crypto.data.SignedScriptKey)
+     * @see org.xwiki.crypto.signedscripts.SignedScript#get(org.xwiki.crypto.signedscripts.SignedScriptKey)
      */
     public String get(SignedScriptKey key)
     {
@@ -197,7 +197,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.data.SignedScript#isSet(org.xwiki.crypto.data.SignedScriptKey)
+     * @see org.xwiki.crypto.signedscripts.SignedScript#isSet(org.xwiki.crypto.signedscripts.SignedScriptKey)
      */
     public boolean isSet(SignedScriptKey key)
     {
