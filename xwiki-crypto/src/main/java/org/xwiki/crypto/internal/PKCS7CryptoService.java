@@ -25,6 +25,7 @@ import java.security.Security;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,7 +42,7 @@ import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
-import org.xwiki.crypto.XWikiSignature;
+import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
 
@@ -53,9 +54,9 @@ import org.xwiki.crypto.data.XWikiX509KeyPair;
  * @version $Id$
  * @since 2.5
  */
-@Component("pkcs7signature")
+@Component("pkcs7crypto")
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
-public class PKCS7Signature implements XWikiSignature, Initializable
+public class PKCS7CryptoService implements CryptoService, Initializable
 {
     /** Unique SHA1 OID. TODO find a way to convert algorithm name to the corresponding OID */
     private static final String SHA1_OID = CMSSignedGenerator.DIGEST_SHA1;
@@ -77,12 +78,33 @@ public class PKCS7Signature implements XWikiSignature, Initializable
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.XWikiSignature#sign(byte[], org.xwiki.crypto.data.XWikiX509KeyPair)
+     * @see org.xwiki.crypto.CryptoService#certsFromSpkac(java.lang.String, int)
      */
-    public byte[] sign(byte[] data, XWikiX509KeyPair keyPair) throws GeneralSecurityException
+    public XWikiX509Certificate[] certsFromSpkac(String spkacSerialization, int daysOfValidity)
+        throws GeneralSecurityException
     {
-        XWikiX509Certificate certificate = keyPair.getCertificate();
-        PrivateKey key = keyPair.getPrivateKey();
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
+     */
+    public XWikiX509KeyPair newCertAndPrivateKey(int daysOfValidity) throws GeneralSecurityException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
+     */
+    public String signText(String textToSign, XWikiX509KeyPair toSignWith) throws GeneralSecurityException
+    {
+        XWikiX509Certificate certificate = toSignWith.getCertificate();
+        PrivateKey key = toSignWith.getPrivateKey();
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
         Collection<?> certs = Collections.singleton(certificate);
@@ -103,28 +125,38 @@ public class PKCS7Signature implements XWikiSignature, Initializable
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.XWikiSignature#verify(byte[], byte[], org.xwiki.crypto.data.XWikiX509Certificate)
+     * @see org.xwiki.crypto.CryptoService#verifyText(java.lang.String, java.lang.String)
      */
-    public boolean verify(byte[] data, byte[] signature, XWikiX509Certificate certificate)
-        throws GeneralSecurityException
+    public XWikiX509Certificate verifyText(String text, String signature) throws GeneralSecurityException
     {
         try {
-            CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);
+            CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(text), signature);
             CertStore certStore = cmsData.getCertificatesAndCRLs(CERT_STORE_TYPE, PROVIDER);
             SignerInformationStore signers = cmsData.getSignerInfos();
 
-            if (signers.getSigners().size() == 0) {
+            int numSigners = signers.getSigners().size();
+            if (numSigners == 0) {
                 throw new GeneralSecurityException("No signers found");
             }
-            boolean result = true;
+            if (numSigners > 1) {
+                throw new GeneralSecurityException("Too many signers: " + numSigners);
+            }
+            XWikiX509Certificate result = null;
             for (Iterator<?> it = signers.getSigners().iterator(); it.hasNext();) {
+                if (result != null) {
+                    throw new GeneralSecurityException("Only one certificate is supported");
+                }
                 SignerInformation signer = (SignerInformation) it.next();
                 Collection< ? extends Certificate> certs = certStore.getCertificates(signer.getSID());
                 for (Iterator<? extends Certificate> cit = certs.iterator(); cit.hasNext();) {
-                    if (!XWikiX509Certificate.calculateFingerprint(cit.next()).equals(certificate.getFingerprint())) {
-                        throw new GeneralSecurityException("Unknown signer certificate.");
+                    Certificate certificate = cit.next();
+                    if (!signer.verify(certificate.getPublicKey(), PROVIDER)) {
+                        return null;
                     }
-                    result &= signer.verify(certificate.getPublicKey(), PROVIDER);
+                    // FIXME I don't really need the certificate here, fingerprint would suffice
+                    if (certificate instanceof X509Certificate) {
+                        result = new XWikiX509Certificate((X509Certificate) certificate, null);
+                    }
                 }
             }
             return result;
@@ -133,6 +165,27 @@ public class PKCS7Signature implements XWikiSignature, Initializable
         } catch (Exception exception) {
             throw new GeneralSecurityException(exception);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
+     */
+    public String encryptText(String textToEncrypt, XWikiX509Certificate[] certificatesToEncryptFor)
+        throws GeneralSecurityException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
+     */
+    public String decryptText(String textToDecrypt, XWikiX509KeyPair toDecryptWith) throws GeneralSecurityException
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
 

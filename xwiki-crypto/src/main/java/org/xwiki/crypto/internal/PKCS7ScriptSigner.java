@@ -28,6 +28,7 @@ import java.util.TimeZone;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.crypto.Converter;
+import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.KeyManager;
 import org.xwiki.crypto.ScriptSigner;
 import org.xwiki.crypto.XWikiSignature;
@@ -50,9 +51,9 @@ public class PKCS7ScriptSigner implements ScriptSigner
     @Requirement("base64")
     private Converter base64;
 
-    /** PKCS7 signer/verifier. */
-    @Requirement("pkcs7signature")
-    private XWikiSignature pkcs7;
+    /** PKCS7 crypto service. */
+    @Requirement("pkcs7crypto")
+    private CryptoService pkcs7;
 
     /** Key manager. */
     @Requirement
