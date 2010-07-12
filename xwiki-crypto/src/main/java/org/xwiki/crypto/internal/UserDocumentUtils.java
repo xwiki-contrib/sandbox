@@ -46,7 +46,7 @@ public class UserDocumentUtils
     private final String certClassName = "XWiki.X509CertificateClass";
 
     /** The name of the property in the certificate XClass which represents the entire certificate in PEM format. */
-    private final String certPEMProperty = "certificatePEM";
+    private final String certFingerprintProperty = "fingerprint";
 
     /** DocumentAccessBridge for getting the current user's document and URL. */
     @Requirement
@@ -81,46 +81,24 @@ public class UserDocumentUtils
     }
 
     /**
-     * Get the website which the user is a member of.
-     * If the url of the user page is: http://www.xwiki.org/bin/view/XWiki/JohnSmith
-     * This method will return http://www.xwiki.org
+     * Get the X509Certificate fingerprints for the named user.
      *
      * @param userName the string representation of the document reference for the user document.
-     * @return A string representation of the website URL.
+     * @return A list of all of this user's authorized certificate fingerprints.
      */
-    public String getWebsiteName(String userDocName)
-    {
-        // This gets the url and looks for the first / which is not part of http://
-        // TODO: Is there a better way?
-        String url = getUserDocURL(userDocName);
-        int index = url.indexOf('/', index);
-        while (index != -1) {
-            char oneBack = url.charAt(index - 1)
-            if (oneBack != ':' && oneBack != '/') {
-                return url.substring(0, index);
-            }
-            index = url.indexOf('/', index);
-        }
-        throw new RuntimeException("Couldn't extract a website name from url: " + url + " for user document name "
-                                   + userDocName);
-    }
-
-    /**
-     * Get the X509Certificates for the named user.
-     *
-     * @param userName the string representation of the document reference for the user document.
-     * @return A list of all of this user's certificates in PEM format.
-     */
-    public List<String> getCertificatePEMsForUser(final String userName)
+    public List<String> getCertificateFingerprintsForUser(final String userName)
     {
         List<String> out = new ArrayList<String>();
-        String certPEM = (String) this.bridge.getProperty(userName, this.certClassName, 0, this.certPEMPropertyName);
+        String certFingerprint = (String) this.bridge.getProperty(userName,
+                                                                  this.certClassName,
+                                                                  0,
+                                                                  this.certFingerprintPropertyName);
         for (int counter = 0; certPem != null; counter++) {
-            out.add(certPem);
-            certPEM = (String) this.bridge.getProperty(userName,
-                                                       this.certClassName, 
-                                                       counter,
-                                                       this.certPEMPropertyName);
+            out.add(certFingerprint);
+            certFingerprint = (String) this.bridge.getProperty(userName,
+                                                               this.certClassName, 
+                                                               counter,
+                                                               this.certFingerprintPropertyName);
             if (counter > 500) {
                 throw new InfiniteLoopException("Either the document " + userName + " has over 500 "
                                                 + this.certClassName
@@ -139,7 +117,7 @@ public class UserDocumentUtils
     public static class InfiniteLoopException extends RuntimeException
     {
         /**
-         * The Constructor
+         * The Constructor.
          *
          * @param message the message to give in the Exception
          */

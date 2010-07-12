@@ -115,4 +115,43 @@ public class ConversionUtils
         out.append(new String(encodedBytes, index, encodedBytes.length - index, base64EncodingCharacterSet));
         return out.toString()
     }
+
+
+
+    private final String pkcs1BeginRSAPrivateKey = "-----BEGIN RSA PRIVATE KEY-----";
+
+    private final String pkcs1EndRSAPrivateKey = "-----END RSA PRIVATE KEY-----";
+
+    /**
+     * Reads a string and looks for a PKCS#1 formatted private key and if found, decodes it and stops.
+     * If there are multiple private keys in the string, the first will be taken.
+     * An invalid key or invalid Base64 encoding will result in undefined behavior.
+     * Anything between -----BEGIN RSA PRIVATE KEY-----
+     * and -----END RSA PRIVATE KEY-----
+     * is assumed to be a base64 encoded private key.
+     *
+     * @param textToFindKeyIn the text to look through to find a private key.
+     */
+    public RSAPrivateKey decodeRSAPrivateKey(String textToFindKeyIn)
+    {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    /**
+     * Gets the encoded form of an RSA private key in Base64 format wrapped with:
+     * -----BEGIN RSA PRIVATE KEY-----
+     * and
+     * -----END RSA PRIVATE KEY-----
+     *
+     * @param key the key to encode.
+     */
+    public String encodeRSAPrivateKey(RSAPrivateKey key)
+    {
+        return
+              this.pkcs1BeginRSAPrivateKey
+            + this.newline
+            + this.getBase64Encoded(key.getEncoded())
+            + this.newLine
+            + this.pkcs1EndRSAPrivateKey;
+    }
 }

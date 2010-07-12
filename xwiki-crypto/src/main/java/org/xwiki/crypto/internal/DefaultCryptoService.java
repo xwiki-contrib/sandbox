@@ -135,9 +135,9 @@ public class DefaultCryptoService implements CryptoService
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.crypto.CryptoService#validateText(String, String)
+     * @see org.xwiki.crypto.CryptoService#validateText(String)
      */
-    public String validateText(final String text, final String signature)
+    public String validateText(final String text)
         throws GeneralSecurityException
     {
         try {
@@ -151,9 +151,10 @@ public class DefaultCryptoService implements CryptoService
 
             boolean result = true;
             for (SignerInformation signer : signers.getSigners()) {
-                for (Certificate cert : certStore.getMatches(signer.getSID())) {
+                for (X509Certificate cert : certStore.getMatches(signer.getSID())) {
+                    // Get the user named in this certificate, then get their user page and make sure their page
+                    // this certificate added as an XObject.
                     
-                    result &= signer.verify(certificate.getCertificate().getPublicKey(), PROVIDER);
                 }
             }
             return result;

@@ -47,67 +47,39 @@ public interface CryptoService
      * @return an array of 2 X509Certificates in Base64 encoded DER format.
      * @throws GeneralSecurityException if something goes wrong while creating the certificate.
      */
-    X509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
+    XWikiX509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
         throws GeneralSecurityException;
 
     /**
-     * Creates an array of Base64 encoded DER formatted X509Certificates containing:
-     * 1. A certificate from the given public key.
-     * 2. A certificate authority certificate which will validate the first certificate in the array.
+     * Creates an XWikiX509Certificate and matching private key.
      *
      * @param daysOfValidity number of days before the certificate should become invalid.
-     * @return an array of 2 X509Certificates in Base64 encoded DER format.
+     * @return object containing certificate and private key.
      * @throws GeneralSecurityException if something goes wrong while creating the certificate.
      */
-    X509CertAndPrivateKey newCertAndPrivateKey(final int daysOfValidity)
+    XWikiX509CertAndPrivateKey newCertAndPrivateKey(final int daysOfValidity)
         throws GeneralSecurityException;
-
-    /**
-     * Creates an array of Base64 encoded keys containing:
-     * 1. A private key
-     * 2. A matching public key.
-     *
-     * @return An array of Base64 encoded serialized keys.
-     */
-    String[] newKeyPair();
-
-    /**
-     * Decode the given Base64 String into binary.
-     * Useful because some web browsers only recognize DER format and all functions here use Base64 encoded DER format
-     * Note: The only difference between PEM format and Base64 encoded DER is that PEM has a header and footer.
-     * For example:
-     *  -----BEGIN CERTIFICATE-----
-     *   base64 of DER
-     *  ----END CERTIFICATE -----
-     * This method does not remove header and footer.
-     * Behavior is undefined if input is not all valid Base64 format.
-     *
-     * @param input the String of Base64 characters to decode.
-     * @return binary format of input.
-     * 
-     */
-    byte[] base64Decode(final String input);
 
     /**
      * Produce a pkcs#7 signature for the given text.
      * Text will be signed with the key belonging to the author of the code which calls this.
      *
      * @param textToSign the text which the user wishes to sign.
-     * @param privateKeyToSignWith the private key (serialized in Base64 encoded DER format) to sign the text with.
+     * @param toSignWith the private key to sign the text with.
      * @return a signature which can be used to validate the signed text.
      * @throws GeneralSecurityException if anything goes wrong during signing.
      */
-    String signText(final String textToSign, final String privateKeyToSignWith) throws GeneralSecurityException;
+    String signText(final String textToSign, final PrivateKey toSignWith) throws GeneralSecurityException;
 
     /**
      * Validate a pkcs#7 signature and return the name of the user who signed it.
      *
      * @param text the text which has been signed.
      * @param signature the signature on the text in Base64 encoded DER format.
-     * @return the name of the user who signed the text or null if the signature is invalid.
+     * @return the certificate used to sign the text or null if it's invalid.
      * @throws GeneralSecurityException if anything goes wrong.
      */
-    String validateText(final String text, final String signature) throws GeneralSecurityException;
+    XWikiX509Certificate validateText(final String text, final String signature) throws GeneralSecurityException;
 
     /**
      * Encrypt a piece of text in pkcs#7/CMS/SMIME format with a public key so that only the holder of the matching 
@@ -121,18 +93,17 @@ public interface CryptoService
      *         matching certificatesToEncryptFor.
      * @throws GeneralSecurityException if something goes wrong.
      */
-    String encryptText(final String textToEncrypt, final String[] certificatesToEncryptFor)
+    String encryptText(final String textToEncrypt, final XWikiX509Certificate[] certificatesToEncryptFor)
         throws GeneralSecurityException;
 
     /**
      * Decrypt a piece of text encrypted with encryptText.
      *
      * @param textToDecrypt the cyphertext to decrypt.
-     * @param privateKeyToDecryptWith the private key (in Base64 encoded DER format) of the user who wants to decrypt 
-     *                                the text.
-     * @return the decrypted text or null if the private key is not authorized.
+     * @param toDecryptWith the private key of the user who wants to decrypt the text.
+     * @return the decrypted text or null if the provided key is not sufficent to decrypt (wrong key).
      * @throws GeneralSecurityException if something goes wrong.
      */
-    String decryptText(final String textToDecrypt, final String privateKeyToDecryptWith)
+    String decryptText(final String textToDecrypt, final PrivateKey toDecryptWith)
         throws GeneralSecurityException;
 }
