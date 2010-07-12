@@ -105,7 +105,7 @@ public class XWikiKeyPair
      */
     public PublicKey getPublicKey()
     {
-        return certificate.getCertificate().getPublicKey();
+        return certificate.getPublicKey();
     }
 
     /**

@@ -124,7 +124,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         String signFingerprint = null;
         if (this.localRootFingerprint != null) {
             XWikiCertificate signCert = getLocalRootCertificate();
-            issuer = signCert.getCertificate().getSubjectX500Principal();
+            issuer = signCert.getSubjectX500Principal();
             signKey = getLocalRootKeyPair().getPrivateKey();
             signFingerprint = signCert.getFingerprint();
         }

@@ -25,7 +25,6 @@ import java.security.Security;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -82,7 +81,7 @@ public class PKCS7Signature implements XWikiSignature, Initializable
      */
     public byte[] sign(byte[] data, XWikiKeyPair keyPair) throws GeneralSecurityException
     {
-        X509Certificate certificate = keyPair.getCertificate().getCertificate();
+        XWikiCertificate certificate = keyPair.getCertificate();
         PrivateKey key = keyPair.getPrivateKey();
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
@@ -121,10 +120,10 @@ public class PKCS7Signature implements XWikiSignature, Initializable
                 SignerInformation signer = (SignerInformation) it.next();
                 Collection< ? extends Certificate> certs = certStore.getCertificates(signer.getSID());
                 for (Iterator<? extends Certificate> cit = certs.iterator(); cit.hasNext();) {
-                    if (!cit.next().equals(certificate.getCertificate())) {
+                    if (!XWikiCertificate.calculateFingerprint(cit.next()).equals(certificate.getFingerprint())) {
                         throw new GeneralSecurityException("Unknown signer certificate.");
                     }
-                    result &= signer.verify(certificate.getCertificate().getPublicKey(), PROVIDER);
+                    result &= signer.verify(certificate.getPublicKey(), PROVIDER);
                 }
             }
             return result;

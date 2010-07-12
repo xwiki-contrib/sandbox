@@ -32,6 +32,7 @@ import java.security.cert.X509Certificate;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.xwiki.crypto.KeyManager;
+import org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper;
 
 
 /**
@@ -40,16 +41,13 @@ import org.xwiki.crypto.KeyManager;
  * @version $Id$
  * @since 2.5
  */
-public class XWikiCertificate
+public class XWikiCertificate extends AbstractX509CertificateWrapper
 {
     /** Supported certificate type. */
     private static final String CERT_TYPE = "X509";
 
     /** Digest algorithm used to generate the fingerprint. */
     private static final String FINGERPRINT_ALGORITHM = "SHA1";
-
-    /** The actual certificate. */
-    private final X509Certificate certificate;
 
     /** Certificate fingerprint. */
     private final String fingerprint;
@@ -69,7 +67,7 @@ public class XWikiCertificate
      */
     public XWikiCertificate(X509Certificate certificate, String issuerFp, KeyManager keyManager)
     {
-        this.certificate = certificate;
+        super(certificate);
         this.keyManager = keyManager;
         this.fingerprint = XWikiCertificate.calculateFingerprint(certificate);
         if (issuerFp == null) {
@@ -119,21 +117,24 @@ public class XWikiCertificate
 
     /**
      * {@inheritDoc}
-     * @see java.lang.Object#hashCode()
+     * @see org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper#hashCode()
      */
     @Override
     public int hashCode()
     {
-        return getCertificate().hashCode();
+        return this.fingerprint.hashCode();
     }
 
     /**
      * {@inheritDoc}
-     * @see java.lang.Object#equals(java.lang.Object)
+     * @see org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object obj)
     {
+        if (this == obj) {
+            return true;
+        }
         if (obj instanceof XWikiCertificate) {
             XWikiCertificate cert = (XWikiCertificate) obj;
             return getFingerprint().equals(cert.getFingerprint());
@@ -143,39 +144,30 @@ public class XWikiCertificate
 
     /**
      * {@inheritDoc}
-     * @see java.lang.Object#toString()
+     * @see java.security.cert.Certificate#toString()
      */
     @Override
     public String toString()
     {
         final String format = "%20s : %s\n";
         StringBuilder builder = new StringBuilder();
-        X509Certificate c = getCertificate();
         builder.append("XWikiCertificate\n");
         builder.append("---------------------------------------------------------------\n");
         builder.append(String.format(format, "Fingerprint", getFingerprint()));
         builder.append(String.format(format, "SubjectDN", getAuthorName()));
         builder.append(String.format(format, "IssuerDN", getIssuerName()));
         builder.append(String.format(format, "Issuer Fingerprint", getIssuerFingerprint()));
-        builder.append(String.format(format, "SerialNumber", c.getSerialNumber().toString(16)));
-        builder.append(String.format(format, "Start Date", c.getNotBefore()));
-        builder.append(String.format(format, "Final Date", c.getNotAfter()));
-        builder.append(String.format(format, "Public Key Algorithm", c.getPublicKey().getAlgorithm()));
-        builder.append(String.format(format, "Signature Algorithm", c.getSigAlgName()));
+        builder.append(String.format(format, "SerialNumber", getSerialNumber().toString(16)));
+        builder.append(String.format(format, "Start Date", getNotBefore()));
+        builder.append(String.format(format, "Final Date", getNotAfter()));
+        builder.append(String.format(format, "Public Key Algorithm", getPublicKey().getAlgorithm()));
+        builder.append(String.format(format, "Signature Algorithm", getSigAlgName()));
         try {
             builder.append(export());
         } catch (CertificateEncodingException exception) {
             // ignore
         }
         return builder.toString();
-    }
-
-    /**
-     * @return the certificate
-     */
-    public X509Certificate getCertificate()
-    {
-        return this.certificate;
     }
 
     /**
@@ -196,7 +188,7 @@ public class XWikiCertificate
     {
         StringBuilder builder = new StringBuilder();
         builder.append("-----BEGIN CERTIFICATE-----\n");
-        builder.append(Base64.encodeBase64String(getCertificate().getEncoded()));
+        builder.append(Base64.encodeBase64String(this.certificate.getEncoded()));
         builder.append("-----END CERTIFICATE-----\n");
         return builder.toString();
     }
@@ -209,7 +201,7 @@ public class XWikiCertificate
      */
     public String getIssuerName()
     {
-        return getCertificate().getIssuerX500Principal().getName();
+        return getIssuerX500Principal().getName();
     }
 
     /**
@@ -228,7 +220,7 @@ public class XWikiCertificate
      */
     public String getAuthorName()
     {
-        return getCertificate().getSubjectX500Principal().getName();
+        return getSubjectX500Principal().getName();
     }
 
     /**
@@ -240,12 +232,12 @@ public class XWikiCertificate
     public void verify() throws GeneralSecurityException
     {
         // check validity
-        getCertificate().checkValidity();
+        checkValidity();
 
         // verify this certificate. Note that the key manager will throw an error if the parent is not trusted
         XWikiCertificate parentCert = keyManager.getCertificate(getIssuerFingerprint());
-        PublicKey key = parentCert.getCertificate().getPublicKey();
-        this.getCertificate().verify(key);
+        PublicKey key = parentCert.getPublicKey();
+        verify(key);
 
         // verify the parent
         if (!equals(parentCert)) {

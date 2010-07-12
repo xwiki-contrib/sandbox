@@ -31,6 +31,7 @@ import org.xwiki.crypto.data.XWikiKeyPair;
 /**
  * Key management component. Allows to create and store key pairs (certificates and private keys).
  * TODO throw something other than GeneralSecurityException
+ * FIXME move org.xwiki.crypto into a separate project
  * 
  * @version $Id$
  * @since 2.5
