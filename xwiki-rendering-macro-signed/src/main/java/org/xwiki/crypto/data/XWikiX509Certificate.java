@@ -23,7 +23,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
-import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
@@ -31,12 +30,11 @@ import java.security.cert.X509Certificate;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.xwiki.crypto.KeyManager;
 import org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper;
 
 
 /**
- * Wrapper class for a X509 certificate used for verification of signed scripts. 
+ * X509 certificate wrapper with several additional helper methods, aimed to be more scripting-friendly.
  * 
  * @version $Id$
  * @since 2.5
@@ -55,20 +53,15 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     /** Certificate fingrprint of the issuer. */
     private final String issuerFingerprint;
 
-    /** Key manager where this certificate is stored. */
-    private final KeyManager keyManager;
-
     /**
      * Create new {@link XWikiX509Certificate}.
      * 
      * @param certificate the actual certificate to use
      * @param issuerFp fingerprint of the issuer certificate, null if self-signed
-     * @param keyManager the key manager where this certificate and its issuer are stored
      */
-    public XWikiX509Certificate(X509Certificate certificate, String issuerFp, KeyManager keyManager)
+    public XWikiX509Certificate(X509Certificate certificate, String issuerFp)
     {
         super(certificate);
-        this.keyManager = keyManager;
         this.fingerprint = XWikiX509Certificate.calculateFingerprint(certificate);
         if (issuerFp == null) {
             this.issuerFingerprint = this.fingerprint;
@@ -221,28 +214,6 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     public String getAuthorName()
     {
         return getSubjectX500Principal().getName();
-    }
-
-    /**
-     * Check validity and verify this certificate. Recursively validates parent certificates by their fingerprints.
-     * Throws an exception if the verification fails or on errors.
-     * 
-     * @throws GeneralSecurityException on verification failure or errors
-     */
-    public void verify() throws GeneralSecurityException
-    {
-        // check validity
-        checkValidity();
-
-        // verify this certificate. Note that the key manager will throw an error if the parent is not trusted
-        XWikiX509Certificate parentCert = keyManager.getCertificate(getIssuerFingerprint());
-        PublicKey key = parentCert.getPublicKey();
-        verify(key);
-
-        // verify the parent
-        if (!equals(parentCert)) {
-            parentCert.verify();
-        }
     }
 }
 

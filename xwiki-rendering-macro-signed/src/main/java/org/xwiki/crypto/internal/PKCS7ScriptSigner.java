@@ -20,6 +20,7 @@
 package org.xwiki.crypto.internal;
 
 import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -121,7 +122,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
             }
 
             // verify the certificate
-            certificate.verify();
+            verify(certificate);
 
             // FIXME check XWiki and document constraints
             // XWIKIVERSION("XWikiVersion"),
@@ -136,6 +137,29 @@ public class PKCS7ScriptSigner implements ScriptSigner
             throw exception;
         } catch (Exception exception) {
             throw new GeneralSecurityException("Failed to verify a signed script.", exception);
+        }
+    }
+
+    /**
+     * Check validity and verify the given certificate. Recursively validates parent certificates by their
+     * fingerprints. Throws an exception if the verification fails or on errors.
+     * 
+     * @param certificate the certificate to verify
+     * @throws GeneralSecurityException on verification failure or errors
+     */
+    private void verify(XWikiX509Certificate certificate) throws GeneralSecurityException
+    {
+        // check validity
+        certificate.checkValidity();
+
+        // verify this certificate. Note that the key manager will throw an error if the parent is not trusted
+        XWikiX509Certificate parentCert = keyManager.getCertificate(certificate.getIssuerFingerprint());
+        PublicKey key = parentCert.getPublicKey();
+        certificate.verify(key);
+
+        // verify the parent
+        if (!certificate.equals(parentCert)) {
+            verify(parentCert);
         }
     }
 

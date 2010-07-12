@@ -105,7 +105,8 @@ public class PKCS7Signature implements XWikiSignature, Initializable
      * {@inheritDoc}
      * @see org.xwiki.crypto.XWikiSignature#verify(byte[], byte[], org.xwiki.crypto.data.XWikiX509Certificate)
      */
-    public boolean verify(byte[] data, byte[] signature, XWikiX509Certificate certificate) throws GeneralSecurityException
+    public boolean verify(byte[] data, byte[] signature, XWikiX509Certificate certificate)
+        throws GeneralSecurityException
     {
         try {
             CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);

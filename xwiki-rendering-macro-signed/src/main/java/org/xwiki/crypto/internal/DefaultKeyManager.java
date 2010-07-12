@@ -146,7 +146,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         certGen.setPublicKey(kp.getPublic());
         certGen.setSignatureAlgorithm(SIGN_ALGORITHM);
 
-        XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint, this);
+        XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint);
         String fingerprint = cert.getFingerprint();
         XWikiX509KeyPair keys = new XWikiX509KeyPair(kp.getPrivate(), cert);
         this.certMap.put(fingerprint, cert);
@@ -209,7 +209,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      */
     public XWikiX509Certificate parseCertificate(String encoded) throws GeneralSecurityException
     {
-        return new XWikiX509Certificate(XWikiX509Certificate.x509FromString(encoded), null, this);
+        return new XWikiX509Certificate(XWikiX509Certificate.x509FromString(encoded), null);
     }
 
     /**
