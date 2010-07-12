@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.signedscripts.internal;
+package org.xwiki.crypto.internal;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -42,8 +42,8 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.KeyManager;
-import org.xwiki.crypto.data.XWikiCertificate;
-import org.xwiki.crypto.data.XWikiKeyPair;
+import org.xwiki.crypto.data.XWikiX509Certificate;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 
 /**
@@ -72,13 +72,13 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     private String localRootFingerprint;
 
     /** Global root certificate. */
-    private XWikiCertificate globalRootCertificate;
+    private XWikiX509Certificate globalRootCertificate;
 
     /** FIXME. */
-    private Map<String, XWikiCertificate> certMap = new HashMap<String, XWikiCertificate>(); 
+    private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>(); 
 
     /** FIXME. */
-    private Map<String, XWikiKeyPair> keysMap = new HashMap<String, XWikiKeyPair>();
+    private Map<String, XWikiX509KeyPair> keysMap = new HashMap<String, XWikiX509KeyPair>();
 
     /**
      * {@inheritDoc}
@@ -123,8 +123,8 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         PrivateKey signKey = kp.getPrivate();
         String signFingerprint = null;
         if (this.localRootFingerprint != null) {
-            XWikiCertificate signCert = getLocalRootCertificate();
-            issuer = signCert.getCertificate().getSubjectX500Principal();
+            XWikiX509Certificate signCert = getLocalRootCertificate();
+            issuer = signCert.getSubjectX500Principal();
             signKey = getLocalRootKeyPair().getPrivateKey();
             signFingerprint = signCert.getFingerprint();
         }
@@ -146,9 +146,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         certGen.setPublicKey(kp.getPublic());
         certGen.setSignatureAlgorithm(SIGN_ALGORITHM);
 
-        XWikiCertificate cert = new XWikiCertificate(certGen.generate(signKey), signFingerprint, this);
+        XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint);
         String fingerprint = cert.getFingerprint();
-        XWikiKeyPair keys = new XWikiKeyPair(kp.getPrivate(), cert);
+        XWikiX509KeyPair keys = new XWikiX509KeyPair(kp.getPrivate(), cert);
         this.certMap.put(fingerprint, cert);
         this.keysMap.put(fingerprint, keys);
         return fingerprint;
@@ -158,9 +158,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getCertificate(java.lang.String)
      */
-    public XWikiCertificate getCertificate(String fingerprint) throws GeneralSecurityException
+    public XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
     {
-        XWikiCertificate cert = this.certMap.get(fingerprint);
+        XWikiX509Certificate cert = this.certMap.get(fingerprint);
         if (cert == null) {
             throw new GeneralSecurityException("Certificate with fingerprint \"" + fingerprint + "\" not found");
         }
@@ -171,9 +171,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getKeyPair(java.lang.String)
      */
-    public XWikiKeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
+    public XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
     {
-        XWikiKeyPair kp = this.keysMap.get(fingerprint);
+        XWikiX509KeyPair kp = this.keysMap.get(fingerprint);
         if (kp == null) {
             throw new GeneralSecurityException("Key pair with fingerprint \"" + fingerprint + "\" was not found");
         }
@@ -182,9 +182,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.KeyManager#registerCertificate(org.xwiki.crypto.data.XWikiCertificate)
+     * @see org.xwiki.crypto.KeyManager#registerCertificate(org.xwiki.crypto.data.XWikiX509Certificate)
      */
-    public void registerCertificate(XWikiCertificate certificate) throws GeneralSecurityException
+    public void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException
     {
         this.certMap.put(certificate.getFingerprint(), certificate);
     }
@@ -207,16 +207,16 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#parseCertificate(java.lang.String)
      */
-    public XWikiCertificate parseCertificate(String encoded) throws GeneralSecurityException
+    public XWikiX509Certificate parseCertificate(String encoded) throws GeneralSecurityException
     {
-        return new XWikiCertificate(XWikiCertificate.x509FromString(encoded), null, this);
+        return new XWikiX509Certificate(XWikiX509Certificate.x509FromString(encoded), null);
     }
 
     /**
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getLocalRootCertificate()
      */
-    public XWikiCertificate getLocalRootCertificate()
+    public XWikiX509Certificate getLocalRootCertificate()
     {
         return getLocalRootKeyPair().getCertificate();
     }
@@ -225,7 +225,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getGlobalRootCertificate()
      */
-    public XWikiCertificate getGlobalRootCertificate()
+    public XWikiX509Certificate getGlobalRootCertificate()
     {
         return this.globalRootCertificate;
     }
@@ -257,7 +257,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * 
      * @return local root key pair object
      */
-    private XWikiKeyPair getLocalRootKeyPair()
+    private XWikiX509KeyPair getLocalRootKeyPair()
     {
         try {
             return getKeyPair(this.localRootFingerprint);
