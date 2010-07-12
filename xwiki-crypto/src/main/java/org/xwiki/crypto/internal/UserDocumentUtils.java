@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.internal.scripting;
+package org.xwiki.crypto.internal;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -53,11 +53,11 @@ public class UserDocumentUtils
     DocumentAccessBridge bridge;
 
     /** Resolver which can make a DocumentReference out of a String. */
-    @Requirement(roll = String.class)
+    @Requirement(role = String.class)
     DocumentReferenceResolver<String> resolver;
 
     /** Serializer to turn a document reference into a String which can be put in a certificate. */
-    @Requirement(roll = String.class)
+    @Requirement(role = String.class)
     EntityReferenceSerializer<String> serializer;
 
     /** @return The fully qualified name of the current user's document eg: xwiki:XWiki.JohnSmith. */
@@ -77,7 +77,7 @@ public class UserDocumentUtils
     public String getUserDocURL(String userDocName)
     {
         DocumentReference dr = this.resolver.resolve(userDocName);
-        return this.bridge.getDocumentURL(dr, view, "", "");
+        return this.bridge.getDocumentURL(dr, "view", "", "");
     }
 
     /**
@@ -121,7 +121,7 @@ public class UserDocumentUtils
          *
          * @param message the message to give in the Exception
          */
-        public UnknownException(String message)
+        public InfiniteLoopException(String message)
         {
             super(message);
         }

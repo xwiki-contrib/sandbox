@@ -20,7 +20,9 @@
 package org.xwiki.crypto.internal.scripting;
 
 //import java.security.GeneralSecurityException;
-import java.security.X509Certificate;
+import java.security.InvalidParameterException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
 
 import org.bouncycastle.util.encoders.Base64;
 
@@ -67,12 +69,12 @@ public class ConversionUtils
      */
     public X509Certificate decodeX509Certificate(String stringContainingPEMFormattedCertificate)
     {
-        int beginningIndex = pemFormattedString.indexOf(this.x509BeginCertificate);
+        int beginningIndex = stringContainingPEMFormattedCertificate.indexOf(this.x509BeginCertificate);
         if (beginningIndex < 0) {
             throw new InvalidParameterException("No certificate found in String\n"
                                                 + "expecting: " + this.x509BeginCertificate);
         }
-        int endIndex = pemFormattedString.indexOf(this.x509EndCertificate, beginningIndex);
+        int endIndex = stringContainingPEMFormattedCertificate.indexOf(this.x509EndCertificate, beginningIndex);
         if (beginningIndex < 0) {
             throw new InvalidParameterException("No end of certificate found in String\n"
                                                 + "expecting: " + this.x509EndCertificate);
@@ -113,7 +115,7 @@ public class ConversionUtils
             index += this.lineLength;
         }
         out.append(new String(encodedBytes, index, encodedBytes.length - index, base64EncodingCharacterSet));
-        return out.toString()
+        return out.toString();
     }
 
 
@@ -151,7 +153,7 @@ public class ConversionUtils
               this.pkcs1BeginRSAPrivateKey
             + this.newline
             + this.getBase64Encoded(key.getEncoded())
-            + this.newLine
+            + this.newline
             + this.pkcs1EndRSAPrivateKey;
     }
 }

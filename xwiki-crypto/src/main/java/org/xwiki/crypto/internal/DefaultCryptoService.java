@@ -17,17 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.internal.scripting;
+package org.xwiki.crypto.internal;
 
 import java.security.GeneralSecurityException;
+import java.security.InvalidParameterException;
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.ScriptSigner;
 import org.xwiki.crypto.data.SignedScript;
+import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.script.service.ScriptService;
 
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.x509.X509Store;
 
 /**
  * Service allowing a user to sign text, determine the validity and signer of already signed text, and create keys.
@@ -50,13 +61,13 @@ public class DefaultCryptoService implements CryptoService
      *
      * @see org.xwiki.crypto.CryptoService#certsFromSpkac(String, int)
      */
-    public String[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
+    public XWikiX509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
         throws GeneralSecurityException
     {
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(Base64.decode(spkac));
+        NetscapeCertRequest certRequest = new NetscapeCertRequest(Base64.decode(spkacSerialization));
 
         // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();
@@ -81,7 +92,7 @@ public class DefaultCryptoService implements CryptoService
      */
     public String[] certsFromPublicKey(final String key, final int daysOfValidity)
     {
-        if (spkacSerialization == null) {
+        if (key == null) {
             throw new InvalidParameterException("Public key parameter is null");
         }
 

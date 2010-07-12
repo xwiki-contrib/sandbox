@@ -20,6 +20,8 @@
 package org.xwiki.crypto.internal.scripting;
 
 import java.security.GeneralSecurityException;
+import java.security.InvalidParameterException;
+import java.security.cert.X509Certificate;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -27,6 +29,7 @@ import org.xwiki.crypto.ScriptSigner;
 import org.xwiki.crypto.data.SignedScript;
 import org.xwiki.script.service.ScriptService;
 
+import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 import org.bouncycastle.util.encoders.Base64;
 
 /**
@@ -65,7 +68,7 @@ public class CryptoScriptService implements ScriptService
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(Base64.decode(spkac));
+        NetscapeCertRequest certRequest = new NetscapeCertRequest(Base64.decode(spkacSerialization));
 
         // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();
