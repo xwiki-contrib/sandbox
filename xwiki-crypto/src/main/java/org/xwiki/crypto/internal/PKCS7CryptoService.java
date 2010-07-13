@@ -69,6 +69,9 @@ public class PKCS7CryptoService implements CryptoService, Initializable
     /** Type of the certificate store to use for PKCS7 encoding/decoding. */
     private static final String CERT_STORE_TYPE = "Collection";
 
+    /** Default string encoding charset used to convert strings to byte arrays. */
+    private static final String CHARSET = "utf-8";
+
     /** Base64 encoding/decoding tool. */
     @Requirement("base64")
     private Converter base64;
@@ -119,7 +122,7 @@ public class PKCS7CryptoService implements CryptoService, Initializable
         try {
             gen.addCertificatesAndCRLs(store);
             gen.addSigner(key, certificate, SHA1_OID);
-            byte[] data = textToSign.getBytes();
+            byte[] data = textToSign.getBytes(CHARSET);
             CMSSignedData cmsData = gen.generate(new CMSProcessableByteArray(data), false, PROVIDER);
 
             return base64.encode(cmsData.getEncoded());
@@ -137,7 +140,7 @@ public class PKCS7CryptoService implements CryptoService, Initializable
     public XWikiX509Certificate verifyText(String signedText, String base64Signature) throws GeneralSecurityException
     {
         try {
-            byte[] data = signedText.getBytes();
+            byte[] data = signedText.getBytes(CHARSET);
             byte[] signature = base64.decode(base64Signature);
             CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);
             CertStore certStore = cmsData.getCertificatesAndCRLs(CERT_STORE_TYPE, PROVIDER);

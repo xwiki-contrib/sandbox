@@ -53,6 +53,9 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     /** Marks the end of a certificate in PEM format. */
     private static final String CERT_END = "-----END CERTIFICATE-----";
 
+    /** Default string encoding charset used to convert strings to byte arrays. */
+    private static final String CHARSET = "utf-8";
+
     /** Certificate fingerprint. */
     private final String fingerprint;
 
@@ -110,7 +113,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
         }
         CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
         try {
-            Certificate cert = factory.generateCertificate(new ByteArrayInputStream(pemEncoded.getBytes("utf-8")));
+            Certificate cert = factory.generateCertificate(new ByteArrayInputStream(pemEncoded.getBytes(CHARSET)));
             if (!(cert instanceof X509Certificate)) {
                 throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
             }
