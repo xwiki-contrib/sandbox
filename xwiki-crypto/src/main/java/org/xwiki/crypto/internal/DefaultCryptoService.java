@@ -46,6 +46,7 @@ import org.bouncycastle.x509.X509Store;
  * @since 2.5
  */
 @Component
+@InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
 public class DefaultCryptoService implements CryptoService
 {
     /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
@@ -56,8 +57,8 @@ public class DefaultCryptoService implements CryptoService
     @Requirement("base64")
     private Converter base64;
 
-    /** Used for the actual key making, also holds any secrets. */
-    private final Keymaker theKeymaker = new Keymaker();
+    /** Handles the generation of keys. */
+    private final KeyService keyService = new KeyService();
 
     /**
      * {@inheritDoc}
@@ -67,25 +68,9 @@ public class DefaultCryptoService implements CryptoService
     public XWikiX509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
         throws GeneralSecurityException
     {
-        if (spkacSerialization == null) {
-            throw new InvalidParameterException("SPKAC parameter is null");
-        }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(base64.decode(spkacSerialization));
-
-        // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();
         String webID = userDocUtils.getUserDocURL(userName);
-
-        X509Certificate[] certs = this.theKeymaker.makeClientAndAuthorityCertificates(certRequest.getPublicKey(),
-                                                                                      daysOfValidity,
-                                                                                      true,
-                                                                                      webId,
-                                                                                      userName);
-        return new String[] {
-//XXX
-            base64.encode(certs[0].getEncoded()),
-            base64.encode(certs[1].getEncoded())
-        };
+        return this.keyService.certsFromSpkac(spkacSerialization, daysOfValidity, webID, userName);
     }
 
     /**
@@ -93,44 +78,38 @@ public class DefaultCryptoService implements CryptoService
      *
      * @see org.xwiki.crypto.CryptoService#certsFromPublicKey(PublicKey, int)
      */
-    public String[] certsFromPublicKey(final String key, final int daysOfValidity)
+    public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity)
     {
-        if (key == null) {
-            throw new InvalidParameterException("Public key parameter is null");
-        }
-
-        // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();
         String webID = userDocUtils.getUserDocURL(userName);
-
-        // In this case the non-repudiation bit is cleared because we assume the private key is stored on the server
-        // where it is vulnerable.
-        return this.theKeymaker.makeClientAndAuthorityCertificates(key, daysOfValidity, false, webId, userName);
+        return this.keyService.newCertandPrivateKey(daysOfValidity, webID, userName);
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.CryptoService#newKeyPair()
+     * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String[] newKeyPair()
+    public String signText(String textToSign, XWikiX509KeyPair toSignWith) throws GeneralSecurityException
     {
-        KeyPair pair = this.theKeymaker.newKeyPair();
-        return new String[] {
-            base64.encode(pair.getPrivate().getEncoded()),
-            base64.encode(pair.getPublic().getEncoded())
-        };
-    }
+        XWikiX509Certificate certificate = toSignWith.getCertificate();
+        PrivateKey key = toSignWith.getPrivateKey();
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.CryptoService#signText(String, String)
-     */
-    public String signText(final String textToSign, final String privateKeyToSignWith)
-        throws GeneralSecurityException
-    {
-        throw new GeneralSecurityException("Not implemented yet.");
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+        Collection<?> certs = Collections.singleton(certificate);
+        CertStore store = CertStore.getInstance(CERT_STORE_TYPE, new CollectionCertStoreParameters(certs));
+
+        try {
+            gen.addCertificatesAndCRLs(store);
+            gen.addSigner(key, certificate, SHA1_OID);
+            byte[] data = textToSign.getBytes();
+            CMSSignedData cmsData = gen.generate(new CMSProcessableByteArray(data), false, PROVIDER);
+
+            return base64.encode(cmsData.getEncoded());
+        } catch (GeneralSecurityException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new GeneralSecurityException(exception);
+        }
     }
 
     /**

@@ -53,6 +53,9 @@ public interface CryptoService
 
     /**
      * Creates an XWikiX509Certificate and matching private key.
+     * This certificate will be self signed since it is expected to be used only on the server.
+     * This certificate will also have it's non-repudiation bit cleared because it is expected to reside on the server
+     * where it is more vulnerable than a client side certificate.
      *
      * @param daysOfValidity number of days before the certificate should become invalid.
      * @return object containing certificate and private key.
@@ -65,11 +68,12 @@ public interface CryptoService
      * Text will be signed with the key belonging to the author of the code which calls this.
      *
      * @param textToSign the text which the user wishes to sign.
-     * @param toSignWith the key pair to sign the text with.
+     * @param toSignWith the certificate and matching private key to sign the text with.
      * @return a signature which can be used to validate the signed text.
      * @throws GeneralSecurityException if anything goes wrong during signing.
      */
-    String signText(final String textToSign, final XWikiX509KeyPair toSignWith) throws GeneralSecurityException;
+    String signText(final String textToSign, final XWikiX509KeyPair toSignWith)
+        throws GeneralSecurityException;
 
     /**
      * Verify a pkcs#7 signature and return the certificate of the user who signed it.
@@ -80,7 +84,8 @@ public interface CryptoService
      * @return the certificate used to sign the text or null if it's invalid.
      * @throws GeneralSecurityException if anything goes wrong.
      */
-    XWikiX509Certificate verifyText(final String signedText, final String base64Signature) throws GeneralSecurityException;
+    XWikiX509Certificate verifyText(final String signedText, final String base64Signature)
+        throws GeneralSecurityException;
 
     /**
      * Encrypt a piece of text in pkcs#7/CMS/SMIME format with a public key so that only the holder of the matching 
@@ -101,7 +106,7 @@ public interface CryptoService
      * Decrypt a piece of text encrypted with encryptText.
      *
      * @param base64Ciphertext Base64 encoded ciphertext to decrypt.
-     * @param toDecryptWith the key pair of the user who wants to decrypt the text.
+     * @param toDecryptWith the certificate and private key belonging to the user who wants to decrypt the text.
      * @return the decrypted text or null if the provided key is not sufficient to decrypt (wrong key).
      * @throws GeneralSecurityException if something goes wrong.
      */
