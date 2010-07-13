@@ -201,13 +201,13 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
      */
     public String export() throws CertificateEncodingException
     {
-        final String NL = "\n";
+        final String newline = "\n";
         StringBuilder builder = new StringBuilder();
         builder.append(CERT_BEGIN);
-        builder.append(NL);
+        builder.append(newline);
         builder.append(Convert.toChunkedBase64String(this.certificate.getEncoded()));
         builder.append(CERT_END);
-        builder.append(NL);
+        builder.append(newline);
         return builder.toString();
     }
 

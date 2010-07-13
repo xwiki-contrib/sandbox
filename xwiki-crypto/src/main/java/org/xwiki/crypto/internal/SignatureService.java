@@ -35,8 +35,6 @@ import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
 
