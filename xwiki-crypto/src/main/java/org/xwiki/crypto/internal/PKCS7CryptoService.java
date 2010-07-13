@@ -69,7 +69,7 @@ public class PKCS7CryptoService implements CryptoService, Initializable
     /** Type of the certificate store to use for PKCS7 encoding/decoding. */
     private static final String CERT_STORE_TYPE = "Collection";
 
-    /** Default string encoding charset used to convert strings to byte arrays. */
+    /** Default string encoding charset used to convert strings to byte arrays (UTF-8 is always available). */
     private static final String CHARSET = "utf-8";
 
     /** Base64 encoding/decoding tool. */

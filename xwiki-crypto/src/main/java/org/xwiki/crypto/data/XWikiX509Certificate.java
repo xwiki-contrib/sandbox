@@ -53,7 +53,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     /** Marks the end of a certificate in PEM format. */
     private static final String CERT_END = "-----END CERTIFICATE-----";
 
-    /** Default string encoding charset used to convert strings to byte arrays. */
+    /** Default string encoding charset used to convert strings to byte arrays (UTF-8 is always available). */
     private static final String CHARSET = "utf-8";
 
     /** Certificate fingerprint. */
