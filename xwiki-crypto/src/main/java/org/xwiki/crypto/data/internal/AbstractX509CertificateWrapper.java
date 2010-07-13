@@ -57,7 +57,12 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
      */
     public AbstractX509CertificateWrapper(X509Certificate certificate)
     {
-        this.certificate = certificate;
+        // If we are wrapping a wrapper, then unwrap and rewrap the internal cert.
+        if (certificate instanceof AbstractX509CertificateWrapper) {
+            this.certificate = ((AbstractX509CertificateWrapper) certificate).certificate;
+        } else {
+            this.certificate = certificate;
+        }
     }
 
     /**

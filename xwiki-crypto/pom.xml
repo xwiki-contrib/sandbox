@@ -37,20 +37,23 @@
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
   </properties>
   <dependencies>
+    <!-- Used by CryptoScriptService which provides a service to Velocity scripts -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-script</artifactId>
       <version>${pom.version}</version>
     </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    </dependency>
+    <!-- The core cryptography engine, used everywhere -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15</artifactId>
       <version>1.45</version>
     </dependency>
+    <!-- 
+      Used for generation and verification of PKCS#7 signatures.
+      PKCS#7 must be used because it's compatable with mozilla
+      crypto.signText() javascript function.
+    -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcmail-jdk15</artifactId>

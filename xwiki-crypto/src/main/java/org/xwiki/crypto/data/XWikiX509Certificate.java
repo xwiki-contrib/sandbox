@@ -35,6 +35,10 @@ import org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper;
 
 /**
  * X509 certificate wrapper with several additional helper methods, aimed to be more scripting-friendly.
+ *
+ * This class cannot be an interface because it extends AbstractX509CertificateWrapper which extends X509Certificate
+ * which is not an interface. Most bouncycastle code requires an X509Certificate so if we used an interface then
+ * it would just have to be casted every time somebody wanted to use it with non xwiki-crypto cryptographic apis.
  * 
  * @version $Id$
  * @since 2.5
@@ -61,6 +65,16 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
 
     /** Certificate fingrprint of the issuer. */
     private final String issuerFingerprint;
+
+    /**
+     * Create new {@link XWikiX509Certificate}.
+     * 
+     * @param certificate the actual certificate to use
+     */
+    public XWikiX509Certificate(X509Certificate certificate)
+    {
+        super(certificate, null);
+    }
 
     /**
      * Create new {@link XWikiX509Certificate}.

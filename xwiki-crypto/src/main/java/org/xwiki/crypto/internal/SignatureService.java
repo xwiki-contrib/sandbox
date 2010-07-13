@@ -21,7 +21,6 @@ package org.xwiki.crypto.internal;
 
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.security.Security;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CollectionCertStoreParameters;
@@ -37,14 +36,9 @@ import org.bouncycastle.cms.CMSSignedGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.InstantiationStrategy;
-import org.xwiki.component.annotation.Requirement;
-import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.component.phase.Initializable;
-import org.xwiki.component.phase.InitializationException;
+
 import org.xwiki.crypto.Converter;
-import org.xwiki.crypto.CryptoService;
+
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
 
@@ -56,9 +50,7 @@ import org.xwiki.crypto.data.XWikiX509KeyPair;
  * @version $Id$
  * @since 2.5
  */
-@Component("pkcs7crypto")
-@InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
-public class PKCS7CryptoService implements CryptoService, Initializable
+public class SignatureService
 {
     /** Unique SHA1 OID. TODO find a way to convert algorithm name to the corresponding OID */
     private static final String SHA1_OID = CMSSignedGenerator.DIGEST_SHA1;
@@ -68,43 +60,6 @@ public class PKCS7CryptoService implements CryptoService, Initializable
 
     /** Type of the certificate store to use for PKCS7 encoding/decoding. */
     private static final String CERT_STORE_TYPE = "Collection";
-
-    /** Default string encoding charset used to convert strings to byte arrays (UTF-8 is always available). */
-    private static final String CHARSET = "utf-8";
-
-    /** Base64 encoding/decoding tool. */
-    @Requirement("base64")
-    private Converter base64;
-
-    /**
-     * {@inheritDoc}
-     * @see org.xwiki.component.phase.Initializable#initialize()
-     */
-    public void initialize() throws InitializationException
-    {
-        Security.addProvider(new BouncyCastleProvider());
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#certsFromSpkac(java.lang.String, int)
-     */
-    public XWikiX509Certificate[] certsFromSpkac(String spkacSerialization, int daysOfValidity)
-        throws GeneralSecurityException
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
-     */
-    public XWikiX509KeyPair newCertAndPrivateKey(int daysOfValidity) throws GeneralSecurityException
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     /**
      * {@inheritDoc}
@@ -122,10 +77,10 @@ public class PKCS7CryptoService implements CryptoService, Initializable
         try {
             gen.addCertificatesAndCRLs(store);
             gen.addSigner(key, certificate, SHA1_OID);
-            byte[] data = textToSign.getBytes(CHARSET);
+            byte[] data = textToSign.getBytes();
             CMSSignedData cmsData = gen.generate(new CMSProcessableByteArray(data), false, PROVIDER);
 
-            return base64.encode(cmsData.getEncoded());
+            return Base64.encode(cmsData.getEncoded());
         } catch (GeneralSecurityException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -140,8 +95,8 @@ public class PKCS7CryptoService implements CryptoService, Initializable
     public XWikiX509Certificate verifyText(String signedText, String base64Signature) throws GeneralSecurityException
     {
         try {
-            byte[] data = signedText.getBytes(CHARSET);
-            byte[] signature = base64.decode(base64Signature);
+            byte[] data = signedText.getBytes();
+            byte[] signature = Base64.decode(base64Signature);
             CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);
             CertStore certStore = cmsData.getCertificatesAndCRLs(CERT_STORE_TYPE, PROVIDER);
             SignerInformationStore signers = cmsData.getSignerInfos();
@@ -177,27 +132,6 @@ public class PKCS7CryptoService implements CryptoService, Initializable
         } catch (Exception exception) {
             throw new GeneralSecurityException(exception);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
-     */
-    public String encryptText(String textToEncrypt, XWikiX509Certificate[] certificatesToEncryptFor)
-        throws GeneralSecurityException
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
-     */
-    public String decryptText(String textToDecrypt, XWikiX509KeyPair toDecryptWith) throws GeneralSecurityException
-    {
-        // TODO Auto-generated method stub
-        return null;
     }
 }
 

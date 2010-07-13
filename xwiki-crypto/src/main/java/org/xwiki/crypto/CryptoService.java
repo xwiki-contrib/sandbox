@@ -77,7 +77,6 @@ public interface CryptoService
 
     /**
      * Verify a pkcs#7 signature and return the certificate of the user who signed it.
-     * FIXME can we assume signedText that is in UTF-8?
      *
      * @param signedText the text which has been signed.
      * @param base64Signature the signature on the text in Base64 encoded DER format.

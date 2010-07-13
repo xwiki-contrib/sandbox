@@ -23,10 +23,12 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidParameterException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.security.Security;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.crypto.Converter;
+import org.xwiki.component.phase.Initializable;
+//import org.xwiki.crypto.Converter;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.script.service.ScriptService;
@@ -47,7 +49,7 @@ import org.bouncycastle.x509.X509Store;
  */
 @Component
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
-public class DefaultCryptoService implements CryptoService
+public class DefaultCryptoService implements CryptoService, Initializable
 {
     /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
     @Requirement
@@ -59,6 +61,18 @@ public class DefaultCryptoService implements CryptoService
 
     /** Handles the generation of keys. */
     private final KeyService keyService = new KeyService();
+
+    /** For signing and verifying signatures on text. */
+    private final SignatureService signatureService = new SignatureService();
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.component.phase.Initializable#initialize()
+     */
+    public void initialize()
+    {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     /**
      * {@inheritDoc}
@@ -89,59 +103,20 @@ public class DefaultCryptoService implements CryptoService
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String signText(String textToSign, XWikiX509KeyPair toSignWith) throws GeneralSecurityException
+    public String signText(final String textToSign, final XWikiX509KeyPair toSignWith) throws GeneralSecurityException
     {
-        XWikiX509Certificate certificate = toSignWith.getCertificate();
-        PrivateKey key = toSignWith.getPrivateKey();
-
-        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-        Collection<?> certs = Collections.singleton(certificate);
-        CertStore store = CertStore.getInstance(CERT_STORE_TYPE, new CollectionCertStoreParameters(certs));
-
-        try {
-            gen.addCertificatesAndCRLs(store);
-            gen.addSigner(key, certificate, SHA1_OID);
-            byte[] data = textToSign.getBytes();
-            CMSSignedData cmsData = gen.generate(new CMSProcessableByteArray(data), false, PROVIDER);
-
-            return base64.encode(cmsData.getEncoded());
-        } catch (GeneralSecurityException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new GeneralSecurityException(exception);
-        }
+        return this.signatureService.signText(textToSign, toSignWith);
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.crypto.CryptoService#verifyText(String)
+     * @see org.xwiki.crypto.CryptoService#verifyText(String, String)
      */
-    public XWikiX509Certificate verifyText(final String text, final String signature) throws GeneralSecurityException
+    public XWikiX509Certificate verifyText(final String signedText, final String base64Signature)
+        throws GeneralSecurityException
     {
-        try {
-            CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);
-            X509Store certStore = cmsData.getCertificates(CERT_STORE_TYPE, PROVIDER);
-            SignerInformationStore signers = cmsData.getSignerInfos();
-
-            if (signers.getSigners().size() == 0) {
-                throw new GeneralSecurityException("No signers found");
-            }
-
-            boolean result = true;
-            for (SignerInformation signer : signers.getSigners()) {
-                for (X509Certificate cert : certStore.getMatches(signer.getSID())) {
-                    // Get the user named in this certificate, then get their user page and make sure their page
-                    // this certificate added as an XObject.
-                    
-                }
-            }
-            return result;
-        } catch (GeneralSecurityException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new GeneralSecurityException(exception);
-        }
+        return this.signatureService.verifyText(signedText, base64Signature);
     }
 
     /**
