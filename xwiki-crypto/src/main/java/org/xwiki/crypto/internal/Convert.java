@@ -135,6 +135,22 @@ public final class Convert
     }
 
     /**
+     * Convert string to byte array using the same encoding as for base64 conversion.
+     * 
+     * @param string the string to convert
+     * @return byte array containing the characters from the string
+     */
+    public static byte[] stringToBytes(String string)
+    {
+        try {
+            return string.getBytes(CHARSET);
+        } catch (UnsupportedEncodingException exception) {
+            // cannot happen
+            throw new RuntimeException(exception);
+        }
+    }
+
+    /**
      * Private default constructor to prevent instantiation.
      */
     private Convert()
