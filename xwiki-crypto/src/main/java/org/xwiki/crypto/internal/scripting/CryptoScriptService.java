@@ -19,23 +19,22 @@
  */
 package org.xwiki.crypto.internal.scripting;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidParameterException;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
 import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.internal.Keymaker;
 import org.xwiki.crypto.internal.UserDocumentUtils;
 import org.xwiki.crypto.signedscripts.ScriptSigner;
 import org.xwiki.crypto.signedscripts.SignedScript;
 import org.xwiki.script.service.ScriptService;
-
-import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 
 /**
  * Script service allowing a user to sign text, determine the validity and signer of already signed text,
@@ -67,7 +66,7 @@ public class CryptoScriptService implements ScriptService
      * 1. A certificate from the given <a href="http://en.wikipedia.org/wiki/Spkac">SPKAC</a>
      * 2. A certificate authority certificate which will validate the first certificate in the array.
      *
-     * Safari, Firefox, Opera, return through the <keygen> element an SPKAC request
+     * Safari, Firefox, Opera, return through the &lt;keygen&gt; element an SPKAC request
      * (see the specification in html5)
      *
      * @param spkacSerialization a <a href="http://en.wikipedia.org/wiki/Spkac">SPKAC</a> Certificate Signing Request
@@ -81,7 +80,12 @@ public class CryptoScriptService implements ScriptService
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(Convert.fromBase64String(spkacSerialization));
+        NetscapeCertRequest certRequest;
+        try {
+            certRequest = new NetscapeCertRequest(Convert.fromBase64String(spkacSerialization));
+        } catch (IOException exception) {
+            throw new GeneralSecurityException(exception);
+        }
 
         // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();
