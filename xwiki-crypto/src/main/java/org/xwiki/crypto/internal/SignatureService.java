@@ -104,7 +104,7 @@ public class SignatureService
                 throw new GeneralSecurityException("No signers found");
             }
             if (numSigners > 1) {
-                throw new GeneralSecurityException("Too many signers: " + numSigners);
+                throw new GeneralSecurityException("Only one signature is supported, found " + numSigners);
             }
             XWikiX509Certificate result = null;
             for (Iterator<?> it = signers.getSigners().iterator(); it.hasNext();) {

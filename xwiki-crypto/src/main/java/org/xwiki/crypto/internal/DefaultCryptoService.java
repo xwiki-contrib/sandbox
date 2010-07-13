@@ -25,8 +25,8 @@ import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.crypto.CryptoService;
@@ -35,7 +35,6 @@ import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 /**
  * Service allowing a user to sign text, determine the validity and signer of already signed text, and create keys.
- * FIXME merge with {@link PKCS7CryptoService}
  * 
  * @version $Id$
  * @since 2.5

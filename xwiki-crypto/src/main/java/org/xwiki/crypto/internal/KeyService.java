@@ -27,6 +27,7 @@ import java.security.cert.X509Certificate;
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
+import org.xwiki.crypto.data.internal.DefaultXWikiX509KeyPair;
 
 /**
  * Service allowing a user to create keys and X509 certificates.
@@ -56,7 +57,7 @@ public class KeyService
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(Convert.fromBase64String(spkacSerialization));
+        NetscapeCertRequest certRequest = new NetscapeCertRequest(Convert.stringToBytes(spkacSerialization));
 
         // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();
@@ -88,13 +89,13 @@ public class KeyService
 
         // In this case the non-repudiation bit is cleared because the private key is made on the server 
         // which is less secure.
-        // Also this implementation will provide a self signed key.
         X509Certificate certificate = this.keymaker.makeClientCertificate(pair.getPublic(),
                                                                         pair,
                                                                         daysOfValidity,
                                                                         false,
                                                                         webID,
                                                                         userName);
-        return new XWikiX509KeyPair(pair.getPrivate(), new XWikiX509Certificate(certificate));
+
+        return new DefaultXWikiX509KeyPair(pair.getPrivate(), new XWikiX509Certificate(certificate));
     }
 }

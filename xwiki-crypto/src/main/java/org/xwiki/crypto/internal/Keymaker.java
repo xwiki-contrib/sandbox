@@ -20,7 +20,6 @@
 package org.xwiki.crypto.internal;
 
 import java.util.Date;
-//import java.util.Vector;
 import java.math.BigInteger;
 
 import java.security.KeyPair;
@@ -32,10 +31,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 
-//import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.x509.X509Extensions;
