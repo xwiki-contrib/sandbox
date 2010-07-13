@@ -19,6 +19,10 @@
  */
 package org.xwiki.crypto.data;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
+
 /**
  * Wrapper for storing a {@link PrivateKey} and the corresponding {@link XWikiX509Certificate}.
  * 
@@ -30,22 +34,22 @@ public interface XWikiX509KeyPair
     /**
      * @return the certificate
      */
-    public XWikiX509Certificate getCertificate();
+    XWikiX509Certificate getCertificate();
 
     /**
      * @return the public key
      */
-    public PublicKey getPublicKey();
+    PublicKey getPublicKey();
 
     /**
      * @return the private key
      */
-    public PrivateKey getPrivateKey();
+    PrivateKey getPrivateKey();
 
     /**
      * @return certificate fingerprint
      */
-    public String getFingerprint();
+    String getFingerprint();
 
     /**
      * Get the internal X509 certificate and RSA private key in a standard PEM format.
@@ -53,11 +57,11 @@ public interface XWikiX509KeyPair
      * @return the certificate and private key in PEM format
      * @throws CertificateEncodingException on errors (very unlikely)
      */
-    public String export() throws CertificateEncodingException;
+    String export() throws CertificateEncodingException;
 
     /**
      * @return the private key in PKCS#8 PEM format
      */
-    private String exportPrivateKey();
+    String exportPrivateKey();
 }
 

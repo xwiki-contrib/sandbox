@@ -25,6 +25,7 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 
 import org.xwiki.crypto.data.XWikiX509Certificate;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 import org.xwiki.crypto.internal.Convert;
 
 
@@ -157,7 +158,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      * {@inheritDoc}
      * @see org.xwiki.crypto.data.XWikiX509KeyPair#exportPrivateKey()
      */
-    private String exportPrivateKey()
+    public String exportPrivateKey()
     {
         StringBuilder builder = new StringBuilder();
         builder.append("-----BEGIN PRIVATE KEY-----\n");
