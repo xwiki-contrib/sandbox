@@ -20,7 +20,7 @@
 package org.xwiki.crypto.data;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.cert.Certificate;
@@ -28,9 +28,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.util.encoders.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper;
+import org.xwiki.crypto.internal.Convert;
 
 
 /**
@@ -56,14 +55,6 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
 
     /** Marks the end of a certificate in PEM format. */
     private static final String CERT_END = "-----END CERTIFICATE-----";
-
-    /**
-     * Character set for converting strings of Base-64 text to byte arrays.
-     * since base 64 uses none of the characters above code point 127 and almost all character sets
-     * treat the lower half the same, the choice need only be something which will decode fast and
-     * is in all java implementations see: {@link java.nio.charset.Charset}
-     */
-    private final String base64Charset = "US-ASCII";
 
     /** Certificate fingerprint. */
     private final String fingerprint;
@@ -108,7 +99,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     {
         try {
             MessageDigest hash = MessageDigest.getInstance(FINGERPRINT_ALGORITHM);
-            return Hex.encodeHexString(hash.digest(certificate.getEncoded()));
+            return new BigInteger(hash.digest(certificate.getEncoded())).toString(16);
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
@@ -131,16 +122,12 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
             throw new GeneralSecurityException("No end of the certificate found");
         }
         CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
-        try {
-            Certificate cert = 
-                factory.generateCertificate(new ByteArrayInputStream(pemEncoded.getBytes(base64Charset)));
-            if (!(cert instanceof X509Certificate)) {
-                throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
-            }
-            return (X509Certificate) cert;
-        } catch (IOException exception) {
-            throw new RuntimeException("Can't happen: " + exception.getMessage(), exception);
+        Certificate cert = 
+            factory.generateCertificate(new ByteArrayInputStream(Convert.stringToBytes(pemEncoded)));
+        if (!(cert instanceof X509Certificate)) {
+            throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
         }
+        return (X509Certificate) cert;
     }
 
     /**
@@ -218,7 +205,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
         StringBuilder builder = new StringBuilder();
         builder.append(CERT_BEGIN);
         builder.append(NL);
-        builder.append(new String(Base64.encode(this.certificate.getEncoded()), this.base64Charset));
+        builder.append(Convert.toChunkedBase64String(this.certificate.getEncoded()));
         builder.append(CERT_END);
         builder.append(NL);
         return builder.toString();
