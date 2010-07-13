@@ -26,6 +26,8 @@ import java.security.cert.X509Certificate;
 
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 import org.bouncycastle.util.encoders.Base64;
+import org.xwiki.crypto.data.XWikiX509Certificate;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 /**
  * Service allowing a user to create keys and X509 certificates.
@@ -75,7 +77,7 @@ public class KeyService
      * @return a certificate and matching private key in an XWikiX509KeyPair object.
      * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
      */
-    public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity.
+    public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity,
                                                  final String webID,
                                                  final String userName)
     {
@@ -88,11 +90,12 @@ public class KeyService
         // In this case the non-repudiation bit is cleared because the private key is made on the server 
         // which is less secure.
         // Also this implementation will provide a self signed key.
-        return new XWikiX509KeyPair(pair.getPrivate(), makeClientCertificate(pair.getPublic(),
-                                                                             pair,
-                                                                             daysOfValidity,
-                                                                             false,
-                                                                             webID,
-                                                                             userName));
+        X509Certificate certificate = this.keymaker.makeClientCertificate(pair.getPublic(),
+                                                                        pair,
+                                                                        daysOfValidity,
+                                                                        false,
+                                                                        webID,
+                                                                        userName);
+        return new XWikiX509KeyPair(pair.getPrivate(), new XWikiX509Certificate(certificate));
     }
 }

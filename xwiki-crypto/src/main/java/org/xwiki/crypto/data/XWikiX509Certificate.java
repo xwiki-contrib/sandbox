@@ -73,7 +73,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
      */
     public XWikiX509Certificate(X509Certificate certificate)
     {
-        super(certificate, null);
+        this(certificate, null);
     }
 
     /**

@@ -20,25 +20,19 @@
 package org.xwiki.crypto.internal;
 
 import java.security.GeneralSecurityException;
-import java.security.InvalidParameterException;
-import java.security.KeyPair;
-import java.security.cert.X509Certificate;
+import java.security.PublicKey;
 import java.security.Security;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.phase.Initializable;
-//import org.xwiki.crypto.Converter;
+import org.xwiki.crypto.Converter;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.script.service.ScriptService;
-
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.jce.netscape.NetscapeCertRequest;
-import org.bouncycastle.x509.X509Store;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 /**
  * Service allowing a user to sign text, determine the validity and signer of already signed text, and create keys.
@@ -96,7 +90,7 @@ public class DefaultCryptoService implements CryptoService, Initializable
     {
         String userName = userDocUtils.getCurrentUser();
         String webID = userDocUtils.getUserDocURL(userName);
-        return this.keyService.newCertandPrivateKey(daysOfValidity, webID, userName);
+        return this.keyService.newCertAndPrivateKey(daysOfValidity, webID, userName);
     }
 
     /**
@@ -110,7 +104,6 @@ public class DefaultCryptoService implements CryptoService, Initializable
 
     /**
      * {@inheritDoc}
-     *
      * @see org.xwiki.crypto.CryptoService#verifyText(String, String)
      */
     public XWikiX509Certificate verifyText(final String signedText, final String base64Signature)
@@ -121,10 +114,9 @@ public class DefaultCryptoService implements CryptoService, Initializable
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.CryptoService#encryptText(String, String)
+     * @see org.xwiki.crypto.CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
      */
-    public String encryptText(final String textToEncrypt, final String publicKeyToEncryptFor)
+    public String encryptText(String plaintext, XWikiX509Certificate[] certificatesToEncryptFor)
         throws GeneralSecurityException
     {
         throw new GeneralSecurityException("Not implemented yet.");
@@ -132,11 +124,9 @@ public class DefaultCryptoService implements CryptoService, Initializable
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.CryptoService#decryptText(String, String)
+     * @see org.xwiki.crypto.CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String decryptText(final String textToDecrypt, final String privateKeyToDecryptWith)
-        throws GeneralSecurityException
+    public String decryptText(String base64Ciphertext, XWikiX509KeyPair toDecryptWith) throws GeneralSecurityException
     {
         throw new GeneralSecurityException("Not implemented yet.");
     }
