@@ -57,7 +57,13 @@ public class KeyService
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(Convert.stringToBytes(spkacSerialization));
+
+        NetscapeCertRequest certRequest = null;
+        try {
+            certRequest = new NetscapeCertRequest(Convert.stringToBytes(spkacSerialization));
+        } catch (Exception e) {
+            throw new GeneralSecurityException("Failed to parse certificate request", e);
+        }
 
         X509Certificate[] certs = this.keymaker.makeClientAndAuthorityCertificates(certRequest.getPublicKey(),
                                                                                    daysOfValidity,
@@ -80,6 +86,7 @@ public class KeyService
     public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity,
                                                  final String webID,
                                                  final String userName)
+        throws GeneralSecurityException
     {
         KeyPair pair = this.keymaker.newKeyPair();
 

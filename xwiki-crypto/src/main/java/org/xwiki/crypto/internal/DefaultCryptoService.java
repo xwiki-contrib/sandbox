@@ -81,6 +81,7 @@ public class DefaultCryptoService implements CryptoService, Initializable
      * @see org.xwiki.crypto.CryptoService#certsFromPublicKey(PublicKey, int)
      */
     public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity)
+        throws GeneralSecurityException
     {
         String userName = userDocUtils.getCurrentUser();
         String webID = userDocUtils.getUserDocURL(userName);
@@ -91,7 +92,8 @@ public class DefaultCryptoService implements CryptoService, Initializable
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String signText(final String textToSign, final XWikiX509KeyPair toSignWith) throws GeneralSecurityException
+    public String signText(final String textToSign, final XWikiX509KeyPair toSignWith)
+        throws GeneralSecurityException
     {
         return this.signatureService.signText(textToSign, toSignWith);
     }
@@ -120,7 +122,8 @@ public class DefaultCryptoService implements CryptoService, Initializable
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String decryptText(String base64Ciphertext, XWikiX509KeyPair toDecryptWith) throws GeneralSecurityException
+    public String decryptText(String base64Ciphertext, XWikiX509KeyPair toDecryptWith)
+        throws GeneralSecurityException
     {
         throw new GeneralSecurityException("Not implemented yet.");
     }
