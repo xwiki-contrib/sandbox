@@ -17,14 +17,15 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.data;
+package org.xwiki.crypto.data.internal;
 
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 
-import org.bouncycastle.util.encoders.Base64;
+import org.xwiki.crypto.data.XWikiX509Certificate;
+import org.xwiki.crypto.internal.Convert;
 
 
 /**
@@ -48,7 +49,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      * @param key the private key to use
      * @param certificate the certificate to use
      */
-    public XWikiX509KeyPair(PrivateKey key, XWikiX509Certificate certificate)
+    public DefaultXWikiX509KeyPair(PrivateKey key, XWikiX509Certificate certificate)
     {
         this.key = key;
         this.certificate = certificate;
@@ -85,8 +86,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof XWikiX509KeyPair) {
-            XWikiX509KeyPair kp = (XWikiX509KeyPair) obj;
+        if (obj instanceof DefaultXWikiX509KeyPair) {
+            DefaultXWikiX509KeyPair kp = (DefaultXWikiX509KeyPair) obj;
             return getFingerprint().equals(kp.getFingerprint()) && getPrivateKey().equals(kp.getPrivateKey());
         }
         return false;
@@ -160,7 +161,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     {
         StringBuilder builder = new StringBuilder();
         builder.append("-----BEGIN PRIVATE KEY-----\n");
-        builder.append(new String(Base64.encode(getPrivateKey().getEncoded()), this.base64Charset));
+        builder.append(Convert.toChunkedBase64String(getPrivateKey().getEncoded()));
         builder.append("-----END PRIVATE KEY-----\n");
         return builder.toString();
     }

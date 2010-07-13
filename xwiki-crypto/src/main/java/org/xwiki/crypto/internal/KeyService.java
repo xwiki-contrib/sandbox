@@ -25,7 +25,6 @@ import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
-import org.bouncycastle.util.encoders.Base64;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
 
@@ -57,7 +56,7 @@ public class KeyService
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(Base64.decode(spkacSerialization));
+        NetscapeCertRequest certRequest = new NetscapeCertRequest(Convert.fromBase64String(spkacSerialization));
 
         // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();

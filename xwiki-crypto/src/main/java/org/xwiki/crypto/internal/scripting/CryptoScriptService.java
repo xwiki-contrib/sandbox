@@ -28,6 +28,7 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
+import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.internal.Keymaker;
 import org.xwiki.crypto.internal.UserDocumentUtils;
 import org.xwiki.crypto.signedscripts.ScriptSigner;
@@ -35,7 +36,6 @@ import org.xwiki.crypto.signedscripts.SignedScript;
 import org.xwiki.script.service.ScriptService;
 
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
-import org.bouncycastle.util.encoders.Base64;
 
 /**
  * Script service allowing a user to sign text, determine the validity and signer of already signed text,
@@ -81,7 +81,7 @@ public class CryptoScriptService implements ScriptService
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
-        NetscapeCertRequest certRequest = new NetscapeCertRequest(Base64.decode(spkacSerialization));
+        NetscapeCertRequest certRequest = new NetscapeCertRequest(Convert.fromBase64String(spkacSerialization));
 
         // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
         String userName = userDocUtils.getCurrentUser();

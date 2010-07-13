@@ -37,8 +37,6 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import org.xwiki.crypto.Converter;
-
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
 
@@ -80,7 +78,7 @@ public class SignatureService
             byte[] data = textToSign.getBytes();
             CMSSignedData cmsData = gen.generate(new CMSProcessableByteArray(data), false, PROVIDER);
 
-            return Base64.encode(cmsData.getEncoded());
+            return Convert.toBase64String(cmsData.getEncoded());
         } catch (GeneralSecurityException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -96,7 +94,7 @@ public class SignatureService
     {
         try {
             byte[] data = signedText.getBytes();
-            byte[] signature = Base64.decode(base64Signature);
+            byte[] signature = Convert.fromBase64String(base64Signature);
             CMSSignedData cmsData = new CMSSignedData(new CMSProcessableByteArray(data), signature);
             CertStore certStore = cmsData.getCertificatesAndCRLs(CERT_STORE_TYPE, PROVIDER);
             SignerInformationStore signers = cmsData.getSignerInfos();

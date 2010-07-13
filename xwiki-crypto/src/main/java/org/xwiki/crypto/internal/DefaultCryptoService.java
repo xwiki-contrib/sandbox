@@ -29,7 +29,6 @@ import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.phase.Initializable;
-import org.xwiki.crypto.Converter;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
@@ -48,10 +47,6 @@ public class DefaultCryptoService implements CryptoService, Initializable
     /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
     @Requirement
     private UserDocumentUtils userDocUtils;
-
-    /** Base64 encoder. */
-    @Requirement("base64")
-    private Converter base64;
 
     /** Handles the generation of keys. */
     private final KeyService keyService = new KeyService();
