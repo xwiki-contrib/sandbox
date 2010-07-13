@@ -90,7 +90,7 @@ public class CryptoScriptService implements ScriptService
         return this.theKeymaker.makeClientAndAuthorityCertificates(certRequest.getPublicKey(),
                                                                    daysOfValidity,
                                                                    true,
-                                                                   webId,
+                                                                   webID,
                                                                    userName);
     }
 

@@ -59,15 +59,15 @@ public class KeyService
         }
         NetscapeCertRequest certRequest = new NetscapeCertRequest(Convert.stringToBytes(spkacSerialization));
 
-        // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
-        String userName = userDocUtils.getCurrentUser();
-        String webID = userDocUtils.getUserDocURL(userName);
-
-        return this.keymaker.makeClientAndAuthorityCertificates(certRequest.getPublicKey(),
-                                                                   daysOfValidity,
-                                                                   true,
-                                                                   webID,
-                                                                   userName);
+        X509Certificate[] certs = this.keymaker.makeClientAndAuthorityCertificates(certRequest.getPublicKey(),
+                                                                                   daysOfValidity,
+                                                                                   true,
+                                                                                   webID,
+                                                                                   userName);
+        return new XWikiX509Certificate[] {
+            new XWikiX509Certificate(certs[0]),
+            new XWikiX509Certificate(certs[1])
+        };
     }
 
     /**
@@ -81,20 +81,16 @@ public class KeyService
                                                  final String webID,
                                                  final String userName)
     {
-        // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
-        String userName = userDocUtils.getCurrentUser();
-        String webID = userDocUtils.getUserDocURL(userName);
-
         KeyPair pair = this.keymaker.newKeyPair();
 
         // In this case the non-repudiation bit is cleared because the private key is made on the server 
         // which is less secure.
         X509Certificate certificate = this.keymaker.makeClientCertificate(pair.getPublic(),
-                                                                        pair,
-                                                                        daysOfValidity,
-                                                                        false,
-                                                                        webID,
-                                                                        userName);
+                                                                          pair,
+                                                                          daysOfValidity,
+                                                                          false,
+                                                                          webID,
+                                                                          userName);
 
         return new DefaultXWikiX509KeyPair(pair.getPrivate(), new XWikiX509Certificate(certificate));
     }

@@ -40,6 +40,8 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
@@ -272,7 +274,7 @@ public class Keymaker
             // Adds the subject key identifier extension
             certGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
                                        false,
-                                       new SubjectKeyIdentifierStructure(forCert));
+                                       new SubjectKeyIdentifierStructure(keyPair.getPublic()));
 
             return this.generate(keyPair);
 
