@@ -59,7 +59,18 @@
       <artifactId>bcmail-jdk15</artifactId>
       <version>1.45</version>
     </dependency>
-
+    <!-- Used exclusively by UserDocumentUtils -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-model</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+    <!-- Used exclusively by UserDocumentUtils -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-bridge</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
     <!-- Testing dependencies -->
     <!--
     <dependency>

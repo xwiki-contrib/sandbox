@@ -46,7 +46,7 @@ public class UserDocumentUtils
     private final String certClassName = "XWiki.X509CertificateClass";
 
     /** The name of the property in the certificate XClass which represents the entire certificate in PEM format. */
-    private final String certFingerprintProperty = "fingerprint";
+    private final String certFingerprintPropertyName = "fingerprint";
 
     /** DocumentAccessBridge for getting the current user's document and URL. */
     @Requirement
@@ -93,7 +93,7 @@ public class UserDocumentUtils
                                                                   this.certClassName,
                                                                   0,
                                                                   this.certFingerprintPropertyName);
-        for (int counter = 0; certPem != null; counter++) {
+        for (int counter = 0; certFingerprint != null; counter++) {
             out.add(certFingerprint);
             certFingerprint = (String) this.bridge.getProperty(userName,
                                                                this.certClassName, 
