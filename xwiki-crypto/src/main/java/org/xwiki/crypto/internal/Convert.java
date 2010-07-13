@@ -21,21 +21,23 @@ package org.xwiki.crypto.internal;
 
 import java.io.UnsupportedEncodingException;
 
+import org.bouncycastle.util.encoders.Base64;
+
 
 /**
- * Utility class for Base64 encoding and decoding. Supports conversion of strings containing Base64 encoded
- * data. The conversion uses UTF-8 because it is always available and Base64 alphabet is a subset of UTF-8.
+ * Utility class for various string conversions, such as base64 encoding and decoding and conversion
+ * to byte array. Supports conversion of strings containing base64 encoded data. The conversion uses
+ * UTF-8 because it is always available and base64 alphabet is a subset of UTF-8.
  * 
  * @version $Id$
  * @since 2.5
  */
-public final class Base64
+public final class Convert
 {
-    /** Charset used for String <-> byte[] conversion. The conversion cannot fail, because UTF-8
-     *  is always available. */
+    /** Charset used for String <-> byte[] conversion. */
     private static final String CHARSET = "utf-8";
 
-    /** Default line length for {@link #encodeToChunkedString(byte[])}. */
+    /** Default line length for {@link #toChunkedBase64String(byte[])}. */
     private static final int DEFAULT_LINE_LENGTH = 64;
 
     /** New line separator. */
@@ -47,10 +49,10 @@ public final class Base64
      * @param data the data to encode
      * @return base64 encoded data
      */
-    public static String encodeToString(byte[] data)
+    public static String toBase64String(byte[] data)
     {
         try {
-            return new String(encode(data), CHARSET);
+            return new String(toBase64(data), CHARSET);
         } catch (UnsupportedEncodingException exception) {
             // cannot happen
             throw new RuntimeException(exception);
@@ -64,9 +66,9 @@ public final class Base64
      * @param data the data to encode
      * @return base64 encoded data
      */
-    public static String encodeToChunkedString(byte[] data)
+    public static String toChunkedBase64String(byte[] data)
     {
-        return encodeToChunkedString(data, DEFAULT_LINE_LENGTH);
+        return toChunkedBase64String(data, DEFAULT_LINE_LENGTH);
     }
 
     /**
@@ -77,10 +79,10 @@ public final class Base64
      * @param lineLength maximal line length
      * @return base64 encoded data
      */
-    public static String encodeToChunkedString(byte[] data, int lineLength)
+    public static String toChunkedBase64String(byte[] data, int lineLength)
     {
         StringBuilder result = new StringBuilder();
-        String encoded = encodeToString(data);
+        String encoded = toBase64String(data);
         int begin = 0;
         int end = lineLength;
         while (end < encoded.length()) {
@@ -100,9 +102,9 @@ public final class Base64
      * @param data the data to encode
      * @return base64 encoded data array
      */
-    public static byte[] encode(byte[] data)
+    public static byte[] toBase64(byte[] data)
     {
-        return org.bouncycastle.util.encoders.Base64.encode(data);
+        return Base64.encode(data);
     }
 
     /**
@@ -111,10 +113,10 @@ public final class Base64
      * @param base64Encoded base64 encoded data string
      * @return the decoded data array
      */
-    public static byte[] decodeFromString(String base64Encoded)
+    public static byte[] fromBase64String(String base64Encoded)
     {
         try {
-            return decode(base64Encoded.getBytes(CHARSET));
+            return fromBase64(base64Encoded.getBytes(CHARSET));
         } catch (UnsupportedEncodingException exception) {
             // cannot happen
             throw new RuntimeException(exception);
@@ -127,9 +129,17 @@ public final class Base64
      * @param base64Encoded base64 encoded data
      * @return the decoded data array
      */
-    public static byte[] decode(byte[] base64Encoded)
+    public static byte[] fromBase64(byte[] base64Encoded)
     {
-        return org.bouncycastle.util.encoders.Base64.decode(base64Encoded);
+        return Base64.decode(base64Encoded);
+    }
+
+    /**
+     * Private default constructor to prevent instantiation.
+     */
+    private Convert()
+    {
+        // this class is not supposed to be instantiated
     }
 }
 
