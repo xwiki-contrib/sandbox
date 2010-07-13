@@ -48,28 +48,46 @@ public interface ScriptSigner
     SignedScript sign(String code, String fingerprint) throws GeneralSecurityException;
 
     /**
-     * Construct the string that needs to be signed to construct a valid signature for a {@link SignedScript}.
-     * This data can be transfered to the client and signed using a private key stored in the browser.
+     * Construct the script object in the same way as {@link #sign(String, String)}, but not sign it.
+     * The resulting script contains all needed data to construct a valid signature. It can be retrieved
+     * using the method {@link SignedScript#getDataToSign()}, transfered to the client and signed using
+     * a private key stored in the browser.
+     * <p>
+     * The signing process must be completed by calling {@link #constructSignedScript(String, String)}.</p>
      * 
      * @param code code to sign
      * @param fingerprint certificate fingerprint identifying the certificate to use
-     * @return the data to sign represented in a string (not encoded)
+     * @return initialized script object, ready to be signed
      * @throws GeneralSecurityException on errors
      * @see #constructSignedScript(String, String)
      */
-    String getDataToSign(String code, String fingerprint) throws GeneralSecurityException;
+    SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException;
 
     /**
-     * Create a signed script object by combining the given code and signature. The signature must have been
-     * produced by {@link #getDataToSign(String, String)} called with the same code. 
+     * Create a signed script object by combining the prepred script object and the signature. The signature must
+     * have been produced by signing the result of {@link SignedScript#getDataToSign(String, String)} called
+     * on the script object created using {@link #prepareScriptForSigning(String, String)}.
+     * <p>
+     * The following sequence of operations:
+     * <pre>
+     * SignedScript preparedScript = signer.prepareScriptForSigning(code, fingerprint);
+     * String signature = signExternally(preparedScript.getDataToSign());
+     * SignedScript signedScript = signer.constructSignedScript(preparedScript, signature);
+     * </pre>
+     * (where signExternally() signs the data with the private key corresponding to the fingerprint) is equivalent to
+     * <pre>
+     * SignedScript signedScript = signer.sign(code, fingerprint);
+     * </pre>
+     * for private key stored on the server.
+     * </p> 
      * 
-     * @param code signed code
-     * @param base64Signature Base64 encoded signature of the data obtained by {@link #getDataToSign(String, String)}
+     * @param preparedScript initialized script object produced by {@link #prepareScriptForSigning(String, String)}
+     * @param base64Signature Base64 encoded signature of the data returned by {@link SignedScript#getDataToSign()}
      * @return signed script object
      * @throws GeneralSecurityException on errors
      * @see {@link #getDataToSign(String, String)}, {@link #sign(String, String)}
      */
-    SignedScript constructSignedScript(String code, String base64Signature) throws GeneralSecurityException;
+    SignedScript constructSignedScript(SignedScript preparedScript, String base64Signature) throws GeneralSecurityException;
 
     /**
      * Create a signed script by parsing and verifying a serialized signed script.
@@ -79,6 +97,6 @@ public interface ScriptSigner
      * @throws GeneralSecurityException if verification fails or on errors
      * @see SignedScript#serialize()
      */
-    SignedScript getVerifiedCode(String signedScript) throws GeneralSecurityException;
+    SignedScript getVerifiedScript(String signedScript) throws GeneralSecurityException;
 }
 

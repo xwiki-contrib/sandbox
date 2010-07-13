@@ -60,12 +60,11 @@ public class PKCS7ScriptSigner implements ScriptSigner
      */
     public SignedScript sign(String code, String fingerprint) throws GeneralSecurityException
     {
-        PKCS7SignedScript script = prepareScript(code, fingerprint);
+        SignedScript script = prepareScriptForSigning(code, fingerprint);
         XWikiX509KeyPair keyPair = this.keyManager.getKeyPair(script.get(SignedScriptKey.FINGERPRINT));
         try {
             String signature = pkcs7.signText(script.getDataToSign(), keyPair);
-            script.set(SignedScriptKey.SIGNATURE, signature);
-            return script;
+            return new PKCS7SignedScript(script, signature);
         } catch (GeneralSecurityException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -75,26 +74,9 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.signedscripts.ScriptSigner#getDataToSign(java.lang.String, java.lang.String)
+     * @see org.xwiki.crypto.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String, java.lang.String)
      */
-    public String getDataToSign(String code, String fingerprint) throws GeneralSecurityException
-    {
-        try {
-            return prepareScript(code, fingerprint).getDataToSign();
-        } catch (IOException exception) {
-            throw new GeneralSecurityException("Failed to collect data to sign", exception);
-        }
-    }
-
-    /**
-     * Create a signed script object ready to be signed.
-     * 
-     * @param code code to sign
-     * @param fingerprint certificate fingerprint identifying the certificate to use
-     * @return initialized signed script object
-     * @throws GeneralSecurityException on errors
-     */
-    private PKCS7SignedScript prepareScript(String code, String fingerprint) throws GeneralSecurityException
+    public SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException
     {
         PKCS7SignedScript script = new PKCS7SignedScript(code, fingerprint);
         XWikiX509Certificate certificate = this.keyManager.getCertificate(script.get(SignedScriptKey.FINGERPRINT));
@@ -116,19 +98,25 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.signedscripts.ScriptSigner#constructSignedScript(java.lang.String, java.lang.String)
+     * @see org.xwiki.crypto.signedscripts.ScriptSigner#constructSignedScript(SignedScript, String)
      */
-    public SignedScript constructSignedScript(String code, String base64Signature) throws GeneralSecurityException
+    public SignedScript constructSignedScript(SignedScript preparedScript, String base64Signature)
+        throws GeneralSecurityException
     {
-        // FIXME implement
-        throw new GeneralSecurityException("Not implemented yet");
+        try {
+            PKCS7SignedScript signedScript = new PKCS7SignedScript(preparedScript, base64Signature);
+            // return verified script to avoid constructing invalid script objects
+            return getVerifiedScript(signedScript.serialize());
+        } catch (IOException exception) {
+            throw new GeneralSecurityException(exception);
+        }
     }
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.signedscripts.ScriptSigner#getVerifiedCode(java.lang.String)
+     * @see org.xwiki.crypto.signedscripts.ScriptSigner#getVerifiedScript(java.lang.String)
      */
-    public SignedScript getVerifiedCode(String signedScript) throws GeneralSecurityException
+    public SignedScript getVerifiedScript(String signedScript) throws GeneralSecurityException
     {
         try {
             PKCS7SignedScript script = new PKCS7SignedScript(signedScript);

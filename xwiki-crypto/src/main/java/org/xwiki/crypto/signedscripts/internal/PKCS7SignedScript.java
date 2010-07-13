@@ -57,7 +57,8 @@ public class PKCS7SignedScript implements SignedScript
     private final Map<SignedScriptKey, String> data;
 
     /**
-     * Create an instance of {@link PKCS7SignedScript} by parsing the given string. 
+     * Create an instance of {@link PKCS7SignedScript} by parsing the given string. The signature
+     * needs to be verified afterwards.
      * 
      * @param script signed script as created by {@link #toString()}
      * @throws IOException on errors
@@ -66,33 +67,12 @@ public class PKCS7SignedScript implements SignedScript
     {
         this.data = parse(script);
 
-        // check that all mandatory keys are present
-        if (!isSet(SignedScriptKey.CODE)) {
-            throw new IOException("Signed script not found.");
-        }
-        for (SignedScriptKey key : SignedScriptKey.values()) {
-            if (!key.isOptional() && !this.data.containsKey(key)) {
-                throw new IOException("Mandatory key \"" + key.toString() + "\" not found.");
-            }
-        }
-
-        // check consistency of the rights list
-        // TODO only "programming" is currently supported
-        String allowRights = get(SignedScriptKey.ALLOWRIGHTS);
-        if (allowRights != null && !SignedScriptKey.ALLOWRIGHTS.getDefault().equals(allowRights)) {
-            throw new IOException("Custom " + SignedScriptKey.ALLOWRIGHTS + " are not supported yet.");
-        }
-
-        // check consistency of the actions list
-        // TODO restrictions are not supported yet
-        String allowActions = get(SignedScriptKey.ALLOWACTIONS);
-        if (allowActions != null && !SignedScriptKey.ALLOWACTIONS.getDefault().equals(allowActions)) {
-            throw new IOException(SignedScriptKey.ALLOWACTIONS + " is not implemented yet.");
-        }
+        checkConsistency();
     }
 
     /**
-     * Create an instance of {@link PKCS7SignedScript} for the given string. Used to sign
+     * Create an instance of {@link PKCS7SignedScript} for the given string. Used to sign the script
+     * object afterwards.
      * 
      * @param code the script to sign
      * @param fingerprint fingerprint of the certificate to use
@@ -121,6 +101,60 @@ public class PKCS7SignedScript implements SignedScript
         set(SignedScriptKey.FINGERPRINT, fingerprint);
         if (!isSet(SignedScriptKey.FINGERPRINT)) {
             throw new GeneralSecurityException("The fingerprint is empty");
+        }
+    }
+
+    /**
+     * Create an instance of {@link PKCS7SignedScript} by combining the data from the given
+     * {@link SignedScript} and Base64 encoded signature. The signature needs to be verified afterwards.
+     * 
+     * @param preparedScript script object initialized with all needed data
+     * @param base64Signature Base64 encoded signature of data obtained by {@link #getDataToSign()}
+     * @throws IOException on errors
+     */
+    PKCS7SignedScript(SignedScript preparedScript, String base64Signature) throws IOException
+    {
+        this.data = new HashMap<SignedScriptKey, String>();
+
+        for (SignedScriptKey key : SignedScriptKey.values()) {
+            if (key == SignedScriptKey.SIGNATURE) {
+                continue;
+            }
+            set(key, preparedScript.get(key));
+        }
+        set(SignedScriptKey.SIGNATURE, base64Signature);
+        checkConsistency();
+    }
+
+    /**
+     * Check the consistency of the internal data.
+     * 
+     * @throws IOException if some inconsistency was found
+     */
+    private void checkConsistency() throws IOException
+    {
+        // check that all mandatory keys are present
+        if (!isSet(SignedScriptKey.CODE)) {
+            throw new IOException("Signed script not found.");
+        }
+        for (SignedScriptKey key : SignedScriptKey.values()) {
+            if (!key.isOptional() && !this.data.containsKey(key)) {
+                throw new IOException("Mandatory key \"" + key.toString() + "\" not found.");
+            }
+        }
+
+        // check consistency of the rights list
+        // TODO only "programming" is currently supported
+        String allowRights = get(SignedScriptKey.ALLOWRIGHTS);
+        if (allowRights != null && !SignedScriptKey.ALLOWRIGHTS.getDefault().equals(allowRights)) {
+            throw new IOException("Custom " + SignedScriptKey.ALLOWRIGHTS + " are not supported yet.");
+        }
+
+        // check consistency of the actions list
+        // TODO restrictions are not supported yet
+        String allowActions = get(SignedScriptKey.ALLOWACTIONS);
+        if (allowActions != null && !SignedScriptKey.ALLOWACTIONS.getDefault().equals(allowActions)) {
+            throw new IOException(SignedScriptKey.ALLOWACTIONS + " is not implemented yet.");
         }
     }
 
@@ -223,7 +257,7 @@ public class PKCS7SignedScript implements SignedScript
      * @return data to sign/verify
      * @throws IOException on errors
      */
-    String getDataToSign() throws IOException
+    public String getDataToSign() throws IOException
     {
         StringBuilder builder = new StringBuilder();
 

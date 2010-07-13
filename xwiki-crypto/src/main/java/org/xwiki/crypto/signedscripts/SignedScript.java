@@ -19,6 +19,8 @@
  */
 package org.xwiki.crypto.signedscripts;
 
+import java.io.IOException;
+
 
 
 /**
@@ -30,7 +32,7 @@ package org.xwiki.crypto.signedscripts;
 public interface SignedScript
 {
     /**
-     * The output produced by this method can be parsed by {@link ScriptSigner#getVerifiedCode(String)}.
+     * The output produced by this method can be parsed by {@link ScriptSigner#getVerifiedScript(String)}.
      * 
      * @return serialized representation of the signed script
      */
@@ -56,8 +58,16 @@ public interface SignedScript
      * Check whether the given key is present in the map, its value is non-empty and (in case the key
      * is optional) not equal to the default value.
      * 
-     * @param key key to use
+     * @param key the key to use
      * @return true if the key is set, false otherwise
      */
     boolean isSet(SignedScriptKey key);
+
+    /**
+     * Create a string with the data that should be signed/verified.
+     * 
+     * @return the data to sign/verify
+     * @throws IOException on errors
+     */
+    String getDataToSign() throws IOException;
 }

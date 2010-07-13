@@ -57,11 +57,11 @@ public class ScriptSignerScriptService implements ScriptService
      * @param signedScript serialized signed script object 
      * @return code contained in the signed script
      * @throws GeneralSecurityException if verification fails or on errors
-     * @see org.xwiki.crypto.ScriptSigner#getVerifiedCode(java.lang.String)
+     * @see org.xwiki.crypto.ScriptSigner#getVerifiedScript(java.lang.String)
      */
     public SignedScript getVerifiedCode(String signedScript) throws GeneralSecurityException
     {
-        return signer.getVerifiedCode(signedScript);
+        return signer.getVerifiedScript(signedScript);
     }
 }
 
