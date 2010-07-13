@@ -20,13 +20,12 @@
 package org.xwiki.crypto.internal;
 
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.annotation.InstantiationStrategy;
+import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.crypto.CryptoService;
@@ -64,8 +63,7 @@ public class DefaultCryptoService implements CryptoService, Initializable
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.CryptoService#certsFromSpkac(String, int)
+     * @see org.xwiki.crypto.CryptoService#certsFromSpkac(java.lang.String, int)
      */
     public XWikiX509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
         throws GeneralSecurityException
@@ -77,8 +75,7 @@ public class DefaultCryptoService implements CryptoService, Initializable
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.CryptoService#certsFromPublicKey(PublicKey, int)
+     * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
      */
     public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity)
         throws GeneralSecurityException
@@ -100,7 +97,7 @@ public class DefaultCryptoService implements CryptoService, Initializable
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#verifyText(String, String)
+     * @see org.xwiki.crypto.CryptoService#verifyText(java.lang.String, java.lang.String)
      */
     public XWikiX509Certificate verifyText(final String signedText, final String base64Signature)
         throws GeneralSecurityException
@@ -115,7 +112,7 @@ public class DefaultCryptoService implements CryptoService, Initializable
     public String encryptText(String plaintext, XWikiX509Certificate[] certificatesToEncryptFor)
         throws GeneralSecurityException
     {
-        throw new GeneralSecurityException("Not implemented yet.");
+        throw new GeneralSecurityException("Not implemented yet. ");
     }
 
     /**

@@ -44,6 +44,14 @@ public final class Convert
     private static final String NEWLINE = System.getProperty("line.separator", "\n");
 
     /**
+     * Private default constructor to prevent instantiation.
+     */
+    private Convert()
+    {
+        // this class is not supposed to be instantiated
+    }
+
+    /**
      * Encode given data and return the base64 encoded result as string (no line breaks).
      * 
      * @param data the data to encode
@@ -148,14 +156,6 @@ public final class Convert
             // cannot happen
             throw new RuntimeException(exception);
         }
-    }
-
-    /**
-     * Private default constructor to prevent instantiation.
-     */
-    private Convert()
-    {
-        // this class is not supposed to be instantiated
     }
 }
 

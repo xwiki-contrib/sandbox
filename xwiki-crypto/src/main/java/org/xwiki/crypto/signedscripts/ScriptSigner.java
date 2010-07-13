@@ -87,7 +87,8 @@ public interface ScriptSigner
      * @throws GeneralSecurityException on errors
      * @see {@link #getDataToSign(String, String)}, {@link #sign(String, String)}
      */
-    SignedScript constructSignedScript(SignedScript preparedScript, String base64Signature) throws GeneralSecurityException;
+    SignedScript constructSignedScript(SignedScript preparedScript, String base64Signature)
+        throws GeneralSecurityException;
 
     /**
      * Create a signed script by parsing and verifying a serialized signed script.

@@ -50,15 +50,15 @@ public class UserDocumentUtils
 
     /** DocumentAccessBridge for getting the current user's document and URL. */
     @Requirement
-    DocumentAccessBridge bridge;
+    private DocumentAccessBridge bridge;
 
     /** Resolver which can make a DocumentReference out of a String. */
     @Requirement(role = String.class)
-    DocumentReferenceResolver<String> resolver;
+    private DocumentReferenceResolver<String> resolver;
 
     /** Serializer to turn a document reference into a String which can be put in a certificate. */
     @Requirement(role = String.class)
-    EntityReferenceSerializer<String> serializer;
+    private EntityReferenceSerializer<String> serializer;
 
     /** @return The fully qualified name of the current user's document eg: xwiki:XWiki.JohnSmith. */
     public String getCurrentUser()
@@ -71,7 +71,7 @@ public class UserDocumentUtils
     /**
      * Get the external URL pointing to the given user document.
      *
-     * @param userName the string representation of the document reference for the user document.
+     * @param userDocName the string representation of the document reference for the user document.
      * @return A string representation of the external URL for the user doc.
      */
     public String getUserDocURL(String userDocName)

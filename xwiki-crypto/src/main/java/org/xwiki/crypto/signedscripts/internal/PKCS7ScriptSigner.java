@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -131,15 +132,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
             }
 
             // check validity of the signature
-            Date now = new Date();
-            Date created = getDateFormat().parse(script.get(SignedScriptKey.CREATEDON));
-            Date expires = null;
-            if (script.isSet(SignedScriptKey.EXPIRESON)) {
-                expires = getDateFormat().parse(script.get(SignedScriptKey.EXPIRESON));
-            }
-            if (created.after(now) || (expires != null && expires.before(now))) {
-                throw new GeneralSecurityException("Signed script has expired or is not yet valid.");
-            }
+            checkValidity(script);
 
             // verify the certificate
             verify(certificate);
@@ -158,6 +151,27 @@ public class PKCS7ScriptSigner implements ScriptSigner
             throw exception;
         } catch (Exception exception) {
             throw new GeneralSecurityException("Failed to verify a signed script.", exception);
+        }
+    }
+
+    /**
+     * Check validity of the signature, i.e. if the creation date lays in the past and expiration
+     * date lays in the future.
+     * 
+     * @param script the script object to check
+     * @throws ParseException if the date is stored in an invalid format
+     * @throws GeneralSecurityException if the validation fails
+     */
+    private void checkValidity(PKCS7SignedScript script) throws ParseException, GeneralSecurityException
+    {
+        Date now = new Date();
+        Date created = getDateFormat().parse(script.get(SignedScriptKey.CREATEDON));
+        Date expires = null;
+        if (script.isSet(SignedScriptKey.EXPIRESON)) {
+            expires = getDateFormat().parse(script.get(SignedScriptKey.EXPIRESON));
+        }
+        if (created.after(now) || (expires != null && expires.before(now))) {
+            throw new GeneralSecurityException("Signed script has expired or is not yet valid.");
         }
     }
 
