@@ -43,6 +43,7 @@ import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
+import org.xwiki.crypto.data.internal.DefaultXWikiX509KeyPair;
 import org.xwiki.crypto.signedscripts.KeyManager;
 
 
@@ -148,7 +149,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
         XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint);
         String fingerprint = cert.getFingerprint();
-        XWikiX509KeyPair keys = new XWikiX509KeyPair(kp.getPrivate(), cert);
+        XWikiX509KeyPair keys = new DefaultXWikiX509KeyPair(kp.getPrivate(), cert);
         this.certMap.put(fingerprint, cert);
         this.keysMap.put(fingerprint, keys);
         return fingerprint;
