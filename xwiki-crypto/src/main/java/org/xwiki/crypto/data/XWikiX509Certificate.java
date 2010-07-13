@@ -28,7 +28,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.util.encoders.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper;
 
@@ -57,8 +57,13 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     /** Marks the end of a certificate in PEM format. */
     private static final String CERT_END = "-----END CERTIFICATE-----";
 
-    /** Default string encoding charset used to convert strings to byte arrays (UTF-8 is always available). */
-    private static final String CHARSET = "utf-8";
+    /**
+     * Character set for converting strings of Base-64 text to byte arrays.
+     * since base 64 uses none of the characters above code point 127 and almost all character sets
+     * treat the lower half the same, the choice need only be something which will decode fast and
+     * is in all java implementations see: {@link java.nio.charset.Charset}
+     */
+    private final String base64Charset = "US-ASCII";
 
     /** Certificate fingerprint. */
     private final String fingerprint;
@@ -127,7 +132,8 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
         }
         CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
         try {
-            Certificate cert = factory.generateCertificate(new ByteArrayInputStream(pemEncoded.getBytes(CHARSET)));
+            Certificate cert = 
+                factory.generateCertificate(new ByteArrayInputStream(pemEncoded.getBytes(base64Charset)));
             if (!(cert instanceof X509Certificate)) {
                 throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
             }
@@ -212,7 +218,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
         StringBuilder builder = new StringBuilder();
         builder.append(CERT_BEGIN);
         builder.append(NL);
-        builder.append(Base64.encodeBase64String(this.certificate.getEncoded()));
+        builder.append(new String(Base64.encode(this.certificate.getEncoded()), this.base64Charset));
         builder.append(CERT_END);
         builder.append(NL);
         return builder.toString();

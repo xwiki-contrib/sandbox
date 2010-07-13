@@ -24,7 +24,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 
-import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.util.encoders.Base64;
 
 
 /**
@@ -34,7 +34,7 @@ import org.apache.commons.codec.binary.Base64;
  * @version $Id$
  * @since 2.5
  */
-public class XWikiX509KeyPair
+public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 {
     /** Private key. */
     private final PrivateKey key;
@@ -70,7 +70,7 @@ public class XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     * @see java.lang.Object#hashCode()
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#hashCode()
      */
     @Override
     public int hashCode()
@@ -80,7 +80,7 @@ public class XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     * @see java.lang.Object#equals(java.lang.Object)
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object obj)
@@ -94,7 +94,7 @@ public class XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     * @see java.lang.Object#toString()
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#toString()
      */
     @Override
     public String toString()
@@ -108,7 +108,8 @@ public class XWikiX509KeyPair
     }
 
     /**
-     * @return the certificate
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#getCertificate()
      */
     public XWikiX509Certificate getCertificate()
     {
@@ -116,7 +117,8 @@ public class XWikiX509KeyPair
     }
 
     /**
-     * @return the public key
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#getPublicKey()
      */
     public PublicKey getPublicKey()
     {
@@ -124,7 +126,8 @@ public class XWikiX509KeyPair
     }
 
     /**
-     * @return the private key
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#getPrivateKey()
      */
     public PrivateKey getPrivateKey()
     {
@@ -132,7 +135,8 @@ public class XWikiX509KeyPair
     }
 
     /**
-     * @return certificate fingerprint
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#getFingerprint()
      */
     public String getFingerprint()
     {
@@ -140,10 +144,8 @@ public class XWikiX509KeyPair
     }
 
     /**
-     * Get the internal X509 certificate and RSA private key in a standard PEM format.
-     * 
-     * @return the certificate and private key in PEM format
-     * @throws CertificateEncodingException on errors (very unlikely)
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#export()
      */
     public String export() throws CertificateEncodingException
     {
@@ -151,13 +153,14 @@ public class XWikiX509KeyPair
     }
 
     /**
-     * @return the private key in PKCS#8 PEM format
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.data.XWikiX509KeyPair#exportPrivateKey()
      */
     private String exportPrivateKey()
     {
         StringBuilder builder = new StringBuilder();
         builder.append("-----BEGIN PRIVATE KEY-----\n");
-        builder.append(Base64.encodeBase64String(getPrivateKey().getEncoded()));
+        builder.append(new String(Base64.encode(getPrivateKey().getEncoded()), this.base64Charset));
         builder.append("-----END PRIVATE KEY-----\n");
         return builder.toString();
     }
