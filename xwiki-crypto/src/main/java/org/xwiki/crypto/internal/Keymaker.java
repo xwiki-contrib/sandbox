@@ -24,11 +24,9 @@ import java.math.BigInteger;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -56,7 +54,7 @@ import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 public class Keymaker
 {
     /** A secure random number generator. */
-    private final SecureRandom random = new SecureRandom();
+    //private final SecureRandom random = new SecureRandom();
 
     /** A certificate generator. Use of this must be synchronized. */
     private final X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
@@ -114,13 +112,6 @@ public class Keymaker
         return this.authorityCertificate;
     }
 
-    /** @return a random BigInteger */
-    private BigInteger randomBigint() {
-        byte[] randomBytes = new byte[4];
-        random.nextBytes(randomBytes);
-        return new BigInteger(randomBytes).abs();
-    }
-
     /**
      * Create a new X509 client certificate and a certificate authority certificate.
      * This method will use authorityKeyPair if it is set, this method is also guarenteed to use the same
@@ -134,11 +125,10 @@ public class Keymaker
      * @param userName a String representation of the name of the user getting the certificate.
      * @return an array of 2 new X509 certificates.
      * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
-     *         CertificateEncodingException if generating and signing the certificate fails.
-     *         NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
-     *         InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
-     *         SignatureException if generating and signing the certificate fails.
-     *         NoSuchProviderException if verifying the signature fails.
+     * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
+     * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
+     * @throws SignatureException if generating and signing the certificate fails.
+     * @throws NoSuchProviderException if verifying the signature fails.
      */
     public synchronized X509Certificate[] makeClientAndAuthorityCertificates(final PublicKey forCert,
                                                                              final int daysOfValidity,
@@ -146,7 +136,6 @@ public class Keymaker
                                                                              final String webId,
                                                                              final String userName)
         throws CertificateException,
-               CertificateEncodingException,
                NoSuchAlgorithmException,
                InvalidKeyException,
                SignatureException,
@@ -178,11 +167,10 @@ public class Keymaker
      * @param userName a String representation of the name of the user getting the certificate.
      * @return a new X509 certificate.
      * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
-     *         CertificateEncodingException if generating and signing the certificate fails.
-     *         NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
-     *         InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
-     *         SignatureException if generating and signing the certificate fails.
-     *         NoSuchProviderException if verifying the signature fails.
+     * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
+     * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
+     * @throws SignatureException if generating and signing the certificate fails.
+     * @throws NoSuchProviderException if verifying the signature fails.
      */
     public synchronized X509Certificate makeClientCertificate(final PublicKey forCert,
                                                               final KeyPair toSignWith,
@@ -191,7 +179,6 @@ public class Keymaker
                                                               final String webId,
                                                               final String userName)
         throws CertificateException,
-               CertificateEncodingException,
                NoSuchAlgorithmException,
                InvalidKeyException,
                SignatureException,
@@ -209,8 +196,7 @@ public class Keymaker
             // Client cert
             certGenerator.addExtension(MiscObjectIdentifiers.netscapeCertType,
                                        false,
-                                       new NetscapeCertType(  NetscapeCertType.sslClient
-                                                            | NetscapeCertType.smime));
+                                       new NetscapeCertType(NetscapeCertType.sslClient | NetscapeCertType.smime));
 
             // Key Usage extension.
             int keyUsage =   KeyUsage.digitalSignature
@@ -247,16 +233,14 @@ public class Keymaker
      * @param daysOfValidity number of days the cert should be valid for.
      * @return a new X509 certificate authority.
      * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
-     *         CertificateEncodingException if generating and signing the certificate fails.
-     *         NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
-     *         InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
-     *         SignatureException if generating and signing the certificate fails.
-     *         NoSuchProviderException if verifying the signature fails.
+     * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
+     * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
+     * @throws SignatureException if generating and signing the certificate fails.
+     * @throws NoSuchProviderException if verifying the signature fails.
      */
     public synchronized X509Certificate makeCertificateAuthority(final KeyPair keyPair,
                                                                  final int daysOfValidity)
         throws CertificateException,
-               CertificateEncodingException,
                NoSuchAlgorithmException,
                InvalidKeyException,
                SignatureException,
@@ -301,7 +285,7 @@ public class Keymaker
         this.certGenerator.setNotAfter(new Date(System.currentTimeMillis() + (this.aDay * daysOfValidity)));
 
         // Set a random serial number.
-        this.certGenerator.setSerialNumber(this.randomBigint());
+        this.certGenerator.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()).abs());
 
         // Set public key and algorithm.
         this.certGenerator.setPublicKey(forCert);
@@ -314,15 +298,13 @@ public class Keymaker
      * @param toSignWith the private key in this pair will be used to sign the certificate.
      * @return a new X509 certificate.
      * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
-     *         CertificateEncodingException if generating and signing the certificate fails.
-     *         NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
-     *         InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
-     *         SignatureException if generating and signing the certificate fails.
-     *         NoSuchProviderException if verifying the signature fails.
+     * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
+     * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
+     * @throws SignatureException if generating and signing the certificate fails.
+     * @throws NoSuchProviderException if verifying the signature fails.
      */
     private synchronized X509Certificate generate(final KeyPair toSignWith)
         throws CertificateException,
-               CertificateEncodingException,
                NoSuchAlgorithmException,
                InvalidKeyException,
                SignatureException,
