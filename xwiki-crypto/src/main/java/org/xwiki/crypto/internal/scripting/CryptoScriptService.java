@@ -19,21 +19,12 @@
  */
 package org.xwiki.crypto.internal.scripting;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.InvalidParameterException;
-import java.security.cert.X509Certificate;
-
-import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.internal.Convert;
-import org.xwiki.crypto.internal.Keymaker;
-import org.xwiki.crypto.internal.UserDocumentUtils;
-import org.xwiki.crypto.signedscripts.ScriptSigner;
-import org.xwiki.crypto.signedscripts.SignedScript;
+
 import org.xwiki.script.service.ScriptService;
 
 /**
@@ -43,113 +34,70 @@ import org.xwiki.script.service.ScriptService;
  * @version $Id$
  * @since 2.5
  */
-@Component("crypto")
-public class CryptoScriptService implements ScriptService
+@Component(role = ScriptSerrvice.class, hint = "crypto")
+public class CryptoScriptService implements ScriptService, CryptoService
 {
-    /** Wrapped crypto service implementing PKCS#7 standard. */
-    @Requirement("pkcs7crypto")
-    private CryptoService pkcs7crypto;
-
-    /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
     @Requirement
-    private UserDocumentUtils userDocUtils;
-
-    /** Used for the actual key making, also holds any secrets. */
-    private Keymaker theKeymaker = new Keymaker();
-
-    /** Enclosed script signer. FIXME why in crypto service? */
-    @Requirement
-    private ScriptSigner signer;
+    private CryptoService crypto;
 
     /**
-     * Creates an array of X509Certificate containing:
-     * 1. A certificate from the given <a href="http://en.wikipedia.org/wiki/Spkac">SPKAC</a>
-     * 2. A certificate authority certificate which will validate the first certificate in the array.
-     *
-     * Safari, Firefox, Opera, return through the &lt;keygen&gt; element an SPKAC request
-     * (see the specification in html5)
-     *
-     * @param spkacSerialization a <a href="http://en.wikipedia.org/wiki/Spkac">SPKAC</a> Certificate Signing Request
-     * @param daysOfValidity number of days before the certificate should become invalid.
-     * @return an array of 2 X509Certificates.
-     * @throws java.security.GeneralSecurityException if something goes wrong while creating the certificate.
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#certsFromSpkac(java.lang.String, int)
      */
-    public X509Certificate[] certsFromSpkac(String spkacSerialization, int daysOfValidity)
+    public XWikiX509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
         throws GeneralSecurityException
     {
-        if (spkacSerialization == null) {
-            throw new InvalidParameterException("SPKAC parameter is null");
-        }
-        NetscapeCertRequest certRequest;
-        try {
-            certRequest = new NetscapeCertRequest(Convert.fromBase64String(spkacSerialization));
-        } catch (IOException exception) {
-            throw new GeneralSecurityException(exception);
-        }
-
-        // Determine the webId by asking who's creating the cert (needed only for FOAFSSL compatibility)
-        String userName = userDocUtils.getCurrentUser();
-        String webID = userDocUtils.getUserDocURL(userName);
-
-        return this.theKeymaker.makeClientAndAuthorityCertificates(certRequest.getPublicKey(),
-                                                                   daysOfValidity,
-                                                                   true,
-                                                                   webID,
-                                                                   userName);
+        return this.crypto.certsFromSpkac(spkacSerialization, daysOfValidity);
     }
 
     /**
-     * Produce a pkcs7 signature for the given text.
-     * Text will be signed with the key belonging to the author of the code which calls this.
-     * TODO: Implement this.
-     *
-     * @param textToSign the text which the user wishes to sign.
-     * @return a signature which can be used to validate the signed text.
-     * @throws GeneralSecurityException if anything goes wrong during signing.
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
      */
-    public String signText(String textToSign)
+    public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity)
         throws GeneralSecurityException
     {
-        throw new GeneralSecurityException("Not implemented yet.");
-//        XWikiX509KeyPair keyPair = null;
-//        return pkcs7crypto.signText(textToSign, keyPair);
+        return this.crypto.newCertAndPrivateKey(daysOfValidity);
     }
 
     /**
-     * Verify a pkcs7 signature and return the name of the user who signed it.
-     *
-     * @param signedText the text which has been signed.
-     * @param base64Signature base64 encoded signature of the text
-     * @return the certificate of the user who signed the text or null if the signature is invalid.
-     * @throws GeneralSecurityException if anything goes wrong.
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public XWikiX509Certificate verifyText(String signedText, String base64Signature)
+    public String signText(final String textToSign, final XWikiX509KeyPair toSignWith)
         throws GeneralSecurityException
     {
-        return pkcs7crypto.verifyText(signedText, base64Signature);
+        return this.crypto.signText(textToSign, toSignWith);
     }
 
     /**
-     * @param code code to sign
-     * @param fingerprint certificate fingerprint identifying the private key to use
-     * @return signed script object
-     * @throws GeneralSecurityException on errors
-     * @see org.xwiki.crypto.ScriptSigner#sign(java.lang.String, java.lang.String)
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#verifyText(java.lang.String, java.lang.String)
      */
-    public SignedScript sign(String code, String fingerprint) throws GeneralSecurityException
+    public XWikiX509Certificate verifyText(final String signedText, final String base64Signature)
+        throws GeneralSecurityException
     {
-        return signer.sign(code, fingerprint);
+        return this.crypto.verifyText(signedText, base64Signature);
     }
 
     /**
-     * @param signedScript serialized signed script object 
-     * @return code contained in the signed script
-     * @throws GeneralSecurityException if verification fails or on errors
-     * @see org.xwiki.crypto.ScriptSigner#getVerifiedScript(java.lang.String)
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
      */
-    public SignedScript getVerifiedCode(String signedScript) throws GeneralSecurityException
+    public String encryptText(String plaintext, XWikiX509Certificate[] certificatesToEncryptFor)
+        throws GeneralSecurityException
     {
-        return signer.getVerifiedScript(signedScript);
+        return this.crypto.encryptText(plaintext, certificatesToEncryptFor);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
+     */
+    public String decryptText(String base64Ciphertext, XWikiX509KeyPair toDecryptWith)
+        throws GeneralSecurityException
+    {
+        return this.crypto.encryptText(base64Ciphertext, toDecryptWith);
     }
 }
 
