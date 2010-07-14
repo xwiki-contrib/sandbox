@@ -81,26 +81,28 @@ public class KeyService
      * @param daysOfValidity number of days before the certificate should become invalid.
      * @param webID the URL of the user's page. Used for FOAFSSL compatabulity.
      * @param userName the String serialization of the user's page name.
+     * @param password the password to set on the resulting XWikiX509KeyPair.
      * @return a certificate and matching private key in an XWikiX509KeyPair object.
      * @throws GeneralSecurityException on errors
      * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
      */
     public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity,
                                                  final String webID,
-                                                 final String userName)
+                                                 final String userName,
+                                                 final String password)
         throws GeneralSecurityException
     {
-        KeyPair pair = this.keymaker.newKeyPair();
+        final KeyPair pair = this.keymaker.newKeyPair();
 
         // In this case the non-repudiation bit is cleared because the private key is made on the server 
         // which is less secure.
-        X509Certificate certificate = this.keymaker.makeClientCertificate(pair.getPublic(),
-                                                                          pair,
-                                                                          daysOfValidity,
-                                                                          false,
-                                                                          webID,
-                                                                          userName);
+        final X509Certificate certificate = this.keymaker.makeClientCertificate(pair.getPublic(),
+                                                                                pair,
+                                                                                daysOfValidity,
+                                                                                false,
+                                                                                webID,
+                                                                                userName);
 
-        return new DefaultXWikiX509KeyPair(pair.getPrivate(), new XWikiX509Certificate(certificate));
+        return new DefaultXWikiX509KeyPair(pair.getPrivate(), password, new XWikiX509Certificate(certificate));
     }
 }

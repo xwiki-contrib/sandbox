@@ -106,31 +106,6 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     }
 
     /**
-     * Create a X509 certificate by parsing the given string. The string should contain a certificate
-     * encoded in PEM format.
-     * 
-     * @param pemEncoded X509 certificate in PEM format
-     * @return the parsed certificate
-     * @throws GeneralSecurityException on parse errors
-     */
-    public static X509Certificate x509FromString(String pemEncoded) throws GeneralSecurityException
-    {
-        if (!pemEncoded.contains(CERT_BEGIN)) {
-            throw new GeneralSecurityException("No certificate found");
-        }
-        if (!pemEncoded.contains(CERT_END)) {
-            throw new GeneralSecurityException("No end of the certificate found");
-        }
-        CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
-        Certificate cert = 
-            factory.generateCertificate(new ByteArrayInputStream(Convert.stringToBytes(pemEncoded)));
-        if (!(cert instanceof X509Certificate)) {
-            throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
-        }
-        return (X509Certificate) cert;
-    }
-
-    /**
      * {@inheritDoc}
      * @see org.xwiki.crypto.data.internal.AbstractX509CertificateWrapper#hashCode()
      */
@@ -178,7 +153,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
         builder.append(String.format(format, "Public Key Algorithm", getPublicKey().getAlgorithm()));
         builder.append(String.format(format, "Signature Algorithm", getSigAlgName()));
         try {
-            builder.append(export());
+            builder.append(this.toPEMString());
         } catch (CertificateEncodingException exception) {
             // ignore
         }
@@ -197,18 +172,43 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
      * Get the internal X509 certificate in a standard PEM format.
      * 
      * @return the certificate in PEM format
-     * @throws CertificateEncodingException on errors (very unlikely)
+     * @throws CertificateEncodingException on errors
+     * @see XWikiX509Certificate#fromPEMString()
      */
-    public String export() throws CertificateEncodingException
+    public String toPEMString() throws CertificateEncodingException
     {
-        final String newline = "\n";
         StringBuilder builder = new StringBuilder();
         builder.append(CERT_BEGIN);
-        builder.append(newline);
+        builder.append(Convert.getNewline());
         builder.append(Convert.toChunkedBase64String(this.certificate.getEncoded()));
         builder.append(CERT_END);
-        builder.append(newline);
+        builder.append(Convert.getNewline());
         return builder.toString();
+    }
+
+    /**
+     * Constructor from a PEM formatted string.
+     * This constructor will search the given string until it finds {@link XWikiX509Certificate#CERT_BEGIN} and assume
+     * everything until the next {@link XWikiX509Certificate#CERT_END} is a valid PEM formatted certificate. If there
+     * are multiple certificates in the passed string the first will be parased and all subsewquent certificates will be
+     * ignored.
+     * 
+     * @param pemEncoded a String containing an X509 certificate in PEM format
+     * @throws GeneralSecurityException If there isn't a valid {@link XWikiX509Certificate#CERT_BEGIN} or
+     *                                  {@link XWikiX509Certificate#CERT_END} tag, or if there is an exception parsing
+     *                                  the content inbetween.
+     * @return an XWikiX509Certificate from the PEM input.
+     * @see XWikiX509Certificate#toPEMString()
+     */
+    public static XWikiX509Certificate fromPEMString(String pemEncoded) throws GeneralSecurityException
+    {
+        final byte[] base64Bytes = Convert.stringToBytes(pemEncoded, CERT_BEGIN, CERT_END);
+        final CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
+        final Certificate cert = factory.generateCertificate(new ByteArrayInputStream(base64Bytes));
+        if (!(cert instanceof X509Certificate)) {
+            throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
+        }
+        return new XWikiX509Certificate((X509Certificate) cert);
     }
 
     /**

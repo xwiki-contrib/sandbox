@@ -19,11 +19,14 @@
  */
 package org.xwiki.crypto.internal.scripting;
 
+import java.security.GeneralSecurityException;
+
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
+import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 import org.xwiki.script.service.ScriptService;
 
@@ -34,9 +37,10 @@ import org.xwiki.script.service.ScriptService;
  * @version $Id$
  * @since 2.5
  */
-@Component(role = ScriptSerrvice.class, hint = "crypto")
+@Component(roles = { ScriptService.class }, hints = { "crypto" })
 public class CryptoScriptService implements ScriptService, CryptoService
 {
+    /** The service which this class wraps. */
     @Requirement
     private CryptoService crypto;
 
@@ -54,20 +58,20 @@ public class CryptoScriptService implements ScriptService, CryptoService
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
      */
-    public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity)
+    public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity, final String password)
         throws GeneralSecurityException
     {
-        return this.crypto.newCertAndPrivateKey(daysOfValidity);
+        return this.crypto.newCertAndPrivateKey(daysOfValidity, password);
     }
 
     /**
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String signText(final String textToSign, final XWikiX509KeyPair toSignWith)
+    public String signText(final String textToSign, final XWikiX509KeyPair toSignWith, final String password)
         throws GeneralSecurityException
     {
-        return this.crypto.signText(textToSign, toSignWith);
+        return this.crypto.signText(textToSign, toSignWith, password);
     }
 
     /**
@@ -84,7 +88,7 @@ public class CryptoScriptService implements ScriptService, CryptoService
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
      */
-    public String encryptText(String plaintext, XWikiX509Certificate[] certificatesToEncryptFor)
+    public String encryptText(final String plaintext, final XWikiX509Certificate[] certificatesToEncryptFor)
         throws GeneralSecurityException
     {
         return this.crypto.encryptText(plaintext, certificatesToEncryptFor);
@@ -94,10 +98,29 @@ public class CryptoScriptService implements ScriptService, CryptoService
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String decryptText(String base64Ciphertext, XWikiX509KeyPair toDecryptWith)
+    public String decryptText(final String base64Ciphertext,
+                              final XWikiX509KeyPair toDecryptWith,
+                              final String password)
         throws GeneralSecurityException
     {
-        return this.crypto.encryptText(base64Ciphertext, toDecryptWith);
+        return this.crypto.decryptText(base64Ciphertext, toDecryptWith, password);
+    }
+
+    /**
+     * Deserialize an X509 certificate from a PEM formatted string.
+     * @param pemFormatCert a String created by {@link org.xwiki.crypto.data.XWikiX509Certificate#toPEMString()}
+     *                      or from OpenSSL or any other standards compliant X509 certificate generator in PEM format.
+     * @return an {@link org.xwiki.crypto.data.XWikiX509Certificate} which extends 
+     *         {@link java.security.cert.X509Certificate} and can be used by methods in this class as well as with
+     *          third party encryption tools.
+     * @throws GeneralSecurityException If there isn't a valid {@link XWikiX509Certificate#CERT_BEGIN} or
+     *                                  {@link XWikiX509Certificate#CERT_END} tag, or if there is an exception parsing
+     *                                  the content inbetween.
+     */
+    public XWikiX509Certificate certFromPEM(final String pemFormatCert)
+        throws GeneralSecurityException
+    {
+        return XWikiX509Certificate.fromPEMString(pemFormatCert);
     }
 }
 

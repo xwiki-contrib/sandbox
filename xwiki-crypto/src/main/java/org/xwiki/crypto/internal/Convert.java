@@ -117,6 +117,24 @@ public final class Convert
 
     /**
      * Decode the base64 encoded data represented as string.
+     * Ignore anything before beginningMarker or after endMarker.
+     * 
+     * @param withBase64EncodedContent string containing base64 encoded data.
+     * @param beginningMarker anything in the string which is not after this will be ignored.
+     * @param endMarker anything in the string which is not before this will be ignored.
+     * @return the decoded data array
+     */
+    public static byte[] fromBase64String(final String withBase64EncodedContent,
+                                          final String beginningMarker,
+                                          final String endMarker)
+    {
+        return Convert.fromBase64(Convert.stringToBytes(withBase64EncodedContent,
+                                                        beginningMarker,
+                                                        endMarker));
+    }
+
+    /**
+     * Decode the base64 encoded data represented as string.
      * 
      * @param base64Encoded base64 encoded data string
      * @return the decoded data array
@@ -144,6 +162,33 @@ public final class Convert
 
     /**
      * Convert string to byte array using the same encoding as for base64 conversion.
+     * Ignore anything before beginningMarker or after endMarker.
+     * 
+     * @param withBase64EncodedContent string containing base64 encoded data.
+     * @param beginningMarker anything in the string which is not after this will be ignored.
+     * @param endMarker anything in the string which is not before this will be ignored.
+     * @return byte array containing the characters from the string (still in Base64 format)
+     */
+    public static byte[] stringToBytes(final String withBase64EncodedContent,
+                                       final String beginningMarker,
+                                       final String endMarker)
+    {
+        int beginIndex = withBase64EncodedContent.indexOf(beginningMarker);
+        if (beginIndex < 0) {
+            throw new IllegalArgumentException("No beginning marker found in string\nExpecting: "
+                                               + beginningMarker);
+        }
+        final int endIndex = withBase64EncodedContent.indexOf(endMarker, beginIndex);
+        if (endIndex < 0) {
+            throw new IllegalArgumentException("No end marker found in string\nExpecting: "
+                                               + endMarker);
+        }
+        beginIndex += beginningMarker.length();
+        return Convert.stringToBytes(withBase64EncodedContent.substring(beginIndex, endIndex));
+    }
+
+    /**
+     * Convert string to byte array using the same encoding as for base64 conversion.
      * 
      * @param string the string to convert
      * @return byte array containing the characters from the string
@@ -156,6 +201,14 @@ public final class Convert
             // cannot happen
             throw new RuntimeException(exception);
         }
+    }
+
+    /**
+     * @return a newline string, dependent on platform.
+     */
+    public static String getNewline()
+    {
+        return Convert.NEWLINE;
     }
 }
 

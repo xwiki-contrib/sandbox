@@ -21,10 +21,10 @@ package org.xwiki.crypto.data;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
+import java.security.GeneralSecurityException;
 
 /**
- * Wrapper for storing a {@link PrivateKey} and the corresponding {@link XWikiX509Certificate}.
+ * Wrapper which contains a {@link PrivateKey} and the corresponding {@link XWikiX509Certificate}.
  * 
  * @version $Id$
  * @since 2.5
@@ -32,7 +32,13 @@ import java.security.cert.CertificateEncodingException;
 public interface XWikiX509KeyPair
 {
     /**
-     * @return the certificate
+     * @return the chain of certificates starting with the user's certificate (the one matching the private key) and
+     *         ascending up to the root certificate authority.
+     */
+    XWikiX509Certificate[] getCertificates();
+
+    /**
+     * @return the user's certificate
      */
     XWikiX509Certificate getCertificate();
 
@@ -42,9 +48,14 @@ public interface XWikiX509KeyPair
     PublicKey getPublicKey();
 
     /**
+     * Get the private key from the underlying X500PrivateCredential.
+     * If this method completes successfully, hasLeaked will henceforth return true.
+     *
+     * @param password the password required to get the private key.
      * @return the private key
+     * @throws GeneralSecurityException if opening the encrypted key storage fails.
      */
-    PrivateKey getPrivateKey();
+    PrivateKey getPrivateKey(final String password) throws GeneralSecurityException;
 
     /**
      * @return certificate fingerprint
@@ -52,16 +63,13 @@ public interface XWikiX509KeyPair
     String getFingerprint();
 
     /**
-     * Get the internal X509 certificate and RSA private key in a standard PEM format.
-     * 
-     * @return the certificate and private key in PEM format
-     * @throws CertificateEncodingException on errors (very unlikely)
+     * @return the certificate and private key in a password protected PKCS#12 container.
      */
-    String export() throws CertificateEncodingException;
+    byte[] toPKCS12();
 
     /**
-     * @return the private key in PKCS#8 PEM format
+     * @return the certificate and private key as a base64 encoded password protected PKCS#12 container.
      */
-    String exportPrivateKey();
+    String toBase64PKCS12();
 }
 

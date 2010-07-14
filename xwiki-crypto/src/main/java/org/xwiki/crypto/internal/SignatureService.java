@@ -20,7 +20,6 @@
 package org.xwiki.crypto.internal;
 
 import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CollectionCertStoreParameters;
@@ -61,10 +60,12 @@ public class SignatureService
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String signText(String textToSign, XWikiX509KeyPair toSignWith) throws GeneralSecurityException
+    public String signText(final String textToSign,
+                           final XWikiX509KeyPair toSignWith,
+                           final String password)
+        throws GeneralSecurityException
     {
         XWikiX509Certificate certificate = toSignWith.getCertificate();
-        PrivateKey key = toSignWith.getPrivateKey();
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
         Collection<?> certs = Collections.singleton(certificate);
@@ -72,7 +73,7 @@ public class SignatureService
 
         try {
             gen.addCertificatesAndCRLs(store);
-            gen.addSigner(key, certificate, SHA1_OID);
+            gen.addSigner(toSignWith.getPrivateKey(password), certificate, SHA1_OID);
             byte[] data = textToSign.getBytes();
             CMSSignedData cmsData = gen.generate(new CMSProcessableByteArray(data), false, PROVIDER);
 

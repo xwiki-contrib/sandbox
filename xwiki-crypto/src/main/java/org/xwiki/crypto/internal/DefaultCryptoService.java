@@ -68,8 +68,8 @@ public class DefaultCryptoService implements CryptoService, Initializable
     public XWikiX509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
         throws GeneralSecurityException
     {
-        String userName = userDocUtils.getCurrentUser();
-        String webID = userDocUtils.getUserDocURL(userName);
+        final String userName = userDocUtils.getCurrentUser();
+        final String webID = userDocUtils.getUserDocURL(userName);
         return this.keyService.certsFromSpkac(spkacSerialization, daysOfValidity, webID, userName);
     }
 
@@ -77,22 +77,22 @@ public class DefaultCryptoService implements CryptoService, Initializable
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
      */
-    public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity)
+    public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity, final String password)
         throws GeneralSecurityException
     {
-        String userName = userDocUtils.getCurrentUser();
-        String webID = userDocUtils.getUserDocURL(userName);
-        return this.keyService.newCertAndPrivateKey(daysOfValidity, webID, userName);
+        final String userName = userDocUtils.getCurrentUser();
+        final String webID = userDocUtils.getUserDocURL(userName);
+        return this.keyService.newCertAndPrivateKey(daysOfValidity, webID, userName, password);
     }
 
     /**
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String signText(final String textToSign, final XWikiX509KeyPair toSignWith)
+    public String signText(final String textToSign, final XWikiX509KeyPair toSignWith, final String password)
         throws GeneralSecurityException
     {
-        return this.signatureService.signText(textToSign, toSignWith);
+        return this.signatureService.signText(textToSign, toSignWith, password);
     }
 
     /**
@@ -109,7 +109,7 @@ public class DefaultCryptoService implements CryptoService, Initializable
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
      */
-    public String encryptText(String plaintext, XWikiX509Certificate[] certificatesToEncryptFor)
+    public String encryptText(final String plaintext, final XWikiX509Certificate[] certificatesToEncryptFor)
         throws GeneralSecurityException
     {
         throw new GeneralSecurityException("Not implemented yet. ");
@@ -119,7 +119,9 @@ public class DefaultCryptoService implements CryptoService, Initializable
      * {@inheritDoc}
      * @see org.xwiki.crypto.CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
-    public String decryptText(String base64Ciphertext, XWikiX509KeyPair toDecryptWith)
+    public String decryptText(final String base64Ciphertext,
+                              final XWikiX509KeyPair toDecryptWith,
+                              final String password)
         throws GeneralSecurityException
     {
         throw new GeneralSecurityException("Not implemented yet.");

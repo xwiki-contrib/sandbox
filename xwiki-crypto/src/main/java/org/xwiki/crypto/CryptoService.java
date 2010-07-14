@@ -58,10 +58,12 @@ public interface CryptoService
      * where it is more vulnerable than a client side certificate.
      *
      * @param daysOfValidity number of days before the certificate should become invalid.
+     * @param password the password to set on the resulting XWikiX509KeyPair.
      * @return object containing certificate and private key.
      * @throws GeneralSecurityException if something goes wrong while creating the certificate.
      */
-    XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity) throws GeneralSecurityException;
+    XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity, final String password) 
+        throws GeneralSecurityException;
 
     /**
      * Produce a pkcs#7 signature for the given text.
@@ -69,10 +71,11 @@ public interface CryptoService
      *
      * @param textToSign the text which the user wishes to sign.
      * @param toSignWith the certificate and matching private key to sign the text with.
+     * @param password to access the private key in the key pair.
      * @return a signature which can be used to validate the signed text.
      * @throws GeneralSecurityException if anything goes wrong during signing.
      */
-    String signText(final String textToSign, final XWikiX509KeyPair toSignWith)
+    String signText(final String textToSign, final XWikiX509KeyPair toSignWith, final String password)
         throws GeneralSecurityException;
 
     /**
@@ -106,9 +109,10 @@ public interface CryptoService
      *
      * @param base64Ciphertext Base64 encoded ciphertext to decrypt.
      * @param toDecryptWith the certificate and private key belonging to the user who wants to decrypt the text.
+     * @param password to access the private key in the key pair.
      * @return the decrypted text or null if the provided key is not sufficient to decrypt (wrong key).
      * @throws GeneralSecurityException if something goes wrong.
      */
-    String decryptText(final String base64Ciphertext, final XWikiX509KeyPair toDecryptWith)
+    String decryptText(final String base64Ciphertext, final XWikiX509KeyPair toDecryptWith, final String password)
         throws GeneralSecurityException;
 }
