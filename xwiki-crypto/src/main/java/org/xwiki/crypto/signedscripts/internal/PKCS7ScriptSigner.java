@@ -48,7 +48,7 @@ import org.xwiki.crypto.signedscripts.SignedScriptKey;
 public class PKCS7ScriptSigner implements ScriptSigner
 {
     /** PKCS7 crypto service. */
-    @Requirement("pkcs7crypto")
+    @Requirement
     private CryptoService pkcs7;
 
     /** Key manager. */
