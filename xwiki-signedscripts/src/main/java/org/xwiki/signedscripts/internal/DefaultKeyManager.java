@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.signedscripts.internal;
+package org.xwiki.signedscripts.internal;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -44,7 +44,7 @@ import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
 import org.xwiki.crypto.data.internal.DefaultXWikiX509KeyPair;
-import org.xwiki.crypto.signedscripts.KeyManager;
+import org.xwiki.signedscripts.KeyManager;
 
 
 /**

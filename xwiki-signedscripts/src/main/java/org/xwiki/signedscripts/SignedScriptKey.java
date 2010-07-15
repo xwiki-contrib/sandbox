@@ -1,4 +1,4 @@
-package org.xwiki.crypto.signedscripts;
+package org.xwiki.signedscripts;
 
 
 

@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.signedscripts.internal;
+package org.xwiki.signedscripts.internal;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.xwiki.crypto.signedscripts.SignedScript;
-import org.xwiki.crypto.signedscripts.SignedScriptKey;
+import org.xwiki.signedscripts.SignedScript;
+import org.xwiki.signedscripts.SignedScriptKey;
 
 
 /**

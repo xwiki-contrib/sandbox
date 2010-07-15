@@ -44,7 +44,7 @@
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-crypto</artifactId>
+      <artifactId>xwiki-core-signedscripts</artifactId>
       <version>${pom.version}</version>
     </dependency>
 

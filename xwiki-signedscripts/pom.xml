@@ -37,6 +37,11 @@
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
   </properties>
   <dependencies>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-crypto</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
     <!-- Used by CryptoScriptService which provides a service to Velocity scripts -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
@@ -53,24 +58,24 @@
       Used for generation and verification of PKCS#7 signatures.
       PKCS#7 must be used because it's compatable with mozilla
       crypto.signText() javascript function.
-    -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcmail-jdk15</artifactId>
       <version>1.45</version>
     </dependency>
-    <!-- Used exclusively by UserDocumentUtils -->
+    -->
+    <!-- Used exclusively by UserDocumentUtils
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-model</artifactId>
       <version>${pom.version}</version>
     </dependency>
-    <!-- Used exclusively by UserDocumentUtils -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-bridge</artifactId>
       <version>${pom.version}</version>
     </dependency>
+    -->
     <!-- Testing dependencies -->
     <!--
     <dependency>
