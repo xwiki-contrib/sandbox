@@ -44,13 +44,14 @@ public class ScriptSignerScriptService implements ScriptService
     /**
      * @param code code to sign
      * @param fingerprint certificate fingerprint identifying the private key to use
+     * @param password the password to unlock the private key
      * @return signed script object
      * @throws GeneralSecurityException on errors
      * @see org.xwiki.crypto.ScriptSigner#sign(java.lang.String, java.lang.String)
      */
-    public SignedScript sign(String code, String fingerprint) throws GeneralSecurityException
+    public SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException
     {
-        return signer.sign(code, fingerprint);
+        return signer.sign(code, fingerprint, password);
     }
 
     /**

@@ -20,7 +20,6 @@
 package org.xwiki.crypto.signedscripts;
 
 import java.security.GeneralSecurityException;
-import java.util.Date;
 import java.util.Set;
 
 import org.xwiki.component.annotation.ComponentRole;
@@ -44,11 +43,12 @@ public interface KeyManager
      * TODO should require global admin rights
      * 
      * @param authorName author name to use
-     * @param expires expiration date, never expires if null
+     * @param password the password to use for encrypting the key
+     * @param daysOfValidity how many days should the new certificate be valid
      * @return fingerprint of the new key pair
      * @throws GeneralSecurityException on errors or insufficient access rights
      */
-    String createKeyPair(String authorName, Date expires) throws GeneralSecurityException;
+    String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException;
 
     /**
      * Register the given certificate as trusted. Scripts, signed with the corresponding private key
@@ -81,18 +81,6 @@ public interface KeyManager
      * @throws GeneralSecurityException if the certificate does not exist
      */
     XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException;
-
-    /**
-     * Create a certificate by parsing the given string. The string should contain a X509 certificate
-     * in PEM format.
-     * <p>
-     * Note that the certificate is just parsed, NOT registered (no special access rights required).</p>
-     * 
-     * @param encoded X509 certificate in PEM format
-     * @return corresponding certificate object
-     * @throws GeneralSecurityException on parse errors
-     */
-    XWikiX509Certificate parseCertificate(String encoded) throws GeneralSecurityException;
 
     /**
      * Get a key pair by certificate fingerprint.

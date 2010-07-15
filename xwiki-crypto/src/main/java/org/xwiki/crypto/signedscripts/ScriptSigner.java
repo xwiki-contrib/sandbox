@@ -41,11 +41,12 @@ public interface ScriptSigner
      * 
      * @param code code to sign
      * @param fingerprint certificate fingerprint identifying the private key to use
+     * @param password the password to unlock the private key
      * @return signed script object
      * @throws GeneralSecurityException on errors
      * @see KeyManager
      */
-    SignedScript sign(String code, String fingerprint) throws GeneralSecurityException;
+    SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException;
 
     /**
      * Construct the script object in the same way as {@link #sign(String, String)}, but not sign it.

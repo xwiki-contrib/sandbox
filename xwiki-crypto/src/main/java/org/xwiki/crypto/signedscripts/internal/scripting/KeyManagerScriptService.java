@@ -20,7 +20,6 @@
 package org.xwiki.crypto.signedscripts.internal.scripting;
 
 import java.security.GeneralSecurityException;
-import java.util.Date;
 import java.util.Set;
 
 import org.xwiki.component.annotation.Component;
@@ -46,14 +45,15 @@ public class KeyManagerScriptService implements ScriptService
 
     /**
      * @param authorName author name to use
-     * @param expires expiration date, never expires if null
+     * @param password the password to use for encrypting the key
+     * @param daysOfValidity how many days should the new certificate be valid
      * @return fingerprint of the new key pair
      * @throws GeneralSecurityException on errors or insufficient access rights
      * @see org.xwiki.crypto.KeyManager#createKeyPair(java.lang.String, java.util.Date)
      */
-    public String createKeyPair(String authorName, Date expires) throws GeneralSecurityException
+    public String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException
     {
-        return keyManager.createKeyPair(authorName, expires);
+        return keyManager.createKeyPair(authorName, password, daysOfValidity);
     }
 
     /**
@@ -85,17 +85,6 @@ public class KeyManagerScriptService implements ScriptService
     public XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
     {
         return keyManager.getCertificate(fingerprint);
-    }
-
-    /**
-     * @param encoded X509 certificate in PEM format
-     * @return corresponding certificate object
-     * @throws GeneralSecurityException on parse errors
-     * @see org.xwiki.crypto.KeyManager#parseCertificate(java.lang.String)
-     */
-    public XWikiX509Certificate parseCertificate(String encoded) throws GeneralSecurityException
-    {
-        return keyManager.parseCertificate(encoded);
     }
 
     /**

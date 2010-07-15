@@ -81,6 +81,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     /** FIXME. */
     private Map<String, XWikiX509KeyPair> keysMap = new HashMap<String, XWikiX509KeyPair>();
 
+    /** FIXME Remove. */
+    private final String localRootPwd = "blah";
+
     /**
      * {@inheritDoc}
      * @see org.xwiki.component.phase.Initializable#initialize()
@@ -99,7 +102,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         // FIXME DEBUG
         try {
             regenerateLocalRoot();
-            String globalFp = createKeyPair("XWiki.org", null);
+            String globalFp = createKeyPair("XWiki.org", "asdf", 365);
             this.globalRootCertificate = getCertificate(globalFp);
             unregister(globalFp);
             registerCertificate(globalRootCertificate);
@@ -111,9 +114,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.KeyManager#createKeyPair(java.lang.String, java.util.Date)
+     * @see org.xwiki.crypto.signedscripts.KeyManager#createKeyPair(java.lang.String, java.lang.String, int)
      */
-    public String createKeyPair(String authorName, Date expires) throws GeneralSecurityException
+    public String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException
     {
         KeyPair kp = this.kpGen.generateKeyPair();
 
@@ -126,7 +129,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         if (this.localRootFingerprint != null) {
             XWikiX509Certificate signCert = getLocalRootCertificate();
             issuer = signCert.getSubjectX500Principal();
-            signKey = getLocalRootKeyPair().getPrivateKey();
+            signKey = getLocalRootKeyPair().getPrivateKey(this.localRootPwd);
             signFingerprint = signCert.getFingerprint();
         }
 
@@ -136,20 +139,15 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         certGen.setSerialNumber(new BigInteger(128, new SecureRandom()));
 
         certGen.setNotBefore(new Date());
-        if (expires != null) {
-            certGen.setNotAfter(expires);
-        } else {
-            Date now = new Date();
-            long year = 1000 * 3600 * 24 * 365;
-            certGen.setNotAfter(new Date(now.getTime() + year * 25));
-        }
+        long day = 1000 * 3600 * 24;
+        certGen.setNotAfter(new Date(System.currentTimeMillis() + day * daysOfValidity));
 
         certGen.setPublicKey(kp.getPublic());
         certGen.setSignatureAlgorithm(SIGN_ALGORITHM);
 
         XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint);
         String fingerprint = cert.getFingerprint();
-        XWikiX509KeyPair keys = new DefaultXWikiX509KeyPair(kp.getPrivate(), cert);
+        XWikiX509KeyPair keys = new DefaultXWikiX509KeyPair(kp.getPrivate(), password, cert);
         this.certMap.put(fingerprint, cert);
         this.keysMap.put(fingerprint, keys);
         return fingerprint;
@@ -206,15 +204,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.KeyManager#parseCertificate(java.lang.String)
-     */
-    public XWikiX509Certificate parseCertificate(String encoded) throws GeneralSecurityException
-    {
-        return new XWikiX509Certificate(XWikiX509Certificate.x509FromString(encoded), null);
-    }
-
-    /**
-     * {@inheritDoc}
      * @see org.xwiki.crypto.KeyManager#getLocalRootCertificate()
      */
     public XWikiX509Certificate getLocalRootCertificate()
@@ -250,7 +239,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         this.certMap.remove(this.localRootFingerprint);
         this.keysMap.remove(this.localRootFingerprint);
         this.localRootFingerprint = null;
-        this.localRootFingerprint = createKeyPair("Local Root", null);
+        this.localRootFingerprint = createKeyPair("Local Root", this.localRootPwd, 365);
     }
 
     /**

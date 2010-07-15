@@ -57,14 +57,14 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String)
+     * @see org.xwiki.crypto.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String, java.lang.String)
      */
-    public SignedScript sign(String code, String fingerprint) throws GeneralSecurityException
+    public SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException
     {
         SignedScript script = prepareScriptForSigning(code, fingerprint);
         XWikiX509KeyPair keyPair = this.keyManager.getKeyPair(script.get(SignedScriptKey.FINGERPRINT));
         try {
-            String signature = pkcs7.signText(script.getDataToSign(), keyPair);
+            String signature = pkcs7.signText(script.getDataToSign(), keyPair, password);
             return new PKCS7SignedScript(script, signature);
         } catch (GeneralSecurityException exception) {
             throw exception;
