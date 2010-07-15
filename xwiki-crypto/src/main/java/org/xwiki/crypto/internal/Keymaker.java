@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.security.SecureRandom;
 
 import java.security.cert.CertificateException;
 import java.security.InvalidKeyException;
@@ -54,7 +55,7 @@ import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 public class Keymaker
 {
     /** A secure random number generator. */
-    //private final SecureRandom random = new SecureRandom();
+//    private final SecureRandom random = new SecureRandom();
 
     /** A certificate generator. Use of this must be synchronized. */
     private final X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
@@ -80,7 +81,7 @@ public class Keymaker
     /** @return a newly generated RSA KeyPair. */
     public KeyPair newKeyPair()
     {
-        return keyPairGen.generateKeyPair();
+        return this.keyPairGen.generateKeyPair();
     }
 
     /**
@@ -187,8 +188,10 @@ public class Keymaker
         try {
             this.prepareGenericCertificate(forCert, daysOfValidity);
 
-            // Set UID
-            this.certGenerator.setSubjectDN(new X509Name("UID=" + userName));
+            // Set UID (same for issuer since this certificate confers no authority)
+            X509Name dName = new X509Name("UID=" + userName);
+            this.certGenerator.setSubjectDN(dName);
+            this.certGenerator.setIssuerDN(dName);
 
             // Not a CA
             certGenerator.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));

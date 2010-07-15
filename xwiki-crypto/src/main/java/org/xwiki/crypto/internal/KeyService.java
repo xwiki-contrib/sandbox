@@ -23,7 +23,9 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidParameterException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.security.Security;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
@@ -39,6 +41,13 @@ public class KeyService
 {
     /** Used for the actual key making, also holds any secrets. */
     private final Keymaker keymaker = new Keymaker();
+
+    /** Make sure the BouncyCastle provider is added to java security providers. */
+    {
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
+    }
 
     /**
      * @param spkacSerialization a <a href="http://en.wikipedia.org/wiki/Spkac">SPKAC</a> Certificate Signing Request

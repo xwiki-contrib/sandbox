@@ -20,9 +20,7 @@
 package org.xwiki.crypto.internal;
 
 import java.security.GeneralSecurityException;
-import java.security.Security;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
@@ -40,7 +38,7 @@ import org.xwiki.crypto.data.XWikiX509KeyPair;
  */
 @Component
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
-public class DefaultCryptoService implements CryptoService, Initializable
+public class DefaultCryptoService implements CryptoService
 {
     /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
     @Requirement
@@ -51,15 +49,6 @@ public class DefaultCryptoService implements CryptoService, Initializable
 
     /** For signing and verifying signatures on text. */
     private final SignatureService signatureService = new SignatureService();
-
-    /**
-     * {@inheritDoc}
-     * @see org.xwiki.component.phase.Initializable#initialize()
-     */
-    public void initialize()
-    {
-        Security.addProvider(new BouncyCastleProvider());
-    }
 
     /**
      * {@inheritDoc}
