@@ -1,3 +1,6 @@
-org.xwiki.crypto.internal.DefaultUserDocumentUtils
 org.xwiki.crypto.internal.DefaultCryptoService
 org.xwiki.crypto.internal.scripting.CryptoScriptService
+org.xwiki.crypto.signedscripts.internal.DefaultKeyManager
+org.xwiki.crypto.signedscripts.internal.PKCS7ScriptSigner
+org.xwiki.crypto.signedscripts.internal.scripting.KeyManagerScriptService
+org.xwiki.crypto.signedscripts.internal.scripting.ScriptSignerScriptService
