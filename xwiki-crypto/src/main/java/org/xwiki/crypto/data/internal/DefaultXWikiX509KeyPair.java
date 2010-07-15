@@ -78,9 +78,9 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     private final String provider = "BC";
 
 public static final Provider BC_PROV = new BouncyCastleProvider();
-
+/*
 public static final SecureRandom RANDOM = new SecureRandom();
-
+*/
     /** The type of key store. */
     private final String keyStoreType = "PKCS12";
 
@@ -235,7 +235,7 @@ public static final SecureRandom RANDOM = new SecureRandom();
             this.certChain[i] = new XWikiX509Certificate(certificates[i]);
         }
     }
-
+/*
     public static class MyCipher extends org.bouncycastle.jce.provider.JCEBlockCipher.DESedeCBC
     {
         public void init(int a, Key b, AlgorithmParameterSpec c, SecureRandom d) throws GeneralSecurityException
@@ -279,7 +279,7 @@ public static final SecureRandom RANDOM = new SecureRandom();
             return tryWrong;
         }
     }
-
+*/
     /**
      * Create new {@link XWikiX509KeyPair} from a PKCS#12 store in base 64 String format.
      * 
