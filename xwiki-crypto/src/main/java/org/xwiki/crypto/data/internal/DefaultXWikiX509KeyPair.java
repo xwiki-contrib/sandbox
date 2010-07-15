@@ -78,9 +78,9 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     private final String provider = "BC";
 
 public static final Provider BC_PROV = new BouncyCastleProvider();
-/*
+
 public static final SecureRandom RANDOM = new SecureRandom();
-*/
+
     /** The type of key store. */
     private final String keyStoreType = "PKCS12";
 
@@ -121,9 +121,9 @@ public static final SecureRandom RANDOM = new SecureRandom();
         }
 
         final java.security.KeyStoreSpi store = new JDKPKCS12KeyStore(BC_PROV,
-                                                                      PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4,
-                                                                      PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4);
-/*
+                                                                      PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC,
+                                                                      PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC)
+
         {
             protected byte[] wrapKey(
                 String                  algorithm,
@@ -132,29 +132,31 @@ public static final SecureRandom RANDOM = new SecureRandom();
                 char[]                  password)
                 throws IOException
             {
-                PBEKeySpec          pbeSpec = new PBEKeySpec(password);
+                byte[] salt = new byte[20];
+                RANDOM.nextBytes(salt);
+                PBEKeySpec          pbeSpec = new PBEKeySpec(password, salt, 1024, 16);
                 byte[]              out;
         
                 try
                 {
                     SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(
                                                         algorithm, DefaultXWikiX509KeyPair.BC_PROV);
-                    PBEParameterSpec    defParams = new PBEParameterSpec(
-                                                        pbeParams.getIV(),
-                                                        pbeParams.getIterations().intValue());
+
+                    PBEParameterSpec    defParams = new PBEParameterSpec(pbeParams.getIV(),
+                                                                         pbeParams.getIterations().intValue());
+
+                    Cipher cipher = Cipher.getInstance(algorithm, DefaultXWikiX509KeyPair.BC_PROV);
+
+                    System.out.println(algorithm + "  " + pbeSpec.getKeyLength() + "  " + keyFact.generateSecret(pbeSpec).getEncoded().length);
+
+
+                    //DefaultXWikiX509KeyPair.MyCipher mc = new DefaultXWikiX509KeyPair.MyCipher();
+
+                    //mc.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), defParams, DefaultXWikiX509KeyPair.RANDOM);
+
+                    cipher.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec));
         
-                    //Cipher cipher = Cipher.getInstance(algorithm, DefaultXWikiX509KeyPair.BC_PROV);
-
-                    //System.out.println(algorithm);
-
-
-                    DefaultXWikiX509KeyPair.MyCipher mc = new DefaultXWikiX509KeyPair.MyCipher();
-
-                    mc.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), defParams, DefaultXWikiX509KeyPair.RANDOM);
-
-                    //cipher.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), defParams);
-        
-                    out = mc.wrap(key);
+                    out = cipher.wrap(key);
                 }
                 catch (Exception e)
                 {
@@ -163,7 +165,7 @@ public static final SecureRandom RANDOM = new SecureRandom();
         
                 return out;
             }
-
+/*
             protected byte[] cryptData(
                 boolean               forEncryption,
                 AlgorithmIdentifier   algId,
@@ -198,8 +200,8 @@ public static final SecureRandom RANDOM = new SecureRandom();
                     throw new IOException("exception decrypting data - " + e.toString(), e);
                 }
             }
-
-        };*/
+*/
+        };
 
 //KeyStore.getInstance(keyStoreType, provider);
         try {
