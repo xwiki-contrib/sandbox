@@ -29,9 +29,9 @@
     <artifactId>xwiki-core-parent</artifactId>
     <version>2.5-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-core-crypto</artifactId>
-  <name>XWiki Platform - Core - Cryptographic Services</name>
-  <description>XWiki Platform - Core - Cryptographic Services</description>
+  <artifactId>xwiki-core-signedscripts</artifactId>
+  <name>XWiki Platform - Core - Signed Scripts Services</name>
+  <description>XWiki Platform - Core - Signed Scripts</description>
   <properties>
     <!-- Skip Clirr execution, since this is a new component -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
