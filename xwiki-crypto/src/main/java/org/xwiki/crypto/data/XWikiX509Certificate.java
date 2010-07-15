@@ -99,7 +99,8 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     {
         try {
             MessageDigest hash = MessageDigest.getInstance(FINGERPRINT_ALGORITHM);
-            return new BigInteger(hash.digest(certificate.getEncoded())).toString(16);
+            BigInteger result = new BigInteger(1, hash.digest(certificate.getEncoded()));
+            return String.format("%0" + hash.getDigestLength() * 2 + "x", result);
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
