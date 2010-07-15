@@ -26,8 +26,8 @@ import java.util.List;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.crypto.ScriptSigner;
-import org.xwiki.crypto.data.SignedScript;
+import org.xwiki.crypto.signedscripts.ScriptSigner;
+import org.xwiki.crypto.signedscripts.SignedScript;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.macro.AbstractMacro;
 import org.xwiki.rendering.macro.MacroExecutionException;
@@ -84,7 +84,7 @@ public class SignedMacro extends AbstractMacro<Object>
         throws MacroExecutionException
     {
         try {
-            SignedScript script = scriptSigner.getVerifiedCode(content);
+            SignedScript script = scriptSigner.getVerifiedScript(content);
             System .out.println("  XXXXX " + script);
             // TODO check that the result contains one script macro? (macros are evaluated during parsing though)
             return evaluate(script.getCode(), context);
