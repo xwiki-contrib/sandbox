@@ -44,6 +44,6 @@ public class KeyServiceTest
     @Test
     public void newCertAndPrivateKeyTest() throws Exception
     {
-        this.service.newCertAndPrivateKey(1, "my webid", "xwiki:XWiki.Me", "pass");
+        this.service.newCertAndPrivateKey(1, "my webid", "xwiki:XWiki.Me", "passwor");
     }
 }

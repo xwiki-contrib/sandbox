@@ -25,7 +25,6 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.security.SecureRandom;
 
 import java.security.cert.CertificateException;
 import java.security.InvalidKeyException;
@@ -54,9 +53,6 @@ import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
  */
 public class Keymaker
 {
-    /** A secure random number generator. */
-//    private final SecureRandom random = new SecureRandom();
-
     /** A certificate generator. Use of this must be synchronized. */
     private final X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
 
@@ -287,7 +283,7 @@ public class Keymaker
         this.certGenerator.setNotBefore(new Date(System.currentTimeMillis() - this.anHour));
         this.certGenerator.setNotAfter(new Date(System.currentTimeMillis() + (this.aDay * daysOfValidity)));
 
-        // Set a random serial number.
+        // Set a serial number to the current time.
         this.certGenerator.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()).abs());
 
         // Set public key and algorithm.

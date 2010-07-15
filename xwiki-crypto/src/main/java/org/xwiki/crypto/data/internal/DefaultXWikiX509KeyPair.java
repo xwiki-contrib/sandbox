@@ -38,28 +38,6 @@ import org.xwiki.crypto.data.XWikiX509KeyPair;
 import org.xwiki.crypto.internal.Convert;
 
 
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-//
-import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
-import java.security.Key;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.spec.AlgorithmParameterSpec;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import javax.crypto.Cipher;
-import org.bouncycastle.jce.provider.JDKPKCS12KeyStore;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.SecretKeyFactory;
-import java.security.Provider;
-import java.security.SecureRandom;
-import javax.crypto.CipherSpi;
-import org.bouncycastle.jce.provider.JCEPBEKey;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import javax.crypto.interfaces.PBEKey;
-//
-
-
-
 /**
  * Wrapper for storing a {@link PrivateKey} and the corresponding {@link XWikiX509Certificate}.
  * 
@@ -77,12 +55,8 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     /** The encryption provider (Bouncycastle). */
     private final String provider = "BC";
 
-public static final Provider BC_PROV = new BouncyCastleProvider();
-
-public static final SecureRandom RANDOM = new SecureRandom();
-
     /** The type of key store. */
-    private final String keyStoreType = "PKCS12";
+    private final String keyStoreType = "PKCS12-3DES-3DES";
 
     /** Binary form of the PKCS#12 container which this class wraps. */
     private final byte[] pkcs12Bytes;
@@ -120,98 +94,16 @@ public static final SecureRandom RANDOM = new SecureRandom();
             nonX509Certs[i] = (Certificate) certificates[i];
         }
 
-        final java.security.KeyStoreSpi store = new JDKPKCS12KeyStore(BC_PROV,
-                                                                      PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC,
-                                                                      PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC)
+        final KeyStore store = KeyStore.getInstance(keyStoreType, provider);
 
-        {
-            protected byte[] wrapKey(
-                String                  algorithm,
-                Key                     key,
-                PKCS12PBEParams         pbeParams,
-                char[]                  password)
-                throws IOException
-            {
-                byte[] salt = new byte[20];
-                RANDOM.nextBytes(salt);
-                PBEKeySpec          pbeSpec = new PBEKeySpec(password, salt, 1024, 16);
-                byte[]              out;
-        
-                try
-                {
-                    SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(
-                                                        algorithm, DefaultXWikiX509KeyPair.BC_PROV);
-
-                    PBEParameterSpec    defParams = new PBEParameterSpec(pbeParams.getIV(),
-                                                                         pbeParams.getIterations().intValue());
-
-                    Cipher cipher = Cipher.getInstance(algorithm, DefaultXWikiX509KeyPair.BC_PROV);
-
-                    System.out.println(algorithm + "  " + pbeSpec.getKeyLength() + "  " + keyFact.generateSecret(pbeSpec).getEncoded().length);
-
-
-                    //DefaultXWikiX509KeyPair.MyCipher mc = new DefaultXWikiX509KeyPair.MyCipher();
-
-                    //mc.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), defParams, DefaultXWikiX509KeyPair.RANDOM);
-
-                    cipher.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec));
-        
-                    out = cipher.wrap(key);
-                }
-                catch (Exception e)
-                {
-                    throw new IOException("exception encrypting data - " + e.toString(), e);
-                }
-        
-                return out;
-            }
-/*
-            protected byte[] cryptData(
-                boolean               forEncryption,
-                AlgorithmIdentifier   algId,
-                char[]                password,
-                boolean               wrongPKCS12Zero,
-                byte[]                data)
-                throws IOException
-            {
-                String          algorithm = algId.getObjectId().getId();
-                PKCS12PBEParams pbeParams = new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
-                PBEKeySpec      pbeSpec = new PBEKeySpec(password);
-        
-                try
-                {
-                    SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithm, DefaultXWikiX509KeyPair.BC_PROV);
-                    PBEParameterSpec defParams = new PBEParameterSpec(
-                        pbeParams.getIV(),
-                        pbeParams.getIterations().intValue());
-                    DefaultXWikiX509KeyPair.MyJCEPBEKey key = (DefaultXWikiX509KeyPair.MyJCEPBEKey) keyFact.generateSecret(pbeSpec);
-        
-                    key.setTryWrongPKCS12Zero(wrongPKCS12Zero);
-        
-                    //Cipher cipher = Cipher.getInstance(algorithm, DefaultXWikiX509KeyPair.BC_PROV);
-                    DefaultXWikiX509KeyPair.MyCipher mc = new DefaultXWikiX509KeyPair.MyCipher();
-
-                    int mode = forEncryption ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
-                    mc.init(mode, key, defParams, DefaultXWikiX509KeyPair.RANDOM);
-                    return mc.doFinal(data);
-                }
-                catch (Exception e)
-                {
-                    throw new IOException("exception decrypting data - " + e.toString(), e);
-                }
-            }
-*/
-        };
-
-//KeyStore.getInstance(keyStoreType, provider);
         try {
-            store.engineLoad(null, null);
-            store.engineSetKeyEntry("",
+            store.load(null, null);
+            store.setKeyEntry("",
                               key,
                               null,
                               nonX509Certs);
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
-            store.engineStore(os, password.toCharArray());
+            store.store(os, password.toCharArray());
             this.pkcs12Bytes = os.toByteArray();
         } catch (IOException e) {
             // If it's a wrapped illegal key size exception then we should give the lecture about import regulations
@@ -237,51 +129,7 @@ public static final SecureRandom RANDOM = new SecureRandom();
             this.certChain[i] = new XWikiX509Certificate(certificates[i]);
         }
     }
-/*
-    public static class MyCipher extends org.bouncycastle.jce.provider.JCEBlockCipher.DESedeCBC
-    {
-        public void init(int a, Key b, AlgorithmParameterSpec c, SecureRandom d) throws GeneralSecurityException
-        {
-            super.engineInit(a, b, c, d);
-        }
 
-        public byte[] wrap(Key a) throws GeneralSecurityException
-        {
-            return super.engineWrap(a);
-        }
-
-        public Key unwrap(byte[] a, String b, int c) throws GeneralSecurityException
-        {
-            return super.engineUnwrap(a, b, c);
-        }
-
-        public byte[] doFinal(byte[] input) throws GeneralSecurityException
-        {
-            return super.engineDoFinal(input, 0, input.length);
-        }
-    }
-
-    public static class MyJCEPBEKey extends JCEPBEKey
-    {
-        // Not used but the compiler demands it.
-        public MyJCEPBEKey()
-        {
-            super(null, null, 0, 0, 0, 0, null, null);
-        }
-
-        boolean tryWrong = false;
-
-        public void setTryWrongPKCS12Zero(boolean tryWrong)
-        {
-            this.tryWrong = tryWrong;
-        }
-    
-        public boolean shouldTryWrongPKCS12()
-        {
-            return tryWrong;
-        }
-    }
-*/
     /**
      * Create new {@link XWikiX509KeyPair} from a PKCS#12 store in base 64 String format.
      * 

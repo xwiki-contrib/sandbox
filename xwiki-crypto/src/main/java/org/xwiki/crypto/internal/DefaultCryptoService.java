@@ -25,7 +25,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.component.phase.Initializable;
 import org.xwiki.crypto.CryptoService;
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
