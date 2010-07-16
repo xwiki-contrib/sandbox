@@ -312,20 +312,20 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      * The store should not leak but by deleting the entries here, we can rest easier.
      *
      * @param store the KeyStore to clean of all it's keys.
-     * @throws GeneralSecurityException if getting the list of aliases fails.
      */
     private static void cleanStore(final KeyStore store)
-        throws GeneralSecurityException
     {
-        // FIXME it might be better to ignore errors on uninitialized key store in the next line, it hides
-        // the real error when this method is used in finally and some operation on the key store fails
-        final Enumeration<String> aliases = store.aliases();
-        while (aliases.hasMoreElements()) {
-            try {
+        try {
+            final Enumeration<String> aliases = store.aliases();
+            while (aliases.hasMoreElements()) {
                 store.deleteEntry(aliases.nextElement());
-            } catch (KeyStoreException e) {
-                // probably a "no such entry" exception, safe to ignore since the key is still dropped.
             }
+        } catch (KeyStoreException e) {
+            // there are 2 cases where exception can be thrown
+            // 1. the key store is not initialized, we cannot clean it anyway
+            // 2. a "no such entry" exception, safe to ignore since the key is still dropped
+            // we ignore the errors, because they hide the real error when this method is used
+            // in finally and some operation on the key store fails
         }
     }
 
