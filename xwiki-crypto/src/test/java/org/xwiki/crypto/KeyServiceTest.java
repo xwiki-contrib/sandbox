@@ -19,11 +19,12 @@
  */
 package org.xwiki.crypto;
 
+import java.security.GeneralSecurityException;
+
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
-
 import org.xwiki.crypto.internal.KeyService;
 
 /**
@@ -34,16 +35,49 @@ import org.xwiki.crypto.internal.KeyService;
  */
 public class KeyServiceTest
 {
+    /** The tested key service. */
     private final KeyService service = new KeyService();
 
+    @Ignore
+    @Test
     public void certsFromSpkacTest() throws Exception
     {
         //this.service.certsFromSpkac(this.spkacSerialization, 1, "my webid", "xwiki:XWiki.Me");
     }
 
     @Test
-    public void newCertAndPrivateKeyTest() throws Exception
+    public void newCertAndPrivateKeyTestShortPwd() throws Exception
     {
+        // 7 character password should definitely work
         this.service.newCertAndPrivateKey(1, "my webid", "xwiki:XWiki.Me", "passwor");
+    }
+
+    @Test
+    public void newCertAndPrivateKeyTestLongPwd() throws Exception
+    {
+        // long password should work because of password mangling
+        this.service.newCertAndPrivateKey(1, "my webid", "xwiki:XWiki.Me", "this is a very, very, very, very, very, looooooong passphrase");
+    }
+
+    @Test
+    public void newPrivateKeyCorrectPassword() throws GeneralSecurityException
+    {
+        String password = "ololol";
+        XWikiX509KeyPair keyPair = this.service.newCertAndPrivateKey(1, "my webid", "xwiki:XWiki.Me", password);
+        Assert.assertNotNull("Private key is null", keyPair.getPrivateKey(password));
+    }
+
+    @Test
+    public void newPrivateKeyWrongPassword() throws GeneralSecurityException
+    {
+        String password = "ololol";
+        XWikiX509KeyPair keyPair = this.service.newCertAndPrivateKey(1, "my webid", "xwiki:XWiki.Me", password);
+        try {
+            Assert.assertNotNull("Private key is null", keyPair.getPrivateKey("asdf"));
+        } catch (GeneralSecurityException exception) {
+            Throwable cause = exception.getCause();
+            Assert.assertNotNull("Unexpected error", cause);
+            Assert.assertTrue("Unknown error message", cause.getMessage().contains("wrong password or corrupted file"));
+        }
     }
 }
