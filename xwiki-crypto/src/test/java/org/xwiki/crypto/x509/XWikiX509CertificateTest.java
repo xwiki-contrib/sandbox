@@ -19,12 +19,17 @@
  */
 package org.xwiki.crypto.x509;
 
+import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.xwiki.crypto.internal.Convert;
 
 
 /**
@@ -99,6 +104,19 @@ public class XWikiX509CertificateTest
         X500Principal issuer = new X500Principal(cert.getIssuerName());
         Assert.assertEquals("Incorrect author name", new X500Principal(CERT_AUTHOR), author);
         Assert.assertEquals("Incorrect issuer name", new X500Principal(CERT_ISSUER), issuer);
+    }
+
+    @Test
+    public void testImportedEqualCreated() throws GeneralSecurityException
+    {
+        CertificateFactory factory = CertificateFactory.getInstance("X509");
+        Certificate cert = factory.generateCertificate(new ByteArrayInputStream(Convert.stringToBytes(CERT_PEM)));
+        if (!(cert instanceof X509Certificate)) {
+            throw new RuntimeException("Wrong certificate type");
+        }
+        XWikiX509Certificate certCreated = new XWikiX509Certificate((X509Certificate) cert);
+        XWikiX509Certificate certImported = XWikiX509Certificate.fromPEMString(CERT_PEM);
+        Assert.assertEquals(certImported, certCreated);
     }
 }
 
