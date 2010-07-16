@@ -19,10 +19,14 @@
  */
 package org.xwiki.crypto.x509;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,12 +44,16 @@ public class X509KeymakerTest
     private final X509Keymaker keyMaker = new X509Keymaker();
 
     @Test
-    public void testGenerateCertAuthority() throws GeneralSecurityException
+    public void testGenerateCertAuthority() throws GeneralSecurityException, IOException
     {
         KeyPair kp = keyMaker.newKeyPair();
         X509Certificate cert = keyMaker.makeCertificateAuthority(kp, 1);
-        System.out.println(cert.getCriticalExtensionOIDs());
-        Assert.assertTrue(BasicConstraints.getInstance(cert).isCA());
+
+        // read Basic Constraints
+        DEROctetString obj = (DEROctetString) new ASN1InputStream(cert.getExtensionValue("2.5.29.19")).readObject();
+        ASN1Sequence seq = (ASN1Sequence) new ASN1InputStream(obj.getOctets()).readObject();
+        BasicConstraints constraints = BasicConstraints.getInstance(seq);
+        Assert.assertTrue(constraints.isCA());
     }
 }
 
