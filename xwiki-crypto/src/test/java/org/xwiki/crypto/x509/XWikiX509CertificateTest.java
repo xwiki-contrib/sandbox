@@ -118,5 +118,13 @@ public class XWikiX509CertificateTest
         XWikiX509Certificate certImported = XWikiX509Certificate.fromPEMString(CERT_PEM);
         Assert.assertEquals(certImported, certCreated);
     }
+
+    @Test
+    public void testIssuerFingerprint() throws GeneralSecurityException
+    {
+        XWikiX509Certificate cert = XWikiX509Certificate.fromPEMString(CERT_PEM);
+        XWikiX509Certificate certWrapper = new XWikiX509Certificate(cert, cert.getFingerprint());
+        Assert.assertEquals(cert.getFingerprint(), certWrapper.getIssuerFingerprint());
+    }
 }
 

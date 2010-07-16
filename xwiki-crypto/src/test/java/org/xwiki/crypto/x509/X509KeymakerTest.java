@@ -55,5 +55,18 @@ public class X509KeymakerTest
         BasicConstraints constraints = BasicConstraints.getInstance(seq);
         Assert.assertTrue(constraints.isCA());
     }
+
+    @Test
+    public void testClientAndAuthority() throws GeneralSecurityException
+    {
+        KeyPair kp = keyMaker.newKeyPair();
+        X509Certificate[] certs = keyMaker.makeClientAndAuthorityCertificates(kp.getPublic(), 1, true, "web id", "xwiki:XWiki.Me");
+        // verify client
+        certs[0].checkValidity();
+        certs[0].verify(certs[1].getPublicKey());
+        // verify authority
+        certs[1].checkValidity();
+        certs[1].verify(certs[1].getPublicKey());
+    }
 }
 

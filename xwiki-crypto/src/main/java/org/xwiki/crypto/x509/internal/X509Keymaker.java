@@ -131,7 +131,7 @@ public class X509Keymaker
      * @param nonRepudiable this should only be true if the private key is not stored on the server.
      * @param webId the URI to put as the alternative name (for FOAFSSL webId compatability)
      * @param userName a String representation of the name of the user getting the certificate.
-     * @return an array of 2 new X509 certificates.
+     * @return an array of 2 new X509 certificates, with the client certificate at 0-th index, and CA cert at 1-st index
      * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
      * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
      * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
