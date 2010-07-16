@@ -44,7 +44,7 @@ public class KeyService
 
     /** Make sure the BouncyCastle provider is added to java security providers. */
     {
-        if (Security.getProvider("BC") == null) {
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
     }

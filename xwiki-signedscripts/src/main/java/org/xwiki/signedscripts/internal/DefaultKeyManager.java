@@ -90,7 +90,11 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      */
     public void initialize() throws InitializationException
     {
-        Security.addProvider(new BouncyCastleProvider());
+        // register Bouncycastle provider if needed
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
+
         try {
             kpGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
             kpGen.initialize(KEY_SIZE);
