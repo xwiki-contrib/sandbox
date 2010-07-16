@@ -54,6 +54,9 @@ import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
  */
 public class X509Keymaker
 {
+    /** The name used in generated CA certificates. */
+    private static final String CA_NAME = "DN=XWiki.org";
+
     /** A certificate generator. Use of this must be synchronized. */
     private final X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
 
@@ -190,12 +193,10 @@ public class X509Keymaker
                NoSuchProviderException
     {
         try {
-            this.prepareGenericCertificate(forCert, daysOfValidity);
-
-            // Set UID (same for issuer since this certificate confers no authority)
+            // the UID (same for issuer since this certificate confers no authority)
             X509Name dName = new X509Name("UID=" + userName);
-            this.certGenerator.setSubjectDN(dName);
-            this.certGenerator.setIssuerDN(dName);
+
+            this.prepareGenericCertificate(forCert, daysOfValidity, dName, dName);
 
             // Not a CA
             certGenerator.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
@@ -254,8 +255,9 @@ public class X509Keymaker
                NoSuchProviderException
     {
         try {
-
-            this.prepareGenericCertificate(keyPair.getPublic(), daysOfValidity);
+            // self-signed
+            X509Name name = new X509Name(CA_NAME);
+            this.prepareGenericCertificate(keyPair.getPublic(), daysOfValidity, name, name);
 
             certGenerator.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(0));
 
@@ -268,7 +270,6 @@ public class X509Keymaker
                                        new SubjectKeyIdentifierStructure(keyPair.getPublic()));
 
             return this.generate(keyPair);
-
         } finally {
             // Clean up after ourselves so that it is more difficult to try to extract private keys from the heap.
             this.certGenerator.reset();
@@ -280,9 +281,13 @@ public class X509Keymaker
      *
      * @param forCert the public key will appear in the certificate.
      * @param daysOfValidity number of days the cert should be valid for.
+     * @param subjectDN subject name
+     * @param issuerDN issuer name
      */
     private synchronized void prepareGenericCertificate(final PublicKey forCert,
-                                                        final int daysOfValidity)
+                                                        final int daysOfValidity,
+                                                        X509Name subjectDN,
+                                                        X509Name issuerDN)
     {
         // We reset and use a "shared" cert generator which is why this method is synchronized.
         this.certGenerator.reset();
@@ -297,6 +302,10 @@ public class X509Keymaker
         // Set public key and algorithm.
         this.certGenerator.setPublicKey(forCert);
         this.certGenerator.setSignatureAlgorithm(this.certSignatureAlgorithm);
+
+        // set subject and issuer names
+        this.certGenerator.setSubjectDN(subjectDN);
+        this.certGenerator.setIssuerDN(issuerDN);
     }
 
     /**
