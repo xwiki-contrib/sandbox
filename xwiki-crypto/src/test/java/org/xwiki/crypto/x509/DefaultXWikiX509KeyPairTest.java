@@ -23,8 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
@@ -51,6 +50,9 @@ public class DefaultXWikiX509KeyPairTest
         XWikiX509KeyPair keyPair = new DefaultXWikiX509KeyPair(kp.getPrivate(), password, cert);
         String exported = keyPair.toBase64PKCS12();
         XWikiX509KeyPair imported = new DefaultXWikiX509KeyPair(exported, password);
+        Assert.assertEquals(keyPair.toBase64PKCS12(), imported.toBase64PKCS12());
+        Assert.assertEquals(keyPair.getPrivateKey(password), imported.getPrivateKey(password));
+        Assert.assertArrayEquals(keyPair.getCertificates(), imported.getCertificates());
         Assert.assertEquals(keyPair, imported);
     }
 }

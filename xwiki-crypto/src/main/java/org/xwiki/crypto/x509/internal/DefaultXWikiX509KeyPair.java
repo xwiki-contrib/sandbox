@@ -31,6 +31,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 import javax.crypto.Cipher;
@@ -212,7 +213,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     public boolean equals(final Object obj)
     {
         if (obj instanceof DefaultXWikiX509KeyPair) {
-            return this.pkcs12Bytes.equals(((DefaultXWikiX509KeyPair) obj).pkcs12Bytes);
+            return Arrays.equals(this.pkcs12Bytes, ((DefaultXWikiX509KeyPair) obj).pkcs12Bytes);
         }
         return false;
     }
