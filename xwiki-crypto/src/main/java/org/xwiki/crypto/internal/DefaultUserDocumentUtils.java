@@ -111,6 +111,9 @@ public class DefaultUserDocumentUtils implements UserDocumentUtils
      */
     public static class InfiniteLoopException extends RuntimeException
     {
+        /** Version ID. */
+        private static final long serialVersionUID = -7135937602338126967L;
+
         /**
          * The Constructor.
          *

@@ -91,7 +91,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
         }
         final Certificate[] nonX509Certs = new Certificate[certificates.length];
         for (int i = 0; i < certificates.length; i++) {
-            nonX509Certs[i] = (Certificate) certificates[i];
+            nonX509Certs[i] = certificates[i];
         }
 
         final KeyStore store = KeyStore.getInstance(keyStoreType, provider);
