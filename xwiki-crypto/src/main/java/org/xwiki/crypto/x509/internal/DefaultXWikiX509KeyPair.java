@@ -35,9 +35,9 @@ import java.util.Enumeration;
 
 import javax.crypto.Cipher;
 
+import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
-import org.xwiki.crypto.internal.Convert;
 
 
 /**
@@ -171,13 +171,11 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     {
         this.maxKeyLength = calculateMaximalKeyLength();
         final KeyStore store = KeyStore.getInstance(keyStoreType, provider);
-        X509Certificate[] certificates = null;
+        Certificate[] certificates = null;
 
         try {
             store.load(new ByteArrayInputStream(pkcs12Bytes), preparePassword(password));
-            certificates = (X509Certificate[]) store.getCertificateChain("");
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("Only PKCS#12 containers with X509Certificates are accepted.");
+            certificates = store.getCertificateChain("");
         } catch (IOException e) {
             throw new GeneralSecurityException("Failed to load key store to parse PKCS#12 container", e);
         } finally {
@@ -186,7 +184,11 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
         this.certChain = new XWikiX509Certificate[certificates.length];
         for (int i = 0; i < certificates.length; i++) {
-            this.certChain[i] = new XWikiX509Certificate(certificates[i]);
+            if (!(certificates[i] instanceof X509Certificate)) {
+                throw new IllegalArgumentException("Only PKCS#12 containers with X509Certificates are accepted, found: "
+                        + certificates[i].getType());
+            }
+            this.certChain[i] = new XWikiX509Certificate((X509Certificate) certificates[i]);
         }
 
         this.pkcs12Bytes = pkcs12Bytes;
