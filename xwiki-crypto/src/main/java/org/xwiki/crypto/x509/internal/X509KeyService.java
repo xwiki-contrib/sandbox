@@ -88,6 +88,8 @@ public class X509KeyService
     }
 
     /**
+     * Create a fresh self-signed key pair.
+     * 
      * @param daysOfValidity number of days before the certificate should become invalid.
      * @param webID the URL of the user's page. Used for FOAFSSL compatabulity.
      * @param userName the String serialization of the user's page name.

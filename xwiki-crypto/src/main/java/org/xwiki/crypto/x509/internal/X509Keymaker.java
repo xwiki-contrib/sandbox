@@ -19,31 +19,31 @@
  */
 package org.xwiki.crypto.x509.internal;
 
-import java.util.Date;
 import java.math.BigInteger;
-
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-
-import java.security.cert.CertificateException;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PublicKey;
+import java.security.Security;
 import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
+import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 
 
 /**
@@ -74,6 +74,13 @@ public class X509Keymaker
 
     /** If this is set then it will be returned by the script service with all client certificates. */
     private X509Certificate authorityCertificate;
+
+    /** Make sure the BouncyCastle provider is added to java security providers. */
+    {
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
+    }
 
     /** @return a newly generated RSA KeyPair. */
     public KeyPair newKeyPair()
