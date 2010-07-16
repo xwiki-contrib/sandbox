@@ -203,7 +203,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
      */
     public static XWikiX509Certificate fromPEMString(String pemEncoded) throws GeneralSecurityException
     {
-        final byte[] base64Bytes = Convert.stringToBytes(pemEncoded, CERT_BEGIN, CERT_END);
+        final byte[] base64Bytes = Convert.fromBase64String(pemEncoded, CERT_BEGIN, CERT_END);
         final CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
         final Certificate cert = factory.generateCertificate(new ByteArrayInputStream(base64Bytes));
         if (!(cert instanceof X509Certificate)) {
