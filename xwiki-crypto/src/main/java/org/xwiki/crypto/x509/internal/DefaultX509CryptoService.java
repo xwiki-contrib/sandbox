@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.internal;
+package org.xwiki.crypto.x509.internal;
 
 import java.security.GeneralSecurityException;
 
@@ -25,9 +25,12 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.crypto.CryptoService;
-import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
+
+import org.xwiki.crypto.internal.UserDocumentUtils;
+import org.xwiki.crypto.x509.X509CryptoService;
+import org.xwiki.crypto.x509.XWikiX509Certificate;
+import org.xwiki.crypto.x509.XWikiX509KeyPair;
+
 
 /**
  * Service allowing a user to sign text, determine the validity and signer of already signed text, and create keys.
@@ -37,21 +40,21 @@ import org.xwiki.crypto.data.XWikiX509KeyPair;
  */
 @Component
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
-public class DefaultCryptoService implements CryptoService
+public class DefaultX509CryptoService implements X509CryptoService
 {
     /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
     @Requirement
     private UserDocumentUtils userDocUtils;
 
     /** Handles the generation of keys. */
-    private final KeyService keyService = new KeyService();
+    private final X509KeyService keyService = new X509KeyService();
 
     /** For signing and verifying signatures on text. */
-    private final SignatureService signatureService = new SignatureService();
+    private final X509SignatureService signatureService = new X509SignatureService();
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#certsFromSpkac(java.lang.String, int)
+     * @see org.xwiki.crypto.x509.X509CryptoService#certsFromSpkac(java.lang.String, int)
      */
     public XWikiX509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
         throws GeneralSecurityException
@@ -63,7 +66,7 @@ public class DefaultCryptoService implements CryptoService
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
+     * @see org.xwiki.crypto.x509.X509CryptoService#newCertAndPrivateKey(int)
      */
     public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity, final String password)
         throws GeneralSecurityException
@@ -75,7 +78,7 @@ public class DefaultCryptoService implements CryptoService
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
+     * @see org.xwiki.crypto.x509.X509CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
     public String signText(final String textToSign, final XWikiX509KeyPair toSignWith, final String password)
         throws GeneralSecurityException
@@ -85,7 +88,7 @@ public class DefaultCryptoService implements CryptoService
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#verifyText(java.lang.String, java.lang.String)
+     * @see org.xwiki.crypto.x509.X509CryptoService#verifyText(java.lang.String, java.lang.String)
      */
     public XWikiX509Certificate verifyText(final String signedText, final String base64Signature)
         throws GeneralSecurityException
@@ -95,7 +98,7 @@ public class DefaultCryptoService implements CryptoService
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
+     * @see org.xwiki.crypto.x509.X509CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
      */
     public String encryptText(final String plaintext, final XWikiX509Certificate[] certificatesToEncryptFor)
         throws GeneralSecurityException
@@ -105,7 +108,7 @@ public class DefaultCryptoService implements CryptoService
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
+     * @see org.xwiki.crypto.x509.X509CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
     public String decryptText(final String base64Ciphertext,
                               final XWikiX509KeyPair toDecryptWith,
@@ -113,5 +116,15 @@ public class DefaultCryptoService implements CryptoService
         throws GeneralSecurityException
     {
         throw new GeneralSecurityException("Not implemented yet.");
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.x509.X509CryptoService#certFromPEM(java.lang.String)
+     */
+    public XWikiX509Certificate certFromPEM(final String pemFormatCert)
+        throws GeneralSecurityException
+    {
+        return XWikiX509Certificate.fromPEMString(pemFormatCert);
     }
 }

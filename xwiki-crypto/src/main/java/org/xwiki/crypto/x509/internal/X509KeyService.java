@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.internal;
+package org.xwiki.crypto.x509.internal;
 
 import java.security.GeneralSecurityException;
 import java.security.InvalidParameterException;
@@ -27,9 +27,10 @@ import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
-import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
-import org.xwiki.crypto.data.internal.DefaultXWikiX509KeyPair;
+
+import org.xwiki.crypto.internal.Convert;
+import org.xwiki.crypto.x509.XWikiX509Certificate;
+import org.xwiki.crypto.x509.XWikiX509KeyPair;
 
 /**
  * Service allowing a user to create keys and X509 certificates.
@@ -37,10 +38,10 @@ import org.xwiki.crypto.data.internal.DefaultXWikiX509KeyPair;
  * @version $Id$
  * @since 2.5
  */
-public class KeyService
+public class X509KeyService
 {
     /** Used for the actual key making, also holds any secrets. */
-    private final Keymaker keymaker = new Keymaker();
+    private final X509Keymaker keymaker = new X509Keymaker();
 
     /** Make sure the BouncyCastle provider is added to java security providers. */
     {

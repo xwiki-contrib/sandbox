@@ -17,15 +17,15 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto;
+package org.xwiki.crypto.x509;
 
 import java.security.GeneralSecurityException;
 
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
-import org.xwiki.crypto.internal.KeyService;
+import org.xwiki.crypto.x509.XWikiX509KeyPair;
+import org.xwiki.crypto.x509.internal.X509KeyService;
 
 /**
  * KeyService test, insure that the key service is able to make keys without throwing an exception.
@@ -33,10 +33,10 @@ import org.xwiki.crypto.internal.KeyService;
  * @version $Id$
  * @since 2.5
  */
-public class KeyServiceTest
+public class X509KeyServiceTest
 {
     /** The tested key service. */
-    private final KeyService service = new KeyService();
+    private final X509KeyService service = new X509KeyService();
 
     @Ignore
     @Test
@@ -56,7 +56,10 @@ public class KeyServiceTest
     public void newCertAndPrivateKeyTestLongPwd() throws Exception
     {
         // long password should work because of password mangling
-        this.service.newCertAndPrivateKey(1, "my webid", "xwiki:XWiki.Me", "this is a very, very, very, very, very, looooooong passphrase");
+        this.service.newCertAndPrivateKey(1,
+                                          "my webid",
+                                          "xwiki:XWiki.Me",
+                                          "this is a very, very, very, very, very, looooooong passphrase");
     }
 
     @Test

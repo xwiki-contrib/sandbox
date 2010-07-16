@@ -17,13 +17,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto;
+package org.xwiki.crypto.x509;
 
 import java.security.GeneralSecurityException;
 
 import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
 
 /**
  * Service allowing components to sign text, determine the validity and signer of already signed text,
@@ -33,7 +31,7 @@ import org.xwiki.crypto.data.XWikiX509KeyPair;
  * @since 2.5
  */
 @ComponentRole
-public interface CryptoService
+public interface X509CryptoService
 {
     /**
      * Creates an array of Base64 encoded DER formatted X509Certificates containing:
@@ -114,5 +112,19 @@ public interface CryptoService
      * @throws GeneralSecurityException if something goes wrong.
      */
     String decryptText(final String base64Ciphertext, final XWikiX509KeyPair toDecryptWith, final String password)
+        throws GeneralSecurityException;
+
+    /**
+     * Deserialize an X509 certificate from a PEM formatted string.
+     * @param pemFormatCert a String created by {@link org.xwiki.crypto.data.XWikiX509Certificate#toPEMString()}
+     *                      or from OpenSSL or any other standards compliant X509 certificate generator in PEM format.
+     * @return an {@link org.xwiki.crypto.data.XWikiX509Certificate} which extends 
+     *         {@link java.security.cert.X509Certificate} and can be used by methods in this class as well as with
+     *          third party encryption tools.
+     * @throws GeneralSecurityException If there isn't a valid {@link XWikiX509Certificate#CERT_BEGIN} or
+     *                                  {@link XWikiX509Certificate#CERT_END} tag, or if there is an exception parsing
+     *                                  the content inbetween.
+     */
+    XWikiX509Certificate certFromPEM(final String pemFormatCert)
         throws GeneralSecurityException;
 }

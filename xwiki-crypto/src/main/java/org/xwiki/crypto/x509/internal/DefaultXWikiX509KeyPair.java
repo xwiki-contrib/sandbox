@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.data.internal;
+package org.xwiki.crypto.x509.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,8 +35,8 @@ import java.util.Enumeration;
 
 import javax.crypto.Cipher;
 
-import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
+import org.xwiki.crypto.x509.XWikiX509Certificate;
+import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.internal.Convert;
 
 

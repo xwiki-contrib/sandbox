@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.internal;
+package org.xwiki.crypto.x509.internal;
 
 import java.util.Date;
 import java.math.BigInteger;
@@ -45,13 +45,14 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 
+
 /**
  * Keymaker allows you to create keypairs and X509Certificates.
  * 
  * @version $Id$
  * @since 2.5
  */
-public class Keymaker
+public class X509Keymaker
 {
     /** A certificate generator. Use of this must be synchronized. */
     private final X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
