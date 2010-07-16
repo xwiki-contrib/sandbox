@@ -22,7 +22,6 @@ package org.xwiki.crypto.data.internal;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -338,7 +337,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      * Strength Jurisdiction Policy Files available on the Sun Microsystems website.</p>
      * 
      * @param password the string representation of the password
-     * @return character array with the password hash
+     * @return character array with the password hash (do not convert to string, invalid UTF-16)
      * @throws GeneralSecurityException if something goes wrong (very unlikely)
      */
     private char[] preparePassword(String password) throws GeneralSecurityException
@@ -354,20 +353,13 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
             throw new GeneralSecurityException("Invalid maximal key length");
         }
         byte[] buf = hash.digest(Convert.stringToBytes(password));
-        InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(buf));
-        try {
-            char[] result = new char[length];
-            int read = reader.read(result);
-            if (read < length) {
-                // something went completely wrong
-                throw new GeneralSecurityException("Failed to prepare password, read " + read
-                    + " characters out of " + length);
-            }
-            return result;
-        } catch (IOException exception) {
-            // should not happen
-            throw new GeneralSecurityException("Should not happen: " + exception.getMessage(), exception);
+        char[] result = new char[length];
+        for (int i = 0; i < length; i++) {
+            // assumes that Character.SIZE = 2 * Byte.SIZE
+            // may produce invalid UTF-16
+            result[i] = (char) (((char) buf[i * 2] << Byte.SIZE) | buf[(i * 2) + 1]);
         }
+        return result;
     }
 
     /**
