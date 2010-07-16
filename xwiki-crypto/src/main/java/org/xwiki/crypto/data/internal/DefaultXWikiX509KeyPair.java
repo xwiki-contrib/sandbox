@@ -19,19 +19,22 @@
  */
 package org.xwiki.crypto.data.internal;
 
-import java.util.Enumeration;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
+import java.io.InputStreamReader;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 
-import java.security.KeyStoreException;
-import java.security.GeneralSecurityException;
+import javax.crypto.Cipher;
 
 import org.xwiki.crypto.data.XWikiX509Certificate;
 import org.xwiki.crypto.data.XWikiX509KeyPair;
@@ -52,6 +55,9 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     /** Marks the end of a private credential in a string. */
     private static final String END_CREDENTIAL = "-----END BASE64 ENCODED PKCS12 CREDENTIAL-----";
 
+    /** Hash algorithm used to mangle the key store password. */
+    private static final String HASH_ALGORITHM = "SHA-256";
+
     /** The encryption provider (Bouncycastle). */
     private final String provider = "BC";
 
@@ -67,12 +73,15 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      */
     private final XWikiX509Certificate[] certChain;
 
+    /** Maximal allowed key length in bit. By default, Java restricts it to 128 bit due to US export regulations. */
+    private final int maxKeyLength;
+
     /**
      * Create new {@link XWikiX509KeyPair}.
      * 
      * @param key the private key to use.
-     * @param certificates an array containing at index 0 the certificate matching the private key, and at indexes above
-     *                     that index, the chain of certificates ascending up to the root certificate authority.
+     * @param certificates an array containing at index 0 the certificate matching the private key, and at indexes
+     *                     above that index, the chain of certificates ascending up to the root certificate authority.
      * @param password the password to require if a user wants to extract the private key.
      *                 This password will also be applied to the PKCS#12 output if this is exported.
      *                 The strength of the PKCS#12 cryptography grows with the length of the password and symmetrical 
@@ -94,6 +103,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
             nonX509Certs[i] = certificates[i];
         }
 
+        this.maxKeyLength = calculateMaximalKeyLength();
         final KeyStore store = KeyStore.getInstance(keyStoreType, provider);
 
         try {
@@ -103,7 +113,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
                               null,
                               nonX509Certs);
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
-            store.store(os, password.toCharArray());
+            store.store(os, preparePassword(password));
             this.pkcs12Bytes = os.toByteArray();
         } catch (IOException e) {
             // If it's a wrapped illegal key size exception then we should give the lecture about import regulations
@@ -160,11 +170,12 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
                                    final String password)
         throws GeneralSecurityException
     {
+        this.maxKeyLength = calculateMaximalKeyLength();
         final KeyStore store = KeyStore.getInstance(keyStoreType, provider);
         X509Certificate[] certificates = null;
 
         try {
-            store.load(new ByteArrayInputStream(pkcs12Bytes), password.toCharArray());
+            store.load(new ByteArrayInputStream(pkcs12Bytes), preparePassword(password));
             certificates = (X509Certificate[]) store.getCertificateChain("");
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("Only PKCS#12 containers with X509Certificates are accepted.");
@@ -257,7 +268,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     {
         final KeyStore store = KeyStore.getInstance(keyStoreType, provider);
         try {
-            store.load(new ByteArrayInputStream(pkcs12Bytes), password.toCharArray());
+            store.load(new ByteArrayInputStream(pkcs12Bytes), preparePassword(password));
             return (PrivateKey) store.getKey("", null);
         } catch (IOException e) {
             throw new GeneralSecurityException("Failed to load key store to get the private key", e);
@@ -307,6 +318,8 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     private static void cleanStore(final KeyStore store)
         throws GeneralSecurityException
     {
+        // FIXME it might be better to ignore errors on uninitialized key store in the next line, it hides
+        // the real error when this method is used in finally and some operation on the key store fails
         final Enumeration<String> aliases = store.aliases();
         while (aliases.hasMoreElements()) {
             try {
@@ -315,5 +328,55 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
                 // probably a "no such entry" exception, safe to ignore since the key is still dropped.
             }
         }
+    }
+
+    /**
+     * Convert the given password string to the character array as required by the key store. This method
+     * uses a cryptographic hash function to improve the password entropy.
+     * <p>
+     * Note that the length of the password is limited to 128 bit unless you install Unlimited 
+     * Strength Jurisdiction Policy Files available on the Sun Microsystems website.</p>
+     * 
+     * @param password the string representation of the password
+     * @return character array with the password hash
+     * @throws GeneralSecurityException if something goes wrong (very unlikely)
+     */
+    private char[] preparePassword(String password) throws GeneralSecurityException
+    {
+        MessageDigest hash = MessageDigest.getInstance(HASH_ALGORITHM);
+        int length = this.maxKeyLength;
+        if (length > hash.getDigestLength() * Byte.SIZE) {
+            length = hash.getDigestLength() * Byte.SIZE;
+        }
+        length /= Character.SIZE;
+        if (length < 1) {
+            throw new GeneralSecurityException("Invalid maximal key length");
+        }
+        byte[] buf = hash.digest(Convert.stringToBytes(password));
+        InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(buf));
+        try {
+            char[] result = new char[length];
+            int read = reader.read(result);
+            if (read < length) {
+                // something went completely wrong
+                throw new GeneralSecurityException("Failed to prepare password, read " + read
+                    + " characters out of " + length);
+            }
+            return result;
+        } catch (IOException exception) {
+            // should not happen
+            throw new GeneralSecurityException("Should not happen: " + exception.getMessage(), exception);
+        }
+    }
+
+    /**
+     * Calculate the currently allowed maximal key length.
+     * 
+     * @return the maximal key length
+     * @throws NoSuchAlgorithmException if the 3DES algorithm is not available (very, very unlikely)
+     */
+    private int calculateMaximalKeyLength() throws NoSuchAlgorithmException
+    {
+        return Cipher.getMaxAllowedKeyLength("DESede");
     }
 }
