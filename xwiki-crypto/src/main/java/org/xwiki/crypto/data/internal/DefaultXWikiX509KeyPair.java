@@ -344,7 +344,8 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     private char[] preparePassword(String password) throws GeneralSecurityException
     {
         MessageDigest hash = MessageDigest.getInstance(HASH_ALGORITHM);
-        int length = this.maxKeyLength;
+        // the key length should be strictly smaller than the maximal length
+        int length = this.maxKeyLength - 1;
         if (length > hash.getDigestLength() * Byte.SIZE) {
             length = hash.getDigestLength() * Byte.SIZE;
         }
@@ -377,6 +378,6 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      */
     private int calculateMaximalKeyLength() throws NoSuchAlgorithmException
     {
-        return Cipher.getMaxAllowedKeyLength("DESede");
+        return Cipher.getMaxAllowedKeyLength("3DES");
     }
 }
