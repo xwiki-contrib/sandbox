@@ -49,10 +49,10 @@ import org.xwiki.crypto.internal.Convert;
 public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 {
     /** Marks the beginning of a private credential in a string. */
-    private static final String BEGIN_CREDENTIAL = "-----BEGIN BASE64 ENCODED PKCS12 CREDENTIAL-----";
+    private static final String BEGIN_CREDENTIAL = "-----BEGIN PKCS12-----";
 
     /** Marks the end of a private credential in a string. */
-    private static final String END_CREDENTIAL = "-----END BASE64 ENCODED PKCS12 CREDENTIAL-----";
+    private static final String END_CREDENTIAL = "-----END PKCS12-----";
 
     /** Hash algorithm used to mangle the key store password. */
     private static final String HASH_ALGORITHM = "SHA-256";
@@ -303,8 +303,8 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
         return BEGIN_CREDENTIAL
              + Convert.getNewline()
              + Convert.toChunkedBase64String(this.pkcs12Bytes)
-             + Convert.getNewline()
-             + END_CREDENTIAL;
+             + END_CREDENTIAL
+             + Convert.getNewline();
     }
 
     /**
