@@ -112,6 +112,9 @@ public final class Convert
      */
     public static byte[] toBase64(byte[] data)
     {
+        if (data == null) {
+            return new byte[0];
+        }
         return Base64.encode(data);
     }
 
@@ -141,12 +144,7 @@ public final class Convert
      */
     public static byte[] fromBase64String(String base64Encoded)
     {
-        try {
-            return fromBase64(base64Encoded.getBytes(CHARSET));
-        } catch (UnsupportedEncodingException exception) {
-            // cannot happen
-            throw new RuntimeException(exception);
-        }
+        return fromBase64(stringToBytes(base64Encoded));
     }
 
     /**
@@ -157,6 +155,9 @@ public final class Convert
      */
     public static byte[] fromBase64(byte[] base64Encoded)
     {
+        if (base64Encoded == null || base64Encoded.length == 0) {
+            return new byte[0];
+        }
         return Base64.decode(base64Encoded);
     }
 
@@ -173,6 +174,9 @@ public final class Convert
                                        final String beginningMarker,
                                        final String endMarker)
     {
+        if (withBase64EncodedContent == null) {
+            throw new IllegalArgumentException("Given string is null");
+        }
         int beginIndex = withBase64EncodedContent.indexOf(beginningMarker);
         if (beginIndex < 0) {
             throw new IllegalArgumentException("No beginning marker found in string\nExpecting: "
@@ -195,6 +199,9 @@ public final class Convert
      */
     public static byte[] stringToBytes(String string)
     {
+        if (string == null) {
+            return new byte[0];
+        }
         try {
             return string.getBytes(CHARSET);
         } catch (UnsupportedEncodingException exception) {
