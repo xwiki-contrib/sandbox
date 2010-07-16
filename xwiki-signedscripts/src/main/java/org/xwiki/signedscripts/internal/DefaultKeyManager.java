@@ -41,9 +41,9 @@ import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
-import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
-import org.xwiki.crypto.data.internal.DefaultXWikiX509KeyPair;
+import org.xwiki.crypto.x509.XWikiX509Certificate;
+import org.xwiki.crypto.x509.XWikiX509KeyPair;
+import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
 import org.xwiki.signedscripts.KeyManager;
 
 

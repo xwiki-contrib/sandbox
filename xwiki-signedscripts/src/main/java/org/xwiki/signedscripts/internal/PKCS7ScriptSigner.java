@@ -29,9 +29,9 @@ import java.util.TimeZone;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.crypto.CryptoService;
-import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
+import org.xwiki.crypto.x509.X509CryptoService;
+import org.xwiki.crypto.x509.XWikiX509Certificate;
+import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.signedscripts.KeyManager;
 import org.xwiki.signedscripts.ScriptSigner;
 import org.xwiki.signedscripts.SignedScript;
@@ -49,7 +49,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 {
     /** PKCS7 crypto service. */
     @Requirement
-    private CryptoService pkcs7;
+    private X509CryptoService pkcs7;
 
     /** Key manager. */
     @Requirement

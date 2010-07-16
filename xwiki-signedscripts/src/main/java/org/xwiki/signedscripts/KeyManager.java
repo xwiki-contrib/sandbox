@@ -23,8 +23,8 @@ import java.security.GeneralSecurityException;
 import java.util.Set;
 
 import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
+import org.xwiki.crypto.x509.XWikiX509Certificate;
+import org.xwiki.crypto.x509.XWikiX509KeyPair;
 
 
 /**

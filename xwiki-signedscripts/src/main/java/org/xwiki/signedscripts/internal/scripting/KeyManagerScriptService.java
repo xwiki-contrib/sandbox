@@ -24,10 +24,10 @@ import java.util.Set;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.crypto.data.XWikiX509Certificate;
-import org.xwiki.crypto.data.XWikiX509KeyPair;
-import org.xwiki.signedscripts.KeyManager;
+import org.xwiki.crypto.x509.XWikiX509Certificate;
+import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.script.service.ScriptService;
+import org.xwiki.signedscripts.KeyManager;
 
 
 /**
