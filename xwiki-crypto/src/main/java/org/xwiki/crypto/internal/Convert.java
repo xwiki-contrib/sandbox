@@ -162,6 +162,35 @@ public final class Convert
     }
 
     /**
+     * Get substring between beginningMarker and endMarker.
+     * 
+     * @param input string to get content from.
+     * @param beginningMarker anything in the string which is not after this will be ignored.
+     * @param endMarker anything in the string which is not before this will be ignored.
+     * @return part of input between beginningMarker and endMarker.
+     */
+    public static String getContentBetween(final String input,
+                                           final String beginningMarker,
+                                           final String endMarker)
+    {
+        if (input == null) {
+            throw new IllegalArgumentException("Given string is null");
+        }
+        int beginIndex = input.indexOf(beginningMarker);
+        if (beginIndex < 0) {
+            throw new IllegalArgumentException("No beginning marker found in string\nExpecting: "
+                                               + beginningMarker);
+        }
+        final int endIndex = input.indexOf(endMarker, beginIndex);
+        if (endIndex < 0) {
+            throw new IllegalArgumentException("No end marker found in string\nExpecting: "
+                                               + endMarker);
+        }
+        beginIndex += beginningMarker.length();
+        return input.substring(beginIndex, endIndex);
+    }
+
+    /**
      * Convert string to byte array using the same encoding as for base64 conversion.
      * Ignore anything before beginningMarker or after endMarker.
      * 
@@ -174,21 +203,7 @@ public final class Convert
                                        final String beginningMarker,
                                        final String endMarker)
     {
-        if (withBase64EncodedContent == null) {
-            throw new IllegalArgumentException("Given string is null");
-        }
-        int beginIndex = withBase64EncodedContent.indexOf(beginningMarker);
-        if (beginIndex < 0) {
-            throw new IllegalArgumentException("No beginning marker found in string\nExpecting: "
-                                               + beginningMarker);
-        }
-        final int endIndex = withBase64EncodedContent.indexOf(endMarker, beginIndex);
-        if (endIndex < 0) {
-            throw new IllegalArgumentException("No end marker found in string\nExpecting: "
-                                               + endMarker);
-        }
-        beginIndex += beginningMarker.length();
-        return Convert.stringToBytes(withBase64EncodedContent.substring(beginIndex, endIndex));
+        return Convert.stringToBytes(Convert.getContentBetween(withBase64EncodedContent, beginningMarker, endMarker));
     }
 
     /**
@@ -204,6 +219,25 @@ public final class Convert
         }
         try {
             return string.getBytes(CHARSET);
+        } catch (UnsupportedEncodingException exception) {
+            // cannot happen
+            throw new RuntimeException(exception);
+        }
+    }
+
+    /**
+     * Convert byte array into a string using UTF-8 encoding.
+     * 
+     * @param bytes to make into a string
+     * @return new String from the given bytes.
+     */
+    public static String bytesToString(byte[] bytes)
+    {
+        if (bytes == null) {
+            return "";
+        }
+        try {
+            return new String(bytes, CHARSET);
         } catch (UnsupportedEncodingException exception) {
             // cannot happen
             throw new RuntimeException(exception);

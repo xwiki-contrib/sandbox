@@ -1,0 +1,56 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+package org.xwiki.crypto.passwd;
+
+import java.security.GeneralSecurityException;
+
+import org.xwiki.component.annotation.ComponentRole;
+
+/**
+ * Service allowing users to encrypt and decrypt text using a password.
+ * 
+ * @version $Id:$
+ * @since 2.5
+ */
+@ComponentRole
+public interface PasswdCryptoService
+{
+    /**
+     * Encipher the given text with the password. The same password will be able to decipher it.
+     *
+     * @param plaintext the text to encrypt.
+     * @param password which will be needed to decrypt the text.
+     * @return Base64 encoded ciphertext which can be decrypted back to plaintext only with the decryptText function.
+     * @throws GeneralSecurityException if something goes wrong.
+     */
+    String encryptText(final String plaintext, final String password)
+        throws GeneralSecurityException;
+
+    /**
+     * Decrypt a piece of text encrypted with encryptText.
+     *
+     * @param base64Ciphertext Base64 encoded ciphertext to decrypt.
+     * @param password which was used to encrypt the text.
+     * @return the decrypted text or null if the provided password was wrong.
+     * @throws GeneralSecurityException if something goes wrong.
+     */
+    String decryptText(final String base64Ciphertext, final String password)
+        throws GeneralSecurityException;
+}
