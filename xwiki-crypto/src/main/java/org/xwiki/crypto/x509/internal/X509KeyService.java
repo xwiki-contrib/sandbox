@@ -71,7 +71,7 @@ public class X509KeyService
 
         NetscapeCertRequest certRequest = null;
         try {
-            certRequest = new NetscapeCertRequest(Convert.stringToBytes(spkacSerialization));
+            certRequest = new NetscapeCertRequest(Convert.fromBase64String(spkacSerialization));
         } catch (Exception e) {
             throw new GeneralSecurityException("Failed to parse certificate request", e);
         }

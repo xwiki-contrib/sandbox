@@ -176,7 +176,9 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
         try {
             store.load(new ByteArrayInputStream(pkcs12Bytes), preparePassword(password));
-            certificates = store.getCertificateChain("");
+            final Enumeration<String> aliases = store.aliases();
+            // Right now we only accept one alias per file. The store is cleaned between files.
+            certificates = store.getCertificateChain(aliases.nextElement());
         } catch (IOException e) {
             throw new GeneralSecurityException("Failed to load key store to parse PKCS#12 container", e);
         } finally {
@@ -345,6 +347,10 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      */
     private char[] preparePassword(String password) throws GeneralSecurityException
     {
+        if (password.length() < 8) {
+            return password.toCharArray();
+        }
+
         MessageDigest hash = MessageDigest.getInstance(HASH_ALGORITHM);
         // the key length should be strictly smaller than the maximal length
         int length = this.maxKeyLength - 1;

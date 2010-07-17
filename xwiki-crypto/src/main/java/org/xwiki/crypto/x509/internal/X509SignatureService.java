@@ -32,6 +32,7 @@ import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedGenerator;
+import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 
@@ -101,10 +102,7 @@ public class X509SignatureService
             SignerInformationStore signers = cmsData.getSignerInfos();
 
             int numSigners = signers.getSigners().size();
-            if (numSigners == 0) {
-                throw new GeneralSecurityException("No signers found");
-            }
-            if (numSigners > 1) {
+            if (numSigners != 1) {
                 throw new GeneralSecurityException("Only one signature is supported, found " + numSigners);
             }
             XWikiX509Certificate result = null;
@@ -126,8 +124,13 @@ public class X509SignatureService
                 }
             }
             return result;
-        } catch (GeneralSecurityException exception) {
-            throw exception;
+        } catch (CMSException exception) {
+            // This means the text is invalid, our contract says we return null.
+            // This message is hardcoded in org.bouncycastle.cms.SignerInformation
+            if ("message-digest attribute value does not match calculated value".equals(exception.getMessage())) {
+                return null;
+            }
+            throw new GeneralSecurityException(exception);
         } catch (Exception exception) {
             throw new GeneralSecurityException(exception);
         }
