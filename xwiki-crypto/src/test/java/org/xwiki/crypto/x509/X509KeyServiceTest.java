@@ -37,14 +37,28 @@ import org.xwiki.crypto.x509.internal.X509KeyService;
  */
 public class X509KeyServiceTest
 {
+    /** This is a public key generated in the browser and passed to the server. */
+    private final String spkacSerialization = "MIICTTCCATUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQClGP/B+AJN\n"
+                                            + "sNuxSMTG9IuSXdW2voNwu9I8lYqEI1sDl55PFWmTTuOqofmLRsa2TVj4AjFNEBKH\n"
+                                            + "abYUGB6DlWe2IfjFAx8qMEI4+/LztLU33dH9heUxyfLdZjT86xg1IBG1Sya2QhUC\n"
+                                            + "QkfxuFGnflyiROtddNsWTccSYMGViwcFOUHyFPpIDb30ashs7Kvks6SyE/WJp0Vn\n"
+                                            + "tNl8ToBrMmGtHzgz6qoji9hEYbFrCyRzA+GfwfhlimM0N0shHUnHayUsgoU2r39k\n"
+                                            + "ifR09s4E2k50mjV8a/T4DIB0qheeuvCyQwf3+FrNFFCeQjIw5RJWGJ9TMgfqyhdV\n"
+                                            + "dcp02z6Ro9kNAgMBAAEWDVRoZUNoYWxsZW5nZTEwDQYJKoZIhvcNAQEEBQADggEB\n"
+                                            + "AENF+mjJiWHDYQiEcPjCrPEL9o0W7lEiQYu38LeC5ijLL9sQKpXiofcGWD0Oo8lF\n"
+                                            + "zT/QoCrgpOdRNQgh2y4/KWpqq0F3Q8pkUh31a9hLtaWHcy2J0JrPUlspXPH2jc2M\n"
+                                            + "+2e69KdYL/3Q9BZSx5KuU5+TqttNa5qBokTT9KCAQG0ptFh/sDbjHM50NqqUaQyx\n"
+                                            + "UF03o6CMXpyu/bdI9ZCoLVos3keK6QtjBG1ADSS7dIaYpvHtCjDzjja6vFKEA7gx\n"
+                                            + "CFTIVzEUCHxlCVEWkFMWVLoLy5GPfCHcI6JkltuA2fSBP/2g+1O5QSXzb5KBeQkg\n"
+                                            + "WEhN3mjR+QNRnjKo3bKpq1g=";
+
     /** The tested key service. */
     private final X509KeyService service = new X509KeyService();
 
-    @Ignore
     @Test
     public void certsFromSpkacTest() throws Exception
     {
-        //this.service.certsFromSpkac(this.spkacSerialization, 1, "my webid", "xwiki:XWiki.Me");
+        this.service.certsFromSpkac(this.spkacSerialization, 1, "my webid", "xwiki:XWiki.Me");
     }
 
     @Test
