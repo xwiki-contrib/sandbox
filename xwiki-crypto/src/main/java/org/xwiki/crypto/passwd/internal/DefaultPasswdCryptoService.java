@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.digests.WhirlpoolDigest;
@@ -30,6 +31,9 @@ import org.bouncycastle.crypto.engines.CAST5Engine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.crypto.prng.DigestRandomGenerator;
+import org.bouncycastle.crypto.prng.RandomGenerator;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.passwd.PasswdCryptoService;
@@ -77,6 +81,7 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
         throws GeneralSecurityException
     {
         final byte[] salt = new byte[20];
+        // TODO seed secure random on component initialization, use the same hash function
         this.random.nextBytes(salt);
 
         this.cipher.reset();
@@ -139,40 +144,30 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     }
 
     /**
-     * Generate a key for the encryption engine.
-     * This function appends the salt to the password and hashes them once, the result is copied into the key
-     * array. If the hash output is not as big as the key, the hash output is hashed again and that is copied into
-     * the key.
+     * Generate a key (and an initialization vector) for the encryption engine.
+     * <p>
+     * This function uses a pseudo-random generator based on the used hash function, seeded with the key
+     * and the salt to generate the key and an initialization vector of the needed length.</p>
+     * 
      *
      * @param password The user supplied password for encryption/decryption.
      * @param salt If encrypting, should be random bytes, if decrypting, should be bytes saved with the ciphertext.
      * @return a symmetric key
      */
-    private synchronized KeyParameter makeKey(final String password, final byte[] salt)
+    private synchronized CipherParameters makeKey(final String password, final byte[] salt)
     {
         final byte[] passbytes = Convert.stringToBytes(password);
 
-        this.hash.reset();
-        this.hash.update(passbytes, 0, passbytes.length);
-        this.hash.update(salt, 0, salt.length);
+        RandomGenerator prng = new DigestRandomGenerator(this.hash);
+        prng.addSeedMaterial(passbytes);
+        prng.addSeedMaterial(salt);
 
-        final byte[] buffer = new byte[this.hash.getDigestSize()];
         final byte[] key = new byte[this.getKeyLength()];
+        final byte[] iv = new byte[this.cipher.getBlockSize()];
+        prng.nextBytes(key);
+        prng.nextBytes(iv);
 
-        for (int i = 0; true; i += buffer.length) {
-            this.hash.doFinal(buffer, 0);
-            if (i + buffer.length > this.getKeyLength()) {
-                System.arraycopy(buffer, 0, key, i, this.getKeyLength() - i);
-                break;
-            }
-            // NOTE this is not the best method for producing long keys, subclasses implementing ciphers
-            // with very long keys should use a pseudo random generator seeded with the key and salt
-            System.arraycopy(buffer, 0, key, i, buffer.length);
-            this.hash.reset();
-            this.hash.update(buffer, 0, buffer.length);
-        }
-
-        return new KeyParameter(key);
+        return new ParametersWithIV(new KeyParameter(key), iv);
     }
 
     /**

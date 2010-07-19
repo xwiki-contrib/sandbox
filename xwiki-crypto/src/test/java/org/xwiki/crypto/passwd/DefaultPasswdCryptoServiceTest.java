@@ -19,15 +19,8 @@
  */
 package org.xwiki.crypto.passwd;
 
-import java.security.GeneralSecurityException;
-
-import java.security.Security;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-
 import org.xwiki.crypto.passwd.internal.DefaultPasswdCryptoService;
 
 
@@ -52,6 +45,7 @@ public class DefaultPasswdCryptoServiceTest
     public void encryptDecryptTest() throws Exception
     {
         final String out = this.service.encryptText(textToEncrypt, password);
+        System .out.println(out);
         final String decrypted = this.service.decryptText(out, password);
         Assert.assertTrue(this.textToEncrypt.equals(decrypted));
     }
@@ -81,13 +75,13 @@ public class DefaultPasswdCryptoServiceTest
     protected String getEncrypted()
     {
         return "------BEGIN PASSWORD CAST5CBC-WHIRLPOOL CIPHERTEXT-----\n"
-             + "s503S2OFeOGxA03C4qERpmrRvdY=:\n"
-             + "ERg1+7nZV/SpC4DkcaswgG4QxiTySAmoQeqrpkcPIO0ZmArcaq7cdPz31tml8A7p\n"
-             + "Gy6HiBHp1LylEKd+RwQ2uUAtEFovVM+NHzXAFHfnsFW8htnb7GreQR6YHCZEygYY\n"
-             + "sX0sAXPlSeIgiQTi8HPZB4IB9kfQeOCgvDznuxtFLLwvtWKESyqgLDlt2OcCBi5a\n"
-             + "hHXrxBDSYe5Euf2aNzGL3iXoysi+P3VP9kshTZ92V4be2sWcUVyJBh0zJwL9G+pa\n"
-             + "x+ItWPaSTJH5nfvkPpToKC28njJ/FtkdKqBPS7hcepFWhJDdtn0NDy4MuU01VojK\n"
-             + "5teYdCQmmvxefUDKler8rlrOs7hcacAfvDpS3SEl+2jztJAFbqMKuw==\n"
+             + "Kg8YLwtnchmtWKd2yYCn2tilT04=:\n"
+             + "r4FlnYUOedRfc31ghGgIhc9rkpRtwDhLO5CPc3wgTuPfHMaAZ/mfdXk3rz2TKtXE\n"
+             + "xanPkLR5th5RelKhe0DEj2lQH0bTtajlDqKBoo7OsfR2HZHCt+q5jRzTf645vN8X\n"
+             + "AeNRF1Im7brfOwoY+J2MC1bf4HD98r4/rjKfMyd4bdTAjXvB+OyOGje1LFHWP2km\n"
+             + "qBh5TO9CHMxdAzFvakAFE/oCxqactwU002dHsF7/4EWncnvwIeQpXAYtcaRrVW5Q\n"
+             + "irUSsQk+UDG2/sF6bGtqPS3SZjHkIlEYgf8MINjcnvBsmDtDsXZL8xza+E7dQSi4\n"
+             + "HI7DjwU7vvUuv3pyAVLM8g8vfS46ehx0pkqKEDrVKFuFktzn48xStw==\n"
              + "------END CIPHERTEXT------";
     }
 }
