@@ -41,10 +41,11 @@ import org.xwiki.crypto.passwd.PasswdCryptoService;
 
 /**
  * A service allowing users to encrypt and decrypt text using a password. This service uses CAST-5 block cipher with
- * the Whirlpool hash function. The user's password is appended with a 20 byte random salt and hashed once to provide
- * the 16 bytes for the key. The cipher is run in CBC mode with a null initialization vector (this is handled by the 
- * salt) and the text is enciphered and the output base64 encoded and prepended with the base64 encoded salt (which
- * ends with a : and a newline). The entire text output is wrapped with descriptive header and footer so typical
+ * the Whirlpool hash function. The user's password is used together with a 20 byte random salt to seed the
+ * pseudo random number generator based on the hash function. The generator is used to produce the needed amount
+ * of data for the key and the initialization vector. The cipher is run in CBC mode. The text is enciphered and
+ * the output is base64 encoded and prepended with the base64 encoded salt (which ends with a : and a newline).
+ * The entire text output is wrapped with descriptive header and footer so typical
  * ciphertext might look as follows:
  * <pre>
  * ------BEGIN PASSWORD CAST5CBC-WHIRLPOOL CIPHERTEXT-----
