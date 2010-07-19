@@ -34,6 +34,10 @@ import org.xwiki.crypto.internal.Convert;
  */
 public class ConvertTest
 {
+    /** Text containing unicode characters. */
+    private static final String NONLATIN = "Kryptographie (von griechisch: κρυπτός, „verborgen“ und γράφειν, „schreiben“) "
+                                         + "ist die Wissenschaft der Verschlüsselung von Informationen.";
+
     /** Random generator. */
     private Random rnd = new Random(System.currentTimeMillis());
 
@@ -98,6 +102,14 @@ public class ConvertTest
     public void testToBytesMarkerNull()
     {
         Convert.stringToBytes(null, null, null);
+    }
+
+    @Test
+    public void testNonLatinConvert()
+    {
+        byte[] data = Convert.stringToBytes(NONLATIN);
+        String recovered = Convert.bytesToString(data);
+        Assert.assertEquals(NONLATIN, recovered);
     }
 
     /**
