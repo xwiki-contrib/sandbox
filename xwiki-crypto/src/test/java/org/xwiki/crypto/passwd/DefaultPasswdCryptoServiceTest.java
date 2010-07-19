@@ -19,27 +19,37 @@
  */
 package org.xwiki.crypto.passwd;
 
+import java.security.GeneralSecurityException;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.xwiki.crypto.passwd.internal.DefaultPasswdCryptoService;
+import org.xwiki.test.AbstractMockingComponentTestCase;
+import org.xwiki.test.annotation.MockingRequirement;
 
 
 /**
- * Password based encryption test.
+ * Tests {@link DefaultPasswdCryptoService}.
  * 
  * @version $Id$
  * @since 2.5
  */
-public class DefaultPasswdCryptoServiceTest
+public class DefaultPasswdCryptoServiceTest extends AbstractMockingComponentTestCase
 {
+    /** Length = 272 byte = 17 * 16 */
     private final String textToEncrypt = "Congress shall make no law respecting an establishment of religion, or "
                                        + "prohibiting the free exercise thereof; or abridging the freedom of speech, "
                                        + "or of the press; or the right of the people peaceably to assemble, and to "
                                        + "petition the Government for a redress of grievances.";
 
+    /** Length = 113 byte = 7 * 16 + 1 */
+    private final String anotherText = "The length of this text is 113 byte. This is 1 byte more "
+                                     + "than a multiple of block size for 128 bit block ciphers.";
+
     private final String password = "Snuffle";
 
-    protected PasswdCryptoService service = new DefaultPasswdCryptoService();
+    @MockingRequirement
+    protected DefaultPasswdCryptoService service;
 
     @Test
     public void encryptDecryptTest() throws Exception
@@ -69,6 +79,25 @@ public class DefaultPasswdCryptoServiceTest
     {
         final String enciphered = this.service.encryptText(textToEncrypt, password);
         Assert.assertNull(this.service.decryptText(enciphered, "wrong password"));
+    }
+
+    @Test
+    public void encryptDecryptOneByteMore() throws GeneralSecurityException
+    {
+        // the last block contains only one character
+        String ciphertext = this.service.encryptText(anotherText, password);
+        String plaintext = this.service.decryptText(ciphertext, password);
+        Assert.assertEquals(anotherText, plaintext);
+    }
+
+    @Test
+    public void encryptDecryptOneByteLess() throws GeneralSecurityException
+    {
+        // the last block has one byte of padding
+        final String shorter = anotherText.substring(0, anotherText.length()-3);
+        String ciphertext = this.service.encryptText(shorter, password);
+        String plaintext = this.service.decryptText(ciphertext, password);
+        Assert.assertEquals(shorter, plaintext);
     }
 
     protected String getEncrypted()
