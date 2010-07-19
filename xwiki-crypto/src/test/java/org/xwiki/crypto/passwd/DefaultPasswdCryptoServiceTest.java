@@ -45,7 +45,6 @@ public class DefaultPasswdCryptoServiceTest
     public void encryptDecryptTest() throws Exception
     {
         final String out = this.service.encryptText(textToEncrypt, password);
-        System .out.println(out);
         final String decrypted = this.service.decryptText(out, password);
         Assert.assertTrue(this.textToEncrypt.equals(decrypted));
     }
