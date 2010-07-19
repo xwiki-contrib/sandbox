@@ -57,7 +57,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String, java.lang.String)
+     * @see org.xwiki.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String, java.lang.String)
      */
     public SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException
     {
@@ -75,7 +75,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String, java.lang.String)
+     * @see org.xwiki.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String, java.lang.String)
      */
     public SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException
     {
@@ -99,7 +99,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.signedscripts.ScriptSigner#constructSignedScript(SignedScript, String)
+     * @see org.xwiki.signedscripts.ScriptSigner#constructSignedScript(org.xwiki.signedscripts.SignedScript, java.lang.String)
      */
     public SignedScript constructSignedScript(SignedScript preparedScript, String base64Signature)
         throws GeneralSecurityException
@@ -115,7 +115,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.signedscripts.ScriptSigner#getVerifiedScript(java.lang.String)
+     * @see org.xwiki.signedscripts.ScriptSigner#getVerifiedScript(java.lang.String)
      */
     public SignedScript getVerifiedScript(String signedScript) throws GeneralSecurityException
     {

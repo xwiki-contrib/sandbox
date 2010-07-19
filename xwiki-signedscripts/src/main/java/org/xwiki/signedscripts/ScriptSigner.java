@@ -65,7 +65,7 @@ public interface ScriptSigner
     SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException;
 
     /**
-     * Create a signed script object by combining the prepred script object and the signature. The signature must
+     * Create a signed script object by combining the prepared script object and the signature. The signature must
      * have been produced by signing the result of {@link SignedScript#getDataToSign(String, String)} called
      * on the script object created using {@link #prepareScriptForSigning(String, String)}.
      * <p>
