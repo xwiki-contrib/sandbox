@@ -23,10 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateExpiredException;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.xwiki.crypto.x509.XWikiX509Certificate;
-import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.X509KeyService;
 
 /**

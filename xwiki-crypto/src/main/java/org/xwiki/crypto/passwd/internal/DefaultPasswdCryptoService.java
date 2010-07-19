@@ -22,18 +22,17 @@ package org.xwiki.crypto.passwd.internal;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.digests.WhirlpoolDigest;
 import org.bouncycastle.crypto.engines.CAST5Engine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.crypto.passwd.PasswdCryptoService;
 import org.xwiki.crypto.internal.Convert;
+import org.xwiki.crypto.passwd.PasswdCryptoService;
 
 
 /**
@@ -43,13 +42,17 @@ import org.xwiki.crypto.internal.Convert;
  * salt) and the text is enciphered and the output base64 encoded and prepended with the base64 encoded salt (which
  * ends with a : and a newline). The entire text output is wrapped with descriptive header and footer so typical
  * ciphertext might look as follows:
- *
+ * <pre>
  * ------BEGIN PASSWORD CAST5CBC-WHIRLPOOL CIPHERTEXT-----
  * 3xbbMX0oWT9ACQv9K0fFOTIr4BU=:
  * jKQsZIfnfQNfrjvvDFNIVhUhBceVhh7C7zoSd0DPGBf+gXFJymCeAApe5SkbG56q
  * j6VmngZAcypqN72vWRhGOBPu/WjDGG0tyNQnaVHLTcWjDmiCQBQqqq7sRJ/SVi/1
  * /cG7npgtTF6+9FAtONY7lg==
  * ------END CIPHERTEXT------
+ * </pre>
+ * <p>
+ * Note: Subclasses implementing other encryption methods should override at least
+ * {@link #getCipher()}, {@link #getDigest()} and {@link #getKeyLength()}</p>
  * 
  * @version $Id:$
  * @since 2.5
@@ -146,7 +149,6 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
      * @return a symmetric key
      */
     private synchronized KeyParameter makeKey(final String password, final byte[] salt)
-        //throws GeneralSecurityException
     {
         final byte[] passbytes = Convert.stringToBytes(password);
 
@@ -163,6 +165,8 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
                 System.arraycopy(buffer, 0, key, i, this.getKeyLength() - i);
                 break;
             }
+            // NOTE this is not the best method for producing long keys, subclasses implementing ciphers
+            // with very long keys should use a pseudo random generator seeded with the key and salt
             System.arraycopy(buffer, 0, key, i, buffer.length);
             this.hash.reset();
             this.hash.update(buffer, 0, buffer.length);
