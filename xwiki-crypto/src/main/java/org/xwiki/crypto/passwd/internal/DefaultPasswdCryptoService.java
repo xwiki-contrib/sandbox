@@ -64,6 +64,9 @@ import org.xwiki.crypto.passwd.PasswdCryptoService;
 @Component
 public class DefaultPasswdCryptoService implements PasswdCryptoService
 {
+    /** Size of the salt in bytes. */
+    private static final int SALT_SIZE = 20;
+
     /** The cipher engine. */
     private final PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(this.getCipher());
 
@@ -80,7 +83,7 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     public synchronized String encryptText(final String plaintext, final String password)
         throws GeneralSecurityException
     {
-        final byte[] salt = new byte[20];
+        final byte[] salt = new byte[SALT_SIZE];
         // TODO seed secure random on component initialization, use the same hash function
         this.random.nextBytes(salt);
 
