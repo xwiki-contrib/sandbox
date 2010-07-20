@@ -290,7 +290,7 @@ public class PKCS7SignedScript implements SignedScript
     private Map<SignedScriptKey, String> parse(String content) throws IOException
     {
         Map<SignedScriptKey, String> map = new HashMap<SignedScriptKey, String>();
-        Pattern comment = Pattern.compile("^([^#]*)(#.*)?$");
+        Pattern comment = Pattern.compile("^([^#\\\\]*|[^#]*[^#\\\\])(#.*)?$");
         Pattern keyValue = Pattern.compile("^(\\w+)\\s*:\\s*(.*)$");
         BufferedReader reader = new BufferedReader(new StringReader(content));
         String line;

@@ -95,7 +95,7 @@ public interface ScriptSigner
      * Create a signed script by parsing and verifying a serialized signed script.
      * 
      * @param signedScript serialized signed script object 
-     * @return code contained in the signed script
+     * @return the parsed signed script
      * @throws GeneralSecurityException if verification fails or on errors
      * @see SignedScript#serialize()
      */
