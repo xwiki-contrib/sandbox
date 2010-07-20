@@ -39,6 +39,9 @@ import org.xwiki.test.annotation.MockingRequirement;
  */
 public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
 {
+    private final static String SIGNATURE = "aN/Abs0lut3ly+u53Le5s/ranD0m/pieCe+0f+BASE64+enc0d3D+da7A/tha7/Is+LoNg3r"
+                                          + "/tHan+76+by73/s0+tHA7/w3/CaN/t3St/1337/SIGNa7ur3+f0rma77ing=";
+
     /** The tested script signer component. */
     @MockingRequirement
     PKCS7ScriptSigner signer;
@@ -66,8 +69,8 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
         final X509CryptoService mockCrypto = getComponentManager().lookup(X509CryptoService.class);
         getMockery().checking(new Expectations() {{
             allowing(mockCrypto).signText(with(any(String.class)), with(getTestKeyPair()), with("passwrd"));
-                will(returnValue("/TEST+SIGNATURE/"));
-            allowing(mockCrypto).verifyText(with(any(String.class)), with("/TEST+SIGNATURE/"));
+                will(returnValue(SIGNATURE));
+            allowing(mockCrypto).verifyText(with(any(String.class)), with(SIGNATURE));
                 will(returnValue(getTestKeyPair().getCertificate()));
             allowing(mockCrypto).verifyText(with(any(String.class)), with("*ERROR*"));
                 will(returnValue(getTestCert()));
@@ -90,7 +93,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
         SignedScript script = signer.sign(code, getTestKeyPair().getFingerprint(), "passwrd");
         // NOTE: the test may fail randomly if the next second starts at this line 
         SignedScript verified = signer.getVerifiedScript(script.serialize());
-        Assert.assertEquals(script.serialize(), verified.serialize());
+        Assert.assertEquals(script.toString(), verified.toString());
     }
 
     @Test
@@ -100,9 +103,8 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
         final SignedScript signed = signer.sign(code, getTestKeyPair().getFingerprint(), "passwrd");
         // NOTE: the test may fail randomly if the next second starts at this line 
         SignedScript prepared = signer.prepareScriptForSigning(code, getTestKeyPair().getFingerprint());
-        String signature = "/TEST+SIGNATURE/";
-        SignedScript script = signer.constructSignedScript(prepared, signature);
-        Assert.assertEquals(signed.serialize(), script.serialize());
+        SignedScript script = signer.constructSignedScript(prepared, SIGNATURE);
+        Assert.assertEquals(signed.toString(), script.toString());
     }
 
     @Test(expected = GeneralSecurityException.class)
