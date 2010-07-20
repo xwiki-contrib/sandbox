@@ -59,6 +59,7 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
     @Override
     public void setUp() throws Exception
     {
+        // NOTE: AbstractMockingComponentTestCase.setUp() takes between 1 and 5 seconds!
         super.setUp();
 
         try {
