@@ -20,9 +20,12 @@
 package org.xwiki.signedscripts.framework;
 
 import java.security.GeneralSecurityException;
+import java.security.Security;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
+import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
 import org.xwiki.test.AbstractMockingComponentTestCase;
 
 
@@ -59,8 +62,84 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
                                          + "rC4qW/5AUann6D1r26EWLSGYh62AcX/jUT4bjoWLhMhblxyLOgbBe8uYPLMH\n"
                                          + "-----END CERTIFICATE-----\n";
 
+    /** Password for the test key pair. */
+    private final static String KP_PASS = "passwrd";
+
+    /** PEM encoded test key pair. */
+    private final static String KP_PEM = "-----BEGIN PKCS12-----\n"
+                                       + "MIACAQMwgAYJKoZIhvcNAQcBoIAkgASCA+gwgDCABgkqhkiG9w0BBwGggCSABIID\n"
+                                       + "6DCCBUcwggVDBgsqhkiG9w0BDAoBAqCCBPowggT2MCgGCiqGSIb3DQEMAQMwGgQU\n"
+                                       + "DLXkMgFZ7bV6TCHoW3fPqKULS5cCAgQABIIEyL98kz/ft2TGdY8WSVTspFj5DQhw\n"
+                                       + "KgJL7fXlUxhV/rfA0W0hx6S61I86cBecCqRAQuh5KyEszqvIzVHwZRxp81GprVpd\n"
+                                       + "bu2qETSoifOU/aNdQ/ON/F0t8xhaAla4PKNV1L/CYEmCtNnyhxATkeup4/jq2yh+\n"
+                                       + "lXhLX4bEfLS92f3W5c6tAj1W3gpHBEqszso8uTgY3m0l2rt865jndRfWz7ayhkoO\n"
+                                       + "GGtL6nFCuMUfkl40A5CkPG1wW3DLdn7QhYF01Chmv5GD2kZHC0AlnBE+0Hp4qxSh\n"
+                                       + "iwZTMD66WGoXmaiQ/d5wqzxTvSHh9towjCLzml88yzJZOlL42T6wwwc93SWqHcGt\n"
+                                       + "7tifw6eV9ox+IscfyiYiYSO/m4bidbWIcodm7bGbiOKoc91cgKAlLJ00ty73Mr/N\n"
+                                       + "6CyEjjA+a4Ubb5gkW/D3t5A0nH1tr9stPHxEuAy7rx/KwkDXsrmauZwz+BcJcrc9\n"
+                                       + "25IHgyu+24zimydcTndm0zc5nmODuG3JSAwgyvsMs3CvBnX4Gdj1i/rfOfZjqXH+\n"
+                                       + "oIV0I7eMh5xmUxm064P38X2SY/O/vmnhv/OzvFPFOZ4JaBFje+KX0lZYU5mgu/R4\n"
+                                       + "oXuqG4aOeYl1yvyLp9ZhanM2QNIbOIFhlwc7Cfa2bRhc147NPTV0Y02mc9bCSLRr\n"
+                                       + "NxsUvHrelaFtZhJ4fY3LYnFuprq3WB/6znQ32xg429qNzOmInehfbf3SEbbNHoVH\n"
+                                       + "uyGb6HqUFFhbfHbyQKMAOf7Sm/QBKOaoLLDiM48cXLVVc7jxleIqRghiD65loaIq\n"
+                                       + "WS7jL2eunlYrrm0Lk58326u/vaT9cxtjv9GTXVW/Nswghcvc+57ffYW204Exmu8a\n"
+                                       + "bjAStnxmUwr12Dqi6AsxVhbF5elns3xl0S5+MMbbpGX+2MScRPq2Vl9rHEptjc+X\n"
+                                       + "Vk5cCqyIjYOWdDvKoROI3XsD0JscAdqZbZiB4iLBuR3GdXBhjBZHROcv/gU/AB1R\n"
+                                       + "nTmnLvEInGVnbSk0+BFqTfUU3WStCvE/prfOt6HYpIm9S7n3s428CGrzUorPLspw\n"
+                                       + "B7A02h1FQqk/Haw2/GInxELMfwHaaEUh7RpNjCwRO8nPLNWxwms5yYsyJnu5rEzH\n"
+                                       + "LTIp0la8Y57l31v/N6cacYqXZOOYrPBBIb1H+dT2GEhITuRJlr/vMsdXWgt++nDr\n"
+                                       + "OMADNUVHjgvh9flXRhwkyZavBIID6Kulh/1OLZPBLsw4vM5Cwl0AHUqB0tx4BIIB\n"
+                                       + "Y1zocDTP0D4cyO0r5/hYeY4Ri4V4Z71iNJmvP/uZX3VkXDutC9m9pIHeewp5h/Gl\n"
+                                       + "hkjd5k/mwzMdMNmXy9VXSCP9dqFGQT+Fl/0c0ZfWoH87SeCZfBBsYQHPoNGJbUoy\n"
+                                       + "d882B1q+lisnB8p1yZwODtkDngbwBBINZ+LQCgu7Krn/ynQKhY78Ln4GenBsd143\n"
+                                       + "RKEIWbdLqm4s7r/jvo/8Fcks0w0Pjl4pNuS+E67f8pltLhCIih/TbYmVUnC0cH7/\n"
+                                       + "xcNL9m1Ycg+/SD2aTKXmAUyYVj/KgK2le/mnk0MB3JO4siSqwWXhSZQVmZcyzIFm\n"
+                                       + "kZowy38oWDCciTni+0Igez08Ba2+qrVLx6n1v4piE64qVMRKcHlOWQkYJZo5EXKG\n"
+                                       + "TW1zqmub+cito9wYMTYwDwYJKoZIhvcNAQkUMQIeADAjBgkqhkiG9w0BCRUxFgQU\n"
+                                       + "sRGZdRMv20BvljB/8csY8NLmfcEAAAAAAAAwgAYJKoZIhvcNAQcGoIAwgAIBADCA\n"
+                                       + "BgkqhkiG9w0BBwEwKAYKKoZIhvcNAQwBAzAaBBShlzat2siS78iIdmMVbPxK6Ymx\n"
+                                       + "iAICBACggASCA5hw3Zz9JoynJKxWyOyhPVQDfVhyViE1tFzvh0R6owM0RiDn41KN\n"
+                                       + "Oxl+EvgCFHk29raMvLtzrOxuMhY6YWLXELNKoN+KaNUn6LXc6VInCcuMC6hOgUuM\n"
+                                       + "8NQ3UTucPz40705at4s0LHGfsnPrcVUxQDykpLikw8/2iy+g/O1spJHdt/FabQFr\n"
+                                       + "S5FRsQp/C5Rg2y82u2Hv/B3buO9qrMtwOt2RBIzS0eISK6zHBH6p9aDQrynmYGbG\n"
+                                       + "D2b5VR5mSGUxeuFRqXKVG7jxgq/gF6x2CbcnJgfEUoJmbCDHCQXjkeyJQ47/0loW\n"
+                                       + "WFyPq/9FJrnHd0GIhXbZSrZqqe8LCayvsb4iu1Wec0tkzBTsO7l8srAMceNrcLKG\n"
+                                       + "30MUV+GwpxTsSBEzRcQ4nnuaukNgPzm7TKI8T3kIiTxQfJORAa7luXMVtkJZtPOx\n"
+                                       + "ahFht/H89lwfQ+1zCQwl442l/hQFh2wFP33yEY/sbHvapjFaRA70BUC5ecih7Y7G\n"
+                                       + "q3io3bGVpLfhmZKkSIzOweKeKgSxVHPP4wncsfOWq41MCCzXqgtlfTHwo+SeU8SR\n"
+                                       + "/c+0wR2+p+IV6SUo6731Sx/O1gPH6NA5elqfOiQKY8cnsPZH3Yc/RlPz+wq2sbe7\n"
+                                       + "B78nfioWGGxppCNR/F11LOohzis6Gv8FL5BmaLHYkPvRROpcVT7dbCGelXS9Wf6C\n"
+                                       + "/yn38uY9urxYFfdGra8EggGRzQXLdscpWUBztPNkR+eEZgR2gN5oqP6PlgWXecj3\n"
+                                       + "P0mVSWdbpwS1ge2Ssj6RQOxdujKqhLCW2nTHvU0nc/8ad/jsWmWmhwGcm4kH9T5a\n"
+                                       + "mOxF3iNt/Jrb3StjJeCrLMR2vrIL7xaHCWNScCZbcBOKok0kpHE0jCBRJujEim9F\n"
+                                       + "2QX1HcghBG28EoUkCB1dZBg8FIkLb8lm0B93gfuEfREPBhHwmf+0YE0q1LIHXO/X\n"
+                                       + "znvP7Xbn/WwMZyR11sBnTIADodJZ/tTOoSmYQJFTGvaZ36uZGwGKOs1BN4jVmPYl\n"
+                                       + "nXEe/s8Xbi6bF4wCKgTcOt/wJXSw6+h4Fi8E0vPbTQcZUng3csrtmOqQB3XGuNlL\n"
+                                       + "34b6CPqnI6UvjFzaFXV0cdaT/IrBGsust54r8ht2BHhWDsvzxqKDesFOwaH52DcD\n"
+                                       + "bts1ruIAGH9F56XXm+GZ/HePoIeCIWCJRDcOmPywroprbL94t8jXZNtmkFT6aS9S\n"
+                                       + "RAzI5ECU5bwmV8gwiIAzgGAfGC8PcSEAAAAAAAAAAAAAAAAAAAAAAAAwPTAhMAkG\n"
+                                       + "BSsOAwIaBQAEFGUuAySAeiDnL9TGRCAvVmD/A9ekBBRtkszvvjtmY3IwJRoKKw2u\n"
+                                       + "/2TFmQICBAAAAA==\n"
+                                       + "-----END PKCS12-----\n";
+
     /** Cached instance of the test certificate, used by {@link #getTestCert()}. */
     private XWikiX509Certificate cachedCert;
+
+    /** Cached instance of the test key pair, used by {@link #getTestKeyPair()}. */
+    private XWikiX509KeyPair cachedKeyPair;
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.test.AbstractMockingComponentTestCase#setUp()
+     */
+    @Override
+    public void setUp() throws Exception
+    {
+        super.setUp();
+
+        // register BC provider
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     /**
      * Get the fingerprint of the test certificate. Same as {@link #getTestCert()}.getFingerprint()
@@ -91,9 +170,17 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
     /**
      * @return the test key pair
      */
-    protected XWikiX509KeyPair getTestKeyPair()
+    protected synchronized XWikiX509KeyPair getTestKeyPair()
     {
-        return null;
+        try {
+            if (this.cachedKeyPair == null) {
+                this.cachedKeyPair = new DefaultXWikiX509KeyPair(KP_PEM, KP_PASS);
+            }
+            return this.cachedKeyPair;
+        } catch (GeneralSecurityException exception) {
+            // should not happen
+            throw new RuntimeException(exception);
+        }
     }
 
 }
