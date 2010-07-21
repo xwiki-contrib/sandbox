@@ -63,7 +63,7 @@ public class PKCS7SignedScript implements SignedScript
      * @param script signed script as created by {@link #toString()}
      * @throws IOException on errors
      */
-    PKCS7SignedScript(String script) throws IOException
+    public PKCS7SignedScript(String script) throws IOException
     {
         this.data = parse(script);
 
@@ -78,21 +78,20 @@ public class PKCS7SignedScript implements SignedScript
      * @param fingerprint fingerprint of the certificate to use
      * @throws GeneralSecurityException on errors
      */
-    PKCS7SignedScript(String code, String fingerprint) throws GeneralSecurityException
+    protected PKCS7SignedScript(String code, String fingerprint) throws GeneralSecurityException
     {
         this.data = new HashMap<SignedScriptKey, String>();
 
         // the current parser always produces one newline at the end of code
         // TODO remove this workaround when the parser is fixed
         final String nl = "\n";
-        String sanitizedCode = code.replaceAll("\\n+$", nl);
+        // normalize EOL
+        String sanitizedCode = code.replaceAll("\r\n", nl);
+        sanitizedCode = sanitizedCode.replaceAll("\r", nl);
+        sanitizedCode = sanitizedCode.replaceAll("\\n+$", nl);
         if (!sanitizedCode.endsWith(nl)) {
             sanitizedCode += nl;
         }
-
-        // normalize EOL
-        sanitizedCode = sanitizedCode.replaceAll("\r\n", nl);
-        sanitizedCode = sanitizedCode.replaceAll("\r", nl);
 
         set(SignedScriptKey.CODE, sanitizedCode);
         if (!isSet(SignedScriptKey.CODE)) {
@@ -112,7 +111,7 @@ public class PKCS7SignedScript implements SignedScript
      * @param base64Signature Base64 encoded signature of data obtained by {@link #getDataToSign()}
      * @throws IOException on errors
      */
-    PKCS7SignedScript(SignedScript preparedScript, String base64Signature) throws IOException
+    protected PKCS7SignedScript(SignedScript preparedScript, String base64Signature) throws IOException
     {
         this.data = new HashMap<SignedScriptKey, String>();
 
@@ -138,7 +137,8 @@ public class PKCS7SignedScript implements SignedScript
             throw new IOException("Signed script not found.");
         }
         for (SignedScriptKey key : SignedScriptKey.values()) {
-            if (!key.isOptional() && !this.data.containsKey(key)) {
+            String value = get(key);
+            if (!key.isOptional() && (value == null || value.trim().equals(""))) {
                 throw new IOException("Mandatory key \"" + key.toString() + "\" not found.");
             }
         }
@@ -246,7 +246,7 @@ public class PKCS7SignedScript implements SignedScript
      * @param key the key to use
      * @param value the value to use
      */
-    void set(SignedScriptKey key, String value)
+    protected void set(SignedScriptKey key, String value)
     {
         this.data.put(key, value);
     }
