@@ -22,6 +22,8 @@ package org.xwiki.csrftoken;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -53,9 +55,6 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTestCase
 
     /** URL of the current document. */
     private static final String mockDocumentUrl = "http://host/xwiki/bin/save/Main/Test";
-
-    /** Query part of the document URL. */
-    private static final String mockQuery = "form_token=&a=b&form_token=xyz&c=d&form_token=xyz";
 
     /** Tested CSRF token component. */
     @MockingRequirement
@@ -104,13 +103,18 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTestCase
         // request
         final HttpServletRequest httpRequest = getMockery().mock(HttpServletRequest.class);
         final ServletRequest servletRequest = new ServletRequest(httpRequest);
+        // tree map preserves order
+        final Map<String, String[]> mockParams = new TreeMap<String, String[]>();
+        mockParams.put("a", new String[] {"b"});
+        mockParams.put("form_token", new String[] {"", null, "xyz", "xyz"});
+        mockParams.put("c", new String[] {"d e/f"});
         getMockery().checking(new Expectations()
         {
             {
                 allowing(httpRequest).getRequestURL();
                 will(returnValue(new StringBuffer(mockDocumentUrl)));
-                allowing(httpRequest).getQueryString();
-                will(returnValue(mockQuery));
+                allowing(httpRequest).getParameterMap();
+                will(returnValue(mockParams));
             }
         });
         // container
@@ -207,7 +211,7 @@ public class DefaultCSRFTokenTest extends AbstractMockingComponentTestCase
     {
         String url = this.csrf.getResubmissionURL();
         try {
-            String redirect = URLEncoder.encode(mockDocumentUrl + "?a=b&c=d", "utf-8");
+            String redirect = URLEncoder.encode(mockDocumentUrl + "?a=b&c=d+e%2Ff", "utf-8");
             String back = URLEncoder.encode(mockDocumentUrl, "utf-8");
             String expected = resubmitUrl + "?xredirect=" + redirect + "&xback=" + back;
             Assert.assertEquals("Invalid resubmission URL", expected, url);

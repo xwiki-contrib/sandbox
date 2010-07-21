@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -206,19 +207,28 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      * Find out the URL of the current request and remove the 'form_token' parameter from the query. The secret token
      * will be replaced by the correct one on the resubmission page.
      * 
+     * Note that currently all request parameters are moved to the URL query, limiting their total size to about 2KiB
+     * 
+     * TODO use {@link com.xpn.xwiki.web.SavedRequestRestorerFilter} to save all parameters in the session and
+     * injecting them back when needed
+     * 
      * @return current URL without secret token
      */
     private String getRequestURLWithoutToken()
     {
         HttpServletRequest httpRequest = getRequest();
         StringBuffer url = httpRequest.getRequestURL();
-        String query = httpRequest.getQueryString();
-        if (query != null) {
-            query = query.replaceAll("(^|&)form_token=[^&]*", "");
-            query = query.replaceFirst("^&", "");
-            if (query != null && query.trim().length() != 0) {
-                url.append("?");
-                url.append(query);
+        @SuppressWarnings("unchecked")
+        Map<String, String[]> parameterMap = httpRequest.getParameterMap();
+        if (parameterMap != null) {
+            String separator = "?";
+            for (String name : parameterMap.keySet()) {
+                if (!name.equals("form_token")) {
+                    url.append(separator);
+                    url.append(urlEncode(name));
+                    url.append("=").append(urlEncode(parameterMap.get(name)[0]));
+                    separator = "&";
+                }
             }
         }
         return url.toString();
