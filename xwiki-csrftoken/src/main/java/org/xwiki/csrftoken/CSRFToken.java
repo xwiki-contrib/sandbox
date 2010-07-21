@@ -22,23 +22,21 @@ package org.xwiki.csrftoken;
 import org.xwiki.component.annotation.ComponentRole;
 
 /**
- * Anti-CSRF protection using secret token validation mechanism.
+ * Anti-CSRF (Cross Site Request Forgery) protection using secret token validation mechanism.
  * <p>
- * A random secret token should be included into every request that modifies or stores some data. If the token
- * included into the request does not match the token stored on the server side, the request is redirected to a
- * resubmission page where a legitimate user has a chance to confirm his action.
+ * A random secret token should be included into every request that modifies or stores some data. If the token included
+ * into the request does not match the token stored on the server side, the request is redirected to a resubmission page
+ * where a legitimate user has a chance to confirm his action.
  * 
  * @see http://www.owasp.org/index.php/Cross-Site_Request_Forgery_%28CSRF%29_Prevention_Cheat_Sheet
- * 
- * @version $Id: $
- * @since 2.4
+ * @version $Id$
+ * @since 2.5M1
  */
 @ComponentRole
 public interface CSRFToken
 {
     /**
-     * Returns the anti-CSRF token associated with the current user.
-     * Creates a fresh token on first call.
+     * Returns the anti-CSRF token associated with the current user. Creates a fresh token on first call.
      * 
      * @return the secret token
      * @see #isTokenValid(String)
@@ -46,17 +44,16 @@ public interface CSRFToken
     String getToken();
 
     /**
-     * Removes the anti-CSRF token associated with the current user. Current token is invalidated
-     * immediately, a subsequent call of {@link #getToken()} will generate a fresh token.
+     * Removes the anti-CSRF token associated with the current user. Current token is invalidated immediately, a
+     * subsequent call of {@link #getToken()} will generate a fresh token.
      */
     void clearToken();
 
     /**
-     * Check if the given <code>token</code> matches the internally stored token associated with the
-     * current user.
+     * Check if the given <code>token</code> matches the internally stored token associated with the current user.
      * 
      * @param token random token from the request
-     * @return true if the component is disabled or the given token is correct, false otherwise
+     * @return {@code true} if the component is disabled or the given token is correct, {@code false} otherwise
      */
     boolean isTokenValid(String token);
 
@@ -67,4 +64,3 @@ public interface CSRFToken
      */
     String getResubmissionURL();
 }
-

@@ -30,14 +30,14 @@ import org.xwiki.csrftoken.CSRFTokenConfiguration;
  * <ul>
  *   <li>"core.csrftoken.enabled", default = false</li>
  * </ul>
- *
- * @version $Id: $
- * @since 2.4
+ * 
+ * @version $Id$
+ * @since 2.5M1
  */
 @Component
 public class DefaultCSRFTokenConfiguration extends AbstractLogEnabled implements CSRFTokenConfiguration
 {
-    /** Prefix for the configuration keys for the {@link CSRFToken} component. */
+    /** Prefix for the configuration keys for the {@link org.xwiki.csrftoken.CSRFToken} component. */
     private static final String PREFIX = "core.csrftoken.";
 
     /** Main XWiki properties configuration source. */
@@ -50,7 +50,6 @@ public class DefaultCSRFTokenConfiguration extends AbstractLogEnabled implements
     public boolean isEnabled()
     {
         String key = PREFIX + "enabled";
-        return configuration.getProperty(key, Boolean.FALSE).booleanValue();
+        return this.configuration.getProperty(key, Boolean.FALSE).booleanValue();
     }
 }
-

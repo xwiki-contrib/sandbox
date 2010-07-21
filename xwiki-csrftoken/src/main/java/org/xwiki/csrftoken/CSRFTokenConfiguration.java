@@ -24,8 +24,8 @@ import org.xwiki.component.annotation.ComponentRole;
 /**
  * Provides configuration for the {@link CSRFToken} component.
  * 
- * @version $Id: $
- * @since 2.4
+ * @version $Id$
+ * @since 2.5M1
  */
 @ComponentRole
 public interface CSRFTokenConfiguration
@@ -37,4 +37,3 @@ public interface CSRFTokenConfiguration
      */
     boolean isEnabled();
 }
-

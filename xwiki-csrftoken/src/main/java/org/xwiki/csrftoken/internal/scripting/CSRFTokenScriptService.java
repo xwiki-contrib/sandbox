@@ -28,61 +28,53 @@ import org.xwiki.script.service.ScriptService;
 /**
  * Script service wrapping a {@link CSRFToken} component.
  * 
- * @version $Id: $
- * @since 2.4
+ * @version $Id$
+ * @since 2.5M1
  */
-@Component("csrf")
-public class CSRFTokenScriptService extends AbstractLogEnabled implements ScriptService
+@Component(roles = ScriptService.class, hints = "csrf")
+public class CSRFTokenScriptService extends AbstractLogEnabled implements CSRFToken, ScriptService
 {
     /** Wrapped CSRF token component. */
     @Requirement
     private CSRFToken csrf;
 
     /**
-     * Returns the anti-CSRF token associated with the current user.
-     * Creates a fresh token on first call.
+     * {@inheritDoc}
      * 
-     * @return the secret token
      * @see CSRFToken#isTokenValid(String)
      */
     public String getToken()
     {
-        return csrf.getToken();
+        return this.csrf.getToken();
     }
 
     /**
-     * Removes the anti-CSRF token associated with the current user. Current token is invalidated
-     * immediately, a subsequent call of {@link #getToken()} will generate a fresh token.
+     * {@inheritDoc}
      * 
      * @see CSRFToken#clearToken()
      */
     public void clearToken()
     {
-        csrf.clearToken();
+        this.csrf.clearToken();
     }
 
     /**
-     * Check if the given <code>token</code> matches the internally stored token associated with the
-     * current user.
+     * {@inheritDoc}
      * 
-     * @param token random token from the request
-     * @return true if the component is disabled or the given token is correct, false otherwise
      * @see CSRFToken#isTokenValid(String)
      */
     public boolean isTokenValid(String token)
     {
-        return csrf.isTokenValid(token);
+        return this.csrf.isTokenValid(token);
     }
 
     /**
-     * Get the URL where a failed request should be redirected to.
+     * {@inheritDoc}
      * 
-     * @return URL of the resubmission page with correct parameters
      * @see CSRFToken#getResubmissionURL()
      */
     public String getResubmissionURL()
     {
-        return csrf.getResubmissionURL();
+        return this.csrf.getResubmissionURL();
     }
 }
-

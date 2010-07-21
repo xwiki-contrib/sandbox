@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
-
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
@@ -50,16 +49,18 @@ import org.xwiki.model.reference.EntityReference;
 
 /**
  * Concrete implementation of the {@link CSRFToken} component.
+ * <p>
+ * This implementation uses a <code>user =&gt; token</code> map to store the tokens. The tokens are random BASE64
+ * encoded bit-strings.
+ * </p>
+ * <p>
+ * TODO Expire tokens every couple of hours (configurable). Expiration can be implemented using two maps, oldTokens and
+ * currentTokens, old tokens are replaced by current tokens every 1/2 period, check is performed on both and new tokens
+ * are added to the current tokens.
+ * </p>
  * 
- * This implementation uses a <code>user =&gt; token</code> map to store the tokens.
- * The tokens are random BASE64 encoded bit-strings.
- * 
- * TODO Expire tokens every couple of hours (configurable).
- * Expiration can be implemented using two maps, oldTokens and currentTokens, old tokens are replaced
- * by current tokens every 1/2 period, check is performed on both and new tokens are added to the current tokens.
- * 
- * @version $Id: $
- * @since 2.4
+ * @version $Id$
+ * @since 2.5M1
  */
 @Component
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
@@ -80,7 +81,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     /** Random number generator. */
     private SecureRandom random;
 
-    /** Used to find out the current user name. */
+    /** Used to find out the current user name and the current document. */
     @Requirement
     private DocumentAccessBridge docBridge;
 
@@ -103,16 +104,16 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     public void initialize() throws InitializationException
     {
-        tokens = new ConcurrentHashMap<String, String>();
+        this.tokens = new ConcurrentHashMap<String, String>();
         try {
-            random = SecureRandom.getInstance("SHA1PRNG");
+            this.random = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
             // use the default implementation then
-            random = new SecureRandom();
+            this.random = new SecureRandom();
             getLogger().warn("CSRFToken: Using default implementation of SecureRandom");
         }
-        byte[] seed = random.generateSeed(TOKEN_LENGTH);
-        random.setSeed(seed);
+        byte[] seed = this.random.generateSeed(TOKEN_LENGTH);
+        this.random.setSeed(seed);
         getLogger().info("CSRFToken: Anti-CSRF secret token component has been initialized");
     }
 
@@ -122,20 +123,20 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     public String getToken()
     {
         String key = getTokenKey();
-        String token = tokens.get(key);
+        String token = this.tokens.get(key);
         if (token != null) {
             return token;
         }
 
         // create fresh token if needed
-        synchronized (tokens) {
-            if (!tokens.containsKey(key)) {
+        synchronized (this.tokens) {
+            if (!this.tokens.containsKey(key)) {
                 byte[] bytes = new byte[TOKEN_LENGTH];
-                random.nextBytes(bytes);
+                this.random.nextBytes(bytes);
                 token = Base64.encodeBase64URLSafeString(bytes);
-                tokens.put(key, token);
+                this.tokens.put(key, token);
             }
-            return tokens.get(key);
+            return this.tokens.get(key);
         }
     }
 
@@ -144,7 +145,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     public void clearToken()
     {
-        tokens.remove(getTokenKey());
+        this.tokens.remove(getTokenKey());
     }
 
     /**
@@ -152,7 +153,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     public boolean isTokenValid(String token)
     {
-        if (!configuration.isEnabled()) {
+        if (!this.configuration.isEnabled()) {
             return true;
         }
         String storedToken = getToken();
@@ -171,7 +172,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     {
         try {
             // TODO find out which encoding is used for response
-            String encoding = "utf-8";
+            String encoding = "UTF-8";
 
             // request URL is the one that performs the modification
             String requestUrl = getRequestURLWithoutToken();
@@ -179,11 +180,11 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
 
             // back URL is the URL of the document that was about to be modified, so in most
             // cases we can redirect back to the correct document (if the user clicks "no")
-            String backUrl = getDocumentURL(docBridge.getCurrentDocumentReference(), null);
+            String backUrl = getDocumentURL(this.docBridge.getCurrentDocumentReference(), null);
             query += "&xback=" + URLEncoder.encode(backUrl, encoding);
 
             // construct the URL of the resubmission page
-            EntityReference wiki = model.getCurrentEntityReference();
+            EntityReference wiki = this.model.getCurrentEntityReference();
             EntityReference space = new EntityReference(RESUBMIT_SPACE, EntityType.SPACE);
             if (wiki != null) {
                 space.setParent(wiki.extractReference(EntityType.WIKI));
@@ -192,7 +193,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
             DocumentReference resubmitDoc = new DocumentReference(doc);
             return getDocumentURL(resubmitDoc, query);
         } catch (UnsupportedEncodingException exception) {
-            // shouldn't happen
+            // Shouldn't happen, UTF-8 is always available
         }
         return "";
     }
@@ -206,12 +207,12 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     private String getDocumentURL(DocumentReference reference, String query)
     {
-        return docBridge.getDocumentURL(reference, "view", query, null);
+        return this.docBridge.getDocumentURL(reference, "view", query, null);
     }
 
     /**
-     * Find out the URL of the current request and remove the 'form_token' parameter from the query.
-     * The secret token will be replaced by the correct one on the resubmission page.
+     * Find out the URL of the current request and remove the 'form_token' parameter from the query. The secret token
+     * will be replaced by the correct one on the resubmission page.
      * 
      * @return current URL without secret token
      */
@@ -238,7 +239,7 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     private HttpServletRequest getRequest()
     {
-        Request request = container.getRequest();
+        Request request = this.container.getRequest();
         if (request instanceof ServletRequest) {
             return ((ServletRequest) request).getHttpServletRequest();
         }
@@ -252,7 +253,6 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     private String getTokenKey()
     {
-        return docBridge.getCurrentUser();
+        return this.docBridge.getCurrentUser();
     }
 }
-

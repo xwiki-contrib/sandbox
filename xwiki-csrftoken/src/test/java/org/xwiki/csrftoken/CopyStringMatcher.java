@@ -24,15 +24,14 @@ import org.hamcrest.Description;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
 
-
 /**
- * A matcher that acts as an action and returns the matched argument in the mocked method, allowing
- * small modifications (prepend/append something to the value).
+ * A matcher that acts as an action and returns the matched argument in the mocked method, allowing small modifications
+ * (prepend/append something to the value).
  * 
- * @version $Id: $
- * @since 2.4
+ * @version $Id$
+ * @since 2.5M1
  */
-public final class CopyStringMatcher extends BaseMatcher<String> implements Action 
+public final class CopyStringMatcher extends BaseMatcher<String> implements Action
 {
     /** The string to copy. */
     private String value = null;
@@ -61,7 +60,7 @@ public final class CopyStringMatcher extends BaseMatcher<String> implements Acti
     public boolean matches(Object argument)
     {
         if (argument instanceof String) {
-            value = (String) argument;
+            this.value = (String) argument;
             return true;
         }
         return false;
@@ -73,7 +72,7 @@ public final class CopyStringMatcher extends BaseMatcher<String> implements Acti
     public void describeTo(Description d)
     {
         d.appendText("COPY VALUE: ");
-        d.appendValue(value);
+        d.appendValue(this.value);
     }
 
     /**
@@ -81,9 +80,9 @@ public final class CopyStringMatcher extends BaseMatcher<String> implements Acti
      */
     public String invoke(Invocation invocation) throws Throwable
     {
-        if (value == null)
-            return prefix + suffix;
-        return prefix + value + suffix;
+        if (this.value == null) {
+            return this.prefix + this.suffix;
+        }
+        return this.prefix + this.value + this.suffix;
     }
 }
-
