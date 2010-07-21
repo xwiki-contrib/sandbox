@@ -170,32 +170,24 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
      */
     public String getResubmissionURL()
     {
-        try {
-            // TODO find out which encoding is used for response
-            String encoding = "UTF-8";
+        // request URL is the one that performs the modification
+        String requestUrl = getRequestURLWithoutToken();
+        String query = "xredirect=" + urlEncode(requestUrl);
 
-            // request URL is the one that performs the modification
-            String requestUrl = getRequestURLWithoutToken();
-            String query = "xredirect=" + URLEncoder.encode(requestUrl, encoding);
+        // back URL is the URL of the document that was about to be modified, so in most
+        // cases we can redirect back to the correct document (if the user clicks "no")
+        String backUrl = getDocumentURL(this.docBridge.getCurrentDocumentReference(), null);
+        query += "&xback=" + urlEncode(backUrl);
 
-            // back URL is the URL of the document that was about to be modified, so in most
-            // cases we can redirect back to the correct document (if the user clicks "no")
-            String backUrl = getDocumentURL(this.docBridge.getCurrentDocumentReference(), null);
-            query += "&xback=" + URLEncoder.encode(backUrl, encoding);
-
-            // construct the URL of the resubmission page
-            EntityReference wiki = this.model.getCurrentEntityReference();
-            EntityReference space = new EntityReference(RESUBMIT_SPACE, EntityType.SPACE);
-            if (wiki != null) {
-                space.setParent(wiki.extractReference(EntityType.WIKI));
-            }
-            EntityReference doc = new EntityReference(RESUBMIT_PAGE, EntityType.DOCUMENT, space);
-            DocumentReference resubmitDoc = new DocumentReference(doc);
-            return getDocumentURL(resubmitDoc, query);
-        } catch (UnsupportedEncodingException exception) {
-            // Shouldn't happen, UTF-8 is always available
+        // construct the URL of the resubmission page
+        EntityReference wiki = this.model.getCurrentEntityReference();
+        EntityReference space = new EntityReference(RESUBMIT_SPACE, EntityType.SPACE);
+        if (wiki != null) {
+            space.setParent(wiki.extractReference(EntityType.WIKI));
         }
-        return "";
+        EntityReference doc = new EntityReference(RESUBMIT_PAGE, EntityType.DOCUMENT, space);
+        DocumentReference resubmitDoc = new DocumentReference(doc);
+        return getDocumentURL(resubmitDoc, query);
     }
 
     /**
@@ -230,6 +222,24 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
             }
         }
         return url.toString();
+    }
+
+    /**
+     * URL-encode given string.
+     * 
+     * @param str the string to encode
+     * @return URL-encoded string
+     */
+    private String urlEncode(String str)
+    {
+        // TODO find out which encoding is used for response
+        String encoding = "UTF-8";
+        try {
+            return URLEncoder.encode(str, encoding);
+        } catch (UnsupportedEncodingException exception) {
+            // Shouldn't happen, UTF-8 is always available
+            return "";
+        }
     }
 
     /**
