@@ -59,7 +59,7 @@ import org.xwiki.crypto.passwd.PasswdCryptoService;
  * Note: Subclasses implementing other encryption methods should override at least
  * {@link #getCipher()}, {@link #getDigest()} and {@link #getKeyLength()}</p>
  * 
- * @version $Id:$
+ * @version $Id$
  * @since 2.5
  */
 @Component
@@ -68,8 +68,13 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     /** Size of the salt in bytes. */
     private static final int SALT_SIZE = 20;
 
-    /** The cipher engine. */
-    private final PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(this.getCipher());
+    /** 
+     * The cipher engine. It is very important to wrap the engine with CBC or similar, otherwise
+     * large patches of the same data will translate to large patches of the same ciphertext.
+     * see: http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation
+     */
+    private final PaddedBufferedBlockCipher cipher = 
+        new PaddedBufferedBlockCipher(new CBCBlockCipher(this.getCipher()));
 
     /** The hash engine. */
     private final Digest hash = this.getDigest();
@@ -175,14 +180,12 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     }
 
     /**
-     * This implementation uses CAST5-CBC. It is very important to wrap the engine with CBC or similar, otherwise
-     * large patches of the same data will translate to large patches of the same ciphertext.
-     * see: http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation
+     * This implementation uses CAST5.
      * @return the cipher engine to use.
      */
     protected BlockCipher getCipher()
     {
-        return new CBCBlockCipher(new CAST5Engine());
+        return new CAST5Engine();
     }
 
     /**

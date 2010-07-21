@@ -43,7 +43,7 @@ public class AESPasswdCryptoService extends DefaultPasswdCryptoService
     @Override
     protected BlockCipher getCipher()
     {
-        return new CBCBlockCipher(new AESEngine());
+        return new AESEngine();
     }
 
     /**
