@@ -39,5 +39,13 @@ public class CryptoScriptService implements ScriptService
     /** The service which this class wraps. */
     @Requirement
     public X509CryptoService x509;
+
+    /**
+     * @return the x509 crypto service
+     */
+    public X509CryptoService getX509()
+    {
+        return this.x509;
+    }
 }
 
