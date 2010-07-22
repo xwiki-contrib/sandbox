@@ -159,7 +159,7 @@ public class PKCS7SignedScript implements SignedScript
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.crypto.data.SignedScript#toString()
+     * @see java.lang.Object#toString()
      */
     @Override
     public String toString()
@@ -170,7 +170,7 @@ public class PKCS7SignedScript implements SignedScript
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.crypto.data.SignedScript#serialize()
+     * @see org.xwiki.signedscripts.SignedScript#serialize()
      */
     public String serialize()
     {
@@ -211,7 +211,7 @@ public class PKCS7SignedScript implements SignedScript
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.crypto.data.SignedScript#getCode()
+     * @see org.xwiki.signedscripts.SignedScript#getCode()
      */
     public String getCode()
     {
@@ -221,7 +221,7 @@ public class PKCS7SignedScript implements SignedScript
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.crypto.data.SignedScript#get(org.xwiki.crypto.data.SignedScriptKey)
+     * @see org.xwiki.signedscripts.SignedScript#get(org.xwiki.signedscripts.SignedScriptKey)
      */
     public String get(SignedScriptKey key)
     {
@@ -231,7 +231,7 @@ public class PKCS7SignedScript implements SignedScript
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.crypto.data.SignedScript#isSet(org.xwiki.crypto.data.SignedScriptKey)
+     * @see org.xwiki.signedscripts.SignedScript#isSet(org.xwiki.signedscripts.SignedScriptKey)
      */
     public boolean isSet(SignedScriptKey key)
     {

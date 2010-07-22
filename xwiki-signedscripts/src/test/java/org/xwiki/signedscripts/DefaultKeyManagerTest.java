@@ -53,7 +53,8 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.test.AbstractMockingComponentTestCase#setUp()
+     * 
+     * @see org.xwiki.signedscripts.framework.AbstractSignedScriptsTest#setUp()
      */
     @Before
     @Override

@@ -130,6 +130,7 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.test.AbstractMockingComponentTestCase#setUp()
      */
     @Override
@@ -182,6 +183,5 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
             throw new RuntimeException(exception);
         }
     }
-
 }
 

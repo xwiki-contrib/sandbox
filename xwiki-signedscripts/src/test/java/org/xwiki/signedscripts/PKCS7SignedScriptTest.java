@@ -80,6 +80,7 @@ public class PKCS7SignedScriptTest extends AbstractSignedScriptsTest
 
         /**
          * {@inheritDoc}
+         * 
          * @see org.xwiki.signedscripts.internal.PKCS7SignedScript#set(org.xwiki.signedscripts.SignedScriptKey, java.lang.String)
          */
         @Override
