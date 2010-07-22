@@ -57,10 +57,11 @@ public interface KeyManager
      * TODO should require global admin rights
      * 
      * @param certificate the certificate to register
+     * @param userName the user to associate the certificate with
      * @throws GeneralSecurityException on errors or insufficient access rights
      * @see #parseCertificate(String)
      */
-    void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException;
+    void registerCertificate(XWikiX509Certificate certificate, String userName) throws GeneralSecurityException;
 
     /**
      * Unregister the certificate or key pair with the given fingerprint. The code previously signed with this

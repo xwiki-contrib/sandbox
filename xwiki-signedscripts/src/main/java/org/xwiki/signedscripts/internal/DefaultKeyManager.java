@@ -120,7 +120,8 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * 
      * @see org.xwiki.signedscripts.KeyManager#createKeyPair(java.lang.String, java.lang.String, int)
      */
-    public String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException
+    public synchronized String createKeyPair(String authorName, String password, int daysOfValidity)
+        throws GeneralSecurityException
     {
         KeyPair kp = this.kpGen.generateKeyPair();
 
@@ -181,10 +182,13 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.KeyManager#registerCertificate(org.xwiki.crypto.x509.XWikiX509Certificate)
+     * @see org.xwiki.signedscripts.KeyManager#registerCertificate(org.xwiki.crypto.x509.XWikiX509Certificate, java.lang.String)
      */
-    public void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException
+    public void registerCertificate(XWikiX509Certificate certificate, String userName) throws GeneralSecurityException
     {
+        if (!docUtils.getCertificateFingerprintsForUser(userName).contains(certificate.getFingerprint())) {
+            throw new GeneralSecurityException("Given certificate is not owned by the user \"" + userName + "\"");
+        }
         this.certMap.put(certificate.getFingerprint(), certificate);
     }
 

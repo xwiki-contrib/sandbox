@@ -131,8 +131,9 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
         XWikiX509Certificate cert = getTestCert();
         Assert.assertEquals(getTestCertFingerprint(), cert.getFingerprint());
         Assert.assertNull("Certificate allready registered", keyManager.getCertificate(cert.getFingerprint()));
-        keyManager.registerCertificate(cert);
+        keyManager.registerCertificate(cert, USER);
         Assert.assertEquals(cert, keyManager.getCertificate(cert.getFingerprint()));
+        Assert.assertEquals(cert.getFingerprint(), keyManager.getTrustedFingerprint(USER));
     }
 
     @Test
@@ -140,7 +141,7 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
     {
         XWikiX509Certificate cert = getTestCert();
         Assert.assertEquals(getTestCertFingerprint(), cert.getFingerprint());
-        keyManager.registerCertificate(cert);
+        keyManager.registerCertificate(cert, USER);
         Assert.assertEquals(cert, keyManager.getCertificate(cert.getFingerprint()));
         keyManager.unregister(cert.getFingerprint());
         Assert.assertNull("Certificate is still registered", keyManager.getCertificate(cert.getFingerprint()));

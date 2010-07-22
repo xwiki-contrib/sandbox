@@ -55,11 +55,12 @@ public class KeyManagerScriptService implements ScriptService, KeyManager
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.KeyManager#registerCertificate(org.xwiki.crypto.x509.XWikiX509Certificate)
+     * @see org.xwiki.signedscripts.KeyManager#registerCertificate(org.xwiki.crypto.x509.XWikiX509Certificate,
+     *      java.lang.String)
      */
-    public void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException
+    public void registerCertificate(XWikiX509Certificate certificate, String userName) throws GeneralSecurityException
     {
-        keyManager.registerCertificate(certificate);
+        keyManager.registerCertificate(certificate, userName);
     }
 
     /**
