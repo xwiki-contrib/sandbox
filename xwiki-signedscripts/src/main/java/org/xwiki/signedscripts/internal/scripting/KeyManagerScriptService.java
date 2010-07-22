@@ -35,20 +35,17 @@ import org.xwiki.signedscripts.KeyManager;
  * @version $Id$
  * @since 2.5
  */
-@Component("keymanager")
-public class KeyManagerScriptService implements ScriptService
+@Component(roles = { ScriptService.class }, hints = { "keymanager" })
+public class KeyManagerScriptService implements ScriptService, KeyManager
 {
     /** Enclosed key manager. */
     @Requirement
     private KeyManager keyManager;
 
     /**
-     * @param authorName author name to use
-     * @param password the password to use for encrypting the key
-     * @param daysOfValidity how many days should the new certificate be valid
-     * @return fingerprint of the new key pair
-     * @throws GeneralSecurityException on errors or insufficient access rights
-     * @see org.xwiki.crypto.KeyManager#createKeyPair(java.lang.String, java.util.Date)
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#createKeyPair(java.lang.String, java.lang.String, int)
      */
     public String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException
     {
@@ -56,9 +53,9 @@ public class KeyManagerScriptService implements ScriptService
     }
 
     /**
-     * @param certificate the certificate to register
-     * @throws GeneralSecurityException on errors or insufficient access rights
-     * @see org.xwiki.crypto.KeyManager#registerCertificate(org.xwiki.crypto.data.XWikiX509Certificate)
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#registerCertificate(org.xwiki.crypto.x509.XWikiX509Certificate)
      */
     public void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException
     {
@@ -66,9 +63,9 @@ public class KeyManagerScriptService implements ScriptService
     }
 
     /**
-     * @param fingerprint fingerprint of the certificate or key pair to unregister
-     * @throws GeneralSecurityException on errors or insufficient access rights
-     * @see org.xwiki.crypto.KeyManager#unregister(java.lang.String)
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#unregister(java.lang.String)
      */
     public void unregister(String fingerprint) throws GeneralSecurityException
     {
@@ -76,10 +73,9 @@ public class KeyManagerScriptService implements ScriptService
     }
 
     /**
-     * @param fingerprint certificate fingerprint to use
-     * @return the corresponding certificate
-     * @throws GeneralSecurityException if the certificate does not exist
-     * @see org.xwiki.crypto.KeyManager#getCertificate(java.lang.String)
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#getCertificate(java.lang.String)
      */
     public XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
     {
@@ -87,10 +83,9 @@ public class KeyManagerScriptService implements ScriptService
     }
 
     /**
-     * @param fingerprint certificate fingerprint to use
-     * @return the corresponding key pair
-     * @throws GeneralSecurityException if the key pair does not exist or on insufficient access rights
-     * @see org.xwiki.crypto.KeyManager#getKeyPair(java.lang.String)
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#getKeyPair(java.lang.String)
      */
     public XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
     {
@@ -98,8 +93,9 @@ public class KeyManagerScriptService implements ScriptService
     }
 
     /**
-     * @return local root certificate object
-     * @see org.xwiki.crypto.KeyManager#getLocalRootCertificate()
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#getLocalRootCertificate()
      */
     public XWikiX509Certificate getLocalRootCertificate()
     {
@@ -107,8 +103,9 @@ public class KeyManagerScriptService implements ScriptService
     }
 
     /**
-     * @return global root certificate object
-     * @see org.xwiki.crypto.KeyManager#getGlobalRootCertificate()
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#getGlobalRootCertificate()
      */
     public XWikiX509Certificate getGlobalRootCertificate()
     {
@@ -116,8 +113,9 @@ public class KeyManagerScriptService implements ScriptService
     }
 
     /**
-     * @return set of all known fingerprints
-     * @see org.xwiki.crypto.KeyManager#getKnownFingerprints()
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#getKnownFingerprints()
      */
     public Set<String> getKnownFingerprints()
     {

@@ -23,9 +23,9 @@ import java.security.GeneralSecurityException;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.script.service.ScriptService;
 import org.xwiki.signedscripts.ScriptSigner;
 import org.xwiki.signedscripts.SignedScript;
-import org.xwiki.script.service.ScriptService;
 
 /**
  * Script service wrapping a {@link ScriptSigner} component.
@@ -33,20 +33,17 @@ import org.xwiki.script.service.ScriptService;
  * @version $Id$
  * @since 2.5
  */
-@Component("scriptsigner")
-public class ScriptSignerScriptService implements ScriptService
+@Component(roles = { ScriptService.class }, hints = { "scriptsigner" })
+public class ScriptSignerScriptService implements ScriptService, ScriptSigner
 {
-    /** Enclosed script signer. */
+    /** Wrapped script signer. */
     @Requirement
     private ScriptSigner signer;
 
     /**
-     * @param code code to sign
-     * @param fingerprint certificate fingerprint identifying the private key to use
-     * @param password the password to unlock the private key
-     * @return signed script object
-     * @throws GeneralSecurityException on errors
-     * @see org.xwiki.crypto.ScriptSigner#sign(java.lang.String, java.lang.String)
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String, java.lang.String)
      */
     public SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException
     {
@@ -54,12 +51,33 @@ public class ScriptSignerScriptService implements ScriptService
     }
 
     /**
-     * @param signedScript serialized signed script object
-     * @return code contained in the signed script
-     * @throws GeneralSecurityException if verification fails or on errors
-     * @see org.xwiki.crypto.ScriptSigner#getVerifiedScript(java.lang.String)
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String, java.lang.String)
      */
-    public SignedScript getVerifiedCode(String signedScript) throws GeneralSecurityException
+    public SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException
+    {
+        return signer.prepareScriptForSigning(code, fingerprint);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.ScriptSigner#constructSignedScript(org.xwiki.signedscripts.SignedScript,
+     *      java.lang.String)
+     */
+    public SignedScript constructSignedScript(SignedScript preparedScript, String base64Signature)
+        throws GeneralSecurityException
+    {
+        return signer.constructSignedScript(preparedScript, base64Signature);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.ScriptSigner#getVerifiedScript(java.lang.String)
+     */
+    public SignedScript getVerifiedScript(String signedScript) throws GeneralSecurityException
     {
         return signer.getVerifiedScript(signedScript);
     }
