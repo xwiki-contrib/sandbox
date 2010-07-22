@@ -25,7 +25,7 @@ import org.xwiki.component.annotation.ComponentRole;
 
 /**
  * A key derivation function.
- * Each function must produce the same hash from the same password repeatably but there is no guarentee that a new
+ * Each function must produce the same hash from the same password repeatable but there is no guarantee that a new
  * function of the same class will produce the same hash from the password. In order to make a password able to be
  * validated, you must call getSerialized() and initialize the next function with that output.
  * Each time a password is to be hashed, it should be done so with a new instance.
@@ -53,13 +53,13 @@ public interface KeyDerivationFunction
      * array and will then produce the same key for the given password.
      *
      * @return a byte array which can be used to recreate the same function again using init.
-     * @throws IOException if something fails whithin the serialization framework.
+     * @throws IOException if something fails within the serialization framework.
      */
     byte[] getSerialized() throws IOException;
 
     /**
      * Convert the given password to a byte array similar to the output from a message digest except specially tuned
-     * for the uniwue requirements of protecting passwords.
+     * for the unique requirements of protecting passwords.
      *
      * @param password the user supplied password.
      * @return a byte array derived from the password.

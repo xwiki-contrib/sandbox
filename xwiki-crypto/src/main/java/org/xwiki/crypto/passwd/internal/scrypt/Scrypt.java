@@ -73,11 +73,11 @@ public class Scrypt
      * This is an implementation of scrypt(P, S, N, r, p, dkLen)
      *
      * @param salt when encoding, a random byte array, when verifying, the same salt as was used to encode.
-     * @param memoryExpense a positive integer representing the relitive memory expense which the function should take.
+     * @param memoryExpense a positive integer representing the relative memory expense which the function should take.
      *                      with blocksize equal to 8 this is the number of kilobytes of memory which this function
      *                      should require.
      * @param blockSize the block size to use in the internal function.
-     * @param processorExpense a positive integer representing the relitive CPU expense which the function should take.
+     * @param processorExpense a positive integer representing the relative CPU expense which the function should take.
      * @param derivedKeyLength the number of bytes of length the derived key should be (dkLen)
      */
     public Scrypt(final byte[] salt,
@@ -124,8 +124,7 @@ public class Scrypt
 
             /* 2: for i = 0 to p - 1 do */
             // NOTE: This loop cycles processorExpense number of cycles.
-            for (int i = 0; i < workingBufferB.length; i += blockSizeInBytes)
-            {
+            for (int i = 0; i < workingBufferB.length; i += blockSizeInBytes) {
                 /* 3: B_i <-- MF(B_i, N) */
                 this.smix(workingBufferB, i);
             }
@@ -199,8 +198,7 @@ public class Scrypt
         System.arraycopy(bufferToMix, offset, bufferX, 0, lengthToMix);
 
         /* 2: for i = 0 to N - 1 do */
-        for (int i = 0; i < this.memoryExpense; i++)
-        {
+        for (int i = 0; i < this.memoryExpense; i++) {
             /* 3: V_i <-- X */
             System.arraycopy(bufferX, 0, this.memoryIntensiveBuffer, i * lengthToMix, lengthToMix);
 
@@ -209,8 +207,7 @@ public class Scrypt
         }
 
         /* 6: for i = 0 to N - 1 do */
-        for (int i = 0; i < this.memoryExpense; i++)
-        {
+        for (int i = 0; i < this.memoryExpense; i++) {
             /* 7: j <-- Integerify(X) mod N */
             blockToXOR = this.integerifyAndMod(bufferX, this.memoryExpense);
 
@@ -237,8 +234,7 @@ public class Scrypt
         System.arraycopy(block, block.length - 64, this.blockMixBufferX, 0, 64);
 
         /* 2: for i = 0 to 2r - 1 do */
-        for (int i = 0; i < block.length; i += 64)
-        {
+        for (int i = 0; i < block.length; i += 64) {
             /* 3: X <-- H(X \xor B_i) */
             this.bulkXOR(block, i, this.blockMixBufferX, 0, 64);
             this.scryptSalsa8(this.blockMixBufferX);
@@ -248,13 +244,11 @@ public class Scrypt
         }
 
         /* 6: B' <-- (Y_0, Y_2 ... Y_{2r-2}, Y_1, Y_3 ... Y_{2r-1}) */
-        for (int i = 0; i < this.blockSize; i++)
-        {
+        for (int i = 0; i < this.blockSize; i++) {
             // Copy all of the even numbered blocks.
             System.arraycopy(this.blockMixBufferY, i * 2 * 64, block, i * 64, 64);
         }
-        for (int i = 0; i < this.blockSize; i++)
-        {
+        for (int i = 0; i < this.blockSize; i++) {
             // Copy the odd numbered blocks to locations after the last copied even number block.
             System.arraycopy(this.blockMixBufferY, (i * 2 + 1) * 64, block, (i + this.blockSize) * 64, 64);
         }
@@ -263,7 +257,7 @@ public class Scrypt
     /**
      * Convert 8 bytes from a specified place in the array to an integer and take the mod of that number against
      * modulus.
-     * This function uses a fast modulus opperation which requires that modulus is a power of 2.
+     * This function uses a fast modulus operation which requires that modulus is a power of 2.
      *
      * @param array the array to take bytes from.
      * @param modulus the output will not be larger than this (must be a power of 2).
@@ -276,7 +270,7 @@ public class Scrypt
 
     /**
      * Convert 4 bytes from a specified place in the array to a long.
-     * This is a binary opperation, sign is ignored.
+     * This is a binary operation, sign is ignored.
      *
      * The paper says Integerify takes the last 8 bytes from the array but the reference implementation
      * takes byte at index (2 * r - 1) * 64 and the 7 bytes following.
@@ -375,8 +369,7 @@ public class Scrypt
     {
         System.arraycopy(input, 0, output, 0, 16);
         // All processing is done on the output array.
-        for (int i = numberOfRounds; i > 0; i -= 2)
-        {
+        for (int i = numberOfRounds; i > 0; i -= 2) {
             this.salsa20ColumnHalfround(output);
             this.salsa20RowHalfround(output);
         }
@@ -486,8 +479,7 @@ public class Scrypt
     protected void bytesToIntsLittle(byte[] input, int[] output)
     {
         int outCounter = 0;
-        for (int i = 0; i < input.length; i += 4)
-        {
+        for (int i = 0; i < input.length; i += 4) {
             output[outCounter] = input[i] & 255;
             output[outCounter] |= (input[i + 1] & 255) <<  8;
             output[outCounter] |= (input[i + 2] & 255) << 16;

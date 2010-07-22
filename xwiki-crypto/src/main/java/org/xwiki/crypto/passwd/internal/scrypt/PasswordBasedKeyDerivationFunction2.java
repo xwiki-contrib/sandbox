@@ -80,13 +80,12 @@ public class PasswordBasedKeyDerivationFunction2
             final byte[] currentIterationAsByteArray = new byte[4];
             final byte[] key = new byte[numberOfBlocks * hLen];
 
-            for (int i = 1; i <= numberOfBlocks; i++)
-            {
+            for (int i = 1; i <= numberOfBlocks; i++) {
                 this.integerToByteArray(i, currentIterationAsByteArray);
                 this.functionF(password, salt, iterationCount, currentIterationAsByteArray, key, (i - 1) * hLen);
             }
 
-            // Usually the key ends up being longer than the desired key length so it must be trunkated.
+            // Usually the key ends up being longer than the desired key length so it must be truncated
             byte[] out = new byte[derivedKeyLength];
             System.arraycopy(key, 0, out, 0, derivedKeyLength);
 
@@ -98,8 +97,10 @@ public class PasswordBasedKeyDerivationFunction2
     }
 
     /**
+     * Convert an integer to byte array in big-endian byte order.
+     * <p> 
      * Takes an int and an array of bytes. This array should be 4 bytes long.
-     * Doesn't return anything in order to recycle the same memory locations.
+     * Doesn't return anything in order to recycle the same memory locations.</p>
      *
      * @param integer the int which will be converted to an array of bytes.
      * @param outArray the array to populate with the output, this array should be 4 bytes.
@@ -149,8 +150,7 @@ public class PasswordBasedKeyDerivationFunction2
         }
         
         // i is initialized to 1 because the first cycle happened above.
-        for (int i = 1; i < iterationCount; i++)
-        {
+        for (int i = 1; i < iterationCount; i++) {
             this.hMac.init(passwordParam);
             this.hMac.update(this.state, 0, this.state.length);
             this.hMac.doFinal(this.state, 0);
