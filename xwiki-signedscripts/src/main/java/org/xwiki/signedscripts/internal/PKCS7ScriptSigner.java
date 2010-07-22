@@ -29,6 +29,7 @@ import java.util.TimeZone;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.crypto.internal.UserDocumentUtils;
 import org.xwiki.crypto.x509.X509CryptoService;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
@@ -54,14 +55,18 @@ public class PKCS7ScriptSigner implements ScriptSigner
     @Requirement
     private KeyManager keyManager;
 
+    /** Used to find out current user name. */
+    @Requirement
+    private UserDocumentUtils docUtils;
+
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String, java.lang.String)
+     * @see org.xwiki.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String)
      */
-    public SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException
+    public SignedScript sign(String code, String password) throws GeneralSecurityException
     {
-        SignedScript script = prepareScriptForSigning(code, fingerprint);
+        SignedScript script = prepareScriptForSigning(code);
         XWikiX509KeyPair keyPair = this.keyManager.getKeyPair(script.get(SignedScriptKey.FINGERPRINT));
         if (keyPair == null) {
             throw new GeneralSecurityException("Could not find the user key pair to sign with");
@@ -79,10 +84,14 @@ public class PKCS7ScriptSigner implements ScriptSigner
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String, java.lang.String)
+     * @see org.xwiki.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String)
      */
-    public SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException
+    public SignedScript prepareScriptForSigning(String code) throws GeneralSecurityException
     {
+        String fingerprint = keyManager.getTrustedFingerprint(docUtils.getCurrentUser());
+        if (fingerprint == null) {
+            throw new GeneralSecurityException("The user \"" + docUtils.getCurrentUser() + "\" can not sign scripts");
+        }
         PKCS7SignedScript script = new PKCS7SignedScript(code, fingerprint);
         XWikiX509Certificate certificate = getCertificate(script.get(SignedScriptKey.FINGERPRINT));
 

@@ -34,19 +34,18 @@ import org.xwiki.component.annotation.ComponentRole;
 public interface ScriptSigner
 {
     /**
-     * Create a signed script object by signing given code with the private key identified by the fingerprint.
+     * Create a signed script object by signing given code with the private key of the current user.
      * <p>
-     * TODO specify optional parameters, like expiration date<br>
-     * TODO should require PR and work only with user's own fingerprint (i.e. remove parameter)
+     * TODO specify optional parameters (like expiration date)<br>
+     * TODO should require PR
      * 
      * @param code code to sign
-     * @param fingerprint certificate fingerprint identifying the private key to use
      * @param password the password to unlock the private key
      * @return signed script object
      * @throws GeneralSecurityException on errors
      * @see KeyManager
      */
-    SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException;
+    SignedScript sign(String code, String password) throws GeneralSecurityException;
 
     /**
      * Construct the script object in the same way as {@link #sign(String, String)}, but not sign it. The resulting
@@ -58,17 +57,16 @@ public interface ScriptSigner
      * </p>
      * 
      * @param code code to sign
-     * @param fingerprint certificate fingerprint identifying the certificate to use
      * @return initialized script object, ready to be signed
      * @throws GeneralSecurityException on errors
      * @see #constructSignedScript(String, String)
      */
-    SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException;
+    SignedScript prepareScriptForSigning(String code) throws GeneralSecurityException;
 
     /**
      * Create a signed script object by combining the prepared script object and the signature. The signature must have
      * been produced by signing the result of {@link SignedScript#getDataToSign(String, String)} called on the script
-     * object created using {@link #prepareScriptForSigning(String, String)}.
+     * object created using {@link #prepareScriptForSigning(String)}.
      * <p>
      * The following sequence of operations:
      * 
@@ -89,7 +87,7 @@ public interface ScriptSigner
      * for private key stored on the server.
      * </p>
      * 
-     * @param preparedScript initialized script object produced by {@link #prepareScriptForSigning(String, String)}
+     * @param preparedScript initialized script object produced by {@link #prepareScriptForSigning(String)}
      * @param base64Signature Base64 encoded signature of the data returned by {@link SignedScript#getDataToSign()}
      * @return signed script object
      * @throws GeneralSecurityException on errors

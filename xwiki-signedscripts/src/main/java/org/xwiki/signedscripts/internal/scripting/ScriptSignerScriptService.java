@@ -43,21 +43,21 @@ public class ScriptSignerScriptService implements ScriptService, ScriptSigner
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String, java.lang.String)
+     * @see org.xwiki.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String)
      */
-    public SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException
+    public SignedScript sign(String code, String password) throws GeneralSecurityException
     {
-        return signer.sign(code, fingerprint, password);
+        return signer.sign(code, password);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String, java.lang.String)
+     * @see org.xwiki.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String)
      */
-    public SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException
+    public SignedScript prepareScriptForSigning(String code) throws GeneralSecurityException
     {
-        return signer.prepareScriptForSigning(code, fingerprint);
+        return signer.prepareScriptForSigning(code);
     }
 
     /**

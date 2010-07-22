@@ -85,7 +85,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
     public void testSign() throws GeneralSecurityException
     {
         final String code = "{{groovy}}println();{{/groovy}}\n";
-        SignedScript script = signer.sign(code, getTestKeyPair().getFingerprint(), "passwrd");
+        SignedScript script = signer.sign(code, "passwrd");
         Assert.assertEquals(code, script.getCode());
         Assert.assertEquals(getTestKeyPair().getFingerprint(), script.get(SignedScriptKey.FINGERPRINT));
     }
@@ -94,7 +94,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
     public void testSignVerify() throws GeneralSecurityException
     {
         final String code = "{{groovy}}println();{{/groovy}}\n";
-        SignedScript script = signer.sign(code, getTestKeyPair().getFingerprint(), "passwrd");
+        SignedScript script = signer.sign(code, "passwrd");
         // NOTE: the test may fail randomly if the next second starts at this line 
         SignedScript verified = signer.getVerifiedScript(script.serialize());
         Assert.assertEquals(script.toString(), verified.toString());
@@ -104,9 +104,9 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
     public void testExternalSignIsSign() throws GeneralSecurityException
     {
         final String code = "{{groovy}}println();{{/groovy}}\n";
-        final SignedScript signed = signer.sign(code, getTestKeyPair().getFingerprint(), "passwrd");
+        final SignedScript signed = signer.sign(code, "passwrd");
         // NOTE: the test may fail randomly if the next second starts at this line 
-        SignedScript prepared = signer.prepareScriptForSigning(code, getTestKeyPair().getFingerprint());
+        SignedScript prepared = signer.prepareScriptForSigning(code);
         SignedScript script = signer.constructSignedScript(prepared, SIGNATURE);
         Assert.assertEquals(signed.toString(), script.toString());
     }
@@ -115,7 +115,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
     public void testPreparedNotVerify() throws GeneralSecurityException
     {
         final String code = "{{groovy}}println();{{/groovy}}\n";
-        SignedScript prepared = signer.prepareScriptForSigning(code, getTestKeyPair().getFingerprint());
+        SignedScript prepared = signer.prepareScriptForSigning(code);
         // the test relies on the fact that an unsigned script has the string *ERROR* instead of the signature
         signer.getVerifiedScript(prepared.serialize());
         Assert.fail("Prepared script passed verification");
