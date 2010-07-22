@@ -27,25 +27,26 @@ import org.xwiki.crypto.passwd.internal.PasswordBasedKeyDerivationFunction2;
  * A java implementation of this http://www.tarsnap.com/scrypt/scrypt.pdf
  *
  * @since 2.5
- * @version $Id:$
+ * @version $Id$
  */
 public class Scrypt
 {
-    /** @serial abstract number referring to how much memory should be expended for hashing the password. */
+    /** Abstract number referring to how much memory should be expended for hashing the password. */
     private int memoryExpense;
 
-    /** @serial abstract number referring to how much CPU power should be expended for hashing the password. */
+    /** Abstract number referring to how much CPU power should be expended for hashing the password. */
     private int processorExpense;
 
-    /** @serial how many bytes long the output key should be. */
+    /** How many bytes long the output key should be. */
     private int derivedKeyLength;
 
-    /** @serial random salt to frustrate cracking attempts. */
+    /** Random salt to frustrate cracking attempts. */
     private byte[] salt;
 
-    /** @serial the block size to use for the scrypt blockmix function. */
+    /** The block size to use for the scrypt blockmix function. */
     private int blockSize;
 
+    /** PBKDF2 function based on SHA-256, used by the scrypt function. */
     private volatile PasswordBasedKeyDerivationFunction2 sha256Pbkdf2 = 
         new PasswordBasedKeyDerivationFunction2(new SHA256Digest());
 
@@ -69,7 +70,8 @@ public class Scrypt
     private volatile byte[] blockMixBufferY;
 
     /**
-     * Implementation of scrypt(P, S, N, r, p, dkLen)
+     * The Constructor.
+     * This is an implementation of scrypt(P, S, N, r, p, dkLen)
      *
      * @param salt when encoding, a random byte array, when verifying, the same salt as was used to encode.
      * @param memoryExpense a positive integer representing the relitive memory expense which the function should take.
@@ -100,13 +102,17 @@ public class Scrypt
         this.processorExpense = processorExpense;
         this.derivedKeyLength = derivedKeyLength;
 
-        // Make sure enough memory is available.
-        this.allocateMemory(false);
-
         this.salt = new byte[salt.length];
         System.arraycopy(salt, 0, this.salt, 0, salt.length);
     }
 
+    /**
+     * Run the scrypt function on the given password.
+     *
+     * @param password a byte array derived from the user input, a key will be made from this in a resource intensive
+     *        way.
+     * @return the key made from hashing the given password.
+     */
     public byte[] hashPassword(final byte[] password)
     {
         try {
@@ -141,21 +147,23 @@ public class Scrypt
      */
     protected void allocateMemory(final boolean forReal)
     {
-        int memoryToAllocate = 128 * blockSize * processorExpense;
-        memoryToAllocate += 256 * blockSize;
-        memoryToAllocate += 128 * blockSize * memoryExpense;
-        if (Runtime.getRuntime().freeMemory() < memoryToAllocate) {
-            System.gc();
-            long freeMemory = Runtime.getRuntime().freeMemory();
-            if (freeMemory < memoryToAllocate) {
-                /*throw new IllegalArgumentException("Cannot allocate " + (memoryToAllocate / 1048576) + "MB of memory "
-                                                   + "only " + (freeMemory / 1048576) + "MB of memory are available.");*/
-            }
-        }
-        if (forReal) {
+        try {
+            // There is no way to prove that memory is not available without trying to allocate it.
             this.memoryIntensiveBuffer = new byte[128 * this.blockSize * this.memoryExpense];
             this.blockMixBufferX = new byte[64];
             this.blockMixBufferY = new byte[128 * this.blockSize];
+        } catch (OutOfMemoryError e) {
+            this.freeMemory();
+            int memoryToAllocate = 128 * blockSize * processorExpense;
+            memoryToAllocate += 256 * blockSize;
+            memoryToAllocate += 128 * blockSize * memoryExpense;
+            throw new IllegalArgumentException("Cannot allocate " + (memoryToAllocate / 1048576) + "MB of memory "
+                                               + "only " + (Runtime.getRuntime().freeMemory() / 1048576)
+                                               + "MB of memory are available.");
+        }
+        if (!forReal) {
+            // Free the memory so that this object doesn't carry it around everywhere.
+            this.freeMemory();
         }
     }
 
@@ -192,47 +200,53 @@ public class Scrypt
         System.arraycopy(bufferToMix, offset, bufferX, 0, lengthToMix);
 
         /* 2: for i = 0 to N - 1 do */
-       	for (int i = 0; i < this.memoryExpense; i++)
+        for (int i = 0; i < this.memoryExpense; i++)
         {
-      		    /* 3: V_i <-- X */
+            /* 3: V_i <-- X */
             System.arraycopy(bufferX, 0, this.memoryIntensiveBuffer, i * lengthToMix, lengthToMix);
 
-		          /* 4: X <-- H(X) */
-		          this.blockMix(bufferX);
-	       }
+            /* 4: X <-- H(X) */
+            this.blockMix(bufferX);
+        }
 
-	       /* 6: for i = 0 to N - 1 do */
-       	for (int i = 0; i < this.memoryExpense; i++)
+        /* 6: for i = 0 to N - 1 do */
+        for (int i = 0; i < this.memoryExpense; i++)
         {
-		          /* 7: j <-- Integerify(X) mod N */
+            /* 7: j <-- Integerify(X) mod N */
             blockToXOR = this.integerifyAndMod(bufferX, this.memoryExpense);
 
             /* 8: X <-- H(X \xor V_j) */
             // This is the memory expensive part. because the output of each hash dictates which hash to load from
             // ram to resalt the hash, there is no safe way to delete any of the hash outputs from memory.
             this.bulkXOR(this.memoryIntensiveBuffer, (blockToXOR * lengthToMix), bufferX, 0, lengthToMix);
-		          this.blockMix(bufferX);
+            this.blockMix(bufferX);
         }
 
-	       /* 10: B' <-- X */
+        /* 10: B' <-- X */
         System.arraycopy(bufferX, 0, bufferToMix, offset, lengthToMix);
     }
 
+    /**
+     * Implementation of BlockMix.
+     * Defined here: http://www.tarsnap.com/scrypt.html as BlockMix_salsa20/8,r (B)
+     *
+     * @param block 64 byte block of text to scramble (B)
+     */
     protected void blockMix(final byte[] block)
     {
-	       /* 1: X <-- B_{2r - 1} */
+        /* 1: X <-- B_{2r - 1} */
         System.arraycopy(block, block.length - 64, this.blockMixBufferX, 0, 64);
 
         /* 2: for i = 0 to 2r - 1 do */
-	       for (int i = 0; i < block.length; i += 64)
+        for (int i = 0; i < block.length; i += 64)
         {
-		          /* 3: X <-- H(X \xor B_i) */
+            /* 3: X <-- H(X \xor B_i) */
             this.bulkXOR(block, i, this.blockMixBufferX, 0, 64);
-		          this.scryptSalsa8(this.blockMixBufferX);
+            this.scryptSalsa8(this.blockMixBufferX);
 
             /* 4: Y_i <-- X */
             System.arraycopy(this.blockMixBufferX, 0, this.blockMixBufferY, i, 64);
-	       }
+        }
 
         /* 6: B' <-- (Y_0, Y_2 ... Y_{2r-2}, Y_1, Y_3 ... Y_{2r-1}) */
         for (int i = 0; i < this.blockSize; i++)
@@ -240,7 +254,7 @@ public class Scrypt
             // Copy all of the even numbered blocks.
             System.arraycopy(this.blockMixBufferY, i * 2 * 64, block, i * 64, 64);
         }
-	       for (int i = 0; i < this.blockSize; i++)
+        for (int i = 0; i < this.blockSize; i++)
         {
             // Copy the odd numbered blocks to locations after the last copied even number block.
             System.arraycopy(this.blockMixBufferY, (i * 2 + 1) * 64, block, (i + this.blockSize) * 64, 64);
@@ -248,7 +262,22 @@ public class Scrypt
     }
 
     /**
-     * Convert 8 bytes from a specified place in the array to an integer within the range of modulus.
+     * Convert 8 bytes from a specified place in the array to an integer and take the mod of that number against
+     * modulus.
+     * This function uses a fast modulus opperation which requires that modulus is a power of 2.
+     *
+     * @param array the array to take bytes from.
+     * @param modulus the output will not be larger than this (must be a power of 2).
+     * @return integer gathered from the array and modded against the modulus.
+     */
+    protected int integerifyAndMod(byte[] array, int modulus)
+    {
+        return this.unsignedMod(this.integerify(array), modulus);
+    }
+
+    /**
+     * Convert 4 bytes from a specified place in the array to a long.
+     * This is a binary opperation, sign is ignored.
      *
      * The paper says Integerify takes the last 8 bytes from the array but the reference implementation
      * takes byte at index (2 * r - 1) * 64 and the 7 bytes following.
@@ -256,38 +285,35 @@ public class Scrypt
      * This function follows the reference implementation.
      *
      * @param array the array to take bytes from.
-     * @param modulus the output will not be larger than this.
-     * @return integer gathered from the array and modded against the modulus.
+     * @return long value gathered from the array.
      */
-    protected int integerifyAndMod(byte[] array, int modulus)
+    protected long integerify(byte[] array)
     {
-        /*
-         * Setp 1, read a long from the array.
-         */
         int startIndex = (2 * this.blockSize - 1) * 64;
-        int endIndex = startIndex + 7;
+        //int endIndex = startIndex + 7;
+        // The reference implementation only takes 4 bytes, not 8.
+        int endIndex = startIndex + 3;
 
         long fromArray = 0;
 
         for (int i = endIndex; i >= startIndex; i--) {
             fromArray <<= 8;
-            fromArray |= array[i];
+            fromArray |= (array[i] & 0xFF);
         }
+        return fromArray;
+    }
 
-        /*
-         * Step 2 is modulus operation.
-         * This is a bit trickey because java thinks the long is signed.
-         */
-        long out = (long) modulus;
-
-        // XOR against 0 to remove sign bit.
-        out ^= 0L;
-
-        // Modulus opperation.
-        out = fromArray & (out - 1);
-
-        // XOR against 0 to replace sign bit.
-        return (int) (out ^ 0L);
+    /**
+     * Compute (unsignedLong % signedModulus) quickly.
+     * signedModulus must be is a power of 2
+     *
+     * @param unsignedLong a long value which is treated as unsigned.
+     * @param signedModulus a modulus which must be a positive number and is treated as signed.
+     * @return value of (x - Long.MIN_VALUE) % signedModulus
+     */
+    protected int unsignedMod(long unsignedLong, int signedModulus)
+    {
+        return (int) (unsignedLong & (((long) signedModulus) - 1));
     }
 
     /**
@@ -307,8 +333,8 @@ public class Scrypt
                            final int outputOffset,
                            final int length)
     {
-        for (int i = 0; i < output.length; i++) {
-            output[i] ^= input[i];
+        for (int i = 0; i < length; i++) {
+            output[i + outputOffset] ^= input[i + inputOffset];
         }
     }
 
@@ -317,7 +343,7 @@ public class Scrypt
     /*-------------------------------------------------------------------------------------------*/
 
     /**
-     * salsa20_8 function as defined in crypto_scrypt.c
+     * salsa20_8 function as defined in crypto_scrypt.
      * see: http://www.tarsnap.com/scrypt.html
      *
      * @param bytesToModify 64 bytes of data to mangle with the function.
@@ -339,7 +365,8 @@ public class Scrypt
     }
     
     /**
-     * Salsa20 function, implementation of function defined here http://cr.yp.to/salsa20.html
+     * Salsa20 function.
+     * Implementation of function defined here: http://cr.yp.to/salsa20.html
      *
      * @param input the data to mangle with the function (array of int, 16 long)
      * @param output the output will be put into this array.
@@ -351,45 +378,8 @@ public class Scrypt
         // All processing is done on the output array.
         for (int i = numberOfRounds; i > 0; i -= 2)
         {
-            output[ 4] ^= rotl((output[ 0] + output[12]), 7);
-            output[ 8] ^= rotl((output[ 4] + output[ 0]), 9);
-            output[12] ^= rotl((output[ 8] + output[ 4]),13);
-            output[ 0] ^= rotl((output[12] + output[ 8]),18);
-
-            output[ 9] ^= rotl((output[ 5] + output[ 1]), 7);
-            output[13] ^= rotl((output[ 9] + output[ 5]), 9);
-            output[ 1] ^= rotl((output[13] + output[ 9]),13);
-            output[ 5] ^= rotl((output[ 1] + output[13]),18);
-
-            output[14] ^= rotl((output[10] + output[ 6]), 7);
-            output[ 2] ^= rotl((output[14] + output[10]), 9);
-            output[ 6] ^= rotl((output[ 2] + output[14]),13);
-            output[10] ^= rotl((output[ 6] + output[ 2]),18);
-
-            output[ 3] ^= rotl((output[15] + output[11]), 7);
-            output[ 7] ^= rotl((output[ 3] + output[15]), 9);
-            output[11] ^= rotl((output[ 7] + output[ 3]),13);
-            output[15] ^= rotl((output[11] + output[ 7]),18);
-
-            output[ 1] ^= rotl((output[ 0] + output[ 3]), 7);
-            output[ 2] ^= rotl((output[ 1] + output[ 0]), 9);
-            output[ 3] ^= rotl((output[ 2] + output[ 1]),13);
-            output[ 0] ^= rotl((output[ 3] + output[ 2]),18);
-
-            output[ 6] ^= rotl((output[ 5] + output[ 4]), 7);
-            output[ 7] ^= rotl((output[ 6] + output[ 5]), 9);
-            output[ 4] ^= rotl((output[ 7] + output[ 6]),13);
-            output[ 5] ^= rotl((output[ 4] + output[ 7]),18);
-
-            output[11] ^= rotl((output[10] + output[ 9]), 7);
-            output[ 8] ^= rotl((output[11] + output[10]), 9);
-            output[ 9] ^= rotl((output[ 8] + output[11]),13);
-            output[10] ^= rotl((output[ 9] + output[ 8]),18);
-
-            output[12] ^= rotl((output[15] + output[14]), 7);
-            output[13] ^= rotl((output[12] + output[15]), 9);
-            output[14] ^= rotl((output[13] + output[12]),13);
-            output[15] ^= rotl((output[14] + output[13]),18);
+            this.salsa20ColumnHalfround(output);
+            this.salsa20RowHalfround(output);
         }
         for (int i = 0; i < 16; i++) {
             output[i] = output[i] + input[i];
@@ -397,7 +387,65 @@ public class Scrypt
     }
 
     /**
-     * Rotate left
+     * Salsa20 column halfround function.
+     * Mixes the rows but does no mixing between columns.
+     *
+     * @param workBuffer the data to mangle with the function (array of int, 16 long)
+     */
+    private void salsa20ColumnHalfround(int[] workBuffer)
+    {
+        workBuffer[ 4] ^= rotl((workBuffer[ 0] + workBuffer[12]),  7);
+        workBuffer[ 8] ^= rotl((workBuffer[ 4] + workBuffer[ 0]),  9);
+        workBuffer[12] ^= rotl((workBuffer[ 8] + workBuffer[ 4]), 13);
+        workBuffer[ 0] ^= rotl((workBuffer[12] + workBuffer[ 8]), 18);
+
+        workBuffer[ 9] ^= rotl((workBuffer[ 5] + workBuffer[ 1]),  7);
+        workBuffer[13] ^= rotl((workBuffer[ 9] + workBuffer[ 5]),  9);
+        workBuffer[ 1] ^= rotl((workBuffer[13] + workBuffer[ 9]), 13);
+        workBuffer[ 5] ^= rotl((workBuffer[ 1] + workBuffer[13]), 18);
+
+        workBuffer[14] ^= rotl((workBuffer[10] + workBuffer[ 6]),  7);
+        workBuffer[ 2] ^= rotl((workBuffer[14] + workBuffer[10]),  9);
+        workBuffer[ 6] ^= rotl((workBuffer[ 2] + workBuffer[14]), 13);
+        workBuffer[10] ^= rotl((workBuffer[ 6] + workBuffer[ 2]), 18);
+
+        workBuffer[ 3] ^= rotl((workBuffer[15] + workBuffer[11]),  7);
+        workBuffer[ 7] ^= rotl((workBuffer[ 3] + workBuffer[15]),  9);
+        workBuffer[11] ^= rotl((workBuffer[ 7] + workBuffer[ 3]), 13);
+        workBuffer[15] ^= rotl((workBuffer[11] + workBuffer[ 7]), 18);
+    }
+
+    /**
+     * Salsa20 row halfround function.
+     * Mixes the columns but does no mixing between rows.
+     *
+     * @param workBuffer the data to mangle with the function (array of int, 16 long)
+     */
+    private void salsa20RowHalfround(int[] workBuffer)
+    {
+        workBuffer[ 1] ^= rotl((workBuffer[ 0] + workBuffer[ 3]),  7);
+        workBuffer[ 2] ^= rotl((workBuffer[ 1] + workBuffer[ 0]),  9);
+        workBuffer[ 3] ^= rotl((workBuffer[ 2] + workBuffer[ 1]), 13);
+        workBuffer[ 0] ^= rotl((workBuffer[ 3] + workBuffer[ 2]), 18);
+
+        workBuffer[ 6] ^= rotl((workBuffer[ 5] + workBuffer[ 4]),  7);
+        workBuffer[ 7] ^= rotl((workBuffer[ 6] + workBuffer[ 5]),  9);
+        workBuffer[ 4] ^= rotl((workBuffer[ 7] + workBuffer[ 6]), 13);
+        workBuffer[ 5] ^= rotl((workBuffer[ 4] + workBuffer[ 7]), 18);
+
+        workBuffer[11] ^= rotl((workBuffer[10] + workBuffer[ 9]),  7);
+        workBuffer[ 8] ^= rotl((workBuffer[11] + workBuffer[10]),  9);
+        workBuffer[ 9] ^= rotl((workBuffer[ 8] + workBuffer[11]), 13);
+        workBuffer[10] ^= rotl((workBuffer[ 9] + workBuffer[ 8]), 18);
+
+        workBuffer[12] ^= rotl((workBuffer[15] + workBuffer[14]),  7);
+        workBuffer[13] ^= rotl((workBuffer[12] + workBuffer[15]),  9);
+        workBuffer[14] ^= rotl((workBuffer[13] + workBuffer[12]), 13);
+        workBuffer[15] ^= rotl((workBuffer[14] + workBuffer[13]), 18);
+    }
+
+    /**
+     * Rotate left.
      * Copied from bouncycastle.crypto.engines.Salsa20Engine
      *
      * @param   x   value to rotate
@@ -421,16 +469,16 @@ public class Scrypt
     {
         int outCounter = 0;
         for (int i = 0; i < input.length; i++) {
-            output[outCounter] = (byte)input[i];
-            output[outCounter + 1] = (byte)(input[i] >>> 8);
-            output[outCounter + 2] = (byte)(input[i] >>> 16);
-            output[outCounter + 3] = (byte)(input[i] >>> 24);
+            output[outCounter] = (byte) input[i];
+            output[outCounter + 1] = (byte) (input[i] >>> 8);
+            output[outCounter + 2] = (byte) (input[i] >>> 16);
+            output[outCounter + 3] = (byte) (input[i] >>> 24);
             outCounter += 4;
         }
     }
 
     /**
-     * Pack byte[] array into an int in little endian order
+     * Pack byte[] array into an int in little endian order.
      *
      * @param input the byte array to convert to int array.
      * @param output the int array to put the output in, if this array is not at least 1/4 the length of input,
@@ -441,10 +489,10 @@ public class Scrypt
         int outCounter = 0;
         for (int i = 0; i < input.length; i += 4)
         {
-            output[outCounter] =    (input[i] & 255)
-                                 | ((input[i + 1] & 255) <<  8)
-                                 | ((input[i + 2] & 255) << 16)
-                                 |  (input[i + 3] << 24);
+            output[outCounter] = input[i] & 255;
+            output[outCounter] |= (input[i + 1] & 255) <<  8;
+            output[outCounter] |= (input[i + 2] & 255) << 16;
+            output[outCounter] |= input[i + 3] << 24;
             outCounter++;
         }
     }

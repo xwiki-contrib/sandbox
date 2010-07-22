@@ -25,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
-import java.security.SecureRandom;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -42,7 +41,7 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
  * is called but not when it has been deserialized.
  *
  * @since 2.5
- * @version $Id:$
+ * @version $Id$
  */
 @Component
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
@@ -60,6 +59,8 @@ public class DefaultKeyDerivationFunction implements KeyDerivationFunction, Seri
      *
      * @param serialized the byte array to create the KeyDerivationFunction from.
      * @return a function made from deserializing the given array.
+     * @throws IOException if something goes wrong in the serialization framework.
+     * @throws ClassNotFoundException if the required key derivation function is not present on the system.
      */
     public static KeyDerivationFunction deserialize(final byte[] serialized) throws IOException, ClassNotFoundException
     {

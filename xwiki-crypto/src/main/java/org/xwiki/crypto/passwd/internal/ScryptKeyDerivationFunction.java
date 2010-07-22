@@ -25,7 +25,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 
-import org.xwiki.crypto.passwd.KeyDerivationFunction;
 import org.xwiki.crypto.passwd.internal.scrypt.Scrypt;
 
 /**
@@ -36,7 +35,7 @@ import org.xwiki.crypto.passwd.internal.scrypt.Scrypt;
  * is called but not when it has been deserialized.
  *
  * @since 2.5
- * @version $Id:$
+ * @version $Id$
  */
 @Component("scrypt/1")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
@@ -84,7 +83,6 @@ public class ScryptKeyDerivationFunction extends DefaultKeyDerivationFunction
 
     /**
      * @param password the user supplied password.
-     * @param parameters the parameters used to create the key.
      * @return a key derived from the password and the parameters.
      */
     public byte[] hashPassword(final byte[] password)

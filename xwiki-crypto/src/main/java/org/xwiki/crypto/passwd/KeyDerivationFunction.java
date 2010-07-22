@@ -31,7 +31,7 @@ import org.xwiki.component.annotation.ComponentRole;
  * Each time a password is to be hashed, it should be done so with a new instance.
  *
  * @since 2.5
- * @version $Id:$
+ * @version $Id$
  */
 @ComponentRole
 public interface KeyDerivationFunction
@@ -41,12 +41,12 @@ public interface KeyDerivationFunction
      *
      * @param derivedKeyLength the desired length of the hash output.
      */
-    public void init(final int derivedKeyLength);
+    void init(final int derivedKeyLength);
 
     /**
      * @return true if this function has been initialized by calling init.
      */
-    public boolean isInitialized();
+    boolean isInitialized();
 
     /**
      * Store this function as a byte array so another function of the same class can be initialized with the same
@@ -55,7 +55,7 @@ public interface KeyDerivationFunction
      * @return a byte array which can be used to recreate the same function again using init.
      * @throws IOException if something fails whithin the serialization framework.
      */
-    public byte[] getSerialized() throws IOException;
+    byte[] getSerialized() throws IOException;
 
     /**
      * Convert the given password to a byte array similar to the output from a message digest except specially tuned
@@ -64,5 +64,5 @@ public interface KeyDerivationFunction
      * @param password the user supplied password.
      * @return a byte array derived from the password.
      */
-    public byte[] hashPassword(final byte[] password);
+    byte[] hashPassword(final byte[] password);
 }

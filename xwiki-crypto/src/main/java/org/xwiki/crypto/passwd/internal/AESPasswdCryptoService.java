@@ -23,7 +23,6 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.xwiki.component.annotation.Component;
 
 

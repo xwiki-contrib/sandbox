@@ -26,12 +26,12 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 /**
- * This is an implementation of the password-based key derivation function 2 (PBKDF2) which is defined as part of
- * RSA's PKCS#5 see: http://www.ietf.org/rfc/rfc2898.txt
- * This class is derived from BouncyCastle PKCS5S2ParametersGenerator.java
+ * Password-Based Key Derivation Function 2.
+ * This is an implementation of the PBKDF2 which is defined as part of RSA's PKCS#5
+ * see: http://www.ietf.org/rfc/rfc2898.txt
  *
  * @since 2.5
- * @version $Id:$
+ * @version $Id$
  */
 public class PasswordBasedKeyDerivationFunction2
 {
@@ -39,13 +39,13 @@ public class PasswordBasedKeyDerivationFunction2
     private final Mac hMac;
 
     /** 
-     * State of functionF, this is only a class scoped variable to prevent the accumulation of 
+     * Internal State of functionF, this is only a class scoped variable to prevent the accumulation of 
      * large amounts of garbage from the array being periodically allocated and dumped.
      */
     private final byte[] state;
 
     /**
-     * Construct a new PBKDF2
+     * Construct a new PBKDF2.
      *
      * @param digest The hash function to use (PKCS#5 uses SHA-1)
      */
@@ -63,6 +63,8 @@ public class PasswordBasedKeyDerivationFunction2
      * @param salt the random salt to add to the password before hashing.
      * @param iterationCount the number of iterations which the internal function (F) should run.
      * @param derivedKeyLength the number of bytes of length the derived key should be (dkLen)
+     * @return a byte array of length derivedKeyLength containing data derived from the password and salt.
+     *         suitable for a key.
      */
     public synchronized byte[] generateDerivedKey(final byte[] password,
                                                   final byte[] salt,
@@ -76,13 +78,17 @@ public class PasswordBasedKeyDerivationFunction2
             int numberOfBlocks = (derivedKeyLength + hLen - 1) / hLen;
 
             final byte[] currentIterationAsByteArray = new byte[4];
-            final byte[] out = new byte[numberOfBlocks * hLen];
+            final byte[] key = new byte[numberOfBlocks * hLen];
 
             for (int i = 1; i <= numberOfBlocks; i++)
             {
                 this.integerToByteArray(i, currentIterationAsByteArray);
-                this.functionF(password, salt, iterationCount, currentIterationAsByteArray, out, (i - 1) * hLen);
+                this.functionF(password, salt, iterationCount, currentIterationAsByteArray, key, (i - 1) * hLen);
             }
+
+            // Usually the key ends up being longer than the desired key length so it must be trunkated.
+            byte[] out = new byte[derivedKeyLength];
+            System.arraycopy(key, 0, out, 0, derivedKeyLength);
 
             return out;
         } finally {
@@ -100,13 +106,14 @@ public class PasswordBasedKeyDerivationFunction2
      */
     private void integerToByteArray(int integer, byte[] outArray)
     {
-        outArray[0] = (byte)(integer >>> 24);
-        outArray[1] = (byte)(integer >>> 16);
-        outArray[2] = (byte)(integer >>> 8);
-        outArray[3] = (byte)integer;
+        outArray[0] = (byte) (integer >>> 24);
+        outArray[1] = (byte) (integer >>> 16);
+        outArray[2] = (byte) (integer >>> 8);
+        outArray[3] = (byte) integer;
     }
 
     /**
+     * PBKDF#2 internal function F.
      * This is an implementation of F(P, S, c, l) defined in http://www.ietf.org/rfc/rfc2898.txt
      *
      * @param password (P)
