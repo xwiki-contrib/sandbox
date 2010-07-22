@@ -36,7 +36,8 @@ import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.transformation.MacroTransformationContext;
 
 /**
- * Macro containing a signed script.
+ * Macro containing a signed script. Verifies the content on view, does not allow further execution if the verification
+ * fails.
  * 
  * @version $Id$
  * @since 2.5
@@ -69,6 +70,7 @@ public class SignedMacro extends AbstractMacro<Object>
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.rendering.macro.Macro#supportsInlineMode()
      */
     public boolean supportsInlineMode()
@@ -78,15 +80,15 @@ public class SignedMacro extends AbstractMacro<Object>
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.rendering.macro.Macro#execute(java.lang.Object, java.lang.String, org.xwiki.rendering.transformation.MacroTransformationContext)
+     * 
+     * @see org.xwiki.rendering.macro.Macro#execute(java.lang.Object, java.lang.String,
+     *      org.xwiki.rendering.transformation.MacroTransformationContext)
      */
     public List<Block> execute(Object parameters, String content, MacroTransformationContext context)
         throws MacroExecutionException
     {
         try {
             SignedScript script = scriptSigner.getVerifiedScript(content);
-            System .out.println("  XXXXX " + script);
-            // TODO check that the result contains one script macro? (macros are evaluated during parsing though)
             return evaluate(script.getCode(), context);
         } catch (GeneralSecurityException exception) {
             throw new MacroExecutionException("Code verification failed: " + exception.getMessage(), exception);
