@@ -191,8 +191,8 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
      * Constructor from a PEM formatted string.
      * This constructor will search the given string until it finds {@link XWikiX509Certificate#CERT_BEGIN} and assume
      * everything until the next {@link XWikiX509Certificate#CERT_END} is a valid PEM formatted certificate. If there
-     * are multiple certificates in the passed string the first will be parased and all subsewquent certificates will be
-     * ignored.
+     * are multiple certificates in the passed string the first will be parsed, its issuer fingerprint will be set to
+     * the fingerprint of the second certificate and all subsequent certificates will be ignored.
      * 
      * @param pemEncoded a String containing an X509 certificate in PEM format
      * @throws GeneralSecurityException If there isn't a valid {@link XWikiX509Certificate#CERT_BEGIN} or
@@ -209,6 +209,18 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
         if (!(cert instanceof X509Certificate)) {
             throw new GeneralSecurityException("Unsupported certificate type: " + cert.getType());
         }
+        // if there is a second certificate, use it to calculate correct issuer fingerprint
+        int second = pemEncoded.indexOf(CERT_BEGIN, pemEncoded.indexOf(CERT_END));
+        if (second > 0) {
+            byte[] cert2 = Convert.fromBase64String(pemEncoded.substring(second), CERT_BEGIN, CERT_END);
+            try {
+                String issuerFp = calculateFingerprint(factory.generateCertificate(new ByteArrayInputStream(cert2)));
+                return new XWikiX509Certificate((X509Certificate) cert, issuerFp);
+            } catch (GeneralSecurityException exception) {
+                // completely ignore the second certificate on error
+            }
+        }
+        // assume self-signed certificate by default
         return new XWikiX509Certificate((X509Certificate) cert);
     }
 
