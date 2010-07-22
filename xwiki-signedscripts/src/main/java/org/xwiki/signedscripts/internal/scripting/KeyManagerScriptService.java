@@ -111,4 +111,14 @@ public class KeyManagerScriptService implements ScriptService, KeyManager
     {
         return keyManager.getKnownFingerprints();
     }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#getTrustedFingerprint(java.lang.String)
+     */
+    public String getTrustedFingerprint(String userName)
+    {
+        return keyManager.getTrustedFingerprint(userName);
+    }
 }

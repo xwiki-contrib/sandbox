@@ -21,8 +21,14 @@ package org.xwiki.signedscripts.framework;
 
 import java.security.GeneralSecurityException;
 import java.security.Security;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.crypto.internal.UserDocumentUtils;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
@@ -122,6 +128,9 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
                                        + "/2TFmQICBAAAAA==\n"
                                        + "-----END PKCS12-----\n";
 
+    /** Current user name to use. */
+    protected final static String USER = "XWiki.Admin";
+
     /** Cached instance of the test certificate, used by {@link #getTestCert()}. */
     private XWikiX509Certificate cachedCert;
 
@@ -133,6 +142,7 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
      * 
      * @see org.xwiki.test.AbstractMockingComponentTestCase#setUp()
      */
+    @Before
     @Override
     public void setUp() throws Exception
     {
@@ -140,6 +150,22 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
 
         // register BC provider
         Security.addProvider(new BouncyCastleProvider());
+
+        try {
+            // mock document utils
+            final UserDocumentUtils mockUtils = getComponentManager().lookup(UserDocumentUtils.class);
+            final List<String> userFingerprints = new LinkedList<String>();
+            userFingerprints.add(getTestCertFingerprint());
+            userFingerprints.add(getTestKeyPair().getFingerprint());
+            getMockery().checking(new Expectations() {{
+                allowing(mockUtils).getCurrentUser();
+                    will(returnValue(USER));
+                allowing(mockUtils).getCertificateFingerprintsForUser(with(USER));
+                    will(returnValue(userFingerprints));
+            }});
+        } catch (ComponentLookupException exception) {
+            // ignore, PKCS7SignedScriptTest does not use @MockingRequirement, which causes lookup to fail
+        }
     }
 
     /**

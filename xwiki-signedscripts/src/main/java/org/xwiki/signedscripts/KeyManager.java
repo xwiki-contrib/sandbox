@@ -109,4 +109,13 @@ public interface KeyManager
      * @return set of all known fingerprints
      */
     Set<String> getKnownFingerprints();
+
+    /**
+     * Get the fingerprint of the trusted certificate/key pair associated with the given user or null if the user
+     * has no associated trusted certificate.
+     * 
+     * @param userName name of the user who's certificate to use
+     * @return trusted fingerprint of the user on success, null otherwise
+     */
+    String getTrustedFingerprint(String userName);
 }

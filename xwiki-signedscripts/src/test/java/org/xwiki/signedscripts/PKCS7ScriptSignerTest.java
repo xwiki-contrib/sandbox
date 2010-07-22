@@ -65,6 +65,8 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
                 will(returnValue(getTestKeyPair().getCertificate()));
             allowing(mockKeyManager).getKeyPair(with(kpFingerprint));
                 will(returnValue(getTestKeyPair()));
+            allowing(mockKeyManager).getTrustedFingerprint(USER);
+                will(returnValue(kpFingerprint));
         }});
         // crypto service
         final X509CryptoService mockCrypto = getComponentManager().lookup(X509CryptoService.class);

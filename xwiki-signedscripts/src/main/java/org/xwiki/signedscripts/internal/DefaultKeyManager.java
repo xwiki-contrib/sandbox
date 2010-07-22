@@ -37,10 +37,12 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
+import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
+import org.xwiki.crypto.internal.UserDocumentUtils;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
@@ -70,6 +72,10 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /** Fingerprint of the local root certificate. */
     private String localRootFingerprint;
+
+    /** Used to get user certificates. */
+    @Requirement
+    private UserDocumentUtils docUtils;
 
     /** FIXME. */
     private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>();
@@ -222,6 +228,21 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     public Set<String> getKnownFingerprints()
     {
         return this.certMap.keySet();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.KeyManager#getTrustedFingerprint(java.lang.String)
+     */
+    public String getTrustedFingerprint(String userName)
+    {
+        for (String fp : docUtils.getCertificateFingerprintsForUser(userName)) {
+            if (certMap.containsKey(fp)) {
+                return fp;
+            }
+        }
+        return null;
     }
 
     /**
