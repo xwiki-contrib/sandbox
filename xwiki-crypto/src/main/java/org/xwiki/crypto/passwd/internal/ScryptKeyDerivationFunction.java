@@ -41,6 +41,9 @@ import org.xwiki.crypto.passwd.internal.scrypt.Scrypt;
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class ScryptKeyDerivationFunction extends DefaultKeyDerivationFunction
 {
+    /** Serial version ID to distinguish different versions of the class. */
+    private static final long serialVersionUID = -6140825910754601136L;
+
     /** @serial abstract number referring to how much memory should be expended for hashing the password. */
     private int memoryExpense;
 

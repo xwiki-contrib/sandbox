@@ -47,6 +47,9 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class DefaultKeyDerivationFunction implements KeyDerivationFunction, Serializable
 {
+    /** Serial version ID to distinguish different versions of the class. */
+    private static final long serialVersionUID = -921894479866760486L;
+
     /**
      * All calls will be passed through to this function.
      * By default use scrypt.
