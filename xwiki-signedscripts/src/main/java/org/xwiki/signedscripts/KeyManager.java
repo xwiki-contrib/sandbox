@@ -85,16 +85,14 @@ public interface KeyManager
     XWikiX509Certificate getCertificate(String fingerprint);
 
     /**
-     * Get a key pair by certificate fingerprint or null if the key pair cannot be found.
+     * Get the key pair associated with the current user or null if the key pair is not registered.
      * <p>
-     * TODO should require PR rights
-     * TODO should only work for the user's own certificate, i.e. better remove parameter
+     * TODO should require PR rights? (private key is encrypted)
      * 
-     * @param fingerprint certificate fingerprint to use
      * @return the corresponding key pair on success, null otherwise
      * @throws GeneralSecurityException on insufficient access rights
      */
-    XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException;
+    XWikiX509KeyPair getKeyPair() throws GeneralSecurityException;
 
     /**
      * Get the local root certificate.

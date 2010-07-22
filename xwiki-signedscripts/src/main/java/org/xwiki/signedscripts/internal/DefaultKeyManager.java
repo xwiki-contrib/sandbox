@@ -171,12 +171,12 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.KeyManager#getKeyPair(java.lang.String)
+     * @see org.xwiki.signedscripts.KeyManager#getKeyPair()
      */
-    public XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
+    public XWikiX509KeyPair getKeyPair() throws GeneralSecurityException
     {
         // FIXME check access rights
-        return this.keysMap.get(fingerprint);
+        return this.keysMap.get(getTrustedFingerprint(docUtils.getCurrentUser()));
     }
 
     /**
@@ -262,11 +262,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      */
     private XWikiX509KeyPair getLocalRootKeyPair()
     {
-        try {
-            return getKeyPair(this.localRootFingerprint);
-        } catch (GeneralSecurityException exception) {
-            getLogger().debug(exception.getMessage(), exception);
-            throw new RuntimeException("Should not happen: " + exception.getMessage(), exception);
-        }
+        return this.keysMap.get(this.localRootFingerprint);
     }
 }

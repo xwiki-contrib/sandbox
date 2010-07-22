@@ -64,7 +64,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
         getMockery().checking(new Expectations() {{
             allowing(mockKeyManager).getCertificate(with(kpFingerprint));
                 will(returnValue(getTestKeyPair().getCertificate()));
-            allowing(mockKeyManager).getKeyPair(with(kpFingerprint));
+            allowing(mockKeyManager).getKeyPair();
                 will(returnValue(getTestKeyPair()));
             allowing(mockKeyManager).getTrustedFingerprint(USER);
                 will(returnValue(kpFingerprint));
