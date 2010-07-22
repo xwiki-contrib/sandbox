@@ -104,6 +104,17 @@ public class DefaultUserDocumentUtils implements UserDocumentUtils
     }
 
     /**
+     * {@inheritDoc}
+     * 
+     * @see org.org.xwiki.crypto.internal.UserDocumentUtils#addCertificateFingerprint(java.lang.String, java.lang.String)
+     */
+    public void addCertificateFingerprint(String userName, String fingerprint) throws Exception
+    {
+        // FIXME this method changes the 0-th object, need to add a new object
+        this.bridge.setProperty(userName, this.certClassName, this.certFingerprintPropertyName, fingerprint);
+    }
+
+    /**
      * Thrown when a loop has looped over an unreasonable number of cycles and is probably looping infinitely.
      * 
      * @version $Id$

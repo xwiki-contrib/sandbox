@@ -53,4 +53,13 @@ public interface UserDocumentUtils
      * @return A list of all of this user's authorized certificate fingerprints.
      */
     List<String> getCertificateFingerprintsForUser(final String userName);
+
+    /**
+     * Add a fingerprint to the list of certificate fingerprints of the given user.
+     * 
+     * @param userName reference to the user document
+     * @param fingerprint the certificate fingerprint to add
+     * @throws Exception on errors
+     */
+    void addCertificateFingerprint(String userName, String fingerprint) throws Exception;
 }
