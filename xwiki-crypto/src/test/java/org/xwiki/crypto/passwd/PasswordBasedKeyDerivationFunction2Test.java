@@ -25,7 +25,7 @@ import org.junit.Assert;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 
-import org.xwiki.crypto.passwd.internal.PasswordBasedKeyDerivationFunction2;
+import org.xwiki.crypto.passwd.internal.scrypt.PasswordBasedKeyDerivationFunction2;
 
 
 /**

@@ -67,6 +67,7 @@ public class ScryptKeyDerivationFunction extends DefaultKeyDerivationFunction
      *
      * @see: org.xwiki.crypto.DefaultKeyDerivationFunction#init(int)
      */
+    @Override
     public void init(final int derivedKeyLength)
     {
         this.derivedKeyLength = derivedKeyLength;
@@ -85,6 +86,7 @@ public class ScryptKeyDerivationFunction extends DefaultKeyDerivationFunction
      * @param password the user supplied password.
      * @return a key derived from the password and the parameters.
      */
+    @Override
     public byte[] hashPassword(final byte[] password)
     {
         throw new RuntimeException("Not implemented yet");

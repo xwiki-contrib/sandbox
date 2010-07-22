@@ -26,7 +26,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.xwiki.crypto.passwd.internal.PasswordBasedKeyDerivationFunction2;
+import org.xwiki.crypto.passwd.internal.scrypt.PasswordBasedKeyDerivationFunction2;
 import org.xwiki.crypto.passwd.internal.scrypt.Scrypt;
 
 /**
@@ -290,16 +290,14 @@ public class ScryptTest extends Scrypt
     public void integerifyTest1() throws Exception
     {
         long out = this.integerify(Hex.decode(this.integerifyAndModInputX.getBytes("US-ASCII")));
-        Assert.assertTrue("\nExpecting: " + Long.toHexString((long) integerifyAndModInteger) + "\n      Got: "
-                          + Long.toHexString(out), (integerifyAndModInteger == out));
+        Assert.assertEquals(Long.toHexString(integerifyAndModInteger), Long.toHexString(out));
     }
 
     @Test
     public void integerifyTest2() throws Exception
     {
         long out = this.integerify(Hex.decode(this.integerifyAndMod2InputX.getBytes("US-ASCII")));
-        Assert.assertTrue("\nExpecting: " + Long.toHexString((long) integerifyAndMod2Integer) + "\n      Got: "
-                          + Long.toHexString(out), (integerifyAndMod2Integer == out));
+        Assert.assertEquals(Long.toHexString(integerifyAndMod2Integer), Long.toHexString(out));
     }
 
     @Test
@@ -310,8 +308,7 @@ public class ScryptTest extends Scrypt
         this.allocateMemory(true);
         this.blockMix(out);
         String outStr = new String(Hex.encode(out), "US-ASCII");
-        Assert.assertTrue("\nExpecting: " + this.blockMixOutput + "\n      Got: "
-                          + outStr, this.blockMixOutput.equals(outStr));
+        Assert.assertEquals(this.blockMixOutput, outStr);
     }
 
     @Test
@@ -320,7 +317,6 @@ public class ScryptTest extends Scrypt
         byte[] out = Hex.decode(this.salsa8Input.getBytes("US-ASCII"));
         this.scryptSalsa8(out);
         String outStr = new String(Hex.encode(out), "US-ASCII");
-        Assert.assertTrue("\nExpecting: " + this.salsa8Output + "\n      Got: "
-                          + outStr, this.salsa8Output.equals(outStr));
+        Assert.assertEquals(this.salsa8Output, outStr);
     }
 }

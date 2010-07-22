@@ -20,7 +20,6 @@
 package org.xwiki.crypto.passwd.internal.scrypt;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.xwiki.crypto.passwd.internal.PasswordBasedKeyDerivationFunction2;
 
 /**
  * The Scrypt Key Derivation Function.
