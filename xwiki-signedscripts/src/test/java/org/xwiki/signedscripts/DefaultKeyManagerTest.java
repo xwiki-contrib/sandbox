@@ -80,6 +80,8 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
         String kp = keyManager.createKeyPair(author, password, 1);
         XWikiX509Certificate cert = keyManager.getCertificate(kp);
         XWikiX509KeyPair keyPair = keyManager.getKeyPair(kp);
+        Assert.assertNotNull(cert);
+        Assert.assertNotNull(keyPair);
 
         // check that the certificate is valid
         cert.checkValidity();
@@ -111,16 +113,16 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
         // TODO assert default certificates are present
     }
 
-    @Test(expected = GeneralSecurityException.class)
+    @Test
     public void testUnknownCertFingerprint() throws GeneralSecurityException
     {
-        keyManager.getCertificate("tralala");
+        Assert.assertNull(keyManager.getCertificate("tralala"));
     }
 
-    @Test(expected = GeneralSecurityException.class)
+    @Test
     public void testUnknownKeyPairFingerprint() throws GeneralSecurityException
     {
-        keyManager.getKeyPair("tralala");
+        Assert.assertNull(keyManager.getKeyPair("tralala"));
     }
 
     @Test
@@ -128,14 +130,9 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
     {
         XWikiX509Certificate cert = getTestCert();
         Assert.assertEquals(getTestCertFingerprint(), cert.getFingerprint());
-        try {
-            keyManager.getCertificate(cert.getFingerprint());
-            Assert.fail("Certificate allready registered");
-        } catch (GeneralSecurityException exception) {
-            // great, continue
-            keyManager.registerCertificate(cert);
-            Assert.assertEquals(cert, keyManager.getCertificate(cert.getFingerprint()));
-        }
+        Assert.assertNull("Certificate allready registered", keyManager.getCertificate(cert.getFingerprint()));
+        keyManager.registerCertificate(cert);
+        Assert.assertEquals(cert, keyManager.getCertificate(cert.getFingerprint()));
     }
 
     @Test
@@ -146,12 +143,7 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
         keyManager.registerCertificate(cert);
         Assert.assertEquals(cert, keyManager.getCertificate(cert.getFingerprint()));
         keyManager.unregister(cert.getFingerprint());
-        try {
-            keyManager.getCertificate(cert.getFingerprint());
-            Assert.fail("Certificate is still registered");
-        } catch (GeneralSecurityException exception) {
-            // ok (can't use expected, because the same exception might be thrown before)
-        }
+        Assert.assertNull("Certificate is still registered", keyManager.getCertificate(cert.getFingerprint()));
     }
 }
 

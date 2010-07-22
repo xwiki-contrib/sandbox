@@ -39,6 +39,7 @@ import org.xwiki.test.annotation.MockingRequirement;
  */
 public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
 {
+    /** Fake base64 encoded signature. */
     private final static String SIGNATURE = "aN/Abs0lut3ly+u53Le5s/ranD0m/pieCe+0f+BASE64+enc0d3D+da7A/tha7/Is+LoNg3r"
                                           + "/tHan+76+by73/s0+tHA7/w3/CaN/t3St/1337/SIGNa7ur3+f0rma77ing=";
 

@@ -77,7 +77,7 @@ public class KeyManagerScriptService implements ScriptService, KeyManager
      * 
      * @see org.xwiki.signedscripts.KeyManager#getCertificate(java.lang.String)
      */
-    public XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
+    public XWikiX509Certificate getCertificate(String fingerprint)
     {
         return keyManager.getCertificate(fingerprint);
     }

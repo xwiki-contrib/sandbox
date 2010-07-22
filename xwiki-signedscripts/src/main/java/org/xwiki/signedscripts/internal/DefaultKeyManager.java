@@ -162,13 +162,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      * 
      * @see org.xwiki.signedscripts.KeyManager#getCertificate(java.lang.String)
      */
-    public XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
+    public XWikiX509Certificate getCertificate(String fingerprint)
     {
-        XWikiX509Certificate cert = this.certMap.get(fingerprint);
-        if (cert == null) {
-            throw new GeneralSecurityException("Certificate with fingerprint \"" + fingerprint + "\" not found");
-        }
-        return cert;
+        return this.certMap.get(fingerprint);
     }
 
     /**
@@ -178,11 +174,8 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      */
     public XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
     {
-        XWikiX509KeyPair kp = this.keysMap.get(fingerprint);
-        if (kp == null) {
-            throw new GeneralSecurityException("Key pair with fingerprint \"" + fingerprint + "\" was not found");
-        }
-        return kp;
+        // FIXME check access rights
+        return this.keysMap.get(fingerprint);
     }
 
     /**

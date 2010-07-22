@@ -76,23 +76,22 @@ public interface KeyManager
     void unregister(String fingerprint) throws GeneralSecurityException;
 
     /**
-     * Get a certificate by fingerprint.
+     * Get a certificate by fingerprint or null if the certificate does not exist.
      * 
      * @param fingerprint certificate fingerprint to use
-     * @return the corresponding certificate
-     * @throws GeneralSecurityException if the certificate does not exist
+     * @return the corresponding certificate or null if not found
      */
-    XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException;
+    XWikiX509Certificate getCertificate(String fingerprint);
 
     /**
-     * Get a key pair by certificate fingerprint.
+     * Get a key pair by certificate fingerprint or null if the key pair cannot be found.
      * <p>
      * TODO should require PR rights
      * TODO should only work for the user's own certificate, i.e. better remove parameter
      * 
      * @param fingerprint certificate fingerprint to use
-     * @return the corresponding key pair
-     * @throws GeneralSecurityException if the key pair does not exist or on insufficient access rights
+     * @return the corresponding key pair on success, null otherwise
+     * @throws GeneralSecurityException on insufficient access rights
      */
     XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException;
 

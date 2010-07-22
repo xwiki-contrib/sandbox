@@ -63,6 +63,9 @@ public class PKCS7ScriptSigner implements ScriptSigner
     {
         SignedScript script = prepareScriptForSigning(code, fingerprint);
         XWikiX509KeyPair keyPair = this.keyManager.getKeyPair(script.get(SignedScriptKey.FINGERPRINT));
+        if (keyPair == null) {
+            throw new GeneralSecurityException("Could not find the user key pair to sign with");
+        }
         try {
             String signature = pkcs7.signText(script.getDataToSign(), keyPair, password);
             return new PKCS7SignedScript(script, signature);
@@ -81,7 +84,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
     public SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException
     {
         PKCS7SignedScript script = new PKCS7SignedScript(code, fingerprint);
-        XWikiX509Certificate certificate = this.keyManager.getCertificate(script.get(SignedScriptKey.FINGERPRINT));
+        XWikiX509Certificate certificate = getCertificate(script.get(SignedScriptKey.FINGERPRINT));
 
         // get certificate data
         script.set(SignedScriptKey.AUTHOR, certificate.getAuthorName());
@@ -125,7 +128,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
     {
         try {
             PKCS7SignedScript script = new PKCS7SignedScript(signedScript);
-            XWikiX509Certificate certificate = this.keyManager.getCertificate(script.get(SignedScriptKey.FINGERPRINT));
+            XWikiX509Certificate certificate = getCertificate(script.get(SignedScriptKey.FINGERPRINT));
 
             // compare author and authority with the certificate
             String certAuthor = certificate.getAuthorName();
@@ -192,7 +195,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
         certificate.checkValidity();
 
         // verify this certificate. Note that the key manager will throw an error if the parent is not trusted
-        XWikiX509Certificate parentCert = keyManager.getCertificate(certificate.getIssuerFingerprint());
+        XWikiX509Certificate parentCert = getCertificate(certificate.getIssuerFingerprint());
         PublicKey key = parentCert.getPublicKey();
         certificate.verify(key);
 
@@ -212,5 +215,21 @@ public class PKCS7ScriptSigner implements ScriptSigner
         DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat;
+    }
+
+    /**
+     * Get certificate by fingerprint, throw an exception if not found.
+     * 
+     * @param fingerprint the fingerprint to search
+     * @return certificate, never null
+     * @throws GeneralSecurityException if the certificate cannot be found
+     */
+    private XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
+    {
+        XWikiX509Certificate certificate = this.keyManager.getCertificate(fingerprint);
+        if (certificate == null) {
+            throw new GeneralSecurityException("Unknown certificate fingerprint: " + fingerprint);
+        }
+        return certificate;
     }
 }
