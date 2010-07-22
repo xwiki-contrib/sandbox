@@ -137,6 +137,9 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
     /** Cached instance of the test key pair, used by {@link #getTestKeyPair()}. */
     private XWikiX509KeyPair cachedKeyPair;
 
+    /** Need to register new fingerprints manually, since {@link UserDocumentUtils} is mocked. */
+    private final List<String> userFingerprints = new LinkedList<String>();
+
     /**
      * {@inheritDoc}
      * 
@@ -146,22 +149,22 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
     @Override
     public void setUp() throws Exception
     {
-        super.setUp();
-
-        // register BC provider
+        // register BC provider first
         Security.addProvider(new BouncyCastleProvider());
 
+        // inject mocking requirements
+        super.setUp();
         try {
             // mock document utils
             final UserDocumentUtils mockUtils = getComponentManager().lookup(UserDocumentUtils.class);
-            final List<String> userFingerprints = new LinkedList<String>();
-            userFingerprints.add(getTestCertFingerprint());
-            userFingerprints.add(getTestKeyPair().getFingerprint());
+            this.userFingerprints.add(getTestCertFingerprint());
+            this.userFingerprints.add(getTestKeyPair().getFingerprint());
             getMockery().checking(new Expectations() {{
                 allowing(mockUtils).getCurrentUser();
                     will(returnValue(USER));
                 allowing(mockUtils).getCertificateFingerprintsForUser(with(USER));
                     will(returnValue(userFingerprints));
+                allowing(mockUtils).addCertificateFingerprint(with(USER), with(any(String.class)));
             }});
         } catch (ComponentLookupException exception) {
             // ignore, PKCS7SignedScriptTest does not use @MockingRequirement, which causes lookup to fail
@@ -208,6 +211,17 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
             // should not happen
             throw new RuntimeException(exception);
         }
+    }
+
+    /**
+     * Manually "reister" a fingerprint. It will be included into the list returned by the mocked
+     * {@link UserDocumentUtils#getCertificateFingerprintsForUser(String)}
+     * 
+     * @param fingerprint the fingerprint to add
+     */
+    protected void addFingerprint(String fingerprint)
+    {
+        this.userFingerprints.add(fingerprint);
     }
 }
 

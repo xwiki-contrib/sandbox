@@ -153,8 +153,16 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint);
         String fingerprint = cert.getFingerprint();
         XWikiX509KeyPair keys = new DefaultXWikiX509KeyPair(kp.getPrivate(), password, cert);
-        this.certMap.put(fingerprint, cert);
-        this.keysMap.put(fingerprint, keys);
+        try {
+            if (this.localRootFingerprint != null) {
+                // we are generating local root certificate, it belongs to no user
+                this.docUtils.addCertificateFingerprint(this.docUtils.getCurrentUser(), fingerprint);
+            }
+            this.certMap.put(fingerprint, cert);
+            this.keysMap.put(fingerprint, keys);
+        } catch (Exception exception) {
+            throw new GeneralSecurityException(exception.getMessage(), exception);
+        }
         return fingerprint;
     }
 

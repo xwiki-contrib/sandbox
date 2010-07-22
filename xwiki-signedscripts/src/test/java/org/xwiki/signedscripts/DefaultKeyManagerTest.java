@@ -26,7 +26,6 @@ import java.util.Set;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
@@ -72,14 +71,15 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
         }
     }
 
-    @Ignore
     @Test
     public void testKeyPairCreation() throws GeneralSecurityException
     {
-        // FIXME createKeyPair() does not register the created certificate in the user document yet
         // several tests, because key pair generation is quite slow
         final String password = "password";
         String kp = keyManager.createKeyPair(USER, password, 1);
+        // manually "register" fingerprint
+        addFingerprint(kp);
+
         XWikiX509Certificate cert = keyManager.getCertificate(kp);
         XWikiX509KeyPair keyPair = keyManager.getKeyPair();
         Assert.assertNotNull(cert);
