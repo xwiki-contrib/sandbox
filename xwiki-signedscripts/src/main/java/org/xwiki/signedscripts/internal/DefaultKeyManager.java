@@ -71,9 +71,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     /** Fingerprint of the local root certificate. */
     private String localRootFingerprint;
 
-    /** Global root certificate. */
-    private XWikiX509Certificate globalRootCertificate;
-
     /** FIXME. */
     private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>();
 
@@ -106,10 +103,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         // FIXME DEBUG
         try {
             regenerateLocalRoot();
-            String globalFp = createKeyPair("XWiki.org", "asdf", 365);
-            this.globalRootCertificate = getCertificate(globalFp);
-            unregister(globalFp);
-            registerCertificate(globalRootCertificate);
         } catch (GeneralSecurityException exception) {
             getLogger().debug(exception.getMessage(), exception);
             throw new InitializationException(exception.getMessage(), exception);
@@ -219,16 +212,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     public XWikiX509Certificate getLocalRootCertificate()
     {
         return getLocalRootKeyPair().getCertificate();
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.crypto.KeyManager#getGlobalRootCertificate()
-     */
-    public XWikiX509Certificate getGlobalRootCertificate()
-    {
-        return this.globalRootCertificate;
     }
 
     /**

@@ -104,14 +104,6 @@ public interface KeyManager
     XWikiX509Certificate getLocalRootCertificate();
 
     /**
-     * Get the global root certificate. Note that this certificate might have been unregistered and is no longer
-     * considered trusted.
-     * 
-     * @return global root certificate object
-     */
-    XWikiX509Certificate getGlobalRootCertificate();
-
-    /**
      * Get a set of all known trusted certificate fingerprints.
      * 
      * @return set of all known fingerprints

@@ -71,14 +71,6 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
     }
 
     @Test
-    public void testGlobalRoot() throws GeneralSecurityException
-    {
-        XWikiX509Certificate cert = keyManager.getGlobalRootCertificate();
-        cert.checkValidity();
-//        Assert.assertEquals("FIXME known global fingerprint", cert.getFingerprint());
-    }
-
-    @Test
     public void testKeyPairCreation() throws GeneralSecurityException
     {
         // several tests, because key pair generation is quite slow
@@ -115,7 +107,7 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
     {
         Set<String> known = keyManager.getKnownFingerprints();
         Assert.assertTrue("Local root not found", known.contains(keyManager.getLocalRootCertificate().getFingerprint()));
-        Assert.assertTrue("Global root not found", known.contains(keyManager.getGlobalRootCertificate().getFingerprint()));
+        // TODO assert default certificates are present
     }
 
     @Test(expected = GeneralSecurityException.class)
@@ -157,7 +149,7 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
             keyManager.getCertificate(cert.getFingerprint());
             Assert.fail("Certificate is still registered");
         } catch (GeneralSecurityException exception) {
-            // ok (can't use expected, because the same exception might be thrown before
+            // ok (can't use expected, because the same exception might be thrown before)
         }
     }
 }
