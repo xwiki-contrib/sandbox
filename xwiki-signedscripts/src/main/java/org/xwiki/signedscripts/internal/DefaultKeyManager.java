@@ -46,7 +46,6 @@ import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
 import org.xwiki.signedscripts.KeyManager;
 
-
 /**
  * Default implementation of the {@link KeyManager}.
  * 
@@ -76,7 +75,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     private XWikiX509Certificate globalRootCertificate;
 
     /** FIXME. */
-    private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>(); 
+    private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>();
 
     /** FIXME. */
     private Map<String, XWikiX509KeyPair> keysMap = new HashMap<String, XWikiX509KeyPair>();
@@ -86,6 +85,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.component.phase.Initializable#initialize()
      */
     public void initialize() throws InitializationException
@@ -118,6 +118,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.signedscripts.KeyManager#createKeyPair(java.lang.String, java.lang.String, int)
      */
     public String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException
@@ -159,6 +160,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.KeyManager#getCertificate(java.lang.String)
      */
     public XWikiX509Certificate getCertificate(String fingerprint) throws GeneralSecurityException
@@ -172,6 +174,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.KeyManager#getKeyPair(java.lang.String)
      */
     public XWikiX509KeyPair getKeyPair(String fingerprint) throws GeneralSecurityException
@@ -185,6 +188,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.KeyManager#registerCertificate(org.xwiki.crypto.data.XWikiX509Certificate)
      */
     public void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException
@@ -194,6 +198,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.KeyManager#unregister(java.lang.String)
      */
     public void unregister(String fingerprint) throws GeneralSecurityException
@@ -208,6 +213,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.KeyManager#getLocalRootCertificate()
      */
     public XWikiX509Certificate getLocalRootCertificate()
@@ -217,6 +223,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.KeyManager#getGlobalRootCertificate()
      */
     public XWikiX509Certificate getGlobalRootCertificate()
@@ -226,6 +233,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.KeyManager#getKnownFingerprints()
      */
     public Set<String> getKnownFingerprints()
@@ -261,4 +269,3 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         }
     }
 }
-

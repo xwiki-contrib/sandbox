@@ -21,8 +21,6 @@ package org.xwiki.signedscripts;
 
 import java.io.IOException;
 
-
-
 /**
  * Represents a signed script object. Signed script can be serialized to string or created from string.
  * 
@@ -55,8 +53,8 @@ public interface SignedScript
     String get(SignedScriptKey key);
 
     /**
-     * Check whether the given key is present in the map, its value is non-empty and (in case the key
-     * is optional) not equal to the default value.
+     * Check whether the given key is present in the map, its value is non-empty and (in case the key is optional) not
+     * equal to the default value.
      * 
      * @param key the key to use
      * @return true if the key is set, false otherwise

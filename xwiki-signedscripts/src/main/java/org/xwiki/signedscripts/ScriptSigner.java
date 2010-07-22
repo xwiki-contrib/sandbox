@@ -23,7 +23,6 @@ import java.security.GeneralSecurityException;
 
 import org.xwiki.component.annotation.ComponentRole;
 
-
 /**
  * Script signing component. Can be used to create and verify signed scripts.
  * 
@@ -36,7 +35,8 @@ public interface ScriptSigner
 {
     /**
      * Create a signed script object by signing given code with the private key identified by the fingerprint.
-     * TODO specify optional parameters, like expiration date
+     * <p>
+     * TODO specify optional parameters, like expiration date<br>
      * TODO should require PR and work only with user's own fingerprint (i.e. remove parameter)
      * 
      * @param code code to sign
@@ -49,12 +49,13 @@ public interface ScriptSigner
     SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException;
 
     /**
-     * Construct the script object in the same way as {@link #sign(String, String)}, but not sign it.
-     * The resulting script contains all needed data to construct a valid signature. It can be retrieved
-     * using the method {@link SignedScript#getDataToSign()}, transfered to the client and signed using
-     * a private key stored in the browser.
+     * Construct the script object in the same way as {@link #sign(String, String)}, but not sign it. The resulting
+     * script contains all needed data to construct a valid signature. It can be retrieved using the method
+     * {@link SignedScript#getDataToSign()}, transfered to the client and signed using a private key stored in the
+     * browser.
      * <p>
-     * The signing process must be completed by calling {@link #constructSignedScript(String, String)}.</p>
+     * The signing process must be completed by calling {@link #constructSignedScript(String, String)}.
+     * </p>
      * 
      * @param code code to sign
      * @param fingerprint certificate fingerprint identifying the certificate to use
@@ -65,22 +66,28 @@ public interface ScriptSigner
     SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException;
 
     /**
-     * Create a signed script object by combining the prepared script object and the signature. The signature must
-     * have been produced by signing the result of {@link SignedScript#getDataToSign(String, String)} called
-     * on the script object created using {@link #prepareScriptForSigning(String, String)}.
+     * Create a signed script object by combining the prepared script object and the signature. The signature must have
+     * been produced by signing the result of {@link SignedScript#getDataToSign(String, String)} called on the script
+     * object created using {@link #prepareScriptForSigning(String, String)}.
      * <p>
      * The following sequence of operations:
+     * 
      * <pre>
      * SignedScript preparedScript = signer.prepareScriptForSigning(code, fingerprint);
+     * 
      * String signature = signExternally(preparedScript.getDataToSign());
+     * 
      * SignedScript signedScript = signer.constructSignedScript(preparedScript, signature);
      * </pre>
+     * 
      * (where signExternally() signs the data with the private key corresponding to the fingerprint) is equivalent to
+     * 
      * <pre>
      * SignedScript signedScript = signer.sign(code, fingerprint);
      * </pre>
+     * 
      * for private key stored on the server.
-     * </p> 
+     * </p>
      * 
      * @param preparedScript initialized script object produced by {@link #prepareScriptForSigning(String, String)}
      * @param base64Signature Base64 encoded signature of the data returned by {@link SignedScript#getDataToSign()}
@@ -94,11 +101,10 @@ public interface ScriptSigner
     /**
      * Create a signed script by parsing and verifying a serialized signed script.
      * 
-     * @param signedScript serialized signed script object 
+     * @param signedScript serialized signed script object
      * @return the parsed signed script
      * @throws GeneralSecurityException if verification fails or on errors
      * @see SignedScript#serialize()
      */
     SignedScript getVerifiedScript(String signedScript) throws GeneralSecurityException;
 }
-

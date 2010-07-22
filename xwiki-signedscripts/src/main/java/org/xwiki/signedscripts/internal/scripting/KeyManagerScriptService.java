@@ -29,7 +29,6 @@ import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.signedscripts.KeyManager;
 
-
 /**
  * Script service wrapping a {@link KeyManager} component.
  * 
@@ -125,4 +124,3 @@ public class KeyManagerScriptService implements ScriptService
         return keyManager.getKnownFingerprints();
     }
 }
-

@@ -1,11 +1,10 @@
 package org.xwiki.signedscripts;
 
-
-
 /**
  * Defines which data is stored in a signature of a {@link SignedScript}.
  * <p>
- * NOTE: Do not change the order!</p>
+ * NOTE: Do not change the order!
+ * </p>
  * 
  * @version $Id$
  * @since 2.5
@@ -84,6 +83,7 @@ public enum SignedScriptKey
 
     /**
      * {@inheritDoc}
+     * 
      * @see java.lang.Enum#toString()
      */
     @Override

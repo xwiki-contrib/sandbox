@@ -31,10 +31,9 @@ import java.util.regex.Pattern;
 import org.xwiki.signedscripts.SignedScript;
 import org.xwiki.signedscripts.SignedScriptKey;
 
-
 /**
- * Implementation of a signed script. The signature is stored in PKCS7 format with embedded signer
- * certificate and detached content.
+ * Implementation of a signed script. The signature is stored in PKCS7 format with embedded signer certificate and
+ * detached content.
  * 
  * @version $Id$
  * @since 2.5
@@ -57,8 +56,8 @@ public class PKCS7SignedScript implements SignedScript
     private final Map<SignedScriptKey, String> data;
 
     /**
-     * Create an instance of {@link PKCS7SignedScript} by parsing the given string. The signature
-     * needs to be verified afterwards.
+     * Create an instance of {@link PKCS7SignedScript} by parsing the given string. The signature needs to be verified
+     * afterwards.
      * 
      * @param script signed script as created by {@link #toString()}
      * @throws IOException on errors
@@ -71,8 +70,7 @@ public class PKCS7SignedScript implements SignedScript
     }
 
     /**
-     * Create an instance of {@link PKCS7SignedScript} for the given string. Used to sign the script
-     * object afterwards.
+     * Create an instance of {@link PKCS7SignedScript} for the given string. Used to sign the script object afterwards.
      * 
      * @param code the script to sign
      * @param fingerprint fingerprint of the certificate to use
@@ -104,8 +102,8 @@ public class PKCS7SignedScript implements SignedScript
     }
 
     /**
-     * Create an instance of {@link PKCS7SignedScript} by combining the data from the given
-     * {@link SignedScript} and Base64 encoded signature. The signature needs to be verified afterwards.
+     * Create an instance of {@link PKCS7SignedScript} by combining the data from the given {@link SignedScript} and
+     * Base64 encoded signature. The signature needs to be verified afterwards.
      * 
      * @param preparedScript script object initialized with all needed data
      * @param base64Signature Base64 encoded signature of data obtained by {@link #getDataToSign()}
@@ -160,6 +158,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.data.SignedScript#toString()
      */
     @Override
@@ -170,6 +169,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.data.SignedScript#serialize()
      */
     public String serialize()
@@ -210,6 +210,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.data.SignedScript#getCode()
      */
     public String getCode()
@@ -219,6 +220,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.data.SignedScript#get(org.xwiki.crypto.data.SignedScriptKey)
      */
     public String get(SignedScriptKey key)
@@ -228,6 +230,7 @@ public class PKCS7SignedScript implements SignedScript
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.crypto.data.SignedScript#isSet(org.xwiki.crypto.data.SignedScriptKey)
      */
     public boolean isSet(SignedScriptKey key)
@@ -279,8 +282,9 @@ public class PKCS7SignedScript implements SignedScript
     }
 
     /**
-     * Parse the content of a signed macro and build a key-value map containing signature details.
-     * The macro to be executed is stored under the special key "Code".
+     * Parse the content of a signed macro and build a key-value map containing signature details. The macro to be
+     * executed is stored under the special key "Code".
+     * <p>
      * TODO write JavaCC parser
      * 
      * @param content the content of a signed macro to be parsed
@@ -331,4 +335,3 @@ public class PKCS7SignedScript implements SignedScript
         return map;
     }
 }
-

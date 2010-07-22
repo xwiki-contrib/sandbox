@@ -27,7 +27,6 @@ import org.xwiki.signedscripts.ScriptSigner;
 import org.xwiki.signedscripts.SignedScript;
 import org.xwiki.script.service.ScriptService;
 
-
 /**
  * Script service wrapping a {@link ScriptSigner} component.
  * 
@@ -55,7 +54,7 @@ public class ScriptSignerScriptService implements ScriptService
     }
 
     /**
-     * @param signedScript serialized signed script object 
+     * @param signedScript serialized signed script object
      * @return code contained in the signed script
      * @throws GeneralSecurityException if verification fails or on errors
      * @see org.xwiki.crypto.ScriptSigner#getVerifiedScript(java.lang.String)
@@ -65,4 +64,3 @@ public class ScriptSignerScriptService implements ScriptService
         return signer.getVerifiedScript(signedScript);
     }
 }
-

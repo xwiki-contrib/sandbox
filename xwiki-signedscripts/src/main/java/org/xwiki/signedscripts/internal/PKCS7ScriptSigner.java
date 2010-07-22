@@ -37,7 +37,6 @@ import org.xwiki.signedscripts.ScriptSigner;
 import org.xwiki.signedscripts.SignedScript;
 import org.xwiki.signedscripts.SignedScriptKey;
 
-
 /**
  * Script signing component using PKCS7 encoding for signatures.
  * 
@@ -57,6 +56,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.signedscripts.ScriptSigner#sign(java.lang.String, java.lang.String, java.lang.String)
      */
     public SignedScript sign(String code, String fingerprint, String password) throws GeneralSecurityException
@@ -75,6 +75,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.signedscripts.ScriptSigner#prepareScriptForSigning(java.lang.String, java.lang.String)
      */
     public SignedScript prepareScriptForSigning(String code, String fingerprint) throws GeneralSecurityException
@@ -99,7 +100,9 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.signedscripts.ScriptSigner#constructSignedScript(org.xwiki.signedscripts.SignedScript, java.lang.String)
+     * 
+     * @see org.xwiki.signedscripts.ScriptSigner#constructSignedScript(org.xwiki.signedscripts.SignedScript,
+     *      java.lang.String)
      */
     public SignedScript constructSignedScript(SignedScript preparedScript, String base64Signature)
         throws GeneralSecurityException
@@ -115,6 +118,7 @@ public class PKCS7ScriptSigner implements ScriptSigner
 
     /**
      * {@inheritDoc}
+     * 
      * @see org.xwiki.signedscripts.ScriptSigner#getVerifiedScript(java.lang.String)
      */
     public SignedScript getVerifiedScript(String signedScript) throws GeneralSecurityException
@@ -155,8 +159,8 @@ public class PKCS7ScriptSigner implements ScriptSigner
     }
 
     /**
-     * Check validity of the signature, i.e. if the creation date lays in the past and expiration
-     * date lays in the future.
+     * Check validity of the signature, i.e. if the creation date lays in the past and expiration date lays in the
+     * future.
      * 
      * @param script the script object to check
      * @throws ParseException if the date is stored in an invalid format
@@ -176,8 +180,8 @@ public class PKCS7ScriptSigner implements ScriptSigner
     }
 
     /**
-     * Check validity and verify the given certificate. Recursively validates parent certificates by their
-     * fingerprints. Throws an exception if the verification fails or on errors.
+     * Check validity and verify the given certificate. Recursively validates parent certificates by their fingerprints.
+     * Throws an exception if the verification fails or on errors.
      * 
      * @param certificate the certificate to verify
      * @throws GeneralSecurityException on verification failure or errors
@@ -210,4 +214,3 @@ public class PKCS7ScriptSigner implements ScriptSigner
         return dateFormat;
     }
 }
-

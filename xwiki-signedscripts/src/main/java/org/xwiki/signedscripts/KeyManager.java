@@ -26,9 +26,9 @@ import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 
-
 /**
  * Key management component. Allows to create and store key pairs (certificates and private keys).
+ * <p>
  * TODO throw something other than GeneralSecurityException
  * 
  * @version $Id$
@@ -39,6 +39,7 @@ public interface KeyManager
 {
     /**
      * Create and register a new key pair (private key and a certificate) signed by the local root.
+     * <p>
      * TODO should require global admin rights
      * 
      * @param authorName author name to use
@@ -50,8 +51,9 @@ public interface KeyManager
     String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException;
 
     /**
-     * Register the given certificate as trusted. Scripts, signed with the corresponding private key
-     * will be considered as trusted.
+     * Register the given certificate as trusted. Scripts, signed with the corresponding private key will be considered
+     * trusted.
+     * <p>
      * TODO should require global admin rights
      * 
      * @param certificate the certificate to register
@@ -61,10 +63,11 @@ public interface KeyManager
     void registerCertificate(XWikiX509Certificate certificate) throws GeneralSecurityException;
 
     /**
-     * Unregister the certificate or key pair with the given fingerprint. The code previously signed with
-     * this certificate/key pair will no longer be considered trusted.
+     * Unregister the certificate or key pair with the given fingerprint. The code previously signed with this
+     * certificate/key pair will no longer be considered trusted.
      * <p>
-     * Note that unregistering the local root certificate will generate a new one.<p>
+     * Note that unregistering the local root certificate will generate a new one.
+     * <p>
      * TODO should require global admin rights
      * 
      * @param fingerprint fingerprint of the certificate or key pair to unregister
@@ -83,6 +86,7 @@ public interface KeyManager
 
     /**
      * Get a key pair by certificate fingerprint.
+     * <p>
      * TODO should require PR rights
      * TODO should only work for the user's own certificate, i.e. better remove parameter
      * 
@@ -100,8 +104,8 @@ public interface KeyManager
     XWikiX509Certificate getLocalRootCertificate();
 
     /**
-     * Get the global root certificate. Note that this certificate might have been unregistered and
-     * is no longer considered trusted.
+     * Get the global root certificate. Note that this certificate might have been unregistered and is no longer
+     * considered trusted.
      * 
      * @return global root certificate object
      */
@@ -114,4 +118,3 @@ public interface KeyManager
      */
     Set<String> getKnownFingerprints();
 }
-
