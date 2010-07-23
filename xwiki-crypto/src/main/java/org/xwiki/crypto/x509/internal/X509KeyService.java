@@ -53,9 +53,9 @@ public class X509KeyService
     /**
      * @param spkacSerialization a <a href="http://en.wikipedia.org/wiki/Spkac">SPKAC</a> Certificate Signing Request
      * @param daysOfValidity number of days before the certificate should become invalid.
-     * @param webID the URL of the user's page. Used for FOAFSSL compatabulity.
+     * @param webID the URL of the user's page. Used for FOAFSSL compatibility.
      * @param userName the String serialization of the user's page name.
-     * @return 2 certificartes, one a client cert and the other an authority cert which signed the client cert.
+     * @return 2 certificates, one a client cert and the other an authority cert which signed the client cert.
      * @throws GeneralSecurityException on errors
      * @see org.xwiki.crypto.CryptoService#certsFromSpkac(String, int)
      */
@@ -91,7 +91,7 @@ public class X509KeyService
      * Create a fresh self-signed key pair.
      * 
      * @param daysOfValidity number of days before the certificate should become invalid.
-     * @param webID the URL of the user's page. Used for FOAFSSL compatabulity.
+     * @param webID the URL of the user's page. Used for FOAFSSL compatibility.
      * @param userName the String serialization of the user's page name.
      * @param password the password to set on the resulting XWikiX509KeyPair.
      * @return a certificate and matching private key in an XWikiX509KeyPair object.

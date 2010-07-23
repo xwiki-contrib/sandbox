@@ -122,17 +122,17 @@ public class X509Keymaker
 
     /**
      * Create a new X509 client certificate and a certificate authority certificate.
-     * This method will use authorityKeyPair if it is set, this method is also guarenteed to use the same
+     * This method will use authorityKeyPair if it is set, this method is also guaranteed to use the same
      * authorityKeyPair for both the client cert signature and the CA cert.
      *
-     * @param forCert the public key which will be embeded in the certificate, whoever has the matching private key
+     * @param forCert the public key which will be embedded in the certificate, whoever has the matching private key
      *                "owns" the certificate.
      * @param daysOfValidity number of days the cert should be valid for.
      * @param nonRepudiable this should only be true if the private key is not stored on the server.
-     * @param webId the URI to put as the alternative name (for FOAFSSL webId compatability)
+     * @param webId the URI to put as the alternative name (for FOAFSSL webId compatibility)
      * @param userName a String representation of the name of the user getting the certificate.
      * @return an array of 2 new X509 certificates, with the client certificate at 0-th index, and CA cert at 1-st index
-     * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
+     * @throws CertificateException if verifying the signature after signing it (sanity test) fails.
      * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
      * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
      * @throws SignatureException if generating and signing the certificate fails.
@@ -166,15 +166,15 @@ public class X509Keymaker
     /**
      * Create a new X509 client certificate.
      *
-     * @param forCert the public key which will be embeded in the certificate, whoever has the matching private key
+     * @param forCert the public key which will be embedded in the certificate, whoever has the matching private key
      *                "owns" the certificate.
      * @param toSignWith the private key in this pair will be used to sign the certificate.
      * @param daysOfValidity number of days the cert should be valid for.
      * @param nonRepudiable this should only be true if the private key is not stored on the server.
-     * @param webId the URI to put as the alternative name (for FOAFSSL webId compatability)
+     * @param webId the URI to put as the alternative name (for FOAFSSL webId compatibility)
      * @param userName a String representation of the name of the user getting the certificate.
      * @return a new X509 certificate.
-     * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
+     * @throws CertificateException if verifying the signature after signing it (sanity test) fails.
      * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
      * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
      * @throws SignatureException if generating and signing the certificate fails.
@@ -240,7 +240,7 @@ public class X509Keymaker
      * @param keyPair the public key will appear in the certificate and the private key will be used to sign it.
      * @param daysOfValidity number of days the cert should be valid for.
      * @return a new X509 certificate authority.
-     * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
+     * @throws CertificateException if verifying the signature after signing it (sanity test) fails.
      * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
      * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
      * @throws SignatureException if generating and signing the certificate fails.
@@ -313,7 +313,7 @@ public class X509Keymaker
      *
      * @param toSignWith the private key in this pair will be used to sign the certificate.
      * @return a new X509 certificate.
-     * @throws CertificateException if verifying the signiture after signing it (sanity test) fails.
+     * @throws CertificateException if verifying the signature after signing it (sanity test) fails.
      * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
      * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
      * @throws SignatureException if generating and signing the certificate fails.

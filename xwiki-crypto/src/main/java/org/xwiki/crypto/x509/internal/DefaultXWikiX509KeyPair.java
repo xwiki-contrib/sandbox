@@ -86,7 +86,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      *                 This password will also be applied to the PKCS#12 output if this is exported.
      *                 The strength of the PKCS#12 cryptography grows with the length of the password and symmetrical 
      *                 encryption using keys larger than 128 bits is not allowed by Java unless you install Unlimited 
-     *                 Strength Jurisdiction Policy Files available on the Sun Microsystems website.
+     *                 Strength Jurisdiction Policy Files available on the Sun Microsystems web site.
      * @throws GeneralSecurityException if initializing or saving of the key store fails.
      */
     public DefaultXWikiX509KeyPair(final PrivateKey key,
@@ -127,7 +127,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
                                                    + "grow with the length of the password and as a result passwords "
                                                    + "longer than 7 characters are not possible without installing the "
                                                    + "Unlimited Strength Jurisdiction Policy Files which are available "
-                                                   + "on the Sun Microsystems website.", e);
+                                                   + "on the Sun Microsystems web site.", e);
             }
             throw new GeneralSecurityException("Failed to initialize or save key store", e);
         } finally {
