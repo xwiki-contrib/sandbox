@@ -134,10 +134,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
             //DefaultXWikiX509KeyPair.cleanStore(store);
         }
 
-        this.certChain = new XWikiX509Certificate[certificates.length];
-        for (int i = 0; i < certificates.length; i++) {
-            this.certChain[i] = new XWikiX509Certificate(certificates[i]);
-        }
+        this.certChain = XWikiX509Certificate.fromCertificateChain(nonX509Certs);
     }
 
     /**
@@ -185,15 +182,7 @@ public final class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
             DefaultXWikiX509KeyPair.cleanStore(store);
         }
 
-        this.certChain = new XWikiX509Certificate[certificates.length];
-        for (int i = 0; i < certificates.length; i++) {
-            if (!(certificates[i] instanceof X509Certificate)) {
-                throw new IllegalArgumentException("Only PKCS#12 containers with X509Certificates are accepted, found: "
-                        + certificates[i].getType());
-            }
-            this.certChain[i] = new XWikiX509Certificate((X509Certificate) certificates[i]);
-        }
-
+        this.certChain = XWikiX509Certificate.fromCertificateChain(certificates);
         this.pkcs12Bytes = pkcs12Bytes;
     }
 

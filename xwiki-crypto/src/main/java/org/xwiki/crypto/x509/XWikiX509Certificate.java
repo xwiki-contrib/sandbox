@@ -28,8 +28,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.xwiki.crypto.x509.internal.AbstractX509CertificateWrapper;
 import org.xwiki.crypto.internal.Convert;
+import org.xwiki.crypto.x509.internal.AbstractX509CertificateWrapper;
 
 
 /**
@@ -63,7 +63,7 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     private final String issuerFingerprint;
 
     /**
-     * Create new {@link XWikiX509Certificate}.
+     * Create new {@link XWikiX509Certificate}. Assume that the certificate is self-signed.
      * 
      * @param certificate the actual certificate to use
      */
@@ -82,7 +82,9 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     {
         super(certificate);
         this.fingerprint = XWikiX509Certificate.calculateFingerprint(certificate);
-        if (issuerFp == null) {
+        if (issuerFp == null && (certificate instanceof XWikiX509Certificate)) {
+            this.issuerFingerprint = ((XWikiX509Certificate) certificate).getIssuerFingerprint();
+        } else if (issuerFp == null) {
             this.issuerFingerprint = this.fingerprint;
         } else {
             this.issuerFingerprint = issuerFp;
@@ -222,6 +224,33 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
         }
         // assume self-signed certificate by default
         return new XWikiX509Certificate((X509Certificate) cert);
+    }
+
+    /**
+     * Convert a chain of {@link Certificate}s into a chain of {@link XWikiX509Certificate}s, correctly setting the
+     * issuer fingerprint. The last certificate in the chain is assumed to be self-signed.
+     * <p>
+     * Each certificate in the input chain must be a subclass of {@link X509Certificate}, otherwise a runtime exception
+     * is thrown (the type is Certificate[] and not X509Certificate[] just for convenience, since certificate factories
+     * create certificate chains of this type).</p>
+     * 
+     * @param x509Chain a chain if X509 certificates
+     * @return a corresponding chain of {@link XWikiX509Certificate}s wrapping the certificates from the input chain
+     */
+    public static XWikiX509Certificate[] fromCertificateChain(Certificate[] x509Chain)
+    {
+        XWikiX509Certificate[] outChain = new XWikiX509Certificate[x509Chain.length];
+        String issuerFP = null;
+        // go through the chain backwards so that we don't need to recalculate the issuer fingerprint
+        for (int i = x509Chain.length - 1; i >= 0; i--) {
+            if (!(x509Chain[i] instanceof X509Certificate)) {
+                throw new IllegalArgumentException("Only X509 certificates are supported, found: "
+                        + x509Chain[i].getType());
+            }
+            outChain[i] = new XWikiX509Certificate((X509Certificate) x509Chain[i], issuerFP);
+            issuerFP = outChain[i].getFingerprint();
+        }
+        return outChain;
     }
 
     /**
