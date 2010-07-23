@@ -38,7 +38,7 @@ import org.xwiki.crypto.x509.XWikiX509KeyPair;
 public interface KeyManager
 {
     /**
-     * Create and register a new key pair (private key and a certificate) signed by the local root.
+     * Create and register a new self-signed key pair (private key and a certificate).
      * <p>
      * TODO should require global admin rights
      * 
@@ -64,8 +64,8 @@ public interface KeyManager
     void registerCertificate(XWikiX509Certificate certificate, String userName) throws GeneralSecurityException;
 
     /**
-     * Unregister the certificate or key pair with the given fingerprint. The code previously signed with this
-     * certificate/key pair will no longer be considered trusted.
+     * Unregister the certificate (and key pair if it exists) with the given fingerprint. The code previously signed
+     * with the key pair corresponding to this certificate will no longer be considered trusted.
      * <p>
      * Note that unregistering the local root certificate will generate a new one.
      * <p>
@@ -86,20 +86,11 @@ public interface KeyManager
 
     /**
      * Get the key pair associated with the current user or null if the key pair is not registered.
-     * <p>
-     * TODO should require PR rights? (private key is encrypted)
      * 
      * @return the corresponding key pair on success, null otherwise
      * @throws GeneralSecurityException on insufficient access rights
      */
     XWikiX509KeyPair getKeyPair() throws GeneralSecurityException;
-
-    /**
-     * Get the local root certificate.
-     * 
-     * @return local root certificate object
-     */
-    XWikiX509Certificate getLocalRootCertificate();
 
     /**
      * Get a set of all known trusted certificate fingerprints.

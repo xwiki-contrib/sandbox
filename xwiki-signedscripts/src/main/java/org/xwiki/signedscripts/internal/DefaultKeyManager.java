@@ -70,9 +70,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     /** Key pair generator. */
     private KeyPairGenerator kpGen;
 
-    /** Fingerprint of the local root certificate. */
-    private String localRootFingerprint;
-
     /** Used to get user certificates. */
     @Requirement
     private UserDocumentUtils docUtils;
@@ -82,9 +79,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
     /** FIXME. */
     private Map<String, XWikiX509KeyPair> keysMap = new HashMap<String, XWikiX509KeyPair>();
-
-    /** FIXME Remove. */
-    private final String localRootPwd = "blah";
 
     /**
      * {@inheritDoc}
@@ -106,13 +100,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
             throw new InitializationException("Failed to initialize key pair generator.", exception);
         }
         // FIXME read local and global root certs
-        // FIXME DEBUG
-        try {
-            regenerateLocalRoot();
-        } catch (GeneralSecurityException exception) {
-            getLogger().debug(exception.getMessage(), exception);
-            throw new InitializationException(exception.getMessage(), exception);
-        }
     }
 
     /**
@@ -126,17 +113,10 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         KeyPair kp = this.kpGen.generateKeyPair();
 
         // TODO rights and actions
-        // local root certificate might not be present if we are generating it, default to self-signed
+        // generate a self-signed certificate
         X500Principal author = new X500Principal("CN=" + authorName);
         X500Principal issuer = author;
         PrivateKey signKey = kp.getPrivate();
-        String signFingerprint = null;
-        if (this.localRootFingerprint != null) {
-            XWikiX509Certificate signCert = getLocalRootCertificate();
-            issuer = signCert.getSubjectX500Principal();
-            signKey = getLocalRootKeyPair().getPrivateKey(this.localRootPwd);
-            signFingerprint = signCert.getFingerprint();
-        }
 
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
         certGen.setSubjectDN(author);
@@ -150,14 +130,12 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         certGen.setPublicKey(kp.getPublic());
         certGen.setSignatureAlgorithm(SIGN_ALGORITHM);
 
-        XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey), signFingerprint);
+        XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey));
         String fingerprint = cert.getFingerprint();
         XWikiX509KeyPair keys = new DefaultXWikiX509KeyPair(kp.getPrivate(), password, cert);
         try {
-            if (this.localRootFingerprint != null) {
-                // we are generating local root certificate, it belongs to no user
-                this.docUtils.addCertificateFingerprint(this.docUtils.getCurrentUser(), fingerprint);
-            }
+            // register the certificate in user document forst (might fail)
+            this.docUtils.addCertificateFingerprint(this.docUtils.getCurrentUser(), fingerprint);
             this.certMap.put(fingerprint, cert);
             this.keysMap.put(fingerprint, keys);
         } catch (Exception exception) {
@@ -207,22 +185,8 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      */
     public void unregister(String fingerprint) throws GeneralSecurityException
     {
-        String localFingerprint = getLocalRootCertificate().getFingerprint();
         this.certMap.remove(fingerprint);
         this.keysMap.remove(fingerprint);
-        if (localFingerprint.equals(fingerprint)) {
-            regenerateLocalRoot();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.signedscripts.KeyManager#getLocalRootCertificate()
-     */
-    public XWikiX509Certificate getLocalRootCertificate()
-    {
-        return getLocalRootKeyPair().getCertificate();
     }
 
     /**
@@ -248,28 +212,5 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
             }
         }
         return null;
-    }
-
-    /**
-     * Generate a new key pair and replace the local root certificate with it.
-     * 
-     * @throws GeneralSecurityException on errors
-     */
-    private void regenerateLocalRoot() throws GeneralSecurityException
-    {
-        this.certMap.remove(this.localRootFingerprint);
-        this.keysMap.remove(this.localRootFingerprint);
-        this.localRootFingerprint = null;
-        this.localRootFingerprint = createKeyPair("Local Root", this.localRootPwd, 365);
-    }
-
-    /**
-     * Get the local root key pair.
-     * 
-     * @return local root key pair object
-     */
-    private XWikiX509KeyPair getLocalRootKeyPair()
-    {
-        return this.keysMap.get(this.localRootFingerprint);
     }
 }

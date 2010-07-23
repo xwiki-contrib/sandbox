@@ -96,16 +96,6 @@ public class KeyManagerScriptService implements ScriptService, KeyManager
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.KeyManager#getLocalRootCertificate()
-     */
-    public XWikiX509Certificate getLocalRootCertificate()
-    {
-        return keyManager.getLocalRootCertificate();
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
      * @see org.xwiki.signedscripts.KeyManager#getKnownFingerprints()
      */
     public Set<String> getKnownFingerprints()
