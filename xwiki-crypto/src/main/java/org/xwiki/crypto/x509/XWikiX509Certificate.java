@@ -28,6 +28,9 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
 import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.x509.internal.AbstractX509CertificateWrapper;
 
@@ -275,12 +278,33 @@ public class XWikiX509Certificate extends AbstractX509CertificateWrapper
     }
 
     /**
-     * Get name of the author (subject name) of this certificate. 
+     * Get name of the author (subject name) of this certificate.
+     *  
      * @return author name
      */
     public String getAuthorName()
     {
         return getSubjectX500Principal().getName();
+    }
+
+    /**
+     * Get user name (stored as UID in the distinguished subject name) of this certificate's author, or empty string
+     * if UID is not present.
+     * 
+     * @return author UID
+     */
+    public String getAuthorUID()
+    {
+        try {
+            X509Principal author = PrincipalUtil.getSubjectX509Principal(this.certificate);
+            if (author.getValues(X509Name.UID).size() == 0) {
+                return "";
+            }
+            return (String) author.getValues(X509Name.UID).get(0);
+        } catch (CertificateEncodingException exception) {
+            // should not happen
+            return "";
+        }
     }
 }
 

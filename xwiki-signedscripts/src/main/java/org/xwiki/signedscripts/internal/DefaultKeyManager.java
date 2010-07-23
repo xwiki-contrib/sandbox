@@ -31,8 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.security.auth.x500.X500Principal;
-
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.xwiki.component.annotation.Component;
@@ -114,8 +113,8 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
         // TODO rights and actions
         // generate a self-signed certificate
-        X500Principal author = new X500Principal("CN=" + authorName);
-        X500Principal issuer = author;
+        X509Principal author = new X509Principal("UID=" + authorName);
+        X509Principal issuer = author;
         PrivateKey signKey = kp.getPrivate();
 
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
