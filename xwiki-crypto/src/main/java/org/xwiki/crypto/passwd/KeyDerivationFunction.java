@@ -19,6 +19,7 @@
  */
 package org.xwiki.crypto.passwd;
 
+import java.io.Serializable;
 import java.io.IOException;
 
 import org.xwiki.component.annotation.ComponentRole;
@@ -34,14 +35,20 @@ import org.xwiki.component.annotation.ComponentRole;
  * @version $Id$
  */
 @ComponentRole
-public interface KeyDerivationFunction
+public interface KeyDerivationFunction extends Serializable
 {
     /**
      * Initialize this function with the desired key length.
      *
+     * @param millisecondsOfProcessorTimeToSpend number of milliseconds to spend hashing the password.
+     *                                           Based on this number and the power of the processor this is running on
+     *                                           a number of iterations will be derived. This number will dictate how
+     *                                           difficult hashing will be and also how difficult it will be to guess
+     *                                           the password using cracking technology.
      * @param derivedKeyLength the desired length of the hash output.
      */
-    void init(final int derivedKeyLength);
+    void init(final int millisecondsOfProcessorTimeToSpend,
+              final int derivedKeyLength);
 
     /**
      * @return true if this function has been initialized by calling init.

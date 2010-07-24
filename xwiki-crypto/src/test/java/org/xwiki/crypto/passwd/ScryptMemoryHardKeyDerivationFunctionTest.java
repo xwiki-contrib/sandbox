@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.passwd.scrypt;
+package org.xwiki.crypto.passwd;
 
 import java.util.Arrays;
 
@@ -29,8 +29,8 @@ import org.bouncycastle.util.encoders.Base64;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.xwiki.crypto.passwd.internal.scrypt.PasswordBasedKeyDerivationFunction2;
-import org.xwiki.crypto.passwd.internal.scrypt.Scrypt;
+import org.xwiki.crypto.passwd.internal.PBKDF2KeyDerivationFunction;
+import org.xwiki.crypto.passwd.internal.ScryptMemoryHardKeyDerivationFunction;
 
 /**
  * Tests Scrypt agains test outputs given in reference document.
@@ -38,7 +38,7 @@ import org.xwiki.crypto.passwd.internal.scrypt.Scrypt;
  * @since 2.5
  * @version $Id$
  */
-public class ScryptTest extends Scrypt
+public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardKeyDerivationFunction
 {
     // scrypt("", "", 16, 1, 1, 64)  see: http://www.tarsnap.com/scrypt/scrypt.pdf
     private final String outputSample1 = "77 d6 57 62 38 65 7b 20 3b 19 ca 42 c1 8a 04 97"
@@ -141,41 +141,35 @@ public class ScryptTest extends Scrypt
     private final String salsa8OutputBase64 =
         "dQmvxSiYVIIqC9RIbC0SAE2B6M9+VxMGLbfos6tY6hbFeBvAptG+FHbLETigJ1dV/xFDQbmtfLPo+PV7VNFdIw==";
 
-    /** Default Constructor needed because this class extends Scrypt to test protected methods. */
-    public ScryptTest()
-    {
-        super(new byte[0], 2, 8, 1, 1);
-    }
-
     @Test
     public void scryptConformanceTest1() throws Exception
     {
-        Scrypt engine = new Scrypt(new byte[0], 16, 1, 1, 64);
-        byte[] out = engine.hashPassword(new byte[0]);
-        Assert.assertTrue(Arrays.equals(Hex.decode(outputSample1.getBytes("US-ASCII")),  out));
+        this.init(new byte[0], 16, 1, 1, 64);
+        byte[] out = this.hashPassword(new byte[0]);
+        Assert.assertTrue(Arrays.equals(Hex.decode(this.outputSample1.getBytes("US-ASCII")),  out));
     }
 
     @Test
     public void scryptConformanceTest2() throws Exception
     {
-        Scrypt engine = new Scrypt(new byte[] {'N', 'a', 'C', 'l'}, 1024, 8, 16, 64);
-        byte[] out = engine.hashPassword(new byte[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'});
-        Assert.assertTrue(Arrays.equals(Hex.decode(outputSample2.getBytes("US-ASCII")),  out));
+        this.init(new byte[] {'N', 'a', 'C', 'l'}, 1024, 8, 16, 64);
+        byte[] out = this.hashPassword(new byte[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'});
+        Assert.assertTrue(Arrays.equals(Hex.decode(this.outputSample2.getBytes("US-ASCII")),  out));
     }
 
     @Test
     public void scryptConformanceTest3() throws Exception
     {
-        Scrypt engine = new Scrypt(new byte[] {'S', 'o', 'd', 'i', 'u', 'm', 'C', 'h', 'l', 'o', 'r', 'i', 'd', 'e'},
-                                   16384, 8, 1, 64);
-        byte[] out = engine.hashPassword(new byte[] {'p', 'l', 'e', 'a', 's', 'e', 'l', 'e', 't', 'm', 'e', 'i', 'n'});
-        Assert.assertTrue(Arrays.equals(Hex.decode(outputSample3.getBytes("US-ASCII")),  out));
+        this.init(new byte[] {'S', 'o', 'd', 'i', 'u', 'm', 'C', 'h', 'l', 'o', 'r', 'i', 'd', 'e'},
+                    16384, 8, 1, 64);
+        byte[] out = this.hashPassword(new byte[] {'p', 'l', 'e', 'a', 's', 'e', 'l', 'e', 't', 'm', 'e', 'i', 'n'});
+        Assert.assertTrue(Arrays.equals(Hex.decode(this.outputSample3.getBytes("US-ASCII")),  out));
     }
 
     @Test
     public void scryptPBKDF2Test() throws Exception
     {
-        PasswordBasedKeyDerivationFunction2 sha256Pbkdf2 = new PasswordBasedKeyDerivationFunction2(new SHA256Digest());
+        PBKDF2KeyDerivationFunction sha256Pbkdf2 = new PBKDF2KeyDerivationFunction(new SHA256Digest());
 
         byte[] out = sha256Pbkdf2.generateDerivedKey(scryptPBKDF2InputPassword.getBytes("US-ASCII"),
                                                      Base64.decode(scryptPBKDF2InputSaltBase64.getBytes("US-ASCII")),
@@ -259,7 +253,9 @@ public class ScryptTest extends Scrypt
     {
         byte[] out = Base64.decode(this.blockMixInputBase64.getBytes("US-ASCII"));
         // Blockmix requires that memory be allocated.
+        this.init(new byte[0], 2, 8, 1, 1);
         this.allocateMemory(true);
+
         this.blockMix(out);
 
         Digest d = new SHA256Digest();
@@ -278,5 +274,28 @@ public class ScryptTest extends Scrypt
         this.scryptSalsa8(out);
         String outStr = new String(Base64.encode(out), "US-ASCII");
         Assert.assertEquals(this.salsa8OutputBase64, outStr);
+    }
+
+    /**
+     * Proove that guessing the processor time when initializing is relitively accurate.
+     * It's important to run this test on various archetectures.
+     * This test will fail if time taken is over 100% difference from time expected.
+     */
+    @Test
+    public void initializationProcessorTimeTest() throws Exception
+    {
+        this.checkInitializationProcessorTime(1024, 500);
+        this.checkInitializationProcessorTime(8192, 1000);
+        this.checkInitializationProcessorTime(16384, 3000);
+    }
+
+    public void checkInitializationProcessorTime(int targetMemory, int targetTime) throws Exception
+    {
+        this.init(targetMemory, targetTime, 64);
+        long time = System.currentTimeMillis();
+        this.hashPassword("password".getBytes());
+        int timeSpent = (int) (System.currentTimeMillis() - time);
+        Assert.assertTrue("password hashing took " + timeSpent + " and target time was " + targetTime,
+                          Math.abs(timeSpent - targetTime) < targetTime);
     }
 }

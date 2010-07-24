@@ -25,7 +25,7 @@ import org.junit.Assert;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 
-import org.xwiki.crypto.passwd.internal.scrypt.PasswordBasedKeyDerivationFunction2;
+import org.xwiki.crypto.passwd.internal.PBKDF2KeyDerivationFunction;
 
 
 /**
@@ -35,12 +35,11 @@ import org.xwiki.crypto.passwd.internal.scrypt.PasswordBasedKeyDerivationFunctio
  * @since 2.5
  * @version $Id$
  */
-public class PasswordBasedKeyDerivationFunction2Test
+public class PBKDF2KeyDerivationFunctionTest
 {
     private final byte[] salt = { 0x12, 0x34, 0x56, 0x78, 0x78, 0x56, 0x34, 0x12 };
 
-    private final PasswordBasedKeyDerivationFunction2 function =
-        new PasswordBasedKeyDerivationFunction2(new SHA1Digest());
+    private final PBKDF2KeyDerivationFunction function = new PBKDF2KeyDerivationFunction(new SHA1Digest());
 
     @Test
     public void pbkdf2Test1() throws Exception

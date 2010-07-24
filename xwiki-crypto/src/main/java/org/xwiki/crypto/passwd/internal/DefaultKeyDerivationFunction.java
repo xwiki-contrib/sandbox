@@ -67,7 +67,7 @@ public class DefaultKeyDerivationFunction implements KeyDerivationFunction, Seri
      */
     public static KeyDerivationFunction deserialize(final byte[] serialized) throws IOException, ClassNotFoundException
     {
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serialized));
+        final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serialized));
         return (KeyDerivationFunction) ois.readObject();
     }
 
@@ -81,8 +81,8 @@ public class DefaultKeyDerivationFunction implements KeyDerivationFunction, Seri
         if (!this.isInitialized()) {
             throw new IllegalStateException("Can't serialize a key derivation function until it has been initialized.");
         }
-        ByteArrayOutputStream out = new ByteArrayOutputStream(128);
-        ObjectOutputStream oos = new ObjectOutputStream(out);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream(128);
+        final ObjectOutputStream oos = new ObjectOutputStream(out);
         if (this.getClass().equals(DefaultKeyDerivationFunction.class)) {
             // If this is a DefaultKeyDerivationFunction wrapping another KDF
             // then serialize the wrapped KDF.
@@ -98,11 +98,12 @@ public class DefaultKeyDerivationFunction implements KeyDerivationFunction, Seri
     /**
      * {@inheritDoc}
      *
-     * @see: org.xwiki.crypto.KeyDerivationFunction#init(int)
+     * @see: org.xwiki.crypto.KeyDerivationFunction#init(int, int)
      */
-    public void init(final int derivedKeyLength)
+    public void init(final int millisecondsOfProcessorTimeToSpend,
+                     final int derivedKeyLength)
     {
-        this.wrappedFunction.init(derivedKeyLength);
+        this.wrappedFunction.init(millisecondsOfProcessorTimeToSpend, derivedKeyLength);
     }
 
     /**

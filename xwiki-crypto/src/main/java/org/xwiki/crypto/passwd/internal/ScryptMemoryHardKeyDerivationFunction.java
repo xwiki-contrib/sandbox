@@ -17,7 +17,9 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.passwd.internal.scrypt;
+package org.xwiki.crypto.passwd.internal;
+
+import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
@@ -28,7 +30,7 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
  * @since 2.5
  * @version $Id$
  */
-public class Scrypt
+public class ScryptMemoryHardKeyDerivationFunction
 {
     /** Abstract number referring to how much memory should be expended for hashing the password. */
     private int memoryExpense;
@@ -42,12 +44,14 @@ public class Scrypt
     /** Random salt to frustrate cracking attempts. */
     private byte[] salt;
 
-    /** The block size to use for the scrypt blockmix function. */
-    private int blockSize;
+    /** The block size to use for the scrypt blockmix function. 8 if not overridden.*/
+    private int blockSize = 8;
 
     /** PBKDF2 function based on SHA-256, used by the scrypt function. */
-    private volatile PasswordBasedKeyDerivationFunction2 sha256Pbkdf2 = 
-        new PasswordBasedKeyDerivationFunction2(new SHA256Digest());
+    private volatile PBKDF2KeyDerivationFunction sha256Pbkdf2 = new PBKDF2KeyDerivationFunction(new SHA256Digest());
+
+    /** Has this object been initialized? Defaults to false */
+    private volatile boolean initialized;
 
     /**
      * A buffer which occupies a large (configurable) amount of memory which is required for this algorithm to 
@@ -69,8 +73,61 @@ public class Scrypt
     private volatile byte[] blockMixBufferY;
 
     /**
-     * The Constructor.
-     * This is an implementation of scrypt(P, S, N, r, p, dkLen)
+     * {@inheritDoc}
+     *
+     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#init(int, int, int)
+     */
+    public void init(final int kilobytesOfMemoryToUse,
+                     final int millisecondsOfProcessorTimeToSpend,
+                     final int derivedKeyLength)
+    {
+        if (kilobytesOfMemoryToUse < 0 || millisecondsOfProcessorTimeToSpend < 0 || derivedKeyLength < 1) {
+            throw new IllegalArgumentException("All arguments must be positive and derivedKeyLength must be at least 1 "
+                                               + "byte long");
+        }
+
+        // Set the salt. (hardcoded salt length at 16.)
+        this.salt = new byte[16];
+        new SecureRandom().nextBytes(this.salt);
+
+        // Round kilobytesOfMemoryToUse to the nearest power of 2
+        int memoryCost = 1;
+        while (memoryCost < kilobytesOfMemoryToUse) {
+            memoryCost <<= 1;
+        }
+        int distanceToNext = memoryCost - kilobytesOfMemoryToUse;
+        int distanceFromLast = kilobytesOfMemoryToUse - (memoryCost >> 1);
+        if (distanceToNext < distanceFromLast) {
+            this.memoryExpense = memoryCost;
+        } else {
+            this.memoryExpense = memoryCost >> 1;
+        }
+
+        // blockSize is hardcoded to 8.
+        this.blockSize = 8;
+        this.derivedKeyLength = derivedKeyLength;
+
+        // Dry run BlockMix once to check time cost.
+        int numTrialRuns = 100;
+        try {
+            this.allocateMemory(true);
+            byte[] testArray = new byte[1024];
+            long time = System.currentTimeMillis();
+            for (int i = 0; i < numTrialRuns; i++) {
+                this.blockMix(testArray);
+            }
+            int timeSpent = (int) (System.currentTimeMillis() - time);
+            // Now predict the time expense.
+            int totalBlockMixRuns = 2 * this.memoryExpense;
+            int timeCostPerCycle = totalBlockMixRuns / numTrialRuns * timeSpent;
+            this.processorExpense = millisecondsOfProcessorTimeToSpend / timeCostPerCycle;
+        } finally {
+            this.freeMemory();
+        }
+    }
+
+    /**
+     * This is an implementation of scrypt(P, S, N, r, p, dkLen) function.
      *
      * @param salt when encoding, a random byte array, when verifying, the same salt as was used to encode.
      * @param memoryExpense a positive integer representing the relative memory expense which the function should take.
@@ -80,11 +137,11 @@ public class Scrypt
      * @param processorExpense a positive integer representing the relative CPU expense which the function should take.
      * @param derivedKeyLength the number of bytes of length the derived key should be (dkLen)
      */
-    public Scrypt(final byte[] salt,
-                  final int memoryExpense,
-                  final int blockSize,
-                  final int processorExpense,
-                  final int derivedKeyLength)
+    public void init(final byte[] salt,
+                     final int memoryExpense,
+                     final int blockSize,
+                     final int processorExpense,
+                     final int derivedKeyLength)
     {
         if (((memoryExpense & (memoryExpense - 1)) != 0) || memoryExpense < 1) {
             throw new IllegalArgumentException("memoryExpense must be a power of 2");
@@ -103,14 +160,24 @@ public class Scrypt
 
         this.salt = new byte[salt.length];
         System.arraycopy(salt, 0, this.salt, 0, salt.length);
+
+        this.initialized = true;
     }
 
     /**
-     * Run the scrypt function on the given password.
+     * {@inheritDoc}
      *
-     * @param password a byte array derived from the user input, a key will be made from this in a resource intensive
-     *        way.
-     * @return the key made from hashing the given password.
+     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#isInitialized()
+     */
+    public boolean isInitialized()
+    {
+        return this.initialized;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#hashPassword(byte[])
      */
     public byte[] hashPassword(final byte[] password)
     {
@@ -226,7 +293,7 @@ public class Scrypt
      * Implementation of BlockMix.
      * Defined here: http://www.tarsnap.com/scrypt.html as BlockMix_salsa20/8,r (B)
      *
-     * @param block 64 byte block of text to scramble (B)
+     * @param block 1024 byte block of bytes to scramble (B)
      */
     protected void blockMix(final byte[] block)
     {
