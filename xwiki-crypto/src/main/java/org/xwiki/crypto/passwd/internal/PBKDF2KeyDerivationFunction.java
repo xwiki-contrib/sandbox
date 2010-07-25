@@ -103,16 +103,6 @@ public class PBKDF2KeyDerivationFunction extends AbstractKeyDerivationFunction
     /**
      * {@inheritDoc}
      *
-     * @see: org.xwiki.crypto.AbstractKeyDerivationFunction#isInitialized()
-     */
-    public boolean isInitialized()
-    {
-        return this.salt != null && this.iterationCount != 0 && this.derivedKeyLength != 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see: org.xwiki.crypto.AbstractKeyDerivationFunction#hashPassword(byte[])
      */
     public synchronized byte[] hashPassword(byte[] password)

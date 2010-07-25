@@ -28,11 +28,8 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
 
 
 /**
- * The default Key Derivation Function.
- * To add a new Key Derivation Function, extend this class and override init(int), isInitialized and hashPassword
- * Since all subclasses of this class are serializable, be careful to make sure any values not needed to reconstruct
- * the object are declared volatile. Dependencies injected by the component manager will be available when init(int)
- * is called but not when it has been deserialized.
+ * The abstract key derivation function.
+ * Provides guess/trial based determination of the correct number of iterations for a given processor time requirement.
  *
  * @since 2.5
  * @version $Id$

@@ -51,11 +51,6 @@ public interface KeyDerivationFunction extends Serializable
               final int derivedKeyLength);
 
     /**
-     * @return true if this function has been initialized by calling init.
-     */
-    boolean isInitialized();
-
-    /**
      * Store this function as a byte array so another function of the same class can be initialized with the same
      * array and will then produce the same key for the given password.
      *

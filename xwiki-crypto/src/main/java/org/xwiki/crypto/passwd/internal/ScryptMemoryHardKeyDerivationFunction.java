@@ -54,9 +54,6 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
     /** The block size to use for the scrypt blockmix function. 8 if not overridden.*/
     private int blockSize = 8;
 
-    /** Has this object been initialized? */
-    private boolean initialized;
-
     /**
      * A buffer which occupies a large (configurable) amount of memory which is required for this algorithm to 
      * frustrate parallel attacks. This buffer is a class scope object because it is used in a number of 
@@ -128,7 +125,6 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
         } finally {
             this.freeMemory();
         }
-        this.initialized = true;
     }
 
     /**
@@ -165,18 +161,6 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
 
         this.salt = new byte[salt.length];
         System.arraycopy(salt, 0, this.salt, 0, salt.length);
-
-        this.initialized = true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#isInitialized()
-     */
-    public boolean isInitialized()
-    {
-        return this.initialized;
     }
 
     /**

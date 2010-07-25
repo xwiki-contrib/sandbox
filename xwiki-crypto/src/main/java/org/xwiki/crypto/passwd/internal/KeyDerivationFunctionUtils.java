@@ -70,9 +70,6 @@ public class KeyDerivationFunctionUtils
      */
     public byte[] serialize(KeyDerivationFunction toSerialize) throws IOException
     {
-        if (!toSerialize.isInitialized()) {
-            throw new IllegalStateException("Can't serialize a key derivation function until it has been initialized.");
-        }
         final ByteArrayOutputStream out = new ByteArrayOutputStream(128);
         final ObjectOutputStream oos = new ObjectOutputStream(out);
         oos.writeObject(toSerialize);
