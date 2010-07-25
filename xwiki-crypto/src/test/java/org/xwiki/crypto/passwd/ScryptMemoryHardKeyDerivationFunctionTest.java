@@ -31,6 +31,7 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.xwiki.crypto.passwd.internal.PBKDF2KeyDerivationFunction;
 import org.xwiki.crypto.passwd.internal.ScryptMemoryHardKeyDerivationFunction;
+import org.xwiki.crypto.passwd.internal.KeyDerivationFunctionUtils;
 
 /**
  * Tests Scrypt agains test outputs given in reference document.
@@ -140,6 +141,15 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
 
     private final String salsa8OutputBase64 =
         "dQmvxSiYVIIqC9RIbC0SAE2B6M9+VxMGLbfos6tY6hbFeBvAptG+FHbLETigJ1dV/xFDQbmtfLPo+PV7VNFdIw==";
+
+    private final String serializedScryptFunctionBase64 =
+        "rO0ABXNyAEZvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5TY3J5cHRNZW1vcnlIYXJkS2V5RGVyaXZhdGlvbkZ1bmN0aW9uAAAA"
+      + "AAAAAAECAAZJAAlibG9ja1NpemVJABBkZXJpdmVkS2V5TGVuZ3RoWgALaW5pdGlhbGl6ZWRJAA1tZW1vcnlFeHBlbnNlSQAQcHJvY2Vzc29y"
+      + "RXhwZW5zZVsABHNhbHR0AAJbQnhyAEhvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5BYnN0cmFjdE1lbW9yeUhhcmRLZXlEZXJp"
+      + "dmF0aW9uRnVuY3Rpb27iV/XSeC6CIwIAAHhwAAAACAAAABQBAAACAAAAAAp1cgACW0Ks8xf4BghU4AIAAHhwAAAAEFjE5BkLhBHcxCCEz0hA"
+      + "r24=";
+
+    private final String serializedScryptFunctionHashOfPassword = "BnkrmqB5zsGVO5fi3dwZKiEkf5w=";
 
     @Test
     public void scryptConformanceTest1() throws Exception
@@ -297,5 +307,37 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
         int timeSpent = (int) (System.currentTimeMillis() - time);
         Assert.assertTrue("password hashing took " + timeSpent + " and target time was " + targetTime,
                           Math.abs(timeSpent - targetTime) < targetTime);
+    }
+
+    /** Prove that the function will continue to produce the same hash for a given password after serialization. */
+    @Test
+    public void serializationTest() throws Exception
+    {
+        final byte[] password = "password".getBytes();
+        final MemoryHardKeyDerivationFunction originalFunction = new ScryptMemoryHardKeyDerivationFunction();
+
+        originalFunction.init(512, 200, 20);
+        byte[] serial = originalFunction.serialize();
+        byte[] originalHash = originalFunction.hashPassword(password);
+
+        // Prove that the function doesn't return the same output _every_ time
+        originalFunction.init(512, 200, 20);
+        byte[] differentHash = originalFunction.hashPassword(password);
+        Assert.assertFalse(Arrays.equals(originalHash, differentHash));
+
+        final KeyDerivationFunction serialFunction = new KeyDerivationFunctionUtils().deserialize(serial);
+        byte[] serialHash = serialFunction.hashPassword(password);
+        Assert.assertTrue(Arrays.equals(originalHash, serialHash));
+    }
+
+    @Test
+    public void deserializationTest() throws Exception
+    {
+        final KeyDerivationFunction serialFunction =
+            new KeyDerivationFunctionUtils().deserialize(
+                Base64.decode(this.serializedScryptFunctionBase64.getBytes("US-ASCII")));
+
+        byte[] serialHash = serialFunction.hashPassword("password".getBytes());
+        Assert.assertEquals(serializedScryptFunctionHashOfPassword, new String(Base64.encode(serialHash)));
     }
 }

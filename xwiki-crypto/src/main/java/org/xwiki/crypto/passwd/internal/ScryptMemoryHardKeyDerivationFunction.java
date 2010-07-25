@@ -32,6 +32,13 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
  */
 public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKeyDerivationFunction
 {
+    /**
+     * Fields in this class are set in stone!
+     * Any changes may result in encrypted data becoming unreadable.
+     * This class should be extended if any changes need to be made.
+     */
+    private static final long serialVersionUID = 1L;
+
     /** Abstract number referring to how much memory should be expended for hashing the password. */
     private int memoryExpense;
 
@@ -49,9 +56,6 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
 
     /** Has this object been initialized? */
     private boolean initialized;
-
-    /** PBKDF2 function based on SHA-256, used by the scrypt function. */
-    private transient PBKDF2KeyDerivationFunction sha256Pbkdf2 = new PBKDF2KeyDerivationFunction(new SHA256Digest());
 
     /**
      * A buffer which occupies a large (configurable) amount of memory which is required for this algorithm to 
@@ -184,11 +188,12 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
     {
         try {
             this.allocateMemory(true);
+            PBKDF2KeyDerivationFunction sha256Pbkdf2 = new PBKDF2KeyDerivationFunction(new SHA256Digest());
             int blockSizeInBytes = 128 * this.blockSize;
             byte[] workingBufferB = new byte[blockSizeInBytes * this.processorExpense];
 
             /* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */
-            workingBufferB = this.sha256Pbkdf2.generateDerivedKey(password, this.salt, 1, workingBufferB.length);
+            workingBufferB = sha256Pbkdf2.generateDerivedKey(password, this.salt, 1, workingBufferB.length);
 
             /* 2: for i = 0 to p - 1 do */
             // NOTE: This loop cycles processorExpense number of cycles.
@@ -198,7 +203,7 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
             }
 
             /* 5: DK <-- PBKDF2(P, B, 1, dkLen) */
-            return this.sha256Pbkdf2.generateDerivedKey(password, workingBufferB, 1, this.derivedKeyLength);
+            return sha256Pbkdf2.generateDerivedKey(password, workingBufferB, 1, this.derivedKeyLength);
 
         } finally {
             this.freeMemory();

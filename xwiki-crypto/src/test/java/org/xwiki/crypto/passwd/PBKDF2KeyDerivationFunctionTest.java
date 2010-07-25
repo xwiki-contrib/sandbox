@@ -19,13 +19,17 @@
  */
 package org.xwiki.crypto.passwd;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.Assert;
 
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 
 import org.xwiki.crypto.passwd.internal.PBKDF2KeyDerivationFunction;
+import org.xwiki.crypto.passwd.internal.KeyDerivationFunctionUtils;
 
 
 /**
@@ -38,7 +42,16 @@ public class PBKDF2KeyDerivationFunctionTest
 {
     private final byte[] salt = { 0x12, 0x34, 0x56, 0x78, 0x78, 0x56, 0x34, 0x12 };
 
-    private final PBKDF2KeyDerivationFunction function = new PBKDF2KeyDerivationFunction(new SHA1Digest());
+    private final PBKDF2KeyDerivationFunction function = new PBKDF2KeyDerivationFunction();
+
+    private final String serializedPBKDF2FunctionBase64 =
+        "rO0ABXNyADxvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5QQktERjJLZXlEZXJpdmF0aW9uRnVuY3Rpb24AAAAAAAAAAQIABEkA"
+      + "EGRlcml2ZWRLZXlMZW5ndGhJAA5pdGVyYXRpb25Db3VudEwAD2RpZ2VzdENsYXNzTmFtZXQAEkxqYXZhL2xhbmcvU3RyaW5nO1sABHNhbHR0"
+      + "AAJbQnhyAD5vcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5BYnN0cmFjdEtleURlcml2YXRpb25GdW5jdGlvbkpYqOQu0qpoAgAA"
+      + "eHAAAAAUAAAH0HQALG9yZy5ib3VuY3ljYXN0bGUuY3J5cHRvLmRpZ2VzdHMuU0hBMjU2RGlnZXN0dXIAAltCrPMX+AYIVOACAAB4cAAAABBJ"
+      + "LMJGe/ciJebZq3xhLs8v";
+
+    private final String serializedPBKDF2FunctionHashOfPassword = "s+VKYt7oW7XSQujoqxNx8y3g8oo=";
 
     /** from: http://www.ietf.org/rfc/rfc3211.txt */
     @Test
@@ -68,9 +81,45 @@ public class PBKDF2KeyDerivationFunctionTest
     @Test
     public void initializationProcessorTimeGuessingTest()
     {
-        this.function.init(20000, 20);
+        int targetTimeToSpend = 1000;
+        this.function.init(targetTimeToSpend, 20);
         long time = System.currentTimeMillis();
         this.function.hashPassword("password".getBytes());
-        System.out.println("Time taken: " + (System.currentTimeMillis() - time));
+        int timeSpent = (int) (System.currentTimeMillis() - time);
+        Assert.assertTrue("The actual time spent running the function was over 100% off "
+                          + "from the specified target time.",
+                          Math.abs(timeSpent - targetTimeToSpend) < targetTimeToSpend);
+    }
+
+    /** Prove that the function will continue to produce the same hash for a given password after serialization. */
+    @Test
+    public void serializationTest() throws Exception
+    {
+        final byte[] password = "password".getBytes();
+
+        final KeyDerivationFunction sha256Function = new PBKDF2KeyDerivationFunction(new SHA256Digest());
+        sha256Function.init(500, 20);
+        byte[] originalHash = sha256Function.hashPassword(password);
+        byte[] serial = sha256Function.serialize();
+
+        // Prove that the function doesn't return the same output _every_ time
+        sha256Function.init(500, 20);
+        byte[] differentHash = sha256Function.hashPassword(password);
+        Assert.assertFalse(Arrays.equals(originalHash, differentHash));
+
+        final KeyDerivationFunction serialFunction = new KeyDerivationFunctionUtils().deserialize(serial);
+        byte[] serialHash = serialFunction.hashPassword(password);
+        Assert.assertTrue(Arrays.equals(originalHash, serialHash));
+    }
+
+    @Test
+    public void deserializationTest() throws Exception
+    {
+        final KeyDerivationFunction serialFunction =
+            new KeyDerivationFunctionUtils().deserialize(
+                Base64.decode(this.serializedPBKDF2FunctionBase64.getBytes("US-ASCII")));
+
+        byte[] serialHash = serialFunction.hashPassword("password".getBytes());
+        Assert.assertEquals(serializedPBKDF2FunctionHashOfPassword, new String(Base64.encode(serialHash)));
     }
 }
