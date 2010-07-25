@@ -26,7 +26,7 @@ import org.xwiki.component.annotation.ComponentRole;
 /**
  * Service allowing users to encrypt and decrypt text using a password.
  * 
- * @version $Id:$
+ * @version $Id$
  * @since 2.5
  */
 @ComponentRole
@@ -52,5 +52,29 @@ public interface PasswdCryptoService
      * @throws GeneralSecurityException if something goes wrong.
      */
     String decryptText(final String base64Ciphertext, final String password)
+        throws GeneralSecurityException;
+
+    /**
+     * Hash a password with a hash function specifically designed to make password guessing attacks difficult.
+     * This hash does salting and multiple iterations which incure not only CPU but memory expense.
+     *
+     * @param password the plain text user supplied password.
+     * @return a String of base-64 formatted bytes which can be used to verify the password later using
+     *         isPasswordCorrect. It is generally considered impossible to derive a password from this data however
+     *         for particularly easy to guess passwords, an attacker may guess the password using isPasswordCorrect
+     *         although the underlying function is designed to make that resource intensive.
+     */
+    public String protectPassword(final String password)
+        throws GeneralSecurityException;
+
+    /**
+     * Check the validity of a password.
+     *
+     * @param password the plain text user supplied password.
+     * @param protectedPassword the result from calling protectPassword.
+     * @return true if after running the user supplied password through the same underlying function, the output 
+     *         matches the protectedPassword.
+     */
+    public boolean isPasswordCorrect(final String password, final String protectedPassword)
         throws GeneralSecurityException;
 }

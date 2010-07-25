@@ -25,42 +25,42 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 
-import org.xwiki.crypto.passwd.KeyDerivationFunction;
+import org.xwiki.crypto.passwd.PasswordVerificationFunction;
 
 
 /**
- * Utilities for serialization and deserialization of functions.
+ * Utilities for getting the serialization and deserialization of functions.
  *
  * @since 2.5
- * @version $Id$
+ * @version $Id:$
  */
-public class KeyDerivationFunctionUtils
+public class PasswordVerificationFunctionUtils
 {
     /**
-     * This method will accept a serialized version of any KeyDerivationFunction defined in the system.
+     * This method will accept a serialized version of any PasswordVerificationFunction defined in the system.
      *
-     * @param serialized the byte array to create the KeyDerivationFunction from.
+     * @param serialized the byte array to create the PasswordVerificationFunction from.
      * @return a function made from deserializing the given array.
      * @throws IOException if something goes wrong in the serialization framework.
      * @throws ClassNotFoundException if the required key derivation function is not present on the system.
      */
-    public KeyDerivationFunction deserialize(final byte[] serialized)
+    public PasswordVerificationFunction deserialize(final byte[] serialized)
         throws IOException,
                ClassNotFoundException
     {
         final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serialized));
-        return (KeyDerivationFunction) ois.readObject();
+        return (PasswordVerificationFunction) ois.readObject();
     }
 
     /**
-     * Convert the given KeyDerivationFunction to a byte array which when passed to deserialize() will make a function
-     * which will produce the same keys from the same passwords.
+     * Convert the given PasswordVerificationFunction to a byte array which when passed to deserialize() will 
+     * make a function which will validate the same password.
      *
-     * @param toSerialize the KeyDerivationFunction to convert into a byte array.
+     * @param toSerialize the PasswordVerificationFunction to convert into a byte array.
      * @return the given function as a byte array.
      * @throws IOException if something goes wrong in the serialization framework.
      */
-    public byte[] serialize(KeyDerivationFunction toSerialize) throws IOException
+    public byte[] serialize(PasswordVerificationFunction toSerialize) throws IOException
     {
         final ByteArrayOutputStream out = new ByteArrayOutputStream(128);
         final ObjectOutputStream oos = new ObjectOutputStream(out);

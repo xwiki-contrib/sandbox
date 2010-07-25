@@ -78,6 +78,7 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
      *
      * @see: org.xwiki.crypto.AbstractMemoryHardKeyDerivationFunction#init(int, int, int)
      */
+    //FIXME: If the result is 0 milliseconds, this will try to divide by 0;
     public void init(final int kilobytesOfMemoryToUse,
                      final int millisecondsOfProcessorTimeToSpend,
                      final int derivedKeyLength)

@@ -74,6 +74,19 @@ public class DefaultPasswdCryptoServiceTest extends AbstractMockingComponentTest
         Assert.assertTrue(this.textToEncrypt.equals(decrypted));
     }
 
+    protected String getEncrypted()
+    {
+        return "------BEGIN PASSWORD CAST5CBC-WHIRLPOOL CIPHERTEXT-----\n"
+             + "Kg8YLwtnchmtWKd2yYCn2tilT04=:\n"
+             + "r4FlnYUOedRfc31ghGgIhc9rkpRtwDhLO5CPc3wgTuPfHMaAZ/mfdXk3rz2TKtXE\n"
+             + "xanPkLR5th5RelKhe0DEj2lQH0bTtajlDqKBoo7OsfR2HZHCt+q5jRzTf645vN8X\n"
+             + "AeNRF1Im7brfOwoY+J2MC1bf4HD98r4/rjKfMyd4bdTAjXvB+OyOGje1LFHWP2km\n"
+             + "qBh5TO9CHMxdAzFvakAFE/oCxqactwU002dHsF7/4EWncnvwIeQpXAYtcaRrVW5Q\n"
+             + "irUSsQk+UDG2/sF6bGtqPS3SZjHkIlEYgf8MINjcnvBsmDtDsXZL8xza+E7dQSi4\n"
+             + "HI7DjwU7vvUuv3pyAVLM8g8vfS46ehx0pkqKEDrVKFuFktzn48xStw==\n"
+             + "------END CIPHERTEXT------";
+    }
+
     @Test
     public void decryptWithWrongPasswordTest() throws Exception
     {
@@ -100,16 +113,11 @@ public class DefaultPasswdCryptoServiceTest extends AbstractMockingComponentTest
         Assert.assertEquals(shorter, plaintext);
     }
 
-    protected String getEncrypted()
+    @Test
+    public void protectPasswordTest() throws Exception
     {
-        return "------BEGIN PASSWORD CAST5CBC-WHIRLPOOL CIPHERTEXT-----\n"
-             + "Kg8YLwtnchmtWKd2yYCn2tilT04=:\n"
-             + "r4FlnYUOedRfc31ghGgIhc9rkpRtwDhLO5CPc3wgTuPfHMaAZ/mfdXk3rz2TKtXE\n"
-             + "xanPkLR5th5RelKhe0DEj2lQH0bTtajlDqKBoo7OsfR2HZHCt+q5jRzTf645vN8X\n"
-             + "AeNRF1Im7brfOwoY+J2MC1bf4HD98r4/rjKfMyd4bdTAjXvB+OyOGje1LFHWP2km\n"
-             + "qBh5TO9CHMxdAzFvakAFE/oCxqactwU002dHsF7/4EWncnvwIeQpXAYtcaRrVW5Q\n"
-             + "irUSsQk+UDG2/sF6bGtqPS3SZjHkIlEYgf8MINjcnvBsmDtDsXZL8xza+E7dQSi4\n"
-             + "HI7DjwU7vvUuv3pyAVLM8g8vfS46ehx0pkqKEDrVKFuFktzn48xStw==\n"
-             + "------END CIPHERTEXT------";
+        String protectedPassword = this.service.protectPassword("Hello World!");
+        Assert.assertTrue(this.service.isPasswordCorrect("Hello World!", protectedPassword));
+        Assert.assertFalse(this.service.isPasswordCorrect("Wrong Passwd", protectedPassword));
     }
 }

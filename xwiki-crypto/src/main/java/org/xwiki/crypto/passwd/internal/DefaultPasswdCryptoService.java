@@ -34,9 +34,15 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.prng.DigestRandomGenerator;
 import org.bouncycastle.crypto.prng.RandomGenerator;
+import org.bouncycastle.util.encoders.Base64;
+
 import org.xwiki.component.annotation.Component;
+
 import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.passwd.PasswdCryptoService;
+import org.xwiki.crypto.passwd.PasswordVerificationFunction;
+import org.xwiki.crypto.passwd.KeyDerivationFunction;
+import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
 
 
 /**
@@ -62,6 +68,7 @@ import org.xwiki.crypto.passwd.PasswdCryptoService;
  * @version $Id$
  * @since 2.5
  */
+//TODO Seperate encryption/decryption from script service.
 @Component
 public class DefaultPasswdCryptoService implements PasswdCryptoService
 {
@@ -79,8 +86,15 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     /** The hash engine. */
     private final Digest hash = this.getDigest();
 
-    /** Supply of pseudorandomness. */
+    /**
+     * Supply of pseudorandomness. 
+     * TODO: If this is going to be a field in a singleton class, it needs to be reseeded from time to time.
+     *       http://www.cigital.com/justiceleague/2009/08/14/proper-use-of-javas-securerandom/
+     */
     private final SecureRandom random = new SecureRandom();
+
+    /** used for deserializing password verification functions. */
+    private final PasswordVerificationFunctionUtils passwordUtils = new PasswordVerificationFunctionUtils();
 
     /**
      * {@inheritDoc}
@@ -149,6 +163,40 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
         } catch (InvalidCipherTextException e) {
             // We are going to assume here that the password was wrong.
             return null;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.crypto.passwd.PasswdCryptoService#protectPassword(String)
+     */
+    public String protectPassword(final String password)
+        throws GeneralSecurityException
+    {
+        try {
+           final PasswordVerificationFunction pvf = new DefaultPasswordVerificationFunction();
+           pvf.init(this.getDefaultKeyDerivationFunction(), password.getBytes("UTF-8"));
+           return new String(Base64.encode(pvf.serialize()), "US-ASCII");
+        } catch (Exception e) {
+            throw new GeneralSecurityException("Unable to protect password", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.crypto.passwd.PasswdCryptoService#isPasswordCorrect(String, String)
+     */
+    public boolean isPasswordCorrect(final String password, final String protectedPassword)
+        throws GeneralSecurityException
+    {
+        try {
+           final PasswordVerificationFunction pvf = 
+               this.passwordUtils.deserialize(Base64.decode(protectedPassword.getBytes("US-ASCII")));
+           return pvf.isPasswordCorrect(password.getBytes("UTF-8"));
+        } catch (Exception e) {
+            throw new GeneralSecurityException("Unable to verify password", e);
         }
     }
 
@@ -226,5 +274,12 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     protected String getEndOfSaltMark()
     {
         return ":\n";
+    }
+
+    protected KeyDerivationFunction getDefaultKeyDerivationFunction()
+    {
+        MemoryHardKeyDerivationFunction kdf = new ScryptMemoryHardKeyDerivationFunction();
+        kdf.init(1024, 100, this.cipher.getBlockSize() + this.getKeyLength());
+        return kdf;
     }
 }
