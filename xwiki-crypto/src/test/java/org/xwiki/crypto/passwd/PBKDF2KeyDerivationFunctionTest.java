@@ -29,8 +29,7 @@ import org.xwiki.crypto.passwd.internal.PBKDF2KeyDerivationFunction;
 
 
 /**
- * Tests PasswordBasedKeyDerivationFunction2 to ensure conformance with PKCS#5v2 standard for PBKDF2.
- * Tests taken from: http://www.ietf.org/rfc/rfc3211.txt
+ * Tests PBKDF2KeyDerivationFunctionTest to ensure conformance with PKCS#5v2 standard for PBKDF2.
  *
  * @since 2.5
  * @version $Id$
@@ -41,8 +40,9 @@ public class PBKDF2KeyDerivationFunctionTest
 
     private final PBKDF2KeyDerivationFunction function = new PBKDF2KeyDerivationFunction(new SHA1Digest());
 
+    /** from: http://www.ietf.org/rfc/rfc3211.txt */
     @Test
-    public void pbkdf2Test1() throws Exception
+    public void pbkdf2ConformanceTest1() throws Exception
     {
         String password = "password";
 
@@ -53,8 +53,9 @@ public class PBKDF2KeyDerivationFunctionTest
                           expectOut.equals(outStr));
     }
 
+    /** from: http://www.ietf.org/rfc/rfc3211.txt */
     @Test
-    public void pbkdf2Test2() throws Exception
+    public void pbkdf2ConformanceTest2() throws Exception
     {
         String password = "All n-entities must communicate with other n-entities via n-1 entiteeheehees";
         byte[] out = this.function.generateDerivedKey(password.getBytes("US-ASCII"), this.salt, 500, 16);
@@ -62,5 +63,14 @@ public class PBKDF2KeyDerivationFunctionTest
         String expectOut = "6a8970bf68c92caea84a8df285108586";
         Assert.assertTrue("\nExpected: " + expectOut + "\n     Got: " + outStr,
                           expectOut.equals(outStr));
+    }
+
+    @Test
+    public void initializationProcessorTimeGuessingTest()
+    {
+        this.function.init(20000, 20);
+        long time = System.currentTimeMillis();
+        this.function.hashPassword("password".getBytes());
+        System.out.println("Time taken: " + (System.currentTimeMillis() - time));
     }
 }

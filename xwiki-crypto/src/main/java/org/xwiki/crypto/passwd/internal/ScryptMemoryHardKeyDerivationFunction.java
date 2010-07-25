@@ -30,7 +30,7 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
  * @since 2.5
  * @version $Id$
  */
-public class ScryptMemoryHardKeyDerivationFunction
+public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKeyDerivationFunction
 {
     /** Abstract number referring to how much memory should be expended for hashing the password. */
     private int memoryExpense;
@@ -47,35 +47,35 @@ public class ScryptMemoryHardKeyDerivationFunction
     /** The block size to use for the scrypt blockmix function. 8 if not overridden.*/
     private int blockSize = 8;
 
-    /** PBKDF2 function based on SHA-256, used by the scrypt function. */
-    private volatile PBKDF2KeyDerivationFunction sha256Pbkdf2 = new PBKDF2KeyDerivationFunction(new SHA256Digest());
+    /** Has this object been initialized? */
+    private boolean initialized;
 
-    /** Has this object been initialized? Defaults to false */
-    private volatile boolean initialized;
+    /** PBKDF2 function based on SHA-256, used by the scrypt function. */
+    private transient PBKDF2KeyDerivationFunction sha256Pbkdf2 = new PBKDF2KeyDerivationFunction(new SHA256Digest());
 
     /**
      * A buffer which occupies a large (configurable) amount of memory which is required for this algorithm to 
      * frustrate parallel attacks. This buffer is a class scope object because it is used in a number of 
      * methods and passing it around would be cumbersome.
      */
-    private volatile byte[] memoryIntensiveBuffer;
+    private transient byte[] memoryIntensiveBuffer;
 
     /** 
      * Buffer used by a method called inside inside of a tight inner loop.
      * Class scoped to prevent enormous amount of garbage from creation and abandonment of buffer in each cycle.
      */
-    private volatile byte[] blockMixBufferX;
+    private transient byte[] blockMixBufferX;
 
     /** 
      * Buffer used by a method called inside inside of a tight inner loop.
      * Class scoped to prevent enormous amount of garbage from creation and abandonment of buffer in each cycle.
      */
-    private volatile byte[] blockMixBufferY;
+    private transient byte[] blockMixBufferY;
 
     /**
      * {@inheritDoc}
      *
-     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#init(int, int, int)
+     * @see: org.xwiki.crypto.AbstractMemoryHardKeyDerivationFunction#init(int, int, int)
      */
     public void init(final int kilobytesOfMemoryToUse,
                      final int millisecondsOfProcessorTimeToSpend,
@@ -124,6 +124,7 @@ public class ScryptMemoryHardKeyDerivationFunction
         } finally {
             this.freeMemory();
         }
+        this.initialized = true;
     }
 
     /**

@@ -19,8 +19,6 @@
  */
 package org.xwiki.crypto.passwd.internal;
 
-import java.security.SecureRandom;
-
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.Digest;
@@ -37,11 +35,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
  * @since 2.5
  * @version $Id$
  */
-public class PBKDF2KeyDerivationFunction extends DefaultKeyDerivationFunction
+public class PBKDF2KeyDerivationFunction extends AbstractKeyDerivationFunction
 {
-    /** Number of bytes length of the salt. This is statically set to 16. */
-    private volatile int saltSize = 16;
-
     /** Number of times to cycle the hash increasing processor expense. */
     private int iterationCount;
 
@@ -58,10 +53,10 @@ public class PBKDF2KeyDerivationFunction extends DefaultKeyDerivationFunction
      * Internal State of functionF, this is only a class scoped variable to prevent the accumulation of 
      * large amounts of garbage from the array being periodically allocated and dumped.
      */
-    private volatile byte[] state;
+    private transient byte[] state;
 
     /** The message authentication code function to use. */
-    private volatile Mac hMac;
+    private transient Mac hMac;
 
     /**
      * Default Constructor.
@@ -87,33 +82,31 @@ public class PBKDF2KeyDerivationFunction extends DefaultKeyDerivationFunction
     /**
      * {@inheritDoc}
      *
-     * @see KeyDerivationFunction#init(int, int)
+     * @see: org.xwiki.crypto.AbstractKeyDerivationFunction#init(byte[], int, int)
      */
-    public void init(final int millisecondsOfProcessorTimeToSpend,
+    public void init(final byte[] salt,
+                     final int iterationCount,
                      final int derivedKeyLength)
     {
-        // Init with 25 cycles.
-        this.init(1, derivedKeyLength);
-
-        // Time a test run.
-        long time = System.currentTimeMillis();
-        this.hashPassword(salt);
-        int timeTaken = (int) (System.currentTimeMillis() - time);
-
-        System.out.println("PKCS2 time spent: " + timeTaken);
-/*
+        this.salt = salt;
         this.iterationCount = iterationCount;
         this.derivedKeyLength = derivedKeyLength;
-
-        // Generate the salt.
-        this.salt = new byte[this.saltSize];
-        new SecureRandom().nextBytes(this.salt);*/
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see: org.xwiki.crypto.KeyDerivationFunction#hashPassword(byte[])
+     * @see: org.xwiki.crypto.AbstractKeyDerivationFunction#isInitialized()
+     */
+    public boolean isInitialized()
+    {
+        return this.salt != null && this.iterationCount != 0 && this.derivedKeyLength != 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see: org.xwiki.crypto.AbstractKeyDerivationFunction#hashPassword(byte[])
      */
     public synchronized byte[] hashPassword(byte[] password)
     {

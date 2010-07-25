@@ -62,7 +62,7 @@ public interface KeyDerivationFunction extends Serializable
      * @return a byte array which can be used to recreate the same function again using init.
      * @throws IOException if something fails within the serialization framework.
      */
-    byte[] getSerialized() throws IOException;
+    byte[] serialize() throws IOException;
 
     /**
      * Convert the given password to a byte array similar to the output from a message digest except specially tuned
