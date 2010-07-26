@@ -35,7 +35,7 @@ import org.bouncycastle.util.encoders.Base64;
 public final class Convert
 {
     /** Charset used for String <-> byte[] conversion. */
-    private static final String CHARSET = "utf-8";
+    private static final String CHARSET = "UTF-8";
 
     /** Default line length for {@link #toChunkedBase64String(byte[])}. */
     private static final int DEFAULT_LINE_LENGTH = 64;

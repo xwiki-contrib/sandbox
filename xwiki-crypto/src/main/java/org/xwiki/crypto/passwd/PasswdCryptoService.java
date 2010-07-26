@@ -63,9 +63,9 @@ public interface PasswdCryptoService
      *         isPasswordCorrect. It is generally considered impossible to derive a password from this data however
      *         for particularly easy to guess passwords, an attacker may guess the password using isPasswordCorrect
      *         although the underlying function is designed to make that resource intensive.
+     * @throws GeneralSecurityException on errors
      */
-    public String protectPassword(final String password)
-        throws GeneralSecurityException;
+    String protectPassword(final String password) throws GeneralSecurityException;
 
     /**
      * Check the validity of a password.
@@ -74,7 +74,8 @@ public interface PasswdCryptoService
      * @param protectedPassword the result from calling protectPassword.
      * @return true if after running the user supplied password through the same underlying function, the output 
      *         matches the protectedPassword.
+     * @throws GeneralSecurityException on errors
      */
-    public boolean isPasswordCorrect(final String password, final String protectedPassword)
+    boolean isPasswordCorrect(final String password, final String protectedPassword)
         throws GeneralSecurityException;
 }

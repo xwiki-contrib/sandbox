@@ -91,6 +91,7 @@ public class PBKDF2KeyDerivationFunction extends AbstractKeyDerivationFunction
      *
      * @see: org.xwiki.crypto.AbstractKeyDerivationFunction#init(byte[], int, int)
      */
+    @Override
     public void init(final byte[] salt,
                      final int iterationCount,
                      final int derivedKeyLength)

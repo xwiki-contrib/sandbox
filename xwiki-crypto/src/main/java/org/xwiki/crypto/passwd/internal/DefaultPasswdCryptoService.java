@@ -34,7 +34,6 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.prng.DigestRandomGenerator;
 import org.bouncycastle.crypto.prng.RandomGenerator;
-import org.bouncycastle.util.encoders.Base64;
 
 import org.xwiki.component.annotation.Component;
 
@@ -175,9 +174,9 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
         throws GeneralSecurityException
     {
         try {
-           final PasswordVerificationFunction pvf = new DefaultPasswordVerificationFunction();
-           pvf.init(this.getDefaultKeyDerivationFunction(), password.getBytes("UTF-8"));
-           return new String(Base64.encode(pvf.serialize()), "US-ASCII");
+            final PasswordVerificationFunction pvf = new DefaultPasswordVerificationFunction();
+            pvf.init(this.getDefaultKeyDerivationFunction(), Convert.stringToBytes(password));
+            return Convert.toBase64String(pvf.serialize());
         } catch (Exception e) {
             throw new GeneralSecurityException("Unable to protect password", e);
         }
@@ -192,9 +191,9 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
         throws GeneralSecurityException
     {
         try {
-           final PasswordVerificationFunction pvf = 
-               this.passwordUtils.deserialize(Base64.decode(protectedPassword.getBytes("US-ASCII")));
-           return pvf.isPasswordCorrect(password.getBytes("UTF-8"));
+            final PasswordVerificationFunction pvf = 
+                this.passwordUtils.deserialize(Convert.fromBase64String(protectedPassword));
+            return pvf.isPasswordCorrect(Convert.stringToBytes(password));
         } catch (Exception e) {
             throw new GeneralSecurityException("Unable to verify password", e);
         }
@@ -276,6 +275,11 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
         return ":\n";
     }
 
+    /**
+     * Get the default key derivation function.
+     * 
+     * @return something
+     */
     protected KeyDerivationFunction getDefaultKeyDerivationFunction()
     {
         MemoryHardKeyDerivationFunction kdf = new ScryptMemoryHardKeyDerivationFunction();

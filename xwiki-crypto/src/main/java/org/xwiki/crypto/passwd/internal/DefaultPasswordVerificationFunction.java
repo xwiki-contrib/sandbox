@@ -34,11 +34,14 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
  */
 public class DefaultPasswordVerificationFunction implements PasswordVerificationFunction
 {
+    /** Password utility instance. */
     private static final PasswordVerificationFunctionUtils PASSWORD_UTILS =
         new PasswordVerificationFunctionUtils();
 
+    /** Password hash. */
     private byte[] passwordHash;
 
+    /** The used key derivation function. */
     private KeyDerivationFunction underlyingHashFunction;
 
     /**
