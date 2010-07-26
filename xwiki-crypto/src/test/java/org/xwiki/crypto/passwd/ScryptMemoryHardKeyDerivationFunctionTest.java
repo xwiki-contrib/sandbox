@@ -34,7 +34,7 @@ import org.xwiki.crypto.passwd.internal.ScryptMemoryHardKeyDerivationFunction;
 import org.xwiki.crypto.passwd.internal.KeyDerivationFunctionUtils;
 
 /**
- * Tests Scrypt agains test outputs given in reference document.
+ * Tests Scrypt against test outputs given in reference document.
  *
  * @since 2.5
  * @version $Id$
@@ -287,8 +287,8 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
     }
 
     /**
-     * Proove that guessing the processor time when initializing is relitively accurate.
-     * It's important to run this test on various archetectures.
+     * Prove that guessing the processor time when initializing is relatively accurate.
+     * It's important to run this test on various architectures.
      * This test will fail if time taken is over 100% difference from time expected.
      */
     @Test
@@ -323,6 +323,7 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
         // Prove that the function doesn't return the same output _every_ time
         originalFunction.init(512, 200, 20);
         byte[] differentHash = originalFunction.hashPassword(password);
+        // FIXME fails for me from time to time under heavy CPU + I/O load
         Assert.assertFalse(Arrays.equals(originalHash, differentHash));
 
         final KeyDerivationFunction serialFunction = new KeyDerivationFunctionUtils().deserialize(serial);

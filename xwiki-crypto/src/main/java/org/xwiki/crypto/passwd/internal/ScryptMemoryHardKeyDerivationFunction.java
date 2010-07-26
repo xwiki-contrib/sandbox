@@ -78,7 +78,6 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
      *
      * @see: org.xwiki.crypto.AbstractMemoryHardKeyDerivationFunction#init(int, int, int)
      */
-    //FIXME: If the result is 0 milliseconds, this will try to divide by 0;
     public void init(final int kilobytesOfMemoryToUse,
                      final int millisecondsOfProcessorTimeToSpend,
                      final int derivedKeyLength)
@@ -110,19 +109,25 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
         this.derivedKeyLength = derivedKeyLength;
 
         // Dry run BlockMix once to check time cost.
-        int numTrialRuns = 100;
+        int numTrialRuns = 64;
         try {
             this.allocateMemory(true);
             byte[] testArray = new byte[1024];
-            long time = System.currentTimeMillis();
-            for (int i = 0; i < numTrialRuns; i++) {
-                this.blockMix(testArray);
-            }
-            int timeSpent = (int) (System.currentTimeMillis() - time);
+            long timeSpent = 0;
+            do {
+                // we need to make sure the trial run takes a reasonable time
+                // note that the granularity of System.currentTimeMillis() is in the range of 20+ ms
+                numTrialRuns *= 2;
+                long time = System.currentTimeMillis();
+                for (int i = 0; i < numTrialRuns; i++) {
+                    this.blockMix(testArray);
+                }
+                timeSpent = System.currentTimeMillis() - time;
+            } while (timeSpent <= 20);
             // Now predict the time expense.
             int totalBlockMixRuns = 2 * this.memoryExpense;
-            int timeCostPerCycle = totalBlockMixRuns / numTrialRuns * timeSpent;
-            this.processorExpense = millisecondsOfProcessorTimeToSpend / timeCostPerCycle;
+            double timeCostPerCycle = totalBlockMixRuns * timeSpent / (double) numTrialRuns;
+            this.processorExpense = (int) (millisecondsOfProcessorTimeToSpend / timeCostPerCycle);
         } finally {
             this.freeMemory();
         }
