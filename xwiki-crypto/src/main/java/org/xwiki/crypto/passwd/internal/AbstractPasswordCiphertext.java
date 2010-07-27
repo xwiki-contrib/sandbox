@@ -111,8 +111,8 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
     /**
      * Generate a key (and an initialization vector) for the encryption engine.
      * This function uses a {@link KeyDerivationFunction}
-     * This function expectes this.keyFunction#hashPassword to return a byte array
-     * which is the size of the key + size of the initializration vector.
+     * This function expects this.keyFunction#hashPassword to return a byte array
+     * which is the size of the key + size of the initialization vector.
      *
      * @param password The user supplied password for encryption/decryption.
      * @return a symmetric key

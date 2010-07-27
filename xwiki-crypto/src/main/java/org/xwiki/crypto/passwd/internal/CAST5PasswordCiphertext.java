@@ -28,6 +28,7 @@ import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
 
 
 /**
+ * A password ciphertext service implementing CAST5 and Scrypt.
  *
  * @version $Id$
  * @since 2.5
