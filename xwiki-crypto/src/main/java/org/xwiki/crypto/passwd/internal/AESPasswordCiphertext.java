@@ -25,12 +25,12 @@ import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 
 
 /**
- * A password crypto service implementing AES-128.
+ * A password ciphertext service implementing AES-128 and Scrypt.
  * 
  * @version $Id$
  * @since 2.5
  */
-public class AESPasswdCryptoService extends CAST5PasswordCiphertext
+public class AESPasswordCiphertext extends CAST5PasswordCiphertext
 {
     /**
      * Fields in this class are set in stone!
