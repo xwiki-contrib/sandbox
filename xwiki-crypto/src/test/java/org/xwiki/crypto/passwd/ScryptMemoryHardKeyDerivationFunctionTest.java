@@ -145,12 +145,11 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
 
     private final String serializedScryptFunctionBase64 =
         "rO0ABXNyAEZvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5TY3J5cHRNZW1vcnlIYXJkS2V5RGVyaXZhdGlvbkZ1bmN0aW9uAAAA"
-      + "AAAAAAECAAZJAAlibG9ja1NpemVJABBkZXJpdmVkS2V5TGVuZ3RoWgALaW5pdGlhbGl6ZWRJAA1tZW1vcnlFeHBlbnNlSQAQcHJvY2Vzc29y"
-      + "RXhwZW5zZVsABHNhbHR0AAJbQnhyAEhvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5BYnN0cmFjdE1lbW9yeUhhcmRLZXlEZXJp"
-      + "dmF0aW9uRnVuY3Rpb27iV/XSeC6CIwIAAHhwAAAACAAAABQBAAACAAAAAAp1cgACW0Ks8xf4BghU4AIAAHhwAAAAEFjE5BkLhBHcxCCEz0hA"
-      + "r24=";
+      + "AAAAAAECAAVJAAlibG9ja1NpemVJABBkZXJpdmVkS2V5TGVuZ3RoSQANbWVtb3J5RXhwZW5zZUkAEHByb2Nlc3NvckV4cGVuc2VbAARzYWx0"
+      + "dAACW0J4cgBIb3JnLnh3aWtpLmNyeXB0by5wYXNzd2QuaW50ZXJuYWwuQWJzdHJhY3RNZW1vcnlIYXJkS2V5RGVyaXZhdGlvbkZ1bmN0aW9u"
+      + "AAAAAAAAAAECAAB4cAAAAAgAAAAUAAACAAAAAAV1cgACW0Ks8xf4BghU4AIAAHhwAAAAEGmYEV2eu4+85nQKHIr1z2o=";
 
-    private final String serializedScryptFunctionHashOfPassword = "BnkrmqB5zsGVO5fi3dwZKiEkf5w=";
+    private final String serializedScryptFunctionHashOfPassword = "e903CTczVQaDifW7R1F5EQuuKu8=";
 
     @Test
     public void scryptConformanceTest1() throws Exception
@@ -322,9 +321,9 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
         byte[] originalHash = originalFunction.hashPassword(password);
 
         // Prove that the function doesn't return the same output _every_ time
-        originalFunction.init(512, 200, 20);
-        byte[] differentHash = originalFunction.hashPassword(password);
-        // FIXME fails for me from time to time under heavy CPU + I/O load
+        final MemoryHardKeyDerivationFunction differentFunction = new ScryptMemoryHardKeyDerivationFunction();
+        differentFunction.init(512, 200, 20);
+        byte[] differentHash = differentFunction.hashPassword(password);
         Assert.assertFalse(Arrays.equals(originalHash, differentHash));
 
         final KeyDerivationFunction serialFunction = (KeyDerivationFunction) SerializationUtils.deserialize(serial);

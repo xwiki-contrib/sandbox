@@ -35,6 +35,13 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
  */
 public class DefaultPasswordVerificationFunction implements PasswordVerificationFunction
 {
+    /**
+     * Fields in this class are set in stone!
+     * Any changes may result in passwords become unverifiable.
+     * This class should be extended if any changes need to be made.
+     */
+    private static final long serialVersionUID = 1L;
+
     /** Password hash. */
     private byte[] passwordHash;
 

@@ -37,6 +37,13 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
  */
 public abstract class AbstractKeyDerivationFunction implements KeyDerivationFunction, Serializable
 {
+    /**
+     * Fields in this class are set in stone!
+     * Any changes may result in encrypted data becoming unreadable.
+     * This class should be extended if any changes need to be made.
+     */
+    private static final long serialVersionUID = 1L;
+
     /** Number of bytes length of the salt. This is statically set to 16. */
     private final transient int saltSize = 16;
 

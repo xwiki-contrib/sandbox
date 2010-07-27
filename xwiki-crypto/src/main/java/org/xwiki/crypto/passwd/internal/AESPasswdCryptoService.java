@@ -33,6 +33,13 @@ import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 public class AESPasswdCryptoService extends CAST5PasswordCiphertext
 {
     /**
+     * Fields in this class are set in stone!
+     * Any changes may result in encrypted data becoming unreadable.
+     * This class should be extended if any changes need to be made.
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
      * {@inheritDoc}
      *
      * @see org.xwiki.crypto.passwd.internal.CAST5PasswordCiphertext#getCipher()

@@ -47,11 +47,11 @@ public class PBKDF2KeyDerivationFunctionTest
     private final String serializedPBKDF2FunctionBase64 =
         "rO0ABXNyADxvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5QQktERjJLZXlEZXJpdmF0aW9uRnVuY3Rpb24AAAAAAAAAAQIABEkA"
       + "EGRlcml2ZWRLZXlMZW5ndGhJAA5pdGVyYXRpb25Db3VudEwAD2RpZ2VzdENsYXNzTmFtZXQAEkxqYXZhL2xhbmcvU3RyaW5nO1sABHNhbHR0"
-      + "AAJbQnhyAD5vcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5BYnN0cmFjdEtleURlcml2YXRpb25GdW5jdGlvbkpYqOQu0qpoAgAA"
-      + "eHAAAAAUAAAH0HQALG9yZy5ib3VuY3ljYXN0bGUuY3J5cHRvLmRpZ2VzdHMuU0hBMjU2RGlnZXN0dXIAAltCrPMX+AYIVOACAAB4cAAAABBJ"
-      + "LMJGe/ciJebZq3xhLs8v";
+      + "AAJbQnhyAD5vcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5BYnN0cmFjdEtleURlcml2YXRpb25GdW5jdGlvbgAAAAAAAAABAgAA"
+      + "eHAAAAAUAAB1MHQALG9yZy5ib3VuY3ljYXN0bGUuY3J5cHRvLmRpZ2VzdHMuU0hBMjU2RGlnZXN0dXIAAltCrPMX+AYIVOACAAB4cAAAABB6"
+      + "mp2kO8CyDjeRDlqmABGt";
 
-    private final String serializedPBKDF2FunctionHashOfPassword = "s+VKYt7oW7XSQujoqxNx8y3g8oo=";
+    private final String serializedPBKDF2FunctionHashOfPassword = "jYk/zFiAoRAGv4YaijLyn7gJf1I=";
 
     /** from: http://www.ietf.org/rfc/rfc3211.txt */
     @Test
@@ -118,7 +118,7 @@ public class PBKDF2KeyDerivationFunctionTest
         final KeyDerivationFunction serialFunction = (KeyDerivationFunction)
             SerializationUtils.deserialize(Base64.decode(this.serializedPBKDF2FunctionBase64.getBytes("US-ASCII")));
 
-        byte[] serialHash = serialFunction.hashPassword("password".getBytes());
+        byte[] serialHash = serialFunction.hashPassword("password".getBytes("US-ASCII"));
         Assert.assertEquals(serializedPBKDF2FunctionHashOfPassword, new String(Base64.encode(serialHash)));
     }
 }

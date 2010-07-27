@@ -29,11 +29,18 @@ import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
 
 /**
  *
- * @version $Id:$
+ * @version $Id$
  * @since 2.5
  */
 public class CAST5PasswordCiphertext extends AbstractPasswordCiphertext
 {
+    /**
+     * Fields in this class are set in stone!
+     * Any changes may result in encrypted data becoming unreadable.
+     * This class should be extended if any changes need to be made.
+     */
+    private static final long serialVersionUID = 1L;
+
     /**
      * {@inheritDoc}
      *
