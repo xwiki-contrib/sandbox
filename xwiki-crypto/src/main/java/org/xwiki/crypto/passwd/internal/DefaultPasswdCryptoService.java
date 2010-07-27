@@ -19,81 +19,49 @@
  */
 package org.xwiki.crypto.passwd.internal;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
-
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.WhirlpoolDigest;
-import org.bouncycastle.crypto.engines.CAST5Engine;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
-import org.bouncycastle.crypto.prng.DigestRandomGenerator;
-import org.bouncycastle.crypto.prng.RandomGenerator;
 
 import org.xwiki.component.annotation.Component;
 
 import org.xwiki.crypto.internal.Convert;
+import org.xwiki.crypto.internal.SerializationUtils;
 import org.xwiki.crypto.passwd.PasswdCryptoService;
+import org.xwiki.crypto.passwd.PasswordCiphertext;
 import org.xwiki.crypto.passwd.PasswordVerificationFunction;
-import org.xwiki.crypto.passwd.KeyDerivationFunction;
 import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
 
 
 /**
- * A service allowing users to encrypt and decrypt text using a password. This service uses CAST-5 block cipher with
- * the Whirlpool hash function. The user's password is used together with a 20 byte random salt to seed the
- * pseudo random number generator based on the hash function. The generator is used to produce the needed amount
- * of data for the key and the initialization vector. The cipher is run in CBC mode. The text is enciphered and
- * the output is base64 encoded and prepended with the base64 encoded salt (which ends with a : and a newline).
- * The entire text output is wrapped with descriptive header and footer so typical
+ * This class allows the user to encrypt and decrypt text using a password
  * ciphertext might look as follows:
  * <pre>
- * ------BEGIN PASSWORD CAST5CBC-WHIRLPOOL CIPHERTEXT-----
- * 3xbbMX0oWT9ACQv9K0fFOTIr4BU=:
- * jKQsZIfnfQNfrjvvDFNIVhUhBceVhh7C7zoSd0DPGBf+gXFJymCeAApe5SkbG56q
- * j6VmngZAcypqN72vWRhGOBPu/WjDGG0tyNQnaVHLTcWjDmiCQBQqqq7sRJ/SVi/1
+ * ------BEGIN PASSWORD CIPHERTEXT-----
+ * rO0ABXNyADhvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5DQVNUNVBh
+ * c3N3b3JkQ2lwaGVydGV4dGBjanGyQ5IzAgAAeHIAO29yZy54d2lraS5jcnlwdG8u
+ * cGFzc3dkLmludGVybmFsLkFic3RyYWN0UGFzc3dvcmRDaXBoZXJ0ZXh0wxB+AJ0R
+ * Z6ACAAJbAApjaXBoZXJ0ZXh0dAACW0JMAAtrZXlGdW5jdGlvbnQAL0xvcmcveHdp
+ * a2kvY3J5cHRvL3Bhc3N3ZC9LZXlEZXJpdmF0aW9uRnVuY3Rpb247eHB1cgACW0Ks
+ * 8xf4BghU4AIAAHhwAAABGPyIkxLgotOse8w/uihvcuHCV9XdFdKzQ7KQDtr0N6Tx
  * /cG7npgtTF6+9FAtONY7lg==
- * ------END CIPHERTEXT------
+ * ------END PASSWORD CIPHERTEXT------
  * </pre>
- * <p>
- * Note: Subclasses implementing other encryption methods should override at least
- * {@link #getCipher()}, {@link #getDigest()} and {@link #getKeyLength()}</p>
- * 
+ *
+ * Users can also protect a password or other secret information so that it can be verified but not
+ * recovered. The output is a string of base-64 text without any header or footer as with encrypt.
+ *
  * @version $Id$
  * @since 2.5
  */
-//TODO Seperate encryption/decryption from script service.
+//TODO Configuration... Which cipher to use, which password verification function, which ket derivation function...
 @Component
 public class DefaultPasswdCryptoService implements PasswdCryptoService
 {
-    /** Size of the salt in bytes. */
-    private static final int SALT_SIZE = 20;
+    /** Text which indicates the beginning of password based ciphertext. */
+    private final String ciphertextHeader = "------BEGIN PASSWORD CIPHERTEXT-----\n";
 
-    /** 
-     * The cipher engine. It is very important to wrap the engine with CBC or similar, otherwise
-     * large patches of the same data will translate to large patches of the same ciphertext.
-     * see: http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation
-     */
-    private final PaddedBufferedBlockCipher cipher = 
-        new PaddedBufferedBlockCipher(new CBCBlockCipher(this.getCipher()));
-
-    /** The hash engine. */
-    private final Digest hash = this.getDigest();
-
-    /**
-     * Supply of pseudorandomness. 
-     * TODO: If this is going to be a field in a singleton class, it needs to be reseeded from time to time.
-     *       http://www.cigital.com/justiceleague/2009/08/14/proper-use-of-javas-securerandom/
-     */
-    private final SecureRandom random = new SecureRandom();
-
-    /** used for deserializing password verification functions. */
-    private final PasswordVerificationFunctionUtils passwordUtils = new PasswordVerificationFunctionUtils();
+    /** Text which indicates the end of password based ciphertext. */
+    private final String ciphertextFooter = "------END PASSWORD CIPHERTEXT------";
 
     /**
      * {@inheritDoc}
@@ -102,28 +70,15 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     public synchronized String encryptText(final String plaintext, final String password)
         throws GeneralSecurityException
     {
-        final byte[] salt = new byte[SALT_SIZE];
-        // TODO seed secure random on component initialization, use the same hash function
-        this.random.nextBytes(salt);
-
-        this.cipher.reset();
-        this.cipher.init(true, this.makeKey(password, salt));
+        final PasswordCiphertext ciphertext = new CAST5PasswordCiphertext();
+        ciphertext.init(plaintext, password);
 
         try {
-            final byte[] message = Convert.stringToBytes(plaintext);
-            final byte[] out = new byte[cipher.getOutputSize(message.length)];
-
-            int length = this.cipher.processBytes(message, 0, message.length, out, 0);
-            this.cipher.doFinal(out, length);
-
-            return this.getHeader() 
-                 + Convert.toBase64String(salt)
-                 + this.getEndOfSaltMark()
-                 + Convert.toChunkedBase64String(out)
-                 + this.getFooter();
-        } catch (InvalidCipherTextException e) {
-            // I don't think this should ever happen for encrypting.
-            throw new GeneralSecurityException("Failed to encrypt text", e);
+            return   this.ciphertextHeader
+                   + Convert.toChunkedBase64String(ciphertext.serialize())
+                   + this.ciphertextFooter;
+        } catch (IOException e) {
+            throw new GeneralSecurityException("Failed to serialize ciphertext", e);
         }
     }
 
@@ -134,34 +89,18 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     public synchronized String decryptText(final String containingBase64Ciphertext, final String password)
         throws GeneralSecurityException
     {
-        final String content = Convert.getContentBetween(containingBase64Ciphertext,
-                                                         this.getHeader(),
-                                                         this.getFooter());
-        final String eos = this.getEndOfSaltMark();
-        final String saltString = content.substring(0, content.indexOf(eos));
-        final String cipherString = content.substring(content.indexOf(eos) + eos.length());
-
-        final byte[] salt = Convert.fromBase64String(saltString);
-        final byte[] ciphertext = Convert.fromBase64String(cipherString);
-
-        this.cipher.reset();
-        this.cipher.init(false, this.makeKey(password, salt));
-
+        final byte[] serial = Convert.fromBase64String(containingBase64Ciphertext,
+                                                       this.ciphertextHeader,
+                                                       this.ciphertextFooter);
         try {
-            final byte[] out = new byte[this.cipher.getOutputSize(ciphertext.length)];
-
-            int length = this.cipher.processBytes(ciphertext, 0, ciphertext.length, out, 0);
-            int remaining = this.cipher.doFinal(out, length);
-
-            // length+remaining is the actual length of the output. getOutputSize is close but still leaves a few
-            // nulls at the top of the array.
-            final byte[] unpadded = new byte[length + remaining];
-            System.arraycopy(out, 0, unpadded, 0, unpadded.length);
-
-            return Convert.bytesToString(unpadded);
-        } catch (InvalidCipherTextException e) {
-            // We are going to assume here that the password was wrong.
-            return null;
+            final PasswordCiphertext ciphertext = (PasswordCiphertext) SerializationUtils.deserialize(serial);
+            return ciphertext.decryptText(password);
+        } catch (IOException e) {
+            throw new GeneralSecurityException("Failed to deserialize ciphertext", e);
+        } catch (ClassNotFoundException e) {
+            throw new GeneralSecurityException("Apparently this ciphertext was encrypted using a cipher which is not "
+                                               + "available on this installation, was this imported from a newer "
+                                               + "version?", e);
         }
     }
 
@@ -174,8 +113,11 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
         throws GeneralSecurityException
     {
         try {
+            final MemoryHardKeyDerivationFunction kdf = new ScryptMemoryHardKeyDerivationFunction();
+            // Demand 1Mb memory for 100ms and output 16 byte key.
+            kdf.init(1024, 100, 16);
             final PasswordVerificationFunction pvf = new DefaultPasswordVerificationFunction();
-            pvf.init(this.getDefaultKeyDerivationFunction(), Convert.stringToBytes(password));
+            pvf.init(kdf, Convert.stringToBytes(password));
             return Convert.toBase64String(pvf.serialize());
         } catch (Exception e) {
             throw new GeneralSecurityException("Unable to protect password", e);
@@ -191,99 +133,14 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
         throws GeneralSecurityException
     {
         try {
-            final PasswordVerificationFunction pvf = 
-                this.passwordUtils.deserialize(Convert.fromBase64String(protectedPassword));
+            final byte[] serial = Convert.fromBase64String(protectedPassword);
+
+            final PasswordVerificationFunction pvf =
+                (PasswordVerificationFunction) SerializationUtils.deserialize(serial);
+
             return pvf.isPasswordCorrect(Convert.stringToBytes(password));
         } catch (Exception e) {
             throw new GeneralSecurityException("Unable to verify password", e);
         }
-    }
-
-    /**
-     * Generate a key (and an initialization vector) for the encryption engine.
-     * <p>
-     * This function uses a pseudo-random generator based on the used hash function, seeded with the key
-     * and the salt to generate the key and an initialization vector of the needed length.</p>
-     * 
-     *
-     * @param password The user supplied password for encryption/decryption.
-     * @param salt If encrypting, should be random bytes, if decrypting, should be bytes saved with the ciphertext.
-     * @return a symmetric key
-     */
-    private synchronized CipherParameters makeKey(final String password, final byte[] salt)
-    {
-        final byte[] passbytes = Convert.stringToBytes(password);
-
-        RandomGenerator prng = new DigestRandomGenerator(this.hash);
-        prng.addSeedMaterial(passbytes);
-        prng.addSeedMaterial(salt);
-
-        final byte[] key = new byte[this.getKeyLength()];
-        final byte[] iv = new byte[this.cipher.getBlockSize()];
-        prng.nextBytes(key);
-        prng.nextBytes(iv);
-
-        return new ParametersWithIV(new KeyParameter(key), iv);
-    }
-
-    /**
-     * This implementation uses CAST5.
-     * @return the cipher engine to use.
-     */
-    protected BlockCipher getCipher()
-    {
-        return new CAST5Engine();
-    }
-
-    /**
-     * @return a new instance of the hash function to use.
-     */
-    protected Digest getDigest()
-    {
-        return new WhirlpoolDigest();
-    }
-
-    /**
-     * @return the key length in bytes.
-     */
-    protected int getKeyLength()
-    {
-        return 16;
-    }
-
-    /**
-     * @return the String which will mark the beginning of the base64 encoded ciphertext.
-     */
-    protected String getHeader()
-    {
-        return "------BEGIN PASSWORD CAST5CBC-WHIRLPOOL CIPHERTEXT-----\n";
-    }
-
-    /**
-     * @return the string which will mark the end of the base64 encoded ciphertext.
-     */
-    protected String getFooter()
-    {
-        return "------END CIPHERTEXT------";
-    }
-
-    /**
-     * @return the mark which delineates the end of the salt in the ciphertext.
-     */
-    protected String getEndOfSaltMark()
-    {
-        return ":\n";
-    }
-
-    /**
-     * Get the default key derivation function.
-     * 
-     * @return something
-     */
-    protected KeyDerivationFunction getDefaultKeyDerivationFunction()
-    {
-        MemoryHardKeyDerivationFunction kdf = new ScryptMemoryHardKeyDerivationFunction();
-        kdf.init(1024, 100, this.cipher.getBlockSize() + this.getKeyLength());
-        return kdf;
     }
 }

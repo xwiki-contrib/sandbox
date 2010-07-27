@@ -19,28 +19,42 @@
  */
 package org.xwiki.crypto.passwd.internal;
 
-import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.engines.CAST5Engine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 
+import org.xwiki.crypto.passwd.KeyDerivationFunction;
+import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
+
 
 /**
- * A password crypto service implementing AES-128.
- * 
- * @version $Id$
+ *
+ * @version $Id:$
  * @since 2.5
  */
-public class AESPasswdCryptoService extends CAST5PasswordCiphertext
+public class CAST5PasswordCiphertext extends AbstractPasswordCiphertext
 {
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.crypto.passwd.internal.CAST5PasswordCiphertext#getCipher()
+     * @see org.xwiki.crypto.passwd.internal.AbstractPasswordCiphertext#getKeyDerivationFunction(int)
+     */
+    @Override
+    protected KeyDerivationFunction getKeyDerivationFunction(int keySize)
+    {
+        MemoryHardKeyDerivationFunction kdf = new ScryptMemoryHardKeyDerivationFunction();
+        kdf.init(1024, 100, keySize);
+        return kdf;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.crypto.passwd.internal.AbstractPasswordCiphertext#getCipher()
      */
     @Override
     protected PaddedBufferedBlockCipher getCipher()
     {
-        return new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
+        return new PaddedBufferedBlockCipher(new CBCBlockCipher(new CAST5Engine()));
     }
 }
-

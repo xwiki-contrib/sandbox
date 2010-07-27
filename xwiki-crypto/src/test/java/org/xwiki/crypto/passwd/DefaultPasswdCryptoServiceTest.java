@@ -76,15 +76,26 @@ public class DefaultPasswdCryptoServiceTest extends AbstractMockingComponentTest
 
     protected String getEncrypted()
     {
-        return "------BEGIN PASSWORD CAST5CBC-WHIRLPOOL CIPHERTEXT-----\n"
-             + "Kg8YLwtnchmtWKd2yYCn2tilT04=:\n"
-             + "r4FlnYUOedRfc31ghGgIhc9rkpRtwDhLO5CPc3wgTuPfHMaAZ/mfdXk3rz2TKtXE\n"
-             + "xanPkLR5th5RelKhe0DEj2lQH0bTtajlDqKBoo7OsfR2HZHCt+q5jRzTf645vN8X\n"
-             + "AeNRF1Im7brfOwoY+J2MC1bf4HD98r4/rjKfMyd4bdTAjXvB+OyOGje1LFHWP2km\n"
-             + "qBh5TO9CHMxdAzFvakAFE/oCxqactwU002dHsF7/4EWncnvwIeQpXAYtcaRrVW5Q\n"
-             + "irUSsQk+UDG2/sF6bGtqPS3SZjHkIlEYgf8MINjcnvBsmDtDsXZL8xza+E7dQSi4\n"
-             + "HI7DjwU7vvUuv3pyAVLM8g8vfS46ehx0pkqKEDrVKFuFktzn48xStw==\n"
-             + "------END CIPHERTEXT------";
+        return "------BEGIN PASSWORD CIPHERTEXT-----\n"
+             + "rO0ABXNyADhvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5DQVNUNVBh\n"
+             + "c3N3b3JkQ2lwaGVydGV4dGBjanGyQ5IzAgAAeHIAO29yZy54d2lraS5jcnlwdG8u\n"
+             + "cGFzc3dkLmludGVybmFsLkFic3RyYWN0UGFzc3dvcmRDaXBoZXJ0ZXh0wxB+AJ0R\n"
+             + "Z6ACAAJbAApjaXBoZXJ0ZXh0dAACW0JMAAtrZXlGdW5jdGlvbnQAL0xvcmcveHdp\n"
+             + "a2kvY3J5cHRvL3Bhc3N3ZC9LZXlEZXJpdmF0aW9uRnVuY3Rpb247eHB1cgACW0Ks\n"
+             + "8xf4BghU4AIAAHhwAAABGPyIkxLgotOse8w/uihvcuHCV9XdFdKzQ7KQDtr0N6Tx\n"
+             + "/rTYet6YHwi00F4hkw9LPu3z9FseSgCgbcPEAR3byxMI480y6Romf+fLofEylvWI\n"
+             + "3thWghdMateUcnwvePCx/+364tbKQBRhk+s6EQYOezoMBCraEyfD04rBHOXrEho3\n"
+             + "P0smawIdCVMYnkGPntAuf2F1bLXfKqL7nsBGu5Zrq5VeSWLEzsGp5Ld3qDt9euKV\n"
+             + "AMUdlN1qzHhZ6/4DsUL8L/7zySCR7i3e8SDD6Nu/wozDeAoXuw2fSs72nlW13TC/\n"
+             + "2MrvgtZBl1icOsCujYIPD5iL2Ixp7yEu0acfoM+fBteb17mz8fUfgTWJl7enW8ak\n"
+             + "jKxlkrv7sJFzcgBGb3JnLnh3aWtpLmNyeXB0by5wYXNzd2QuaW50ZXJuYWwuU2Ny\n"
+             + "eXB0TWVtb3J5SGFyZEtleURlcml2YXRpb25GdW5jdGlvbgAAAAAAAAABAgAFSQAJ\n"
+             + "YmxvY2tTaXplSQAQZGVyaXZlZEtleUxlbmd0aEkADW1lbW9yeUV4cGVuc2VJABBw\n"
+             + "cm9jZXNzb3JFeHBlbnNlWwAEc2FsdHEAfgACeHIASG9yZy54d2lraS5jcnlwdG8u\n"
+             + "cGFzc3dkLmludGVybmFsLkFic3RyYWN0TWVtb3J5SGFyZEtleURlcml2YXRpb25G\n"
+             + "dW5jdGlvbuJX9dJ4LoIjAgAAeHAAAAAIAAAAGAAABAAAAAAAdXEAfgAFAAAAEDxP\n"
+             + "n7jkau3EJiRRwfWmltI=\n"
+             + "------END PASSWORD CIPHERTEXT------";
     }
 
     @Test
