@@ -22,6 +22,7 @@ package org.xwiki.crypto.passwd.internal;
 import java.util.Arrays;
 import java.io.IOException;
 
+import org.xwiki.crypto.internal.SerializationUtils;
 import org.xwiki.crypto.passwd.PasswordVerificationFunction;
 import org.xwiki.crypto.passwd.KeyDerivationFunction;
 
@@ -30,14 +31,10 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
  * Default password verification function wraps a key derivation function and stores the hash output.
  *
  * @since 2.5
- * @version $Id:$
+ * @version $Id$
  */
 public class DefaultPasswordVerificationFunction implements PasswordVerificationFunction
 {
-    /** Password utility instance. */
-    private static final PasswordVerificationFunctionUtils PASSWORD_UTILS =
-        new PasswordVerificationFunctionUtils();
-
     /** Password hash. */
     private byte[] passwordHash;
 
@@ -63,7 +60,7 @@ public class DefaultPasswordVerificationFunction implements PasswordVerification
      */
     public byte[] serialize() throws IOException
     {
-        return PASSWORD_UTILS.serialize(this);
+        return SerializationUtils.serialize(this);
     }
 
     /**

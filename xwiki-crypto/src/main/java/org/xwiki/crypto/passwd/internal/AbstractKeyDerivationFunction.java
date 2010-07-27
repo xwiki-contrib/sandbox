@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import java.security.SecureRandom;
 
+import org.xwiki.crypto.internal.SerializationUtils;
 import org.xwiki.crypto.passwd.KeyDerivationFunction;
 
 
@@ -36,9 +37,6 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
  */
 public abstract class AbstractKeyDerivationFunction implements KeyDerivationFunction, Serializable
 {
-    /** Access to the key derivation function utilities used for serializing the function. */
-    private final transient KeyDerivationFunctionUtils utils = new KeyDerivationFunctionUtils();
-
     /** Number of bytes length of the salt. This is statically set to 16. */
     private final transient int saltSize = 16;
 
@@ -49,7 +47,7 @@ public abstract class AbstractKeyDerivationFunction implements KeyDerivationFunc
      */
     public byte[] serialize() throws IOException
     {
-        return this.utils.serialize(this);
+        return SerializationUtils.serialize(this);
     }
 
     /**

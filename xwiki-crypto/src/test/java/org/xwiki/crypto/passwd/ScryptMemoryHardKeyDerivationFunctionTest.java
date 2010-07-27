@@ -31,7 +31,8 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.xwiki.crypto.passwd.internal.PBKDF2KeyDerivationFunction;
 import org.xwiki.crypto.passwd.internal.ScryptMemoryHardKeyDerivationFunction;
-import org.xwiki.crypto.passwd.internal.KeyDerivationFunctionUtils;
+import org.xwiki.crypto.internal.SerializationUtils;
+
 
 /**
  * Tests Scrypt against test outputs given in reference document.
@@ -326,7 +327,7 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
         // FIXME fails for me from time to time under heavy CPU + I/O load
         Assert.assertFalse(Arrays.equals(originalHash, differentHash));
 
-        final KeyDerivationFunction serialFunction = new KeyDerivationFunctionUtils().deserialize(serial);
+        final KeyDerivationFunction serialFunction = (KeyDerivationFunction) SerializationUtils.deserialize(serial);
         byte[] serialHash = serialFunction.hashPassword(password);
         Assert.assertTrue(Arrays.equals(originalHash, serialHash));
     }
@@ -334,9 +335,8 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
     @Test
     public void deserializationTest() throws Exception
     {
-        final KeyDerivationFunction serialFunction =
-            new KeyDerivationFunctionUtils().deserialize(
-                Base64.decode(this.serializedScryptFunctionBase64.getBytes("US-ASCII")));
+        final KeyDerivationFunction serialFunction = (KeyDerivationFunction)
+            SerializationUtils.deserialize(Base64.decode(this.serializedScryptFunctionBase64.getBytes("US-ASCII")));
 
         byte[] serialHash = serialFunction.hashPassword("password".getBytes());
         Assert.assertEquals(serializedScryptFunctionHashOfPassword, new String(Base64.encode(serialHash)));

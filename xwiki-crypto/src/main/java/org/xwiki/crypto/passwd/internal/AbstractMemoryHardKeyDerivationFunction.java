@@ -21,6 +21,7 @@ package org.xwiki.crypto.passwd.internal;
 
 import java.io.IOException;
 
+import org.xwiki.crypto.internal.SerializationUtils;
 import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
 
 /**
@@ -31,7 +32,7 @@ import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
  * the same password to key mapping, and make sure fields unnecessary to this are declared transient.
  *
  * @since 2.5
- * @version $Id:$
+ * @version $Id$
  */
 public abstract class AbstractMemoryHardKeyDerivationFunction implements MemoryHardKeyDerivationFunction
 {
@@ -41,9 +42,6 @@ public abstract class AbstractMemoryHardKeyDerivationFunction implements MemoryH
     /** Amount of memory to use by default (4MB). */
     private final transient int defaultNumberOfKilobytesOfMemoryToUse = 4096;
 
-    /** Access to the key derivation function utilities used for serializing the function. */
-    private final transient KeyDerivationFunctionUtils utils = new KeyDerivationFunctionUtils();
-
     /**
      * {@inheritDoc}
      *
@@ -51,7 +49,7 @@ public abstract class AbstractMemoryHardKeyDerivationFunction implements MemoryH
      */
     public byte[] serialize() throws IOException
     {
-        return this.utils.serialize(this);
+        return SerializationUtils.serialize(this);
     }
 
     /**
