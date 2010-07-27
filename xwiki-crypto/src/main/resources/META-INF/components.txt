@@ -1,5 +1,4 @@
 org.xwiki.crypto.internal.DefaultUserDocumentUtils
 org.xwiki.crypto.internal.scripting.CryptoScriptService
-org.xwiki.crypto.passwd.internal.AESPasswdCryptoService
 org.xwiki.crypto.passwd.internal.DefaultPasswdCryptoService
 org.xwiki.crypto.x509.internal.DefaultX509CryptoService
