@@ -27,6 +27,13 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
  * The Scrypt Key Derivation Function.
  * A java implementation of this http://www.tarsnap.com/scrypt/scrypt.pdf
  *
+ * Scrypt function includes a shortcut which may be regarded as a weakness.
+ * This function may be executed with half the memory by throwing out every other blockMix output and when one of the
+ * missing outputs is needed, recomputing it. This will halve the memory cost while increasing the processor cost by
+ * 1/6 of the total. Using even less memory is possible but the processor cost grows at a much higher rate.
+ * The existance of this shortcut has been confirmend with the designer of Scrypt who claimed it was for cases when
+ * decryption was necessary on a system with less memory than the system used to encrypt the data.
+ *
  * @since 2.5
  * @version $Id$
  */
