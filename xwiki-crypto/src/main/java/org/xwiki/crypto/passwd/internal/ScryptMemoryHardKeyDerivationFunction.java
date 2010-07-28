@@ -128,6 +128,10 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
             int totalBlockMixRuns = 2 * this.memoryExpense;
             double timeCostPerCycle = totalBlockMixRuns * timeSpent / (double) numTrialRuns;
             this.processorExpense = (int) (millisecondsOfProcessorTimeToSpend / timeCostPerCycle);
+            // There are no guarentees if processorExpense is 0.
+            if (this.processorExpense < 1) {
+                this.processorExpense = 1;
+            }
         } finally {
             this.freeMemory();
         }
