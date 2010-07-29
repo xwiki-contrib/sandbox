@@ -37,15 +37,22 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
 /**
  * A service allowing users to encrypt and decrypt text using a password.
  * <p>
- * Note: Subclasses implementing other encryption methods should override at least
- * {@link #getKeyDerivationFunction()}, {@link #getCipher()} and {@link #getKeyLength()}
- * and avoid using fields since this class is serialized to produce the ciphertext.</p>
+ * Note: Subclasses implementing other encryption methods should override
+ * {@link #getCipher()} and optionaly {@link #getKeyLength()}
+ * also subclasses should avoid using fields since this class is serialized to produce the ciphertext.</p>
  *
- * @version $Id:$
+ * @version $Id$
  * @since 2.5
  */
 public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
 {
+    /**
+     * Fields in this class are set in stone!
+     * Any changes may result in encrypted data becoming unreadable.
+     * This class should be extended if any changes need to be made.
+     */
+    private static final long serialVersionUID = 1L;
+
     /** The actual encrypted text. */
     private byte[] ciphertext;
 
@@ -53,25 +60,33 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
     private KeyDerivationFunction keyFunction;
 
     /**
+     * Temporarily hold the cipher instance because it needs to be loaded a few times.
+     * It is important that this is not initialized here because it will not be honered by the serialization framework.
+     */
+    private transient PaddedBufferedBlockCipher cipher;
+
+    /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.crypto.passwd.PasswordCiphertext#init(String, String)
+     * @see org.xwiki.crypto.passwd.PasswordCiphertext#init(String, String, KeyDerivationFunction)
      */
-    public synchronized void init(final String plaintext, final String password)
+    public synchronized void init(final String plaintext,
+                                  final String password,
+                                  final KeyDerivationFunction keyFunction)
         throws GeneralSecurityException
     {
-        this.keyFunction = this.getKeyDerivationFunction(this.getKeyLength() + this.getCipher().getBlockSize());
+        this.keyFunction = keyFunction;
 
-        PaddedBufferedBlockCipher cipher = this.getCipher();
-        cipher.reset();
-        cipher.init(true, this.makeKey(password));
+        PaddedBufferedBlockCipher theCipher = this.getCipher();
+        theCipher.reset();
+        theCipher.init(true, this.makeKey(password));
 
         try {
             final byte[] message = Convert.stringToBytes(plaintext);
-            this.ciphertext = new byte[cipher.getOutputSize(message.length)];
+            this.ciphertext = new byte[theCipher.getOutputSize(message.length)];
 
-            int length = cipher.processBytes(message, 0, message.length, this.ciphertext, 0);
-            cipher.doFinal(this.ciphertext, length);
+            int length = theCipher.processBytes(message, 0, message.length, this.ciphertext, 0);
+            theCipher.doFinal(this.ciphertext, length);
         } catch (InvalidCipherTextException e) {
             // I don't think this should ever happen for encrypting.
             throw new GeneralSecurityException("Failed to encrypt text", e);
@@ -86,15 +101,15 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
     public synchronized String decryptText(final String password)
         throws GeneralSecurityException
     {
-        PaddedBufferedBlockCipher cipher = this.getCipher();
-        cipher.reset();
-        cipher.init(false, this.makeKey(password));
+        PaddedBufferedBlockCipher theCipher = this.getCipher();
+        theCipher.reset();
+        theCipher.init(false, this.makeKey(password));
 
         try {
-            final byte[] out = new byte[cipher.getOutputSize(ciphertext.length)];
+            final byte[] out = new byte[theCipher.getOutputSize(ciphertext.length)];
 
-            int length = cipher.processBytes(ciphertext, 0, ciphertext.length, out, 0);
-            int remaining = cipher.doFinal(out, length);
+            int length = theCipher.processBytes(ciphertext, 0, ciphertext.length, out, 0);
+            int remaining = theCipher.doFinal(out, length);
 
             // length+remaining is the actual length of the output. getOutputSize is close but still leaves a few
             // nulls at the top of the array.
@@ -144,6 +159,19 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.crypto.passwd.PasswordCiphertext#getRequiredKeySize()
+     */
+    public int getRequiredKeySize()
+    {
+        return this.getKeyLength() + this.getCipher().getBlockSize();
+    }
+
+    /**
+     * Get the size of the cipher key.
+     * This does not include the initialization vector as does {@link #getRequiredKeySize()}
+     *
      * @return the key length in bytes.
      */
     protected int getKeyLength()
@@ -152,20 +180,26 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
     }
 
     /**
-     * Get the key derivation function initialized and ready to call hashPassword.
+     * Get the the cipher.
+     * If this is the first call after this object was initialized, or if this object was deserialized, then
+     * this will call newCipherInstance.
      *
-     * @param keySize the length of the output key in bytes.
-     * @return initialized key derivation function.
+     * @return the cipher instance.
      */
-    protected abstract KeyDerivationFunction getKeyDerivationFunction(int keySize);
-
+    protected PaddedBufferedBlockCipher getCipher()
+    {
+        if (this.cipher == null) {
+            this.cipher = this.newCipherInstance();
+        }
+        return this.cipher;
+    }
 
     /**
      * The cipher engine. It is very important to wrap the engine with CBC or similar, otherwise
      * large patches of the same data will translate to large patches of the same ciphertext.
      * see: http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation
      *
-     * @return the cipher engine to use.
+     * @return a new instance of the cipher engine to use.
      */
-    protected abstract PaddedBufferedBlockCipher getCipher();
+    protected abstract PaddedBufferedBlockCipher newCipherInstance();
 }

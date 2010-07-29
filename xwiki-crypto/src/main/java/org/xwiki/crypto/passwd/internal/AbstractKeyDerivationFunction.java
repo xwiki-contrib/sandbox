@@ -19,6 +19,7 @@
  */
 package org.xwiki.crypto.passwd.internal;
 
+import java.util.Properties;
 import java.io.Serializable;
 import java.io.IOException;
 
@@ -47,6 +48,12 @@ public abstract class AbstractKeyDerivationFunction implements KeyDerivationFunc
     /** Number of bytes length of the salt. This is statically set to 16. */
     private final transient int saltSize = 16;
 
+    /** The default amount of processor time to spend deriving the key. */
+    private final transient int defaultMillisecondsOfProcessorTime = 200;
+
+    /** The default length in bytes of the derived key (output). */
+    private final transient int defaultDerivedKeyLength = 64;
+
     /**
      * {@inheritDoc}
      *
@@ -55,6 +62,40 @@ public abstract class AbstractKeyDerivationFunction implements KeyDerivationFunc
     public byte[] serialize() throws IOException
     {
         return SerializationUtils.serialize(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see KeyDerivationFunction#init()
+     */
+    public void init()
+    {
+        this.init(this.getDefaultMillisecondsOfProcessorTime(), this.getDefaultDerivedKeyLength());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see KeyDerivationFunction#init(Properties)
+     */
+    public void init(Properties parameters)
+    {
+        int keyLength = this.getDefaultDerivedKeyLength();
+        int milliseconds = this.getDefaultMillisecondsOfProcessorTime();
+        try {
+            final String millisecondsString = parameters.getProperty("millisecondsOfProcessorTimeToSpend");
+            if (millisecondsString != null) {
+                milliseconds = Integer.parseInt(millisecondsString);
+            }
+            final String keyLengthString = parameters.getProperty("derivedKeyLength");
+            if (keyLengthString != null) {
+                keyLength = Integer.parseInt(keyLengthString);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Could not parse Properties", e);
+        }
+        this.init(milliseconds, keyLength);
     }
 
     /**
@@ -108,4 +149,16 @@ public abstract class AbstractKeyDerivationFunction implements KeyDerivationFunc
     public abstract void init(final byte[] salt,
                               final int iterationCount,
                               final int derivedKeyLength);
+
+    /** @return the default number of milliseconds of processor time to require. */
+    protected int getDefaultMillisecondsOfProcessorTime()
+    {
+        return this.defaultMillisecondsOfProcessorTime;
+    }
+
+    /** @return the default size of the derived key (output) int bytes. */
+    protected int getDefaultDerivedKeyLength()
+    {
+        return this.defaultDerivedKeyLength;
+    }
 }

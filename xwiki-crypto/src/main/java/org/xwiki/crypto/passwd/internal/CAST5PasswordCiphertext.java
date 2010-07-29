@@ -23,12 +23,9 @@ import org.bouncycastle.crypto.engines.CAST5Engine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 
-import org.xwiki.crypto.passwd.KeyDerivationFunction;
-import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
-
 
 /**
- * A password ciphertext service implementing CAST5 and Scrypt.
+ * A password ciphertext service implementing CAST5.
  *
  * @version $Id$
  * @since 2.5
@@ -45,23 +42,10 @@ public class CAST5PasswordCiphertext extends AbstractPasswordCiphertext
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.crypto.passwd.internal.AbstractPasswordCiphertext#getKeyDerivationFunction(int)
+     * @see org.xwiki.crypto.passwd.internal.AbstractPasswordCiphertext#newCipherInstance()
      */
     @Override
-    protected KeyDerivationFunction getKeyDerivationFunction(int keySize)
-    {
-        MemoryHardKeyDerivationFunction kdf = new ScryptMemoryHardKeyDerivationFunction();
-        kdf.init(1024, 100, keySize);
-        return kdf;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.passwd.internal.AbstractPasswordCiphertext#getCipher()
-     */
-    @Override
-    protected PaddedBufferedBlockCipher getCipher()
+    protected PaddedBufferedBlockCipher newCipherInstance()
     {
         return new PaddedBufferedBlockCipher(new CBCBlockCipher(new CAST5Engine()));
     }

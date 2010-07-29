@@ -23,9 +23,9 @@ import java.security.GeneralSecurityException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xwiki.crypto.passwd.internal.DefaultPasswdCryptoService;
-import org.xwiki.test.AbstractMockingComponentTestCase;
-import org.xwiki.test.annotation.MockingRequirement;
+import org.junit.Before;
+
+import org.xwiki.test.AbstractComponentTestCase;
 
 
 /**
@@ -34,7 +34,7 @@ import org.xwiki.test.annotation.MockingRequirement;
  * @version $Id$
  * @since 2.5
  */
-public class DefaultPasswdCryptoServiceTest extends AbstractMockingComponentTestCase
+public class DefaultPasswdCryptoServiceTest extends AbstractComponentTestCase
 {
     /** Length = 272 byte = 17 * 16 */
     private final String textToEncrypt = "Congress shall make no law respecting an establishment of religion, or "
@@ -48,8 +48,14 @@ public class DefaultPasswdCryptoServiceTest extends AbstractMockingComponentTest
 
     private final String password = "Snuffle";
 
-    @MockingRequirement
-    protected DefaultPasswdCryptoService service;
+    protected PasswdCryptoService service;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        super.setUp();
+        this.service = getComponentManager().lookup(PasswdCryptoService.class);
+    }
 
     @Test
     public void encryptDecryptTest() throws Exception
@@ -79,22 +85,22 @@ public class DefaultPasswdCryptoServiceTest extends AbstractMockingComponentTest
         return "------BEGIN PASSWORD CIPHERTEXT-----\n"
              + "rO0ABXNyADhvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5DQVNUNVBh\n"
              + "c3N3b3JkQ2lwaGVydGV4dAAAAAAAAAABAgAAeHIAO29yZy54d2lraS5jcnlwdG8u\n"
-             + "cGFzc3dkLmludGVybmFsLkFic3RyYWN0UGFzc3dvcmRDaXBoZXJ0ZXh0wxB+AJ0R\n"
-             + "Z6ACAAJbAApjaXBoZXJ0ZXh0dAACW0JMAAtrZXlGdW5jdGlvbnQAL0xvcmcveHdp\n"
+             + "cGFzc3dkLmludGVybmFsLkFic3RyYWN0UGFzc3dvcmRDaXBoZXJ0ZXh0AAAAAAAA\n"
+             + "AAECAAJbAApjaXBoZXJ0ZXh0dAACW0JMAAtrZXlGdW5jdGlvbnQAL0xvcmcveHdp\n"
              + "a2kvY3J5cHRvL3Bhc3N3ZC9LZXlEZXJpdmF0aW9uRnVuY3Rpb247eHB1cgACW0Ks\n"
-             + "8xf4BghU4AIAAHhwAAABGKu0L1JPS2is0XR+QaXeW078cZi7yEmJkqOOql1qyRG4\n"
-             + "7KGvhVXVWNaxLr3CJlGd87O82SYH6rq2JtPmzw45KE9ps2anip/BQ0gBx7cE6akn\n"
-             + "9FgulJ5uGSqnqE3nfE1jQtTTzTXBkANj7in8GcH2p9Sfqb/yD2xlrMQRHQPW5pbC\n"
-             + "yB9xj/HkFFTz3y0Jrb/0xSEQQWwaV6EKf21xM5TEXawygxbtOYOvyywCNINDs2l1\n"
-             + "sd9WYJZSNEutN2KcCj9ieYxyowYqkHcQ7xQ5RUqDLY9Zv4KoxVPQX7mGJ8GtYoqH\n"
-             + "uD410tUGtki082DyBZ2EgtIHSEMnPf3Y5w6iGNovdYf9h1LMVF55ugImXxBr5k4m\n"
-             + "X+f1xkHEK4FzcgBGb3JnLnh3aWtpLmNyeXB0by5wYXNzd2QuaW50ZXJuYWwuU2Ny\n"
+             + "8xf4BghU4AIAAHhwAAABGLXi0Ndwrq3OVzjWh9XgWyRBAHlq+3+cR3PGWVY8WM26\n"
+             + "owReBtKHtThDLwqDeP8zdnBDQ9CWgZm26Kdnbsz/rLLGQqHI08KPG8exYREsOupu\n"
+             + "STIQG0QaZ1kmYO6fwWDnskFl6VGo8mU8AqJfG7aVcAAySAREirBOox8ScOv/QnFP\n"
+             + "VaX6UgYwRY29/aI0u/oAIDIcqcvLMnJHgybW6UZgp8t4E5yhETIEug/0CnloTqsk\n"
+             + "Nys1YFKAEQTzabwTvAcIlt9YiFsA89SMj2foB2ZkvnTAewuLYpmRusbBcVNl4peG\n"
+             + "0d92YQo21yxzkm6wO7T5DBg5XoyaBmPaAkVUDB2fCS7YhgrVoaEW49yHwvkVJ67M\n"
+             + "3LwU9ifxoKtzcgBGb3JnLnh3aWtpLmNyeXB0by5wYXNzd2QuaW50ZXJuYWwuU2Ny\n"
              + "eXB0TWVtb3J5SGFyZEtleURlcml2YXRpb25GdW5jdGlvbgAAAAAAAAABAgAFSQAJ\n"
              + "YmxvY2tTaXplSQAQZGVyaXZlZEtleUxlbmd0aEkADW1lbW9yeUV4cGVuc2VJABBw\n"
              + "cm9jZXNzb3JFeHBlbnNlWwAEc2FsdHEAfgACeHIASG9yZy54d2lraS5jcnlwdG8u\n"
              + "cGFzc3dkLmludGVybmFsLkFic3RyYWN0TWVtb3J5SGFyZEtleURlcml2YXRpb25G\n"
-             + "dW5jdGlvbgAAAAAAAAABAgAAeHAAAAAIAAAAGAAABAAAAAABdXEAfgAFAAAAEOFG\n"
-             + "Wz/q3V9lnKrIW6eRQBY=\n"
+             + "dW5jdGlvbgAAAAAAAAABAgAAeHAAAAAIAAAAGAAABAAAAAABdXEAfgAFAAAAEKQD\n"
+             + "mYpvbMVTVoq8SKFAw6Q=\n"
              + "------END PASSWORD CIPHERTEXT------";
     }
 

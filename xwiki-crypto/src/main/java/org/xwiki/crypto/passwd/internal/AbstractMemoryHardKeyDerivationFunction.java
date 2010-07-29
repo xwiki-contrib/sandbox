@@ -19,6 +19,7 @@
  */
 package org.xwiki.crypto.passwd.internal;
 
+import java.util.Properties;
 import java.io.IOException;
 
 import org.xwiki.crypto.internal.SerializationUtils;
@@ -46,8 +47,14 @@ public abstract class AbstractMemoryHardKeyDerivationFunction implements MemoryH
     /** Number of bytes length of the salt. This is statically set to 16. */
     private final transient int saltSize = 16;
 
-    /** Amount of memory to use by default (4MB). */
-    private final transient int defaultNumberOfKilobytesOfMemoryToUse = 4096;
+    /** Amount of memory to use by default (1MB). */
+    private final transient int defaultNumberOfKilobytesOfMemoryToUse = 1024;
+
+    /** The default amount of processor time to spend deriving the key. */
+    private final transient int defaultMillisecondsOfProcessorTime = 200;
+
+    /** The default length in bytes of the derived key (output). */
+    private final transient int defaultDerivedKeyLength = 64;
 
     /**
      * {@inheritDoc}
@@ -62,13 +69,72 @@ public abstract class AbstractMemoryHardKeyDerivationFunction implements MemoryH
     /**
      * {@inheritDoc}
      *
+     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#init()
+     */
+    public void init()
+    {
+        this.init(this.getDefaultNumberOfKilobytesOfMemoryToUse(),
+                  this.getDefaultMillisecondsOfProcessorTime(),
+                  this.getDefaultDerivedKeyLength());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#init(Properties)
+     */
+    public void init(Properties parameters)
+    {
+        int keyLength = this.getDefaultDerivedKeyLength();
+        int milliseconds = this.getDefaultMillisecondsOfProcessorTime();
+        int kilobytes = this.getDefaultNumberOfKilobytesOfMemoryToUse();
+        try {
+            final String millisecondsString = parameters.getProperty("millisecondsOfProcessorTimeToSpend");
+            if (millisecondsString != null) {
+                milliseconds = Integer.parseInt(millisecondsString);
+            }
+            final String keyLengthString = parameters.getProperty("derivedKeyLength");
+            if (keyLengthString != null) {
+                keyLength = Integer.parseInt(keyLengthString);
+            }
+            final String kilobytesString = parameters.getProperty("numberOfKilobytesOfMemoryToUse");
+            if (kilobytesString != null) {
+                kilobytes = Integer.parseInt(kilobytesString);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Could not parse Properties", e);
+        }
+        this.init(kilobytes, milliseconds, keyLength);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#init(int, int)
      */
     public void init(final int millisecondsOfProcessorTimeToSpend,
                      final int derivedKeyLength)
     {
-        this.init(this.defaultNumberOfKilobytesOfMemoryToUse,
+        this.init(this.getDefaultNumberOfKilobytesOfMemoryToUse(),
                   millisecondsOfProcessorTimeToSpend,
                   derivedKeyLength);
+    }
+
+    /** @return the number of kilobytes of memory to require by default. */
+    public int getDefaultNumberOfKilobytesOfMemoryToUse()
+    {
+        return this.defaultNumberOfKilobytesOfMemoryToUse;
+    }
+
+    /** @return the default number of milliseconds of processor time to require. */
+    protected int getDefaultMillisecondsOfProcessorTime()
+    {
+        return this.defaultMillisecondsOfProcessorTime;
+    }
+
+    /** @return the default size of the derived key (output) int bytes. */
+    protected int getDefaultDerivedKeyLength()
+    {
+        return this.defaultDerivedKeyLength;
     }
 }

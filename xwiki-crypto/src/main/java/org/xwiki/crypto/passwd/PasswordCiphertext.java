@@ -29,20 +29,22 @@ import java.security.GeneralSecurityException;
  * Ciphertext represents a single password encrypted text.
  * It can be serialized and deserialized and the same password will be able to decrypt it.
  *
- * @version $Id:$
+ * @version $Id$
  * @since 2.5
  */
 public interface PasswordCiphertext extends Serializable
 {
     /**
-     * Initialize this ciphertext with a given plaintext and password.
+     * Initialize this ciphertext with a given plaintext, password, and an initialized key derivation function.
      * To get the plaintext back, use decryptText with the same password.
      *
      * @param plaintext the text which will be encrypted.
      * @param password the password used to encrypt the plaintext.
+     * @param initializedKeyFunction an initialized KeyDerivationFunction which will return a key of the length given
+     *                               by {@link #getRequiredKeySize()}.
      * @throws GeneralSecurityException if something goes wrong while encrypting.
      */
-    void init(final String plaintext, final String password)
+    void init(final String plaintext, final String password, final KeyDerivationFunction initializedKeyFunction)
         throws GeneralSecurityException;
 
     /**
@@ -63,4 +65,15 @@ public interface PasswordCiphertext extends Serializable
      */
     byte[] serialize()
         throws IOException;
+
+    /**
+     * Get the length of the key which should be output by the keyFunction which is to be passed to 
+     * {@link #init(Strong, String, KeyDerivationFunction)}.
+     * Users are expected to call this method and pass the result when initializing the key derivation function then
+     * pass the initialized key derivation function to {@link #init(Strong, String, KeyDerivationFunction)}.
+     *
+     * @return the length required for the derived key.
+     * @see org.xwiki.crypto.passwd.PasswordCiphertext#getRequiredKeySize()
+     */
+    int getRequiredKeySize();
 }

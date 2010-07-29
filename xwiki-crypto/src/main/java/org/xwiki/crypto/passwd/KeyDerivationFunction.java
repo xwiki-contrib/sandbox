@@ -19,6 +19,7 @@
  */
 package org.xwiki.crypto.passwd;
 
+import java.util.Properties;
 import java.io.Serializable;
 import java.io.IOException;
 
@@ -37,8 +38,22 @@ import org.xwiki.component.annotation.ComponentRole;
 @ComponentRole
 public interface KeyDerivationFunction extends Serializable
 {
+    /** Initialize with default values. */
+    void init();
+
     /**
-     * Initialize this function with the desired key length.
+     * Initialize this function with the desired key length and processor cost as a {@link java.util.Properties}
+     * The properties which will be looked for are millisecondsOfProcessorTimeToSpend and derivedKeyLength.
+     * Both will be parsed as {@link Integer}s. If either or both are missing then default values will be used.
+     * If values are not integers or are invalid, an {@link java.lang.IllegalArgumentException} will throw.
+     *
+     * @param parameters A properties expected to contain millisecondsOfProcessorTimeToSpend and
+     *                   derivedKeyLength which are both expected to parse as integers.
+     */    
+    void init(Properties parameters);
+
+    /**
+     * Initialize this function with the desired key length and processor cost.
      *
      * @param millisecondsOfProcessorTimeToSpend number of milliseconds to spend hashing the password.
      *                                           Based on this number and the power of the processor this is running on

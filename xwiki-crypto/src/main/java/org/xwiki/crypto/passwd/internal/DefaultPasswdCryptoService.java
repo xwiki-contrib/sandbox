@@ -19,17 +19,20 @@
  */
 package org.xwiki.crypto.passwd.internal;
 
+import java.util.Properties;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
 
 import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.internal.SerializationUtils;
 import org.xwiki.crypto.passwd.PasswdCryptoService;
 import org.xwiki.crypto.passwd.PasswordCiphertext;
+import org.xwiki.crypto.passwd.KeyDerivationFunction;
 import org.xwiki.crypto.passwd.PasswordVerificationFunction;
-import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
+import org.xwiki.crypto.passwd.PasswordCryptoServiceConfiguration;
 
 
 /**
@@ -53,7 +56,6 @@ import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
  * @version $Id$
  * @since 2.5
  */
-//TODO Configuration... Which cipher to use, which password verification function, which ket derivation function...
 @Component
 public class DefaultPasswdCryptoService implements PasswdCryptoService
 {
@@ -63,6 +65,10 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     /** Text which indicates the end of password based ciphertext. */
     private final String ciphertextFooter = "------END PASSWORD CIPHERTEXT------";
 
+    /** For deciding which classes to use for cipher and key functions. */
+    @Requirement
+    private PasswordCryptoServiceConfiguration config;
+
     /**
      * {@inheritDoc}
      * @see org.xwiki.crypto.passwd.PasswdCryptoService#encryptText(String, String)
@@ -70,15 +76,29 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
     public synchronized String encryptText(final String plaintext, final String password)
         throws GeneralSecurityException
     {
-        final PasswordCiphertext ciphertext = new CAST5PasswordCiphertext();
-        ciphertext.init(plaintext, password);
-
         try {
-            return   this.ciphertextHeader
-                   + Convert.toChunkedBase64String(ciphertext.serialize())
-                   + this.ciphertextFooter;
-        } catch (IOException e) {
-            throw new GeneralSecurityException("Failed to serialize ciphertext", e);
+            final KeyDerivationFunction keyFunction = 
+                this.config.getKeyDerivationFunctionClassForEncryption().newInstance();
+            final Properties keyFunctionProps =
+                this.config.getKeyDerivationFunctionPropertiesForEncryption();
+
+            // need to set derivedKeyLength property based on which ciphertext is used.
+            final PasswordCiphertext ciphertext = this.config.getCipherClass().newInstance();
+            keyFunctionProps.setProperty("derivedKeyLength",
+                                         Integer.valueOf(ciphertext.getRequiredKeySize()).toString());
+
+            keyFunction.init(keyFunctionProps);
+            ciphertext.init(plaintext, password, keyFunction);
+
+            try {
+                return   this.ciphertextHeader
+                       + Convert.toChunkedBase64String(ciphertext.serialize())
+                       + this.ciphertextFooter;
+            } catch (IOException e) {
+                throw new GeneralSecurityException("Failed to serialize ciphertext", e);
+            }
+        } catch (Exception e) {
+            throw new GeneralSecurityException("Failed to encrypt text", e);
         }
     }
 
@@ -113,12 +133,18 @@ public class DefaultPasswdCryptoService implements PasswdCryptoService
         throws GeneralSecurityException
     {
         try {
-            final MemoryHardKeyDerivationFunction kdf = new ScryptMemoryHardKeyDerivationFunction();
-            // Demand 1Mb memory for 100ms and output 16 byte key.
-            kdf.init(1024, 100, 16);
-            final PasswordVerificationFunction pvf = new DefaultPasswordVerificationFunction();
-            pvf.init(kdf, Convert.stringToBytes(password));
-            return Convert.toBase64String(pvf.serialize());
+            final KeyDerivationFunction keyFunction = 
+                this.config.getKeyDerivationFunctionClassForPasswordVerification().newInstance();
+            final Properties keyFunctionProps =
+                this.config.getKeyDerivationFunctionPropertiesForPasswordVerification();
+
+            keyFunction.init(keyFunctionProps);
+
+            final PasswordVerificationFunction passwordFunction = 
+                this.config.getPasswordVerificationFunctionClass().newInstance();
+
+            passwordFunction.init(keyFunction, Convert.stringToBytes(password));
+            return Convert.toBase64String(passwordFunction.serialize());
         } catch (Exception e) {
             throw new GeneralSecurityException("Unable to protect password", e);
         }
