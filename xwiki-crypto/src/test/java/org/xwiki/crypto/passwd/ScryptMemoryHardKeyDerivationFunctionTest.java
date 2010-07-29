@@ -155,7 +155,7 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
     public void scryptConformanceTest1() throws Exception
     {
         this.init(new byte[0], 16, 1, 1, 64);
-        byte[] out = this.hashPassword(new byte[0]);
+        byte[] out = this.deriveKey(new byte[0]);
         Assert.assertTrue(Arrays.equals(Hex.decode(this.outputSample1.getBytes("US-ASCII")),  out));
     }
 
@@ -163,7 +163,7 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
     public void scryptConformanceTest2() throws Exception
     {
         this.init(new byte[] {'N', 'a', 'C', 'l'}, 1024, 8, 16, 64);
-        byte[] out = this.hashPassword(new byte[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'});
+        byte[] out = this.deriveKey(new byte[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'});
         Assert.assertTrue(Arrays.equals(Hex.decode(this.outputSample2.getBytes("US-ASCII")),  out));
     }
 
@@ -172,7 +172,7 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
     {
         this.init(new byte[] {'S', 'o', 'd', 'i', 'u', 'm', 'C', 'h', 'l', 'o', 'r', 'i', 'd', 'e'},
                     16384, 8, 1, 64);
-        byte[] out = this.hashPassword(new byte[] {'p', 'l', 'e', 'a', 's', 'e', 'l', 'e', 't', 'm', 'e', 'i', 'n'});
+        byte[] out = this.deriveKey(new byte[] {'p', 'l', 'e', 'a', 's', 'e', 'l', 'e', 't', 'm', 'e', 'i', 'n'});
         Assert.assertTrue(Arrays.equals(Hex.decode(this.outputSample3.getBytes("US-ASCII")),  out));
     }
 
@@ -303,7 +303,7 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
     {
         this.init(targetMemory, targetTime, 64);
         long time = System.currentTimeMillis();
-        this.hashPassword("password".getBytes());
+        this.deriveKey("password".getBytes());
         int timeSpent = (int) (System.currentTimeMillis() - time);
         Assert.assertTrue("password hashing took " + timeSpent + " and target time was " + targetTime,
                           Math.abs(timeSpent - targetTime) < targetTime);
@@ -318,16 +318,16 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
 
         originalFunction.init(512, 200, 20);
         byte[] serial = originalFunction.serialize();
-        byte[] originalHash = originalFunction.hashPassword(password);
+        byte[] originalHash = originalFunction.deriveKey(password);
 
         // Prove that the function doesn't return the same output _every_ time
         final MemoryHardKeyDerivationFunction differentFunction = new ScryptMemoryHardKeyDerivationFunction();
         differentFunction.init(512, 200, 20);
-        byte[] differentHash = differentFunction.hashPassword(password);
+        byte[] differentHash = differentFunction.deriveKey(password);
         Assert.assertFalse(Arrays.equals(originalHash, differentHash));
 
         final KeyDerivationFunction serialFunction = (KeyDerivationFunction) SerializationUtils.deserialize(serial);
-        byte[] serialHash = serialFunction.hashPassword(password);
+        byte[] serialHash = serialFunction.deriveKey(password);
         Assert.assertTrue(Arrays.equals(originalHash, serialHash));
     }
 
@@ -337,7 +337,7 @@ public class ScryptMemoryHardKeyDerivationFunctionTest extends ScryptMemoryHardK
         final KeyDerivationFunction serialFunction = (KeyDerivationFunction)
             SerializationUtils.deserialize(Base64.decode(this.serializedScryptFunctionBase64.getBytes("US-ASCII")));
 
-        byte[] serialHash = serialFunction.hashPassword("password".getBytes());
+        byte[] serialHash = serialFunction.deriveKey("password".getBytes());
         Assert.assertEquals(serializedScryptFunctionHashOfPassword, new String(Base64.encode(serialHash)));
     }
 }

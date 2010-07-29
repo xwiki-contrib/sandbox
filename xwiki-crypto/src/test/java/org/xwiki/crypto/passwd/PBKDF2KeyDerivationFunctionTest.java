@@ -84,7 +84,7 @@ public class PBKDF2KeyDerivationFunctionTest
         int targetTimeToSpend = 1000;
         this.function.init(targetTimeToSpend, 20);
         long time = System.currentTimeMillis();
-        this.function.hashPassword("password".getBytes());
+        this.function.deriveKey("password".getBytes());
         int timeSpent = (int) (System.currentTimeMillis() - time);
         Assert.assertTrue("The actual time spent running the function was over 100% off "
                           + "from the specified target time.",
@@ -99,16 +99,16 @@ public class PBKDF2KeyDerivationFunctionTest
 
         final KeyDerivationFunction sha256Function = new PBKDF2KeyDerivationFunction(new SHA256Digest());
         sha256Function.init(500, 20);
-        byte[] originalHash = sha256Function.hashPassword(password);
+        byte[] originalHash = sha256Function.deriveKey(password);
         byte[] serial = sha256Function.serialize();
 
         // Prove that the function doesn't return the same output _every_ time
         sha256Function.init(500, 20);
-        byte[] differentHash = sha256Function.hashPassword(password);
+        byte[] differentHash = sha256Function.deriveKey(password);
         Assert.assertFalse(Arrays.equals(originalHash, differentHash));
 
         final KeyDerivationFunction serialFunction = (KeyDerivationFunction) SerializationUtils.deserialize(serial);
-        byte[] serialHash = serialFunction.hashPassword(password);
+        byte[] serialHash = serialFunction.deriveKey(password);
         Assert.assertTrue(Arrays.equals(originalHash, serialHash));
     }
 
@@ -118,7 +118,7 @@ public class PBKDF2KeyDerivationFunctionTest
         final KeyDerivationFunction serialFunction = (KeyDerivationFunction)
             SerializationUtils.deserialize(Base64.decode(this.serializedPBKDF2FunctionBase64.getBytes("US-ASCII")));
 
-        byte[] serialHash = serialFunction.hashPassword("password".getBytes("US-ASCII"));
+        byte[] serialHash = serialFunction.deriveKey("password".getBytes("US-ASCII"));
         Assert.assertEquals(serializedPBKDF2FunctionHashOfPassword, new String(Base64.encode(serialHash)));
     }
 }

@@ -104,9 +104,9 @@ public class PBKDF2KeyDerivationFunction extends AbstractKeyDerivationFunction
     /**
      * {@inheritDoc}
      *
-     * @see: org.xwiki.crypto.AbstractKeyDerivationFunction#hashPassword(byte[])
+     * @see: org.xwiki.crypto.AbstractKeyDerivationFunction#deriveKey(byte[])
      */
-    public synchronized byte[] hashPassword(byte[] password)
+    public synchronized byte[] deriveKey(byte[] password)
     {
         return generateDerivedKey(password, this.salt, this.iterationCount, this.derivedKeyLength);
     }

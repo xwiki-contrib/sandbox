@@ -128,7 +128,7 @@ public abstract class AbstractKeyDerivationFunction implements KeyDerivationFunc
         // Run until 4 milliseconds have gone by.
         int numberOfCycles = 0;
         while ((System.currentTimeMillis() - time) < testLength) {
-            this.hashPassword(salt);
+            this.deriveKey(salt);
             numberOfCycles += testIterationCount;
         }
         // Set the iteration count to target run time / testLength (because the test run went testLength milliseconds)

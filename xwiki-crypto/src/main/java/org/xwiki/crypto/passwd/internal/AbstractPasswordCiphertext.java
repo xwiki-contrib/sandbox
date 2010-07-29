@@ -126,7 +126,7 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
     /**
      * Generate a key (and an initialization vector) for the encryption engine.
      * This function uses a {@link KeyDerivationFunction}
-     * This function expects this.keyFunction#hashPassword to return a byte array
+     * This function expects this.keyFunction#deriveKey to return a byte array
      * which is the size of the key + size of the initialization vector.
      *
      * @param password The user supplied password for encryption/decryption.
@@ -139,7 +139,7 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
         final byte[] key = new byte[this.getKeyLength()];
         final byte[] iv = new byte[this.getCipher().getBlockSize()];
 
-        final byte[] keyAndIV = this.keyFunction.hashPassword(passbytes);
+        final byte[] keyAndIV = this.keyFunction.deriveKey(passbytes);
 
         System.arraycopy(keyAndIV, 0, key, 0, key.length);
         System.arraycopy(keyAndIV, key.length, iv, 0, iv.length);

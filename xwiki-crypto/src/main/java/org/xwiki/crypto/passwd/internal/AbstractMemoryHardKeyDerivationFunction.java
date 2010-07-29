@@ -28,7 +28,7 @@ import org.xwiki.crypto.passwd.MemoryHardKeyDerivationFunction;
 /**
  * Abstract memory hard key derivation function.
  * to subclass this, simply implement init(int, int, int) from MemoryHardKeyDerivationFunction
- * and isInitialized() and hashPassword(byte[]) from  KeyDerivationFunction.
+ * and isInitialized() and deriveKey(byte[]) from  KeyDerivationFunction.
  * Be careful, this class is serializable, serialization and deserialization should yield a function which provides
  * the same password to key mapping, and make sure fields unnecessary to this are declared transient.
  *

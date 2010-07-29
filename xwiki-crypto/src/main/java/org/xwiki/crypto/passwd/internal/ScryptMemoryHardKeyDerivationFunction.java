@@ -183,9 +183,9 @@ public class ScryptMemoryHardKeyDerivationFunction extends AbstractMemoryHardKey
     /**
      * {@inheritDoc}
      *
-     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#hashPassword(byte[])
+     * @see: org.xwiki.crypto.MemoryHardKeyDerivationFunction#deriveKey(byte[])
      */
-    public byte[] hashPassword(final byte[] password)
+    public byte[] deriveKey(final byte[] password)
     {
         try {
             this.allocateMemory(true);

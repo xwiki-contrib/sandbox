@@ -57,7 +57,7 @@ public class DefaultPasswordVerificationFunction implements PasswordVerification
                      final byte[] password)
     {
         this.underlyingHashFunction = underlyingHashFunction;
-        this.passwordHash = this.underlyingHashFunction.hashPassword(password);
+        this.passwordHash = this.underlyingHashFunction.deriveKey(password);
     }
 
     /**
@@ -77,6 +77,6 @@ public class DefaultPasswordVerificationFunction implements PasswordVerification
      */
     public boolean isPasswordCorrect(final byte[] password)
     {
-        return Arrays.equals(this.passwordHash, this.underlyingHashFunction.hashPassword(password));
+        return Arrays.equals(this.passwordHash, this.underlyingHashFunction.deriveKey(password));
     }
 }

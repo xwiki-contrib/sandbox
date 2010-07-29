@@ -81,5 +81,5 @@ public interface KeyDerivationFunction extends Serializable
      * @param password the user supplied password.
      * @return a byte array derived from the password.
      */
-    byte[] hashPassword(final byte[] password);
+    byte[] deriveKey(final byte[] password);
 }
