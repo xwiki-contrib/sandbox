@@ -23,6 +23,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
 import org.xwiki.crypto.x509.X509CryptoService;
+import org.xwiki.crypto.passwd.PasswordCryptoService;
 
 import org.xwiki.script.service.ScriptService;
 
@@ -36,16 +37,12 @@ import org.xwiki.script.service.ScriptService;
 @Component(roles = { ScriptService.class }, hints = { "crypto" })
 public class CryptoScriptService implements ScriptService
 {
-    /** The service which this class wraps. */
+    /** The x509/CMS service. */
     @Requirement
     public X509CryptoService x509;
 
-    /**
-     * @return the x509 crypto service
-     */
-    public X509CryptoService getX509()
-    {
-        return this.x509;
-    }
+    /** The password encryption and password hashing/protection service. */
+    @Requirement
+    public PasswordCryptoService passwd;
 }
 
