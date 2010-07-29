@@ -30,7 +30,7 @@ import org.xwiki.component.annotation.ComponentRole;
  * @since 2.5
  */
 @ComponentRole
-public interface PasswdCryptoService
+public interface PasswordCryptoService
 {
     /**
      * Encipher the given text with the password. The same password will be able to decipher it.

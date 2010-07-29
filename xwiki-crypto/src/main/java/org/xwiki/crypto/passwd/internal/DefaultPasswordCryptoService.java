@@ -28,7 +28,7 @@ import org.xwiki.component.annotation.Requirement;
 
 import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.internal.SerializationUtils;
-import org.xwiki.crypto.passwd.PasswdCryptoService;
+import org.xwiki.crypto.passwd.PasswordCryptoService;
 import org.xwiki.crypto.passwd.PasswordCiphertext;
 import org.xwiki.crypto.passwd.KeyDerivationFunction;
 import org.xwiki.crypto.passwd.PasswordVerificationFunction;
@@ -57,7 +57,7 @@ import org.xwiki.crypto.passwd.PasswordCryptoServiceConfiguration;
  * @since 2.5
  */
 @Component
-public class DefaultPasswdCryptoService implements PasswdCryptoService
+public class DefaultPasswordCryptoService implements PasswordCryptoService
 {
     /** Text which indicates the beginning of password based ciphertext. */
     private final String ciphertextHeader = "------BEGIN PASSWORD CIPHERTEXT-----\n";

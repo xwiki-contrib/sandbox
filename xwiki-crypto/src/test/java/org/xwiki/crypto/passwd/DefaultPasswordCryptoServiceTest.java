@@ -34,7 +34,7 @@ import org.xwiki.test.AbstractComponentTestCase;
  * @version $Id$
  * @since 2.5
  */
-public class DefaultPasswdCryptoServiceTest extends AbstractComponentTestCase
+public class DefaultPasswordCryptoServiceTest extends AbstractComponentTestCase
 {
     /** Length = 272 byte = 17 * 16 */
     private final String textToEncrypt = "Congress shall make no law respecting an establishment of religion, or "
@@ -48,13 +48,13 @@ public class DefaultPasswdCryptoServiceTest extends AbstractComponentTestCase
 
     private final String password = "Snuffle";
 
-    protected PasswdCryptoService service;
+    protected PasswordCryptoService service;
 
     @Before
     public void setUp() throws Exception
     {
         super.setUp();
-        this.service = getComponentManager().lookup(PasswdCryptoService.class);
+        this.service = getComponentManager().lookup(PasswordCryptoService.class);
     }
 
     @Test
