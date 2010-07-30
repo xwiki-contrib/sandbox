@@ -98,28 +98,6 @@ public class DefaultX509CryptoService implements X509CryptoService
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.x509.X509CryptoService#encryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509Certificate[])
-     */
-    public String encryptText(final String plaintext, final XWikiX509Certificate[] certificatesToEncryptFor)
-        throws GeneralSecurityException
-    {
-        throw new GeneralSecurityException("Not implemented yet. ");
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see org.xwiki.crypto.x509.X509CryptoService#decryptText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
-     */
-    public String decryptText(final String base64Ciphertext,
-                              final XWikiX509KeyPair toDecryptWith,
-                              final String password)
-        throws GeneralSecurityException
-    {
-        throw new GeneralSecurityException("Not implemented yet.");
-    }
-
-    /**
-     * {@inheritDoc}
      * @see org.xwiki.crypto.x509.X509CryptoService#certFromPEM(java.lang.String)
      */
     public XWikiX509Certificate certFromPEM(final String pemFormatCert)

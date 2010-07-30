@@ -88,33 +88,6 @@ public interface X509CryptoService
         throws GeneralSecurityException;
 
     /**
-     * Encrypt a piece of text in pkcs#7/CMS/SMIME format with a public key so that only the holder of the matching 
-     * private key may read it. The private key need not be on the server and this format is supported by major
-     * email clients allowing sensitive data to be stored encrypted and mailed to authorized people.
-     *
-     * @param plaintext the text to encrypt.
-     * @param certificatesToEncryptFor one or more X509 certificates (in Base64 encoded DER format) belonging to people
-     *                                 authorized to read the data.
-     * @return Base64 encoded ciphertext which can be decrypted back to plaintext by any of the private keys
-     *         matching certificatesToEncryptFor.
-     * @throws GeneralSecurityException if something goes wrong.
-     */
-    String encryptText(final String plaintext, final XWikiX509Certificate[] certificatesToEncryptFor)
-        throws GeneralSecurityException;
-
-    /**
-     * Decrypt a piece of text encrypted with encryptText.
-     *
-     * @param base64Ciphertext Base64 encoded ciphertext to decrypt.
-     * @param toDecryptWith the certificate and private key belonging to the user who wants to decrypt the text.
-     * @param password to access the private key in the key pair.
-     * @return the decrypted text or null if the provided key is not sufficient to decrypt (wrong key).
-     * @throws GeneralSecurityException if something goes wrong.
-     */
-    String decryptText(final String base64Ciphertext, final XWikiX509KeyPair toDecryptWith, final String password)
-        throws GeneralSecurityException;
-
-    /**
      * Deserialize an X509 certificate from a PEM formatted string.
      * @param pemFormatCert a String created by {@link org.xwiki.crypto.data.XWikiX509Certificate#toPEMString()}
      *                      or from OpenSSL or any other standards compliant X509 certificate generator in PEM format.
