@@ -77,6 +77,9 @@ public abstract class AbstractEscapingTest implements FileTest
     /** HTTP client shared between all subclasses. */
     private static HttpClient client;
 
+    /** A flag controlling login. If true, administrator credentials are used. */
+    private static boolean loggedIn = true;
+
     /** File name of the template to use. */
     protected String name;
 
@@ -223,6 +226,26 @@ public abstract class AbstractEscapingTest implements FileTest
     protected abstract Set<String> parse(Reader reader);
 
     /**
+     * Check if the authentication status.
+     * 
+     * @return true if the requests will be sent authenticated as admin, false otherwise
+     */
+    protected static boolean isLoggedIn()
+    {
+        return loggedIn;
+    }
+
+    /**
+     * Set authentication status.
+     * 
+     * @param value the value to set
+     */
+    protected static void setLoggedIn(boolean value)
+    {
+        loggedIn = value;
+    }
+
+    /**
      * Download a page from the server and return its content. Throws a {@link RuntimeException}
      * on connection problems etc.
      * 
@@ -233,15 +256,27 @@ public abstract class AbstractEscapingTest implements FileTest
     {
         GetMethod get = new GetMethod(url);
         get.setFollowRedirects(true);
-        get.setDoAuthentication(true);
-        get.addRequestHeader("Authorization", "Basic " + new String(Base64.encodeBase64("Admin:admin".getBytes())));
+        if (isLoggedIn()) {
+            get.setDoAuthentication(true);
+            get.addRequestHeader("Authorization", "Basic " + new String(Base64.encodeBase64("Admin:admin".getBytes())));
+        }
 
         try {
             int statusCode = AbstractEscapingTest.getClient().executeMethod(get);
-            // ignore 404 (the page is still rendered)
-            if (statusCode != HttpStatus.SC_OK && statusCode != HttpStatus.SC_NOT_FOUND) {
-                throw new RuntimeException("HTTP GET request returned status " + statusCode + " ("
-                    + get.getStatusText() + ") for URL: " + url);
+            switch (statusCode) {
+                case HttpStatus.SC_OK:
+                    // everything is fine
+                    break;
+                case HttpStatus.SC_UNAUTHORIZED:
+                    // do not fail on 401 (unauthorized), used in some tests
+                    System.out.println("WARNING, Ignoring status 401 (unauthorized) for URL: " + url);
+                    break;
+                case HttpStatus.SC_NOT_FOUND:
+                    // ignore 404 (the page is still rendered)
+                    break;
+                default:
+                    throw new RuntimeException("HTTP GET request returned status " + statusCode + " ("
+                        + get.getStatusText() + ") for URL: " + url);
             }
 
             // get the data, converting to utf-8
