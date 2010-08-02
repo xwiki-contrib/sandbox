@@ -42,6 +42,7 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.internal.UserDocumentUtils;
+import org.xwiki.crypto.passwd.PasswordCryptoService;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
@@ -72,6 +73,10 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     /** Used to get user certificates. */
     @Requirement
     private UserDocumentUtils docUtils;
+
+    /** Used to encrypt generated key pairs. */
+    @Requirement
+    private PasswordCryptoService cryptoService;
 
     /** FIXME. */
     private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>();
@@ -131,7 +136,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
 
         XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey));
         String fingerprint = cert.getFingerprint();
-        XWikiX509KeyPair keys = new DefaultXWikiX509KeyPair(kp.getPrivate(), password, cert);
+        XWikiX509KeyPair keys = new DefaultXWikiX509KeyPair(cert, kp.getPrivate(), password, this.cryptoService);
         try {
             // register the certificate in user document forst (might fail)
             this.docUtils.addCertificateFingerprint(this.docUtils.getCurrentUser(), fingerprint);

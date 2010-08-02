@@ -19,6 +19,7 @@
  */
 package org.xwiki.signedscripts.framework;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.LinkedList;
@@ -29,6 +30,7 @@ import org.jmock.Expectations;
 import org.junit.Before;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.crypto.internal.UserDocumentUtils;
+import org.xwiki.crypto.passwd.PasswordCryptoService;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
@@ -204,17 +206,17 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
     {
         try {
             if (this.cachedKeyPair == null) {
-                this.cachedKeyPair = new DefaultXWikiX509KeyPair(KP_PEM, KP_PASS);
+                this.cachedKeyPair = DefaultXWikiX509KeyPair.deserializeFromBase64(KP_PEM);
             }
             return this.cachedKeyPair;
-        } catch (GeneralSecurityException exception) {
+        } catch (IOException exception) {
             // should not happen
             throw new RuntimeException(exception);
         }
     }
 
     /**
-     * Manually "reister" a fingerprint. It will be included into the list returned by the mocked
+     * Manually "register" a fingerprint. It will be included into the list returned by the mocked
      * {@link UserDocumentUtils#getCertificateFingerprintsForUser(String)}
      * 
      * @param fingerprint the fingerprint to add
