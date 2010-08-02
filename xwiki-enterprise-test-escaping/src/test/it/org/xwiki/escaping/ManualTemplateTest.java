@@ -20,12 +20,21 @@
 
 package org.xwiki.escaping;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import junit.framework.Assert;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
@@ -40,12 +49,16 @@ import org.xwiki.escaping.framework.XMLEscapingValidator;
  */
 public class ManualTemplateTest extends AbstractEscapingTest
 {
+    /** List of URLs that should be deleted in {@link #tearDown()}.
+     *  @see #createPage(String, String, String, String) */
+    private List<String> toDeleteURLs = new LinkedList<String>();
+
     /**
      * Create new ManualTemplateTest, needed for JUnit.
      */
     public ManualTemplateTest()
     {
-        super(Pattern.compile(".*\\.vm"));
+        super(Pattern.compile(".*"));
     }
 
     // already covered
@@ -62,10 +75,10 @@ public class ManualTemplateTest extends AbstractEscapingTest
     @Test
     public void testEditReflectedXSS()
     {
-        if (!initialize("XWIKI-4758", null)) {
+        if (!initialize("XWIKI-5190", null)) {
             return;
         }
-        checkUnderEscaping(createUrl("edit", "Main", XMLEscapingValidator.getTestString(), null), "page");
+        checkUnderEscaping(createUrl("edit", "Main", XMLEscapingValidator.getTestString(), null), "XWIKI-4758");
     }
 
     @Test
@@ -127,16 +140,15 @@ public class ManualTemplateTest extends AbstractEscapingTest
     }
 
     @Test
-    public void testBrowseWysiwygSQL()
+    public void testBrowseWysiwygSQL() throws IOException
     {
         if (!initialize("XWIKI-5193", null)) {
             return;
         }
-        // FIXME check for SQL escaping (i.e. additionally check for \ and ;)
-        checkUnderEscaping(createUrl("view", "Sandbox", "WebHome", getTestParams("xpage", "browsewysiwyg", "text")),
-            "browsewysiwyg sql");
-        // TODO check that there is no error on the page
-        // Assert.assertTrue(getDriver().findElements(By.xpath("//pre[@class='xwikierror']")).isEmpty());
+        // TODO check for SQL escaping (i.e. additionally put \ and ;)
+        String url = createUrl("view", "Sandbox", "WebHome", getTestParams("xpage", "browsewysiwyg", "text"));
+        checkUnderEscaping(url, "browsewysiwyg sql");
+        checkForErrorTrace(url);
     }
 
     @Test
@@ -146,8 +158,8 @@ public class ManualTemplateTest extends AbstractEscapingTest
         if (!initialize("XWIKI-5193", null)) {
             return;
         }
-        // FIXME need an existing page with name = title = test string
-        // createPage("Main", test, test, "Bla bla");
+        // need an existing page with name = title = test string
+        createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("browsewysiwyg", null, null)),
             "browsewysiwyg");
     }
@@ -158,25 +170,26 @@ public class ManualTemplateTest extends AbstractEscapingTest
         if (!initialize("XWIKI-5193", null)) {
             return;
         }
-        // FIXME need an existing page with name = title = test string
-        // createPage("Main", test, test, "Bla bla");
+        // need an existing page with name = title = test string
+        createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("recentdocwysiwyg", null, null)),
             "wysiwyg recent docs");
     }
 
     @Test
-    public void testSearchWysiwygSQL()
+    public void testSearchWysiwygSQL() throws IOException
     {
         if (!initialize("XWIKI-5344", null)) {
             return;
         }
-        // FIXME check for SQL escaping (i.e. additionally check for \ and ;)
-        checkUnderEscaping(createUrl("view", "Main", "Test", getTestParams("xpage", "searchwysiwyg", "space")),
-            "searchwysiwyg sql space");
-        checkUnderEscaping(createUrl("view", "Main", "Test", getTestParams("xpage", "searchwysiwyg", "page")),
-            "searchwysiwyg sql page");
-        // TODO check that there is no error on the page
-        // Assert.assertTrue(getDriver().findElements(By.xpath("//pre[@class='xwikierror']")).isEmpty());
+        // TODO check for SQL escaping (i.e. additionally put \ and ;)
+        String spaceUrl = createUrl("view", "Main", "Test", getTestParams("xpage", "searchwysiwyg", "space"));
+        checkUnderEscaping(spaceUrl, "searchwysiwyg sql space");
+        checkForErrorTrace(spaceUrl);
+
+        String pageUrl = createUrl("view", "Main", "Test", getTestParams("xpage", "searchwysiwyg", "page"));
+        checkUnderEscaping(pageUrl, "searchwysiwyg sql page");
+        checkForErrorTrace(pageUrl);
     }
 
     @Test
@@ -185,8 +198,8 @@ public class ManualTemplateTest extends AbstractEscapingTest
         if (!initialize("XWIKI-5344", null)) {
             return;
         }
-        // FIXME need an existing page with name = title = test string
-        // createPage("Main", test, test, "Bla bla");
+        // need an existing page with name = title = test string
+        createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("searchwysiwyg", null, null)),
             "searchwysiwyg");
     }
@@ -197,10 +210,14 @@ public class ManualTemplateTest extends AbstractEscapingTest
         if (!initialize("login redirect", null)) {
             return;
         }
-        // FIXME need to be logged off
-        // getUtil().setSession(null);
-        checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("xredirect")),
-            "login redirect");
+        // need to be logged off
+        setLoggedIn(false);
+        try {
+            checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("xredirect")),
+                "login redirect");
+        } finally {
+            setLoggedIn(true);
+        }
     }
 
     @Test
@@ -209,10 +226,14 @@ public class ManualTemplateTest extends AbstractEscapingTest
         if (!initialize("login srid", null)) {
             return;
         }
-        // FIXME need to be logged off
-        // getUtil().setSession(null);
-        checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("srid")),
-            "login srid");
+        // need to be logged off
+        setLoggedIn(false);
+        try {
+            checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("srid")),
+                "login srid");
+        } finally {
+            setLoggedIn(true);
+        }
     }
 
     @Test
@@ -221,8 +242,8 @@ public class ManualTemplateTest extends AbstractEscapingTest
         if (!initialize("edit comment", null)) {
             return;
         }
-        // FIXME need an existing page with name = title = test string
-        // createPage("Main", test, test, "Bla bla");
+        // need an existing page with name = title = test string
+        createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
         checkUnderEscaping(createUrl("edit", "Main", "WebHome", getTestParams("editor", "wiki", "comment")),
             "edit comment");
     }
@@ -245,8 +266,8 @@ public class ManualTemplateTest extends AbstractEscapingTest
         if (!initialize("XWIKI-5206", null)) {
             return;
         }
-        // FIXME need an existing page with name = test string
-        // createPage("Main", test, "", "Bla bla");
+        // need an existing page with name = test string
+        createPage("Main", XMLEscapingValidator.getTestString(), "", "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", XMLEscapingValidator.getTestString(),
             getTestParams("xpage", "copy", null)), "copy existing");
     }
@@ -280,8 +301,10 @@ public class ManualTemplateTest extends AbstractEscapingTest
             HashMap<String, String> params = getParamsFor("rename", "step", "2");
             // HTTP 400 is returned if newPageName is empty, 409 if the new page exist
             if (!params.containsKey("newPageName")) {
-                // TODO cleanup
-                params.put("newPageName", "testRename" + System.nanoTime());
+                String page = "testRename" + System.nanoTime();
+                params.put("newPageName", page);
+                // the above may create a page, schedule for deletion
+                this.toDeleteURLs.add(createUrl("delete", null, page, getTestParams("confirm", "1", null)));
             }
             params.put(parameter, XMLEscapingValidator.getTestString());
             String url = createUrl(null, null, null, params);
@@ -352,8 +375,59 @@ public class ManualTemplateTest extends AbstractEscapingTest
     private HashMap<String, String> getTestParams(String parameter, String value, String testedParameter)
     {
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put(parameter, XMLEscapingValidator.getTestString());
+        params.put(parameter, value);
+        if (testedParameter != null) {
+            params.put(testedParameter, XMLEscapingValidator.getTestString());
+        }
         return params;
+    }
+
+    /**
+     * Check that there is no error trace on the given URL.
+     * TODO do not download the same URL twice (usually {@link #checkUnderEscaping(String, String)} is also used)
+     * 
+     * @param url the URL to download
+     * @throws IOException on connection errors
+     */
+    private void checkForErrorTrace(String url) throws IOException
+    {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(AbstractEscapingTest.getUrlContent(url)));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            Assert.assertFalse("The page contains a error trace", line.matches("^.*<pre\\s+class=\"xwikierror\">.*$"));
+        }
+    }
+
+    /**
+     * Create a page with the given data. This page is automatically deleted in {@link #tearDown()}.
+     * 
+     * @param space space name
+     * @param page page name
+     * @param title document title
+     * @param content document content
+     */
+    private void createPage(String space, String page, String title, String content)
+    {
+        // create
+        Map<String, String> params = getTestParams("title", title, null);
+        params.put("content", content);
+        params.put("action_save", "Save+%26+View");
+        String url = createUrl("save", space, page, params);
+        AbstractEscapingTest.getUrlContent(url);
+        // schedule for deletion
+        this.toDeleteURLs.add(createUrl("delete", space, page, getTestParams("confirm", "1", null)));
+    }
+
+    /**
+     * Clean up.
+     */
+    @Before
+    public void tearDown()
+    {
+        // delete all created pages
+        for (String url : this.toDeleteURLs) {
+            AbstractEscapingTest.getUrlContent(url);
+        }
     }
 }
 
