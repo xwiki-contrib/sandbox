@@ -252,6 +252,18 @@ public class ManualTemplateTest extends AbstractEscapingTest
     }
 
     @Test
+    public void testCreateEditMode()
+    {
+        if (!initialize("templates/create.vm", null)) {
+            return;
+        }
+        checkUnderEscaping(createUrl("edit", "Main", XMLEscapingValidator.getTestString(),
+            getParamsFor("createinline", null, null)), "XWIKI-5207 create inline");
+        checkUnderEscaping(createUrl("edit", "Main", XMLEscapingValidator.getTestString(),
+            getParamsFor("create", "ajax", "1")), "XWIKI-5207 create ajax");
+    }
+
+    @Test
     public void testCopySourcedoc()
     {
         testCopy("sourcedoc");
