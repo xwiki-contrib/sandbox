@@ -48,6 +48,17 @@ public class ManualTemplateTest extends AbstractEscapingTest
         super(Pattern.compile(".*\\.vm"));
     }
 
+    // already covered
+    // XWIKI-5205
+    // XWIKI-5209
+    // XWIKI-5193 (space)
+    // XWIKI-5344 (space)
+    // XWIKI-5204
+    // testImported()
+
+    // too complicated to cover
+    // testVersionSummary()
+
     @Test
     public void testEditReflectedXSS()
     {
@@ -56,13 +67,6 @@ public class ManualTemplateTest extends AbstractEscapingTest
         }
         checkUnderEscaping(createUrl("edit", "Main", XMLEscapingValidator.getTestString(), null), "page");
     }
-
-    /*
-        HashMap<String, String> params = getParamsFor("copy", "targetdoc", "bla");
-        params.put(parameter, XMLEscapingValidator.getTestString());
-        String url = createUrl(null, null, null, params);
-        checkUnderEscaping(url, "\"" + parameter + "\"");
-     */
 
     @Test
     public void testErrorTraceEscaping()
@@ -210,19 +214,6 @@ public class ManualTemplateTest extends AbstractEscapingTest
         checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("srid")),
             "login srid");
     }
-
-/*
-    // allready covered
-    // XWIKI-5205
-    // XWIKI-5209
-    // XWIKI-5193 (space)
-    // XWIKI-5344 (space)
-    // XWIKI-5204
-    // testImported()
-
-    // too complicated to cover
-    // testVersionSummary()
- */
 
     @Test
     public void testEditActions()
