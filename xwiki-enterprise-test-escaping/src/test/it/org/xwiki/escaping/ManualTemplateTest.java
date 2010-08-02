@@ -75,7 +75,7 @@ public class ManualTemplateTest extends AbstractEscapingTest
     @Test
     public void testEditReflectedXSS()
     {
-        if (!initialize("XWIKI-5190", null)) {
+        if (!initialize("templates/htmlheader.vm", null)) {
             return;
         }
         checkUnderEscaping(createUrl("edit", "Main", XMLEscapingValidator.getTestString(), null), "XWIKI-4758");
@@ -84,70 +84,73 @@ public class ManualTemplateTest extends AbstractEscapingTest
     @Test
     public void testErrorTraceEscaping()
     {
-        if (!initialize("XWIKI-5170", null)) {
+        if (!initialize("templates/exceptioninline.vm", null)) {
             return;
         }
-        checkUnderEscaping(createUrl("viewrev", "Main", "WebHome", getTestParams("rev")), "error trace");
+        checkUnderEscaping(createUrl("viewrev", "Main", "WebHome", getTestParams("rev")), "XWIKI-5170 error trace");
     }
 
     @Test
     public void testEditorEscaping()
     {
-        if (!initialize("XWIKI-5164", null)) {
+        if (!initialize("templates/edit.vm", null)) {
             return;
         }
         // tests for XWIKI-5164, XML symbols in editor parameter should be escaped
-        checkUnderEscaping(createUrl("edit", "Main", "Page", getTestParams("editor")), "editor");
-        checkUnderEscaping(createUrl("edit", "Main", "Page", getTestParams("editor", "wysiwyg", "section")), "section");
+        checkUnderEscaping(createUrl("edit", "Main", "Page", getTestParams("editor")), "XWIKI-5164 editor");
+        checkUnderEscaping(createUrl("edit", "Main", "Page", getTestParams("editor", "wysiwyg", "section")),
+            "XWIKI-5164 section");
         checkUnderEscaping(createUrl("edit", "Main", "Page", getTestParams("editor", "wiki", "x-maximized")),
-            "x-maximized");
+            "XWIKI-5164 x-maximized");
     }
 
     @Test
     public void testAdminEditor()
     {
-        if (!initialize("XWIKI-5190", null)) {
+        if (!initialize("templates/admin.vm", null)) {
             return;
         }
-        checkUnderEscaping(createUrl("admin", "XWiki", "AdminSheet", getTestParams("editor")), "admin editor");
+        checkUnderEscaping(createUrl("admin", "XWiki", "AdminSheet", getTestParams("editor")),
+            "XWIKI-5190 admin editor");
         // same page after redirect
         checkUnderEscaping(createUrl("view", "Main", "WebHome", getTestParams("xpage", "admin", "editor")),
-            "admin editor redirect");
+            "XWIKI-5190 admin editor redirect");
     }
 
     @Test
     public void testAdminSection()
     {
-        if (!initialize("XWIKI-5190", null)) {
+        if (!initialize("templates/admin.vm", null)) {
             return;
         }
         // kind of covered (only the redirect version)
-        checkUnderEscaping(createUrl("admin", "XWiki", "AdminSheet", getTestParams("section")), "admin section");
+        checkUnderEscaping(createUrl("admin", "XWiki", "AdminSheet", getTestParams("section")),
+            "XWIKI-5190 admin section");
         // same page after redirect
         checkUnderEscaping(createUrl("view", "Main", "WebHome", getTestParams("xpage", "admin", "section")),
-            "admin section redirect");
+            "XWIKI-5190 admin section redirect");
     }
 
     @Test
     public void testAttachmentsInline()
     {
-        if (!initialize("XWIKI-5191", null)) {
+        if (!initialize("templates/attachments*.vm", null)) {
             return;
         }
         // need a page with attachments, Sandbox has an image attached by default
         checkUnderEscaping(createUrl("view", "Sandbox", "WebHome", getTestParams("viewer", "attachments", "xredirect")),
-            "attachments inline");
+            "XWIKI-5191 attachments inline");
     }
 
     @Test
     public void testBrowseWysiwygSQL() throws IOException
     {
-        if (!initialize("XWIKI-5193", null)) {
+        if (!initialize("templates/browsewysiwyg.vm", null)) {
             return;
         }
         // TODO check for SQL escaping (i.e. additionally put \ and ;)
         String url = createUrl("view", "Sandbox", "WebHome", getTestParams("xpage", "browsewysiwyg", "text"));
-        checkUnderEscaping(url, "browsewysiwyg sql");
+        checkUnderEscaping(url, "XWIKI-5193 sql");
         checkForErrorTrace(url);
     }
 
@@ -155,66 +158,66 @@ public class ManualTemplateTest extends AbstractEscapingTest
     public void testBrowseWysiwygPage()
     {
         // also covers former testBrowseWysiwygPageLink()
-        if (!initialize("XWIKI-5193", null)) {
+        if (!initialize("templates/browsewysiwyg.vm", null)) {
             return;
         }
         // need an existing page with name = title = test string
         createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("browsewysiwyg", null, null)),
-            "browsewysiwyg");
+            "XWIKI-5193 page");
     }
 
     @Test
     public void testWysiwygRecentViewsPage()
     {
-        if (!initialize("XWIKI-5193", null)) {
+        if (!initialize("templates/recentdocwysiwyg.vm", null)) {
             return;
         }
         // need an existing page with name = title = test string
         createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("recentdocwysiwyg", null, null)),
-            "wysiwyg recent docs");
+            "XWIKI-5193 recent docs");
     }
 
     @Test
     public void testSearchWysiwygSQL() throws IOException
     {
-        if (!initialize("XWIKI-5344", null)) {
+        if (!initialize("templates/searchwysiwyg.vm", null)) {
             return;
         }
         // TODO check for SQL escaping (i.e. additionally put \ and ;)
         String spaceUrl = createUrl("view", "Main", "Test", getTestParams("xpage", "searchwysiwyg", "space"));
-        checkUnderEscaping(spaceUrl, "searchwysiwyg sql space");
+        checkUnderEscaping(spaceUrl, "XWIKI-5344 sql space");
         checkForErrorTrace(spaceUrl);
 
         String pageUrl = createUrl("view", "Main", "Test", getTestParams("xpage", "searchwysiwyg", "page"));
-        checkUnderEscaping(pageUrl, "searchwysiwyg sql page");
+        checkUnderEscaping(pageUrl, "XWIKI-5344 sql page");
         checkForErrorTrace(pageUrl);
     }
 
     @Test
     public void testSearchWysiwygPageLink()
     {
-        if (!initialize("XWIKI-5344", null)) {
+        if (!initialize("templates/searchwysiwyg.vm", null)) {
             return;
         }
         // need an existing page with name = title = test string
         createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("searchwysiwyg", null, null)),
-            "searchwysiwyg");
+            "XWIKI-5344 page link");
     }
 
     @Test
     public void testLoginRedirect()
     {
-        if (!initialize("login redirect", null)) {
+        if (!initialize("templates/login.vm", null)) {
             return;
         }
         // need to be logged off
         setLoggedIn(false);
         try {
             checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("xredirect")),
-                "login redirect");
+                "XWIKI-5246 xredirect");
         } finally {
             setLoggedIn(true);
         }
@@ -223,14 +226,14 @@ public class ManualTemplateTest extends AbstractEscapingTest
     @Test
     public void testLoginSrid()
     {
-        if (!initialize("login srid", null)) {
+        if (!initialize("templates/login.vm", null)) {
             return;
         }
         // need to be logged off
         setLoggedIn(false);
         try {
             checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("srid")),
-                "login srid");
+                "XWIKI-5246 srid");
         } finally {
             setLoggedIn(true);
         }
@@ -263,13 +266,13 @@ public class ManualTemplateTest extends AbstractEscapingTest
     @Test
     public void testCopyExistingPage()
     {
-        if (!initialize("XWIKI-5206", null)) {
+        if (!initialize("templates/copy.vm", null)) {
             return;
         }
         // need an existing page with name = test string
         createPage("Main", XMLEscapingValidator.getTestString(), "", "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", XMLEscapingValidator.getTestString(),
-            getTestParams("xpage", "copy", null)), "copy existing");
+            getTestParams("xpage", "copy", null)), "XWIKI-5206 copy existing page");
     }
 
     /**
