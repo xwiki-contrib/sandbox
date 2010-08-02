@@ -117,7 +117,6 @@ public class X509SignatureService
                     if (!signer.verify(certificate.getPublicKey(), PROVIDER)) {
                         return null;
                     }
-                    // FIXME I don't really need the certificate here, fingerprint would suffice
                     if (certificate instanceof X509Certificate) {
                         result = new XWikiX509Certificate((X509Certificate) certificate, null);
                     }

@@ -23,8 +23,12 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateExpiredException;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.crypto.passwd.PasswordCryptoService;
+import org.xwiki.crypto.passwd.internal.DefaultPasswordCryptoService;
 import org.xwiki.crypto.x509.internal.X509KeyService;
+import org.xwiki.test.AbstractComponentTestCase;
 
 /**
  * KeyService test, insure that the key service is able to make keys without throwing an exception.
@@ -32,7 +36,7 @@ import org.xwiki.crypto.x509.internal.X509KeyService;
  * @version $Id$
  * @since 2.5
  */
-public class X509KeyServiceTest
+public class X509KeyServiceTest extends AbstractComponentTestCase
 {
     /** This is a public key generated in the browser and passed to the server. */
     private final String spkacSerialization = "MIICTTCCATUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDC4aLkoIHw\n"
@@ -55,17 +59,30 @@ public class X509KeyServiceTest
     /** Storing a single keypair for as many tests as possible because they take a long time to generate. */
     private static XWikiX509KeyPair keyPair;
 
-    public static XWikiX509KeyPair getKeyPair()
+    public static XWikiX509KeyPair getKeyPair(PasswordCryptoService passwordService)
         throws GeneralSecurityException
     {
         if (keyPair == null) {
-            keyPair = new X509KeyService().newCertAndPrivateKey(1, "my webid", "xwiki:XWiki.Me", PASSWORD);
+            keyPair = new X509KeyService().newCertAndPrivateKey(1,
+                                                                "my webid",
+                                                                "xwiki:XWiki.Me",
+                                                                PASSWORD,
+                                                                passwordService);
         }
         return keyPair;
     }
 
     /** The tested key service. */
     private final X509KeyService service = new X509KeyService();
+
+    protected PasswordCryptoService passwordService;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        super.setUp();
+        this.passwordService = getComponentManager().lookup(PasswordCryptoService.class);
+    }
 
     @Test
     public void certsFromSpkacTest() throws Exception
@@ -80,31 +97,31 @@ public class X509KeyServiceTest
         this.service.newCertAndPrivateKey(1,
                                           "my webid",
                                           "xwiki:XWiki.Me",
-                                          "this is a very, very, very, very, very, looooooong passphrase");
+                                          "this is a very, very, very, very, very, looooooong passphrase",
+                                          this.passwordService);
     }
 
     @Test
     public void newPrivateKeyCorrectPassword() throws GeneralSecurityException
     {
-        Assert.assertNotNull("Private key is null", getKeyPair().getPrivateKey(PASSWORD));
+        Assert.assertNotNull("Private key is null", getKeyPair(this.passwordService).getPrivateKey(PASSWORD));
     }
 
     @Test
     public void newPrivateKeyWrongPassword() throws GeneralSecurityException
     {
         try {
-            Assert.assertNotNull("Private key is null", getKeyPair().getPrivateKey("asdf"));
+            Assert.assertNotNull("Private key is null", getKeyPair(passwordService).getPrivateKey("asdf"));
         } catch (GeneralSecurityException exception) {
-            Throwable cause = exception.getCause();
-            Assert.assertNotNull("Unexpected error", cause);
-            Assert.assertTrue("Unknown error message", cause.getMessage().contains("wrong password or corrupted file"));
+            Assert.assertTrue(exception.getMessage().contains("Could not decrypt private key, "
+                                                              + "wrong password or corrupted file."));
         }
     }
 
     @Test
     public void testNewCertIsValid() throws GeneralSecurityException
     {
-        XWikiX509Certificate cert = getKeyPair().getCertificate();
+        XWikiX509Certificate cert = getKeyPair(this.passwordService).getCertificate();
         cert.checkValidity();
         cert.verify(cert.getPublicKey());
     }
@@ -112,7 +129,11 @@ public class X509KeyServiceTest
     @Test(expected = CertificateExpiredException.class)
     public void testNewExpiredCertIsInvalid() throws GeneralSecurityException
     {
-        XWikiX509KeyPair keyPair = this.service.newCertAndPrivateKey(0, "my webid", "xwiki:XWiki.Me", "bla");
+        XWikiX509KeyPair keyPair = this.service.newCertAndPrivateKey(0,
+                                                                     "my webid",
+                                                                     "xwiki:XWiki.Me",
+                                                                     "bla",
+                                                                     this.passwordService);
         XWikiX509Certificate cert = keyPair.getCertificate();
         cert.verify(cert.getPublicKey());
         cert.checkValidity();

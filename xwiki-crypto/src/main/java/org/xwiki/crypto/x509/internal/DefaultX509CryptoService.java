@@ -27,6 +27,7 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 
 import org.xwiki.crypto.internal.UserDocumentUtils;
+import org.xwiki.crypto.passwd.PasswordCryptoService;
 import org.xwiki.crypto.x509.X509CryptoService;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
@@ -45,6 +46,10 @@ public class DefaultX509CryptoService implements X509CryptoService
     /** Used for dealing with non cryptographic stuff like getting user document names and URLs. */
     @Requirement
     private UserDocumentUtils userDocUtils;
+
+    /** For encrypting the private key when a key pair is generated on the server side. */
+    @Requirement
+    private PasswordCryptoService passwordCryptoService;
 
     /** Handles the generation of keys. */
     private final X509KeyService keyService = new X509KeyService();
@@ -73,7 +78,7 @@ public class DefaultX509CryptoService implements X509CryptoService
     {
         final String userName = userDocUtils.getCurrentUser();
         final String webID = userDocUtils.getUserDocURL(userName);
-        return this.keyService.newCertAndPrivateKey(daysOfValidity, webID, userName, password);
+        return this.keyService.newCertAndPrivateKey(daysOfValidity, webID, userName, password, passwordCryptoService);
     }
 
     /**

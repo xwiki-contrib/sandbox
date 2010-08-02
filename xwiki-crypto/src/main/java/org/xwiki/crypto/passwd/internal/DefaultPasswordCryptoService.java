@@ -39,7 +39,7 @@ import org.xwiki.crypto.passwd.PasswordCryptoServiceConfiguration;
  * This class allows the user to encrypt and decrypt text using a password
  * ciphertext might look as follows:
  * <pre>
- * ------BEGIN PASSWORD CIPHERTEXT-----
+ * -----BEGIN PASSWORD CIPHERTEXT-----
  * rO0ABXNyADhvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5DQVNUNVBh
  * c3N3b3JkQ2lwaGVydGV4dGBjanGyQ5IzAgAAeHIAO29yZy54d2lraS5jcnlwdG8u
  * cGFzc3dkLmludGVybmFsLkFic3RyYWN0UGFzc3dvcmRDaXBoZXJ0ZXh0wxB+AJ0R
@@ -47,7 +47,7 @@ import org.xwiki.crypto.passwd.PasswordCryptoServiceConfiguration;
  * a2kvY3J5cHRvL3Bhc3N3ZC9LZXlEZXJpdmF0aW9uRnVuY3Rpb247eHB1cgACW0Ks
  * 8xf4BghU4AIAAHhwAAABGPyIkxLgotOse8w/uihvcuHCV9XdFdKzQ7KQDtr0N6Tx
  * /cG7npgtTF6+9FAtONY7lg==
- * ------END PASSWORD CIPHERTEXT------
+ * -----END PASSWORD CIPHERTEXT-----
  * </pre>
  *
  * Users can also protect a password or other secret information so that it can be verified but not
@@ -60,10 +60,10 @@ import org.xwiki.crypto.passwd.PasswordCryptoServiceConfiguration;
 public class DefaultPasswordCryptoService implements PasswordCryptoService
 {
     /** Text which indicates the beginning of password based ciphertext. */
-    private final String ciphertextHeader = "------BEGIN PASSWORD CIPHERTEXT-----\n";
+    private final String ciphertextHeader = "-----BEGIN PASSWORD CIPHERTEXT-----\n";
 
     /** Text which indicates the end of password based ciphertext. */
-    private final String ciphertextFooter = "------END PASSWORD CIPHERTEXT------";
+    private final String ciphertextFooter = "-----END PASSWORD CIPHERTEXT-----";
 
     /** For deciding which classes to use for cipher and key functions. */
     @Requirement

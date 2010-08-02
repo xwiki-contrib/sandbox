@@ -22,8 +22,11 @@ package org.xwiki.crypto.x509;
 import java.security.GeneralSecurityException;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.crypto.passwd.PasswordCryptoService;
 import org.xwiki.crypto.x509.internal.X509SignatureService;
+import org.xwiki.test.AbstractComponentTestCase;
 
 /**
  * Prove that X509SignatureService can sign and verify text and can verify text signed in firefox.
@@ -31,7 +34,7 @@ import org.xwiki.crypto.x509.internal.X509SignatureService;
  * @version $Id$
  * @since 2.5
  */
-public class X509SignatureServiceTest
+public class X509SignatureServiceTest extends AbstractComponentTestCase
 {
     private final String browserSignedText = "This text was signed in Firefox 3.6.6-Linux using crypto.signText()";
 
@@ -98,11 +101,20 @@ public class X509SignatureServiceTest
 
     private final X509SignatureService service = new X509SignatureService();
 
+    protected PasswordCryptoService passwordService;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        super.setUp();
+        this.passwordService = getComponentManager().lookup(PasswordCryptoService.class);
+    }
+
     @Test
     public void signAndVerifyTextTest()
         throws GeneralSecurityException
     {
-        XWikiX509KeyPair pair = X509KeyServiceTest.getKeyPair();
+        XWikiX509KeyPair pair = X509KeyServiceTest.getKeyPair(passwordService);
         String signature = this.service.signText("hello world", pair, X509KeyServiceTest.PASSWORD);
         XWikiX509Certificate cert = this.service.verifyText("hello world", signature);
         Assert.assertNotNull("Signtext/verifyText, failed when they should have succeeded.", cert);
@@ -116,7 +128,7 @@ public class X509SignatureServiceTest
     public void signAndVerifyWrongTextTest()
         throws GeneralSecurityException
     {
-        XWikiX509KeyPair pair = X509KeyServiceTest.getKeyPair();
+        XWikiX509KeyPair pair = X509KeyServiceTest.getKeyPair(passwordService);
         String signature = this.service.signText("hello world", pair, X509KeyServiceTest.PASSWORD);
         XWikiX509Certificate cert = this.service.verifyText("Wrong Text", signature);
         Assert.assertNull("Signtext/verifyText, succeeded with wrong text!", cert);

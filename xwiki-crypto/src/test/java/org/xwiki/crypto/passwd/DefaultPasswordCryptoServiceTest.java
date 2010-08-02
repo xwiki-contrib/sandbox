@@ -82,7 +82,7 @@ public class DefaultPasswordCryptoServiceTest extends AbstractComponentTestCase
 
     protected String getEncrypted()
     {
-        return "------BEGIN PASSWORD CIPHERTEXT-----\n"
+        return "-----BEGIN PASSWORD CIPHERTEXT-----\n"
              + "rO0ABXNyADhvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5DQVNUNVBh\n"
              + "c3N3b3JkQ2lwaGVydGV4dAAAAAAAAAABAgAAeHIAO29yZy54d2lraS5jcnlwdG8u\n"
              + "cGFzc3dkLmludGVybmFsLkFic3RyYWN0UGFzc3dvcmRDaXBoZXJ0ZXh0AAAAAAAA\n"
@@ -101,7 +101,7 @@ public class DefaultPasswordCryptoServiceTest extends AbstractComponentTestCase
              + "cGFzc3dkLmludGVybmFsLkFic3RyYWN0TWVtb3J5SGFyZEtleURlcml2YXRpb25G\n"
              + "dW5jdGlvbgAAAAAAAAABAgAAeHAAAAAIAAAAGAAABAAAAAABdXEAfgAFAAAAEKQD\n"
              + "mYpvbMVTVoq8SKFAw6Q=\n"
-             + "------END PASSWORD CIPHERTEXT------";
+             + "-----END PASSWORD CIPHERTEXT-----";
     }
 
     @Test

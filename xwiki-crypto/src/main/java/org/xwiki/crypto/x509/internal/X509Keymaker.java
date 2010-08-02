@@ -20,17 +20,15 @@
 package org.xwiki.crypto.x509.internal;
 
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Security;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Vector;
 
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -54,8 +52,8 @@ import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
  */
 public class X509Keymaker
 {
-    /** The name used in generated CA certificates. */
-    private static final String CA_NAME = "DN=XWiki.org";
+    /** The name used for the heading underwhich all of the generated CA certificates will show in the browser. */
+    private static final String CA_ORGANIZATION_NAME = "Fake authorities for trusting client certificates";
 
     /** A certificate generator. Use of this must be synchronized. */
     private final X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
@@ -132,33 +130,24 @@ public class X509Keymaker
      * @param webId the URI to put as the alternative name (for FOAFSSL webId compatibility)
      * @param userName a String representation of the name of the user getting the certificate.
      * @return an array of 2 new X509 certificates, with the client certificate at 0-th index, and CA cert at 1-st index
-     * @throws CertificateException if verifying the signature after signing it (sanity test) fails.
-     * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
-     * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
-     * @throws SignatureException if generating and signing the certificate fails.
-     * @throws NoSuchProviderException if verifying the signature fails.
+     * @throws GeneralSecurityException if something goes wrong.
      */
     public synchronized X509Certificate[] makeClientAndAuthorityCertificates(final PublicKey forCert,
                                                                              final int daysOfValidity,
                                                                              final boolean nonRepudiable,
                                                                              final String webId,
                                                                              final String userName)
-        throws CertificateException,
-               NoSuchAlgorithmException,
-               InvalidKeyException,
-               SignatureException,
-               NoSuchProviderException
+        throws GeneralSecurityException
     {
         KeyPair auth = this.authorityKeyPair;
         if (auth == null) {
             auth = this.newKeyPair();
         }
-        X509Certificate[] out = new X509Certificate[2];
+        final X509Certificate[] out = new X509Certificate[2];
         out[0] = this.makeClientCertificate(forCert, auth, daysOfValidity, nonRepudiable, webId, userName);
-        if (this.getAuthorityCertificate() != null) {
-            out[1] = this.getAuthorityCertificate();
-        } else {
-            out[1] = this.makeCertificateAuthority(auth, daysOfValidity);
+        out[1] = this.getAuthorityCertificate();
+        if (out[1] == null) {
+            out[1] = this.makeCertificateAuthority(auth, daysOfValidity, webId);
         }
         return out;
     }
@@ -174,11 +163,7 @@ public class X509Keymaker
      * @param webId the URI to put as the alternative name (for FOAFSSL webId compatibility)
      * @param userName a String representation of the name of the user getting the certificate.
      * @return a new X509 certificate.
-     * @throws CertificateException if verifying the signature after signing it (sanity test) fails.
-     * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
-     * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
-     * @throws SignatureException if generating and signing the certificate fails.
-     * @throws NoSuchProviderException if verifying the signature fails.
+     * @throws GeneralSecurityException if something goes wrong.
      */
     public synchronized X509Certificate makeClientCertificate(final PublicKey forCert,
                                                               final KeyPair toSignWith,
@@ -186,15 +171,11 @@ public class X509Keymaker
                                                               final boolean nonRepudiable,
                                                               final String webId,
                                                               final String userName)
-        throws CertificateException,
-               NoSuchAlgorithmException,
-               InvalidKeyException,
-               SignatureException,
-               NoSuchProviderException
+        throws GeneralSecurityException
     {
         try {
             // the UID (same for issuer since this certificate confers no authority)
-            X509Name dName = new X509Name("UID=" + userName);
+            final X509Name dName = new X509Name("UID=" + userName);
 
             this.prepareGenericCertificate(forCert, daysOfValidity, dName, dName);
 
@@ -222,7 +203,7 @@ public class X509Keymaker
                                        new AuthorityKeyIdentifierStructure(toSignWith.getPublic()));
 
             // FOAFSSL compatibility.
-            GeneralNames subjectAltNames =
+            final GeneralNames subjectAltNames =
                 new GeneralNames(new GeneralName(GeneralName.uniformResourceIdentifier, webId));
             certGenerator.addExtension(X509Extensions.SubjectAlternativeName, true, subjectAltNames);
 
@@ -239,32 +220,40 @@ public class X509Keymaker
      *
      * @param keyPair the public key will appear in the certificate and the private key will be used to sign it.
      * @param daysOfValidity number of days the cert should be valid for.
+     * @param commonName what to put in the common name field, this field will identify this certificate authority
+     *                   in the list on the user's browser.
      * @return a new X509 certificate authority.
-     * @throws CertificateException if verifying the signature after signing it (sanity test) fails.
-     * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
-     * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
-     * @throws SignatureException if generating and signing the certificate fails.
-     * @throws NoSuchProviderException if verifying the signature fails.
+     * @throws GeneralSecurityException if something goes wrong.
      */
     public synchronized X509Certificate makeCertificateAuthority(final KeyPair keyPair,
-                                                                 final int daysOfValidity)
-        throws CertificateException,
-               NoSuchAlgorithmException,
-               InvalidKeyException,
-               SignatureException,
-               NoSuchProviderException
+                                                                 final int daysOfValidity,
+                                                                 final String commonName)
+        throws GeneralSecurityException
     {
         try {
-            // self-signed
-            X509Name name = new X509Name(CA_NAME);
+            final X509Name name = new X509Name(
+                new Vector<DERObjectIdentifier>() {
+                    {
+                        this.add(X509Name.O);
+                        this.add(X509Name.CN);
+                    }
+                },
+                new Vector<String>() {
+                    {
+                        this.add(X509Keymaker.CA_ORGANIZATION_NAME);
+                        this.add(commonName);
+                    }
+                });
+
             this.prepareGenericCertificate(keyPair.getPublic(), daysOfValidity, name, name);
 
+            // This authority can't sign other CA's.
             certGenerator.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(0));
 
             // Allow certificate signing only.
             certGenerator.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.keyCertSign));
 
-            // Adds the subject key identifier extension
+            // Adds the subject key identifier extension. Self singed so uses it's own key.
             certGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
                                        false,
                                        new SubjectKeyIdentifierStructure(keyPair.getPublic()));
@@ -286,8 +275,8 @@ public class X509Keymaker
      */
     private synchronized void prepareGenericCertificate(final PublicKey forCert,
                                                         final int daysOfValidity,
-                                                        X509Name subjectDN,
-                                                        X509Name issuerDN)
+                                                        final X509Name subjectDN,
+                                                        final X509Name issuerDN)
     {
         // We reset and use a "shared" cert generator which is why this method is synchronized.
         this.certGenerator.reset();
@@ -313,21 +302,13 @@ public class X509Keymaker
      *
      * @param toSignWith the private key in this pair will be used to sign the certificate.
      * @return a new X509 certificate.
-     * @throws CertificateException if verifying the signature after signing it (sanity test) fails.
-     * @throws NoSuchAlgorithmException if the algorithm (currently SHA1WithRSAEncryption) is not implemented.
-     * @throws InvalidKeyException if verifying the signed key fails or if adding the authority key identifier fails.
-     * @throws SignatureException if generating and signing the certificate fails.
-     * @throws NoSuchProviderException if verifying the signature fails.
+     * @throws GeneralSecurityException if something goes wrong.
      */
     private synchronized X509Certificate generate(final KeyPair toSignWith)
-        throws CertificateException,
-               NoSuchAlgorithmException,
-               InvalidKeyException,
-               SignatureException,
-               NoSuchProviderException
+        throws GeneralSecurityException
     {
         // Creates and sign this certificate.
-        X509Certificate cert = this.certGenerator.generate(toSignWith.getPrivate());
+        final X509Certificate cert = this.certGenerator.generate(toSignWith.getPrivate());
 
         // Checks that this certificate has indeed been correctly signed.
         cert.verify(toSignWith.getPublic());

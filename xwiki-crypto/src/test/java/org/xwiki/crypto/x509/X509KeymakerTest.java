@@ -47,7 +47,7 @@ public class X509KeymakerTest
     public void testGenerateCertAuthority() throws GeneralSecurityException, IOException
     {
         KeyPair kp = keyMaker.newKeyPair();
-        X509Certificate cert = keyMaker.makeCertificateAuthority(kp, 1);
+        X509Certificate cert = keyMaker.makeCertificateAuthority(kp, 1, "http://my.web.id.com/");
 
         // read Basic Constraints
         DEROctetString obj = (DEROctetString) new ASN1InputStream(cert.getExtensionValue("2.5.29.19")).readObject();
@@ -60,7 +60,11 @@ public class X509KeymakerTest
     public void testClientAndAuthority() throws GeneralSecurityException
     {
         KeyPair kp = keyMaker.newKeyPair();
-        X509Certificate[] certs = keyMaker.makeClientAndAuthorityCertificates(kp.getPublic(), 1, true, "web id", "xwiki:XWiki.Me");
+        X509Certificate[] certs = keyMaker.makeClientAndAuthorityCertificates(kp.getPublic(),
+                                                                              1,
+                                                                              true,
+                                                                              "web id",
+                                                                              "xwiki:XWiki.Me");
         // verify client
         certs[0].checkValidity();
         certs[0].verify(certs[1].getPublicKey());
@@ -69,4 +73,3 @@ public class X509KeymakerTest
         certs[1].verify(certs[1].getPublicKey());
     }
 }
-

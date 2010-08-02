@@ -19,57 +19,59 @@
  */
 package org.xwiki.crypto.x509;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
 
+
 /**
  * Wrapper which contains a {@link PrivateKey} and the corresponding {@link XWikiX509Certificate}.
+ * This class is capable of holding a chain of certificates from the user's certificate back to the root certificate.
  * 
  * @version $Id$
  * @since 2.5
  */
-public interface XWikiX509KeyPair
+public interface XWikiX509KeyPair extends Serializable
 {
     /**
-     * @return the chain of certificates starting with the user's certificate (the one matching the private key) and
-     *         ascending up to the root certificate authority.
-     */
-    XWikiX509Certificate[] getCertificates();
-
-    /**
      * @return the user's certificate
+     * @throws GeneralSecurityException if the certificate cannot be deserialized.
      */
-    XWikiX509Certificate getCertificate();
+    XWikiX509Certificate getCertificate() throws GeneralSecurityException;
 
     /**
      * @return the public key
+     * @throws GeneralSecurityException if the certificate with the public key cannot be deserialized.
      */
-    PublicKey getPublicKey();
+    PublicKey getPublicKey() throws GeneralSecurityException;
 
     /**
-     * Get the private key from the underlying X500PrivateCredential.
-     * If this method completes successfully, hasLeaked will henceforth return true.
+     * Get the private key from the key pair.
      *
-     * @param password the password required to get the private key.
-     * @return the private key
-     * @throws GeneralSecurityException if opening the encrypted key storage fails.
+     * @param password the password needed to decrypt the private key.
+     * @return the private key or null if the password is incorrect.
+     * @throws GeneralSecurityException if the private key cannot be decrypted.
      */
     PrivateKey getPrivateKey(final String password) throws GeneralSecurityException;
 
     /**
      * @return certificate fingerprint
+     * @throws GeneralSecurityException if the certificate to fingerprint cannot be deserialized.
      */
-    String getFingerprint();
+    String getFingerprint() throws GeneralSecurityException;
 
     /**
-     * @return the certificate and private key in a password protected PKCS#12 container.
+     * @return this key pair as a byte array, the private key will remain password encrypted as it is in memory.
+     * @throws IOException if something goes wrong within the serialization framework.
      */
-    byte[] toPKCS12();
+    byte[] serialize() throws IOException;
 
     /**
-     * @return the certificate and private key as a base64 encoded password protected PKCS#12 container.
+     * @return this key pair {@link #serialize()}d and converted to a base-64 encoded String.
+     * @throws IOException if something goes wrong within the serialization framework.
      */
-    String toBase64PKCS12();
+    String serializeAsBase64() throws IOException;
 }
 

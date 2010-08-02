@@ -23,12 +23,11 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidParameterException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
-import java.security.Security;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
 
 import org.xwiki.crypto.internal.Convert;
+import org.xwiki.crypto.passwd.PasswordCryptoService;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 
@@ -42,13 +41,6 @@ public class X509KeyService
 {
     /** Used for the actual key making, also holds any secrets. */
     private final X509Keymaker keymaker = new X509Keymaker();
-
-    /** Make sure the BouncyCastle provider is added to java security providers. */
-    {
-        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
-            Security.addProvider(new BouncyCastleProvider());
-        }
-    }
 
     /**
      * @param spkacSerialization a <a href="http://en.wikipedia.org/wiki/Spkac">SPKAC</a> Certificate Signing Request
@@ -94,6 +86,8 @@ public class X509KeyService
      * @param webID the URL of the user's page. Used for FOAFSSL compatibility.
      * @param userName the String serialization of the user's page name.
      * @param password the password to set on the resulting XWikiX509KeyPair.
+     * @param passwordCryptoService the service to use for encrypting the private key so this object can safely be
+     *                              serialized without allowing the private key to be read from the database.
      * @return a certificate and matching private key in an XWikiX509KeyPair object.
      * @throws GeneralSecurityException on errors
      * @see org.xwiki.crypto.CryptoService#newCertAndPrivateKey(int)
@@ -101,7 +95,8 @@ public class X509KeyService
     public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity,
                                                  final String webID,
                                                  final String userName,
-                                                 final String password)
+                                                 final String password,
+                                                 final PasswordCryptoService passwordCryptoService)
         throws GeneralSecurityException
     {
         final KeyPair pair = this.keymaker.newKeyPair();
@@ -115,6 +110,9 @@ public class X509KeyService
                                                                                 webID,
                                                                                 userName);
 
-        return new DefaultXWikiX509KeyPair(pair.getPrivate(), password, new XWikiX509Certificate(certificate));
+        return new DefaultXWikiX509KeyPair(new XWikiX509Certificate(certificate),
+                                           pair.getPrivate(),
+                                           password,
+                                           passwordCryptoService);
     }
 }
