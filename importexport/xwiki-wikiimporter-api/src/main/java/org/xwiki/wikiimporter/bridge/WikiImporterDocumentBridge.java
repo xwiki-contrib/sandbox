@@ -33,14 +33,13 @@ import org.xwiki.wikiimporter.wiki.WikiPage;
 @ComponentRole
 public interface WikiImporterDocumentBridge
 {
-
     /**
      * @return instance of DocumentAcessBridge.
      */
     DocumentAccessBridge getDocAccessBridge();
 
     /**
-     * Creates a Wiki Page inside xwiki, includes page content,parent, attachments and tags creation.
+     * Creates a Wiki Page inside xwiki, includes page content, parent, attachments and tags creation.
      * 
      * @param page Wiki Page object to be created inside xwiki.
      * @throws WikiImporterException if DocumentAcessBridge throws any error while creating the WikiPage.
