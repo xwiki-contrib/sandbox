@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
 
 
 /**
- * Ciphertext represents a single password encrypted text.
+ * Ciphertext represents a single password encrypted data.
  * It can be serialized and deserialized and the same password will be able to decrypt it.
  *
  * @version $Id$
@@ -35,26 +35,26 @@ import java.security.GeneralSecurityException;
 public interface PasswordCiphertext extends Serializable
 {
     /**
-     * Initialize this ciphertext with a given plaintext, password, and an initialized key derivation function.
-     * To get the plaintext back, use decryptText with the same password.
+     * Initialize this ciphertext with a given message (i.e. plaintext), password, and an initialized key derivation
+     * function. To get the data back, use {@link #decrypt(String)} with the same password.
      *
-     * @param plaintext the text which will be encrypted.
-     * @param password the password used to encrypt the plaintext.
+     * @param message the message which will be encrypted.
+     * @param password the password used to encrypt the message.
      * @param initializedKeyFunction an initialized KeyDerivationFunction which will return a key of the length given
      *                               by {@link #getRequiredKeySize()}.
      * @throws GeneralSecurityException if something goes wrong while encrypting.
      */
-    void init(final String plaintext, final String password, final KeyDerivationFunction initializedKeyFunction)
+    void init(final byte[] message, final String password, final KeyDerivationFunction initializedKeyFunction)
         throws GeneralSecurityException;
 
     /**
-     * Get the plaintext back from this ciphertext.
+     * Get the message (i.e. plaintext) back from this ciphertext.
      *
      * @param password the user supplied password.
-     * @return the original plaintext or null if the password was wrong.
+     * @return the original message or null if the password was wrong.
      * @throws GeneralSecurityException if something goes wrong while decrypting.
      */
-    String decryptText(final String password)
+    byte[] decrypt(final String password)
         throws GeneralSecurityException;
 
     /**
@@ -68,9 +68,9 @@ public interface PasswordCiphertext extends Serializable
 
     /**
      * Get the length of the key which should be output by the keyFunction which is to be passed to 
-     * {@link #init(Strong, String, KeyDerivationFunction)}.
+     * {@link #init(byte[], String, KeyDerivationFunction)}.
      * Users are expected to call this method and pass the result when initializing the key derivation function then
-     * pass the initialized key derivation function to {@link #init(Strong, String, KeyDerivationFunction)}.
+     * pass the initialized key derivation function to {@link #init(byte[], String, KeyDerivationFunction)}.
      *
      * @return the length required for the derived key.
      * @see org.xwiki.crypto.passwd.PasswordCiphertext#getRequiredKeySize()

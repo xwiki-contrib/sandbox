@@ -100,12 +100,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
             throw new GeneralSecurityException("Failed to encode private key", e);
         }
 
-        // Ideally it would be possible to encrypt a byte[] and get a byte[] in return.
-        // This is a workaround.
-        final String encryptedPrivateKeyString = 
-            passwordCryptoService.encryptText(Convert.toBase64String(encodedKey), password);
-
-        this.passwordEncryptedPrivateKey = Convert.fromBase64String(encryptedPrivateKeyString, "-----\n", "\n-----");
+        this.passwordEncryptedPrivateKey = passwordCryptoService.encryptBytes(encodedKey, password);
     }
 
     /**
@@ -275,12 +270,11 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
             throw new GeneralSecurityException("Could not deserialize private key ", e);
         }
 
-        final String privateKeyBase64 = ct.decryptText(password);
-        if (privateKeyBase64 == null) {
+        final byte[] privateKeyBytes = ct.decrypt(password);
+        if (privateKeyBytes == null) {
             // Wrong password.
             throw new GeneralSecurityException("Could not decrypt private key, wrong password or corrupted file.");
         }
-        final byte[] privateKeyBytes = Convert.fromBase64String(privateKeyBase64);
         final PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(privateKeyBytes);
         final KeyFactory converter = KeyFactory.getInstance(this.privateKeyAlgorithm);
         return converter.generatePrivate(spec);

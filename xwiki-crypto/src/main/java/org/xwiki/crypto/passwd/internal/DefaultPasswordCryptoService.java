@@ -36,8 +36,8 @@ import org.xwiki.crypto.passwd.PasswordCryptoServiceConfiguration;
 
 
 /**
- * This class allows the user to encrypt and decrypt text using a password
- * ciphertext might look as follows:
+ * This class allows the user to encrypt and decrypt text and data using a password.
+ * Base 64 encrypted ciphertext might look as follows:
  * <pre>
  * -----BEGIN PASSWORD CIPHERTEXT-----
  * rO0ABXNyADhvcmcueHdpa2kuY3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5DQVNUNVBh
@@ -71,10 +71,39 @@ public class DefaultPasswordCryptoService implements PasswordCryptoService
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.passwd.PasswdCryptoService#encryptText(String, String)
+     * 
+     * @see org.xwiki.crypto.passwd.PasswordCryptoService#encryptText(java.lang.String, java.lang.String)
      */
     public synchronized String encryptText(final String plaintext, final String password)
         throws GeneralSecurityException
+    {
+        byte[] message = Convert.stringToBytes(plaintext);
+        return this.ciphertextHeader
+                + Convert.toChunkedBase64String(encryptBytes(message, password))
+                + this.ciphertextFooter;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.passwd.PasswdCryptoService#decryptText(String, String)
+     */
+    public synchronized String decryptText(final String base64Ciphertext, final String password)
+        throws GeneralSecurityException
+    {
+        byte[] serial = Convert.fromBase64String(base64Ciphertext, this.ciphertextHeader, this.ciphertextFooter);
+        byte[] decrypted = decryptBytes(serial, password);
+        if (decrypted == null) {
+            return null;
+        }
+        return Convert.bytesToString(decrypted);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.crypto.passwd.PasswordCryptoService#encryptBytes(byte[], java.lang.String)
+     */
+    public byte[] encryptBytes(byte[] message, String password) throws GeneralSecurityException
     {
         try {
             final KeyDerivationFunction keyFunction = 
@@ -88,15 +117,11 @@ public class DefaultPasswordCryptoService implements PasswordCryptoService
                                          Integer.valueOf(ciphertext.getRequiredKeySize()).toString());
 
             keyFunction.init(keyFunctionProps);
-            ciphertext.init(plaintext, password, keyFunction);
+            ciphertext.init(message, password, keyFunction);
 
-            try {
-                return   this.ciphertextHeader
-                       + Convert.toChunkedBase64String(ciphertext.serialize())
-                       + this.ciphertextFooter;
-            } catch (IOException e) {
-                throw new GeneralSecurityException("Failed to serialize ciphertext", e);
-            }
+            return ciphertext.serialize();
+        } catch (IOException e) {
+            throw new GeneralSecurityException("Failed to serialize ciphertext", e);
         } catch (Exception e) {
             throw new GeneralSecurityException("Failed to encrypt text", e);
         }
@@ -104,23 +129,20 @@ public class DefaultPasswordCryptoService implements PasswordCryptoService
 
     /**
      * {@inheritDoc}
-     * @see org.xwiki.crypto.passwd.PasswdCryptoService#decryptText(String, String)
+     * 
+     * @see org.xwiki.crypto.passwd.PasswordCryptoService#decryptBytes(byte[], java.lang.String)
      */
-    public synchronized String decryptText(final String containingBase64Ciphertext, final String password)
-        throws GeneralSecurityException
+    public byte[] decryptBytes(byte[] rawCiphertext, String password) throws GeneralSecurityException
     {
-        final byte[] serial = Convert.fromBase64String(containingBase64Ciphertext,
-                                                       this.ciphertextHeader,
-                                                       this.ciphertextFooter);
         try {
-            final PasswordCiphertext ciphertext = (PasswordCiphertext) SerializationUtils.deserialize(serial);
-            return ciphertext.decryptText(password);
+            final PasswordCiphertext ciphertext = (PasswordCiphertext) SerializationUtils.deserialize(rawCiphertext);
+            return ciphertext.decrypt(password);
         } catch (IOException e) {
             throw new GeneralSecurityException("Failed to deserialize ciphertext", e);
         } catch (ClassNotFoundException e) {
             throw new GeneralSecurityException("Apparently this ciphertext was encrypted using a cipher which is not "
-                                               + "available on this installation, was this imported from a newer "
-                                               + "version?", e);
+                + "available on this installation, was this imported from a newer "
+                + "version?", e);
         }
     }
 

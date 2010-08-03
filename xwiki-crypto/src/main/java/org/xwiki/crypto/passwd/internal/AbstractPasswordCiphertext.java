@@ -38,7 +38,7 @@ import org.xwiki.crypto.passwd.KeyDerivationFunction;
  * A service allowing users to encrypt and decrypt text using a password.
  * <p>
  * Note: Subclasses implementing other encryption methods should override
- * {@link #getCipher()} and optionaly {@link #getKeyLength()}
+ * {@link #getCipher()} and optionally {@link #getKeyLength()}
  * also subclasses should avoid using fields since this class is serialized to produce the ciphertext.</p>
  *
  * @version $Id$
@@ -61,28 +61,25 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
 
     /**
      * Temporarily hold the cipher instance because it needs to be loaded a few times.
-     * It is important that this is not initialized here because it will not be honered by the serialization framework.
+     * It is important that this is not initialized here because it will not be honored by the serialization framework.
      */
     private transient PaddedBufferedBlockCipher cipher;
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.passwd.PasswordCiphertext#init(String, String, KeyDerivationFunction)
+     * 
+     * @see org.xwiki.crypto.passwd.PasswordCiphertext#init(byte[], java.lang.String, org.xwiki.crypto.passwd.KeyDerivationFunction)
      */
-    public synchronized void init(final String plaintext,
-                                  final String password,
-                                  final KeyDerivationFunction keyFunction)
+    public synchronized void init(byte[] message, String password, KeyDerivationFunction initializedKeyFunction)
         throws GeneralSecurityException
     {
-        this.keyFunction = keyFunction;
+        this.keyFunction = initializedKeyFunction;
 
         PaddedBufferedBlockCipher theCipher = this.getCipher();
         theCipher.reset();
         theCipher.init(true, this.makeKey(password));
 
         try {
-            final byte[] message = Convert.stringToBytes(plaintext);
             this.ciphertext = new byte[theCipher.getOutputSize(message.length)];
 
             int length = theCipher.processBytes(message, 0, message.length, this.ciphertext, 0);
@@ -95,11 +92,10 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.passwd.PasswordCiphertext#decryptText(String)
+     * 
+     * @see org.xwiki.crypto.passwd.PasswordCiphertext#decrypt(java.lang.String)
      */
-    public synchronized String decryptText(final String password)
-        throws GeneralSecurityException
+    public synchronized byte[] decrypt(String password) throws GeneralSecurityException
     {
         PaddedBufferedBlockCipher theCipher = this.getCipher();
         theCipher.reset();
@@ -116,7 +112,7 @@ public abstract class AbstractPasswordCiphertext implements PasswordCiphertext
             final byte[] unpadded = new byte[length + remaining];
             System.arraycopy(out, 0, unpadded, 0, unpadded.length);
 
-            return Convert.bytesToString(unpadded);
+            return unpadded;
         } catch (InvalidCipherTextException e) {
             // We are going to assume here that the password was wrong.
             return null;

@@ -55,6 +55,28 @@ public interface PasswordCryptoService
         throws GeneralSecurityException;
 
     /**
+     * Encipher the given byte array with the password. The same password will be able to decipher it.
+     *
+     * @param message the message to encrypt.
+     * @param password which will be needed to decrypt the text.
+     * @return raw ciphertext which can be decrypted back to data using {@link #decryptBytes(String, String)}
+     * @throws GeneralSecurityException if something goes wrong.
+     */
+    byte[] encryptBytes(final byte[] message, final String password)
+        throws GeneralSecurityException;
+
+    /**
+     * Decrypt raw ciphertext created with {@link #encryptBytes(byte[], String)}.
+     *
+     * @param rawCiphertext the ciphertext to decrypt.
+     * @param password which was used to encrypt the text.
+     * @return the decrypted message or null if the provided password was wrong.
+     * @throws GeneralSecurityException if something goes wrong.
+     */
+    byte[] decryptBytes(final byte[] rawCiphertext, final String password)
+        throws GeneralSecurityException;
+
+    /**
      * Hash a password with a hash function specifically designed to make password guessing attacks difficult.
      * This hash does salting and multiple iterations which incure not only CPU but memory expense.
      *
