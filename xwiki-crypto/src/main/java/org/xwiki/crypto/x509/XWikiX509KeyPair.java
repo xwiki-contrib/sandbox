@@ -42,16 +42,17 @@ public interface XWikiX509KeyPair extends Serializable
     String BASE64_FOOTER = "-----END XWIKI CERTIFICATE AND PRIVATE KEY-----";
 
     /**
+     * Get the user's certificate. May throw a {@link RuntimeException} if the key pair was deserialized directly using
+     * Java deserialization methods without checking that the certificate can be deserialized.
+     * 
      * @return the user's certificate
-     * @throws GeneralSecurityException if the certificate cannot be deserialized.
      */
-    XWikiX509Certificate getCertificate() throws GeneralSecurityException;
+    XWikiX509Certificate getCertificate();
 
     /**
      * @return the public key
-     * @throws GeneralSecurityException if the certificate with the public key cannot be deserialized.
      */
-    PublicKey getPublicKey() throws GeneralSecurityException;
+    PublicKey getPublicKey();
 
     /**
      * Get the private key from the key pair.
@@ -64,9 +65,8 @@ public interface XWikiX509KeyPair extends Serializable
 
     /**
      * @return certificate fingerprint
-     * @throws GeneralSecurityException if the certificate to fingerprint cannot be deserialized.
      */
-    String getFingerprint() throws GeneralSecurityException;
+    String getFingerprint();
 
     /**
      * @return this key pair as a byte array, the private key will remain password encrypted as it is in memory.

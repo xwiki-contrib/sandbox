@@ -142,9 +142,10 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
                ClassNotFoundException,
                CertificateException
     {
-        XWikiX509KeyPair pair = SerializationUtils.deserialize(keyPairAsBytes);
+        XWikiX509KeyPair pair = (XWikiX509KeyPair) SerializationUtils.deserialize(keyPairAsBytes);
         try {
             pair.getCertificate();
+            return pair;
         } catch (RuntimeException e) {
             throw (CertificateException) e.getCause();
         }
