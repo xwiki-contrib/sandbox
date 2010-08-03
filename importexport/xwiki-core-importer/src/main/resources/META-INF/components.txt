@@ -1,5 +1,0 @@
-org.xwiki.wikiimporter.internal.MediaWikiImporter
-org.xwiki.wikiimporter.internal.ConfluenceWikiImporter
-org.xwiki.wikiimporter.internal.WikiImporterVelocityContextInitializer
-org.xwiki.wikiimporter.internal.DefaultWikiImporterConfig
-org.xwiki.wikiimporter.internal.WikiImpConfigVelocityContextInitializer

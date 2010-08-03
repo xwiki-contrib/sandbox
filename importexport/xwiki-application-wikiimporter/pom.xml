@@ -32,6 +32,6 @@
   <artifactId>xwiki-application-wikiimporter</artifactId>
   <packaging>xar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>XWiki - Application - WikiImporter</name>
-  <description>XWiki - Application - Wiki - Importer</description>
+  <name>XWiki - Application - Wiki Importer</name>
+  <description>XWiki - Application - Wiki Importer</description>
 </project>
