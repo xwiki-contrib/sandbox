@@ -73,7 +73,7 @@ public class DefaultXWikiX509KeyPairTest extends AbstractComponentTestCase
       + "jcnlwdG8ucGFzc3dkLmludGVybmFsLlNjcnlwdE1lbW9yeUhhcmRLZXlEZXJpdmF0aW9uRnVuY3Rpb24AAAAAAAAAAQIABUkACWJsb2NrU2l6\n"
       + "ZUkAEGRlcml2ZWRLZXlMZW5ndGhJAA1tZW1vcnlFeHBlbnNlSQAQcHJvY2Vzc29yRXhwZW5zZVsABHNhbHRxAH4AAnhyAEhvcmcueHdpa2kuY\n"
       + "3J5cHRvLnBhc3N3ZC5pbnRlcm5hbC5BYnN0cmFjdE1lbW9yeUhhcmRLZXlEZXJpdmF0aW9uRnVuY3Rpb24AAAAAAAAAAQIAAHhwAAAACAAAAB\n"
-      + "gAAAQAAAAACHVxAH4ABQAAABDJ7hrb6YGgV4L/F3hlyE2tdAADUlNB"
+      + "gAAAQAAAAACHVxAH4ABQAAABDJ7hrb6YGgV4L/F3hlyE2tdAADUlNB\n"
       + "-----END XWIKI CERTIFICATE AND PRIVATE KEY-----";
 
     protected PasswordCryptoService service;

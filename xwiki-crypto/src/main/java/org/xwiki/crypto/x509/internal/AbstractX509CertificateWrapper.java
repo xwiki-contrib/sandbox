@@ -67,6 +67,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.Certificate#hashCode()
      */
     @Override
@@ -77,6 +78,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.Certificate#equals(java.lang.Object)
      */
     @Override
@@ -93,6 +95,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Extension#hasUnsupportedCriticalExtension()
      */
     public boolean hasUnsupportedCriticalExtension()
@@ -102,6 +105,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Extension#getCriticalExtensionOIDs()
      */
     public Set<String> getCriticalExtensionOIDs()
@@ -111,6 +115,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Extension#getNonCriticalExtensionOIDs()
      */
     public Set<String> getNonCriticalExtensionOIDs()
@@ -120,6 +125,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#checkValidity()
      */
     @Override
@@ -130,6 +136,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.Certificate#getEncoded()
      */
     @Override
@@ -140,6 +147,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.Certificate#verify(java.security.PublicKey)
      */
     @Override
@@ -151,6 +159,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#checkValidity(java.util.Date)
      */
     @Override
@@ -161,6 +170,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.Certificate#verify(java.security.PublicKey, java.lang.String)
      */
     @Override
@@ -172,6 +182,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Extension#getExtensionValue(java.lang.String)
      */
     public byte[] getExtensionValue(String oid)
@@ -181,6 +192,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getVersion()
      */
     @Override
@@ -191,6 +203,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSerialNumber()
      */
     @Override
@@ -201,6 +214,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.Certificate#getPublicKey()
      */
     @Override
@@ -211,6 +225,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getIssuerDN()
      */
     @Override
@@ -221,6 +236,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getIssuerX500Principal()
      */
     @Override
@@ -231,6 +247,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSubjectDN()
      */
     @Override
@@ -241,6 +258,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSubjectX500Principal()
      */
     @Override
@@ -251,6 +269,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getNotBefore()
      */
     @Override
@@ -261,6 +280,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getNotAfter()
      */
     @Override
@@ -271,6 +291,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getTBSCertificate()
      */
     @Override
@@ -281,6 +302,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSignature()
      */
     @Override
@@ -291,6 +313,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSigAlgName()
      */
     @Override
@@ -301,6 +324,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSigAlgOID()
      */
     @Override
@@ -311,6 +335,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSigAlgParams()
      */
     @Override
@@ -321,6 +346,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getIssuerUniqueID()
      */
     @Override
@@ -331,6 +357,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSubjectUniqueID()
      */
     @Override
@@ -341,6 +368,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getKeyUsage()
      */
     @Override
@@ -351,6 +379,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getExtendedKeyUsage()
      */
     @Override
@@ -361,6 +390,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getBasicConstraints()
      */
     @Override
@@ -371,6 +401,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getSubjectAlternativeNames()
      */
     @Override
@@ -381,6 +412,7 @@ public abstract class AbstractX509CertificateWrapper extends X509Certificate
 
     /**
      * {@inheritDoc}
+     *
      * @see java.security.cert.X509Certificate#getIssuerAlternativeNames()
      */
     @Override

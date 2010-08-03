@@ -59,6 +59,7 @@ public class DefaultX509CryptoService implements X509CryptoService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.x509.X509CryptoService#certsFromSpkac(java.lang.String, int)
      */
     public XWikiX509Certificate[] certsFromSpkac(final String spkacSerialization, final int daysOfValidity)
@@ -71,6 +72,7 @@ public class DefaultX509CryptoService implements X509CryptoService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.x509.X509CryptoService#newCertAndPrivateKey(int)
      */
     public XWikiX509KeyPair newCertAndPrivateKey(final int daysOfValidity, final String password)
@@ -83,6 +85,7 @@ public class DefaultX509CryptoService implements X509CryptoService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.x509.X509CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
     public String signText(final String textToSign, final XWikiX509KeyPair toSignWith, final String password)
@@ -93,6 +96,7 @@ public class DefaultX509CryptoService implements X509CryptoService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.x509.X509CryptoService#verifyText(java.lang.String, java.lang.String)
      */
     public XWikiX509Certificate verifyText(final String signedText, final String base64Signature)
@@ -103,6 +107,7 @@ public class DefaultX509CryptoService implements X509CryptoService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.x509.X509CryptoService#certFromPEM(java.lang.String)
      */
     public XWikiX509Certificate certFromPEM(final String pemFormatCert)
@@ -113,6 +118,7 @@ public class DefaultX509CryptoService implements X509CryptoService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.x509.X509CryptoService#keyPairFromBase64(java.lang.String)
      */
     public XWikiX509KeyPair keyPairFromBase64(final String keyPairAsBase64)

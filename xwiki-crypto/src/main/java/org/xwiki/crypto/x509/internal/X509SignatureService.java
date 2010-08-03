@@ -61,6 +61,7 @@ public class X509SignatureService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.CryptoService#signText(java.lang.String, org.xwiki.crypto.data.XWikiX509KeyPair)
      */
     public String signText(final String textToSign,
@@ -90,6 +91,7 @@ public class X509SignatureService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.CryptoService#verifyText(java.lang.String, java.lang.String)
      */
     public XWikiX509Certificate verifyText(String signedText, String base64Signature) throws GeneralSecurityException
