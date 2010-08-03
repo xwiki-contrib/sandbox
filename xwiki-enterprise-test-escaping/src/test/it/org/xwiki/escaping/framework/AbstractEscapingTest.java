@@ -74,6 +74,9 @@ public abstract class AbstractEscapingTest implements FileTest
     /** Static part of the test URL. */
     private static final String URL_START = "http://127.0.0.1:8080/xwiki/bin/";
 
+    /** Language parameter name. */
+    private static final String LANGUAGE = "language";
+
     /** HTTP client shared between all subclasses. */
     private static HttpClient client;
 
@@ -301,7 +304,7 @@ public abstract class AbstractEscapingTest implements FileTest
     protected final String escapeUrl(String str)
     {
         try {
-            return URLEncoder.encode(str == null ? "" : str, "utf-8");
+            return URLEncoder.encode(str == null ? "" : str, "UTF-8");
         } catch (UnsupportedEncodingException exception) {
             // should not happen
             throw new RuntimeException("Should not happen: ", exception);
@@ -404,6 +407,11 @@ public abstract class AbstractEscapingTest implements FileTest
                 url += delimiter + escapeUrl(parameter) + "=" + escapeUrl(value);
             }
             delimiter = "&";
+        }
+        // special handling for language parameter to exclude false positives (language setting is saved in cookies and
+        // sent on subsequent requests)
+        if (!parameters.containsKey(LANGUAGE)) {
+            url += delimiter + LANGUAGE + "=en";
         }
         return url;
     }
