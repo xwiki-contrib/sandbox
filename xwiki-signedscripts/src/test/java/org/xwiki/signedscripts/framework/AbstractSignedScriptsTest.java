@@ -19,7 +19,6 @@
  */
 package org.xwiki.signedscripts.framework;
 
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.LinkedList;
@@ -225,10 +224,10 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
     {
         try {
             if (this.cachedKeyPair == null) {
-                this.cachedKeyPair = DefaultXWikiX509KeyPair.deserializeFromBase64(KP_PEM);
+                this.cachedKeyPair = DefaultXWikiX509KeyPair.fromBase64String(KP_PEM);
             }
             return this.cachedKeyPair;
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             // should not happen
             throw new RuntimeException(exception);
         }
