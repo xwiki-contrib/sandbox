@@ -90,17 +90,6 @@ public class X509KeyServiceTest extends AbstractComponentTestCase
     }
 
     @Test
-    public void newCertAndPrivateKeyTestLongPwd() throws Exception
-    {
-        // long password should work because of password mangling
-        this.service.newCertAndPrivateKey(1,
-                                          "http://www.my.web.id",
-                                          "xwiki:XWiki.Me",
-                                          "this is a very, very, very, very, very, looooooong passphrase",
-                                          this.passwordService);
-    }
-
-    @Test
     public void newPrivateKeyCorrectPassword() throws GeneralSecurityException
     {
         Assert.assertNotNull("Private key is null", getKeyPair(this.passwordService).getPrivateKey(PASSWORD));

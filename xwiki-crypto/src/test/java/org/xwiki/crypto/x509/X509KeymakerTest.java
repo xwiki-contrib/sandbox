@@ -63,7 +63,7 @@ public class X509KeymakerTest
         X509Certificate[] certs = keyMaker.makeClientAndAuthorityCertificates(kp.getPublic(),
                                                                               1,
                                                                               true,
-                                                                              "web id",
+                                                                              "http://my.web.id.com/",
                                                                               "xwiki:XWiki.Me");
         // verify client
         certs[0].checkValidity();
