@@ -27,8 +27,8 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.InputSource;
-import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.BulletedListBlock;
 import org.xwiki.rendering.block.DefinitionDescriptionBlock;
@@ -78,10 +78,8 @@ import org.xwiki.wikiimporter.listener.AbstractWikiImporterListenerXDOM;
  * 
  * @version $Id$
  */
-@Component("mediawiki/xml")
 public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
 {
-
     private MediaWikiPage page;
 
     private MediaWikiPageRevision pageRevision;
@@ -94,28 +92,27 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
 
     private boolean onPageRevisionFlag;
 
-    private String attachmentSrcPath;
-
-    private String attachmentExcludeDirs;
-
-    private String defaultSpace;
-
     private String fileExtensions;
 
     private String wiki;
 
     private MediaWikiImportParameters importParams;
 
-    private String preserveHistory;
-
     private List<String> attachments = new ArrayList<String>();
-
-    private WikiImporterLogger logger = WikiImporterLogger.getLogger();
 
     private int macroErrors;
 
-    @Requirement
-    WikiImporterDocumentBridge docBridge;
+    private WikiImporterLogger logger;
+
+    private WikiImporterDocumentBridge docBridge;
+
+    public MediaWikiImporterListener(ComponentManager componentManager, MediaWikiImportParameters params)
+        throws ComponentLookupException
+    {
+        this.logger = componentManager.lookup(WikiImporterLogger.class);
+        this.docBridge = componentManager.lookup(WikiImporterDocumentBridge.class);
+        this.importParams = params;
+    }
 
     /**
      * {@inheritDoc}
@@ -125,7 +122,8 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
     public void beginAttachment(String attachmentName)
     {
         if (onPageFlag) {
-            page.addAttachment(new MediaWikiAttachment(attachmentSrcPath, attachmentName, attachmentExcludeDirs));
+            page.addAttachment(new MediaWikiAttachment(this.importParams.getAttachmentSrcPath(), attachmentName,
+                this.importParams.getAttachmentExcludeDirs(), logger));
             endAttachment();
         }
 
@@ -149,15 +147,15 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
     public void beginWikiPage()
     {
         // Begin Page Flags.
-        onPageFlag = true;
-        pageProps.clear();
-        page = new MediaWikiPage(defaultSpace, wiki);
-        logger.nextPage();
-        stack.clear();
-        attachments.clear();
-        macroErrors = 0;
+        this.onPageFlag = true;
+        this.pageProps.clear();
+        this.page = new MediaWikiPage(this.importParams.getDefaultSpace(), this.wiki);
+        this.logger.nextPage();
+        this.stack.clear();
+        this.attachments.clear();
+        this.macroErrors = 0;
 
-        logger.info("Begin Page", true, WikiImporterLogger.INFO);
+        this.logger.info("Begin Page", true);
     }
 
     /**
@@ -177,9 +175,9 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
      */
     public void beginWikiPageRevision()
     {
-        if (onPageFlag) {
-            onPageRevisionFlag = true;
-            pageRevProps.clear();
+        if (this.onPageFlag) {
+            this.onPageRevisionFlag = true;
+            this.pageRevProps.clear();
         }
     }
 
@@ -219,28 +217,26 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
     public void endWikiPage()
     {
         // Populate the Page properties.
-        page.populateProps(pageProps);
-        onPageFlag = false;
+        this.page.populateProps(this.pageProps);
+        this.onPageFlag = false;
 
         // Logging - set original page title for reference.
-        logger.getPageLog().setLog(page.getPageTitleForReference());
+        this.logger.getPageLog().setLog(this.page.getPageTitleForReference());
         if (macroErrors > 0) {
-            logger.info("Total Macro Errors reported on this page :" + macroErrors, true, WikiImporterLogger.WARNING);
+            this.logger.warn("Total Macro Errors reported on this page :" + macroErrors, true);
         }
 
         // attachments
-        if (page.getAttachments().size() > 0) {
-            logger.info("Total Attachments encountered :" + attachments.size(), true, WikiImporterLogger.INFO);
+        if (this.page.getAttachments().size() > 0) {
+            this.logger.info("Total Attachments encountered :" + attachments.size(), true);
         }
 
         try {
             // Save the Wiki Page.
-            docBridge.createWikiPage(page);
-
+            this.docBridge.addWikiPage(this.page);
         } catch (Exception e) {
             // Do nothing.
         }
-
     }
 
     /**
@@ -250,12 +246,11 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
      */
     public void endWikiPageRevision()
     {
-        if (onPageFlag) {
-
-            pageRevision = new MediaWikiPageRevision(pageRevProps);
-            pageRevision.setTextContent(getXDOM());
-            page.addRevision(pageRevision);
-            onPageRevisionFlag = false;
+        if (this.onPageFlag) {
+            this.pageRevision = new MediaWikiPageRevision(this.pageRevProps);
+            this.pageRevision.setTextContent(getXDOM());
+            this.page.addRevision(pageRevision);
+            this.onPageRevisionFlag = false;
         }
     }
 
@@ -277,11 +272,11 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
      */
     public void onProperty(String property, String value)
     {
-        if (onPageFlag) {
-            if (onPageRevisionFlag) {
-                pageRevProps.put(property, value);
+        if (this.onPageFlag) {
+            if (this.onPageRevisionFlag) {
+                this.pageRevProps.put(property, value);
             } else {
-                pageProps.put(property, value);
+                this.pageProps.put(property, value);
             }
         }
 
@@ -691,12 +686,12 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
 
         // Convert Categories to Tags.
         if (linkReference.startsWith("Category")) {
-            page.addTag(linkReference.split(":")[1]);
+            this.page.addTag(linkReference.split(":")[1]);
             return;
         }
 
-        // Fix Link
-        this.fixLink(linkBlock.getLink());
+        // Convert from MediaWiki link to XWiki link
+        convertLink(linkBlock.getLink());
 
         this.stack.push(linkBlock);
     }
@@ -738,7 +733,6 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
      */
     public void onMacro(String id, Map<String, String> macroParameters, String content, boolean isInline)
     {
-
         if (id.equals("toc") || id.equals("forcetoc")) {
             if (macroParameters == null) {
                 macroParameters = new HashMap<String, String>();
@@ -746,7 +740,7 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
             macroParameters.put("numbered", "true");
         } else {
             id = "warning";
-            macroErrors++;
+            this.macroErrors++;
         }
         MacroBlock macroBlock = new MacroBlock(id, macroParameters, content, isInline);
         this.stack.push(macroBlock);
@@ -823,7 +817,7 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
         this.stack.push(new ImageBlock(image, isFreeStandingURI, parameters));
     }
 
-    private void fixLink(Link mediaWikiLink)
+    private void convertLink(Link mediaWikiLink)
     {
         // If link reference is a external url
         if (-1 != mediaWikiLink.getReference().indexOf("://")) {
@@ -900,20 +894,6 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
     }
 
     /**
-     * Sets the MediaWikiImporter parameters.
-     * 
-     * @param params mediawikiimport params.
-     */
-    public void setImportParameters(MediaWikiImportParameters params)
-    {
-        this.importParams = params;
-        this.attachmentSrcPath = params.getAttachmentSrcPath();
-        this.attachmentExcludeDirs = params.getAttachmentExcludeDirs();
-        this.defaultSpace = params.getDefaultSpace();
-        this.preserveHistory = params.getPreserveHistory();
-    }
-
-    /**
      * Check if the file is a image.
      * 
      * @param nameSpace Namespace of the file.Images usually have File or Image and namespace.
@@ -928,6 +908,7 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
             String fileExtension = fileName.substring(dotIndex + 1).toLowerCase();
             return Arrays.asList(fileExtensions).contains(fileExtension);
         }
+
         return false;
     }
 
@@ -936,10 +917,10 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
      */
     private String getDefaultSpace()
     {
-        if (StringUtils.isNotBlank(defaultSpace)) {
-            return defaultSpace;
+        if (StringUtils.isNotBlank(this.importParams.getDefaultSpace())) {
+            return this.importParams.getDefaultSpace();
         }
+
         return "Main";
     }
-
 }

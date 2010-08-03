@@ -30,7 +30,6 @@ import java.util.List;
  */
 public class MediaWikiConstants
 {
-
     public final static String PAGE_TAG = "page";
 
     public final static String PAGE_TITLE_TAG = "title";

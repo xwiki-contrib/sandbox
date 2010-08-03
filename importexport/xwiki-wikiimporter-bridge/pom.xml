@@ -6,11 +6,16 @@
     <artifactId>xwiki-core-parent</artifactId>
     <version>2.5-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-wikiimporter-api</artifactId>
-  <name>XWiki WikiImporter API</name>
-  <description>XWiki Platform - WikiImporter API</description>
+  <artifactId>xwiki-wikiimporter-bridge</artifactId>
+  <name>XWiki WikiImporter Bridge</name>
+  <description>XWiki Platform - WikiImporter Bridge</description>
   <packaging>jar</packaging>
   <dependencies>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-wikiimporter-api</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-configuration-api</artifactId>
@@ -34,6 +39,16 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-rendering-api</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-bridge</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.xpn.xwiki.platform</groupId>
+      <artifactId>xwiki-core</artifactId>
       <version>${pom.version}</version>
     </dependency>
 

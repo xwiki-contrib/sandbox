@@ -33,14 +33,14 @@ import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
 import org.xwiki.wikiimporter.importer.WikiImporterException;
 import org.xwiki.wikiimporter.internal.importer.WikiImporterLogger;
+import org.xwiki.wikiimporter.wiki.Attachment;
 import org.xwiki.wikiimporter.wiki.WikiPage;
 import org.xwiki.wikiimporter.wiki.WikiPageRevision;
-import org.xwiki.wikiimporter.wiki.Attachment;
 
 /**
  * Default Implementation for WikiImporterDocumentBridge.
  * 
- * @version $Id$
+ * @version $Id: DefaultWikiImporterDocumentBridge.java 27627 2010-03-14 14:33:22Z arun $
  */
 @Component
 public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBridge
@@ -53,7 +53,8 @@ public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBr
     @Requirement
     private ComponentManager componentManager;
 
-    private WikiImporterLogger logger = WikiImporterLogger.getLogger();
+    @Requirement
+    private WikiImporterLogger logger;
 
     /**
      * {@inheritDoc}
@@ -68,9 +69,9 @@ public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBr
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge#createWikiPage(org.xwiki.wikiimporter.wiki.WikiPage)
+     * @see org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge#addWikiPage(org.xwiki.wikiimporter.wiki.WikiPage)
      */
-    public void createWikiPage(WikiPage page) throws WikiImporterException
+    public void addWikiPage(WikiPage page) throws WikiImporterException
     {
 
         // Skip creating pages if page name or space is null.
@@ -88,7 +89,7 @@ public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBr
                 error = " Given page is a Category page.";
             }
 
-            logger.info("Page Skipped - " + error, true, WikiImporterLogger.ERROR);
+            logger.error("Page Skipped - " + error, true);
             return;
         }
 
@@ -98,8 +99,8 @@ public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBr
         DocumentReference reference = new DocumentReference(page.getWiki(), page.getSpace(), page.getName());
 
         try {
-            docAccessBridge.setProperty(page.getSpace() + "." + page.getName(), "XWiki.TagClass", "tags", page
-                .getTagsAsString());
+            docAccessBridge.setProperty(page.getSpace() + "." + page.getName(), "XWiki.TagClass", "tags",
+                page.getTagsAsString());
 
             // Document Parent.
             String parentPageName = page.getParent() != null ? page.getParent() : "WebHome";
@@ -126,8 +127,8 @@ public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBr
                 BlockRenderer renderer = componentManager.lookup(BlockRenderer.class, Syntax.XWIKI_2_0.toIdString());
                 renderer.render(revision.getContent(), printer);
 
-                docAccessBridge.setDocumentContent(reference, printer.toString(), revision.getComment(), revision
-                    .isMinorEdit());
+                docAccessBridge.setDocumentContent(reference, printer.toString(), revision.getComment(),
+                    revision.isMinorEdit());
             }
 
         } catch (Exception e) {
@@ -137,23 +138,23 @@ public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBr
         // On successful page creation
         String pageLink = page.getSpace() + "." + page.getName();
         logger.info("Page Created ->  <a href=\"$xwiki.getDocument('" + pageLink + "').getExternalURL()>" + pageLink
-            + "</a>", true, WikiImporterLogger.INFO);
+            + "</a>", true);
 
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge#createLogPage(java.lang.String, java.lang.String)
+     * @see org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge#saveLog(org.xwiki.model.reference.DocumentReference,
+     *      java.lang.String)
      */
-    public void createLogPage(String logPageName, String log) throws WikiImporterException
+    public void log(String log) throws WikiImporterException
     {
         try {
             DocumentReference logDocReference = new DocumentReference("xwiki", "WikiImporter", "WikiImporterLog");
-            docAccessBridge.setDocumentContent(logDocReference, log, "Log Page Created", true);
+            this.docAccessBridge.setDocumentContent(logDocReference, log, "Log Page Created", true);
         } catch (Exception e) {
             throw new WikiImporterException("Error while creating the wiki importer log page", e);
         }
     }
-
 }

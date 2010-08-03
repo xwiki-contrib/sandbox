@@ -17,10 +17,14 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.wikiimporter.importer;
+package org.xwiki.wikiimporter.internal;
 
-import org.xwiki.component.logging.Logger;
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.script.service.ScriptService;
+import org.xwiki.wikiimporter.importer.WikiImporter;
+import org.xwiki.wikiimporter.importer.WikiImporterException;
 import org.xwiki.wikiimporter.type.WikiImporterType;
 import org.xwiki.wikiimporter.type.WikiImporterTypeFactory;
 
@@ -29,40 +33,20 @@ import org.xwiki.wikiimporter.type.WikiImporterTypeFactory;
  * 
  * @version $Id$
  */
-public class WikiImporterVelocityBridge
+@Component("wikimporter")
+public class WikiImporterScriptService implements ScriptService
 {
-    private WikiImporter wikiImporter;
-
     /**
      * Wiki Importer factory can be used to query supported wikis and export types.
      */
+    @Requirement
     private WikiImporterTypeFactory wikiImporterTypeFactory;
 
     /**
      * XWiki component manager.
      */
+    @Requirement
     private ComponentManager componentManager;
-
-    private Logger logger;
-
-    public WikiImporterVelocityBridge(ComponentManager componentManager, Logger logger) throws WikiImporterException
-    {
-        try {
-            this.logger = logger;
-            this.componentManager = componentManager;
-            this.wikiImporterTypeFactory = componentManager.lookup(WikiImporterTypeFactory.class);
-        } catch (Exception e) {
-            throw new WikiImporterException("Error while initializing wiki importer velocity bridge.", e);
-        }
-    }
-
-    /**
-     * @return {@link WikiImporterTypeFactory}
-     */
-    public WikiImporterTypeFactory getWikiImporterTypeFactory()
-    {
-        return wikiImporterTypeFactory;
-    }
 
     /**
      * Returns the Wiki Importer based on WikiImporter type id (eg: mediawiki/xml, confluence/xml .. )
@@ -73,15 +57,13 @@ public class WikiImporterVelocityBridge
      */
     public WikiImporter getWikiImporter(String wikiImporterType) throws WikiImporterException
     {
-
         try {
-            WikiImporterType type = wikiImporterTypeFactory.createTypeFromIdString(wikiImporterType);
-            wikiImporter = componentManager.lookup(WikiImporter.class, type.toIdString());
+            WikiImporterType type = this.wikiImporterTypeFactory.createTypeFromIdString(wikiImporterType);
+
+            return this.componentManager.lookup(WikiImporter.class, type.toIdString());
         } catch (Exception e) {
-            logger.error("Unable to create wiki importer, Unsupported wiki importer type");
             throw new WikiImporterException("Unable to create wiki importer, Unsupported wiki importer type", e);
         }
-        return wikiImporter;
     }
 
 }

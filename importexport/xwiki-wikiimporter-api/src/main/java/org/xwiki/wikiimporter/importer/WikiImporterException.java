@@ -26,7 +26,6 @@ package org.xwiki.wikiimporter.importer;
  */
 public class WikiImporterException extends Exception
 {
-
     /**
      * Class version.
      */

@@ -19,27 +19,16 @@
  */
 package org.xwiki.wikiimporter.internal.mediawiki;
 
-import static org.xwiki.wikiimporter.internal.mediawiki.MediaWikiConstants.MW_PROPERTIES;
-import static org.xwiki.wikiimporter.internal.mediawiki.MediaWikiConstants.PAGE_REVISION_TAG;
-import static org.xwiki.wikiimporter.internal.mediawiki.MediaWikiConstants.PAGE_TAG;
-import static org.xwiki.wikiimporter.internal.mediawiki.MediaWikiConstants.TEXT_CONTENT_TAG;
-
 import java.io.StringReader;
 import java.util.Stack;
 
-import org.wikimodel.wem.WikiParserException;
-import org.wikimodel.wem.mediawiki.MediaWikiParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.rendering.internal.parser.wikimodel.XWikiGeneratorListener;
-import org.xwiki.rendering.parser.ImageParser;
-import org.xwiki.rendering.parser.LinkParser;
 import org.xwiki.rendering.parser.StreamParser;
 import org.xwiki.rendering.renderer.PrintRendererFactory;
-import org.xwiki.rendering.util.IdGenerator;
 import org.xwiki.wikiimporter.listener.WikiImporterListener;
 
 /**
@@ -49,27 +38,21 @@ import org.xwiki.wikiimporter.listener.WikiImporterListener;
  */
 public class MediaWikiXmlHandler extends DefaultHandler
 {
-
     private WikiImporterListener listener;
 
     private Stack<String> currElement = new Stack<String>();
 
     private StringBuilder strBuf = new StringBuilder();
 
-    private StreamParser streamParser;
-
-    private LinkParser linkParser;
-
-    private ImageParser imageParser;
-
-    private IdGenerator idGenerator;
-
     protected PrintRendererFactory plainRendererFactory;
 
-    private ComponentManager componentManager;
+    private StreamParser mediawikiParser;
 
-    public MediaWikiXmlHandler(WikiImporterListener listener)
+    public MediaWikiXmlHandler(ComponentManager componentManager, WikiImporterListener listener)
+        throws ComponentLookupException
     {
+        this.mediawikiParser = componentManager.lookup(StreamParser.class, "mediawiki/1.0");
+
         this.listener = listener;
     }
 
@@ -81,7 +64,7 @@ public class MediaWikiXmlHandler extends DefaultHandler
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
     {
-        strBuf.append(ch, start, length);
+        this.strBuf.append(ch, start, length);
     }
 
     /**
@@ -94,15 +77,15 @@ public class MediaWikiXmlHandler extends DefaultHandler
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
     {
 
-        if (PAGE_TAG.equals(qName)) {
-            listener.beginWikiPage();
-        } else if (PAGE_REVISION_TAG.equals(qName)) {
-            listener.beginWikiPageRevision();
+        if (MediaWikiConstants.PAGE_TAG.equals(qName)) {
+            this.listener.beginWikiPage();
+        } else if (MediaWikiConstants.PAGE_REVISION_TAG.equals(qName)) {
+            this.listener.beginWikiPageRevision();
         }
 
         // Set Current Element
-        currElement.push(qName);
-        strBuf.setLength(0);
+        this.currElement.push(qName);
+        this.strBuf.setLength(0);
 
     }
 
@@ -114,107 +97,32 @@ public class MediaWikiXmlHandler extends DefaultHandler
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
-
-        if (MW_PROPERTIES.contains(currElement.peek())) {
-            listener.onProperty(currElement.pop(), strBuf.toString());
+        if (MediaWikiConstants.MW_PROPERTIES.contains(currElement.peek())) {
+            this.listener.onProperty(currElement.pop(), strBuf.toString());
         }
 
-        if (TEXT_CONTENT_TAG.equals(currElement.peek())) {
+        if (MediaWikiConstants.TEXT_CONTENT_TAG.equals(currElement.peek())) {
             try {
                 this.parseText(strBuf);
             } catch (Exception e) {
                 // Do Nothing.
             }
-            currElement.pop();
+            this.currElement.pop();
         }
 
-        if (PAGE_TAG.equals(qName)) {
-            listener.endWikiPage();
-        } else if (PAGE_REVISION_TAG.equals(qName)) {
-            listener.endWikiPageRevision();
+        if (MediaWikiConstants.PAGE_TAG.equals(qName)) {
+            this.listener.endWikiPage();
+        } else if (MediaWikiConstants.PAGE_REVISION_TAG.equals(qName)) {
+            this.listener.endWikiPageRevision();
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
-     */
-    @Override
-    public void error(SAXParseException e) throws SAXException
-    {
-        super.error(e);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
-     */
-    @Override
-    public void fatalError(SAXParseException arg0) throws SAXException
-    {
-        super.fatalError(arg0);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xml.sax.helpers.DefaultHandler#ignorableWhitespace(char[], int, int)
-     */
-    @Override
-    public void ignorableWhitespace(char[] arg0, int arg1, int arg2) throws SAXException
-    {
-        // TODO Auto-generated method stub
-        super.ignorableWhitespace(arg0, arg1, arg2);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xml.sax.helpers.DefaultHandler#startDocument()
-     */
-    @Override
-    public void startDocument() throws SAXException
-    {
-        super.startDocument();
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xml.sax.helpers.DefaultHandler#endDocument()
-     */
-    @Override
-    public void endDocument() throws SAXException
-    {
-        super.endDocument();
     }
 
     private void parseText(StringBuilder str) throws MediaWikiImporterException
     {
-
-        MediaWikiParser wemMediaWikiParser = new MediaWikiParser();
-        idGenerator = new IdGenerator();
         try {
-            streamParser = componentManager.lookup(StreamParser.class, "plain/1.0");
-            plainRendererFactory = componentManager.lookup(PrintRendererFactory.class, "plain/1.0");
-            linkParser = componentManager.lookup(LinkParser.class);
-            imageParser = componentManager.lookup(ImageParser.class);
-
-            XWikiGeneratorListener wikimodelListener =
-                new XWikiGeneratorListener(streamParser, listener, linkParser, imageParser, this.plainRendererFactory,
-                    idGenerator);
-
-            wemMediaWikiParser.parse(new StringReader(str.toString()), wikimodelListener);
+            this.mediawikiParser.parse(new StringReader(str.toString()), listener);
         } catch (Exception e) {
-            throw new MediaWikiImporterException("Unable to parse text with MediaWikiParser", e);
+            throw new MediaWikiImporterException("Unable to parse page content", e);
         }
     }
-
-    public void setComponentManager(ComponentManager componentManager)
-    {
-        this.componentManager = componentManager;
-    }
-
 }

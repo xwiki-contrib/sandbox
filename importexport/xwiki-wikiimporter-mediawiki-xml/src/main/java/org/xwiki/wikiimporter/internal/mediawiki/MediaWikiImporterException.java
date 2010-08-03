@@ -28,7 +28,6 @@ import org.xwiki.wikiimporter.importer.WikiImporterException;
  */
 public class MediaWikiImporterException extends WikiImporterException
 {
-
     private static final long serialVersionUID = 6829912406221343164L;
 
     /**

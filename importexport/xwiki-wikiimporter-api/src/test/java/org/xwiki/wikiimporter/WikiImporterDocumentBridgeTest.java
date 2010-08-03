@@ -30,7 +30,6 @@ import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
  */
 public class WikiImporterDocumentBridgeTest extends AbstractComponentTestCase
 {
-
     WikiImporterDocumentBridge bridge;
 
     /**
@@ -49,6 +48,5 @@ public class WikiImporterDocumentBridgeTest extends AbstractComponentTestCase
     public void testDocumentBridge()
     {
         Assert.assertNotNull(bridge);
-        Assert.assertNotNull(bridge.getDocAccessBridge());
     }
 }

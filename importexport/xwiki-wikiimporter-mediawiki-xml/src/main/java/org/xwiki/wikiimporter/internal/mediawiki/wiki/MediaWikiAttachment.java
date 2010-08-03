@@ -45,13 +45,14 @@ public class MediaWikiAttachment extends AbstractAttachment
 
     private String excludeDirList;
 
-    WikiImporterLogger logger = WikiImporterLogger.getLogger();
+    private WikiImporterLogger logger;
 
-    public MediaWikiAttachment(String directory, String fileName, String excludeDirList)
+    public MediaWikiAttachment(String directory, String fileName, String excludeDirList, WikiImporterLogger logger)
     {
         this.directory = directory;
         this.fileName = fileName;
         this.excludeDirList = excludeDirList;
+        this.logger = logger;
     }
 
     /**
@@ -71,7 +72,7 @@ public class MediaWikiAttachment extends AbstractAttachment
                 long length = attachmentAsFile.length();
 
                 if (length > Integer.MAX_VALUE) {
-                    logger.info(fileName + " is too large to import.", true, WikiImporterLogger.ERROR);
+                    logger.error(fileName + " is too large to import.", true);
                 }
 
                 // Create the byte array to hold the data
@@ -86,8 +87,7 @@ public class MediaWikiAttachment extends AbstractAttachment
 
                 // Ensure all the bytes have been read in
                 if (offset < bytes.length) {
-                    logger.info("Attachment : Unable to read the complete file" + fileName, true,
-                        WikiImporterLogger.ERROR);
+                    logger.error("Attachment : Unable to read the complete file" + fileName, true);
                 }
 
                 // Close the input stream and return bytes

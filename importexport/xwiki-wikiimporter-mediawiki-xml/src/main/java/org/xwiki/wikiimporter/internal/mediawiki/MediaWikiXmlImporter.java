@@ -27,6 +27,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
 import org.xwiki.wikiimporter.importer.AbstractWikiImporter;
@@ -43,15 +44,10 @@ import org.xwiki.wikiimporter.type.WikiImporterType;
 @Component("mediawiki/xml")
 public class MediaWikiXmlImporter extends AbstractWikiImporter
 {
-
     /**
      * The description of the macro.
      */
     private static final String DESCRIPTION = "Imports MediaWiki XML dump into XWiki.";
-
-    MediaWikiImportParameters params;
-
-    WikiImporterListener listener;
 
     @Requirement
     private ComponentManager componentManager;
@@ -59,15 +55,16 @@ public class MediaWikiXmlImporter extends AbstractWikiImporter
     @Requirement
     private WikiImporterDocumentBridge docBridge;
 
-    @Requirement("mediawiki/xml")
-    private WikiImporterListener mwXmlListener;
+    @Requirement
+    private WikiImporterLogger logger;
 
-    private WikiImporterLogger logger = WikiImporterLogger.getLogger();
+    SAXParserFactory saxParserFactory;
 
     public MediaWikiXmlImporter()
     {
         super("MediaWiki XML", DESCRIPTION, MediaWikiImportParameters.class);
-        logger = WikiImporterLogger.getLogger();
+
+        this.saxParserFactory = SAXParserFactory.newInstance();
     }
 
     /**
@@ -76,15 +73,12 @@ public class MediaWikiXmlImporter extends AbstractWikiImporter
      * @see org.xwiki.wikiimporter.importer.WikiImporter#importWiki(java.lang.Object,
      *      org.xwiki.wikiimporter.listener.WikiImporterListener)
      */
-    public void importWiki(Object object, WikiImporterListener listener) throws WikiImporterException
+    public void importWiki(Map<String, ? > parameters, WikiImporterListener listener) throws WikiImporterException
     {
-        logger.info("Import process started.", false, WikiImporterLogger.INFO);
+        // Populating MediaWikiParameters.
+        MediaWikiImportParameters mxParams = populateParameterBean(parameters);
 
-        this.parseWikiDumpXml((String) object, listener);
-
-        logger.info("Import process completed Successfully.", false, WikiImporterLogger.INFO);
-        docBridge.createLogPage("WikiImporter.WikiImporterLog", logger.getAllLogsAsString());
-        logger.clearAllLogs();
+        importWiki(mxParams, listener);
     }
 
     /**
@@ -93,15 +87,30 @@ public class MediaWikiXmlImporter extends AbstractWikiImporter
      * 
      * @see org.xwiki.wikiimporter.importer.WikiImporter#importWiki(java.util.Map)
      */
-    public void importWiki(Map<String, ? > paramsMap) throws WikiImporterException
+    public void importWiki(Map<String, ? > parameters) throws WikiImporterException
     {
         // Populating MediaWikiParameters.
-        this.populateParameterBean(paramsMap);
-        ((MediaWikiImporterListener) mwXmlListener).setImportParameters(params);
+        MediaWikiImportParameters mxParameters = populateParameterBean(parameters);
 
-        this.listener = mwXmlListener;
-        this.importWiki(params.getSrcPath(), listener);
+        try {
+            MediaWikiImporterListener mwXmlListener =
+                new MediaWikiImporterListener(this.componentManager, mxParameters);
+            importWiki(mxParameters, mwXmlListener);
+        } catch (ComponentLookupException e) {
+            throw new WikiImporterException("Failed to create MediaWikiImporterListener", e);
+        }
+    }
 
+    private void importWiki(MediaWikiImportParameters params, WikiImporterListener listener)
+        throws WikiImporterException
+    {
+        this.logger.info("Import process started.", false);
+
+        this.parseWikiDumpXml(params, listener);
+
+        this.logger.info("Import process completed Successfully.", false);
+        this.docBridge.log(this.logger.getAllLogsAsString());
+        this.logger.clearAllLogs();
     }
 
     /**
@@ -114,43 +123,39 @@ public class MediaWikiXmlImporter extends AbstractWikiImporter
         return WikiImporterType.MEDIAWIKI_XML;
     }
 
-    /**
-     * Populates the Parameter Bean Class
-     * 
-     * @param paramMap
-     */
-    private void populateParameterBean(Map<String, ? > paramsMap) throws MediaWikiImporterException
+    private MediaWikiImportParameters populateParameterBean(Map<String, ? > paramsMap)
+        throws MediaWikiImporterException
     {
-
-        params = new MediaWikiImportParameters();
+        MediaWikiImportParameters params = new MediaWikiImportParameters();
         try {
             this.beanManager.populate(params, paramsMap);
         } catch (Exception e) {
             throw new MediaWikiImporterException("Unable to populate the parameter bean", e);
         }
+
+        return params;
     }
 
     /**
      * Parses MediaWiki XML using a SAX Parser
      * 
-     * @param xmlFilePath Absoulute path to the xml file.
-     * @param listener WikiImporterListener which listens to events generated by parser.
-     * @throws MediaWikiImporterException in case of any erros parsing the xml file.
+     * @param xmlFilePath the absolute path to the XML file.
+     * @param listener {@link WikiImporterListener} which listens to events generated by parser.
+     * @throws MediaWikiImporterException in case of any errors parsing the XML file.
      */
-    private void parseWikiDumpXml(String xmlFilePath, WikiImporterListener listener) throws MediaWikiImporterException
+    private void parseWikiDumpXml(MediaWikiImportParameters params, WikiImporterListener listener)
+        throws MediaWikiImporterException
     {
+        String xmlFilePath = params.getSrcPath();
 
         File file = new File(xmlFilePath);
-        MediaWikiXmlHandler handler = new MediaWikiXmlHandler(listener);
-        handler.setComponentManager(componentManager);
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        try {
-            SAXParser saxParser = factory.newSAXParser();
-            saxParser.parse(file, handler);
 
+        try {
+            MediaWikiXmlHandler handler = new MediaWikiXmlHandler(this.componentManager, listener);
+            SAXParser saxParser = this.saxParserFactory.newSAXParser();
+            saxParser.parse(file, handler);
         } catch (Exception e) {
             throw new MediaWikiImporterException("Error while parsing the MediaWiki XML Dump File", e);
         }
     }
-
 }

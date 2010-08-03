@@ -30,14 +30,13 @@ import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.listener.Listener;
 
 /**
- * Abstarct implementation of WikiImporterListener. This listener generates XDOM of the page content based on event call
+ * Abstract implementation of WikiImporterListener. This listener generates XDOM of the page content based on event call
  * backs from parser.
  * 
  * @version $Id$
  */
 public abstract class AbstractWikiImporterListenerXDOM implements WikiImporterListener
 {
-
     protected Stack<Block> stack = new Stack<Block>();
 
     protected final MarkerBlock marker = new MarkerBlock();
@@ -53,7 +52,6 @@ public abstract class AbstractWikiImporterListenerXDOM implements WikiImporterLi
         {
             // Nothing to do since this block is only used as a marker.
         }
-
     }
 
     /**

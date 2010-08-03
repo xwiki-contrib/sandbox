@@ -20,7 +20,6 @@
 package org.xwiki.wikiimporter.listener;
 
 import org.xml.sax.InputSource;
-import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.rendering.listener.Listener;
 
 /**
@@ -28,10 +27,8 @@ import org.xwiki.rendering.listener.Listener;
  * 
  * @version $Id$
  */
-@ComponentRole
 public interface WikiImporterListener extends Listener
 {
-
     /**
      * Call back for Start of a Wiki page.
      */
@@ -46,12 +43,12 @@ public interface WikiImporterListener extends Listener
     void beginWikiPage(String pageName);
 
     /**
-     *Call back for Start of Wiki page revision
+     * Call back for Start of Wiki page revision
      */
     void beginWikiPageRevision();
 
     /**
-     *Call back for Start of Wiki page revision
+     * Call back for Start of Wiki page revision
      * 
      * @param pageName the page name
      * @param revision number/id of revision
@@ -74,7 +71,7 @@ public interface WikiImporterListener extends Listener
     void onProperty(String property, String value);
 
     /**
-     *Call back for End of an Object.
+     * Call back for End of an Object.
      * 
      * @param objectType type of Object
      * @param params parameters of the object

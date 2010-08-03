@@ -23,45 +23,11 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
-<object>
-<class>
-<name>XWiki.TagClass</name>
-<customClass></customClass>
-<customMapping></customMapping>
-<defaultViewSheet></defaultViewSheet>
-<defaultEditSheet></defaultEditSheet>
-<defaultWeb></defaultWeb>
-<nameField></nameField>
-<validationScript></validationScript>
-<tags>
-<cache>0</cache>
-<displayType>input</displayType>
-<multiSelect>1</multiSelect>
-<name>tags</name>
-<number>1</number>
-<prettyName>Tags</prettyName>
-<relationalStorage>1</relationalStorage>
-<separator> </separator>
-<separators> ,|</separators>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<values></values>
-<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-</tags>
-</class>
-<name>WikiImporter.ImportHandler</name>
-<number>0</number>
-<className>XWiki.TagClass</className>
-<guid>9b8162f2-2f4d-4374-90ba-72cf34c75bc9</guid>
-<property>
-<tags/>
-</property>
-</object>
 <content>
 {{velocity}}
 #if($xwiki.hasAdminRights())
-  #set($paramMap=$request.getParameterMap())
-  $wikiimporter.getWikiImporter($!{request.wikiImporterType}).importWiki($paramMap)
+  #set($paramMap = $request.getParameterMap())
+  $services.wikiimporter.getWikiImporter($!{request.wikiImporterType}).importWiki($paramMap)
   $xwiki.getDocument('WikiImporter.WikiImporterLog').getContent()
  #else
 {{info}} Need admin rights to use this application. {{/info}}

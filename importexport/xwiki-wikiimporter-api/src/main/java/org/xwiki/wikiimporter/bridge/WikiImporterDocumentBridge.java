@@ -19,7 +19,6 @@
  */
 package org.xwiki.wikiimporter.bridge;
 
-import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.wikiimporter.importer.WikiImporterException;
 import org.xwiki.wikiimporter.wiki.WikiPage;
@@ -34,24 +33,18 @@ import org.xwiki.wikiimporter.wiki.WikiPage;
 public interface WikiImporterDocumentBridge
 {
     /**
-     * @return instance of DocumentAcessBridge.
-     */
-    DocumentAccessBridge getDocAccessBridge();
-
-    /**
      * Creates a Wiki Page inside xwiki, includes page content, parent, attachments and tags creation.
      * 
      * @param page Wiki Page object to be created inside xwiki.
      * @throws WikiImporterException if DocumentAcessBridge throws any error while creating the WikiPage.
      */
-    void createWikiPage(WikiPage page) throws WikiImporterException;
+    void addWikiPage(WikiPage page) throws WikiImporterException;
 
     /**
      * Create the log page if not existing and set the log content of the import process.
      * 
-     * @param logPageName
      * @param log Log content as String.
      * @throws WikiImporterException if DocumentAcessBridge throws any error while creating the given log page.
      */
-    void createLogPage(String logPageName, String log) throws WikiImporterException;
+    void log(String log) throws WikiImporterException;
 }

@@ -19,29 +19,34 @@
  */
 package org.xwiki.wikiimporter;
 
-import org.apache.velocity.VelocityContext;
-import org.junit.Assert;
+import junit.framework.Assert;
+
 import org.junit.Test;
 import org.xwiki.test.AbstractComponentTestCase;
-import org.xwiki.velocity.VelocityContextFactory;
+import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
 
 /**
- * @version $Id$
+ * @version $Id: WikiImporterDocumentBridgeTest.java 27627 2010-03-14 14:33:22Z arun $
  */
-public class VelocityContextInitializerTest extends AbstractComponentTestCase
+public class WikiImporterDocumentBridgeTest extends AbstractComponentTestCase
 {
+    WikiImporterDocumentBridge bridge;
 
     /**
-     * Test the presence of velocity bridges.
+     * {@inheritDoc}
      * 
-     * @throws Exception
+     * @see org.xwiki.test.AbstractComponentTestCase#registerComponents()
      */
-    @Test
-    public void testVelocityBridges() throws Exception
+    @Override
+    protected void registerComponents() throws Exception
     {
-        VelocityContext context = getComponentManager().lookup(VelocityContextFactory.class).createContext();
-        Assert.assertNotNull(context.get("wikiimporter"));
-
+        super.registerComponents();
+        bridge = getComponentManager().lookup(WikiImporterDocumentBridge.class);
     }
 
+    @Test
+    public void testDocumentBridge()
+    {
+        Assert.assertNotNull(bridge);
+    }
 }

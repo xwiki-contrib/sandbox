@@ -19,55 +19,18 @@
  */
 package org.xwiki.wikiimporter.internal.importer;
 
-import java.util.LinkedList;
 import java.util.List;
+
+import org.xwiki.component.annotation.ComponentRole;
 
 /**
  * WikiImporter custom logging class to generate import process log summary. Uses singleton design pattern.
  * 
  * @version $Id$
  */
-public class WikiImporterLogger
+@ComponentRole
+public interface WikiImporterLogger
 {
-
-    private static WikiImporterLogger logger;
-
-    // Log levels
-    public static final int INFO = 1;
-
-    public static final int ERROR = 2;
-
-    public static final int WARNING = 3;
-
-    private static PageLog pageLog;
-
-    private static final String START_TAG = "{{velocity}}\n $xwiki.ssx.use(\"WikiImporter.SSX\")\n{{html}}";
-
-    private static final String END_TAG = "{{/html}}{{/velocity}}";
-
-    private static final String NEW_LINE = "\n";
-
-    private static final String LI_START_TAG = "<li>";
-
-    private static final String LI_START_TAG_INFO = "<li class=\"info\">";
-
-    private static final String LI_START_TAG_ERROR = "<li class=\"error\">";
-
-    private static final String LI_START_TAG_WARNING = "<li class=\"warning\">";
-
-    private static final String LI_END_TAG = "</li>";
-
-    private static final String UL_START_TAG = "<ul class=\"importer\">";
-
-    private static final String UL_END_TAG = "</ul>";
-
-    private List<Log> logs = new LinkedList<Log>();
-
-    // Private Constructor
-    private WikiImporterLogger()
-    {
-    }
-
     // Log class to report any information.
     public class Log
     {
@@ -85,121 +48,34 @@ public class WikiImporterLogger
 
     }
 
-    // Page log class to report page specific information.
-    public class PageLog extends Log
-    {
-        private StringBuilder pageLog = new StringBuilder();
+    public void info(String infoStr, boolean isPage);
 
-        public PageLog()
-        {
-            pageLog.append(UL_START_TAG);
-        }
+    public void warn(String infoStr, boolean isPage);
 
-        public void setLog(String log)
-        {
-            this.log = LI_START_TAG + log + LI_END_TAG;
-        }
-
-        public StringBuilder getPageLog()
-        {
-            return pageLog;
-        }
-    }
-
-    /**
-     * @param infoStr Log Content.
-     * @param isPage if the log is page specific log.
-     * @param logLevel Error, Info or Warning.
-     */
-    public void info(String infoStr, boolean isPage, int logLevel)
-    {
-
-        switch (logLevel) {
-            case INFO:
-                infoStr = LI_START_TAG_INFO + infoStr + LI_END_TAG;
-                break;
-            case ERROR:
-                infoStr = LI_START_TAG_ERROR + infoStr + LI_END_TAG;
-                break;
-            case WARNING:
-                infoStr = LI_START_TAG_WARNING + infoStr + LI_END_TAG;
-                break;
-            default:
-                infoStr = LI_START_TAG + infoStr + LI_END_TAG;
-
-        }
-
-        if (isPage) {
-            if (pageLog == null) {
-                nextPage();
-            }
-            pageLog.getPageLog().append(infoStr);
-        } else {
-            Log logTmp = new Log();
-            logs.add(logTmp);
-            logTmp.setLog(infoStr);
-        }
-    }
+    public void error(String infoStr, boolean isPage);
 
     /**
      * @return the page logger in use.
      */
-    public static PageLog getPageLog()
-    {
-        return pageLog;
-    }
+    public Log getPageLog();
 
     /**
      * Creates page log object for a new page.
      */
-    public void nextPage()
-    {
-        PageLog newPageLog = new PageLog();
-        logs.add(newPageLog);
-        pageLog = newPageLog;
-    }
+    public void nextPage();
 
     /**
      * @return the list of all log objects.
      */
-    public List<Log> getAllLogs()
-    {
-        return logs;
-    }
+    public List<Log> getAllLogs();
 
     /**
-     *Clear all the logs.
+     * Clear all the logs.
      */
-    public void clearAllLogs()
-    {
-        logs.clear();
-    }
+    public void clearAllLogs();
 
     /**
      * @return the log content as String.
      */
-    public String getAllLogsAsString()
-    {
-        StringBuilder logStr = new StringBuilder();
-        logStr.append(START_TAG + "<ol \"importer\">");
-        for (Log log : logs) {
-            logStr.append(log.getLog() + NEW_LINE);
-            if (log instanceof PageLog) {
-                logStr.append(((PageLog) log).getPageLog() + UL_END_TAG + NEW_LINE);
-            }
-        }
-        logStr.append("</ol>" + END_TAG);
-        return logStr.toString();
-    }
-
-    /**
-     * @return instance of the logger.
-     */
-    public static WikiImporterLogger getLogger()
-    {
-        if (logger == null) {
-            logger = new WikiImporterLogger();
-        }
-        return logger;
-    }
+    public String getAllLogsAsString();
 }

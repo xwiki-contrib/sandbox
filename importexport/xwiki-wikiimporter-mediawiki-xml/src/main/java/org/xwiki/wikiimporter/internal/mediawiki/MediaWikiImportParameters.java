@@ -22,15 +22,15 @@ package org.xwiki.wikiimporter.internal.mediawiki;
 import org.xwiki.properties.annotation.PropertyDescription;
 import org.xwiki.properties.annotation.PropertyMandatory;
 import org.xwiki.properties.annotation.PropertyName;
+import org.xwiki.wikiimporter.importer.WikiImportParameters;
 
 /**
  * Parameters for the MediaWiki Importer
  * 
  * @version $Id$
  */
-public class MediaWikiImportParameters
+public class MediaWikiImportParameters extends WikiImportParameters
 {
-
     private String srcPath;
 
     private String attachmentSrcPath;

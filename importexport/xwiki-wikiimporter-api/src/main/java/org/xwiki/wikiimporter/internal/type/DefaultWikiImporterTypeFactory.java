@@ -40,7 +40,6 @@ import org.xwiki.wikiimporter.type.WikiType;
 @Component
 public class DefaultWikiImporterTypeFactory implements WikiImporterTypeFactory
 {
-
     /**
      * Used to cut the syntax identifier into syntax name and syntax version.
      */
@@ -87,7 +86,7 @@ public class DefaultWikiImporterTypeFactory implements WikiImporterTypeFactory
         List<WikiImporter> importers;
 
         try {
-            importers = componentManager.lookupList(WikiImporter.class);
+            importers = this.componentManager.lookupList(WikiImporter.class);
         } catch (ComponentLookupException e) {
             throw new WikiImporterException("Failed to lookup the list of available Wiki Importer Types.", e);
         }

@@ -32,12 +32,12 @@ public class WikiImporterType
     public static final WikiImporterType CONFLUENCE_XML = new WikiImporterType(WikiType.CONFLUENCE, "XML");
 
     /**
-     * Wiki type
+     * Wiki type.
      */
     private WikiType type;
 
     /**
-     * Export data format
+     * Export data format.
      */
     private String dataFormat;
 

@@ -28,8 +28,6 @@ import org.junit.Test;
 import org.xwiki.test.AbstractComponentTestCase;
 import org.xwiki.wikiimporter.importer.WikiImporter;
 import org.xwiki.wikiimporter.importer.WikiImporterException;
-import org.xwiki.wikiimporter.internal.mediawiki.MediaWikiImporterListener;
-import org.xwiki.wikiimporter.internal.mediawiki.MediaWikiXmlImporter;
 import org.xwiki.wikiimporter.listener.WikiImporterListener;
 
 /**
@@ -37,13 +35,12 @@ import org.xwiki.wikiimporter.listener.WikiImporterListener;
  */
 public class MediaWikiXmlImporterTest extends AbstractComponentTestCase
 {
+    private WikiImporter wikiimporter;
 
-    WikiImporter wikiimporter;
+    private WikiImporterListener listener;
 
-    String dumpPath;
-
-    WikiImporterListener listener;
-
+    private String dumpPath;
+    
     /**
      * {@inheritDoc}
      * 
@@ -53,53 +50,29 @@ public class MediaWikiXmlImporterTest extends AbstractComponentTestCase
     public void setUp() throws Exception
     {
         super.setUp();
+
         // listener = new MediaWikiImporterListener();
-        dumpPath = this.getClass().getResource("/MediaWikiXML.xml").getPath();
-    }
+        this.dumpPath = this.getClass().getResource("/MediaWikiXML.xml").getPath();
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.test.AbstractComponentTestCase#tearDown()
-     */
-    @Override
-    public void tearDown() throws Exception
-    {
-        // TODO Auto-generated method stub
-        super.tearDown();
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.test.AbstractComponentTestCase#registerComponents()
-     */
-    @Override
-    protected void registerComponents() throws Exception
-    {
-        super.registerComponents();
-        wikiimporter = (MediaWikiXmlImporter) getComponentManager().lookup(WikiImporter.class, "mediawiki/xml");
-        listener =
-            (MediaWikiImporterListener) getComponentManager().lookup(WikiImporterListener.class, "mediawiki/xml");
+        this.wikiimporter = getComponentManager().lookup(WikiImporter.class, "mediawiki/xml");
+        this.listener = getComponentManager().lookup(WikiImporterListener.class, "mediawiki/xml");
     }
 
     @Test
     public void testWikiImporter() throws Exception
     {
-        Assert.assertNotNull(wikiimporter);
-        Assert.assertNotNull(listener);
-        Assert.assertEquals("mediawiki/xml", wikiimporter.getType().toIdString());
+        Assert.assertNotNull(this.wikiimporter);
+        Assert.assertNotNull(this.listener);
+        Assert.assertEquals("mediawiki/xml", this.wikiimporter.getType().toIdString());
     }
 
     @Test
     public void testImportWikiWithMapParams() throws WikiImporterException
     {
-        Assert.assertNotNull(dumpPath);
+        Assert.assertNotNull(this.dumpPath);
 
         // Create Map of Parameters
         Map<String, String> paramMap = new HashMap<String, String>();
-        paramMap.put("srcPath", dumpPath);
-
+        paramMap.put("srcPath", this.dumpPath);
     }
-
 }

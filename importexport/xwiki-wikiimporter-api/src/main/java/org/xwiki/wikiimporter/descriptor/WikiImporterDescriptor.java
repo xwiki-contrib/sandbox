@@ -28,7 +28,6 @@ import java.util.Map;
  */
 public interface WikiImporterDescriptor
 {
-
     /**
      * @return human readable name of wiki importer ( MediaWiki-XML, Wordpress XMLRPC ) etc..
      */
@@ -49,5 +48,4 @@ public interface WikiImporterDescriptor
      */
 
     Map<String, WikiImporterParameterDescriptor> getParameterDescriptorMap();
-
 }

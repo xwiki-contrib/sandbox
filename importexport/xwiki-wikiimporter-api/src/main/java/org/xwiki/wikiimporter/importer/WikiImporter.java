@@ -52,15 +52,14 @@ public interface WikiImporter
     /**
      * Parses the document with given import parameters and fires events on custom WikiImporterListener.
      * 
-     * @param object the wiki-importer parameters class object.
+     * @param parameters the wiki-importer parameters class object.
      * @param listener listens to the events generated during parsing/import process.
      * @throws WikiImporterException if a unexpected error happens during the import process.
      */
-    void importWiki(Object object, WikiImporterListener listener) throws WikiImporterException;
+    void importWiki(Map<String, ? > parameters, WikiImporterListener listener) throws WikiImporterException;
 
     /**
      * @return the export type format of WikiImporter (eg: MediaWiki XML, Confluence XML, Wordpress XMLRPC... )
      */
     WikiImporterType getType();
-
 }

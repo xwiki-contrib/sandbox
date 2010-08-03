@@ -105,5 +105,4 @@ public abstract class AbstractWikiImporter extends AbstractLogEnabled implements
     {
         this.descriptor = descriptor;
     }
-
 }

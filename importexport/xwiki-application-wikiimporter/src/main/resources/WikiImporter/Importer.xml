@@ -23,52 +23,16 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
-<object>
-<class>
-<name>XWiki.TagClass</name>
-<customClass></customClass>
-<customMapping></customMapping>
-<defaultViewSheet></defaultViewSheet>
-<defaultEditSheet></defaultEditSheet>
-<defaultWeb></defaultWeb>
-<nameField></nameField>
-<validationScript></validationScript>
-<tags>
-<cache>0</cache>
-<displayType>input</displayType>
-<multiSelect>1</multiSelect>
-<name>tags</name>
-<number>1</number>
-<prettyName>Tags</prettyName>
-<relationalStorage>1</relationalStorage>
-<separator>|</separator>
-<separators>|,</separators>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<values></values>
-<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-</tags>
-</class>
-<name>WikiImporter.Importer</name>
-<number>0</number>
-<className>XWiki.TagClass</className>
-<guid>74c96761-cdb4-4edc-b1e2-056d9d19f61c</guid>
-<property>
-<tags/>
-</property>
-</object>
 <content>
 {{velocity}}
-
 #if($xwiki.hasAdminRights())
-
-$xwiki.ssx.use("WikiImporter.SSX")
-$xwiki.jsx.use("WikiImporter.JSX")
+#set($void = $xwiki.ssx.use("WikiImporter.SSX"))
+#set($void = $xwiki.jsx.use("WikiImporter.JSX"))
 #set($importerType = $!{request.wikiimporter} )
-#set($mwimporter=$wikiimporter.getWikiImporter($importerType))
-#set($mwimpdesc=$mwimporter.getDescriptor())
+#set($mwimporter = $services.wikiimporter.getWikiImporter($importerType))
+#set($mwimpdesc = $mwimporter.getDescriptor())
+##
 {{html}}
-
 &lt;div id="wikiimporter-page-header" class="imp_title"&gt;
 $mwimpdesc.getName() - $mwimpdesc.getDescription()
 &lt;/div&gt;
@@ -78,7 +42,7 @@ $mwimpdesc.getName() - $mwimpdesc.getDescription()
    &lt;strong&gt;Map is Empty&lt;/strong&gt;
 
 #else
-#set($allProducts=$mwimpdesc.getParameterDescriptorMap())
+#set($allProducts = $mwimpdesc.getParameterDescriptorMap())
 
 &lt;div id="wikiimporter-notifications"&gt;&amp;nbsp;&lt;span id="wikiimporter-notifications-text"&gt;&lt;/span&gt;&lt;/div&gt;
 
