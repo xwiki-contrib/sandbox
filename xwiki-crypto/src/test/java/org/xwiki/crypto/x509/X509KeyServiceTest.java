@@ -26,7 +26,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.crypto.passwd.PasswordCryptoService;
-import org.xwiki.crypto.passwd.internal.DefaultPasswordCryptoService;
 import org.xwiki.crypto.x509.internal.X509KeyService;
 import org.xwiki.test.AbstractComponentTestCase;
 
@@ -77,6 +76,7 @@ public class X509KeyServiceTest extends AbstractComponentTestCase
     protected PasswordCryptoService passwordService;
 
     @Before
+    @Override
     public void setUp() throws Exception
     {
         super.setUp();

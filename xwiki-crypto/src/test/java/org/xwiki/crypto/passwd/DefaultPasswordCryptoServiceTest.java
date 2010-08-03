@@ -51,6 +51,7 @@ public class DefaultPasswordCryptoServiceTest extends AbstractComponentTestCase
     protected PasswordCryptoService service;
 
     @Before
+    @Override
     public void setUp() throws Exception
     {
         super.setUp();

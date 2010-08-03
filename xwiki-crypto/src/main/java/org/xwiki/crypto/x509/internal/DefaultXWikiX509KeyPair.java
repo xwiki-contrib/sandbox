@@ -148,8 +148,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#serializeAsBase64()
+     * 
+     * @see org.xwiki.crypto.x509.XWikiX509KeyPair#serializeAsBase64()
      */
     public String serializeAsBase64() throws IOException
     {
@@ -160,8 +160,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#serialize()
+     * 
+     * @see org.xwiki.crypto.x509.XWikiX509KeyPair#serialize()
      */
     public byte[] serialize() throws IOException
     {
@@ -170,8 +170,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#hashCode()
+     * 
+     * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode()
@@ -181,8 +181,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#equals(java.lang.Object)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals(final Object obj)
@@ -204,8 +204,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#toString()
+     * 
+     * @see java.lang.Object#toString()
      */
     @Override
     public String toString()
@@ -224,8 +224,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#getCertificate()
+     * 
+     * @see org.xwiki.crypto.x509.XWikiX509KeyPair#getCertificate()
      */
     public XWikiX509Certificate getCertificate()
     {
@@ -246,8 +246,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#getPublicKey()
+     * 
+     * @see org.xwiki.crypto.x509.XWikiX509KeyPair#getPublicKey()
      */
     public PublicKey getPublicKey()
     {
@@ -256,8 +256,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#getPrivateKey()
+     * 
+     * @see org.xwiki.crypto.x509.XWikiX509KeyPair#getPrivateKey(java.lang.String)
      */
     public PrivateKey getPrivateKey(final String password)
         throws GeneralSecurityException
@@ -282,8 +282,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.xwiki.crypto.data.XWikiPrivateCredential#getFingerprint()
+     * 
+     * @see org.xwiki.crypto.x509.XWikiX509KeyPair#getFingerprint()
      */
     public String getFingerprint()
     {

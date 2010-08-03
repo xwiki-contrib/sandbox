@@ -104,6 +104,7 @@ public class X509SignatureServiceTest extends AbstractComponentTestCase
     protected PasswordCryptoService passwordService;
 
     @Before
+    @Override
     public void setUp() throws Exception
     {
         super.setUp();
