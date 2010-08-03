@@ -71,8 +71,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     /**
      * Create new {@link XWikiX509KeyPair}.
      * 
-     * @param certificate a certificate matching the private key, this will be stored unencripted.
-     * @param key the private key to use, this will be password encripted.
+     * @param certificate a certificate matching the private key, this will be stored unencrypted.
+     * @param key the private key to use, this will be password encrypted.
 
      * @param password the password to require if a user wants to extract the private key.
      * @param passwordCryptoService the service to use for encrypting the private key so this object can safely be
