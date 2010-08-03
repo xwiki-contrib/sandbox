@@ -19,6 +19,8 @@
  */
 package org.xwiki.crypto.x509.internal;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidParameterException;
 import java.security.KeyPair;
@@ -57,6 +59,8 @@ public class X509KeyService
                                                  final String userName)
         throws GeneralSecurityException
     {
+        this.checkWebID(webID);
+
         if (spkacSerialization == null) {
             throw new InvalidParameterException("SPKAC parameter is null");
         }
@@ -99,6 +103,8 @@ public class X509KeyService
                                                  final PasswordCryptoService passwordCryptoService)
         throws GeneralSecurityException
     {
+        this.checkWebID(webID);
+
         final KeyPair pair = this.keymaker.newKeyPair();
 
         // In this case the non-repudiation bit is cleared because the private key is made on the server 
@@ -114,5 +120,22 @@ public class X509KeyService
                                            pair.getPrivate(),
                                            password,
                                            passwordCryptoService);
+    }
+
+    /**
+     * Prove that the webID is a valid URI.
+     * Without this validation, it is possible to create a certificate with an invalid URI specified and serialize the
+     * certificate, the exception is only thrown upon deserialization.
+     *
+     * @param webID the webID to make sure it's a valid URI.
+     * @throws GeneralSecurityException if the webID is not a valid URI.
+     */
+    private void checkWebID(final String webID) throws GeneralSecurityException
+    {
+        try {
+            new URI(webID);
+        } catch (URISyntaxException e) {
+            throw new GeneralSecurityException("webID must be valid URI", e);
+        }
     }
 }

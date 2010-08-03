@@ -86,7 +86,7 @@ public class X509KeyServiceTest extends AbstractComponentTestCase
     @Test
     public void certsFromSpkacTest() throws Exception
     {
-        this.service.certsFromSpkac(this.spkacSerialization, 1, "my webid", "xwiki:XWiki.Me");
+        this.service.certsFromSpkac(this.spkacSerialization, 1, "http://www.my.web.id", "xwiki:XWiki.Me");
     }
 
     @Test
@@ -94,7 +94,7 @@ public class X509KeyServiceTest extends AbstractComponentTestCase
     {
         // long password should work because of password mangling
         this.service.newCertAndPrivateKey(1,
-                                          "my webid",
+                                          "http://www.my.web.id",
                                           "xwiki:XWiki.Me",
                                           "this is a very, very, very, very, very, looooooong passphrase",
                                           this.passwordService);
@@ -129,7 +129,7 @@ public class X509KeyServiceTest extends AbstractComponentTestCase
     public void testNewExpiredCertIsInvalid() throws GeneralSecurityException
     {
         XWikiX509KeyPair keyPair = this.service.newCertAndPrivateKey(0,
-                                                                     "my webid",
+                                                                     "http://www.my.web.id",
                                                                      "xwiki:XWiki.Me",
                                                                      "bla",
                                                                      this.passwordService);
