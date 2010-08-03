@@ -115,15 +115,39 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      * @return some type of XWikiX509KeyPair depending on the type which was serialized.
      * @throws IOException if something goes wrong within the serialization framework.
      * @throws ClassNotFoundException if the object which was serialized is not available now.
+     * @throws CertificateException if deserialization of the certificate fails.
      */
     public static XWikiX509KeyPair fromBase64String(final String keyPairAsBase64)
         throws IOException,
-               ClassNotFoundException
+               ClassNotFoundException,
+               CertificateException
     {
-        byte[] keyBytes = Convert.fromBase64String(keyPairAsBase64,
-                                                   XWikiX509KeyPair.BASE64_HEADER,
-                                                   XWikiX509KeyPair.BASE64_FOOTER);
-        return (XWikiX509KeyPair) SerializationUtils.deserialize(keyBytes);
+        return DefaultXWikiX509KeyPair.fromBase64String(Convert.fromBase64String(keyPairAsBase64,
+                                                                                 XWikiX509KeyPair.BASE64_HEADER,
+                                                                                 XWikiX509KeyPair.BASE64_FOOTER));
+    }
+    
+
+    /**
+     * Deserialize an instance of XWikiX509KeyPair from a byte array, opposite of {@link #serialize()}.
+     *
+     * @param keyPairAsBytes an array of bytes as produced by {@link #serialize()}.
+     * @return some type of XWikiX509KeyPair depending on the type which was serialized.
+     * @throws IOException if something goes wrong within the serialization framework.
+     * @throws ClassNotFoundException if the object which was serialized is not available now.
+     * @throws CertificateException if deserialization of the certificate fails.
+     */
+    public static XWikiX509KeyPair fromBase64String(final byte[] keyPairAsBytes)
+        throws IOException,
+               ClassNotFoundException,
+               CertificateException
+    {
+        XWikiX509KeyPair pair = SerializationUtils.deserialize(keyPairAsBytes);
+        try {
+            pair.getCertificate();
+        } catch (RuntimeException e) {
+            throw (CertificateException) e.getCause();
+        }
     }
 
     /**
@@ -195,8 +219,8 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
         builder.append("------------\n");
         try {
             builder.append(this.getCertificate().toString());
-        } catch (GeneralSecurityException e) {
-            builder.append("ERROR: Failed to load certificate: " + e.getMessage());
+        } catch (RuntimeException e) {
+            builder.append("ERROR: Failed to load certificate: " + e.getCause().getMessage());
         }
         builder.append("Private key cannot be shown without a password.");
         return builder.toString();
@@ -207,7 +231,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      *
      * @see org.xwiki.crypto.data.XWikiPrivateCredential#getCertificate()
      */
-    public XWikiX509Certificate getCertificate() throws GeneralSecurityException
+    public XWikiX509Certificate getCertificate()
     {
         if (this.certificate == null) {
             final X509Certificate cert;
@@ -216,7 +240,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
                 cert = 
                     (X509Certificate) converter.generateCertificate(new ByteArrayInputStream(this.encodedCertificate));
             } catch (CertificateException e) {
-                throw new GeneralSecurityException(e);
+                throw new RuntimeException(e);
             }
 
             this.certificate = new XWikiX509Certificate(cert);
@@ -229,7 +253,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      *
      * @see org.xwiki.crypto.data.XWikiPrivateCredential#getPublicKey()
      */
-    public PublicKey getPublicKey() throws GeneralSecurityException
+    public PublicKey getPublicKey()
     {
         return this.getCertificate().getPublicKey();
     }
@@ -266,7 +290,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      *
      * @see org.xwiki.crypto.data.XWikiPrivateCredential#getFingerprint()
      */
-    public String getFingerprint() throws GeneralSecurityException
+    public String getFingerprint()
     {
         return this.getCertificate().getFingerprint();
     }
