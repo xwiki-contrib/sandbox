@@ -53,8 +53,7 @@ public class X509KeyServiceTest extends AbstractComponentTestCase
                                             + "oFfUOwW0YIX4zJEqD+aB5hxN8hP+wJG/mYYoVIZFRkk9t4l2ZEo5Avu5aTfEuDUX\n"
                                             + "yj8rDgFwLxTXBpBxvdiRAgw=";
 
-    /** PKCS#12 has a 7 character limit. */
-    public static final String PASSWORD = "passwrd";
+    public static final String PASSWORD = "blah";
 
     /** Storing a single keypair for as many tests as possible because they take a long time to generate. */
     private static XWikiX509KeyPair keyPair;
@@ -64,7 +63,7 @@ public class X509KeyServiceTest extends AbstractComponentTestCase
     {
         if (keyPair == null) {
             keyPair = new X509KeyService().newCertAndPrivateKey(1,
-                                                                "my webid",
+                                                                "http://www.my.web.id",
                                                                 "xwiki:XWiki.Me",
                                                                 PASSWORD,
                                                                 passwordService);

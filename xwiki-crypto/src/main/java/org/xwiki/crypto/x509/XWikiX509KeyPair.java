@@ -35,6 +35,12 @@ import java.security.GeneralSecurityException;
  */
 public interface XWikiX509KeyPair extends Serializable
 {
+    /** This will be at the beginning of the output from {@link #serializeAsBase64()}. */
+    String BASE64_HEADER = "-----BEGIN XWIKI CERTIFICATE AND PRIVATE KEY-----\n";
+
+    /** This will be at the end of the output from {@link #serializeAsBase64()}. */
+    String BASE64_FOOTER = "-----END XWIKI CERTIFICATE AND PRIVATE KEY-----";
+
     /**
      * @return the user's certificate
      * @throws GeneralSecurityException if the certificate cannot be deserialized.

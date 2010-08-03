@@ -110,4 +110,18 @@ public class DefaultX509CryptoService implements X509CryptoService
     {
         return XWikiX509Certificate.fromPEMString(pemFormatCert);
     }
+
+    /**
+     * {@inheritDoc}
+     * @see org.xwiki.crypto.x509.X509CryptoService#keyPairFromBase64(java.lang.String)
+     */
+    public XWikiX509KeyPair keyPairFromBase64(final String keyPairAsBase64)
+        throws GeneralSecurityException
+    {
+        try {
+            return DefaultXWikiX509KeyPair.fromBase64String(keyPairAsBase64);
+        } catch (Exception e) {
+            throw new GeneralSecurityException("Failed to deserialize key pair", e);
+        }
+    }
 }

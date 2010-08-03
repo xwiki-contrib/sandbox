@@ -30,6 +30,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+
 import java.util.Arrays;
 
 import org.xwiki.crypto.internal.Convert;
@@ -48,14 +49,12 @@ import org.xwiki.crypto.x509.XWikiX509KeyPair;
  */
 public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 {
-    /** Serial version ID. */
+    /**
+     * Fields in this class are set in stone!
+     * Any changes may result in encrypted data becoming unreadable.
+     * This class should be extended if any changes need to be made.
+     */
     private static final long serialVersionUID = 1L;
-
-    /** This will be at the beginning of the output from {@link #serializeAsBase64()}. */
-    private static final transient String BASE64_HEADER = "-----BEGIN XWIKI CERTIFICATE AND PRIVATE KEY-----\n";
-
-    /** This will be at the end of the output from {@link #serializeAsBase64()}. */
-    private static final transient String BASE64_FOOTER = "-----END XWIKI CERTIFICATE AND PRIVATE KEY-----\n";
 
     /** @serial The algorithm of the private key. Something like "RSA". */
     private final String privateKeyAlgorithm;
@@ -69,12 +68,11 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
     /** User's certificate. */
     private transient XWikiX509Certificate certificate;
 
-
     /**
      * Create new {@link XWikiX509KeyPair}.
      * 
-     * @param certificate a certificate matching the private key, this will be stored unencrypted.
-     * @param key the private key to use, this will be password encrypted.
+     * @param certificate a certificate matching the private key, this will be stored unencripted.
+     * @param key the private key to use, this will be password encripted.
 
      * @param password the password to require if a user wants to extract the private key.
      * @param passwordCryptoService the service to use for encrypting the private key so this object can safely be
@@ -104,27 +102,28 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
 
         // Ideally it would be possible to encrypt a byte[] and get a byte[] in return.
         // This is a workaround.
-        final String encryptedPrivateKeyString =
+        final String encryptedPrivateKeyString = 
             passwordCryptoService.encryptText(Convert.toBase64String(encodedKey), password);
 
         this.passwordEncryptedPrivateKey = Convert.fromBase64String(encryptedPrivateKeyString, "-----\n", "\n-----");
     }
 
     /**
-     * Deserialize a key pair from a base64 encoded representation.
-     * 
-     * @param encoded a base64 encoded serialized key pair, as produced by {@link #serializeAsBase64()}
-     * @return a key pair created from the given input
-     * @throws IOException on errors
+     * Deserialize an instance of XWikiX509KeyPair from a base-64 String, opposite of {@link #serializeAsBase64()}.
+     *
+     * @param keyPairAsBase64 a base-64 String as produced by {@link #serializeAsBase64()}.
+     * @return some type of XWikiX509KeyPair depending on the type which was serialized.
+     * @throws IOException if something goes wrong within the serialization framework.
+     * @throws ClassNotFoundException if the object which was serialized is not available now.
      */
-    public static XWikiX509KeyPair deserializeFromBase64(String encoded) throws IOException
+    public static XWikiX509KeyPair fromBase64String(final String keyPairAsBase64)
+        throws IOException,
+               ClassNotFoundException
     {
-        byte[] serialized = Convert.fromBase64String(encoded, BASE64_HEADER, BASE64_FOOTER);
-        try {
-            return (XWikiX509KeyPair) SerializationUtils.deserialize(serialized);
-        } catch (ClassNotFoundException exception) {
-            throw new IOException(exception.getMessage());
-        }
+        byte[] keyBytes = Convert.fromBase64String(keyPairAsBase64,
+                                                   XWikiX509KeyPair.BASE64_HEADER,
+                                                   XWikiX509KeyPair.BASE64_FOOTER);
+        return (XWikiX509KeyPair) SerializationUtils.deserialize(keyBytes);
     }
 
     /**
@@ -134,7 +133,7 @@ public class DefaultXWikiX509KeyPair implements XWikiX509KeyPair
      */
     public String serializeAsBase64() throws IOException
     {
-        return BASE64_HEADER
+        return   BASE64_HEADER
                + Convert.toChunkedBase64String(this.serialize())
                + BASE64_FOOTER;
     }
