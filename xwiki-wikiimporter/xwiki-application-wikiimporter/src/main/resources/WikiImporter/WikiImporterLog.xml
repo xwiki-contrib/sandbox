@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <xwikidoc>
 <web>WikiImporter</web>
 <name>WikiImporterLog</name>
@@ -12,9 +11,9 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1267983404000</creationDate>
-<date>1267989991000</date>
-<contentUpdateDate>1267989991000</contentUpdateDate>
-<version>3.4</version>
+<date>1280943462000</date>
+<contentUpdateDate>1280943462000</contentUpdateDate>
+<version>1.16</version>
 <title>WikiImporter.WikiImporterLog</title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -23,5 +22,16 @@
 <minorEdit>true</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
-<content>Import Log Page</content>
-</xwikidoc>
+<content>{{velocity}}
+ $xwiki.ssx.use("WikiImporter.SSX")
+{{html}}&lt;ul class="importer"&gt;&lt;li class="info"&gt;Import process started.&lt;/li&gt;
+&lt;li&gt;MediaWiki:Bureaucrattitle&lt;/li&gt;
+&lt;ul class="importer"&gt;&lt;li class="info"&gt;Page Created -&gt;  &lt;a href="/xwiki/bin/view/Main/Bureaucrattitle"&gt;Main.Bureaucrattitle&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+&lt;li&gt;MediaWiki:Confirmdeletetext&lt;/li&gt;
+&lt;ul class="importer"&gt;&lt;li class="info"&gt;Page Created -&gt;  &lt;a href="/xwiki/bin/view/Main/Confirmdeletetext"&gt;Main.Confirmdeletetext&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+&lt;li&gt;MediaWiki:Mycontris&lt;/li&gt;
+&lt;ul class="importer"&gt;&lt;li class="info"&gt;Page Created -&gt;  &lt;a href="/xwiki/bin/view/Main/Mycontris"&gt;Main.Mycontris&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+&lt;li&gt;MediaWiki:Preferences&lt;/li&gt;
+&lt;ul class="importer"&gt;&lt;li class="info"&gt;Page Created -&gt;  &lt;a href="/xwiki/bin/view/Main/Preferences"&gt;Main.Preferences&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+&lt;li class="info"&gt;Import process completed Successfully.&lt;/li&gt;
+&lt;/ul&gt;{{/html}}{{/velocity}}</content></xwikidoc>

@@ -23,14 +23,13 @@ import org.apache.commons.lang.StringUtils;
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
-import org.xwiki.rendering.renderer.printer.WikiPrinter;
-import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
+import org.xwiki.wikiimporter.importer.WikiImportParameters;
 import org.xwiki.wikiimporter.importer.WikiImporterException;
 import org.xwiki.wikiimporter.internal.importer.WikiImporterLogger;
 import org.xwiki.wikiimporter.wiki.Attachment;
@@ -43,18 +42,16 @@ import org.xwiki.wikiimporter.wiki.WikiPageRevision;
  * @version $Id: DefaultWikiImporterDocumentBridge.java 27627 2010-03-14 14:33:22Z arun $
  */
 @Component
-public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBridge
+public class DefaultWikiImporterDocumentBridge extends AbstractLogEnabled implements WikiImporterDocumentBridge
 {
     @Requirement
     private DocumentAccessBridge docAccessBridge;
 
-    private WikiPrinter printer;
-
-    @Requirement
-    private ComponentManager componentManager;
-
     @Requirement
     private WikiImporterLogger logger;
+
+    @Requirement("xwiki/2.0")
+    private BlockRenderer renderer;
 
     /**
      * {@inheritDoc}
@@ -69,11 +66,11 @@ public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBr
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge#addWikiPage(org.xwiki.wikiimporter.wiki.WikiPage)
+     * @see org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge#addWikiPage(org.xwiki.wikiimporter.wiki.WikiPage,
+     *      WikiImportParameters)
      */
-    public void addWikiPage(WikiPage page) throws WikiImporterException
+    public void addWikiPage(WikiPage page, WikiImportParameters parameters) throws WikiImporterException
     {
-
         // Skip creating pages if page name or space is null.
         // TODO Skip pages . CSS Category JSX and stuff.
         if (StringUtils.isBlank(page.getName()) || StringUtils.isBlank(page.getSpace())
@@ -89,57 +86,71 @@ public class DefaultWikiImporterDocumentBridge implements WikiImporterDocumentBr
                 error = " Given page is a Category page.";
             }
 
-            logger.error("Page Skipped - " + error, true);
+            this.logger.error("Page Skipped - " + error, true);
+
             return;
         }
 
-        printer = new DefaultWikiPrinter();
+        String pageWiki = page.getWiki();
+        if (StringUtils.isNotEmpty(parameters.getTargetWiki())) {
+            pageWiki = parameters.getTargetWiki();
+        } else if (StringUtils.isEmpty(pageWiki)) {
+            pageWiki = this.docAccessBridge.getCurrentWiki();
+        }
 
         // Set Document Properties
-        DocumentReference reference = new DocumentReference(page.getWiki(), page.getSpace(), page.getName());
+        DocumentReference reference = new DocumentReference(pageWiki, page.getSpace(), page.getName());
 
         try {
-            docAccessBridge.setProperty(page.getSpace() + "." + page.getName(), "XWiki.TagClass", "tags",
-                page.getTagsAsString());
+            if (page.getTags() != null && !page.getTags().isEmpty()) {
+                this.docAccessBridge.setProperty(page.getSpace() + "." + page.getName(), "XWiki.TagClass", "tags",
+                    page.getTagsAsString());
+            }
 
             // Document Parent.
-            String parentPageName = page.getParent() != null ? page.getParent() : "WebHome";
-
-            DocumentReference parentReference = new DocumentReference(page.getWiki(), page.getSpace(), parentPageName);
-            if (!docAccessBridge.exists(parentReference)) {
-                docAccessBridge.setDocumentContent(parentReference, "Add Content to the page",
-                    "Created for the first time.", false);
+            if (page.getParent() != null) {
+                DocumentReference parentReference = new DocumentReference(pageWiki, page.getSpace(), page.getParent());
+                this.docAccessBridge.setDocumentParentReference(reference, parentReference);
             }
-            docAccessBridge.setDocumentParentReference(reference, parentReference);
 
             // Document Title.
-            docAccessBridge.setDocumentTitle(reference, page.getTitle());
+            if (page.getTitle() != null) {
+                this.docAccessBridge.setDocumentTitle(reference, page.getTitle());
+            }
 
             // Attachments
             for (Attachment attachment : page.getAttachments()) {
                 AttachmentReference attachmentRef = new AttachmentReference(attachment.getFileName(), reference);
-                docAccessBridge.setAttachmentContent(attachmentRef, attachment.getContent());
+                this.docAccessBridge.setAttachmentContent(attachmentRef, attachment.getContent());
             }
 
-            // For each wiki page revision render xdom and set page content.
-            for (WikiPageRevision revision : page.getRevisions()) {
-                // Render the XDOM to XWiki 2.0 Syntax.
-                BlockRenderer renderer = componentManager.lookup(BlockRenderer.class, Syntax.XWIKI_2_0.toIdString());
-                renderer.render(revision.getContent(), printer);
-
-                docAccessBridge.setDocumentContent(reference, printer.toString(), revision.getComment(),
-                    revision.isMinorEdit());
+            if (parameters.getPreserveHistory()) {
+                // For each wiki page revision render xdom and set page content.
+                for (WikiPageRevision revision : page.getRevisions()) {
+                    addRevision(reference, revision);
+                }
+            } else {
+                addRevision(reference, page.getLastRevision());
             }
-
         } catch (Exception e) {
+            getLogger().error("Error while creating the sucessfully parsed page.", e);
             throw new WikiImporterException("Error while creating the sucessfully parsed page.", e);
         }
 
         // On successful page creation
         String pageLink = page.getSpace() + "." + page.getName();
-        logger.info("Page Created ->  <a href=\"$xwiki.getDocument('" + pageLink + "').getExternalURL()>" + pageLink
-            + "</a>", true);
+        this.logger.info("Page Created ->  <a href=\"" + this.docAccessBridge.getDocumentURL(reference, "view", "", "")
+            + "\">" + pageLink + "</a>", true);
+    }
 
+    private void addRevision(DocumentReference reference, WikiPageRevision revision) throws Exception
+    {
+        DefaultWikiPrinter printer = new DefaultWikiPrinter();
+
+        this.renderer.render(revision.getContent(), printer);
+
+        this.docAccessBridge.setDocumentContent(reference, printer.toString(), revision.getComment(),
+            revision.isMinorEdit());
     }
 
     /**

@@ -37,11 +37,7 @@ public class MediaWikiImportParameters extends WikiImportParameters
 
     private String attachmentExcludeDirs;
 
-    private String defaultSpace;
-
-    private String preserveHistory;
-
-    private String wiki;
+    private String defaultSpace = "Main";
 
     private String allowedImageExtensions;
 
@@ -120,42 +116,6 @@ public class MediaWikiImportParameters extends WikiImportParameters
     }
 
     /**
-     * @return the preserveHistory
-     */
-    public String getPreserveHistory()
-    {
-        return preserveHistory;
-    }
-
-    /**
-     * @param preserveHistory the preserveHistory to set
-     */
-    @PropertyName("Preserve history")
-    @PropertyDescription("Select true to preserve history")
-    public void setPreserveHistory(String preserveHistory)
-    {
-        this.preserveHistory = preserveHistory;
-    }
-
-    /**
-     * @return the wiki reference
-     */
-    public String getWiki()
-    {
-        return wiki;
-    }
-
-    /**
-     * @param wiki the Wiki Reference into which files will be imported
-     */
-    @PropertyName("Wiki")
-    @PropertyDescription("Wiki Reference into which files will be imported")
-    public void setWiki(String wiki)
-    {
-        this.wiki = wiki;
-    }
-
-    /**
      * @return the allowedImageExtensions
      */
     public String getAllowedImageExtensions()
@@ -172,5 +132,4 @@ public class MediaWikiImportParameters extends WikiImportParameters
     {
         this.allowedImageExtensions = allowedImageExtensions;
     }
-
 }

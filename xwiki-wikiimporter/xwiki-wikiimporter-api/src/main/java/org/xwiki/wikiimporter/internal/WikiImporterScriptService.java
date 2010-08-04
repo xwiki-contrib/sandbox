@@ -33,7 +33,7 @@ import org.xwiki.wikiimporter.type.WikiImporterTypeFactory;
  * 
  * @version $Id$
  */
-@Component("wikimporter")
+@Component("wikiimporter")
 public class WikiImporterScriptService implements ScriptService
 {
     /**
@@ -65,5 +65,9 @@ public class WikiImporterScriptService implements ScriptService
             throw new WikiImporterException("Unable to create wiki importer, Unsupported wiki importer type", e);
         }
     }
-
+    
+    public WikiImporterTypeFactory getWikiImporterTypeFactory()
+    {
+        return this.wikiImporterTypeFactory;
+    }
 }

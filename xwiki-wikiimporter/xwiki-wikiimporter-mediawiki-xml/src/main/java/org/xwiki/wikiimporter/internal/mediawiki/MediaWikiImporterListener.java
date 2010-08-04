@@ -154,8 +154,6 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
         this.stack.clear();
         this.attachments.clear();
         this.macroErrors = 0;
-
-        this.logger.info("Begin Page", true);
     }
 
     /**
@@ -233,8 +231,9 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
 
         try {
             // Save the Wiki Page.
-            this.docBridge.addWikiPage(this.page);
+            this.docBridge.addWikiPage(this.page, this.importParams);
         } catch (Exception e) {
+            this.logger.error("Failed to create the page: " + e.getMessage(), true);
             // Do nothing.
         }
     }

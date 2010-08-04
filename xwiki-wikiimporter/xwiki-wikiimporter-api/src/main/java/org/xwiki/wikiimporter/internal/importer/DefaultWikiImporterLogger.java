@@ -198,14 +198,14 @@ public class DefaultWikiImporterLogger implements WikiImporterLogger
     public String getAllLogsAsString()
     {
         StringBuilder logStr = new StringBuilder();
-        logStr.append(START_TAG + "<ol \"importer\">");
+        logStr.append(START_TAG + "<ul class=\"importer\">");
         for (Log log : logs) {
             logStr.append(log.getLog() + NEW_LINE);
             if (log instanceof PageLog) {
                 logStr.append(((PageLog) log).getPageLog() + UL_END_TAG + NEW_LINE);
             }
         }
-        logStr.append("</ol>" + END_TAG);
+        logStr.append("</ul>" + END_TAG);
         return logStr.toString();
     }
 }

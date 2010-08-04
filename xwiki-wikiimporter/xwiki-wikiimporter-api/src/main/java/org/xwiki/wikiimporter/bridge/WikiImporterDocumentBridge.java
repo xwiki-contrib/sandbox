@@ -20,6 +20,7 @@
 package org.xwiki.wikiimporter.bridge;
 
 import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.wikiimporter.importer.WikiImportParameters;
 import org.xwiki.wikiimporter.importer.WikiImporterException;
 import org.xwiki.wikiimporter.wiki.WikiPage;
 
@@ -36,9 +37,10 @@ public interface WikiImporterDocumentBridge
      * Creates a Wiki Page inside xwiki, includes page content, parent, attachments and tags creation.
      * 
      * @param page Wiki Page object to be created inside xwiki.
+     * @param parameters TODO
      * @throws WikiImporterException if DocumentAcessBridge throws any error while creating the WikiPage.
      */
-    void addWikiPage(WikiPage page) throws WikiImporterException;
+    void addWikiPage(WikiPage page, WikiImportParameters parameters) throws WikiImporterException;
 
     /**
      * Create the log page if not existing and set the log content of the import process.

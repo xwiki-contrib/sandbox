@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <xwikidoc>
 <web>WikiImporter</web>
 <name>WebHome</name>
@@ -12,15 +11,15 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1265524884000</creationDate>
-<date>1268565266000</date>
-<contentUpdateDate>1268565266000</contentUpdateDate>
-<version>1.0</version>
+<date>1280941479000</date>
+<contentUpdateDate>1280941479000</contentUpdateDate>
+<version>2.7</version>
 <title>WikiImporter</title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
 <comment></comment>
-<minorEdit>false</minorEdit>
+<minorEdit>true</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <content>Welcome to Wiki Importer Home Page.
@@ -35,22 +34,20 @@
   {{html}}
     &lt;form method="post" action="$xwiki.getDocument("WikiImporter.Importer").getURL()"&gt;
      Select the Wiki and Export Data Type.
-     &lt;div class="imptype"&gt;
-     &lt;ul&gt;
+     &lt;dl&gt;
      #foreach($type in $availableTypes)
-      &lt;li&gt;
-      &lt;input type="radio" name="wikiimporter" value="$type.toIdString()"&gt;$type&lt;/input&gt; 
-      &lt;li&gt; 
+      &lt;dd&gt;
+        &lt;input type="radio" name="wikiimporter" value="$type.toIdString()"&gt;$type&lt;/input&gt; 
+      &lt;/dd&gt;
      #end
-     &lt;ul&gt;
-     &lt;/div&gt;
+     &lt;/dl&gt;
 
-     &lt;/br&gt;
+     &lt;br/&gt;
 
      &lt;input type="submit" value='Next &amp;#62;' class="button"&gt;
     &lt;/form&gt;
   {{/html}}
 #else
-{{info}}Need admin rights to use this application.{{/info}}
+  {{info}}Need admin rights to use this application.{{/info}}
 #end
 {{/velocity}}</content></xwikidoc>

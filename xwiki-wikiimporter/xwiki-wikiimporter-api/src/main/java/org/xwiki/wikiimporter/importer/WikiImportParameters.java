@@ -1,7 +1,7 @@
 package org.xwiki.wikiimporter.importer;
 
-import org.xwiki.model.reference.SpaceReference;
-import org.xwiki.model.reference.WikiReference;
+import org.xwiki.properties.annotation.PropertyDescription;
+import org.xwiki.properties.annotation.PropertyName;
 
 /**
  * Common import parameters.
@@ -13,20 +13,52 @@ public class WikiImportParameters
     /**
      * When not null all the imported pages should go in the targeted wiki. Otherwise it's importer choice.
      */
-    private WikiReference wiki;
+    private String targetWiki;
 
     /**
      * When not null all the imported pages should go in the targeted space. Otherwise it's importer choice.
      */
-    private SpaceReference space;
+    private String targetSpace;
 
-    public SpaceReference getSpace()
+    private boolean preserveHistory = true;
+
+    @PropertyName("Target wiki")
+    public String getTargetWiki()
     {
-        return this.space;
+        return this.targetWiki;
     }
 
-    public void setSpace(SpaceReference space)
+    public void setTargetWiki(String targetWiki)
     {
-        this.space = space;
+        this.targetWiki = targetWiki;
+    }
+
+    @PropertyName("Target space")
+    public String getTargetSpace()
+    {
+        return this.targetSpace;
+    }
+
+    public void setTargetSpace(String targetSpace)
+    {
+        this.targetSpace = targetSpace;
+    }
+
+    /**
+     * @return the preserveHistory
+     */
+    public boolean getPreserveHistory()
+    {
+        return preserveHistory;
+    }
+
+    /**
+     * @param preserveHistory the preserveHistory to set
+     */
+    @PropertyName("Preserve history")
+    @PropertyDescription("Select true to preserve history")
+    public void setPreserveHistory(boolean preserveHistory)
+    {
+        this.preserveHistory = preserveHistory;
     }
 }
