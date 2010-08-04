@@ -27,13 +27,11 @@ import java.util.List;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jmock.Expectations;
 import org.junit.Before;
-import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.crypto.internal.UserDocumentUtils;
-import org.xwiki.crypto.passwd.PasswordCryptoService;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
-import org.xwiki.test.AbstractMockingComponentTestCase;
+import org.xwiki.test.AbstractComponentTestCase;
 
 
 /**
@@ -42,7 +40,7 @@ import org.xwiki.test.AbstractMockingComponentTestCase;
  * @version $Id$
  * @since 2.5
  */
-public abstract class AbstractSignedScriptsTest extends AbstractMockingComponentTestCase
+public abstract class AbstractSignedScriptsTest extends AbstractComponentTestCase
 {
     /** Fingerprint of the test certificate. */
     private static final String CERT_FP = "eb31104d2fb1bc8495cf39e75124aef3f9ab7bfb";
@@ -165,30 +163,30 @@ public abstract class AbstractSignedScriptsTest extends AbstractMockingComponent
     {
         // register BC provider first
         Security.addProvider(new BouncyCastleProvider());
-
-        // inject mocking requirements
         super.setUp();
-        try {
-            // mock document utils
-            final PasswordCryptoService mockCrypto = getComponentManager().lookup(PasswordCryptoService.class);
-            final UserDocumentUtils mockUtils = getComponentManager().lookup(UserDocumentUtils.class);
-            this.userFingerprints.add(getTestCertFingerprint());
-            this.userFingerprints.add(getTestKeyPair().getFingerprint());
-            getMockery().checking(new Expectations() {{
-                allowing(mockCrypto).encryptText(with(any(String.class)), with(any(String.class)));
-                    will(returnValue("-----BEGIN XWIKI CERTIFICATE AND PRIVATE KEY-----\nENCRYPTED+DATA\n"
-                        + "-----END XWIKI CERTIFICATE AND PRIVATE KEY-----"));
-                allowing(mockUtils).getCurrentUser();
-                    will(returnValue(USER));
-                allowing(mockUtils).getCertificateFingerprintsForUser(with(USER));
-                    will(returnValue(userFingerprints));
-                allowing(mockUtils).addCertificateFingerprint(with(USER), with(any(String.class)));
-            }});
-        } catch (ComponentLookupException exception) {
-            System .out.println("\n\n\nFUCK:\n" + exception.getMessage());
-            exception/*.getCause().getCause()*/.printStackTrace();
-            // ignore, PKCS7SignedScriptTest does not use @MockingRequirement, which causes lookup to fail
-        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.test.AbstractComponentTestCase#registerComponents()
+     */
+    @Override
+    protected void registerComponents() throws Exception
+    {
+        super.registerComponents();
+
+        // mock document utils
+        final UserDocumentUtils mockUtils = registerMockComponent(UserDocumentUtils.class);
+        this.userFingerprints.add(getTestCertFingerprint());
+        this.userFingerprints.add(getTestKeyPair().getFingerprint());
+        getMockery().checking(new Expectations() {{
+            allowing(mockUtils).getCurrentUser();
+                will(returnValue(USER));
+            allowing(mockUtils).getCertificateFingerprintsForUser(with(USER));
+                will(returnValue(userFingerprints));
+            allowing(mockUtils).addCertificateFingerprint(with(USER), with(any(String.class)));
+        }});
     }
 
     /**

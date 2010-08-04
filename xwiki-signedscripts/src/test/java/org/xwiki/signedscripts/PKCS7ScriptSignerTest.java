@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.xwiki.crypto.x509.X509CryptoService;
 import org.xwiki.signedscripts.framework.AbstractSignedScriptsTest;
 import org.xwiki.signedscripts.internal.PKCS7ScriptSigner;
-import org.xwiki.test.annotation.MockingRequirement;
 
 
 /**
@@ -44,8 +43,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
                                           + "/tHan+76+by73/s0+tHA7/w3/CaN/t3St/1337/SIGNa7ur3+f0rma77ing=";
 
     /** The tested script signer component. */
-    @MockingRequirement
-    PKCS7ScriptSigner signer;
+    ScriptSigner signer;
 
     /**
      * {@inheritDoc}
@@ -57,10 +55,21 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
     public void setUp() throws Exception
     {
         super.setUp();
+        this.signer = getComponentManager().lookup(ScriptSigner.class);
+    }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.signedscripts.framework.AbstractSignedScriptsTest#registerComponents()
+     */
+    @Override
+    protected void registerComponents() throws Exception
+    {
+        super.registerComponents();
         // key manager
         final String kpFingerprint = getTestKeyPair().getFingerprint();
-        final KeyManager mockKeyManager = getComponentManager().lookup(KeyManager.class);
+        final KeyManager mockKeyManager = registerMockComponent(KeyManager.class);
         getMockery().checking(new Expectations() {{
             allowing(mockKeyManager).getCertificate(with(kpFingerprint));
                 will(returnValue(getTestKeyPair().getCertificate()));
@@ -70,7 +79,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
                 will(returnValue(kpFingerprint));
         }});
         // crypto service
-        final X509CryptoService mockCrypto = getComponentManager().lookup(X509CryptoService.class);
+        final X509CryptoService mockCrypto = registerMockComponent(X509CryptoService.class);
         getMockery().checking(new Expectations() {{
             allowing(mockCrypto).signText(with(any(String.class)), with(getTestKeyPair()), with("passwrd"));
                 will(returnValue(SIGNATURE));

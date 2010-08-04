@@ -33,7 +33,6 @@ import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.X509SignatureService;
 import org.xwiki.signedscripts.framework.AbstractSignedScriptsTest;
 import org.xwiki.signedscripts.internal.DefaultKeyManager;
-import org.xwiki.test.annotation.MockingRequirement;
 
 
 /**
@@ -49,8 +48,7 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
                                           + "community are all hallmarks of the Gentoo experience.";
 
     /** Tested key manager implementation. */
-    @MockingRequirement
-    private DefaultKeyManager keyManager;
+    private KeyManager keyManager;
 
     /**
      * {@inheritDoc}
@@ -61,9 +59,9 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
     @Override
     public void setUp() throws Exception
     {
-        // NOTE: AbstractMockingComponentTestCase.setUp() takes between 1 and 5 seconds!
         super.setUp();
 
+        this.keyManager = getComponentManager().lookup(KeyManager.class);
         try {
             // make sure the test certificate is not registered
             keyManager.unregister(getTestCertFingerprint());
