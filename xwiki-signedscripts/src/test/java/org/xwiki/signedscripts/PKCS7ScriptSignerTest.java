@@ -38,10 +38,6 @@ import org.xwiki.signedscripts.internal.PKCS7ScriptSigner;
  */
 public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
 {
-    /** Fake base64 encoded signature. */
-    private final static String SIGNATURE = "aN/Abs0lut3ly+u53Le5s/ranD0m/pieCe+0f+BASE64+enc0d3D+da7A/tha7/Is+LoNg3r"
-                                          + "/tHan+76+by73/s0+tHA7/w3/CaN/t3St/1337/SIGNa7ur3+f0rma77ing=";
-
     /** The tested script signer component. */
     ScriptSigner signer;
 
@@ -78,56 +74,51 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
             allowing(mockKeyManager).getTrustedFingerprint(USER);
                 will(returnValue(kpFingerprint));
         }});
-        // crypto service
-        final X509CryptoService mockCrypto = registerMockComponent(X509CryptoService.class);
-        getMockery().checking(new Expectations() {{
-            allowing(mockCrypto).signText(with(any(String.class)), with(getTestKeyPair()), with("passwrd"));
-                will(returnValue(SIGNATURE));
-            allowing(mockCrypto).verifyText(with(any(String.class)), with(SIGNATURE));
-                will(returnValue(getTestKeyPair().getCertificate()));
-            allowing(mockCrypto).verifyText(with(any(String.class)), with(""));
-                will(returnValue(getTestCert()));
-        }});
     }
 
     @Test
     public void testSign() throws GeneralSecurityException
     {
-        final String code = "{{groovy}}println();{{/groovy}}\n";
-        SignedScript script = signer.sign(code, "passwrd");
-        Assert.assertEquals(code, script.getCode());
+        SignedScript script = signer.sign(CODE, "passwrd");
+        Assert.assertEquals(CODE, script.getCode());
         Assert.assertEquals(getTestKeyPair().getFingerprint(), script.get(SignedScriptKey.FINGERPRINT));
     }
 
     @Test
     public void testSignVerify() throws GeneralSecurityException
     {
-        final String code = "{{groovy}}println();{{/groovy}}\n";
-        SignedScript script = signer.sign(code, "passwrd");
+        SignedScript script = signer.sign(CODE, "passwrd");
         // NOTE: the test may fail randomly if the next second starts at this line 
         SignedScript verified = signer.getVerifiedScript(script.serialize());
         Assert.assertEquals(script.toString(), verified.toString());
     }
 
     @Test
-    public void testExternalSignIsSign() throws GeneralSecurityException
+    public void testExternalSignIsSign() throws Exception
     {
-        final String code = "{{groovy}}println();{{/groovy}}\n";
-        final SignedScript signed = signer.sign(code, "passwrd");
+        final SignedScript signed = signer.sign(CODE, "passwrd");
         // NOTE: the test may fail randomly if the next second starts at this line 
-        SignedScript prepared = signer.prepareScriptForSigning(code);
-        SignedScript script = signer.constructSignedScript(prepared, SIGNATURE);
+        SignedScript prepared = signer.prepareScriptForSigning(CODE);
+        // browser imitation
+        X509CryptoService pkcs7 = getComponentManager().lookup(X509CryptoService.class);
+        String signature = pkcs7.signText(prepared.getDataToSign(), getTestKeyPair(), "passwrd");
+        SignedScript script = signer.constructSignedScript(prepared, signature);
         Assert.assertEquals(signed.toString(), script.toString());
     }
 
     @Test(expected = GeneralSecurityException.class)
     public void testPreparedNotVerify() throws GeneralSecurityException
     {
-        final String code = "{{groovy}}println();{{/groovy}}\n";
-        SignedScript prepared = signer.prepareScriptForSigning(code);
+        SignedScript prepared = signer.prepareScriptForSigning(CODE);
         // the test relies on the fact that an unsigned script has the empty string instead of the signature
         signer.getVerifiedScript(prepared.serialize());
         Assert.fail("Prepared script passed verification");
+    }
+
+    @Test
+    public void testRegression() throws Exception
+    {
+        Assert.assertNotNull(this.signer.getVerifiedScript(SIGNED_SCRIPT));
     }
 }
 

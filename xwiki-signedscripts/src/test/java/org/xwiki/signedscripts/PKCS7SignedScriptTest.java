@@ -90,48 +90,12 @@ public class PKCS7SignedScriptTest extends AbstractSignedScriptsTest
         }
     }
 
-    /** Serialized signed script */
-    private static final String SIGNED_SCRIPT =
-        "Author        : UID=XWiki.Admin\n" +
-        "Authority     : UID=XWiki.Admin\n" +
-        "Fingerprint   : 942356b9c40a765c73f600036f89b41cdb09a65b\n" +
-        "XWikiVersion  : 2.4M2\n" +
-        "CreatedOn     : Tuesday, August 3, 2010 11:55:34 PM UTC\n" +
-        "Signature     : MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIAwggMuMIIC\n" +
-        "                FqADAgECAgYBKjphreUwDQYJKoZIhvcNAQEFBQAwHTEbMBkGCgmSJomT8ixkAQEMC1hXaWtpLkFk\n" +
-        "                bWluMB4XDTEwMDgwMzIyNTUzNFoXDTExMDgwMzIzNTUzNFowHTEbMBkGCgmSJomT8ixkAQEMC1hX\n" +
-        "                aWtpLkFkbWluMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi4xFJfWGJIkg85D2VpMv\n" +
-        "                HxiA83py3k11okU74cBffh/4uG09vfTfj8m0Kda8xF9beuJiNME2p2EwVqftCXcJkL5rn4B+EeFz\n" +
-        "                S255wAlOA6TQtJFQ9UoCnQy/7uEuKEUgwmhZCds5TqOyNEkS5lGJU0m39ro0LADYIHV4Pmd5U+wA\n" +
-        "                ogtXooG29CrE7cgII1DyTruCtHCR7rxuRTTQAiHvdaEZt9OR/erYEwj6kfsJxRT47jhRf688nbhF\n" +
-        "                Y61UnPg2XwWc4gK09ClJBSzNIYVWxOWqoTMcPwz1Vca8kQnlHKKpq89en7kQA4YfZQggAX6mKxJK\n" +
-        "                alhSj18dm8uJGt/w/QIDAQABo3QwcjAMBgNVHRMBAf8EAjAAMBEGCWCGSAGG+EIBAQQEAwIFoDAO\n" +
-        "                BgNVHQ8BAf8EBAMCA7gwHwYDVR0jBBgwFoAUaVCK4HHxuB8PGxGVEPUUDKDAOWEwHgYDVR0RAQH/\n" +
-        "                BBQwEoYQaHR0cDovL215LndlYi5pZDANBgkqhkiG9w0BAQUFAAOCAQEAg+QPjUJCnmz1Tn6+EfnS\n" +
-        "                DNFpdPwjvenfKBibndbZoYuqvCgeucUgAW744RD9wZ4rW6UEZ+faclFZhaDV80mWAFoovgV1SvdQ\n" +
-        "                z0yTLNc/9GhNtkOltb2nTuwKbyP/c7IpmzmaKWhkw5JFlZ6rNzuWYpDfTl39zmH4+2J7MpsSJ4JX\n" +
-        "                2i0jTN8nQWvwRqRKQcI6+8KAq+reCiGnrVIBgWj3LJOLi8a3jB7cLQcoiV0odTNadHOeXHBO3F4R\n" +
-        "                OpiaeA6DZylfN/A91VTBY+msx/09AmeB4HBfBVPYxd9URV0rTRzbz4p9v7iv+CBoFvbscTkrlVDT\n" +
-        "                uWun8EvtWZytYFaRTwAAMYIBrTCCAakCAQEwJzAdMRswGQYKCZImiZPyLGQBAQwLWFdpa2kuQWRt\n" +
-        "                aW4CBgEqOmGt5TAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG\n" +
-        "                9w0BCQUxDxcNMTAwODAzMjM1NTM0WjAjBgkqhkiG9w0BCQQxFgQUaYMiQ3VukBQs/4QbC0sWNwjQ\n" +
-        "                FTkwDQYJKoZIhvcNAQEBBQAEggEALHTxL5VGj8mXXqAkkbPGPWbA0RHzZxCoYUJx4NFQcZVEGqdK\n" +
-        "                j7UCHbA9l2a0ZmG2ZFIeiXr2VYEOChrQwboNXAZsqlxmUva9a0MQ+coBt6motmL+y0CkK4HBDJZs\n" +
-        "                4jIAygLIqfKhDmd3pm/ntfLJ5RjNtz2T7oc/zl9O7quJkbqraTLWOFDC83pYRs3YLvRm45l/3B8X\n" +
-        "                qHUxq4m4C9Wr6FBUm6o558a+jzHNrVnpyssgBBcvJNOZAVpRB+ny5o9Gj+JdqXdv9f1CpuXL3KqL\n" +
-        "                CS4/abuYmOplkcx/+GcskNECleOrGqj+lw/vH5F77ZS5ZY+UVLPnaC4h/aD1xwt4VAAAAAAAAA==\n" +
-        "------------------------------------------------------------\n" +
-        "{{groovy}}println();{{/groovy}}\n\n";
-
-    /** The CODE from the signed script above. */
-    private final String CODE = "{{groovy}}println();{{/groovy}}\n\n";
-
     @Test
     public void testParse() throws Exception
     {
         SignedScript script = new TestableSignedScript(SIGNED_SCRIPT);
         // check all parsed key-value pairs
-        String sigPart = "BBQwEoYQaHR0cDovL215LndlYi5pZDANBgkqhkiG9w0BAQUFAAOCAQEAg+QPjUJCnmz1Tn6+EfnS";
+        String sigPart = "2i0jTN8nQWvwRqRKQcI6+8KAq+reCiGnrVIBgWj3LJOLi8a3jB7cLQcoiV0odTNadHOeXHBO3F4R";
         XWikiX509Certificate cert = getTestKeyPair().getCertificate();
         Assert.assertNull(script.get(SignedScriptKey.ALLOWACTIONS));
         Assert.assertNull(script.get(SignedScriptKey.ALLOWRIGHTS));
@@ -142,7 +106,7 @@ public class PKCS7SignedScriptTest extends AbstractSignedScriptsTest
         Assert.assertEquals(cert.getIssuerName(), script.get(SignedScriptKey.AUTHORITY));
         Assert.assertEquals(CODE, script.get(SignedScriptKey.CODE));
         Assert.assertEquals(script.get(SignedScriptKey.CODE), script.getCode());
-        Assert.assertEquals("Tuesday, August 3, 2010 11:55:34 PM UTC", script.get(SignedScriptKey.CREATEDON));
+        Assert.assertEquals("Wednesday, August 4, 2010 12:18:59 PM UTC", script.get(SignedScriptKey.CREATEDON));
         Assert.assertEquals(cert.getFingerprint(), script.get(SignedScriptKey.FINGERPRINT));
         Assert.assertTrue("Signature seems to be wrong", script.get(SignedScriptKey.SIGNATURE).contains(sigPart));
         Assert.assertEquals("2.4M2", script.get(SignedScriptKey.XWIKIVERSION));
@@ -157,7 +121,7 @@ public class PKCS7SignedScriptTest extends AbstractSignedScriptsTest
     @Test(expected = IOException.class)
     public void testMissingCodeOnParsing() throws IOException
     {
-        String wrong = SIGNED_SCRIPT.replaceAll("\\{\\{.+\\}\\}\n\n", "");
+        String wrong = SIGNED_SCRIPT.replaceAll("\\{\\{.+\\}\\}\n", "");
         new TestableSignedScript(wrong);
     }
 

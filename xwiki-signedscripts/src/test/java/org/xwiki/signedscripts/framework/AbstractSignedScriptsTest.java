@@ -133,6 +133,42 @@ public abstract class AbstractSignedScriptsTest extends AbstractComponentTestCas
     /** Current user name to use. */
     protected final static String USER = "XWiki.Admin";
 
+    /** Serialized signed script */
+    protected static final String SIGNED_SCRIPT =
+        "Author        : UID=XWiki.Admin\n" +
+        "Authority     : UID=XWiki.Admin\n" +
+        "Fingerprint   : 942356b9c40a765c73f600036f89b41cdb09a65b\n" +
+        "XWikiVersion  : 2.4M2\n" +
+        "CreatedOn     : Wednesday, August 4, 2010 12:18:59 PM UTC\n" +
+        "Signature     : MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIAwggMuMIIC\n" +
+        "                FqADAgECAgYBKjphreUwDQYJKoZIhvcNAQEFBQAwHTEbMBkGCgmSJomT8ixkAQEMC1hXaWtpLkFk\n" +
+        "                bWluMB4XDTEwMDgwMzIyNTUzNFoXDTExMDgwMzIzNTUzNFowHTEbMBkGCgmSJomT8ixkAQEMC1hX\n" +
+        "                aWtpLkFkbWluMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi4xFJfWGJIkg85D2VpMv\n" +
+        "                HxiA83py3k11okU74cBffh/4uG09vfTfj8m0Kda8xF9beuJiNME2p2EwVqftCXcJkL5rn4B+EeFz\n" +
+        "                S255wAlOA6TQtJFQ9UoCnQy/7uEuKEUgwmhZCds5TqOyNEkS5lGJU0m39ro0LADYIHV4Pmd5U+wA\n" +
+        "                ogtXooG29CrE7cgII1DyTruCtHCR7rxuRTTQAiHvdaEZt9OR/erYEwj6kfsJxRT47jhRf688nbhF\n" +
+        "                Y61UnPg2XwWc4gK09ClJBSzNIYVWxOWqoTMcPwz1Vca8kQnlHKKpq89en7kQA4YfZQggAX6mKxJK\n" +
+        "                alhSj18dm8uJGt/w/QIDAQABo3QwcjAMBgNVHRMBAf8EAjAAMBEGCWCGSAGG+EIBAQQEAwIFoDAO\n" +
+        "                BgNVHQ8BAf8EBAMCA7gwHwYDVR0jBBgwFoAUaVCK4HHxuB8PGxGVEPUUDKDAOWEwHgYDVR0RAQH/\n" +
+        "                BBQwEoYQaHR0cDovL215LndlYi5pZDANBgkqhkiG9w0BAQUFAAOCAQEAg+QPjUJCnmz1Tn6+EfnS\n" +
+        "                DNFpdPwjvenfKBibndbZoYuqvCgeucUgAW744RD9wZ4rW6UEZ+faclFZhaDV80mWAFoovgV1SvdQ\n" +
+        "                z0yTLNc/9GhNtkOltb2nTuwKbyP/c7IpmzmaKWhkw5JFlZ6rNzuWYpDfTl39zmH4+2J7MpsSJ4JX\n" +
+        "                2i0jTN8nQWvwRqRKQcI6+8KAq+reCiGnrVIBgWj3LJOLi8a3jB7cLQcoiV0odTNadHOeXHBO3F4R\n" +
+        "                OpiaeA6DZylfN/A91VTBY+msx/09AmeB4HBfBVPYxd9URV0rTRzbz4p9v7iv+CBoFvbscTkrlVDT\n" +
+        "                uWun8EvtWZytYFaRTwAAMYIBrTCCAakCAQEwJzAdMRswGQYKCZImiZPyLGQBAQwLWFdpa2kuQWRt\n" +
+        "                aW4CBgEqOmGt5TAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG\n" +
+        "                9w0BCQUxDxcNMTAwODA0MTIxODU5WjAjBgkqhkiG9w0BCQQxFgQUDaEkpynIInmGpXq5DjLwntP4\n" +
+        "                eLwwDQYJKoZIhvcNAQEBBQAEggEABkvDf2iqnGpbBH1P0LRpcJUYTz7g1aEINGwe32F5yX1j0iXd\n" +
+        "                rvLA4uxprpC8wU64PQsVSpRWlOaYxCeh8Tp6FDqAanguIdE9jeO46YW0rjf5Ls5A8pdthKjy4Ywb\n" +
+        "                1teuswMPueqeeRPcujxTyC7fF3E25f+z/Nr6CLQBH9BphO9oKAAvQ72Baekm8JG0xoXkRHnwosgN\n" +
+        "                ND+9IXfiPcfxps2K6tQnQ/PIWKse2HmXrYAUphFPsk9/7P2feUai2gs5FfQv2bwC46HXJBiRMTDP\n" +
+        "                JWLPjjnk4/2tUb48DX/635B07htw4QKeXzN30Rmb9Cby3wnXhYYo12sS60Lja6UwOgAAAAAAAA==\n" +
+        "------------------------------------------------------------\n" +
+        "{{groovy}}println();{{/groovy}}\n";
+
+    /** The CODE from the signed script above. */
+    protected final String CODE = "{{groovy}}println();{{/groovy}}\n";
+
     /** Cached instance of the test certificate, used by {@link #getTestCert()}. */
     private XWikiX509Certificate cachedCert;
 
