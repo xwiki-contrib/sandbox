@@ -79,9 +79,9 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.KeyManager#createKeyPair(java.lang.String, java.lang.String, int)
+     * @see org.xwiki.signedscripts.KeyManager#createKeyPair(java.lang.String, int)
      */
-    public synchronized String createKeyPair(String authorName, String password, int daysOfValidity)
+    public synchronized String createKeyPair(String password, int daysOfValidity)
         throws GeneralSecurityException
     {
         // TODO rights and actions

@@ -45,11 +45,11 @@ public class KeyManagerScriptService implements ScriptService, KeyManager
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.signedscripts.KeyManager#createKeyPair(java.lang.String, java.lang.String, int)
+     * @see org.xwiki.signedscripts.KeyManager#createKeyPair(java.lang.String, int)
      */
-    public String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException
+    public String createKeyPair(String password, int daysOfValidity) throws GeneralSecurityException
     {
-        return keyManager.createKeyPair(authorName, password, daysOfValidity);
+        return keyManager.createKeyPair(password, daysOfValidity);
     }
 
     /**

@@ -38,17 +38,14 @@ import org.xwiki.crypto.x509.XWikiX509KeyPair;
 public interface KeyManager
 {
     /**
-     * Create and register a new self-signed key pair (private key and a certificate).
-     * <p>
-     * TODO should require global admin rights
+     * Create a new self-signed user key pair (private key and a certificate).
      * 
-     * @param authorName author name to use
      * @param password the password to use for encrypting the key
      * @param daysOfValidity how many days should the new certificate be valid
      * @return fingerprint of the new key pair
      * @throws GeneralSecurityException on errors or insufficient access rights
      */
-    String createKeyPair(String authorName, String password, int daysOfValidity) throws GeneralSecurityException;
+    String createKeyPair(String password, int daysOfValidity) throws GeneralSecurityException;
 
     /**
      * Register the given certificate as trusted. Scripts, signed with the corresponding private key will be considered

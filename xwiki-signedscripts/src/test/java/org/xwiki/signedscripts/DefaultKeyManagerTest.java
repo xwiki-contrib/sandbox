@@ -75,7 +75,7 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
     {
         // several tests, because key pair generation is quite slow
         final String password = "password";
-        String kp = keyManager.createKeyPair(USER, password, 1);
+        String kp = keyManager.createKeyPair(password, 1);
         // manually "register" fingerprint
         addFingerprint(kp);
 
@@ -102,7 +102,7 @@ public class DefaultKeyManagerTest extends AbstractSignedScriptsTest
     @Test(expected = CertificateExpiredException.class)
     public void testExpiredKeyPair() throws GeneralSecurityException
     {
-        String kp = keyManager.createKeyPair("author", "password", 0);
+        String kp = keyManager.createKeyPair("password", 0);
         keyManager.getCertificate(kp).checkValidity();
     }
 
