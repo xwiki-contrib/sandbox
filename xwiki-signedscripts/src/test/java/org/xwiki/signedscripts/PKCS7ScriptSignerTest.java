@@ -85,7 +85,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
                 will(returnValue(SIGNATURE));
             allowing(mockCrypto).verifyText(with(any(String.class)), with(SIGNATURE));
                 will(returnValue(getTestKeyPair().getCertificate()));
-            allowing(mockCrypto).verifyText(with(any(String.class)), with("*ERROR*"));
+            allowing(mockCrypto).verifyText(with(any(String.class)), with(""));
                 will(returnValue(getTestCert()));
         }});
     }
@@ -125,7 +125,7 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
     {
         final String code = "{{groovy}}println();{{/groovy}}\n";
         SignedScript prepared = signer.prepareScriptForSigning(code);
-        // the test relies on the fact that an unsigned script has the string *ERROR* instead of the signature
+        // the test relies on the fact that an unsigned script has the empty string instead of the signature
         signer.getVerifiedScript(prepared.serialize());
         Assert.fail("Prepared script passed verification");
     }

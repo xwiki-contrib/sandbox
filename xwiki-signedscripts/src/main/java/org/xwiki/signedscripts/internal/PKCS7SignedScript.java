@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -174,8 +176,23 @@ public class PKCS7SignedScript implements SignedScript
      */
     public String serialize()
     {
+        return serialize(null, false);
+    }
+
+    /**
+     * Serialize in a format that can be parsed using {@link #parse(String)}.
+     * 
+     * @param outMissingKeys all missing mandatory keys are put into this list, can be null (missing keys are ignored)
+     * @param ignoreSignature if true, signature key is ignored
+     * @return serialized signed script
+     */
+    private String serialize(List<String> outMissingKeys, boolean ignoreSignature)
+    {
         StringBuilder builder = new StringBuilder();
         for (SignedScriptKey key : SignedScriptKey.values()) {
+            if (ignoreSignature && key == SignedScriptKey.SIGNATURE) {
+                continue;
+            }
             switch (key) {
                 case CODE:
                     builder.append(CODE_SEPARATOR).append('\n');
@@ -185,27 +202,40 @@ public class PKCS7SignedScript implements SignedScript
                     // ignore
                     break;
                 default:
-                    String value = "*ERROR*";
+                    String value = "";
                     if (isSet(key)) {
                         value = get(key);
                     } else if (key.isOptional()) {
                         continue;
+                    } else if (outMissingKeys != null) {
+                        outMissingKeys.add(key.toString());
                     }
-                    if (key == SignedScriptKey.SIGNATURE) {
-                        final int size = Math.min(BASE64_WIDTH, value.length());
-                        int pos = size;
-                        builder.append(String.format(KEY_VALUE_FORMAT, key.toString(), value.substring(0, size)));
-                        while (pos < value.length()) {
-                            builder.append(String.format(SIGNATURE_FORMAT, "", value.substring(pos)));
-                            pos += size;
-                        }
-                    } else {
-                        builder.append(String.format(KEY_VALUE_FORMAT, key.toString(), value));
-                    }
-                    break;
+                    prettyPrintKeyValue(builder, key, value);
             }
         }
         return builder.toString();
+    }
+
+    /**
+     * Pretty-print a key-value pair, appending the result to the given string builder.
+     * 
+     * @param builder the string builder to use
+     * @param key the key
+     * @param value the value
+     */
+    private void prettyPrintKeyValue(StringBuilder builder, SignedScriptKey key, String value)
+    {
+        if (key == SignedScriptKey.SIGNATURE) {
+            final int size = Math.min(BASE64_WIDTH, value.length());
+            int pos = size;
+            builder.append(String.format(KEY_VALUE_FORMAT, key.toString(), value.substring(0, size)));
+            while (pos < value.length()) {
+                builder.append(String.format(SIGNATURE_FORMAT, "", value.substring(pos)));
+                pos += size;
+            }
+        } else {
+            builder.append(String.format(KEY_VALUE_FORMAT, key.toString(), value));
+        }
     }
 
     /**
@@ -262,23 +292,19 @@ public class PKCS7SignedScript implements SignedScript
      */
     public String getDataToSign() throws IOException
     {
-        StringBuilder builder = new StringBuilder();
-
-        for (SignedScriptKey key : SignedScriptKey.values()) {
-            if (key == SignedScriptKey.SIGNATURE) {
-                continue;
+        List<String> missing = new LinkedList<String>();
+        String result = serialize(missing, true);
+        if (missing.size() > 0) {
+            String keys = "";
+            for (String key : missing) {
+                keys += " " + key;
             }
-            if (isSet(key)) {
-                builder.append(key.toString());
-                builder.append(get(key));
-            } else if (!key.isOptional()) {
-                throw new IOException("Missing mandatory key: " + key);
-            }
+            throw new IOException("Missing mandatory keys: " + keys);
         }
-        if (builder.length() == 0) {
-            throw new IOException("Data is empty");
+        if (result.length() == 0) {
+            throw new IOException("Signed script is empty");
         }
-        return builder.toString();
+        return result;
     }
 
     /**
