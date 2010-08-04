@@ -92,36 +92,36 @@ public class PKCS7SignedScriptTest extends AbstractSignedScriptsTest
 
     /** Serialized signed script */
     private static final String SIGNED_SCRIPT =
-    		"Author        : UID=xwiki:XWiki.Me\n" + 
-    		"Authority     : UID=xwiki:XWiki.Me\n" + 
-    		"Fingerprint   : 13d4a5326c8e14ac473323c9dc8ceb4357de14d2\n" + 
-    		"XWikiVersion  : 2.4M2\n" + 
-    		"CreatedOn     : Wednesday, July 21, 2010 1:15:25 PM UTC\n" + 
-    		"Signature     : MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIAwggMqMIIC\n" + 
-    		"                EqADAgECAgYBKfCIyDMwDQYJKoZIhvcNAQEFBQAwIDEeMBwGCgmSJomT8ixkAQEMDnh3aWtpOlhX\n" + 
-    		"                aWtpLk1lMB4XDTEwMDcyMDE0NDYyMloXDTExMDcyMDE1NDYyMlowIDEeMBwGCgmSJomT8ixkAQEM\n" + 
-    		"                Dnh3aWtpOlhXaWtpLk1lMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsBYFtHCMYBv8\n" + 
-    		"                qKmSPlbTswOKjhM7V9T/stbBbr4PaiYuDXFDhNn53bXFUq7fOlqTXgYDEtWXyFImtEaItsuMIMVe\n" + 
-    		"                cGQZa66BcAj7ha9MUKlGfYw5QHHcBtBCy0w62Qvk+MQFlCUy5esKpKDHkFVDYIPg9O6sgF37ufal\n" + 
-    		"                n7pB3nL/RaL+IXQme8Z7VWhI0l8hGxmD1Dh4VUgU5v//Oyh4wDWcZU4lpxQLw6YTkU1jbyHRkhln\n" + 
-    		"                5rpqSpk40+ES+Gt07jXJQHbC4FslNNI17YyWeyYPlaUdYLzmlxnKR1ZZrPD5S5t5yHxzNT1+niaI\n" + 
-    		"                nIvOn9ch4pGgv6FPVIiDrhASLQIDAQABo2owaDAMBgNVHRMBAf8EAjAAMBEGCWCGSAGG+EIBAQQE\n" + 
-    		"                AwIFoDAOBgNVHQ8BAf8EBAMCA/gwHwYDVR0jBBgwFoAUsRGZdRMv20BvljB/8csY8NLmfcEwFAYD\n" + 
-    		"                VR0RAQH/BAowCIYGd2ViIGlkMA0GCSqGSIb3DQEBBQUAA4IBAQAn9oj8TfZYUrV25/Tzy31GU1sg\n" + 
-    		"                f1KqxTdLs+nPZJj4ek5R0w3zpPHyUXnUcFVB0GC4KkqK8XOCEk04w1a9dW1BCgQdbnnDm/Koq1np\n" + 
-    		"                yKkZOTiHqNngidknj3m6x5RNBuvNfxF/oawCMhbWBDJXLbfrAqLmRvKLw1wAAE24c/5+7z/mXNek\n" + 
-    		"                uHCOSeUSNX/nj8lT/HBcQ9/mMpmHkKiVDUBbs2Vh+V6ILK+YaU0GtLHtpUyUzkmZY26A/9oNXBJS\n" + 
-    		"                AaM7+MOvJetu0DEBn/5FlCv4Jaoi8Z9OjwbpQ1VSydCRf39G8g7Hs4+GPtO6ChN6X8w7aKXsQyz+\n" + 
-    		"                EzLiEDhRn6W2AAAxggGwMIIBrAIBATAqMCAxHjAcBgoJkiaJk/IsZAEBDA54d2lraTpYV2lraS5N\n" + 
-    		"                ZQIGASnwiMgzMAkGBSsOAwIaBQCgXTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3\n" + 
-    		"                DQEJBTEPFw0xMDA3MjExMzE1MjVaMCMGCSqGSIb3DQEJBDEWBBQIvg0OTS/t6FwAI1/jaiMfA/+b\n" + 
-    		"                9TANBgkqhkiG9w0BAQEFAASCAQAaA+oFIhb10cIoQ2Kl7h5tAgXxAnHXaDm9KJ7HHhlJJKUJQD4J\n" + 
-    		"                wVSp0NCOewUhaoH45faKkTnyzy1mMZNN7CpG6cwlqCQBl6SPSKOCCEhuG32MJ3Pu+hon36zIVODG\n" + 
-    		"                VjwtSNgjNuP40XSiom1y4/A5JadzMdRULZHTpi2Ry1poGXqlVxPs1TPgXds1Awk9MJFAtdMeAqfT\n" + 
-    		"                +PuDXtG6sxVdTHtlrVF0fwUE7B39484qmXNuJy9aW/XX0yRJwrQ5ROjbcGr64AHdS5c5TgUi06bk\n" + 
-    		"                rVd8PNBNWvv1wxTu4qfayDIN9Ak5p9XFz3KUmjB2kXH6/HPTrVDdMO7/T3Apyzr0AAAAAAAA\n" + 
-    		"------------------------------------------------------------\n" + 
-    		"{{groovy}}println();{{/groovy}}\n\n";
+        "Author        : UID=XWiki.Admin\n" +
+        "Authority     : UID=XWiki.Admin\n" +
+        "Fingerprint   : 942356b9c40a765c73f600036f89b41cdb09a65b\n" +
+        "XWikiVersion  : 2.4M2\n" +
+        "CreatedOn     : Tuesday, August 3, 2010 11:55:34 PM UTC\n" +
+        "Signature     : MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIAwggMuMIIC\n" +
+        "                FqADAgECAgYBKjphreUwDQYJKoZIhvcNAQEFBQAwHTEbMBkGCgmSJomT8ixkAQEMC1hXaWtpLkFk\n" +
+        "                bWluMB4XDTEwMDgwMzIyNTUzNFoXDTExMDgwMzIzNTUzNFowHTEbMBkGCgmSJomT8ixkAQEMC1hX\n" +
+        "                aWtpLkFkbWluMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi4xFJfWGJIkg85D2VpMv\n" +
+        "                HxiA83py3k11okU74cBffh/4uG09vfTfj8m0Kda8xF9beuJiNME2p2EwVqftCXcJkL5rn4B+EeFz\n" +
+        "                S255wAlOA6TQtJFQ9UoCnQy/7uEuKEUgwmhZCds5TqOyNEkS5lGJU0m39ro0LADYIHV4Pmd5U+wA\n" +
+        "                ogtXooG29CrE7cgII1DyTruCtHCR7rxuRTTQAiHvdaEZt9OR/erYEwj6kfsJxRT47jhRf688nbhF\n" +
+        "                Y61UnPg2XwWc4gK09ClJBSzNIYVWxOWqoTMcPwz1Vca8kQnlHKKpq89en7kQA4YfZQggAX6mKxJK\n" +
+        "                alhSj18dm8uJGt/w/QIDAQABo3QwcjAMBgNVHRMBAf8EAjAAMBEGCWCGSAGG+EIBAQQEAwIFoDAO\n" +
+        "                BgNVHQ8BAf8EBAMCA7gwHwYDVR0jBBgwFoAUaVCK4HHxuB8PGxGVEPUUDKDAOWEwHgYDVR0RAQH/\n" +
+        "                BBQwEoYQaHR0cDovL215LndlYi5pZDANBgkqhkiG9w0BAQUFAAOCAQEAg+QPjUJCnmz1Tn6+EfnS\n" +
+        "                DNFpdPwjvenfKBibndbZoYuqvCgeucUgAW744RD9wZ4rW6UEZ+faclFZhaDV80mWAFoovgV1SvdQ\n" +
+        "                z0yTLNc/9GhNtkOltb2nTuwKbyP/c7IpmzmaKWhkw5JFlZ6rNzuWYpDfTl39zmH4+2J7MpsSJ4JX\n" +
+        "                2i0jTN8nQWvwRqRKQcI6+8KAq+reCiGnrVIBgWj3LJOLi8a3jB7cLQcoiV0odTNadHOeXHBO3F4R\n" +
+        "                OpiaeA6DZylfN/A91VTBY+msx/09AmeB4HBfBVPYxd9URV0rTRzbz4p9v7iv+CBoFvbscTkrlVDT\n" +
+        "                uWun8EvtWZytYFaRTwAAMYIBrTCCAakCAQEwJzAdMRswGQYKCZImiZPyLGQBAQwLWFdpa2kuQWRt\n" +
+        "                aW4CBgEqOmGt5TAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG\n" +
+        "                9w0BCQUxDxcNMTAwODAzMjM1NTM0WjAjBgkqhkiG9w0BCQQxFgQUaYMiQ3VukBQs/4QbC0sWNwjQ\n" +
+        "                FTkwDQYJKoZIhvcNAQEBBQAEggEALHTxL5VGj8mXXqAkkbPGPWbA0RHzZxCoYUJx4NFQcZVEGqdK\n" +
+        "                j7UCHbA9l2a0ZmG2ZFIeiXr2VYEOChrQwboNXAZsqlxmUva9a0MQ+coBt6motmL+y0CkK4HBDJZs\n" +
+        "                4jIAygLIqfKhDmd3pm/ntfLJ5RjNtz2T7oc/zl9O7quJkbqraTLWOFDC83pYRs3YLvRm45l/3B8X\n" +
+        "                qHUxq4m4C9Wr6FBUm6o558a+jzHNrVnpyssgBBcvJNOZAVpRB+ny5o9Gj+JdqXdv9f1CpuXL3KqL\n" +
+        "                CS4/abuYmOplkcx/+GcskNECleOrGqj+lw/vH5F77ZS5ZY+UVLPnaC4h/aD1xwt4VAAAAAAAAA==\n" +
+        "------------------------------------------------------------\n" +
+        "{{groovy}}println();{{/groovy}}\n\n";
 
     /** The CODE from the signed script above. */
     private final String CODE = "{{groovy}}println();{{/groovy}}\n\n";
@@ -131,7 +131,7 @@ public class PKCS7SignedScriptTest extends AbstractSignedScriptsTest
     {
         SignedScript script = new TestableSignedScript(SIGNED_SCRIPT);
         // check all parsed key-value pairs
-        String sigPart = "yKkZOTiHqNngidknj3m6x5RNBuvNfxF/oawCMhbWBDJXLbfrAqLmRvKLw1wAAE24c/5+7z/mXNek";
+        String sigPart = "BBQwEoYQaHR0cDovL215LndlYi5pZDANBgkqhkiG9w0BAQUFAAOCAQEAg+QPjUJCnmz1Tn6+EfnS";
         XWikiX509Certificate cert = getTestKeyPair().getCertificate();
         Assert.assertNull(script.get(SignedScriptKey.ALLOWACTIONS));
         Assert.assertNull(script.get(SignedScriptKey.ALLOWRIGHTS));
@@ -142,7 +142,7 @@ public class PKCS7SignedScriptTest extends AbstractSignedScriptsTest
         Assert.assertEquals(cert.getIssuerName(), script.get(SignedScriptKey.AUTHORITY));
         Assert.assertEquals(CODE, script.get(SignedScriptKey.CODE));
         Assert.assertEquals(script.get(SignedScriptKey.CODE), script.getCode());
-        Assert.assertEquals("Wednesday, July 21, 2010 1:15:25 PM UTC", script.get(SignedScriptKey.CREATEDON));
+        Assert.assertEquals("Tuesday, August 3, 2010 11:55:34 PM UTC", script.get(SignedScriptKey.CREATEDON));
         Assert.assertEquals(cert.getFingerprint(), script.get(SignedScriptKey.FINGERPRINT));
         Assert.assertTrue("Signature seems to be wrong", script.get(SignedScriptKey.SIGNATURE).contains(sigPart));
         Assert.assertEquals("2.4M2", script.get(SignedScriptKey.XWIKIVERSION));
