@@ -19,21 +19,13 @@
  */
 package org.xwiki.signedscripts.internal;
 
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
 import java.security.Security;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
@@ -42,10 +34,9 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.crypto.internal.UserDocumentUtils;
-import org.xwiki.crypto.passwd.PasswordCryptoService;
+import org.xwiki.crypto.x509.X509CryptoService;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
-import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
 import org.xwiki.signedscripts.KeyManager;
 
 /**
@@ -58,25 +49,13 @@ import org.xwiki.signedscripts.KeyManager;
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)
 public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager, Initializable
 {
-    /** Algorithm to use when generating keys. */
-    private static final String KEY_ALGORITHM = "RSA";
-
-    /** The algorithm to use for signing certificates. */
-    private static final String SIGN_ALGORITHM = "SHA1withRSA";
-
-    /** Signing algorithm key size in bits. */
-    private static final int KEY_SIZE = 2048;
-
-    /** Key pair generator. */
-    private KeyPairGenerator kpGen;
-
     /** Used to get user certificates. */
     @Requirement
     private UserDocumentUtils docUtils;
 
-    /** Used to encrypt generated key pairs. */
+    /** Used to generate key pairs. */
     @Requirement
-    private PasswordCryptoService cryptoService;
+    private X509CryptoService cryptoService;
 
     /** FIXME. */
     private Map<String, XWikiX509Certificate> certMap = new HashMap<String, XWikiX509Certificate>();
@@ -95,15 +74,6 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
-
-        try {
-            kpGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
-            kpGen.initialize(KEY_SIZE);
-        } catch (GeneralSecurityException exception) {
-            getLogger().debug(exception.getMessage(), exception);
-            throw new InitializationException("Failed to initialize key pair generator.", exception);
-        }
-        // FIXME read local and global root certs
     }
 
     /**
@@ -114,37 +84,20 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     public synchronized String createKeyPair(String authorName, String password, int daysOfValidity)
         throws GeneralSecurityException
     {
-        KeyPair kp = this.kpGen.generateKeyPair();
-
         // TODO rights and actions
         // generate a self-signed certificate
-        X509Principal author = new X509Principal("UID=" + authorName);
-        X509Principal issuer = author;
-        PrivateKey signKey = kp.getPrivate();
-
-        X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-        certGen.setSubjectDN(author);
-        certGen.setIssuerDN(issuer);
-        certGen.setSerialNumber(new BigInteger(128, new SecureRandom()));
-
-        certGen.setNotBefore(new Date());
-        long day = 1000 * 3600 * 24;
-        certGen.setNotAfter(new Date(System.currentTimeMillis() + day * daysOfValidity));
-
-        certGen.setPublicKey(kp.getPublic());
-        certGen.setSignatureAlgorithm(SIGN_ALGORITHM);
-
-        XWikiX509Certificate cert = new XWikiX509Certificate(certGen.generate(signKey));
+        XWikiX509KeyPair keys = cryptoService.newCertAndPrivateKey(daysOfValidity, password);
+        XWikiX509Certificate cert = keys.getCertificate();
         String fingerprint = cert.getFingerprint();
-        XWikiX509KeyPair keys = new DefaultXWikiX509KeyPair(cert, kp.getPrivate(), password, this.cryptoService);
         try {
-            // register the certificate in user document forst (might fail)
+            // register the certificate in user document first (might fail)
             this.docUtils.addCertificateFingerprint(this.docUtils.getCurrentUser(), fingerprint);
             this.certMap.put(fingerprint, cert);
             this.keysMap.put(fingerprint, keys);
         } catch (Exception exception) {
             throw new GeneralSecurityException(exception.getMessage(), exception);
         }
+        // FIXME user creates its own key pair => admin must register it afterwards
         return fingerprint;
     }
 

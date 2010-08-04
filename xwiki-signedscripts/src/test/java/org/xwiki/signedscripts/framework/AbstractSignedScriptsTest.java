@@ -209,6 +209,8 @@ public abstract class AbstractSignedScriptsTest extends AbstractComponentTestCas
         getMockery().checking(new Expectations() {{
             allowing(mockUtils).getCurrentUser();
                 will(returnValue(USER));
+            allowing(mockUtils).getUserDocURL(USER);
+                will(returnValue("http://my.id.org/"));
             allowing(mockUtils).getCertificateFingerprintsForUser(with(USER));
                 will(returnValue(userFingerprints));
             allowing(mockUtils).addCertificateFingerprint(with(USER), with(any(String.class)));
