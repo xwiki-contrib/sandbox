@@ -88,7 +88,6 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
     public void testSignVerify() throws GeneralSecurityException
     {
         SignedScript script = signer.sign(CODE, "passwrd");
-        // NOTE: the test may fail randomly if the next second starts at this line 
         SignedScript verified = signer.getVerifiedScript(script.serialize());
         Assert.assertEquals(script.toString(), verified.toString());
     }
@@ -97,13 +96,15 @@ public class PKCS7ScriptSignerTest extends AbstractSignedScriptsTest
     public void testExternalSignIsSign() throws Exception
     {
         final SignedScript signed = signer.sign(CODE, "passwrd");
-        // NOTE: the test may fail randomly if the next second starts at this line 
         SignedScript prepared = signer.prepareScriptForSigning(CODE);
         // browser imitation
         X509CryptoService pkcs7 = getComponentManager().lookup(X509CryptoService.class);
         String signature = pkcs7.signText(prepared.getDataToSign(), getTestKeyPair(), "passwrd");
         SignedScript script = signer.constructSignedScript(prepared, signature);
-        Assert.assertEquals(signed.toString(), script.toString());
+        // the test will fail if both scripts are signed at different seconds
+        // workaround is to remove the creation date
+        String regEx = "CreatedOn[^\n]+UTC";
+        Assert.assertEquals(signed.toString().replaceFirst(regEx, ""), script.toString().replaceFirst(regEx, ""));
     }
 
     @Test(expected = GeneralSecurityException.class)
