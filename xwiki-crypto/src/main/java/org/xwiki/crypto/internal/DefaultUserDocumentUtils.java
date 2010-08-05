@@ -48,7 +48,11 @@ public class DefaultUserDocumentUtils implements UserDocumentUtils
     @Requirement(role = String.class)
     private EntityReferenceSerializer<String> serializer;
 
-    /** @return The fully qualified name of the current user's document eg: xwiki:XWiki.JohnSmith. */
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.crypto.internal.UserDocumentUtils#getCurrentUser()
+     */
     public String getCurrentUser()
     {
         String localName = this.bridge.getCurrentUser();
@@ -57,10 +61,9 @@ public class DefaultUserDocumentUtils implements UserDocumentUtils
     }
 
     /**
-     * Get the external URL pointing to the given user document.
-     *
-     * @param userDocName the string representation of the document reference for the user document.
-     * @return A string representation of the external URL for the user doc.
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.crypto.internal.UserDocumentUtils#getUserDocURL(java.lang.String)
      */
     public String getUserDocURL(final String userDocName)
     {
