@@ -26,6 +26,8 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
@@ -52,6 +54,12 @@ public class DefaultWikiImporterDocumentBridge extends AbstractLogEnabled implem
 
     @Requirement("xwiki/2.0")
     private BlockRenderer renderer;
+
+    @Requirement
+    private EntityReferenceSerializer<String> serializer;
+
+    @Requirement
+    private DocumentReferenceResolver<String> resolver;
 
     /**
      * {@inheritDoc}
@@ -98,39 +106,32 @@ public class DefaultWikiImporterDocumentBridge extends AbstractLogEnabled implem
             pageWiki = this.docAccessBridge.getCurrentWiki();
         }
 
+        String pageSpace = page.getSpace();
+        if (StringUtils.isNotEmpty(parameters.getTargetSpace())) {
+            pageSpace = parameters.getTargetSpace();
+        } else if (StringUtils.isEmpty(pageSpace)) {
+            pageSpace = "Main";
+        }
+
         // Set Document Properties
-        DocumentReference reference = new DocumentReference(pageWiki, page.getSpace(), page.getName());
+        DocumentReference documentReference = new DocumentReference(pageWiki, pageSpace, page.getName());
+        String stringReference = this.serializer.serialize(documentReference);
 
         try {
-            if (page.getTags() != null && !page.getTags().isEmpty()) {
-                this.docAccessBridge.setProperty(page.getSpace() + "." + page.getName(), "XWiki.TagClass", "tags",
-                    page.getTagsAsString());
-            }
-
-            // Document Parent.
-            if (page.getParent() != null) {
-                DocumentReference parentReference = new DocumentReference(pageWiki, page.getSpace(), page.getParent());
-                this.docAccessBridge.setDocumentParentReference(reference, parentReference);
-            }
-
-            // Document Title.
-            if (page.getTitle() != null) {
-                this.docAccessBridge.setDocumentTitle(reference, page.getTitle());
-            }
-
             // Attachments
             for (Attachment attachment : page.getAttachments()) {
-                AttachmentReference attachmentRef = new AttachmentReference(attachment.getFileName(), reference);
+                AttachmentReference attachmentRef =
+                    new AttachmentReference(attachment.getFileName(), documentReference);
                 this.docAccessBridge.setAttachmentContent(attachmentRef, attachment.getContent());
             }
 
             if (parameters.getPreserveHistory()) {
                 // For each wiki page revision render xdom and set page content.
                 for (WikiPageRevision revision : page.getRevisions()) {
-                    addRevision(reference, revision);
+                    addRevision(documentReference, revision);
                 }
             } else {
-                addRevision(reference, page.getLastRevision());
+                addRevision(documentReference, page.getLastRevision());
             }
         } catch (Exception e) {
             getLogger().error("Error while creating the sucessfully parsed page.", e);
@@ -138,19 +139,40 @@ public class DefaultWikiImporterDocumentBridge extends AbstractLogEnabled implem
         }
 
         // On successful page creation
-        String pageLink = page.getSpace() + "." + page.getName();
-        this.logger.info("Page Created ->  <a href=\"" + this.docAccessBridge.getDocumentURL(reference, "view", "", "")
-            + "\">" + pageLink + "</a>", true);
+        this.logger.info(
+            "Page Created ->  <a href=\"" + this.docAccessBridge.getDocumentURL(documentReference, "view", "", "")
+                + "\">" + stringReference + "</a>", true);
     }
 
-    private void addRevision(DocumentReference reference, WikiPageRevision revision) throws Exception
+    private void addRevision(DocumentReference documentReference, WikiPageRevision revision) throws Exception
     {
+        String stringReference = this.serializer.serialize(documentReference);
+
+        // Document Content
         DefaultWikiPrinter printer = new DefaultWikiPrinter();
-
         this.renderer.render(revision.getContent(), printer);
-
-        this.docAccessBridge.setDocumentContent(reference, printer.toString(), revision.getComment(),
+        this.docAccessBridge.setDocumentContent(documentReference, printer.toString(), revision.getComment(),
             revision.isMinorEdit());
+
+        // Document Title
+        if (revision.getTitle() != null) {
+            this.docAccessBridge.setDocumentTitle(documentReference, revision.getTitle());
+        }
+
+        // Document Parent
+        if (revision.getParent() != null) {
+            DocumentReference parentReference = this.resolver.resolve(revision.getParent(), documentReference);
+            this.docAccessBridge.setDocumentParentReference(documentReference, parentReference);
+        }
+
+        // Document Tags
+        if (revision.getTags() != null && !revision.getTags().isEmpty()) {
+            StringBuilder tagString = new StringBuilder();
+            for (String tag : revision.getTags()) {
+                tagString.append(tag + "|");
+            }
+            this.docAccessBridge.setProperty(stringReference, "XWiki.TagClass", "tags", tagString.toString());
+        }
     }
 
     /**

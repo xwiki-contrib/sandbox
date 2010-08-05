@@ -20,6 +20,7 @@
 package org.xwiki.wikiimporter.wiki;
 
 import java.util.List;
+import java.util.Set;
 
 import org.xwiki.rendering.block.XDOM;
 
@@ -30,35 +31,48 @@ import org.xwiki.rendering.block.XDOM;
  */
 public interface WikiPageRevision
 {
+    /**
+     * @return title of the Page.
+     */
+    public String getTitle();
 
     /**
-     *@return the author of Page revision.
+     * @return the author of Page revision.
      */
     public String getAuthor();
 
     /**
-     *@return the list of attachments of a Page revision.
+     * @return the name of parent page.
+     */
+    public String getParent();
+
+    /**
+     * @return the list of attachments of a Page revision.
      */
     public List<Attachment> getAttachments();
 
     /**
-     *@return the version of Page revision.
+     * @return the version of Page revision.
      */
     public String getVersion();
 
     /**
-     *@return the text content of Page revision.
+     * @return the text content of Page revision.
      */
     public XDOM getContent();
 
     /**
-     *@return the comment on Page revision.
+     * @return the comment on Page revision.
      */
     public String getComment();
 
     /**
-     *@return <tt>true</tt> if the revision is a minor edit, <tt>false</tt> if not.
+     * @return <tt>true</tt> if the revision is a minor edit, <tt>false</tt> if not.
      */
     public boolean isMinorEdit();
 
+    /**
+     * @return the collection of tags associated with the Page.
+     */
+    public Set<String> getTags();
 }

@@ -35,25 +35,9 @@ public interface WikiImporterListener extends Listener
     void beginWikiPage();
 
     /**
-     * Call back for Start of a Wiki page.
-     * 
-     * @param pageName the page name.
-     * @param params the parameters of page
-     */
-    void beginWikiPage(String pageName);
-
-    /**
      * Call back for Start of Wiki page revision
      */
     void beginWikiPageRevision();
-
-    /**
-     * Call back for Start of Wiki page revision
-     * 
-     * @param pageName the page name
-     * @param revision number/id of revision
-     */
-    void beginWikiPageRevision(String pageName, int revision);
 
     /**
      * Call back for Start of an Object.

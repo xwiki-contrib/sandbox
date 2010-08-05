@@ -14,8 +14,10 @@ Website: http://gsoc.myxwiki.org/xwiki/bin/view/Import%20Export%20other%20wikis/
 - the logger, even if it's a good idea, is not very well designed:
    - the logs should be a list of XDOM based content instead of html strings
    - it should be based on standard log api instead of having to use a special api
+- attachment handling is very bad, there is a mix between pages revision and attachemt revisions
 - the UI should reuse some way the work done for the WYSIWYG for macros on the parameters handling
 
 == Missing
 
-- does not seems to really import objects yet
+- import objects
+- import classes

@@ -19,7 +19,10 @@
  */
 package org.xwiki.wikiimporter.wiki;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.xwiki.rendering.block.XDOM;
 
@@ -28,6 +31,9 @@ import org.xwiki.rendering.block.XDOM;
  */
 public abstract class AbstractWikiPageRevision implements WikiPageRevision
 {
+    protected String title;
+
+    protected String parent;
 
     protected String author;
 
@@ -39,17 +45,29 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
 
     protected List<Attachment> attachmentList;
 
-    protected XDOM textContent;
+    protected Set<String> tags = new TreeSet<String>();
 
-    /**
-     * @param author
-     * @param comment
-     * @param version
-     * @param minorEdit
-     */
-    public AbstractWikiPageRevision(String author, String comment, String version, boolean minorEdit)
+    protected XDOM content;
+
+    public AbstractWikiPageRevision()
     {
-        super();
+    }
+
+    public AbstractWikiPageRevision(WikiPageRevision previousWikiPageRevision)
+    {
+        setTitle(previousWikiPageRevision.getTitle());
+        setParent(previousWikiPageRevision.getParent());
+        setAuthor(previousWikiPageRevision.getAuthor());
+        setComment(previousWikiPageRevision.getComment());
+        setVersion(previousWikiPageRevision.getVersion());
+        setMinorEdit(previousWikiPageRevision.isMinorEdit());
+        setTags(previousWikiPageRevision.getTags());
+        setContent(previousWikiPageRevision.getContent());
+    }
+
+    public AbstractWikiPageRevision(String title, String author, String comment, String version, boolean minorEdit)
+    {
+        this.title = title;
         this.author = author;
         this.comment = comment;
         this.version = version;
@@ -59,11 +77,41 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
     /**
      * {@inheritDoc}
      * 
+     * @see org.xwiki.wikiimporter.wiki.WikiPageRevision#getTitle()
+     */
+    public String getTitle()
+    {
+        return this.title;
+    }
+
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.wikiimporter.wiki.WikiPageRevision#getParent()
+     */
+    public String getParent()
+    {
+        return this.parent;
+    }
+
+    public void setParent(String parent)
+    {
+        this.parent = parent;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
      * @see org.xwiki.wikiimporter.wiki.WikiPageRevision#getAttachments()
      */
     public List<Attachment> getAttachments()
     {
-        return attachmentList;
+        return this.attachmentList;
     }
 
     /**
@@ -73,7 +121,7 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public String getAuthor()
     {
-        return author;
+        return this.author;
     }
 
     /**
@@ -83,7 +131,7 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public String getComment()
     {
-        return comment;
+        return this.comment;
     }
 
     /**
@@ -93,7 +141,7 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public XDOM getContent()
     {
-        return textContent;
+        return this.content;
     }
 
     /**
@@ -113,7 +161,7 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
      */
     public boolean isMinorEdit()
     {
-        return minorEdit;
+        return this.minorEdit;
     }
 
     /**
@@ -151,13 +199,28 @@ public abstract class AbstractWikiPageRevision implements WikiPageRevision
     /**
      * @param textContent the textContent to set
      */
-    public void setTextContent(XDOM textContent)
+    public void setContent(XDOM textContent)
     {
-        this.textContent = textContent;
+        this.content = textContent;
     }
 
     public void addAttachment(Attachment attachment)
     {
         this.attachmentList.add(attachment);
+    }
+
+    public Set<String> getTags()
+    {
+        return this.tags;
+    }
+
+    public void setTags(Set<String> tags)
+    {
+        this.tags = new LinkedHashSet<String>(tags);
+    }
+
+    public void addTag(String tag)
+    {
+        this.tags.add(tag);
     }
 }

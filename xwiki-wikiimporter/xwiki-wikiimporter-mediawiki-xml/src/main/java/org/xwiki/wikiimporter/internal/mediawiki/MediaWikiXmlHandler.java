@@ -76,7 +76,6 @@ public class MediaWikiXmlHandler extends DefaultHandler
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
     {
-
         if (MediaWikiConstants.PAGE_TAG.equals(qName)) {
             this.listener.beginWikiPage();
         } else if (MediaWikiConstants.PAGE_REVISION_TAG.equals(qName)) {

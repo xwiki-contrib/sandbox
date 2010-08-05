@@ -19,15 +19,7 @@
  */
 package org.xwiki.wikiimporter.listener;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
-
-import org.xwiki.rendering.block.AbstractBlock;
-import org.xwiki.rendering.block.Block;
-import org.xwiki.rendering.block.XDOM;
-import org.xwiki.rendering.listener.Listener;
+import org.xwiki.rendering.listener.WrappingListener;
 
 /**
  * Abstract implementation of WikiImporterListener. This listener generates XDOM of the page content based on event call
@@ -35,46 +27,7 @@ import org.xwiki.rendering.listener.Listener;
  * 
  * @version $Id$
  */
-public abstract class AbstractWikiImporterListenerXDOM implements WikiImporterListener
+public abstract class AbstractWikiImporterListenerXDOM extends WrappingListener implements WikiImporterListener
 {
-    protected Stack<Block> stack = new Stack<Block>();
-
-    protected final MarkerBlock marker = new MarkerBlock();
-
-    protected static class MarkerBlock extends AbstractBlock
-    {
-        /**
-         * {@inheritDoc}
-         * 
-         * @see AbstractBlock#traverse(Listener)
-         */
-        public void traverse(Listener listener)
-        {
-            // Nothing to do since this block is only used as a marker.
-        }
-    }
-
-    /**
-     * @return content of the page in XDOM.
-     */
-    public XDOM getXDOM()
-    {
-        return new XDOM(generateListFromStack());
-    }
-
-    protected List<Block> generateListFromStack()
-    {
-        List<Block> blocks = new ArrayList<Block>();
-        while (!this.stack.empty()) {
-            if (this.stack.peek() != this.marker) {
-                blocks.add(this.stack.pop());
-            } else {
-                this.stack.pop();
-                break;
-            }
-        }
-        Collections.reverse(blocks);
-        return blocks;
-    }
-
+    
 }

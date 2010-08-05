@@ -19,9 +19,6 @@
  */
 package org.xwiki.wikiimporter.internal.mediawiki.wiki;
 
-import java.util.Map;
-
-import org.xwiki.wikiimporter.internal.mediawiki.MediaWikiConstants;
 import org.xwiki.wikiimporter.wiki.AbstractWikiPageRevision;
 
 /**
@@ -31,18 +28,12 @@ import org.xwiki.wikiimporter.wiki.AbstractWikiPageRevision;
  */
 public class MediaWikiPageRevision extends AbstractWikiPageRevision
 {
-
-    public MediaWikiPageRevision(String author, String comment, String version, boolean minorEdit)
+    public MediaWikiPageRevision()
     {
-        super(author, comment, version, minorEdit);
     }
-
-    public MediaWikiPageRevision(Map<String, String> pageRevProps)
+    
+    public MediaWikiPageRevision(MediaWikiPageRevision previousMediaWikiPageRevision)
     {
-
-        this(pageRevProps.get(MediaWikiConstants.AUTHOR_TAG), pageRevProps.get(MediaWikiConstants.COMMENT_TAG),
-            pageRevProps.get(MediaWikiConstants.VERSION_TAG), "true".equals(pageRevProps
-                .get(MediaWikiConstants.IS_MINOR_TAG)) ? true : false);
+        super(previousMediaWikiPageRevision);
     }
-
 }

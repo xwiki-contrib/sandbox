@@ -19,12 +19,8 @@
  */
 package org.xwiki.wikiimporter.wiki;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * @version $Id$
@@ -32,15 +28,9 @@ import java.util.TreeSet;
 public abstract class AbstractWikiPage implements WikiPage
 {
 
-    protected String title;
-
     protected LinkedList<WikiPageRevision> pageRevisionList = new LinkedList<WikiPageRevision>();
 
     protected LinkedList<Attachment> attachmentList = new LinkedList<Attachment>();
-
-    protected List<String> children = new ArrayList<String>();
-
-    protected String parent;
 
     protected String space;
 
@@ -48,11 +38,8 @@ public abstract class AbstractWikiPage implements WikiPage
 
     protected String wiki;
 
-    protected Set<String> tags = new TreeSet<String>();
-
-    public AbstractWikiPage(String title, String defaultSpace, String wiki)
+    public AbstractWikiPage(String defaultSpace, String wiki)
     {
-        this.title = title;
         this.space = defaultSpace;
         this.wiki = wiki;
     }
@@ -70,17 +57,6 @@ public abstract class AbstractWikiPage implements WikiPage
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getChildren()
-     */
-    public List<String> getChildren()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
      * @see org.xwiki.wikiimporter.wiki.WikiPage#getLastRevision()
      */
     public WikiPageRevision getLastRevision()
@@ -91,52 +67,11 @@ public abstract class AbstractWikiPage implements WikiPage
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getProperties()
-     */
-    public Properties getProperties()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
      * @see org.xwiki.wikiimporter.wiki.WikiPage#getRevisions()
      */
     public List<WikiPageRevision> getRevisions()
     {
         return pageRevisionList;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getTags()
-     */
-    public Set<String> getTags()
-    {
-        // TODO Auto-generated method stub
-        return tags;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getTagsAsString()
-     */
-    public String getTagsAsString()
-    {
-        StringBuilder tagString = new StringBuilder();
-        for (String tag : tags) {
-            tagString.append(tag + "|");
-        }
-        return tagString.toString();
-    }
-
-    public void setTitle(String title)
-    {
-        this.title = title;
     }
 
     public void setSpace(String space)
@@ -154,14 +89,8 @@ public abstract class AbstractWikiPage implements WikiPage
         pageRevisionList.addLast(revision);
     }
 
-    public void addTag(String tag)
-    {
-        tags.add(tag);
-    }
-
     public void addAttachment(Attachment attachment)
     {
         attachmentList.add(attachment);
     }
-
 }

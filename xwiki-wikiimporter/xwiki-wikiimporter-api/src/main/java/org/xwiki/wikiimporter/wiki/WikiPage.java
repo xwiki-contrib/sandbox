@@ -21,7 +21,6 @@ hi
 package org.xwiki.wikiimporter.wiki;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -31,19 +30,13 @@ import java.util.Set;
  */
 public interface WikiPage
 {
-
     /**
-     *@return title of the Page.
-     */
-    public String getTitle();
-
-    /**
-     *@return name of the Page.
+     * @return name of the Page.
      */
     public String getName();
 
     /**
-     *@return name of the Space to which the Page corresponds to.
+     * @return name of the Space to which the Page corresponds to.
      */
     public String getSpace();
 
@@ -53,48 +46,17 @@ public interface WikiPage
     public String getWiki();
 
     /**
-     *@return properties of the Page.
-     */
-    public Properties getProperties();
-
-    /**
-     *@return list of revisions of Page.
+     * @return list of revisions of Page.
      */
     public List<WikiPageRevision> getRevisions();
 
     /**
-     *@return list of attachments of the Page.
+     * @return list of attachments of the Page.
      */
     public List<Attachment> getAttachments();
 
     /**
-     *@return last revision of the Page.
+     * @return last revision of the Page.
      */
     public WikiPageRevision getLastRevision();
-
-    /**
-     *@param fileName name of the Attachment.
-     *@return attachment of the Page.
-     */
-    public Attachment getAttachment(String fileName);
-
-    /**
-     *@return the list of names of child pages associated with the Page.
-     */
-    public List<String> getChildren();
-
-    /**
-     *@return the collection of tags associated with the Page.
-     */
-    public Set<String> getTags();
-
-    /**
-     *@return the tags associated with the Page as a pipe seperated string.
-     */
-    public String getTagsAsString();
-
-    /**
-     *@return the name of parent page.
-     */
-    public String getParent();
 }

@@ -19,12 +19,8 @@
  */
 package org.xwiki.wikiimporter.internal.mediawiki.wiki;
 
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
-import org.xwiki.wikiimporter.internal.mediawiki.MediaWikiConstants;
 import org.xwiki.wikiimporter.wiki.AbstractWikiPage;
-import org.xwiki.wikiimporter.wiki.Attachment;
 
 /**
  * This class represents a MediaWiki Page.
@@ -33,30 +29,25 @@ import org.xwiki.wikiimporter.wiki.Attachment;
  */
 public class MediaWikiPage extends AbstractWikiPage
 {
-    /**
-     * The orginal page title present in the exported document. Useful for reference purpose while generating page
-     * import log.
-     */
-    private String pageTitleForReference;
-
-    public MediaWikiPage(String title, String defaultSpace, String wiki)
+    public MediaWikiPage(String mediaWikiTitle, String defaultSpace)
     {
-        super(title, defaultSpace, wiki);
+        super(defaultSpace, null);
     }
 
-    public MediaWikiPage(String defaultSpace, String wiki)
+    public MediaWikiPage(String defaultSpace)
     {
-        this(null, defaultSpace, wiki);
+        this(null, defaultSpace);
     }
 
     /**
-     * Populate page properties.
+     * {@inheritDoc}
      * 
-     * @param pageProps properties of the page like page title.
+     * @see org.xwiki.wikiimporter.wiki.AbstractWikiPage#getLastRevision()
      */
-    public void populateProps(Map<String, String> pageProps)
+    @Override
+    public MediaWikiPageRevision getLastRevision()
     {
-        setTitle(pageProps.get(MediaWikiConstants.PAGE_TITLE_TAG));
+        return (MediaWikiPageRevision) super.getLastRevision();
     }
 
     /**
@@ -66,35 +57,7 @@ public class MediaWikiPage extends AbstractWikiPage
      */
     public String toString()
     {
-        return "MediaWiki Page :" + pageTitleForReference;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getTitle()
-     */
-    public String getTitle()
-    {
-        return title;
-    }
-
-    @Override
-    public void setTitle(String title)
-    {
-        super.setTitle(title);
-        this.pageTitleForReference = title;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getAttachment(java.lang.String)
-     */
-    public Attachment getAttachment(String fileName)
-    {
-        // TODO Auto-generated method stub
-        return null;
+        return "MediaWiki Page :" + getLastRevision().getTitle();
     }
 
     /**
@@ -104,7 +67,7 @@ public class MediaWikiPage extends AbstractWikiPage
      */
     public String getName()
     {
-        String tmpName = cleanName(title, "[^a-zA-Z0-9:/# ]", null);
+        String tmpName = cleanName(getLastRevision().getTitle(), "[^a-zA-Z0-9:/# ]", null);
 
         tmpName = cleanEdges(tmpName, ':');
         tmpName = cleanEdges(tmpName, '/');
@@ -127,24 +90,11 @@ public class MediaWikiPage extends AbstractWikiPage
             }
 
             tmpName = tmpName.substring(lastIndex + 1);
-            this.parent = parentStr;
         }
 
-        this.title = tmpName;
         this.pageName = tmpName.replaceAll("[ ]", "");
 
         return this.pageName;
-    }
-
-    /**
-     * In MediaWiki the page hierarchy is of format Parent/Child. Hierarchy is maintained with page name separated with
-     * forward slash ("/")
-     * 
-     * @see org.xwiki.wikiimporter.wiki.WikiPage#getParent()
-     */
-    public String getParent()
-    {
-        return cleanName(parent, "[^a-zA-Z0-9]", "WebHome");
     }
 
     /**
@@ -156,7 +106,7 @@ public class MediaWikiPage extends AbstractWikiPage
      */
     public String getSpace()
     {
-        String tmpSpace = cleanName(title, "[^a-z0-9A-Z:]", space);
+        String tmpSpace = cleanName(getLastRevision().getTitle(), "[^a-z0-9A-Z:]", space);
 
         // Extract Space from title.
         if (tmpSpace.indexOf(':') > 0 && tmpSpace.indexOf(':') < tmpSpace.length() - 1) {
@@ -165,6 +115,7 @@ public class MediaWikiPage extends AbstractWikiPage
         } else {
             // TODO Handle Error with error log.
         }
+
         return space;
     }
 
@@ -215,13 +166,5 @@ public class MediaWikiPage extends AbstractWikiPage
         }
 
         return null;
-    }
-
-    /**
-     * @return the orginal page title.
-     */
-    public String getPageTitleForReference()
-    {
-        return pageTitleForReference;
     }
 }
