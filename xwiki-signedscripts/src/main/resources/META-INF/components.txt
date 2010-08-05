@@ -1,3 +1,4 @@
+org.xwiki.signedscripts.internal.DefaultCryptoStorageUtils
 org.xwiki.signedscripts.internal.DefaultKeyManager
 org.xwiki.signedscripts.internal.PKCS7ScriptSigner
 org.xwiki.signedscripts.internal.scripting.KeyManagerScriptService

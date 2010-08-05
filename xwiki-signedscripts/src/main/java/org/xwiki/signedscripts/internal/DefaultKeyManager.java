@@ -53,6 +53,10 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
     @Requirement
     private UserDocumentUtils docUtils;
 
+    /** Used to store certificates and key pairs in user's profile. */
+    @Requirement
+    private CryptoStorageUtils storage;
+
     /** Used to generate key pairs. */
     @Requirement
     private X509CryptoService cryptoService;
@@ -91,7 +95,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
         String fingerprint = cert.getFingerprint();
         try {
             // register the certificate in user document first (might fail)
-            this.docUtils.addCertificateFingerprint(this.docUtils.getCurrentUser(), fingerprint);
+            this.storage.addCertificateFingerprint(this.docUtils.getCurrentUser(), fingerprint);
             this.certMap.put(fingerprint, cert);
             this.keysMap.put(fingerprint, keys);
         } catch (Exception exception) {
@@ -129,7 +133,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      */
     public void registerCertificate(XWikiX509Certificate certificate, String userName) throws GeneralSecurityException
     {
-        if (!docUtils.getCertificateFingerprintsForUser(userName).contains(certificate.getFingerprint())) {
+        if (!this.storage.getCertificateFingerprintsForUser(userName).contains(certificate.getFingerprint())) {
             throw new GeneralSecurityException("Given certificate is not owned by the user \"" + userName + "\"");
         }
         this.certMap.put(certificate.getFingerprint(), certificate);
@@ -163,7 +167,7 @@ public class DefaultKeyManager extends AbstractLogEnabled implements KeyManager,
      */
     public String getTrustedFingerprint(String userName)
     {
-        for (String fp : docUtils.getCertificateFingerprintsForUser(userName)) {
+        for (String fp : this.storage.getCertificateFingerprintsForUser(userName)) {
             if (certMap.containsKey(fp)) {
                 return fp;
             }

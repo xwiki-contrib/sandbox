@@ -19,30 +19,23 @@
  */
 package org.xwiki.crypto.internal;
 
-import java.util.List;
-import java.util.ArrayList;
-
+import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.bridge.DocumentAccessBridge;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
-import org.xwiki.model.reference.DocumentReference;
 
 
 /**
+ * Default implementation of {@link UserDocumentUtils}.
+ * 
  * @version $Id$
  * @since 2.5
  */
 @Component
 public class DefaultUserDocumentUtils implements UserDocumentUtils
 {
-    /** The name of the XClass which represents a user's certificate. */
-    private final String certClassName = "XWiki.X509CertificateClass";
-
-    /** The name of the property in the certificate XClass which represents the entire certificate in PEM format. */
-    private final String certFingerprintPropertyName = "fingerprint";
-
     /** DocumentAccessBridge for getting the current user's document and URL. */
     @Requirement
     private DocumentAccessBridge bridge;
@@ -73,66 +66,5 @@ public class DefaultUserDocumentUtils implements UserDocumentUtils
     {
         DocumentReference dr = this.resolver.resolve(userDocName);
         return this.bridge.getDocumentURL(dr, "view", "", "");
-    }
-
-    /**
-     * Get the X509Certificate fingerprints for the named user.
-     *
-     * @param userName the string representation of the document reference for the user document.
-     * @return A list of all of this user's authorized certificate fingerprints.
-     */
-    public List<String> getCertificateFingerprintsForUser(final String userName)
-    {
-        List<String> out = new ArrayList<String>();
-        String certFingerprint = (String) this.bridge.getProperty(userName,
-                                                                  this.certClassName,
-                                                                  0,
-                                                                  this.certFingerprintPropertyName);
-        for (int counter = 0; certFingerprint != null; counter++) {
-            out.add(certFingerprint);
-            certFingerprint = (String) this.bridge.getProperty(userName,
-                                                               this.certClassName, 
-                                                               counter,
-                                                               this.certFingerprintPropertyName);
-            if (counter > 500) {
-                throw new InfiniteLoopException("Either the document " + userName + " has over 500 "
-                                                + this.certClassName
-                                                + " objects or something went wrong. Chickening out...");
-            }
-        }
-        return out;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.org.xwiki.crypto.internal.UserDocumentUtils#addCertificateFingerprint(java.lang.String, java.lang.String)
-     */
-    public void addCertificateFingerprint(String userName, String fingerprint) throws Exception
-    {
-        // FIXME this method changes the 0-th object, need to add a new object
-        this.bridge.setProperty(userName, this.certClassName, this.certFingerprintPropertyName, fingerprint);
-    }
-
-    /**
-     * Thrown when a loop has looped over an unreasonable number of cycles and is probably looping infinitely.
-     * 
-     * @version $Id$
-     * @since 2.5
-     */
-    public static class InfiniteLoopException extends RuntimeException
-    {
-        /** Version ID. */
-        private static final long serialVersionUID = -7135937602338126967L;
-
-        /**
-         * The Constructor.
-         *
-         * @param message the message to give in the Exception
-         */
-        public InfiniteLoopException(String message)
-        {
-            super(message);
-        }
     }
 }

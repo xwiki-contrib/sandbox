@@ -31,6 +31,7 @@ import org.xwiki.crypto.internal.UserDocumentUtils;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
 import org.xwiki.crypto.x509.XWikiX509KeyPair;
 import org.xwiki.crypto.x509.internal.DefaultXWikiX509KeyPair;
+import org.xwiki.signedscripts.internal.CryptoStorageUtils;
 import org.xwiki.test.AbstractComponentTestCase;
 
 
@@ -211,9 +212,13 @@ public abstract class AbstractSignedScriptsTest extends AbstractComponentTestCas
                 will(returnValue(USER));
             allowing(mockUtils).getUserDocURL(USER);
                 will(returnValue("http://my.id.org/"));
-            allowing(mockUtils).getCertificateFingerprintsForUser(with(USER));
+        }});
+        // mock storage utils
+        final CryptoStorageUtils mockStorage = registerMockComponent(CryptoStorageUtils.class);
+        getMockery().checking(new Expectations() {{
+            allowing(mockStorage).getCertificateFingerprintsForUser(with(USER));
                 will(returnValue(userFingerprints));
-            allowing(mockUtils).addCertificateFingerprint(with(USER), with(any(String.class)));
+            allowing(mockStorage).addCertificateFingerprint(with(USER), with(any(String.class)));
         }});
     }
 

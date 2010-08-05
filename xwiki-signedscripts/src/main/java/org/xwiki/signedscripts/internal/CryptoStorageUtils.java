@@ -17,29 +17,35 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.crypto.internal;
+package org.xwiki.signedscripts.internal;
+
+import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
 
-
 /**
- * Means by which to get a string representation of the user page for the current user for inclusion in a certificate.
- * This component has no cryptographic code.
+ * An internal component used to store, load and modify certificates and key pairs stored in XWiki documents.
  * 
  * @version $Id$
  * @since 2.5
  */
 @ComponentRole
-public interface UserDocumentUtils
+public interface CryptoStorageUtils
 {
-    /** @return The fully qualified name of the current user's document eg: xwiki:XWiki.JohnSmith. */
-    String getCurrentUser();
+    /**
+     * Get the X509Certificate fingerprints for the named user.
+     *
+     * @param userName the string representation of the document reference for the user document.
+     * @return A list of all of this user's authorized certificate fingerprints.
+     */
+    List<String> getCertificateFingerprintsForUser(final String userName);
 
     /**
-     * Get the external URL pointing to the given user document.
-     *
-     * @param userDocName the string representation of the document reference for the user document.
-     * @return A string representation of the external URL for the user doc.
+     * Add a fingerprint to the list of certificate fingerprints of the given user.
+     * 
+     * @param userName reference to the user document
+     * @param fingerprint the certificate fingerprint to add
+     * @throws Exception on errors
      */
-    String getUserDocURL(final String userDocName);
+    void addCertificateFingerprint(String userName, String fingerprint) throws Exception;
 }
