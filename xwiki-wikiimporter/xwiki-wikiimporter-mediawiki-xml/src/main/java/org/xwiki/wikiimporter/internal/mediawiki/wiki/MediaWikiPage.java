@@ -92,8 +92,6 @@ public class MediaWikiPage extends AbstractWikiPage
             tmpName = tmpName.substring(lastIndex + 1);
         }
 
-        this.pageName = tmpName.replaceAll("[ ]", "");
-
         return this.pageName;
     }
 
@@ -106,7 +104,7 @@ public class MediaWikiPage extends AbstractWikiPage
      */
     public String getSpace()
     {
-        String tmpSpace = cleanName(getLastRevision().getTitle(), "[^a-z0-9A-Z:]", space);
+        String tmpSpace = cleanName(getLastRevision().getTitle(), "[^a-z0-9A-Z: ]", space);
 
         // Extract Space from title.
         if (tmpSpace.indexOf(':') > 0 && tmpSpace.indexOf(':') < tmpSpace.length() - 1) {

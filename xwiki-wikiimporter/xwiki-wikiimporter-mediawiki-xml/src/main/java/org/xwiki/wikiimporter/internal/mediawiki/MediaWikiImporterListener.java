@@ -347,9 +347,6 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
             xwikiLink.setReference(null);
         }
 
-        // Remove Space if any.
-        xwikiLink.setReference(xwikiLink.getReference().replaceAll("[ ]", ""));
-
         return xwikiLink;
     }
 
