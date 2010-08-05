@@ -109,7 +109,13 @@ public class DefaultPasswordCryptoServiceTest extends AbstractComponentTestCase
     public void decryptWithWrongPasswordTest() throws Exception
     {
         final String enciphered = this.service.encryptText(textToEncrypt, password);
-        Assert.assertNull(this.service.decryptText(enciphered, "wrong password"));
+        String decrypted = this.service.decryptText(enciphered, "wrong password");
+        if (decrypted != null) {
+            if (decrypted.equals(this.textToEncrypt)) {
+                Assert.fail("OMG: decrypted with wrong password!!!!");
+            }
+            System.out.println("Successfully decrypted with wrong password but output was \"garbage\".");
+        }
     }
 
     @Test

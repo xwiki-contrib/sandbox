@@ -67,6 +67,8 @@ public interface PasswordCryptoService
 
     /**
      * Decrypt raw ciphertext created with {@link #encryptBytes(byte[], String)}.
+     * Most of the time the response is null if the password is incorrect, 1 out of 250 times the output is 
+     * unintelligable garbage.
      *
      * @param rawCiphertext the ciphertext to decrypt.
      * @param password which was used to encrypt the text.

@@ -85,6 +85,7 @@ public class DefaultPasswordCryptoService implements PasswordCryptoService
 
     /**
      * {@inheritDoc}
+     *
      * @see org.xwiki.crypto.passwd.PasswdCryptoService#decryptText(String, String)
      */
     public synchronized String decryptText(final String base64Ciphertext, final String password)

@@ -49,6 +49,8 @@ public interface PasswordCiphertext extends Serializable
 
     /**
      * Get the message (i.e. plaintext) back from this ciphertext.
+     * Most of the time the response is null if the password is incorrect, 1 out of 250 times the output is 
+     * unintelligable garbage which sneaks undetected past the padding scheme.
      *
      * @param password the user supplied password.
      * @return the original message or null if the password was wrong.

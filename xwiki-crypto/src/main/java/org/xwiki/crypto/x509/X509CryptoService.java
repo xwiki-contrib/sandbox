@@ -89,9 +89,9 @@ public interface X509CryptoService
 
     /**
      * Deserialize an X509 certificate from a PEM formatted string.
-     * @param pemFormatCert a String created by {@link org.xwiki.crypto.data.XWikiX509Certificate#toPEMString()}
+     * @param pemFormatCert a String created by {@link org.xwiki.crypto.x509.XWikiX509Certificate#toPEMString()}
      *                      or from OpenSSL or any other standards compliant X509 certificate generator in PEM format.
-     * @return an {@link org.xwiki.crypto.data.XWikiX509Certificate} which extends 
+     * @return an {@link org.xwiki.crypto.x509.XWikiX509Certificate} which extends 
      *         {@link java.security.cert.X509Certificate} and can be used by methods in this class as well as with
      *          third party encryption tools.
      * @throws GeneralSecurityException If there isn't a valid {@link XWikiX509Certificate#CERT_BEGIN} or
@@ -99,5 +99,17 @@ public interface X509CryptoService
      *                                  the content inbetween.
      */
     XWikiX509Certificate certFromPEM(final String pemFormatCert)
+        throws GeneralSecurityException;
+
+    /**
+     * Deserialize an {@link XWikiX509KeyPair} from a base64 encoded String.
+     *
+     * @param keyPairAsBase64 a String created by calling 
+     *                        {@link org.xwiki.crypto.x509.XWikiX509KeyPair#serializeAsBase64()}
+     * @return a new {@link org.xwiki.crypto.x509.XWikiX509KeyPair}
+     * @throws GeneralSecurityException if the data has become corrupted or
+     *                                  if something fails during the deserialization process.
+     */
+    XWikiX509KeyPair keyPairFromBase64(final String keyPairAsBase64)
         throws GeneralSecurityException;
 }
