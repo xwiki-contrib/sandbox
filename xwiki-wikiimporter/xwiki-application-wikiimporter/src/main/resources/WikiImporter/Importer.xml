@@ -11,9 +11,9 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1265533119000</creationDate>
-<date>1280930775000</date>
-<contentUpdateDate>1280930775000</contentUpdateDate>
-<version>1.19</version>
+<date>1281100777000</date>
+<contentUpdateDate>1281100777000</contentUpdateDate>
+<version>1.1</version>
 <title>WikiImporter Importer Page</title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -45,7 +45,7 @@
           #foreach($parameter in $allProducts.values())
             &lt;p&gt;
               &lt;label for="importer_$parameter.id"&gt;$parameter.name&lt;/label&gt;
-              #if ($parameter.type.name == "java.lang.Boolean" || $parameter.type.name == "boolean")
+              #if ("${parameter.type}" == "class java.lang.Boolean" || "${parameter.type.name}" == "boolean")
                 &lt;select name="$parameter.id" id="importer_$parameter.id"&gt;
                   &lt;option value="true"#if($parameter.defaultValue == true)selected="selected"#end&gt;yes&lt;/option&gt;
                   &lt;option value="false"#if($parameter.defaultValue == false)selected="selected"#end&gt;no&lt;/option&gt;
