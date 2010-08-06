@@ -91,6 +91,8 @@ public class MediaWikiPage extends AbstractWikiPage
 
             tmpName = tmpName.substring(lastIndex + 1);
         }
+        
+        this.pageName = tmpName;
 
         return this.pageName;
     }
@@ -109,7 +111,6 @@ public class MediaWikiPage extends AbstractWikiPage
         // Extract Space from title.
         if (tmpSpace.indexOf(':') > 0 && tmpSpace.indexOf(':') < tmpSpace.length() - 1) {
             this.space = tmpSpace.substring(0, tmpSpace.indexOf(':'));
-            return this.space;
         } else {
             // TODO Handle Error with error log.
         }
