@@ -27,7 +27,6 @@ import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.jce.netscape.NetscapeCertRequest;
-
 import org.xwiki.crypto.internal.Convert;
 import org.xwiki.crypto.passwd.PasswordCryptoService;
 import org.xwiki.crypto.x509.XWikiX509Certificate;
@@ -133,9 +132,12 @@ public class X509KeyService
     private void checkWebID(final String webID) throws GeneralSecurityException
     {
         try {
-            new URI(webID);
+            URI uri = new URI(webID);
+            if (!uri.isAbsolute()) {
+                throw new GeneralSecurityException("webID must be an absolute URI, got: " + webID);
+            }
         } catch (URISyntaxException e) {
-            throw new GeneralSecurityException("webID must be valid URI", e);
+            throw new GeneralSecurityException("webID must be valid URI, got: " + webID, e);
         }
     }
 }
