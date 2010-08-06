@@ -126,5 +126,13 @@ public class XWikiX509CertificateTest
         XWikiX509Certificate certWrapper = new XWikiX509Certificate(cert, cert.getFingerprint());
         Assert.assertEquals(cert.getFingerprint(), certWrapper.getIssuerFingerprint());
     }
+
+    @Test
+    public void testNoUID() throws GeneralSecurityException
+    {
+        XWikiX509Certificate cert = XWikiX509Certificate.fromPEMString(CERT_PEM);
+        // we use a web certificate here, it doesn't have UID
+        Assert.assertEquals("Web certificate should not have UID", "", cert.getAuthorUID());
+    }
 }
 

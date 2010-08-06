@@ -19,6 +19,9 @@
  */
 package org.xwiki.crypto.x509;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,5 +109,13 @@ public class DefaultXWikiX509KeyPairTest extends AbstractComponentTestCase
     {
         XWikiX509KeyPair imported = DefaultXWikiX509KeyPair.fromBase64String(keyPairExportedAsBase64);
         Assert.assertNotNull(imported.getPrivateKey(this.password));
+    }
+
+    @Test
+    public void testUID() throws GeneralSecurityException, IOException, ClassNotFoundException
+    {
+        XWikiX509KeyPair imported = DefaultXWikiX509KeyPair.fromBase64String(keyPairExportedAsBase64);
+        XWikiX509Certificate cert = imported.getCertificate();
+        Assert.assertEquals("xwiki:XWiki.Me", cert.getAuthorUID());
     }
 }
