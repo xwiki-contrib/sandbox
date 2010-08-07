@@ -48,7 +48,16 @@ public class MediaWikiConstants
 
     public final static String TEXT_CONTENT_TAG = "text";
 
-    public final static List<String> MW_PROPERTIES =
-        new ArrayList<String>(Arrays.asList(PAGE_TITLE_TAG, AUTHOR_TAG, COMMENT_TAG, IS_MINOR_TAG, TIMESTAMP_TAG));
+    public final static List<String> MW_PROPERTIES = new ArrayList<String>(Arrays.asList(PAGE_TITLE_TAG, AUTHOR_TAG,
+        COMMENT_TAG, IS_MINOR_TAG, TIMESTAMP_TAG));
 
+    public static String convertPageName(String mediaWikiPageName)
+    {
+        String xwikiPageName = mediaWikiPageName.replaceAll("[.:\\\\]", "");
+
+        // In MediaWiki the first character can have any case
+        xwikiPageName = xwikiPageName.substring(0, 1).toUpperCase() + xwikiPageName.substring(1);
+
+        return xwikiPageName;
+    }
 }

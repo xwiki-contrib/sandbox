@@ -20,6 +20,7 @@
 package org.xwiki.wikiimporter.internal.mediawiki.wiki;
 
 import org.apache.commons.lang.StringUtils;
+import org.xwiki.wikiimporter.internal.mediawiki.MediaWikiConstants;
 import org.xwiki.wikiimporter.wiki.AbstractWikiPage;
 
 /**
@@ -67,7 +68,7 @@ public class MediaWikiPage extends AbstractWikiPage
      */
     public String getName()
     {
-        String tmpName = cleanName(getLastRevision().getTitle(), "[^a-zA-Z0-9:/# ]", null);
+        String tmpName = getLastRevision().getTitle();
 
         tmpName = cleanEdges(tmpName, ':');
         tmpName = cleanEdges(tmpName, '/');
@@ -92,7 +93,7 @@ public class MediaWikiPage extends AbstractWikiPage
             tmpName = tmpName.substring(lastIndex + 1);
         }
         
-        this.pageName = tmpName;
+        this.pageName = MediaWikiConstants.convertPageName(tmpName);
 
         return this.pageName;
     }

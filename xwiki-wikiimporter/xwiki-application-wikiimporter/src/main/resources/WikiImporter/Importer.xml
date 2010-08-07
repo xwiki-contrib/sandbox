@@ -45,7 +45,7 @@
           #foreach($parameter in $allProducts.values())
             &lt;p&gt;
               &lt;label for="importer_$parameter.id"&gt;$parameter.name&lt;/label&gt;
-              #if ("${parameter.type}" == "class java.lang.Boolean" || "${parameter.type.name}" == "boolean")
+              #if ("${parameter.type}" == "class java.lang.Boolean" || "${parameter.type}" == "boolean")
                 &lt;select name="$parameter.id" id="importer_$parameter.id"&gt;
                   &lt;option value="true"#if($parameter.defaultValue == true)selected="selected"#end&gt;yes&lt;/option&gt;
                   &lt;option value="false"#if($parameter.defaultValue == false)selected="selected"#end&gt;no&lt;/option&gt;

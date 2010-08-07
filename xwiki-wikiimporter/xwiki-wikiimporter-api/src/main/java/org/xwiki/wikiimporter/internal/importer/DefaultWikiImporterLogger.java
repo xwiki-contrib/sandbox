@@ -100,7 +100,7 @@ public class DefaultWikiImporterLogger implements WikiImporterLogger
      */
     public void warn(String infoStr, boolean isPage)
     {
-        log(infoStr, isPage, INFO);
+        log(infoStr, isPage, WARNING);
     }
 
     /**
@@ -110,7 +110,7 @@ public class DefaultWikiImporterLogger implements WikiImporterLogger
      */
     public void error(String infoStr, boolean isPage)
     {
-        log(infoStr, isPage, INFO);
+        log(infoStr, isPage, ERROR);
     }
 
     /**

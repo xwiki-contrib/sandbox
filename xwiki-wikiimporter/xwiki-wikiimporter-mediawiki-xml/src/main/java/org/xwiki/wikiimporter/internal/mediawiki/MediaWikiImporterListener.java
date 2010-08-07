@@ -19,16 +19,21 @@
  */
 package org.xwiki.wikiimporter.internal.mediawiki;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.InputSource;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.rendering.block.Block;
+import org.xwiki.rendering.block.QuotationBlock;
 import org.xwiki.rendering.internal.parser.XDOMGeneratorListener;
 import org.xwiki.rendering.listener.Link;
 import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
@@ -69,12 +74,55 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
 
     private void newXDOMGeneratorListener()
     {
-        setWrappedListener(new XDOMGeneratorListener());
+        setWrappedListener(new XDOMGeneratorListener()
+        {
+            public Stack<Block> getStack()
+            {
+                try {
+                    Field field = getClass().getDeclaredField("stack");
+                    field.setAccessible(true);
+
+                    return (Stack<Block>) field.get(this);
+                } catch (Exception e) {
+
+                }
+
+                return null;
+            }
+        });
     }
 
     private XDOMGeneratorListener getXDOMGeneratorListener()
     {
         return (XDOMGeneratorListener) getWrappedListener();
+    }
+
+    private Stack<Block> getStack()
+    {
+        try {
+            Field field = XDOMGeneratorListener.class.getDeclaredField("stack");
+            field.setAccessible(true);
+
+            return (Stack<Block>) field.get(getXDOMGeneratorListener());
+        } catch (Exception e) {
+
+        }
+
+        return null;
+    }
+
+    private List<Block> generateListFromStack()
+    {
+        try {
+            Method method = XDOMGeneratorListener.class.getDeclaredMethod("generateListFromStack");
+            method.setAccessible(true);
+
+            return (List<Block>) method.invoke(getXDOMGeneratorListener());
+        } catch (Exception e) {
+
+        }
+
+        return null;
     }
 
     /**
@@ -223,6 +271,23 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
     /**
      * {@inheritDoc}
      * 
+     * @see org.xwiki.rendering.listener.WrappingListener#endQuotation(java.util.Map)
+     */
+    // TODO: this should be fixed in the MediaWiki parser itself
+    public void endQuotation(Map<String, String> parameters)
+    {
+        QuotationBlock quotationBlock = new QuotationBlock(generateListFromStack(), parameters);
+        if (!getStack().isEmpty() && getStack().peek() instanceof QuotationBlock) {
+            QuotationBlock lastBlock = (QuotationBlock) getStack().peek();
+            lastBlock.addChildren(quotationBlock.getChildren());
+        } else {
+            getStack().push(quotationBlock);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
      * @see org.xwiki.rendering.listener.WrappingListener#beginLink(org.xwiki.rendering.listener.Link, boolean,
      *      java.util.Map)
      */
@@ -309,19 +374,15 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
                 beginAttachment(resourceName);
 
             } else if (-1 != resourceName.indexOf('/')) {
-                xwikiLink.setReference(nameSpace + "." + resourceName.substring(resourceName.lastIndexOf('/') + 1));
+                xwikiLink.setReference(nameSpace + "."
+                    + MediaWikiConstants.convertPageName(resourceName.substring(resourceName.lastIndexOf('/') + 1)));
             } else {
-                xwikiLink.setReference(nameSpace + "." + resourceName);
+                xwikiLink.setReference(nameSpace + "." + MediaWikiConstants.convertPageName(resourceName));
             }
-        } else {
+        } else if (StringUtils.isNotEmpty(xwikiLink.getReference())) {
             // If linkreference is not referred to a space, set the default space as Main.
-            xwikiLink.setReference(getDefaultSpace() + "." + xwikiLink.getReference());
-        }
-
-        // Anchored Links.
-        if (xwikiLink.getAnchor() != null) {
-            xwikiLink.setReference(xwikiLink.getReference() + "#" + xwikiLink.getAnchor());
-            xwikiLink.setAnchor(null);
+            xwikiLink.setReference(getDefaultSpace() + "."
+                + MediaWikiConstants.convertPageName(xwikiLink.getReference()));
         }
 
         // Fix Category Link [[:Category:Help|HELP]]
@@ -337,14 +398,10 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
 
         // Handle hierarchy ('/')
         if (-1 != xwikiLink.getReference().indexOf('/')) {
-            xwikiLink.setReference(getDefaultSpace() + "."
-                + xwikiLink.getReference().substring(xwikiLink.getReference().lastIndexOf('/') + 1));
-        }
-
-        // Fix local anchored link like [[#TOP|TOP OF PAGE]]
-        if (xwikiLink.getReference().startsWith("#")) {
-            xwikiLink.setAnchor("H" + xwikiLink.getReference().substring(1).replaceAll("[^a-zA-Z0-9]", ""));
-            xwikiLink.setReference(null);
+            xwikiLink.setReference(getDefaultSpace()
+                + "."
+                + MediaWikiConstants.convertPageName(xwikiLink.getReference().substring(
+                    xwikiLink.getReference().lastIndexOf('/') + 1)));
         }
 
         return xwikiLink;
