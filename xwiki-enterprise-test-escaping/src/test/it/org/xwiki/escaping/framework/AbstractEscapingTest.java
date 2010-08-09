@@ -140,6 +140,9 @@ public abstract class AbstractEscapingTest implements FileTest
         String url = AbstractEscapingTest.URL_START + "save/XWiki/XWikiPreferences?";
         url += "XWiki.XWikiPreferences_0_languages=&XWiki.XWikiPreferences_0_multilingual=";
         AbstractEscapingTest.getUrlContent(url + (enabled ? 1 : 0));
+        // set language=en to prevent false positives coming from the cookies
+        String langUrl = AbstractEscapingTest.URL_START + "view/Main/?" + LANGUAGE + "=en";
+        AbstractEscapingTest.getUrlContent(langUrl);
     }
 
     /**

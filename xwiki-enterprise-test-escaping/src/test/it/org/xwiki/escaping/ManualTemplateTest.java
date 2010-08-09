@@ -34,7 +34,9 @@ import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 
-import org.junit.Before;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xwiki.escaping.framework.AbstractEscapingTest;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
@@ -59,6 +61,26 @@ public class ManualTemplateTest extends AbstractEscapingTest
     public ManualTemplateTest()
     {
         super(Pattern.compile(".*"));
+    }
+
+    /**
+     * Initialize tests.
+     */
+    @BeforeClass
+    public static void init()
+    {
+        // for tests using "language" parameter
+        AbstractEscapingTest.setMultiLanguageMode(true);
+    }
+
+    /**
+     * Shutdown tests
+     */
+    @AfterClass
+    public static void shutdown()
+    {
+        // restore single language mode
+        AbstractEscapingTest.setMultiLanguageMode(false);
     }
 
     // already covered
@@ -436,7 +458,7 @@ public class ManualTemplateTest extends AbstractEscapingTest
     /**
      * Clean up.
      */
-    @Before
+    @After
     public void tearDown()
     {
         // delete all created pages
