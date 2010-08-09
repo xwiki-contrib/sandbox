@@ -323,6 +323,9 @@ public class ManualTemplateTest extends AbstractEscapingTest
         // copy.vm does not display the form if targetdoc is not set
         HashMap<String, String> params = getParamsFor("copy", "targetdoc", XMLEscapingValidator.getTestString());
         params.put(parameter, XMLEscapingValidator.getTestString());
+        // delete the copy afterwards
+        deleteAfterwards(null, XMLEscapingValidator.getTestString());
+
         String url = createUrl(null, null, null, params);
         checkUnderEscaping(url, "\"" + parameter + "\"");
     }
@@ -335,13 +338,15 @@ public class ManualTemplateTest extends AbstractEscapingTest
         }
         // rename.vm is only used with step=2, otherwise renameStep1.vm is used
         for (String parameter : userInput) {
+            // make sure the target page exists (cannot use WebHome, since it might be renamed)
+            createPage(null, "testRenameSource" + System.nanoTime(), "test", "test");
             HashMap<String, String> params = getParamsFor("rename", "step", "2");
             // HTTP 400 is returned if newPageName is empty, 409 if the new page exist
             if (!params.containsKey("newPageName")) {
                 String page = "testRename" + System.nanoTime();
                 params.put("newPageName", page);
-                // the above may create a page, schedule for deletion
-                this.toDeleteURLs.add(createUrl("delete", null, page, getTestParams("confirm", "1", null)));
+                // the test may create a page, schedule for deletion
+                deleteAfterwards(null, page);
             }
             params.put(parameter, XMLEscapingValidator.getTestString());
             String url = createUrl(null, null, null, params);
@@ -452,6 +457,17 @@ public class ManualTemplateTest extends AbstractEscapingTest
         String url = createUrl("save", space, page, params);
         AbstractEscapingTest.getUrlContent(url);
         // schedule for deletion
+        deleteAfterwards(space, page);
+    }
+
+    /**
+     * Schedule a page for deletion in {@link #tearDown()}.
+     * 
+     * @param space space name
+     * @param page page name
+     */
+    private void deleteAfterwards(String space, String page)
+    {
         this.toDeleteURLs.add(createUrl("delete", space, page, getTestParams("confirm", "1", null)));
     }
 
