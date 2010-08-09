@@ -50,8 +50,8 @@ import org.xwiki.crypto.x509.XWikiX509KeyPair;
  */
 public class X509SignatureService
 {
-    /** Unique SHA1 OID. TODO find a way to convert algorithm name to the corresponding OID */
-    private static final String SHA1_OID = CMSSignedGenerator.DIGEST_SHA1;
+    /** Digest Object ID. TODO should the digest used be configurable? */
+    private static final String DIGEST_OID = CMSSignedGenerator.DIGEST_SHA1;
 
     /** Bouncy Castle provider name. */
     private static final String PROVIDER = "BC";
@@ -77,7 +77,7 @@ public class X509SignatureService
 
         try {
             gen.addCertificatesAndCRLs(store);
-            gen.addSigner(toSignWith.getPrivateKey(password), certificate, SHA1_OID);
+            gen.addSigner(toSignWith.getPrivateKey(password), certificate, DIGEST_OID);
             byte[] data = textToSign.getBytes();
             CMSSignedData cmsData = gen.generate(new CMSProcessableByteArray(data), false, PROVIDER);
 

@@ -68,6 +68,6 @@ public class DefaultUserDocumentUtils implements UserDocumentUtils
     public String getUserDocURL(final String userDocName)
     {
         DocumentReference dr = this.resolver.resolve(userDocName);
-        return this.bridge.getDocumentURL(dr, "view", "", "");
+        return this.bridge.getDocumentURL(dr, "view", "", "", true);
     }
 }
