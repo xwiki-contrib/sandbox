@@ -56,6 +56,11 @@ public abstract class AbstractVelocityEscapingTest extends AbstractEscapingTest
     @Override
     protected Set<String> parse(Reader reader)
     {
+        // parameters in this set are known to produce false positives only
+        Set<String> ignored = new HashSet<String>();
+        // xpage is handled by actions (in xwiki-core) to render a velocity template
+        // invalid template names produce "Unexpected empty response" warnings
+        ignored.add("xpage");
         // TODO match if user name, space name or action is used
         Set<String> input = new HashSet<String>();
         BufferedReader data = new BufferedReader(reader);
@@ -85,7 +90,7 @@ public abstract class AbstractVelocityEscapingTest extends AbstractEscapingTest
                 while (match.find()) {
                     for (int i = 1; i <= match.groupCount(); i++) {
                         String parameter = match.group(i);
-                        if (parameter != null && !parameter.matches("\\s*")) {
+                        if (parameter != null && !parameter.matches("\\s*") && !ignored.contains(parameter)) {
                             input.add(parameter);
                         }
                     }
