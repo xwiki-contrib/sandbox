@@ -73,7 +73,10 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
     @Override
     protected Set<String> parse(Reader reader)
     {
-        return new HashSet<String>();
+        Set<String> set = new HashSet<String>();
+        // the set cannot be completely empty, otherwise all tests will be ignored
+        set.add("unused");
+        return set;
     }
 
     /**
