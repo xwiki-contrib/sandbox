@@ -176,7 +176,7 @@ public abstract class AbstractEscapingTest implements FileTest
      * Check if the system property "pattern" matches (substring regular expression) the file name.
      * Empty pattern matches everything.
      * 
-     * @param fileName file nmae to check
+     * @param fileName file name to check
      * @return true if the pattern matches, false otherwise
      */
     protected boolean patternMatches(String fileName)
