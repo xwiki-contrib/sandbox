@@ -94,5 +94,22 @@ public class ObjectAndClassEditorTest extends AbstractManualTest
         String test = XMLEscapingValidator.getTestString();
         checkUnderEscaping(createUrl("edit", test, test, params(kv("editor", "object"))), "XWIKI-5242");
     }
+
+    @Test
+    public void testObjectProperty()
+    {
+        skipIfIgnored("templates/editobject.vm");
+        String test = XMLEscapingValidator.getTestString();
+        checkUnderEscaping(createUrl("edit", test, test, params(kv("editor", "object"),
+            kv("classname", test + "." + test), test("property"))), "XWIKI-5242");
+    }
+
+    @Test
+    public void testObjectXMaximized()
+    {
+        skipIfIgnored("templates/editobject.vm");
+        checkUnderEscaping(createUrl("edit", "Blog", "WebHome", params(kv("editor", "object"),
+            test("x-maximized"))), "XWIKI-5242");
+    }
 }
 
