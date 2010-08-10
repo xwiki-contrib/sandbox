@@ -20,25 +20,14 @@
 
 package org.xwiki.escaping;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
-import junit.framework.Assert;
-
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xwiki.escaping.framework.AbstractEscapingTest;
+import org.xwiki.escaping.framework.AbstractManualTest;
 import org.xwiki.escaping.framework.XMLEscapingValidator;
 
 
@@ -49,20 +38,8 @@ import org.xwiki.escaping.framework.XMLEscapingValidator;
  * @version $Id$
  * @since 2.5
  */
-public class ManualTemplateTest extends AbstractEscapingTest
+public class ManualTemplateTest extends AbstractManualTest
 {
-    /** List of URLs that should be deleted in {@link #tearDown()}.
-     *  @see #createPage(String, String, String, String) */
-    private List<String> toDeleteURLs = new LinkedList<String>();
-
-    /**
-     * Create new ManualTemplateTest, needed for JUnit.
-     */
-    public ManualTemplateTest()
-    {
-        super(Pattern.compile(".*"));
-    }
-
     /**
      * Initialize tests.
      */
@@ -337,7 +314,11 @@ public class ManualTemplateTest extends AbstractEscapingTest
             return;
         }
         // rename.vm is only used with step=2, otherwise renameStep1.vm is used
-        for (String parameter : userInput) {
+        String[] tested = new String[] {"language", "sourcedoc", "targetdoc",
+                                        "newPageName", "newSpaceName", "parameterNames"};
+        // test page will probably be created
+        deleteAfterwards(null, XMLEscapingValidator.getTestString());
+        for (String parameter : tested) {
             // make sure the target page exists (cannot use WebHome, since it might be renamed)
             createPage(null, "testRenameSource" + System.nanoTime(), "test", "test");
             HashMap<String, String> params = getParamsFor("rename", "step", "2");
@@ -351,135 +332,6 @@ public class ManualTemplateTest extends AbstractEscapingTest
             params.put(parameter, XMLEscapingValidator.getTestString());
             String url = createUrl(null, null, null, params);
             checkUnderEscaping(url, "\"" + parameter + "\"");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * The file reader is not used in manual tests, we just return a fixed set of parameters.
-     * 
-     * @see org.xwiki.escaping.TemplateTest#parse(java.io.Reader)
-     */
-    @Override
-    protected Set<String> parse(Reader reader)
-    {
-        Set<String> parameters = new HashSet<String>();
-        parameters.add("language");
-        parameters.add("sourcedoc");
-        parameters.add("targetdoc");
-        parameters.add("newPageName");
-        parameters.add("newSpaceName");
-        parameters.add("parameterNames");
-        return parameters;
-    }
-
-    /**
-     * Create a parameter map for the given template and one optional parameter.
-     * 
-     * @param template template name
-     * @param parameter parameter name, ignored if null
-     * @param value value of the parameter
-     * @return new parameter map
-     */
-    private HashMap<String, String> getParamsFor(String template, String parameter, String value)
-    {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("xpage", template);
-        if (parameter != null) {
-            params.put(parameter, value);
-        }
-        return params;
-    }
-
-    /**
-     * Create a parameter map containing one parameter with the value set to the test string.
-     * 
-     * @param parameter parameter name
-     * @return new parameter map
-     */
-    private HashMap<String, String> getTestParams(String parameter)
-    {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(parameter, XMLEscapingValidator.getTestString());
-        return params;
-    }
-
-    /**
-     * Create a parameter map containing two parameters, one with the given value and the second with the value set to
-     * the test string.
-     * 
-     * @param parameter parameter name
-     * @param value value of the parameter
-     * @param testedParameter name of the tested parameter, its value will be the test string
-     * @return new parameter map
-     */
-    private HashMap<String, String> getTestParams(String parameter, String value, String testedParameter)
-    {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(parameter, value);
-        if (testedParameter != null) {
-            params.put(testedParameter, XMLEscapingValidator.getTestString());
-        }
-        return params;
-    }
-
-    /**
-     * Check that there is no error trace on the given URL.
-     * TODO do not download the same URL twice (usually {@link #checkUnderEscaping(String, String)} is also used)
-     * 
-     * @param url the URL to download
-     * @throws IOException on connection errors
-     */
-    private void checkForErrorTrace(String url) throws IOException
-    {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(AbstractEscapingTest.getUrlContent(url)));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            Assert.assertFalse("The page contains a error trace", line.matches("^.*<pre\\s+class=\"xwikierror\">.*$"));
-        }
-    }
-
-    /**
-     * Create a page with the given data. This page is automatically deleted in {@link #tearDown()}.
-     * 
-     * @param space space name
-     * @param page page name
-     * @param title document title
-     * @param content document content
-     */
-    private void createPage(String space, String page, String title, String content)
-    {
-        // create
-        Map<String, String> params = getTestParams("title", title, null);
-        params.put("content", content);
-        params.put("action_save", "Save+%26+View");
-        String url = createUrl("save", space, page, params);
-        AbstractEscapingTest.getUrlContent(url);
-        // schedule for deletion
-        deleteAfterwards(space, page);
-    }
-
-    /**
-     * Schedule a page for deletion in {@link #tearDown()}.
-     * 
-     * @param space space name
-     * @param page page name
-     */
-    private void deleteAfterwards(String space, String page)
-    {
-        this.toDeleteURLs.add(createUrl("delete", space, page, getTestParams("confirm", "1", null)));
-    }
-
-    /**
-     * Clean up.
-     */
-    @After
-    public void tearDown()
-    {
-        // delete all created pages
-        for (String url : this.toDeleteURLs) {
-            AbstractEscapingTest.getUrlContent(url);
         }
     }
 }
