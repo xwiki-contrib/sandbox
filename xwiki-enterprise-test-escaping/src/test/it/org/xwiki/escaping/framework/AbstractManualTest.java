@@ -34,10 +34,14 @@ import java.util.regex.Pattern;
 import junit.framework.Assert;
 
 import org.junit.After;
+import org.junit.Assume;
 
 /**
  * Abstract base class for manual tests. Provides several helper methods and default implementation for less likely
  * needed superclass methods.
+ * <p>
+ * The test methods should call {@link #skipIfIgnored(String)} at the beginning to allow skipping the tests using
+ * -Dpattern=regex maven command line option.</p>
  * 
  * @version $Id$
  * @since 2.5
@@ -70,6 +74,17 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
     protected Set<String> parse(Reader reader)
     {
         return new HashSet<String>();
+    }
+
+    /**
+     * Skip the test if the file name does not match ignore pattern (-Dpattern=regex on command line). Should be called
+     * at the beginning of all tests.
+     * 
+     * @param testedFileName tested file name
+     */
+    protected void skipIfIgnored(String testedFileName)
+    {
+        Assume.assumeTrue(initialize(testedFileName, null));
     }
 
     /**

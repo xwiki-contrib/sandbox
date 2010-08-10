@@ -19,6 +19,8 @@
  */
 package org.xwiki.escaping;
 
+import junit.framework.Assert;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -82,9 +84,8 @@ public class ObjectAndClassEditorTest extends AbstractManualTest
     @Test
     public void testClassEditor()
     {
-        if (!initialize("templates/editclass.vm", null)) {
-            return;
-        }
+        skipIfIgnored("templates/editclass.vm");
+        Assert.fail();
         String test = XMLEscapingValidator.getTestString();
         checkUnderEscaping(createUrl("edit", test, test, params(kv("editor", "class"))), "XWIKI-5242");
     }
@@ -92,9 +93,7 @@ public class ObjectAndClassEditorTest extends AbstractManualTest
     @Test
     public void testObjectEditor()
     {
-        if (!initialize("templates/editobject.vm", null)) {
-            return;
-        }
+        skipIfIgnored("templates/editobject.vm");
         String test = XMLEscapingValidator.getTestString();
         checkUnderEscaping(createUrl("edit", test, test, params(kv("editor", "object"))), "XWIKI-5242");
     }
