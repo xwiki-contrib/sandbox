@@ -21,7 +21,7 @@
 package org.xwiki.escaping;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -86,7 +86,7 @@ public class ManualTemplateTest extends AbstractManualTest
         if (!initialize("templates/exceptioninline.vm", null)) {
             return;
         }
-        checkUnderEscaping(createUrl("viewrev", "Main", "WebHome", getTestParams("rev")), "XWIKI-5170 error trace");
+        checkUnderEscaping(createUrl("viewrev", "Main", "WebHome", params(test("rev"))), "XWIKI-5170 error trace");
     }
 
     @Test
@@ -96,10 +96,10 @@ public class ManualTemplateTest extends AbstractManualTest
             return;
         }
         // tests for XWIKI-5164, XML symbols in editor parameter should be escaped
-        checkUnderEscaping(createUrl("edit", "Main", "Page", getTestParams("editor")), "XWIKI-5164 editor");
-        checkUnderEscaping(createUrl("edit", "Main", "Page", getTestParams("editor", "wysiwyg", "section")),
+        checkUnderEscaping(createUrl("edit", "Main", "Page", params(test("editor"))), "XWIKI-5164 editor");
+        checkUnderEscaping(createUrl("edit", "Main", "Page", params(kv("editor", "wysiwyg"), test("section"))),
             "XWIKI-5164 section");
-        checkUnderEscaping(createUrl("edit", "Main", "Page", getTestParams("editor", "wiki", "x-maximized")),
+        checkUnderEscaping(createUrl("edit", "Main", "Page", params(kv("editor", "wiki"), test("x-maximized"))),
             "XWIKI-5164 x-maximized");
     }
 
@@ -109,10 +109,10 @@ public class ManualTemplateTest extends AbstractManualTest
         if (!initialize("templates/admin.vm", null)) {
             return;
         }
-        checkUnderEscaping(createUrl("admin", "XWiki", "AdminSheet", getTestParams("editor")),
+        checkUnderEscaping(createUrl("admin", "XWiki", "AdminSheet", params(test("editor"))),
             "XWIKI-5190 admin editor");
         // same page after redirect
-        checkUnderEscaping(createUrl("view", "Main", "WebHome", getTestParams("xpage", "admin", "editor")),
+        checkUnderEscaping(createUrl("view", "Main", "WebHome", params(kv("xpage", "admin"), test("editor"))),
             "XWIKI-5190 admin editor redirect");
     }
 
@@ -123,10 +123,10 @@ public class ManualTemplateTest extends AbstractManualTest
             return;
         }
         // kind of covered (only the redirect version)
-        checkUnderEscaping(createUrl("admin", "XWiki", "AdminSheet", getTestParams("section")),
+        checkUnderEscaping(createUrl("admin", "XWiki", "AdminSheet", params(test("section"))),
             "XWIKI-5190 admin section");
         // same page after redirect
-        checkUnderEscaping(createUrl("view", "Main", "WebHome", getTestParams("xpage", "admin", "section")),
+        checkUnderEscaping(createUrl("view", "Main", "WebHome", params(kv("xpage", "admin"), test("section"))),
             "XWIKI-5190 admin section redirect");
     }
 
@@ -137,7 +137,7 @@ public class ManualTemplateTest extends AbstractManualTest
             return;
         }
         // need a page with attachments, Sandbox has an image attached by default
-        checkUnderEscaping(createUrl("view", "Sandbox", "WebHome", getTestParams("viewer", "attachments", "xredirect")),
+        checkUnderEscaping(createUrl("view", "Sandbox", "WebHome", params(kv("viewer", "attachments"), test("xredirect"))),
             "XWIKI-5191 attachments inline");
     }
 
@@ -148,7 +148,7 @@ public class ManualTemplateTest extends AbstractManualTest
             return;
         }
         // TODO check for SQL escaping (i.e. additionally put \ and ;)
-        String url = createUrl("view", "Sandbox", "WebHome", getTestParams("xpage", "browsewysiwyg", "text"));
+        String url = createUrl("view", "Sandbox", "WebHome", params(kv("xpage", "browsewysiwyg"), test("text")));
         checkUnderEscaping(url, "XWIKI-5193 sql");
         checkForErrorTrace(url);
     }
@@ -162,7 +162,7 @@ public class ManualTemplateTest extends AbstractManualTest
         }
         // need an existing page with name = title = test string
         createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
-        checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("browsewysiwyg", null, null)),
+        checkUnderEscaping(createUrl("view", "Main", "Test", params(template("browsewysiwyg"))),
             "XWIKI-5193 page");
     }
 
@@ -174,7 +174,7 @@ public class ManualTemplateTest extends AbstractManualTest
         }
         // need an existing page with name = title = test string
         createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
-        checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("recentdocwysiwyg", null, null)),
+        checkUnderEscaping(createUrl("view", "Main", "Test", params(template("recentdocwysiwyg"))),
             "XWIKI-5193 recent docs");
     }
 
@@ -185,11 +185,11 @@ public class ManualTemplateTest extends AbstractManualTest
             return;
         }
         // TODO check for SQL escaping (i.e. additionally put \ and ;)
-        String spaceUrl = createUrl("view", "Main", "Test", getTestParams("xpage", "searchwysiwyg", "space"));
+        String spaceUrl = createUrl("view", "Main", "Test", params(kv("xpage", "searchwysiwyg"), test("space")));
         checkUnderEscaping(spaceUrl, "XWIKI-5344 sql space");
         checkForErrorTrace(spaceUrl);
 
-        String pageUrl = createUrl("view", "Main", "Test", getTestParams("xpage", "searchwysiwyg", "page"));
+        String pageUrl = createUrl("view", "Main", "Test", params(kv("xpage", "searchwysiwyg"), test("page")));
         checkUnderEscaping(pageUrl, "XWIKI-5344 sql page");
         checkForErrorTrace(pageUrl);
     }
@@ -202,7 +202,7 @@ public class ManualTemplateTest extends AbstractManualTest
         }
         // need an existing page with name = title = test string
         createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
-        checkUnderEscaping(createUrl("view", "Main", "Test", getParamsFor("searchwysiwyg", null, null)),
+        checkUnderEscaping(createUrl("view", "Main", "Test", params(template("searchwysiwyg"))),
             "XWIKI-5344 page link");
     }
 
@@ -215,7 +215,7 @@ public class ManualTemplateTest extends AbstractManualTest
         // need to be logged off
         setLoggedIn(false);
         try {
-            checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("xredirect")),
+            checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", params(test("xredirect"))),
                 "XWIKI-5246 xredirect");
         } finally {
             setLoggedIn(true);
@@ -231,7 +231,7 @@ public class ManualTemplateTest extends AbstractManualTest
         // need to be logged off
         setLoggedIn(false);
         try {
-            checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", getTestParams("srid")),
+            checkUnderEscaping(createUrl("login", "XWiki", "XWikiLogin", params(test("srid"))),
                 "XWIKI-5246 srid");
         } finally {
             setLoggedIn(true);
@@ -246,7 +246,7 @@ public class ManualTemplateTest extends AbstractManualTest
         }
         // need an existing page with name = title = test string
         createPage("Main", XMLEscapingValidator.getTestString(), XMLEscapingValidator.getTestString(), "Bla bla");
-        checkUnderEscaping(createUrl("edit", "Main", "WebHome", getTestParams("editor", "wiki", "comment")),
+        checkUnderEscaping(createUrl("edit", "Main", "WebHome", params(kv("editor", "wiki"), test("comment"))),
             "edit comment");
     }
 
@@ -257,9 +257,9 @@ public class ManualTemplateTest extends AbstractManualTest
             return;
         }
         checkUnderEscaping(createUrl("edit", "Main", XMLEscapingValidator.getTestString(),
-            getParamsFor("createinline", null, null)), "XWIKI-5207 create inline");
+            params(template("createinline"))), "XWIKI-5207 create inline");
         checkUnderEscaping(createUrl("edit", "Main", XMLEscapingValidator.getTestString(),
-            getParamsFor("create", "ajax", "1")), "XWIKI-5207 create ajax");
+            params(template("create"), kv("ajax", "1"))), "XWIKI-5207 create ajax");
     }
 
     @Test
@@ -283,7 +283,7 @@ public class ManualTemplateTest extends AbstractManualTest
         // need an existing page with name = test string
         createPage("Main", XMLEscapingValidator.getTestString(), "", "Bla bla");
         checkUnderEscaping(createUrl("view", "Main", XMLEscapingValidator.getTestString(),
-            getTestParams("xpage", "copy", null)), "XWIKI-5206 copy existing page");
+            params(kv("xpage", "copy"))), "XWIKI-5206 copy existing page");
     }
 
     /**
@@ -298,12 +298,9 @@ public class ManualTemplateTest extends AbstractManualTest
         }
         // XWIKI-5206
         // copy.vm does not display the form if targetdoc is not set
-        HashMap<String, String> params = getParamsFor("copy", "targetdoc", XMLEscapingValidator.getTestString());
-        params.put(parameter, XMLEscapingValidator.getTestString());
+        String url = createUrl(null, null, null, params(template("copy"), test("targetdoc"), test(parameter)));
         // delete the copy afterwards
         deleteAfterwards(null, XMLEscapingValidator.getTestString());
-
-        String url = createUrl(null, null, null, params);
         checkUnderEscaping(url, "\"" + parameter + "\"");
     }
 
@@ -321,7 +318,7 @@ public class ManualTemplateTest extends AbstractManualTest
         for (String parameter : tested) {
             // make sure the target page exists (cannot use WebHome, since it might be renamed)
             createPage(null, "testRenameSource" + System.nanoTime(), "test", "test");
-            HashMap<String, String> params = getParamsFor("rename", "step", "2");
+            Map<String, String> params = params(template("rename"), kv("step", "2"), test(parameter));
             // HTTP 400 is returned if newPageName is empty, 409 if the new page exist
             if (!params.containsKey("newPageName")) {
                 String page = "testRename" + System.nanoTime();
@@ -329,7 +326,6 @@ public class ManualTemplateTest extends AbstractManualTest
                 // the test may create a page, schedule for deletion
                 deleteAfterwards(null, page);
             }
-            params.put(parameter, XMLEscapingValidator.getTestString());
             String url = createUrl(null, null, null, params);
             checkUnderEscaping(url, "\"" + parameter + "\"");
         }

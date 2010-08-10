@@ -73,51 +73,6 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
     }
 
     /**
-     * Create a parameter map for the given template and one optional parameter.
-     * 
-     * @param template template name
-     * @param parameter parameter name, ignored if null
-     * @param value value of the parameter
-     * @return new parameter map
-     */
-    protected Map<String, String> getParamsFor(String template, String parameter, String value)
-    {
-        return params(kv("xpage", template), kv(parameter, value));
-    }
-
-    /**
-     * Create a parameter map containing one parameter with the value set to the test string.
-     * 
-     * @param parameter parameter name
-     * @return new parameter map
-     */
-    protected Map<String, String> getTestParams(String parameter)
-    {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(parameter, XMLEscapingValidator.getTestString());
-        return params;
-    }
-
-    /**
-     * Create a parameter map containing two parameters, one with the given value and the second with the value set to
-     * the test string.
-     * 
-     * @param parameter parameter name
-     * @param value value of the parameter
-     * @param testedParameter name of the tested parameter, its value will be the test string
-     * @return new parameter map
-     */
-    protected Map<String, String> getTestParams(String parameter, String value, String testedParameter)
-    {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(parameter, value);
-        if (testedParameter != null) {
-            params.put(testedParameter, XMLEscapingValidator.getTestString());
-        }
-        return params;
-    }
-
-    /**
      * Check that there is no error trace on the given URL.
      * TODO do not download the same URL twice (usually {@link #checkUnderEscaping(String, String)} is also used)
      * 
@@ -212,6 +167,19 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
     protected static String[] test(String key)
     {
         return kv(key, XMLEscapingValidator.getTestString());
+    }
+
+    /**
+     * Create one key-value pair that would add a parameter redirecting to the given template name.
+     * 
+     * @param templateName key name
+     * @return a key-value-pair
+     * @see AbstractManualTest#params(String[][])
+     * @see AbstractManualTest#kv(String, String)
+     */
+    protected static String[] template(String templateName)
+    {
+        return kv("xpage", templateName);
     }
 
     /**
