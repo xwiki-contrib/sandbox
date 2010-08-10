@@ -294,5 +294,24 @@ public class ManualTemplateTest extends AbstractManualTest
             checkUnderEscaping(url, "\"" + parameter + "\"");
         }
     }
+
+    @Test
+    public void testDelete()
+    {
+        skipIfIgnored("templates/delete.vm");
+        // xredirect is only used if id is set
+        // doesn't actually delete anything (confirmation dialog is shown)
+        checkUnderEscaping(createUrl("view", null, null, params(template("delete"), kv("id", "bla"), test("xredirect"))),
+            "XWIKI-5239");
+    }
+
+    @Test
+    public void testDeleteVersionsConfirm()
+    {
+        skipIfIgnored("templates/deleteversionsconfirm.vm");
+        // needs both revisions
+        checkUnderEscaping(createUrl("view", null, null, params(template("deleteversionsconfirm"), test("rev1"),
+            test("rev2"))), "XWIKI-5238");
+    }
 }
 

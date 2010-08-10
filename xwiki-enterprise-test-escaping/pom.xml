@@ -106,7 +106,6 @@
                     Panels/CreatePanel\.xml <!-- returns status 409 (Conflict) -->
                     templates/changemyavatar\.vm <!-- target page must be user page -->
                     templates/createinline\.vm <!-- expects xredirect to be a valid URL -->
-                    templates/deleteversionsconfirm\.vm <!-- needs both rev1 and rev2 to be present -->
                     templates/login\.vm <!-- expects xredirect to be a valid URL -->
                     templates/leftpanels.vm <!-- empty response if parameter "forceLeftPanels" is not set -->
                     templates/rightpanels.vm <!-- empty response if parameter "forceRightPanels" is not set -->
