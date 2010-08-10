@@ -153,6 +153,7 @@ public abstract class AbstractEscapingTest implements FileTest
     {
         this.name = name;
         if (!fileNameMatches(name) || !patternMatches(name) || isExcludedFile(name)) {
+            // TODO debug log the reason why the test was skipped
             return false;
         }
 

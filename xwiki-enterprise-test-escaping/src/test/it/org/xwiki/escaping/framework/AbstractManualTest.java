@@ -137,7 +137,8 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
     }
 
     /**
-     * Create a parameter map from the given list of key-value pairs. Properly URL-escapes values.
+     * Create a parameter map from the given list of key-value pairs. Does NOT URL-escapes values
+     * ({@link #createUrl(String, String, String, Map)} does this).
      * 
      * @param keysAndValues list of key-value pairs
      * @return parameter map
@@ -152,7 +153,7 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
                 String key = kv[0];
                 String value = "";
                 if (kv.length > 1 && kv[1] != null) {
-                    value = escapeUrl(kv[1]);
+                    value = kv[1];
                 }
                 params.put(key, value);
             }
