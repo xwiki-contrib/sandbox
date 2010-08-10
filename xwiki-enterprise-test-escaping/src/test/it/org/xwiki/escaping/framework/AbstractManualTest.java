@@ -80,14 +80,9 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
      * @param value value of the parameter
      * @return new parameter map
      */
-    protected HashMap<String, String> getParamsFor(String template, String parameter, String value)
+    protected Map<String, String> getParamsFor(String template, String parameter, String value)
     {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("xpage", template);
-        if (parameter != null) {
-            params.put(parameter, value);
-        }
-        return params;
+        return params(kv("xpage", template), kv(parameter, value));
     }
 
     /**
@@ -96,7 +91,7 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
      * @param parameter parameter name
      * @return new parameter map
      */
-    protected HashMap<String, String> getTestParams(String parameter)
+    protected Map<String, String> getTestParams(String parameter)
     {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put(parameter, XMLEscapingValidator.getTestString());
@@ -112,7 +107,7 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
      * @param testedParameter name of the tested parameter, its value will be the test string
      * @return new parameter map
      */
-    protected HashMap<String, String> getTestParams(String parameter, String value, String testedParameter)
+    protected Map<String, String> getTestParams(String parameter, String value, String testedParameter)
     {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put(parameter, value);
@@ -149,11 +144,9 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
     protected void createPage(String space, String page, String title, String content)
     {
         // create
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("title", title);
-        params.put("content", content);
-        params.put("action_save", "Save+%26+View");
-        String url = createUrl("save", space, page, params);
+        String url = createUrl("save", space, page, params(kv("title", title),
+                                                           kv("content", content),
+                                                           kv("action_save", "Save+%26+View")));
         AbstractEscapingTest.getUrlContent(url);
         // schedule for deletion
         deleteAfterwards(space, page);
@@ -167,9 +160,58 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
      */
     protected void deleteAfterwards(String space, String page)
     {
+        this.toDeleteURLs.add(createUrl("delete", space, page, params(kv("confirm", "1"))));
+    }
+
+    /**
+     * Create a parameter map from the given list of key-value pairs. Properly URL-escapes values.
+     * 
+     * @param keysAndValues list of key-value pairs
+     * @return parameter map
+     * @see AbstractManualTest#kv(String, String)
+     * @see AbstractManualTest#test(String)
+     */
+    protected static Map<String, String> params(String[]... keysAndValues)
+    {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("confirm", "1");
-        this.toDeleteURLs.add(createUrl("delete", space, page, params));
+        for (String[] kv : keysAndValues) {
+            if (kv != null && kv.length > 0 && kv[0] != null) {
+                String key = kv[0];
+                String value = "";
+                if (kv.length > 1 && kv[1] != null) {
+                    value = escapeUrl(kv[1]);
+                }
+                params.put(key, value);
+            }
+        }
+        return params;
+    }
+
+    /**
+     * Create one key-value pair with the given key name and value.
+     * 
+     * @param key key name
+     * @param value unescaped value
+     * @return a key-value pair
+     * @see AbstractManualTest#params(String[][])
+     * @see AbstractManualTest#test(String)
+     */
+    protected static String[] kv(String key, String value)
+    {
+        return new String[] {key, value};
+    }
+
+    /**
+     * Create one key-value pair with the given key name and value set to the test string.
+     * 
+     * @param key key name
+     * @return a key-value-pair
+     * @see AbstractManualTest#params(String[][])
+     * @see AbstractManualTest#kv(String, String)
+     */
+    protected static String[] test(String key)
+    {
+        return kv(key, XMLEscapingValidator.getTestString());
     }
 
     /**

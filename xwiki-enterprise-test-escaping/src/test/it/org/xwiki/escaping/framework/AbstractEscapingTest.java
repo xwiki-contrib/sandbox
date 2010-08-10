@@ -114,7 +114,7 @@ public abstract class AbstractEscapingTest implements FileTest
      * @throws Exception on errors
      */
     @BeforeClass
-    public static void init() throws Exception
+    public static void startExecutor() throws Exception
     {
         SingleXWikiExecutor.getExecutor().start();
     }
@@ -125,7 +125,7 @@ public abstract class AbstractEscapingTest implements FileTest
      * @throws Exception on errors
      */
     @AfterClass
-    public static void shutdown() throws Exception
+    public static void stopExecutor() throws Exception
     {
         SingleXWikiExecutor.getExecutor().stop();
     }
@@ -304,7 +304,7 @@ public abstract class AbstractEscapingTest implements FileTest
      * @param str string to escape, "" is used if null
      * @return URL-escaped {@code str}
      */
-    protected final String escapeUrl(String str)
+    protected static String escapeUrl(String str)
     {
         try {
             return URLEncoder.encode(str == null ? "" : str, "UTF-8");
@@ -395,7 +395,7 @@ public abstract class AbstractEscapingTest implements FileTest
      * @param parameters list of parameters with values, parameters are omitted if null, "" is used is a value is null
      * @return the resulting absolute URL
      */
-    protected final String createUrl(String action, String space, String page, Map<String, String> parameters)
+    protected static String createUrl(String action, String space, String page, Map<String, String> parameters)
     {
         String url = URL_START + escapeUrl(action == null ? "view" : action) + "/";
         url += escapeUrl(space == null ? "Main" : space) + "/";
