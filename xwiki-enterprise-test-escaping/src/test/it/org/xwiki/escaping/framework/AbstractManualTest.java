@@ -80,6 +80,38 @@ public abstract class AbstractManualTest extends AbstractEscapingTest
     }
 
     /**
+     * {@inheritDoc}
+     * 
+     * The default implementation for manual tests returns false.
+     * 
+     * @param fileName file name to check
+     * @return true if the file should be excluded, false otherwise
+     * @see AbstractAutomaticTest#isExcludedFile(String)
+     * @see org.xwiki.escaping.framework.AbstractEscapingTest#isExcludedFile(java.lang.String)
+     */
+    @Override
+    protected boolean isExcludedFile(String fileName)
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * The default implementation for manual tests returns true.
+     * 
+     * @param fileName file name to check
+     * @return true if the file is expected to produce some output when requested from the server, false otherwise
+     * @see AbstractAutomaticTest#isOutputProducingFile(String)
+     * @see org.xwiki.escaping.framework.AbstractEscapingTest#isOutputProducingFile(java.lang.String)
+     */
+    @Override
+    protected boolean isOutputProducingFile(String fileName)
+    {
+        return true;
+    }
+
+    /**
      * Skip the test if the file name does not match ignore pattern (-Dpattern=regex on command line). Should be called
      * at the beginning of all tests.
      * 

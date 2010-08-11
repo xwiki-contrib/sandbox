@@ -194,28 +194,20 @@ public abstract class AbstractEscapingTest implements FileTest
     }
 
     /**
-     * Check if the given file should be excluded from the tests. The default implementation returns false.
+     * Check if the given file should be excluded from the tests.
      * 
      * @param fileName file name to check
      * @return true if the file should be excluded, false otherwise
-     * @see AbstractAutomaticTest#isExcludedFile(String)
      */
-    protected boolean isExcludedFile(String fileName)
-    {
-        return false;
-    }
+    protected abstract boolean isExcludedFile(String fileName);
 
     /**
-     * Check if the given file name should produce output. The default implementation returns true.
+     * Check if the given file name should produce output.
      * 
      * @param fileName file name to check
      * @return true if the file is expected to produce some output when requested from the server, false otherwise
-     * @see AbstractAutomaticTest#isOutputProducingFile(String)
      */
-    protected boolean isOutputProducingFile(String fileName)
-    {
-        return true;
-    }
+    protected abstract boolean isOutputProducingFile(String fileName);
 
     /**
      * Parse the file and collect parameters controlled by the user.
