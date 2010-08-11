@@ -117,6 +117,7 @@
                     -->
                     templates/accessdenied\.vm <!-- simply returns 403 -->
                     templates/attach\.vm <!-- only redirects to attachments.vm -->
+                    templates/deleteversionsconfirm\.vm <!-- needs both rev1 and rev2, otherwise returns 400 (Bad Request) -->
                     templates/watch.vm <!-- expects xredirect to be a valid URL, does not display anything -->
                     templates/wysiwyg.vm <!-- redirects to editwysiwyg.vm, recursive redirection error with some parameters -->
                     templates/xpart.vm <!-- avoid recursive include -->
