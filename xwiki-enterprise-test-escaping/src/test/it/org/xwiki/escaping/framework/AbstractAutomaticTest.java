@@ -33,7 +33,7 @@ public abstract class AbstractAutomaticTest extends AbstractEscapingTest
     /**
      * Create new {@link AbstractAutomaticTest}.
      * 
-     * @param fileNameMatcher
+     * @param fileNameMatcher regex pattern used to filter files by name
      */
     public AbstractAutomaticTest(Pattern fileNameMatcher)
     {
