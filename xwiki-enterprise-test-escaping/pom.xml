@@ -87,7 +87,7 @@
           <systemProperties>
               <!-- Used only in escaping tests -->
               <property>
-                <name>filesProduceNoOutput</name>
+                <name>filesProduceNoOutput</name><!-- NOTE: Only affects automatic tests -->
                 <value>
                     templates/adduorg.vm
                     templates/colorThemeInit.vm
@@ -98,7 +98,7 @@
                 </value>
               </property>
               <property>
-                <name>patternExcludeFiles</name>
+                <name>patternExcludeFiles</name><!-- NOTE: Only affects automatic tests -->
                 <value>
                   <!-- TODO Files that must be tested manually
                     -->

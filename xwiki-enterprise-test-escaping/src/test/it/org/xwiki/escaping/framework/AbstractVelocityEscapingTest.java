@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  * @version $Id$
  * @since 2.5
  */
-public abstract class AbstractVelocityEscapingTest extends AbstractEscapingTest
+public abstract class AbstractVelocityEscapingTest extends AbstractAutomaticTest
 {
     /**
      * Create new AbstractVelocityEscapingTest.

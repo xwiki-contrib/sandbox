@@ -62,6 +62,10 @@ import org.xwiki.validator.ValidationError;
  * <ul>
  * <li>pattern (optional): Additional pattern to select files to be tested (use -Dpattern="substring-regex").
  *                         Matches all files if empty.</li>
+ * </ul></p>
+ * <p>
+ * Automatic tests (see {@link AbstractAutomaticTest}) additionally support:
+ * <ul>
  * <li>filesProduceNoOutput (optional): List of files that are expected to produce empty response</li>
  * <li>patternExcludeFiles (optional): List of RegEx patterns to exclude files from the tests</li>
  * </ul></p>
@@ -190,37 +194,26 @@ public abstract class AbstractEscapingTest implements FileTest
     }
 
     /**
-     * Check if the given file should be excluded from the tests. The default implementation checks
-     * "patternExcludeFiles" property (set in maven build configuration).
+     * Check if the given file should be excluded from the tests. The default implementation returns false.
      * 
      * @param fileName file name to check
      * @return true if the file should be excluded, false otherwise
+     * @see AbstractAutomaticTest#isExcludedFile(String)
      */
     protected boolean isExcludedFile(String fileName)
     {
-        for (String pattern : System.getProperty("patternExcludeFiles", "").split("\\s+")) {
-            Pattern exclude = Pattern.compile(pattern);
-            if (exclude.matcher(fileName).matches()) {
-                return true;
-            }
-        }
         return false;
     }
 
     /**
-     * Check if the given file name should produce output. The default implementation checks
-     * "filesProduceNoOutput" property (set in maven build configuration).
+     * Check if the given file name should produce output. The default implementation returns true.
      * 
      * @param fileName file name to check
      * @return true if the file is expected to produce some output when requested from the server, false otherwise
+     * @see AbstractAutomaticTest#isOutputProducingFile(String)
      */
     protected boolean isOutputProducingFile(String fileName)
     {
-        for (String file : System.getProperty("filesProduceNoOutput", "").split("\\s+")) {
-            if (file.trim().equals(fileName)) {
-                return false;
-            }
-        }
         return true;
     }
 
