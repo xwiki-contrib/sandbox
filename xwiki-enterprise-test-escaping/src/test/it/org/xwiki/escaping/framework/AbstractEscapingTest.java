@@ -373,7 +373,8 @@ public abstract class AbstractEscapingTest implements FileTest
     }
 
     /**
-     * Create the target URL from the given parameters. URL-escapes everything.
+     * Create the target URL from the given parameters. URL-escapes everything. Adds language=en if the parameter map
+     * does not contain language parameter.
      * 
      * @param action action to use, "view" is used if null
      * @param space space name to use, "Main" is used if null
@@ -382,6 +383,22 @@ public abstract class AbstractEscapingTest implements FileTest
      * @return the resulting absolute URL
      */
     protected static String createUrl(String action, String space, String page, Map<String, String> parameters)
+    {
+        return createUrl(action, space, page, parameters, true);
+    }
+
+    /**
+     * Create the target URL from the given parameters. URL-escapes everything.
+     * 
+     * @param action action to use, "view" is used if null
+     * @param space space name to use, "Main" is used if null
+     * @param page page name to use, "WebHome" is used if null
+     * @param parameters list of parameters with values, parameters are omitted if null, "" is used is a value is null
+     * @param addLanguage add language=en if it is not set in the parameter map
+     * @return the resulting absolute URL
+     */
+    protected static String createUrl(String action, String space, String page, Map<String, String> parameters,
+        boolean addLanguage)
     {
         String url = URL_START + escapeUrl(action == null ? "view" : action) + "/";
         url += escapeUrl(space == null ? "Main" : space) + "/";
@@ -399,7 +416,7 @@ public abstract class AbstractEscapingTest implements FileTest
         }
         // special handling for language parameter to exclude false positives (language setting is saved in cookies and
         // sent on subsequent requests)
-        if (!parameters.containsKey(LANGUAGE)) {
+        if (addLanguage && !parameters.containsKey(LANGUAGE)) {
             url += delimiter + LANGUAGE + "=en";
         }
         return url;

@@ -38,12 +38,12 @@ import org.xwiki.escaping.framework.XMLEscapingValidator;
 public class ObjectAndClassEditorTest extends AbstractManualTest
 {
     /**
-     * Set up the test class.
+     * Set up the test class. The tests need a special class and a document containing objects of that class, we put
+     * both into the same document.
      */
     @BeforeClass
     public static void init()
     {
-        // the tests need a special class and a document containing objects of that class, we put both into the same doc
         String test = XMLEscapingValidator.getTestString();
         // create a new class
         AbstractEscapingTest.getUrlContent(createUrl("propadd", test, test, params(kv("propname", "test"),
