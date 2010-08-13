@@ -107,20 +107,23 @@
                     templates/changemyavatar\.vm <!-- target page must be user page -->
                     templates/createinline\.vm <!-- expects xredirect to be a valid URL -->
                     templates/login\.vm <!-- expects xredirect to be a valid URL -->
-                    templates/leftpanels.vm <!-- empty response if parameter "forceLeftPanels" is not set -->
-                    templates/rightpanels.vm <!-- empty response if parameter "forceRightPanels" is not set -->
-                    templates/plain.vm <!-- need raw=1 -->
-                    templates/recyclebinlist.vm <!-- page must have been deleted before -->
-                    templates/rendercontent.vm <!-- page must exist, otherwise empty -->
-                    templates/textarea_wysiwyg.vm <!-- probably need to set default editor to wysiwyg -->
+                    templates/leftpanels\.vm <!-- empty response if parameter "forceLeftPanels" is not set -->
+                    templates/rightpanels\.vm <!-- empty response if parameter "forceRightPanels" is not set -->
+                    templates/passwd\.vm <!-- must be tested on a user document, otherwise returns status 400 -->
+                    templates/plain\.vm <!-- need raw=1 -->
+                    templates/recyclebinlist\.vm <!-- page must have been deleted before -->
+                    templates/rendercontent\.vm <!-- page must exist, otherwise empty -->
+                    templates/textarea_wysiwyg\.vm <!-- probably need to set default editor to wysiwyg -->
                   <!-- False positives
                     -->
                     templates/accessdenied\.vm <!-- simply returns 403 -->
                     templates/attach\.vm <!-- only redirects to attachments.vm -->
                     templates/deleteversionsconfirm\.vm <!-- needs both rev1 and rev2, otherwise returns 400 (Bad Request) -->
-                    templates/watch.vm <!-- expects xredirect to be a valid URL, does not display anything -->
-                    templates/wysiwyg.vm <!-- redirects to editwysiwyg.vm, recursive redirection error with some parameters -->
-                    templates/xpart.vm <!-- avoid recursive include -->
+                    templates/docalreadyexists\.vm <!-- returns 409 and shows an error message -->
+                    templates/templatedoesnotexist.vm <!-- returns 400 and shows an error message -->
+                    templates/watch\.vm <!-- expects xredirect to be a valid URL, does not display anything -->
+                    templates/wysiwyg\.vm <!-- redirects to editwysiwyg.vm, recursive redirection error with some parameters -->
+                    templates/xpart\.vm <!-- avoid recursive include -->
                 </value>
               </property>
               <property>
