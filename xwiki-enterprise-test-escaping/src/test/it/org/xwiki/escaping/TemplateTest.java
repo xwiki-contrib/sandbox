@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xwiki.escaping.framework.AbstractEscapingTest;
@@ -101,6 +102,9 @@ public class TemplateTest extends AbstractVelocityEscapingTest
         super(Pattern.compile(".*\\.vm"));
     }
 
+    /**
+     * Test escaping of the space name.
+     */
     @Test
     public void testSpaceEscaping()
     {
@@ -109,6 +113,9 @@ public class TemplateTest extends AbstractVelocityEscapingTest
         checkUnderEscaping(url, "space name");
     }
 
+    /**
+     * Test escaping of the page name.
+     */
     @Test
     public void testPageEscaping()
     {
@@ -117,16 +124,21 @@ public class TemplateTest extends AbstractVelocityEscapingTest
         checkUnderEscaping(url, "page name");
     }
 
+    /**
+     * Test escaping of all found parameters.
+     */
     @Test
     public void testParameterEscaping()
     {
-        // all found parameters
+        // skip the test if there are no parameters to test
+        Assume.assumeTrue(!this.userInput.isEmpty());
+
         List<EscapingError> errors = new ArrayList<EscapingError>();
-        for (String parameter : userInput) {
+        for (String parameter : this.userInput) {
             String url = createUrl("Main", null, parameter, XMLEscapingValidator.getTestString());
             List<ValidationError> val_errors = getUnderEscapingErrors(url);
             if (!val_errors.isEmpty()) {
-                errors.add(new EscapingError("* Parameter: \"" + parameter + "\"", name, url, val_errors));
+                errors.add(new EscapingError("* Parameter: \"" + parameter + "\"", this.name, url, val_errors));
             }
         }
         if (!errors.isEmpty()) {

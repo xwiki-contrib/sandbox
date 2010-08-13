@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xwiki.escaping.framework.AbstractEscapingTest;
@@ -64,6 +65,11 @@ public class ApplicationTest extends AbstractVelocityEscapingTest
         return System.getProperty("localRepository") + "/" + System.getProperty("pathToXWikiXar");
     }
 
+    /**
+     * Initialize the test.
+     * 
+     * @throws Exception on errors
+     */
     @BeforeSuite
     public static void init() throws Exception
     {
@@ -73,6 +79,11 @@ public class ApplicationTest extends AbstractVelocityEscapingTest
         AbstractEscapingTest.setMultiLanguageMode(true);
     }
 
+    /**
+     * Clean up.
+     * 
+     * @throws Exception on errors
+     */
     @AfterSuite
     public static void shutdown() throws Exception
     {
@@ -90,6 +101,9 @@ public class ApplicationTest extends AbstractVelocityEscapingTest
         super(Pattern.compile(".+/.+\\.xml"));
     }
 
+    /**
+     * Test escaping of all found parameters for colibri.
+     */
     @Test
     public void testParametersInColibri()
     {
@@ -104,17 +118,20 @@ public class ApplicationTest extends AbstractVelocityEscapingTest
      */
     private void testParameterEscaping(String skin)
     {
-        String space = name.replaceAll("/.+$", "");
-        String page = name.replaceAll("^.+/", "").replaceAll("\\..+$", "");
+        // skip the test if there are no parameters to test
+        Assume.assumeTrue(!this.userInput.isEmpty());
+
+        String space = this.name.replaceAll("/.+$", "");
+        String page = this.name.replaceAll("^.+/", "").replaceAll("\\..+$", "");
 
         // all found parameters
         // TODO need to also consider parameters from page header templates bound to variables
         List<EscapingError> errors = new ArrayList<EscapingError>();
-        for (String parameter : userInput) {
+        for (String parameter : this.userInput) {
             String url = createUrl(space, page, parameter, XMLEscapingValidator.getTestString(), skin);
             List<ValidationError> val_errors = getUnderEscapingErrors(url);
             if (!val_errors.isEmpty()) {
-                errors.add(new EscapingError("* Parameter: \"" + parameter + "\"", name, url, val_errors));
+                errors.add(new EscapingError("* Parameter: \"" + parameter + "\"", this.name, url, val_errors));
             }
         }
         if (!errors.isEmpty()) {

@@ -151,6 +151,10 @@ public abstract class AbstractEscapingTest implements FileTest
 
     /**
      * {@inheritDoc}
+     * 
+     * The implementation for escaping tests checks if the given file name matches the supported name pattern and parses
+     * the file.
+     * 
      * @see org.xwiki.escaping.suite.FileTest#initialize(java.lang.String, java.io.Reader)
      */
     public boolean initialize(String name, final Reader reader)
@@ -163,7 +167,7 @@ public abstract class AbstractEscapingTest implements FileTest
 
         this.shouldProduceOutput = isOutputProducingFile(name);
         this.userInput = parse(reader);
-        return !userInput.isEmpty();
+        return true;
     }
 
     /**
@@ -323,6 +327,7 @@ public abstract class AbstractEscapingTest implements FileTest
 
     /**
      * {@inheritDoc}
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
