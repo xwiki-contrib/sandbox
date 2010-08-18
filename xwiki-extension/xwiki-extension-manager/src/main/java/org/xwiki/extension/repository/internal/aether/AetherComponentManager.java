@@ -17,34 +17,13 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension;
+package org.xwiki.extension.repository.internal.aether;
 
-import java.io.File;
-import java.util.List;
+import org.codehaus.plexus.PlexusContainer;
+import org.xwiki.component.annotation.ComponentRole;
 
-import org.xwiki.extension.repository.ExtensionRepository;
-
-public interface Extension
+@ComponentRole
+public interface AetherComponentManager
 {
-    String getName();
-
-    String getVersion();
-
-    ExtensionType getType();
-
-    String getDescription();
-
-    String getWebSite();
-
-    String getAuthor();
-
-    /**
-     * TODO: introduce ExtensionDependency when we will need version range, for now {@link ExtensionId#getVersion()} is
-     * the minimum version (maven-like rule)
-     */
-    List<ExtensionDependency> getDependencies();
-
-    void download(File file) throws ExtensionException;
-
-    ExtensionRepository getRepository();
+    PlexusContainer getPlexus();
 }

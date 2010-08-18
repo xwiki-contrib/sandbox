@@ -31,8 +31,8 @@ import java.util.List;
 
 import org.apache.log4j.lf5.util.StreamUtils;
 import org.xwiki.extension.Extension;
+import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
-import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.repository.ExtensionRepository;
@@ -57,7 +57,7 @@ public class DefaultLocalExtension implements LocalExtension
 
     private String website;
 
-    private List<ExtensionId> dependencies = new ArrayList<ExtensionId>();
+    private List<ExtensionDependency> dependencies = new ArrayList<ExtensionDependency>();
 
     private DefaultLocalExtensionRepository repository;
 
@@ -164,7 +164,7 @@ public class DefaultLocalExtension implements LocalExtension
         return this.website;
     }
 
-    public List<ExtensionId> getDependencies()
+    public List<ExtensionDependency> getDependencies()
     {
         return Collections.unmodifiableList(this.dependencies);
     }

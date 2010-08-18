@@ -28,6 +28,7 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
+import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManager;
 import org.xwiki.extension.ExtensionType;
@@ -41,7 +42,6 @@ import org.xwiki.extension.repository.ExtensionRepositoryManager;
 import org.xwiki.extension.repository.LocalExtensionRepository;
 
 /**
- * 
  * TODO: cut installation process in steps (create and validate an install plan, install, etc.)
  */
 @Component
@@ -89,7 +89,7 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
         return null;
     }
 
-    public List<Extension> getInstalledExtensions(int nb, int offset)
+    public List<? extends Extension> getInstalledExtensions(int nb, int offset)
     {
         return this.localExtensionRepository.getExtensions(nb, offset);
     }
@@ -104,8 +104,9 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
         try {
             Extension remoteExtension = this.repositoryManager.resolve(extensionId);
 
-            for (ExtensionId dependencyId : remoteExtension.getDependencies()) {
-                installExtension(dependencyId, true);
+            for (ExtensionDependency dependencyDependency : remoteExtension.getDependencies()) {
+                installExtension(new ExtensionId(dependencyDependency.getName(), dependencyDependency.getVersion()),
+                    true);
             }
 
             LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);

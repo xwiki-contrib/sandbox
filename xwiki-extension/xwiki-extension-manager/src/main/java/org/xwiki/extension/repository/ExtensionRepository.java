@@ -33,5 +33,5 @@ public interface ExtensionRepository
 
     boolean exists(ExtensionId extensionId);
     
-    List<Extension> getExtensions(int nb, int offset);
+    List< ? extends Extension> getExtensions(int nb, int offset);
 }

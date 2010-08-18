@@ -1,24 +1,19 @@
 package org.xwiki.extension.repository;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URI;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.extension.Extension;
-import org.xwiki.extension.ExtensionException;
+import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.test.AbstractComponentTestCase;
 
-public class DefaultRepositoryManagerTest extends AbstractComponentTestCase
+public class AetherDefaultRepositoryManagerTest extends AbstractComponentTestCase
 {
     private ExtensionRepositoryManager repositoryManager;
 
@@ -31,7 +26,7 @@ public class DefaultRepositoryManagerTest extends AbstractComponentTestCase
 
         this.repositoryManager = getComponentManager().lookup(ExtensionRepositoryManager.class);
 
-        this.repositoryManager.addRepository(new ExtensionRepositoryId("xwiki-releases", "maven", new URI(
+        this.repositoryManager.addRepository(new ExtensionRepositoryId("xwiki-releases", "aether", new URI(
             "http://maven.xwiki.org/releases/")));
 
         this.rubyArtifactId = new ExtensionId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.3.1");
@@ -46,10 +41,12 @@ public class DefaultRepositoryManagerTest extends AbstractComponentTestCase
         Assert.assertEquals("org.xwiki.platform:xwiki-core-rendering-macro-ruby", artifact.getName());
         Assert.assertEquals("2.3.1", artifact.getVersion());
         Assert.assertEquals(ExtensionType.JAR, artifact.getType());
-        Assert.assertEquals(new ExtensionId("org.jruby:jruby", "1.3.0"), artifact.getDependencies().get(1));
+        ExtensionDependency dependency = artifact.getDependencies().get(1);
+        Assert.assertEquals("org.jruby:jruby", dependency.getName());
+        Assert.assertEquals("1.3.0", dependency.getVersion());
     }
 
-    @Test
+    /*@Test
     public void testDownload() throws ExtensionException, IOException
     {
         Extension artifact = this.repositoryManager.resolve(this.rubyArtifactId);
@@ -77,5 +74,5 @@ public class DefaultRepositoryManagerTest extends AbstractComponentTestCase
         }
 
         zis.close();
-    }
+    }*/
 }

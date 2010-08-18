@@ -41,8 +41,7 @@ import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.LocalExtensionRepository;
 
 /**
- * TODO: decide local repository format (probably maven-like)
- * TODO: make it threadsafe bulletproof
+ * TODO: decide local repository format (probably maven-like) TODO: make it threadsafe bulletproof
  */
 @Component
 public class DefaultLocalExtensionRepository implements LocalExtensionRepository, Initializable
@@ -115,9 +114,9 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
         return new DefaultLocalExtension(this, extension);
     }
 
-    public List<Extension> getExtensions(int nb, int offset)
+    public List< ? extends Extension> getExtensions(int nb, int offset)
     {
-        return (List) getLocalExtensions(nb, offset);
+        return getLocalExtensions(nb, offset);
     }
 
     public LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException
@@ -131,7 +130,7 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
                 extension.download(localExtension.getFile());
             } catch (ExtensionException e) {
                 // TODO: clean
-                
+
                 throw new InstallException("Failed to download extension [" + extension + "]", e);
             }
         }

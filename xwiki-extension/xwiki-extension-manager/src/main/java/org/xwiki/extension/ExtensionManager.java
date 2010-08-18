@@ -28,7 +28,7 @@ public interface ExtensionManager
 {
     List<Extension> getAvailableExtensions(int nb, int offset);
 
-    List<Extension> getInstalledExtensions(int nb, int offset);
+    List< ? extends Extension> getInstalledExtensions(int nb, int offset);
 
     int coundAvailableExtensions();
 

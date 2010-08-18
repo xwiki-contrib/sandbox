@@ -34,7 +34,8 @@
   <packaging>jar</packaging>
   <description>XWiki Platform - Extension - Repository</description>
    <properties>
-    <maven.version>3.0-beta-1</maven.version>
+    <aether.version>1.1-SNAPSHOT</aether.version>
+    <maven.version>3.0-SNAPSHOT</maven.version>
     <wagon.providers.version>1.0-beta-6</wagon.providers.version>
   </properties>
   <dependencies>
@@ -44,6 +45,33 @@
       <version>${pom.version}</version>
     </dependency>
     
+    <!-- Aether -->
+    <dependency>
+      <groupId>org.sonatype.aether</groupId>
+      <artifactId>aether-api</artifactId>
+      <version>${aether.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.aether</groupId>
+      <artifactId>aether-util</artifactId>
+      <version>${aether.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.aether</groupId>
+      <artifactId>aether-impl</artifactId>
+      <version>${aether.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.aether</groupId>
+      <artifactId>aether-connector-wagon</artifactId>
+      <version>${aether.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-aether-provider</artifactId>
+      <version>${maven.version}</version>
+    </dependency>
+
     <!-- Maven -->
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -76,7 +104,7 @@
       <version>${maven.version}</version>
     </dependency>
     
-    <!-- Wagon providers -->
+    <!-- Wagon -->
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-file</artifactId>
@@ -89,8 +117,18 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-http</artifactId>
+      <artifactId>wagon-http-lightweight</artifactId>
       <version>${wagon.providers.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>nekohtml</groupId>
+          <artifactId>nekohtml</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>nekohtml</groupId>
+          <artifactId>xercesMinimal</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
@@ -106,5 +144,29 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
+  <repositories>
+    <repository>
+      <id>sonatype-forge</id>
+      <name>Sonatype Forge</name>
+      <url>http://repository.sonatype.org/content/groups/forge/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+        <id>Maven Snapshots</id>
+        <url>http://repository.apache.org/snapshots</url>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+      </repository>
+  </repositories>
 </project>
        

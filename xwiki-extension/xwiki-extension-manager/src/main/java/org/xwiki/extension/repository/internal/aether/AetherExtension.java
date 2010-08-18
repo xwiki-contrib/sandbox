@@ -17,18 +17,15 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository.internal.maven;
+package org.xwiki.extension.repository.internal.aether;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.repository.legacy.WagonManager;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.sonatype.aether.ArtifactDescriptorResult;
+import org.sonatype.aether.Dependency;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
@@ -36,38 +33,36 @@ import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.repository.ExtensionRepository;
 
-public class MavenExtension implements Extension
+public class AetherExtension implements Extension
 {
-    private MavenProject project;
+    private AetherComponentManager mavenComponentManager;
+
+    private AetherExtensionRepository repository;
+    
+    private ArtifactDescriptorResult artifactDescriptorResult;
 
     private ExtensionId artifactId;
 
     private ExtensionType extensionType;
 
-    private MavenExtensionRepository repository;
-
-    private MavenComponentManager mavenComponentManager;
-
-    private RepositorySystem repositorySystem;
-
     private List<ExtensionDependency> dependencies;
 
     private List<ExtensionId> suggested;
 
-    public MavenExtension(ExtensionId artifactId, MavenProject project, MavenExtensionRepository repository,
-        MavenComponentManager mavenComponentManager) throws ComponentLookupException
+    public AetherExtension(ExtensionId artifactId, ArtifactDescriptorResult artifactDescriptorResult,
+        AetherExtensionRepository repository, AetherComponentManager mavenComponentManager)
+        throws ComponentLookupException
     {
-        this.artifactId = artifactId;
-        this.project = project;
-        this.repository = repository;
-
         this.mavenComponentManager = mavenComponentManager;
 
-        this.repositorySystem = this.mavenComponentManager.getPlexus().lookup(RepositorySystem.class);
+        this.repository = repository;
+        
+        this.artifactId = artifactId;
+        this.artifactDescriptorResult = artifactDescriptorResult;
 
-        if (project.getPackaging().equals("jar")) {
+        if (artifactDescriptorResult.getArtifact().getExtension().equals("jar")) {
             this.extensionType = ExtensionType.JAR;
-        } else if (project.getPackaging().equals("xar")) {
+        } else if (artifactDescriptorResult.getArtifact().getExtension().equals("xar")) {
             this.extensionType = ExtensionType.PAGES;
         } else {
             this.extensionType = ExtensionType.UNKNOWN;
@@ -92,12 +87,12 @@ public class MavenExtension implements Extension
 
     public String getDescription()
     {
-        return this.project.getDescription();
+        return null;// return this.project.getDescription();
     }
 
     public String getWebSite()
     {
-        return this.project.getUrl();
+        return null;// return this.project.getUrl();
     }
 
     public ExtensionType getType()
@@ -110,12 +105,13 @@ public class MavenExtension implements Extension
         if (this.dependencies == null) {
             this.dependencies = new ArrayList<ExtensionDependency>();
 
-            for (Dependency mavenDependency : this.project.getDependencies()) {
-                if (!mavenDependency.isOptional()
-                    && (mavenDependency.getScope().equals("compile") || mavenDependency.getScope().equals("runtime") || mavenDependency
+            for (Dependency aetherDependency : this.artifactDescriptorResult.getDependencies()) {
+                if (!aetherDependency.isOptional()
+                    && (aetherDependency.getScope().equals("compile") || aetherDependency.getScope().equals("runtime") || aetherDependency
                         .getScope().equals("provided"))) {
-                    this.dependencies.add(new MavenExtensionDependency(new ExtensionId(mavenDependency.getGroupId()
-                        + ":" + mavenDependency.getArtifactId(), mavenDependency.getVersion())));
+                    this.dependencies.add(new AetherExtensionDependency(new ExtensionId(aetherDependency.getArtifact()
+                        .getGroupId() + ":" + aetherDependency.getArtifact().getArtifactId(), aetherDependency
+                        .getArtifact().getVersion())));
                 }
             }
         }
@@ -129,10 +125,10 @@ public class MavenExtension implements Extension
         if (this.suggested == null) {
             this.suggested = new ArrayList<ExtensionId>();
 
-            for (Dependency mavenDependency : this.project.getDependencies()) {
+            for (Dependency mavenDependency : this.artifactDescriptorResult.getDependencies()) {
                 if (mavenDependency.isOptional()) {
-                    this.suggested.add(new ExtensionId(mavenDependency.getGroupId() + ":"
-                        + mavenDependency.getArtifactId(), mavenDependency.getVersion()));
+                    this.suggested.add(new ExtensionId(mavenDependency.getArtifact().getGroupId() + ":"
+                        + mavenDependency.getArtifact().getArtifactId(), mavenDependency.getArtifact().getVersion()));
                 }
             }
         }
@@ -142,19 +138,7 @@ public class MavenExtension implements Extension
 
     public void download(File file) throws ExtensionException
     {
-        try {
-            WagonManager wagonManager = this.mavenComponentManager.getPlexus().lookup(WagonManager.class);
-
-            Artifact fileArtifact =
-                this.repositorySystem.createArtifact(this.project.getGroupId(), this.project.getArtifactId(),
-                    this.project.getVersion(), this.project.getPackaging());
-
-            wagonManager.getRemoteFile(this.repository.getRepository(), file,
-                this.repository.getRepository().pathOf(fileArtifact), null/* downloadMonitor */,
-                null/* checksumPolicy */, true);
-        } catch (Exception e) {
-            throw new ExtensionException("Failed to download extension", e);
-        }
+        // TODO
     }
 
     public ExtensionRepository getRepository()
