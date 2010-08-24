@@ -31,7 +31,7 @@ import junit.framework.TestCase;
 /**
  * Tests the default bidirectional converter xhtml - XWiki syntax .
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

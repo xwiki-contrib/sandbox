@@ -24,7 +24,7 @@ import com.xpn.xwiki.XWikiContext;
 /**
  * Represents a computed average rating for a container or a set of containers.
  *
- * @version $Id: $
+ * @version $Id$
  */
 public interface AverageRating
 {

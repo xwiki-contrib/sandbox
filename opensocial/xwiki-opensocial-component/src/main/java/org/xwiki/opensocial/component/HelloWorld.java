@@ -25,7 +25,7 @@ import org.xwiki.component.annotation.ComponentRole;
 /**
  * This component produces a greeting.
  * 
- * @version $Id: $
+ * @version $Id$
  */
 @ComponentRole
 public interface HelloWorld

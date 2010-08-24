@@ -77,7 +77,7 @@ import org.codehaus.plexus.util.StringInputStream;
  * The default mapping is <code>{@value #DEFAULT_FILEDS_MAPPING}.</code></li>
  * </ul>
  *
- * @version $Id: $
+ * @version $Id$
  */
 public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 {

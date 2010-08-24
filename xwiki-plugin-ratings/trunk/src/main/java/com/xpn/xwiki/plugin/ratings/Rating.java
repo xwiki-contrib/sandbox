@@ -29,7 +29,7 @@ import java.util.Date;
  * section of a wiki document</li> <li>A sentence in a wiki document</li> <li>A comment</li> <li>A sentence in a
  * comment</li> <li>etc...</li> </ul>
  *
- * @version $Id: $
+ * @version $Id$
  */
 public interface Rating
 {

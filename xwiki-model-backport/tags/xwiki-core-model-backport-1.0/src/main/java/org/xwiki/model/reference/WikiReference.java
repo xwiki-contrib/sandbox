@@ -24,7 +24,7 @@ import org.xwiki.model.EntityType;
 /**
  * Represents a reference to a wiki (wiki name). This is the topmost reference and it doesn't have a parent reference.
  * 
- * @version $Id: WikiReference.java 26135 2010-01-13 21:28:52Z vmassol $
+ * @version $Id$
  * @since 2.2M1
  */
 public class WikiReference extends EntityReference

@@ -23,7 +23,7 @@ package org.xwiki.xoo;
 /**
  * Stores the settings used for connecting to a remote server.
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 public class ConnectionSettings

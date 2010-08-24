@@ -28,7 +28,7 @@ import com.xpn.xwiki.plugin.ratings.RatingsException;
 import com.xpn.xwiki.plugin.ratings.RatingsManager;
 
 /**
- * @version $Id: $
+ * @version $Id$
  * @see AverageRating
  */
 public class StoredAverageRating implements AverageRating

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * @version $Id: $
+ * @version $Id$
  */
 public class RatingsPluginApi extends PluginApi<RatingsPlugin>
 {

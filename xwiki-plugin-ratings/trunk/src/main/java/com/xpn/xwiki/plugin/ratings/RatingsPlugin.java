@@ -30,7 +30,7 @@ import com.xpn.xwiki.plugin.XWikiPluginInterface;
 import com.xpn.xwiki.plugin.ratings.internal.DefaultRatingsManager;
 
 /**
- * @version $Id: $
+ * @version $Id$
  */
 public class RatingsPlugin extends XWikiDefaultPlugin
 {

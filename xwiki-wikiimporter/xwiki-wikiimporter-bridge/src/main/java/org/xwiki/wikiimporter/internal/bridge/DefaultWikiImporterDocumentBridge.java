@@ -41,7 +41,7 @@ import org.xwiki.wikiimporter.wiki.WikiPageRevision;
 /**
  * Default Implementation for WikiImporterDocumentBridge.
  * 
- * @version $Id: DefaultWikiImporterDocumentBridge.java 27627 2010-03-14 14:33:22Z arun $
+ * @version $Id$
  */
 @Component
 public class DefaultWikiImporterDocumentBridge extends AbstractLogEnabled implements WikiImporterDocumentBridge

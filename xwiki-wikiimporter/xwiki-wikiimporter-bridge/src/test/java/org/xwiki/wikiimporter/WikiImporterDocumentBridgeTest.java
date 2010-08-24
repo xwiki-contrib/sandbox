@@ -26,7 +26,7 @@ import org.xwiki.test.AbstractComponentTestCase;
 import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
 
 /**
- * @version $Id: WikiImporterDocumentBridgeTest.java 27627 2010-03-14 14:33:22Z arun $
+ * @version $Id$
  */
 public class WikiImporterDocumentBridgeTest extends AbstractComponentTestCase
 {

@@ -33,7 +33,7 @@ import com.sun.star.frame.XFrame;
 /**
  * A class used for displaying messages for debugging
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 public class Debug

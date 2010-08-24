@@ -28,7 +28,7 @@ import java.util.Date;
  * Wrapper around a {@link Rating}, typically returned by the {@link RatingsPluginApi} and manipulated using a scripting
  * language in the wiki.
  *
- * @version $Id: $
+ * @version $Id$
  * @see Rating
  */
 public class RatingApi extends Api

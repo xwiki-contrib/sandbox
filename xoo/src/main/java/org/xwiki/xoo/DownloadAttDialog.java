@@ -39,7 +39,7 @@ import com.sun.star.uno.XComponentContext;
 /**
  * The dialog used to choose the download location.
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 public class DownloadAttDialog extends XWikiDialog

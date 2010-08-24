@@ -34,7 +34,7 @@ import com.xpn.xwiki.plugin.ratings.RatingsManager;
 import com.xpn.xwiki.plugin.ratings.RatingsPlugin;
 
 /**
- * @version $Id: $
+ * @version $Id$
  * @see Rating
  */
 public class SeparatePageRating implements Rating

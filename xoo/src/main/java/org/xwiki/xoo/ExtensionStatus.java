@@ -25,7 +25,7 @@ import java.util.Hashtable;
 /**
  * Stores the context of the extension
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 public class ExtensionStatus

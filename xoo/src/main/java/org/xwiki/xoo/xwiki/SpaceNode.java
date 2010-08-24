@@ -27,7 +27,7 @@ import org.codehaus.swizzle.confluence.SpaceSummary;
 /**
  * The class used for spaces in the XWiki Structure
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

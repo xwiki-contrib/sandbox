@@ -34,7 +34,7 @@ import com.xpn.xwiki.plugin.ratings.RatingsException;
 import com.xpn.xwiki.plugin.ratings.RatingsManager;
 
 /**
- * @version $Id: $
+ * @version $Id$
  * @see RatingsManager
  * @see AbstractRatingsManager
  */

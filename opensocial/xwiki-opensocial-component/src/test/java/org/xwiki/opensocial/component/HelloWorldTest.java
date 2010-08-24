@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 /**
  * Tests for the {@link HelloWorld} component.
  * 
- * @version $Id: $
+ * @version $Id$
  */
 public class HelloWorldTest extends TestCase
 {

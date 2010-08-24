@@ -35,7 +35,7 @@ import java.util.jar.Manifest;
 /**
  * Global service registration class.
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

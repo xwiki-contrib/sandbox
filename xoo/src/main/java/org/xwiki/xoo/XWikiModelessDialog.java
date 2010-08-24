@@ -39,7 +39,7 @@ import com.sun.star.uno.XComponentContext;
 /**
  * The base class for the non-modal dialogs designed with the Basic Editor
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

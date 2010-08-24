@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Represents a reference to a document (wiki, space and page names).
  * 
- * @version $Id: DocumentReference.java 26135 2010-01-13 21:28:52Z vmassol $
+ * @version $Id$
  * @since 2.2M1
  */
 public class DocumentReference extends EntityReference

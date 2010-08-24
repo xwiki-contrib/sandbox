@@ -40,7 +40,7 @@ import com.sun.star.uno.XComponentContext;
 /**
  * This class implements the actions related to the OpenOffice
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

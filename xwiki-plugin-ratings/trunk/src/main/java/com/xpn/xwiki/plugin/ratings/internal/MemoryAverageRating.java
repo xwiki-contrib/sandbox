@@ -24,7 +24,7 @@ import com.xpn.xwiki.plugin.ratings.AverageRating;
 import com.xpn.xwiki.plugin.ratings.RatingsException;
 
 /**
- * @version $Id: $
+ * @version $Id$
  * @see AverageRating
  */
 public class MemoryAverageRating implements AverageRating

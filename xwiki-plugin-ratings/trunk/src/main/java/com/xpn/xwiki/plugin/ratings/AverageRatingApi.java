@@ -25,7 +25,7 @@ import com.xpn.xwiki.api.Api;
 /**
  * Api wrapper for an average rating.
  *
- * @version $Id: $
+ * @version $Id$
  * @see AverageRating
  */
 public class AverageRatingApi extends Api

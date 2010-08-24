@@ -28,7 +28,7 @@ import org.codehaus.swizzle.confluence.Attachment;
 /**
  * The class used for pages in the XWiki Structure
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

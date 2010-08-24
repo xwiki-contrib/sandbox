@@ -32,7 +32,7 @@ import com.xpn.xwiki.plugin.ratings.ReputationException;
 /**
  * Default very simple reputation algorithm. It won't include recalculation put only flow level reputation
  *
- * @version $Id: $
+ * @version $Id$
  * @see ReputationAlgorythm
  */
 public class DefaultReputationAlgorythm implements ReputationAlgorythm

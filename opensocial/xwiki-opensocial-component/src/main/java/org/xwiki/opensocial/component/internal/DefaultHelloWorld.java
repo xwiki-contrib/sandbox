@@ -39,7 +39,7 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 /**
  * Concrete implementation of a <tt>HelloWorld</tt> component. The component is configured via the Plexus container.
  * 
- * @version $Id: $
+ * @version $Id$
  */
 @Component("default")
 public class DefaultHelloWorld extends AbstractLogEnabled implements HelloWorld, ActivityService, AppDataService,

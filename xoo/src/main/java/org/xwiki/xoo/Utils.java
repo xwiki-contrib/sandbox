@@ -42,7 +42,7 @@ import com.sun.star.uno.XComponentContext;
 /**
  * A general class with useful methods
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

@@ -31,7 +31,7 @@ import java.io.IOException;
 /**
  * The class used for storing the user settings in a special file
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 public class LoginData

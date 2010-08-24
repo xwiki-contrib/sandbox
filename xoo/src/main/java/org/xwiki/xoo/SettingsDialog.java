@@ -31,7 +31,7 @@ import com.sun.star.uno.XComponentContext;
 /**
  * The dialog with the user settings used for the communication with the XE server
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 public class SettingsDialog extends XWikiDialog

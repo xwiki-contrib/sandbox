@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * The class used for representing the structure of the XWiki server
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

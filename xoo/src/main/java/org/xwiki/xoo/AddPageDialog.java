@@ -34,7 +34,7 @@ import com.sun.star.uno.XComponentContext;
 /**
  * The dialog used for adding a new page.
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 public class AddPageDialog extends XWikiDialog

@@ -23,7 +23,7 @@ package org.xwiki.xoo;
 /**
  * The constants used in the whole project
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

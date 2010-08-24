@@ -30,7 +30,7 @@ import com.sun.star.uno.XComponentContext;
 /**
  * The dialog which allows the user to specify the customization he/she made at the XE install
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 public class CustomSettingsDialog extends XWikiDialog

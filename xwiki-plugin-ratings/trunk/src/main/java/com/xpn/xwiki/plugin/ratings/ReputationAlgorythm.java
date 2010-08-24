@@ -24,7 +24,7 @@ import com.xpn.xwiki.XWikiContext;
 import java.util.Map;
 
 /**
- * @version $Id: $
+ * @version $Id$
  */
 public interface ReputationAlgorythm
 {

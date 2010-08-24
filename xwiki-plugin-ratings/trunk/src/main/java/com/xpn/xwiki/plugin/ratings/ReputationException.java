@@ -22,7 +22,7 @@ package com.xpn.xwiki.plugin.ratings;
 import com.xpn.xwiki.XWikiException;
 
 /**
- * @version $Id: $
+ * @version $Id$
  */
 public class ReputationException extends RatingsException
 {

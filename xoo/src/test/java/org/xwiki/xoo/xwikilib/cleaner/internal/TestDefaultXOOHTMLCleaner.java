@@ -29,7 +29,7 @@ import org.xwiki.xoo.xwikilib.cleaner.internal.DefaultXOOHTMLCleaner;
 /**
  * Tests the default HTML cleaner.
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

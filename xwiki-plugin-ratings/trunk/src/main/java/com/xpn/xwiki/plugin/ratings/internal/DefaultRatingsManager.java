@@ -33,7 +33,7 @@ import com.xpn.xwiki.plugin.ratings.Rating;
 import com.xpn.xwiki.plugin.ratings.RatingsException;
 
 /**
- * @version $Id: $
+ * @version $Id$
  */
 public class DefaultRatingsManager extends AbstractRatingsManager
 {

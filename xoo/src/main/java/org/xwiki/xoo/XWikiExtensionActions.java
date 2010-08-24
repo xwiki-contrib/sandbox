@@ -68,7 +68,7 @@ import com.sun.star.lang.XEventListener;
 /**
  * A class that implements the actions of the XWiki Extension
  * 
- * @version $Id: $
+ * @version $Id$
  * @since 1.0 M
  */
 

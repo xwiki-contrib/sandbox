@@ -52,7 +52,7 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
  * mapping is <code>{@value #DEFAULT_FIELDSMAPPING_VALUE}.</code></li>
  * </ul>
  * 
- * @version $Id: XWikiCBAuthenticator.java 219 2009-11-06 09:48:46Z tmortagne $
+ * @version $Id$
  */
 public class XWikiSunSSOAuthenticator extends XWikiAuthServiceImpl
 {

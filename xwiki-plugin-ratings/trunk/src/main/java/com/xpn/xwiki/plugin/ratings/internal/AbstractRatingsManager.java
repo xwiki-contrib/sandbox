@@ -39,7 +39,7 @@ import com.xpn.xwiki.plugin.ratings.ReputationAlgorythm;
 import com.xpn.xwiki.plugin.ratings.ReputationException;
 
 /**
- * @version $Id: $
+ * @version $Id$
  * @see RatingsManager
  */
 public abstract class AbstractRatingsManager implements RatingsManager

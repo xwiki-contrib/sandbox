@@ -27,7 +27,7 @@ import org.xwiki.component.annotation.Component;
 /**
  * WikiImporter custom logging class to generate import process log summary. Uses singleton design pattern.
  * 
- * @version $Id: WikiImporterLogger.java 27627 2010-03-14 14:33:22Z arun $
+ * @version $Id$
  */
 @Component
 public class DefaultWikiImporterLogger implements WikiImporterLogger

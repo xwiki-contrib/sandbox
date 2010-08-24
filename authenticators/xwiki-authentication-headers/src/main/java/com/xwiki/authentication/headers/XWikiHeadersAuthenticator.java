@@ -45,7 +45,7 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
  * The default mapping is <code>{@value #DEFAULT_FILEDS_MAPPING}.</code></li>
  * </ul>
  *
- * @version $Id: $
+ * @version $Id$
  */
 public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
 {
