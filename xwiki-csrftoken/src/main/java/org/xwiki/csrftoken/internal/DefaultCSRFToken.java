@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -41,12 +40,10 @@ import org.xwiki.component.phase.InitializationException;
 import org.xwiki.container.Container;
 import org.xwiki.container.Request;
 import org.xwiki.container.servlet.ServletRequest;
+import org.xwiki.container.servlet.filters.SavedRequestManager;
 import org.xwiki.csrftoken.CSRFToken;
 import org.xwiki.csrftoken.CSRFTokenConfiguration;
-import org.xwiki.model.EntityType;
-import org.xwiki.model.ModelContext;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReference;
 
 /**
  * Concrete implementation of the {@link CSRFToken} component.
@@ -70,11 +67,8 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     /** Length of the random string in bytes. */
     private static final int TOKEN_LENGTH = 16;
 
-    /** Space where resubmission page is located. */
-    private static final String RESUBMIT_SPACE = "XWiki";
-
-    /** Resubmission page name. */
-    private static final String RESUBMIT_PAGE = "Resubmit";
+    /** Resubmission template name. */
+    private static final String RESUBMIT_TEMPLATE = "resubmit";
 
     /** Token storage (one token per user). */
     private ConcurrentMap<String, String> tokens;
@@ -89,10 +83,6 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     /** Needed to access the current request. */
     @Requirement
     private Container container;
-
-    /** Needed to find out the current wiki reference. */
-    @Requirement
-    private ModelContext model;
 
     /** CSRFToken component configuration. */
     @Requirement
@@ -172,23 +162,19 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     public String getResubmissionURL()
     {
         // request URL is the one that performs the modification
-        String requestUrl = getRequestURLWithoutToken();
-        String query = "xredirect=" + urlEncode(requestUrl);
+        String srid = SavedRequestManager.saveRequest(getRequest());
+        String resubmitUrl = getRequest().getRequestURI();
+        resubmitUrl += '?' + SavedRequestManager.getSavedRequestIdentifier() + "=" + srid;
+        String query = "resubmit=" + urlEncode(resubmitUrl);
 
         // back URL is the URL of the document that was about to be modified, so in most
         // cases we can redirect back to the correct document (if the user clicks "no")
         String backUrl = getDocumentURL(this.docBridge.getCurrentDocumentReference(), null);
         query += "&xback=" + urlEncode(backUrl);
 
-        // construct the URL of the resubmission page
-        EntityReference wiki = this.model.getCurrentEntityReference();
-        EntityReference space = new EntityReference(RESUBMIT_SPACE, EntityType.SPACE);
-        if (wiki != null) {
-            space.setParent(wiki.extractReference(EntityType.WIKI));
-        }
-        EntityReference doc = new EntityReference(RESUBMIT_PAGE, EntityType.DOCUMENT, space);
-        DocumentReference resubmitDoc = new DocumentReference(doc);
-        return getDocumentURL(resubmitDoc, query);
+        // redirect to the resubmission template
+        query += "&xpage=" + RESUBMIT_TEMPLATE;
+        return backUrl + "?" + query;
     }
 
     /**
@@ -201,37 +187,6 @@ public class DefaultCSRFToken extends AbstractLogEnabled implements CSRFToken, I
     private String getDocumentURL(DocumentReference reference, String query)
     {
         return this.docBridge.getDocumentURL(reference, "view", query, null);
-    }
-
-    /**
-     * Find out the URL of the current request and remove the 'form_token' parameter from the query. The secret token
-     * will be replaced by the correct one on the resubmission page.
-     * 
-     * Note that currently all request parameters are moved to the URL query, limiting their total size to about 2KiB
-     * 
-     * TODO use {@link com.xpn.xwiki.web.SavedRequestRestorerFilter} to save all parameters in the session and
-     * injecting them back when needed
-     * 
-     * @return current URL without secret token
-     */
-    private String getRequestURLWithoutToken()
-    {
-        HttpServletRequest httpRequest = getRequest();
-        StringBuffer url = httpRequest.getRequestURL();
-        @SuppressWarnings("unchecked")
-        Map<String, String[]> parameterMap = httpRequest.getParameterMap();
-        if (parameterMap != null) {
-            String separator = "?";
-            for (String name : parameterMap.keySet()) {
-                if (!name.equals("form_token")) {
-                    url.append(separator);
-                    url.append(urlEncode(name));
-                    url.append("=").append(urlEncode(parameterMap.get(name)[0]));
-                    separator = "&";
-                }
-            }
-        }
-        return url.toString();
     }
 
     /**
