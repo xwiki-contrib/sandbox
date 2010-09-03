@@ -1,0 +1,115 @@
+##
+## CSS files related to JS libraries.
+##
+<link href="$xwiki.getSkinFile("js/xwiki/suggest/ajaxSuggest.css")" rel="stylesheet" type="text/css" />
+<link href="$xwiki.getSkinFile("js/xwiki/lightbox/lightbox.css", true)" rel="stylesheet" type="text/css" />
+<!--[if IE]>
+  <link href="$xwiki.getSkinFile("js/xwiki/lightbox/lightboxIE.css", true)" rel="stylesheet" type="text/css" />
+<![endif]-->
+##
+## JS Libraries.
+##
+$xwiki.jsfx.use('js/scriptaculous/effects.js', true)
+$xwiki.jsfx.use('js/xwiki/widgets/modalPopup.js', true)
+$xwiki.ssfx.use('js/xwiki/widgets/modalPopup.css', true)
+$xwiki.jsfx.use('js/xwiki/widgets/jumpToPage.js', true)
+$xwiki.ssfx.use('js/xwiki/widgets/jumpToPage.css', true)
+$xwiki.jsfx.use('uicomponents/widgets/confirmationBox.js', true)
+$xwiki.ssfx.use('uicomponents/widgets/confirmationBox.css', true)
+$xwiki.jsfx.use('uicomponents/widgets/confirmedAjaxRequest.js', true)
+$xwiki.jsfx.use('uicomponents/widgets/notification.js', true)
+$xwiki.ssfx.use('uicomponents/widgets/notification.css', true)
+<script type="text/javascript" src="$xwiki.getSkinFile("js/prototype/prototype.js")"></script>
+<script type="text/javascript" src="$xwiki.getSkinFile("js/xwiki/xwiki.js", true)"></script>
+<script type="text/javascript" src="$xwiki.getSkinFile("js/xwiki/suggest/ajaxSuggest.js")"></script>
+$xwiki.jsfx.use('js/xwiki/suggest/searchlight.js', true)
+<script type="text/javascript">
+// <![CDATA[
+XWiki.webapppath = "${xwiki.webAppPath}";
+XWiki.servletpath = "${xwiki.servletPath}";
+XWiki.contextPath = "${request.contextPath}";
+XWiki.mainWiki = "${context.mainWikiName}";
+XWiki.currentWiki = "${context.database}";
+XWiki.currentSpace = "${doc.space}";
+XWiki.editor = "$!{editor}";
+XWiki.viewer = "$!{viewer}";
+XWiki.contextaction = "${context.getAction()}";
+XWiki.docisnew = $!doc.isNew();
+XWiki.docsyntax = "$!doc.getSyntaxId()";
+XWiki.blacklistedSpaces = [ #foreach($space in $blacklistedSpaces)#if($velocityCount > 1),#end"$space"#end ];
+XWiki.hasEdit = $hasEdit;
+XWiki.hasProgramming = $hasProgramming;
+window.docviewurl = "${doc.getURL('view')}";
+window.docediturl = "${doc.getURL('edit')}";
+window.docsaveurl = "${doc.getURL('save')}";
+window.docgeturl = "${doc.getURL('get')}";
+// ]]>
+</script>
+#if(($context.action=="inline")||($context.action=="edit") || ($context.action=="admin"))
+<script type="text/javascript">
+// <![CDATA[
+ var cancelEditNextOnunload;
+ var cancelCancelEditFlag = true;
+ var  lockEditFlag = false;
+
+ function cancelEditResponse(){
+ }
+
+ function cancelEdit(){
+     if (cancelCancelEditFlag) {
+       var surl = "$doc.getExternalURL("cancel", "ajax=1")";
+       var myAjax = new Ajax.Request(
+                 surl,
+                 {
+                     method: 'get',
+                     parameters: "",
+                     asynchronous: true,
+                     discardResponse: true
+                 });
+        cancelCancelEditFlag = false;
+     }
+     if (cancelEditNextOnunload!=null)
+           cancelEditNextOnunload();
+ }
+
+ function lockEdit(){
+    if (lockEditFlag==false) {
+#if($context.action=="inline")
+      var surl = "$doc.getExternalURL("lock")?action=inline&ajax=1&${docvariant.replaceAll("&amp;", "&")}";
+#else
+      var surl = "$doc.getExternalURL("lock")?ajax=1&${docvariant.replaceAll("&amp;", "&")}";
+#end
+      var myAjax = new Ajax.Request(
+                surl,
+                {
+                    method: 'get',
+                    parameters: "",
+                    asynchronous: true
+                });
+       lockEditFlag = false;
+    }
+ }
+
+ function prepareCancelEdit() {
+    lockEdit();
+ }
+ function cancelCancelEdit() {
+     cancelCancelEditFlag = false;
+ }
+    Event.observe(window, "unload", cancelEdit);
+    Event.observe(window, "pagehide", cancelEdit);
+// ]]>
+</script>
+#end
+##
+## Hooks for inserting JavaScript skin extensions
+##
+## - Skin file extension hook. Placed first since skin extensions might need to have xwiki or external libraries included first to be able to work properly
+<!-- com.xpn.xwiki.plugin.skinx.JsSkinFileExtensionPlugin -->
+## - Skin extension hook
+<!-- com.xpn.xwiki.plugin.skinx.JsSkinExtensionPlugin -->
+##
+## Compatibility "aspect" file for deprecated code.
+## Placed at the very end of the stream so that skin file extensions code can be deprecated easily as well.
+##
+<script type="text/javascript" src="$xwiki.getSkinFile("js/xwiki/compatibility.js", true)"></script>
