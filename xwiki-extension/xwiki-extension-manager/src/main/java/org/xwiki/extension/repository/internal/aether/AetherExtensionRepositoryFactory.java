@@ -36,7 +36,7 @@ import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryException;
 import org.xwiki.extension.repository.ExtensionRepositoryFactory;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
-import org.xwiki.extension.repository.internal.maven.configuration.MavenConfiguration;
+import org.xwiki.extension.repository.internal.aether.configuration.AetherConfiguration;
 import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
 @Component("maven")
@@ -47,7 +47,7 @@ public class AetherExtensionRepositoryFactory extends AbstractLogEnabled impleme
     private PlexusComponentManager aetherComponentManager;
 
     @Requirement
-    private MavenConfiguration mavenConfiguration;
+    private AetherConfiguration mavenConfiguration;
 
     private DefaultRepositorySystemSession session;
 

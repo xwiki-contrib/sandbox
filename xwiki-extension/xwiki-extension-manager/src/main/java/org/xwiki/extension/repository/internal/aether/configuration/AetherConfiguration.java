@@ -1,4 +1,4 @@
-package org.xwiki.extension.repository.internal.maven.configuration;
+package org.xwiki.extension.repository.internal.aether.configuration;
 
 import java.io.File;
 
@@ -8,7 +8,7 @@ import org.apache.maven.settings.Settings;
 import org.xwiki.component.annotation.ComponentRole;
 
 @ComponentRole
-public interface MavenConfiguration
+public interface AetherConfiguration
 {
     File getLocalRepository();
 

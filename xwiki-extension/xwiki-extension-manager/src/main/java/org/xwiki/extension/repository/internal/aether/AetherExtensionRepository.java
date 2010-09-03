@@ -36,16 +36,16 @@ import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
-import org.xwiki.extension.repository.internal.maven.configuration.MavenConfiguration;
+import org.xwiki.extension.repository.internal.aether.configuration.AetherConfiguration;
 import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
 public class AetherExtensionRepository implements ExtensionRepository
 {
     private ExtensionRepositoryId repositoryId;
 
-    private MavenConfiguration mavenConfiguration;
+    private AetherConfiguration mavenConfiguration;
 
-    private PlexusComponentManager mavenComponentManager;
+    private PlexusComponentManager plexusComponentManager;
 
     private RepositorySystem repositorySystem;
 
@@ -54,17 +54,17 @@ public class AetherExtensionRepository implements ExtensionRepository
     private RemoteRepository remoteRepository;
 
     public AetherExtensionRepository(ExtensionRepositoryId repositoryId, RepositorySystemSession session,
-        MavenConfiguration mavenConfiguration, PlexusComponentManager mavenComponentManager)
+        AetherConfiguration mavenConfiguration, PlexusComponentManager mavenComponentManager)
         throws ComponentLookupException
     {
         this.repositoryId = repositoryId;
 
         this.mavenConfiguration = mavenConfiguration;
 
-        this.mavenComponentManager = mavenComponentManager;
+        this.plexusComponentManager = mavenComponentManager;
 
         this.session = session;
-        this.repositorySystem = this.mavenComponentManager.getPlexus().lookup(RepositorySystem.class);
+        this.repositorySystem = this.plexusComponentManager.getPlexus().lookup(RepositorySystem.class);
 
         this.remoteRepository = new RemoteRepository(repositoryId.getId(), "default", repositoryId.getURI().toString());
     }
@@ -96,7 +96,7 @@ public class AetherExtensionRepository implements ExtensionRepository
         }
 
         try {
-            return new AetherExtension(extensionId, result, this, this.mavenComponentManager);
+            return new AetherExtension(extensionId, result, this, this.plexusComponentManager);
         } catch (ComponentLookupException e) {
             throw new ResolveException("Failed to resolve extension [" + extensionId + "]", e);
         }
@@ -106,5 +106,15 @@ public class AetherExtensionRepository implements ExtensionRepository
     {
         // TODO
         return false;
+    }
+    
+    public RepositorySystemSession getSession()
+    {
+        return session;
+    }
+    
+    public RemoteRepository getRemoteRepository()
+    {
+        return remoteRepository;
     }
 }

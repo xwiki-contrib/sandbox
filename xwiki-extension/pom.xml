@@ -30,7 +30,7 @@
     <version>32-SNAPSHOT</version>
   </parent>
   <artifactId>xwiki-extension</artifactId>
-  <version>2.4-SNAPSHOT</version>
+  <version>2.5-SNAPSHOT</version>
   <name>XWiki Platform - Extension</name>
   <packaging>pom</packaging>
   <description>XWiki Platform - Extension</description>

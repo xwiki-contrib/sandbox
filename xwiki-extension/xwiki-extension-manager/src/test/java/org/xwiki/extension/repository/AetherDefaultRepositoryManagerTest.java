@@ -30,12 +30,14 @@ public class AetherDefaultRepositoryManagerTest extends AbstractComponentTestCas
     {
         super.setUp();
 
+        getConfigurationSource().setProperty("extension.aether.localRepository", "target/test-repository");
+        
         this.repositoryManager = getComponentManager().lookup(ExtensionRepositoryManager.class);
 
         this.repositoryManager.addRepository(new ExtensionRepositoryId("xwiki-releases", "maven", new URI(
             "http://maven.xwiki.org/releases/")));
 
-        this.rubyArtifactId = new ExtensionId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.3.1");
+        this.rubyArtifactId = new ExtensionId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.3.1");        
     }
 
     @Test

@@ -1,4 +1,4 @@
-package org.xwiki.extension.repository.internal.maven.configuration;
+package org.xwiki.extension.repository.internal.aether.configuration;
 
 import java.io.File;
 
@@ -16,13 +16,17 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
+import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
 @Component
-public class DefaultMavenConfiguration extends AbstractLogEnabled implements MavenConfiguration, Initializable
+public class DefaultAetherConfiguration extends AbstractLogEnabled implements AetherConfiguration, Initializable
 {
     @Requirement
     private PlexusComponentManager mavenComponentManager;
+
+    @Requirement("xwikiproperties")
+    private ConfigurationSource configurationSource;
 
     private RepositorySystem repositorySystem;
 
@@ -45,12 +49,14 @@ public class DefaultMavenConfiguration extends AbstractLogEnabled implements Mav
 
     public File getLocalRepository()
     {
-        String localRepositoryPath = getSettings().getLocalRepository();
-        if (localRepositoryPath != null) {
-            return new File(localRepositoryPath);
+        String localRepositoryPath = this.configurationSource.getProperty("extension.aether.localRepository");
+
+        if (localRepositoryPath == null) {
+            localRepositoryPath = getSettings().getLocalRepository();
         }
 
-        return RepositorySystem.defaultUserLocalRepository;
+        return localRepositoryPath != null ? new File(localRepositoryPath)
+            : RepositorySystem.defaultUserLocalRepository;
     }
 
     public ArtifactRepository getLocalArtifactRepository() throws InvalidRepositoryException

@@ -20,12 +20,18 @@
 package org.xwiki.extension.repository.internal.aether;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.resolution.ArtifactDescriptorResult;
+import org.sonatype.aether.resolution.ArtifactRequest;
+import org.sonatype.aether.resolution.ArtifactResolutionException;
+import org.sonatype.aether.resolution.ArtifactResult;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
@@ -36,10 +42,10 @@ import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
 public class AetherExtension implements Extension
 {
-    private PlexusComponentManager mavenComponentManager;
+    private PlexusComponentManager plexusComponentManager;
 
     private AetherExtensionRepository repository;
-    
+
     private ArtifactDescriptorResult artifactDescriptorResult;
 
     private ExtensionId artifactId;
@@ -50,14 +56,16 @@ public class AetherExtension implements Extension
 
     private List<ExtensionId> suggested;
 
+    private RepositorySystem repositorySystem;
+
     public AetherExtension(ExtensionId artifactId, ArtifactDescriptorResult artifactDescriptorResult,
         AetherExtensionRepository repository, PlexusComponentManager mavenComponentManager)
         throws ComponentLookupException
     {
-        this.mavenComponentManager = mavenComponentManager;
+        this.plexusComponentManager = mavenComponentManager;
 
         this.repository = repository;
-        
+
         this.artifactId = artifactId;
         this.artifactDescriptorResult = artifactDescriptorResult;
 
@@ -68,6 +76,8 @@ public class AetherExtension implements Extension
         } else {
             this.extensionType = ExtensionType.UNKNOWN;
         }
+
+        this.repositorySystem = this.plexusComponentManager.getPlexus().lookup(RepositorySystem.class);
     }
 
     public String getName()
@@ -139,7 +149,24 @@ public class AetherExtension implements Extension
 
     public void download(File file) throws ExtensionException
     {
-        // TODO
+        ArtifactRequest artifactRequest = new ArtifactRequest();
+        artifactRequest.addRepository(this.repository.getRemoteRepository());
+        artifactRequest.setArtifact(this.artifactDescriptorResult.getArtifact());
+
+        ArtifactResult artifactResult;
+        try {
+            artifactResult = this.repositorySystem.resolveArtifact(this.repository.getSession(), artifactRequest);
+        } catch (ArtifactResolutionException e) {
+            throw new ExtensionException("Failed to resolve artifact", e);
+        }
+        
+        File aetherFile = artifactResult.getArtifact().getFile();
+        
+        try {
+            FileUtils.copyFile(aetherFile, file);
+        } catch (IOException e) {
+            new ExtensionException("Failed to copy file", e);
+        }
     }
 
     public ExtensionRepository getRepository()
