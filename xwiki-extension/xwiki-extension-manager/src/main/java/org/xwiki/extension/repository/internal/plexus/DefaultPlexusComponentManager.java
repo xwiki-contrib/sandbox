@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository.internal.aether;
+package org.xwiki.extension.repository.internal.plexus;
 
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
@@ -30,9 +30,10 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
+import org.xwiki.extension.repository.internal.aether.XWikiLoggerManager;
 
 @Component
-public class DefaultAetherComponentManager extends AbstractLogEnabled implements AetherComponentManager, Initializable
+public class DefaultPlexusComponentManager extends AbstractLogEnabled implements PlexusComponentManager, Initializable
 {
     /**
      * In-process maven runtime.

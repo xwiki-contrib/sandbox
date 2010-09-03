@@ -24,18 +24,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.sonatype.aether.ArtifactDescriptorResult;
-import org.sonatype.aether.Dependency;
+import org.sonatype.aether.graph.Dependency;
+import org.sonatype.aether.resolution.ArtifactDescriptorResult;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.repository.ExtensionRepository;
+import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
 public class AetherExtension implements Extension
 {
-    private AetherComponentManager mavenComponentManager;
+    private PlexusComponentManager mavenComponentManager;
 
     private AetherExtensionRepository repository;
     
@@ -50,7 +51,7 @@ public class AetherExtension implements Extension
     private List<ExtensionId> suggested;
 
     public AetherExtension(ExtensionId artifactId, ArtifactDescriptorResult artifactDescriptorResult,
-        AetherExtensionRepository repository, AetherComponentManager mavenComponentManager)
+        AetherExtensionRepository repository, PlexusComponentManager mavenComponentManager)
         throws ComponentLookupException
     {
         this.mavenComponentManager = mavenComponentManager;

@@ -23,20 +23,21 @@ import java.util.Collections;
 import java.util.List;
 
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.sonatype.aether.Artifact;
-import org.sonatype.aether.ArtifactDescriptorException;
-import org.sonatype.aether.ArtifactDescriptorRequest;
-import org.sonatype.aether.ArtifactDescriptorResult;
-import org.sonatype.aether.DefaultArtifact;
-import org.sonatype.aether.RemoteRepository;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.repository.RemoteRepository;
+import org.sonatype.aether.resolution.ArtifactDescriptorException;
+import org.sonatype.aether.resolution.ArtifactDescriptorRequest;
+import org.sonatype.aether.resolution.ArtifactDescriptorResult;
+import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.internal.maven.configuration.MavenConfiguration;
+import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
 public class AetherExtensionRepository implements ExtensionRepository
 {
@@ -44,7 +45,7 @@ public class AetherExtensionRepository implements ExtensionRepository
 
     private MavenConfiguration mavenConfiguration;
 
-    private AetherComponentManager mavenComponentManager;
+    private PlexusComponentManager mavenComponentManager;
 
     private RepositorySystem repositorySystem;
 
@@ -53,7 +54,7 @@ public class AetherExtensionRepository implements ExtensionRepository
     private RemoteRepository remoteRepository;
 
     public AetherExtensionRepository(ExtensionRepositoryId repositoryId, RepositorySystemSession session,
-        MavenConfiguration mavenConfiguration, AetherComponentManager mavenComponentManager)
+        MavenConfiguration mavenConfiguration, PlexusComponentManager mavenComponentManager)
         throws ComponentLookupException
     {
         this.repositoryId = repositoryId;

@@ -16,13 +16,13 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
-import org.xwiki.extension.repository.internal.maven.MavenComponentManager;
+import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
 @Component
 public class DefaultMavenConfiguration extends AbstractLogEnabled implements MavenConfiguration, Initializable
 {
     @Requirement
-    private MavenComponentManager mavenComponentManager;
+    private PlexusComponentManager mavenComponentManager;
 
     private RepositorySystem repositorySystem;
 
@@ -35,7 +35,7 @@ public class DefaultMavenConfiguration extends AbstractLogEnabled implements Mav
         } catch (ComponentLookupException e) {
             throw new InitializationException("Failed to lookup ArtifactRepositoryFactory", e);
         }
-        
+
         try {
             this.settingsBuilder = this.mavenComponentManager.getPlexus().lookup(SettingsBuilder.class);
         } catch (ComponentLookupException e) {
@@ -43,14 +43,19 @@ public class DefaultMavenConfiguration extends AbstractLogEnabled implements Mav
         }
     }
 
-    public ArtifactRepository getLocalRepository() throws InvalidRepositoryException
+    public File getLocalRepository()
     {
         String localRepositoryPath = getSettings().getLocalRepository();
         if (localRepositoryPath != null) {
-            return this.repositorySystem.createLocalRepository(new File(localRepositoryPath));
+            return new File(localRepositoryPath);
         }
 
-        return this.repositorySystem.createLocalRepository(RepositorySystem.defaultUserLocalRepository);
+        return RepositorySystem.defaultUserLocalRepository;
+    }
+
+    public ArtifactRepository getLocalArtifactRepository() throws InvalidRepositoryException
+    {
+        return this.repositorySystem.createLocalRepository(getLocalRepository());
     }
 
     public Settings getSettings()

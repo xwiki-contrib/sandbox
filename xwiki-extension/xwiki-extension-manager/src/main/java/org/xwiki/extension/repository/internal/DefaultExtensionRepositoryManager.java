@@ -41,7 +41,7 @@ public class DefaultExtensionRepositoryManager implements ExtensionRepositoryMan
     @Requirement
     private ComponentManager componentManager;
 
-    Map<ExtensionRepositoryId, ExtensionRepository> repositories =
+    private Map<ExtensionRepositoryId, ExtensionRepository> repositories =
         new ConcurrentHashMap<ExtensionRepositoryId, ExtensionRepository>();
 
     public void addRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException
@@ -52,7 +52,7 @@ public class DefaultExtensionRepositoryManager implements ExtensionRepositoryMan
 
             addRepository(repositoryFactory.createRepository(repositoryId));
         } catch (ComponentLookupException e) {
-            new ExtensionRepositoryException("Unsupported repository type[" + repositoryId.getType() + "]", e);
+            throw new ExtensionRepositoryException("Unsupported repository type[" + repositoryId.getType() + "]", e);
         }
     }
 

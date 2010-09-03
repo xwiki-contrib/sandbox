@@ -34,8 +34,8 @@
   <packaging>jar</packaging>
   <description>XWiki Platform - Extension - Repository</description>
    <properties>
-    <aether.version>1.1-SNAPSHOT</aether.version>
-    <maven.version>3.0-SNAPSHOT</maven.version>
+    <aether.version>1.2</aether.version>
+    <maven.version>3.0-beta-3</maven.version>
     <wagon.providers.version>1.0-beta-6</wagon.providers.version>
   </properties>
   <dependencies>
@@ -75,27 +75,7 @@
     <!-- Maven -->
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-model</artifactId>
-      <version>${maven.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-model-builder</artifactId>
-      <version>${maven.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
       <artifactId>maven-compat</artifactId>
-      <version>${maven.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>${maven.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact</artifactId>
       <version>${maven.version}</version>
     </dependency>
     <dependency>

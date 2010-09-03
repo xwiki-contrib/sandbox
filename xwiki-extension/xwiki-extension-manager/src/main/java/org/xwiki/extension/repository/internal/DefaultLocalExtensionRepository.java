@@ -41,7 +41,10 @@ import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.LocalExtensionRepository;
 
 /**
- * TODO: decide local repository format (probably maven-like) TODO: make it threadsafe bulletproof
+ * <ul>
+ * <li>TODO: decide local repository format (probably maven-like)</li>
+ * <li>TODO: make it threadsafe bulletproof</li>
+ * </ul>
  */
 @Component
 public class DefaultLocalExtensionRepository implements LocalExtensionRepository, Initializable

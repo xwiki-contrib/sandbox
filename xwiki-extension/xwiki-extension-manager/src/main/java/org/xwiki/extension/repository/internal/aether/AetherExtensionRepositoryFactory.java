@@ -22,9 +22,10 @@ package org.xwiki.extension.repository.internal.aether;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.sonatype.aether.LocalRepository;
 import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.repository.LocalRepository;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -36,17 +37,18 @@ import org.xwiki.extension.repository.ExtensionRepositoryException;
 import org.xwiki.extension.repository.ExtensionRepositoryFactory;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.internal.maven.configuration.MavenConfiguration;
+import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
-@Component("aether")
+@Component("maven")
 public class AetherExtensionRepositoryFactory extends AbstractLogEnabled implements ExtensionRepositoryFactory,
     Initializable
 {
     @Requirement
-    private AetherComponentManager aetherComponentManager;
+    private PlexusComponentManager aetherComponentManager;
 
     @Requirement
     private MavenConfiguration mavenConfiguration;
-    
+
     private DefaultRepositorySystemSession session;
 
     public void initialize() throws InitializationException
@@ -58,9 +60,9 @@ public class AetherExtensionRepositoryFactory extends AbstractLogEnabled impleme
             throw new InitializationException("Failed to lookup RepositorySystem", e);
         }
 
-        this.session = DefaultRepositorySystemSession.newMavenRepositorySystemSession();
+        this.session = new MavenRepositorySystemSession();
 
-        LocalRepository localRepo = new LocalRepository("target/local-repo");
+        LocalRepository localRepo = new LocalRepository(this.mavenConfiguration.getLocalRepository());
         this.session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(localRepo));
     }
 
@@ -74,7 +76,8 @@ public class AetherExtensionRepositoryFactory extends AbstractLogEnabled impleme
     public ExtensionRepository createRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException
     {
         try {
-            return new AetherExtensionRepository(repositoryId, this.session, this.mavenConfiguration, this.aetherComponentManager);
+            return new AetherExtensionRepository(repositoryId, this.session, this.mavenConfiguration,
+                this.aetherComponentManager);
         } catch (Exception e) {
             throw new ExtensionRepositoryException("Failed to create repository [" + repositoryId + "]", e);
         }
