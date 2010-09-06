@@ -1,3 +1,4 @@
+* directly download into XWiki local repository instead of having a maven repository and a XWiki repository
 * asynchronous install UI (resolve, download, etc...) with events
 * link to components registration and xar import
 * uninstall
