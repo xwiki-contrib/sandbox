@@ -35,11 +35,13 @@ public class DefaultCoreExtensionRepositoryTest extends AbstractComponentTestCas
     {
         super.setUp();
 
+        getConfigurationSource().setProperty("extension.localRepository", "target/test-repository");
+        
         this.coreExtensionRepository = getComponentManager().lookup(CoreExtensionRepository.class);
     }
     
     @Test
-    public void testBidon() throws ResolveException
+    public void testInit() throws ResolveException
     {
         Assert.assertTrue(this.coreExtensionRepository.countExtensions() > 0);
     }
