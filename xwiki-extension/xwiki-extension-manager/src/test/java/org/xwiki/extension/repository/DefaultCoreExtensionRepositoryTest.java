@@ -34,8 +34,6 @@ public class DefaultCoreExtensionRepositoryTest extends AbstractComponentTestCas
     public void setUp() throws Exception
     {
         super.setUp();
-
-        getConfigurationSource().setProperty("extension.localRepository", "target/test-repository");
         
         this.coreExtensionRepository = getComponentManager().lookup(CoreExtensionRepository.class);
     }
