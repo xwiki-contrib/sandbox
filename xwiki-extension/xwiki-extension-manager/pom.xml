@@ -45,8 +45,24 @@
       <version>${pom.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-classloader</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-component-default</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.5-RC2</version>
     </dependency>
     
     <!-- Aether -->
@@ -150,6 +166,11 @@
         <releases>
           <enabled>true</enabled>
         </releases>
+      </repository>
+      <repository>
+        <id>reflections-repo</id>
+        <name>Reflections Maven2 Repository</name>
+        <url>http://reflections.googlecode.com/svn/repo</url>
       </repository>
   </repositories>
 </project>

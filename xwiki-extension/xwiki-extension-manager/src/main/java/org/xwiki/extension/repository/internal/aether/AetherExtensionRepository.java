@@ -74,6 +74,12 @@ public class AetherExtensionRepository implements ExtensionRepository
         return this.repositoryId;
     }
 
+    public int countExtensions()
+    {
+        // TODO
+        return 0;
+    }
+    
     public List<Extension> getExtensions(int nb, int offset)
     {
         // TODO

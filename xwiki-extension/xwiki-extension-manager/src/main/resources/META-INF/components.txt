@@ -2,6 +2,7 @@ org.xwiki.extension.internal.DefaultExtensionManager
 org.xwiki.extension.internal.DefaultExtensionManagerConfiguration
 org.xwiki.extension.repository.internal.DefaultExtensionRepositoryManager
 org.xwiki.extension.repository.internal.DefaultLocalExtensionRepository
+org.xwiki.extension.repository.internal.DefaultCoreExtensionRepository
 org.xwiki.extension.repository.internal.aether.AetherExtensionRepositoryFactory
 org.xwiki.extension.repository.internal.aether.configuration.DefaultAetherConfiguration
 org.xwiki.extension.repository.internal.plexus.DefaultPlexusComponentManager

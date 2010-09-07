@@ -17,23 +17,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository;
+package org.xwiki.extension;
 
-import java.util.List;
+import java.net.URL;
 
-import org.xwiki.extension.Extension;
-import org.xwiki.extension.ExtensionId;
-import org.xwiki.extension.ResolveException;
-
-public interface ExtensionRepository
+public interface CoreExtension extends Extension
 {
-    ExtensionRepositoryId getId();
-    
-    Extension resolve(ExtensionId extensionId) throws ResolveException;
-
-    boolean exists(ExtensionId extensionId);
-    
-    int countExtensions();
-    
-    List< ? extends Extension> getExtensions(int nb, int offset);
+    URL getURL();
 }

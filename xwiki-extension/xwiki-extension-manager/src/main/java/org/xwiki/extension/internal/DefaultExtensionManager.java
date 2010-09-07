@@ -19,23 +19,26 @@
  */
 package org.xwiki.extension.internal;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManager;
-import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.UninstallException;
+import org.xwiki.extension.install.ExtensionInstaller;
+import org.xwiki.extension.install.ExtensionInstallerException;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryFactory;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
@@ -56,19 +59,32 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
     @Requirement
     private LocalExtensionRepository localExtensionRepository;
 
+    @Requirement
+    private ComponentManager componentManager;
+
     /**
-     * extensions than can't be upgraded (generally because it's "core module" and not part of the extension management
+     * Extensions than can't be upgraded (generally because it's "core" modules and not part of the extension management
      * system)
      */
-    private Map<String, ExtensionId> lockedExtensions = new HashMap<String, ExtensionId>();
+    private Set<ExtensionId> lockedExtensions = new HashSet<ExtensionId>();
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.component.phase.Initializable#initialize()
+     */
     public void initialize() throws InitializationException
     {
+        // Load extension repositories
         for (ExtensionRepositoryFactory repositoryFactory : this.extensionRepositoryFactory) {
             for (ExtensionRepository repository : repositoryFactory.getDefaultExtensionRepositories()) {
                 this.repositoryManager.addRepository(repository);
             }
         }
+
+        // TODO: List core module (get all existing maven module and add them to lockedExtensions)
+
+        // TODO: Load extensions from local repository
     }
 
     public int coundAvailableExtensions()
@@ -89,7 +105,7 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
         return null;
     }
 
-    public List<? extends Extension> getInstalledExtensions(int nb, int offset)
+    public List< ? extends Extension> getInstalledExtensions(int nb, int offset)
     {
         return this.localExtensionRepository.getExtensions(nb, offset);
     }
@@ -102,29 +118,30 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
     private void installExtension(ExtensionId extensionId, boolean dependency) throws InstallException
     {
         try {
+            // Resolve extension
             Extension remoteExtension = this.repositoryManager.resolve(extensionId);
 
-            for (ExtensionDependency dependencyDependency : remoteExtension.getDependencies()) {
-                installExtension(new ExtensionId(dependencyDependency.getName(), dependencyDependency.getVersion()),
-                    true);
-            }
-
-            LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);
-
-            // TODO: inject extension, what about some kind of ExtensionLoader with the ExtensionType string as role
-            // hint ?
-            // We should probably change the type for a plain String to make possible to support any "type" of
-            // extension, pretty sure we would have use case for this.
-            if (localExtension.getType() == ExtensionType.PAGES) {
-                // TODO import xar
-            } else if (localExtension.getType() == ExtensionType.JAR) {
-                // TODO load jar components
-            }
-
-            // etc.
-        } catch (ResolveException e) {
-            throw new InstallException("Failed to resolve extension", e);
+            installExtension(remoteExtension, dependency);
+        } catch (Exception e) {
+            throw new InstallException("Failed to install extension", e);
         }
+    }
+
+    private void installExtension(Extension remoteExtension, boolean dependency) throws ComponentLookupException,
+        InstallException, ExtensionInstallerException
+    {
+        for (ExtensionDependency dependencyDependency : remoteExtension.getDependencies()) {
+            installExtension(new ExtensionId(dependencyDependency.getName(), dependencyDependency.getVersion()), true);
+        }
+
+        // Store extension in local repository
+        LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);
+
+        // Load extension
+        ExtensionInstaller extensionInstaller =
+            this.componentManager.lookup(ExtensionInstaller.class, localExtension.getType().toString().toLowerCase());
+
+        extensionInstaller.install(localExtension);
     }
 
     public void uninstallExtension(ExtensionId extensionId) throws UninstallException

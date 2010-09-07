@@ -19,21 +19,28 @@
  */
 package org.xwiki.extension.repository;
 
-import java.util.List;
+import junit.framework.Assert;
 
-import org.xwiki.extension.Extension;
-import org.xwiki.extension.ExtensionId;
+import org.junit.Before;
+import org.junit.Test;
 import org.xwiki.extension.ResolveException;
+import org.xwiki.test.AbstractComponentTestCase;
 
-public interface ExtensionRepository
+public class DefaultCoreExtensionRepositoryTest extends AbstractComponentTestCase
 {
-    ExtensionRepositoryId getId();
+    CoreExtensionRepository coreExtensionRepository;
     
-    Extension resolve(ExtensionId extensionId) throws ResolveException;
+    @Before
+    public void setUp() throws Exception
+    {
+        super.setUp();
 
-    boolean exists(ExtensionId extensionId);
+        this.coreExtensionRepository = getComponentManager().lookup(CoreExtensionRepository.class);
+    }
     
-    int countExtensions();
-    
-    List< ? extends Extension> getExtensions(int nb, int offset);
+    @Test
+    public void testBidon() throws ResolveException
+    {
+        Assert.assertTrue(this.coreExtensionRepository.countExtensions() > 0);
+    }
 }

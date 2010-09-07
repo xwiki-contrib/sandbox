@@ -117,7 +117,13 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
         return new DefaultLocalExtension(this, extension);
     }
 
-    public List< ? extends Extension> getExtensions(int nb, int offset)
+    public int countExtensions()
+    {
+        // TODO
+        return 0;
+    }
+    
+    public List< ? extends LocalExtension> getExtensions(int nb, int offset)
     {
         return getLocalExtensions(nb, offset);
     }

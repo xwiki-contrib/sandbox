@@ -21,19 +21,15 @@ package org.xwiki.extension.repository;
 
 import java.util.List;
 
-import org.xwiki.extension.Extension;
+import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.extension.CoreExtension;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ResolveException;
 
-public interface ExtensionRepository
+@ComponentRole
+public interface CoreExtensionRepository extends ExtensionRepository
 {
-    ExtensionRepositoryId getId();
-    
-    Extension resolve(ExtensionId extensionId) throws ResolveException;
+    List<CoreExtension> getCoreExtensions(int nb, int offset);
 
-    boolean exists(ExtensionId extensionId);
-    
-    int countExtensions();
-    
-    List< ? extends Extension> getExtensions(int nb, int offset);
+    CoreExtension getCoreExtension(ExtensionId extensionId) throws ResolveException;
 }
