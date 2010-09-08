@@ -60,6 +60,12 @@ public class TrustedLDAPConfig extends Config
 
     public Map<String, String> getRemoteUserMapping(String propertyName, XWikiContext context)
     {
-        return getMapParam("remoteUserMapping." + propertyName, '|', Collections.<String, String> emptyMap(), context);
+        return getRemoteUserMapping(propertyName, false, context);
+    }
+
+    public Map<String, String> getRemoteUserMapping(String propertyName, boolean forceLowerCaseKey, XWikiContext context)
+    {
+        return getMapParam("remoteUserMapping." + propertyName, '|', Collections.<String, String> emptyMap(),
+            forceLowerCaseKey, context);
     }
 }

@@ -21,6 +21,7 @@
 
 package com.xwiki.authentication.trustedldap;
 
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.securityfilter.realm.SimplePrincipal;
 
+import com.novell.ldap.LDAPException;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -153,6 +155,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             user = super.checkAuth(context);
         }
 
+        LOG.debug("XWikiUser: " + user);
+
         return user;
     }
 
@@ -172,8 +176,12 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
 
         if (user == null) {
+            LOG.debug("Fallback on standard LDAP authenticator");
+
             user = super.checkAuth(username, password, rememberme, context);
         }
+
+        LOG.debug("XWikiUser: " + user);
 
         return user;
     }
@@ -225,7 +233,9 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             }
 
             LOG.debug("Saving auth cookie");
-            String encuname = encryptText(principal.getName(), context);
+            String encuname =
+                encryptText(principal.getName().contains(":") ? principal.getName() : context.getDatabase() + ":"
+                    + principal.getName(), context);
             Cookie usernameCookie = new Cookie("XWIKISSOAUTHINFO", encuname);
             usernameCookie.setMaxAge(-1);
             usernameCookie.setPath("/");
@@ -253,8 +263,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         try {
             context.setDatabase(context.getMainXWiki());
 
-            principal = authenticateSSOInContext(wikiName.equals(context.getMainXWiki()), context);
-        } catch (XWikiException e) {
+            principal = authenticateSSOInContext(login, password, wikiName.equals(context.getMainXWiki()), context);
+        } catch (Exception e) {
             LOG.debug("Failed to authenticate with SSO", e);
         } finally {
             context.setDatabase(wikiName);
@@ -275,6 +285,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         ldapConfiguration.put("login", ssoRemoteUser);
 
         Pattern remoteUserParser = getConfig().getRemoteUserParser(context);
+
+        LOG.debug("remoteUserParser: " + remoteUserParser);
 
         if (remoteUserParser != null) {
             Matcher marcher = remoteUserParser.matcher(ssoRemoteUser);
@@ -303,8 +315,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
     private String convertRemoteUserMapping(String propertyName, String propertyValue, XWikiContext context)
     {
-        Map<String, String> hostConvertor = getConfig().getRemoteUserMapping(propertyName, context);
-        String converted = hostConvertor.get(propertyValue);
+        Map<String, String> hostConvertor = getConfig().getRemoteUserMapping(propertyName, true, context);
+        String converted = hostConvertor.get(propertyValue.toLowerCase());
 
         return converted != null ? converted : propertyValue;
     }
@@ -344,20 +356,28 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         return bind;
     }
 
-    public Principal authenticateSSOInContext(boolean local, XWikiContext context) throws XWikiException
+    public Principal authenticateSSOInContext(String login, String password, boolean local, XWikiContext context)
+        throws XWikiException, UnsupportedEncodingException, LDAPException
     {
         LOG.debug("Authenticate SSO");
 
         XWikiRequest request = context.getRequest();
 
+        boolean checkAuth = false;
         Principal principal = null;
 
         String ssoRemoteUser = request.getRemoteUser();
 
         if (ssoRemoteUser == null) {
-            LOG.warn("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
+            // try using provided user name/password if no SSO information is provided
+            ssoRemoteUser = login;
+            checkAuth = true;
 
-            return null;
+            if (ssoRemoteUser == null) {
+                LOG.warn("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
+
+                return null;
+            }
         }
 
         LOG.debug("request remote user: " + ssoRemoteUser);
@@ -367,6 +387,11 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         // ////////////////////////////////////////////////////////////////////
 
         Map<String, String> remoteUserLdapConfiguration = parseRemoteUser(ssoRemoteUser, context);
+
+        // provide form password
+        if (!remoteUserLdapConfiguration.containsKey("password")) {
+            remoteUserLdapConfiguration.put("password", password);
+        }
 
         String ldapUid = remoteUserLdapConfiguration.get("login");
         String validXWikiUserName = ldapUid.replace(".", "");
@@ -436,6 +461,35 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                 "Can't find LDAP user DN for [" + ldapUid + "]");
         }
+
+        // if using form user/password, validate it
+        if (checkAuth) {
+            if ("1".equals(config.getLDAPParam("ldap_validate_password", "0", context))) {
+                String passwordField = config.getLDAPParam("ldap_password_field", "userPassword", context);
+                if (!connector.checkPassword(ldapDn, password, passwordField)) {
+                    LOG.debug("Password comparison failed, are you really sure you need validate_password ?"
+                        + " If you don't enable it, it does not mean user credentials are not validated."
+                        + " The goal of this property is to bypass standard LDAP bind"
+                        + " which is usually bad unless you really know what you do.");
+
+                    throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
+                        "LDAP authentication failed:" + " could not validate the password: wrong password for "
+                            + ldapDn);
+                }
+            } else {
+                String bindDNFormat = config.getLDAPBindDN(context);
+                String bindDN = config.getLDAPBindDN(ldapUid, password, context);
+
+                if (bindDNFormat.equals(bindDN)) {
+                    // Validate user credentials
+                    connector.bind(ldapDn, password);
+
+                    // Rebind admin user
+                    connector.bind(bindDN, config.getLDAPBindPassword(ldapUid, password, context));
+                }
+            }
+        }
+
         // ////////////////////////////////////////////////////////////////////
         // sync user
         // ////////////////////////////////////////////////////////////////////

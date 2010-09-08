@@ -101,7 +101,8 @@ public class Config
         return list;
     }
 
-    public Map<String, String> getMapParam(String name, char separator, Map<String, String> def, XWikiContext context)
+    public Map<String, String> getMapParam(String name, char separator, Map<String, String> def,
+        boolean forceLowerCaseKey, XWikiContext context)
     {
         Map<String, String> mappings = def;
 
@@ -114,12 +115,12 @@ public class Config
                 mappings = new LinkedHashMap<String, String>();
 
                 for (String fieldStr : list) {
-                    String[] field = StringUtils.split(fieldStr, '=');
-                    if (2 == field.length) {
-                        String key = field[0];
-                        String value = field[1];
+                    int index = fieldStr.indexOf('=');
+                    if (index != -1) {
+                        String key = fieldStr.substring(0, index);
+                        String value = index + 1 == fieldStr.length() ? "" : fieldStr.substring(index + 1);
 
-                        mappings.put(key, value);
+                        mappings.put(forceLowerCaseKey ? key.toLowerCase() : key, value);
                     } else {
                         LOG.warn("Error parsing " + name + " attribute in xwiki.cfg: " + fieldStr);
                     }

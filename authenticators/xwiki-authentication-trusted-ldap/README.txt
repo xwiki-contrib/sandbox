@@ -1,6 +1,6 @@
 = What it does =
 
-Support request remote user based SSO authentication and get informations from LDAP server.
+Support SAAS remote user based SSO authentication and get informations from LDAP server.
 
 = This authenticator execute the following process =
 
@@ -19,7 +19,7 @@ If SSO fail, it tries standard LDAP authentication.
 #-# Indicate which of the regexp group correspond to which LDAP properties
 #-# The following LDAP properties are supported: login, ldap_server, ldap_base_DN
 # xwiki.authentication.trustedldap.remoteUserMapping.1=login
-# xwiki.authentication.trustedldap.remoteUserMapping.2=host,ldap_base_DN
+# xwiki.authentication.trustedldap.remoteUserMapping.2=ldap_server,ldap_base_DN
 
 #-# Indicate how to convert each found property
 # xwiki.authentication.trustedldap.remoteUserMapping.host=MYDOMAIN=my.domain.com|MYDOMAIN2=my.domain2.com
@@ -31,12 +31,10 @@ If SSO fail, it tries standard LDAP authentication.
 
 It's also possible to put any of theses configuration in the XWiki.XWikiPreferences object in the XWiki.XWikiPreferences page. Add a string field with the proper name to the class and put the value you want.
 
-The fields names are not exactly the same, you have to change "xwiki.authentication.puma." prefix to "puma_":
+The fields names are not exactly the same, you have to change "xwiki.authentication.trustedldap." prefix to "trustedldap_":
 
-xwiki.authentication.puma.userUidField -> puma_userUidField
-xwiki.authentication.puma.userMapping -> puma_userMapping
-xwiki.authentication.puma.groupsMapping -> puma_groupsMapping
-xwiki.authentication.puma.fallback -> puma_fallback
+xwiki.authentication.trustedldap.remoteUserParser -> trustedldap_remoteUserParser
+...
 
 = Install =
 
@@ -48,4 +46,4 @@ xwiki.authentication.authclass=com.xwiki.authentication.trustedldap.TrustedLDAPA
 
 = TODO =
 
-* support any LDAP property in remoteUserMapping configuration
+* generic support of LDAP property in remoteUserMapping configuration
