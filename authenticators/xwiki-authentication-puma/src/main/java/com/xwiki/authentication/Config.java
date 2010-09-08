@@ -38,7 +38,7 @@ import com.xpn.xwiki.XWikiContext;
 /**
  * Get PUMA authenticator configuration.
  * 
- * @version $Id$
+ * @version $Id: Config.java 29914 2010-06-30 16:23:44Z tmortagne $
  */
 public class Config
 {
@@ -47,14 +47,14 @@ public class Config
      */
     private static final Log LOG = LogFactory.getLog(Config.class);
 
-    private final String prefSuffix;
+    private final String prefPrefix;
 
-    private final String confSuffix;
+    private final String confPrefix;
 
-    public Config(String prefSuffix, String confSuffix)
+    public Config(String prefPrefix, String confPrefix)
     {
-        this.prefSuffix = prefSuffix;
-        this.confSuffix = confSuffix;
+        this.prefPrefix = prefPrefix;
+        this.confPrefix = confPrefix;
     }
 
     public String getParam(String name, XWikiContext context)
@@ -66,18 +66,18 @@ public class Config
     {
         String param = null;
         try {
-            param = context.getWiki().getXWikiPreference(prefSuffix + "_" + name, context);
+            param = context.getWiki().getXWikiPreference(prefPrefix + "_" + name, context);
         } catch (Exception e) {
-            LOG.error("Faile to get preference [" + prefSuffix + "_" + name + "]", e);
+            LOG.error("Faile to get preference [" + prefPrefix + "_" + name + "]", e);
         }
 
         if (StringUtils.isEmpty(param)) {
             param = def;
 
             try {
-                param = context.getWiki().Param(confSuffix + "." + name);
+                param = context.getWiki().Param(confPrefix + "." + name);
             } catch (Exception e) {
-                LOG.error("Failed to get property [" + confSuffix + "." + name + "] from configuration file", e);
+                LOG.error("Failed to get property [" + confPrefix + "." + name + "] from configuration file", e);
             }
         }
 
@@ -114,10 +114,10 @@ public class Config
                 mappings = new LinkedHashMap<String, String>();
 
                 for (String fieldStr : list) {
-                    String[] field = StringUtils.split(fieldStr, '=');
-                    if (2 == field.length) {
-                        String key = field[0];
-                        String value = field[1];
+                	int index = fieldStr.indexOf('=');
+                    if (index != -1) {
+                        String key = fieldStr.substring(0, index);
+                        String value = index + 1 == fieldStr.length() ? "" : fieldStr.substring(index + 1);
 
                         mappings.put(key, value);
                     } else {

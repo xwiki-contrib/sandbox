@@ -147,7 +147,9 @@ public abstract class AbstractSSOAuthServiceImpl extends AbstractAuthServiceImpl
             }
 
             LOG.debug("Saving auth cookie");
-            String encuname = encryptText(principal.getName(), context);
+            String encuname =
+                encryptText(principal.getName().contains(":") ? principal.getName() : context.getDatabase() + ":"
+                    + principal.getName(), context);
             Cookie usernameCookie = new Cookie(COOKIE_NAME, encuname);
             usernameCookie.setMaxAge(-1);
             usernameCookie.setPath("/");
