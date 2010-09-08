@@ -79,7 +79,7 @@ public class AetherExtensionRepository implements ExtensionRepository
         // TODO
         return 0;
     }
-    
+
     public List<Extension> getExtensions(int nb, int offset)
     {
         // TODO
@@ -101,6 +101,12 @@ public class AetherExtensionRepository implements ExtensionRepository
             throw new ResolveException("Failed to resolve aether artifact", e);
         }
 
+        List<Exception> extensions = result.getExceptions();
+
+        if (!extensions.isEmpty()) {
+            throw new ResolveException("Failed to resolve extension [" + extensionId + "]", extensions.get(0));
+        }
+
         try {
             return new AetherExtension(extensionId, result, this, this.plexusComponentManager);
         } catch (ComponentLookupException e) {
@@ -113,12 +119,12 @@ public class AetherExtensionRepository implements ExtensionRepository
         // TODO
         return false;
     }
-    
+
     public RepositorySystemSession getSession()
     {
         return session;
     }
-    
+
     public RemoteRepository getRemoteRepository()
     {
         return remoteRepository;

@@ -34,7 +34,9 @@ public interface ExtensionManager
 
     int coundInstalledExtensions();
 
-    void installExtension(ExtensionId extensionId) throws InstallException;
+    // LocalExtension installExtension(String name) throws InstallException;
 
-    void uninstallExtension(ExtensionId extensionId) throws UninstallException;
+    LocalExtension installExtension(ExtensionId extensionId) throws InstallException;
+
+    void uninstallExtension(String name) throws UninstallException;
 }

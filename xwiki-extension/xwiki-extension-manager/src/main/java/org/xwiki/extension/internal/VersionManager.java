@@ -17,20 +17,12 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository;
-
-import java.util.List;
+package org.xwiki.extension.internal;
 
 import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.extension.CoreExtension;
-import org.xwiki.extension.ResolveException;
 
 @ComponentRole
-public interface CoreExtensionRepository extends ExtensionRepository
+public interface VersionManager
 {
-    List<CoreExtension> getCoreExtensions(int nb, int offset);
-
-    CoreExtension getCoreExtension(String name) throws ResolveException;
-
-    boolean exists(String name);
+    int compareVersions(String version1, String version2);
 }

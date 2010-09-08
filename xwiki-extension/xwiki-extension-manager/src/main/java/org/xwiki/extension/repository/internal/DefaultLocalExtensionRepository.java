@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -32,11 +34,11 @@ import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionException;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManagerConfiguration;
-import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.UninstallException;
+import org.xwiki.extension.internal.VersionManager;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.LocalExtensionRepository;
 
@@ -52,9 +54,14 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
     @Requirement
     private ExtensionManagerConfiguration configuration;
 
+    @Requirement
+    private VersionManager versionManager;
+
     private ExtensionRepositoryId repositoryId;
 
     private File rootFolder;
+
+    private Map<String, LocalExtension> extensions = new ConcurrentHashMap<String, LocalExtension>();
 
     public void initialize() throws InitializationException
     {
@@ -65,6 +72,8 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
         }
 
         this.repositoryId = new ExtensionRepositoryId("local", "xwiki", this.rootFolder.toURI());
+
+        // TODO: load local extensions from repository
     }
 
     public File getRootFolder()
@@ -76,7 +85,13 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
-        return getLocalExtension(extensionId);
+        LocalExtension localExtension = getLocalExtension(extensionId.getName());
+
+        if (localExtension == null) {
+            throw new ResolveException("Can't find extension [" + extensionId + "]");
+        }
+
+        return localExtension;
     }
 
     public boolean exists(ExtensionId extensionId)
@@ -98,31 +113,27 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
         return Collections.emptyList();
     }
 
-    public LocalExtension getLocalExtension(ExtensionId extensionId) throws ResolveException
+    public LocalExtension getLocalExtension(String name)
     {
-        return getLocalExtension(extensionId.getName(), extensionId.getVersion());
-    }
+        LocalExtension extension = this.extensions.get(name);
 
-    private LocalExtension getLocalExtension(String name, String version)
-    {
-        // FIXME: generate a DefaultLocalExtension from a descriptor file
-
-        return new DefaultLocalExtension(this, name, version, ExtensionType.JAR);
+        return extension != null ? extension : null;
     }
 
     private LocalExtension createExtension(Extension extension, boolean dependency)
     {
-        // FIXME: create a local extension descriptor and export it in a file in the local repository
+        DefaultLocalExtension localExtension = new DefaultLocalExtension(this, extension);
 
-        return new DefaultLocalExtension(this, extension);
+        localExtension.setDependency(dependency);
+
+        return localExtension;
     }
 
     public int countExtensions()
     {
-        // TODO
-        return 0;
+        return this.extensions.size();
     }
-    
+
     public List< ? extends LocalExtension> getExtensions(int nb, int offset)
     {
         return getLocalExtensions(nb, offset);
@@ -130,9 +141,10 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     public LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException
     {
-        LocalExtension localExtension = getLocalExtension(extension.getName(), extension.getVersion());
+        LocalExtension localExtension = getLocalExtension(extension.getName());
 
-        if (localExtension == null) {
+        if (localExtension == null
+            || this.versionManager.compareVersions(extension.getVersion(), localExtension.getVersion()) != 0) {
             localExtension = createExtension(extension, dependency);
 
             try {

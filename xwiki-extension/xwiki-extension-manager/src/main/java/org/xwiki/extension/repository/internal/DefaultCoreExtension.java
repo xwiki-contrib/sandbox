@@ -61,6 +61,12 @@ public class DefaultCoreExtension implements CoreExtension
 
     private DefaultCoreExtensionRepository repository;
 
+    public DefaultCoreExtension(String name, String version)
+    {
+        this.name = name;
+        this.version = version;
+    }
+
     public DefaultCoreExtension(DefaultCoreExtensionRepository repository, URL url, InputStream descriptorStream)
         throws ParserConfigurationException, SAXException, IOException
     {
@@ -79,7 +85,7 @@ public class DefaultCoreExtension implements CoreExtension
         Document doc = db.parse(descriptorStream);
 
         Node projectNode = extractElement(doc, "project");
-        
+
         Node groupIdNode = extractElement(projectNode, "groupId");
         Node artifactIdNode = extractElement(projectNode, "artifactId");
         Node versionNode = extractElement(projectNode, "version");
@@ -165,7 +171,6 @@ public class DefaultCoreExtension implements CoreExtension
 
     public URL getURL()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return this.url;
     }
 }

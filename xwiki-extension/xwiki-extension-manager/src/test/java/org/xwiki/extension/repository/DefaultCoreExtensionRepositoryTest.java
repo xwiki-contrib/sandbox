@@ -23,7 +23,6 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xwiki.extension.ResolveException;
 import org.xwiki.test.AbstractComponentTestCase;
 
 public class DefaultCoreExtensionRepositoryTest extends AbstractComponentTestCase
@@ -39,7 +38,7 @@ public class DefaultCoreExtensionRepositoryTest extends AbstractComponentTestCas
     }
     
     @Test
-    public void testInit() throws ResolveException
+    public void testInit()
     {
         Assert.assertTrue(this.coreExtensionRepository.countExtensions() > 0);
     }

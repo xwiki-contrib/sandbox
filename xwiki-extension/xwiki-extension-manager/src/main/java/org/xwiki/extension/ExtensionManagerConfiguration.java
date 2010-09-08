@@ -22,6 +22,9 @@ package org.xwiki.extension;
 import java.io.File;
 import java.io.IOException;
 
+import org.xwiki.component.annotation.ComponentRole;
+
+@ComponentRole
 public interface ExtensionManagerConfiguration
 {
     File getLocalRepository() throws IOException;

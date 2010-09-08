@@ -23,8 +23,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -80,10 +80,9 @@ public class JarExtensionInstaller extends AbstractLogEnabled implements Extensi
     {
         try {
             if (this.classLoader == null) {
-                this.classLoader =
-                    new URIClassLoader(new URI[] {new URI(jarFile.getAbsolutePath())}, getClass().getClassLoader());
+                this.classLoader = new URIClassLoader(new URI[] {jarFile.toURI()}, getClass().getClassLoader());
             } else {
-                this.classLoader.addURL(new URL(jarFile.getAbsolutePath()));
+                this.classLoader.addURL(jarFile.toURL());
             }
         } catch (Exception e) {
             throw new ExtensionInstallerException("Failed to load jar file", e);
@@ -93,27 +92,26 @@ public class JarExtensionInstaller extends AbstractLogEnabled implements Extensi
     private void loadComponents(File jarFile) throws ExtensionInstallerException
     {
         try {
-            List<String> componentClassNames = new ArrayList<String>();
-            List<String> componentOverrideClassNames = new ArrayList<String>();
+            List<String>[] components = getDeclaredComponents(jarFile);
 
-            getDeclaredComponents(jarFile, componentClassNames, componentOverrideClassNames);
-
-            if (componentClassNames.isEmpty()) {
+            if (components[0] == null) {
                 getLogger().debug(jarFile + " does not contains any component");
                 return;
             }
 
-            this.jarLoader.initialize(this.componentManager, this.classLoader, componentClassNames,
-                componentOverrideClassNames);
+            this.jarLoader.initialize(this.componentManager, this.classLoader, components[0], components[1] == null
+                ? Collections.<String> emptyList() : components[1]);
         } catch (Exception e) {
             throw new ExtensionInstallerException("Failed to load jar file components", e);
         }
     }
 
-    private void getDeclaredComponents(File jarFile, List<String> componentClassNames,
-        List<String> componentOverrideClassNames) throws IOException
+    private List<String>[] getDeclaredComponents(File jarFile) throws IOException
     {
         ZipInputStream zis = new ZipInputStream(new FileInputStream(jarFile));
+
+        List<String> componentClassNames = null;
+        List<String> componentOverrideClassNames = null;
 
         try {
             for (ZipEntry entry = zis.getNextEntry(); entry != null && componentClassNames == null
@@ -127,5 +125,7 @@ public class JarExtensionInstaller extends AbstractLogEnabled implements Extensi
         } finally {
             zis.close();
         }
+
+        return new List[] {componentClassNames, componentOverrideClassNames};
     }
 }

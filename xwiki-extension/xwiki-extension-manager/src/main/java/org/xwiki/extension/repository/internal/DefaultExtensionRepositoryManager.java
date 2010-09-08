@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.extension.Extension;
@@ -36,7 +37,7 @@ import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
 
 @Component
-public class DefaultExtensionRepositoryManager implements ExtensionRepositoryManager
+public class DefaultExtensionRepositoryManager extends AbstractLogEnabled implements ExtensionRepositoryManager
 {
     @Requirement
     private ComponentManager componentManager;
@@ -71,13 +72,16 @@ public class DefaultExtensionRepositoryManager implements ExtensionRepositoryMan
         Extension artifact = null;
 
         for (ExtensionRepository repository : this.repositories.values()) {
-            artifact = repository.resolve(artifactId);
+            try {
+                artifact = repository.resolve(artifactId);
 
-            if (artifact != null) {
-                break;
+                return artifact;
+            } catch (ResolveException e) {
+                getLogger().debug(
+                    "Could not find extension [" + artifactId + "] in repository [" + repository.getId() + "]");
             }
         }
 
-        return artifact;
+        throw new ResolveException("Could not find extension [" + artifactId + "]");
     }
 }

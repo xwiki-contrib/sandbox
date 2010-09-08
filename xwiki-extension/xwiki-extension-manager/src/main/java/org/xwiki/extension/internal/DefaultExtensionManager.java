@@ -19,9 +19,7 @@
  */
 package org.xwiki.extension.internal;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -39,6 +37,7 @@ import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.UninstallException;
 import org.xwiki.extension.install.ExtensionInstaller;
 import org.xwiki.extension.install.ExtensionInstallerException;
+import org.xwiki.extension.repository.CoreExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryFactory;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
@@ -57,16 +56,16 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
     private List<ExtensionRepositoryFactory> extensionRepositoryFactory;
 
     @Requirement
+    private CoreExtensionRepository coreExtensionRepository;
+
+    @Requirement
     private LocalExtensionRepository localExtensionRepository;
 
     @Requirement
     private ComponentManager componentManager;
 
-    /**
-     * Extensions than can't be upgraded (generally because it's "core" modules and not part of the extension management
-     * system)
-     */
-    private Set<ExtensionId> lockedExtensions = new HashSet<ExtensionId>();
+    @Requirement
+    private VersionManager versionManager;
 
     /**
      * {@inheritDoc}
@@ -81,8 +80,6 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
                 this.repositoryManager.addRepository(repository);
             }
         }
-
-        // TODO: List core module (get all existing maven module and add them to lockedExtensions)
 
         // TODO: Load extensions from local repository
     }
@@ -110,28 +107,61 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
         return this.localExtensionRepository.getExtensions(nb, offset);
     }
 
-    public void installExtension(ExtensionId extensionId) throws InstallException
+    public LocalExtension installExtension(ExtensionId extensionId) throws InstallException
     {
-        installExtension(extensionId, false);
+        if (this.coreExtensionRepository.exists(extensionId.getName())) {
+            throw new InstallException("[" + extensionId.getName() + "]: core extension");
+        }
+
+        LocalExtension localExtension = this.localExtensionRepository.getLocalExtension(extensionId.getName());
+
+        if (localExtension != null) {
+            int diff = this.versionManager.compareVersions(extensionId.getVersion(), localExtension.getVersion());
+
+            if (diff == 0) {
+                throw new InstallException("[" + extensionId.getName() + "]: already installed");
+            } else if (diff < 0) {
+                throw new InstallException("[" + extensionId.getName()
+                    + "]: a more recent version is already installed");
+            }
+        }
+
+        return installExtension(extensionId, false);
+
     }
 
-    private void installExtension(ExtensionId extensionId, boolean dependency) throws InstallException
+    private LocalExtension installExtension(ExtensionId extensionId, boolean dependency) throws InstallException
     {
+        // Resolve extension
+        Extension remoteExtension;
         try {
-            // Resolve extension
-            Extension remoteExtension = this.repositoryManager.resolve(extensionId);
+            remoteExtension = this.repositoryManager.resolve(extensionId);
+        } catch (ResolveException e) {
+            throw new InstallException("Failed to resolve extension [" + extensionId + "]", e);
+        }
 
-            installExtension(remoteExtension, dependency);
+        if (remoteExtension == null) {
+            throw new InstallException("Failed to resolve extension [" + extensionId + "]");
+        }
+
+        try {
+            return installExtension(remoteExtension, dependency);
         } catch (Exception e) {
             throw new InstallException("Failed to install extension", e);
         }
     }
 
-    private void installExtension(Extension remoteExtension, boolean dependency) throws ComponentLookupException,
-        InstallException, ExtensionInstallerException
+    private LocalExtension installExtension(Extension remoteExtension, boolean dependency)
+        throws ComponentLookupException, InstallException, ExtensionInstallerException
     {
         for (ExtensionDependency dependencyDependency : remoteExtension.getDependencies()) {
-            installExtension(new ExtensionId(dependencyDependency.getName(), dependencyDependency.getVersion()), true);
+            ExtensionId dependencyId =
+                new ExtensionId(dependencyDependency.getName(), dependencyDependency.getVersion());
+
+            if (!this.coreExtensionRepository.exists(dependencyId.getName())
+                && !this.localExtensionRepository.exists(dependencyId)) {
+                installExtension(dependencyId, true);
+            }
         }
 
         // Store extension in local repository
@@ -142,16 +172,40 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
             this.componentManager.lookup(ExtensionInstaller.class, localExtension.getType().toString().toLowerCase());
 
         extensionInstaller.install(localExtension);
+
+        return localExtension;
     }
 
-    public void uninstallExtension(ExtensionId extensionId) throws UninstallException
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.extension.ExtensionManager#uninstallExtension(java.lang.String)
+     */
+    public void uninstallExtension(String name) throws UninstallException
     {
-        try {
-            LocalExtension extension = this.localExtensionRepository.getLocalExtension(extensionId);
+        LocalExtension localExtension = this.localExtensionRepository.getLocalExtension(name);
 
-            this.localExtensionRepository.uninstallExtension(extension);
-        } catch (ResolveException e) {
-            throw new UninstallException("Failed to resolve extension", e);
+        if (localExtension == null) {
+            throw new UninstallException("[" + name + "]: extension is not installed");
         }
+
+        try {
+            uninstallExtension(localExtension);
+        } catch (Exception e) {
+            throw new UninstallException("Failed to uninstall extension", e);
+        }
+    }
+
+    public void uninstallExtension(LocalExtension localExtension) throws ComponentLookupException,
+        ExtensionInstallerException, UninstallException
+    {
+        // Unload extension
+        ExtensionInstaller extensionInstaller =
+            this.componentManager.lookup(ExtensionInstaller.class, localExtension.getType().toString().toLowerCase());
+
+        extensionInstaller.install(localExtension);
+
+        // Remove from local repository
+        this.localExtensionRepository.uninstallExtension(localExtension);
     }
 }

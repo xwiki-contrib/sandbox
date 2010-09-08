@@ -117,9 +117,9 @@ public class AetherExtension implements Extension
             this.dependencies = new ArrayList<ExtensionDependency>();
 
             for (Dependency aetherDependency : this.artifactDescriptorResult.getDependencies()) {
+                // XXX: not sure what to do about "provided"
                 if (!aetherDependency.isOptional()
-                    && (aetherDependency.getScope().equals("compile") || aetherDependency.getScope().equals("runtime") || aetherDependency
-                        .getScope().equals("provided"))) {
+                    && (aetherDependency.getScope().equals("compile") || aetherDependency.getScope().equals("runtime"))) {
                     this.dependencies.add(new AetherExtensionDependency(new ExtensionId(aetherDependency.getArtifact()
                         .getGroupId() + ":" + aetherDependency.getArtifact().getArtifactId(), aetherDependency
                         .getArtifact().getVersion())));

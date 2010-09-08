@@ -23,10 +23,8 @@ import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.extension.Extension;
-import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
-import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.UninstallException;
 
 @ComponentRole
@@ -34,7 +32,7 @@ public interface LocalExtensionRepository extends ExtensionRepository
 {
     List<LocalExtension> getLocalExtensions(int nb, int offset);
 
-    LocalExtension getLocalExtension(ExtensionId extensionId) throws ResolveException;
+    LocalExtension getLocalExtension(String name);
 
     LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException;
 

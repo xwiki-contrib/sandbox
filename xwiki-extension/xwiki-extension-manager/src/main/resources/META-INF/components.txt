@@ -1,5 +1,7 @@
 org.xwiki.extension.internal.DefaultExtensionManager
 org.xwiki.extension.internal.DefaultExtensionManagerConfiguration
+org.xwiki.extension.internal.DefaultVersionManager
+org.xwiki.extension.install.internal.jar.JarExtensionInstaller
 org.xwiki.extension.repository.internal.DefaultExtensionRepositoryManager
 org.xwiki.extension.repository.internal.DefaultLocalExtensionRepository
 org.xwiki.extension.repository.internal.DefaultCoreExtensionRepository

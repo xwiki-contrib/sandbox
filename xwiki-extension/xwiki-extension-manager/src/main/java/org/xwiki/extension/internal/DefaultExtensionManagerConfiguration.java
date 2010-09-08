@@ -22,13 +22,34 @@ package org.xwiki.extension.internal;
 import java.io.File;
 import java.io.IOException;
 
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.extension.ExtensionManagerConfiguration;
 
+@Component
 public class DefaultExtensionManagerConfiguration implements ExtensionManagerConfiguration
 {
+    @Requirement("xwikiproperties")
+    private ConfigurationSource configurationSource;
+
+    // Cache
+
+    private File localRepository;
+
     public File getLocalRepository() throws IOException
     {
-        // TODO
-        return new File(File.createTempFile("extension", ".xml").getParentFile(), "repository/");
+        if (this.localRepository == null) {
+            String localRepositoryPath = this.configurationSource.getProperty("extension.localRepository");
+
+            if (localRepositoryPath == null) {
+                this.localRepository =
+                    new File(File.createTempFile("extension", ".xml").getParentFile(), "repository/");
+            } else {
+                this.localRepository = new File(localRepositoryPath);
+            }
+        }
+
+        return this.localRepository;
     }
 }

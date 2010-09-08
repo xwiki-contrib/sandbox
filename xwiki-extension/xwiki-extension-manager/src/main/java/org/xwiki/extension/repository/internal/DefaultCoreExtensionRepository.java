@@ -33,7 +33,6 @@ import org.reflections.scanners.ResourcesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
@@ -43,7 +42,6 @@ import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.repository.CoreExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
-import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
 import com.google.common.base.Predicates;
 
@@ -53,12 +51,9 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
 {
     public static final String COMPONENT_OVERRIDE_LIST = "META-INF/pom.xml";
 
-    @Requirement
-    private PlexusComponentManager plexusComponentManager;
-
     private ExtensionRepositoryId repositoryId;
 
-    private Map<ExtensionId, CoreExtension> extensions = new ConcurrentHashMap<ExtensionId, CoreExtension>();
+    protected Map<String, CoreExtension> extensions = new ConcurrentHashMap<String, CoreExtension>();
 
     /**
      * {@inheritDoc}
@@ -91,8 +86,7 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
             try {
                 CoreExtension coreExtension = new DefaultCoreExtension(this, descriptorUrl, descriptorStream);
 
-                this.extensions
-                    .put(new ExtensionId(coreExtension.getName(), coreExtension.getVersion()), coreExtension);
+                this.extensions.put(coreExtension.getName(), coreExtension);
             } catch (Exception e) {
                 getLogger().error("Failed to parse descriptor [" + descriptorUrl + "]", e);
             } finally {
@@ -115,7 +109,7 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
      */
     public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
-        return getCoreExtension(extensionId);
+        return getCoreExtension(extensionId.getName());
     }
 
     /**
@@ -125,7 +119,17 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
      */
     public boolean exists(ExtensionId extensionId)
     {
-        return this.extensions.containsKey(extensionId);
+        return exists(extensionId.getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.extension.repository.CoreExtensionRepository#exists(java.lang.String)
+     */
+    public boolean exists(String name)
+    {
+        return this.extensions.containsKey(name);
     }
 
     /**
@@ -163,11 +167,11 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.extension.repository.CoreExtensionRepository#getCoreExtension(org.xwiki.extension.ExtensionId)
+     * @see org.xwiki.extension.repository.CoreExtensionRepository#getCoreExtension(java.lang.String)
      */
-    public CoreExtension getCoreExtension(ExtensionId extensionId) throws ResolveException
+    public CoreExtension getCoreExtension(String name) throws ResolveException
     {
-        return this.extensions.get(extensionId);
+        return this.extensions.get(name);
     }
 
     /**

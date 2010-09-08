@@ -30,7 +30,7 @@ public class AetherDefaultRepositoryManagerTest extends AbstractComponentTestCas
     {
         super.setUp();
 
-        getConfigurationSource().setProperty("extension.aether.localRepository", "target/test-repository");
+        getConfigurationSource().setProperty("extension.aether.localRepository", "target/test-aether-repository");
         
         this.repositoryManager = getComponentManager().lookup(ExtensionRepositoryManager.class);
 

@@ -50,4 +50,44 @@ public class ExtensionRepositoryId
     {
         return uri;
     }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof ExtensionRepositoryId) {
+            ExtensionRepositoryId extensionId = (ExtensionRepositoryId) obj;
+
+            return id.equals(extensionId.getId()) && type.equals(extensionId.getType())
+                && uri.equals(extensionId.getURI());
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        return toString().hashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return this.id + " (" + this.uri + ')';
+    }
 }

@@ -64,6 +64,8 @@ public class AetherExtensionRepositoryFactory extends AbstractLogEnabled impleme
 
         LocalRepository localRepo = new LocalRepository(this.mavenConfiguration.getLocalRepository());
         this.session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(localRepo));
+        this.session.setIgnoreMissingArtifactDescriptor(false);
+        this.session.setIgnoreInvalidArtifactDescriptor(false);
     }
 
     public List<ExtensionRepository> getDefaultExtensionRepositories()
