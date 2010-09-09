@@ -1,9 +1,11 @@
 package org.xwiki.extension.repository;
 
+import java.io.File;
 import java.net.URI;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.bridge.DocumentAccessBridge;
@@ -38,6 +40,11 @@ public class DefaultExtensionManagerTest extends AbstractComponentTestCase
         getConfigurationSource().setProperty("extension.localRepository",
             "target/DefaultExtensionManagerTest/test-repository");
 
+        File testDirectory = new File("target/DefaultExtensionManagerTest");
+        if (testDirectory.exists()) {
+            FileUtils.deleteDirectory(testDirectory);
+        }
+
         this.repositoryManager = getComponentManager().lookup(ExtensionRepositoryManager.class);
 
         this.repositoryManager.addRepository(new ExtensionRepositoryId("xwiki-releases", "maven", new URI(
@@ -57,20 +64,15 @@ public class DefaultExtensionManagerTest extends AbstractComponentTestCase
     {
         super.registerComponents();
 
-        DefaultComponentDescriptor<CoreExtensionRepository> componentDescriptor =
-            new DefaultComponentDescriptor<CoreExtensionRepository>();
-        componentDescriptor.setImplementation(ConfigurableDefaultCoreExtensionRepository.class);
-        componentDescriptor.setRole(CoreExtensionRepository.class);
-
-        getComponentManager().registerComponent(componentDescriptor);
+        ConfigurableDefaultCoreExtensionRepository.register(getComponentManager());
     }
 
     @Test
     public void testInstallExtension() throws ComponentLookupException, Exception
     {
         // way too big for a unit test so lets skip it
-        this.coreExtensionRepository.addExtensions(new DefaultCoreExtension("org.jruby:jruby", "1.5"));
-        
+        this.coreExtensionRepository.addExtensions("org.jruby:jruby", "1.5");
+
         // emulate environment
         registerMockComponent(DocumentAccessBridge.class);
         registerMockComponent(AttachmentReferenceResolver.class, "current");

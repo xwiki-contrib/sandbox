@@ -19,27 +19,42 @@
  */
 package org.xwiki.extension.repository;
 
+import java.io.File;
+
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ResolveException;
+import org.xwiki.extension.repository.internal.DefaultLocalExtensionRepository;
 import org.xwiki.extension.test.ConfigurableDefaultCoreExtensionRepository;
 import org.xwiki.test.AbstractComponentTestCase;
 
-public class DefaultCoreExtensionRepositoryTest extends AbstractComponentTestCase
+public class DefaultLocalExtensionRepositoryTest extends AbstractComponentTestCase
 {
-    private ConfigurableDefaultCoreExtensionRepository coreExtensionRepository;
+    private DefaultLocalExtensionRepository localExtensionRepository;
 
     @Before
     public void setUp() throws Exception
     {
         super.setUp();
 
-        this.coreExtensionRepository =
-            (ConfigurableDefaultCoreExtensionRepository) getComponentManager().lookup(CoreExtensionRepository.class);
+        getConfigurationSource().setProperty("extension.localRepository",
+            "target/DefaultLocalExtensionRepositoryTest/test-repository");
+
+        File testDirectory = new File("target/DefaultLocalExtensionRepositoryTest");
+        if (testDirectory.exists()) {
+            FileUtils.deleteDirectory(testDirectory);
+        }
+
+        FileUtils.touch(new File(
+            "target/DefaultLocalExtensionRepositoryTest/test-repository/existingextension-version.type"));
+
+        this.localExtensionRepository =
+            (DefaultLocalExtensionRepository) getComponentManager().lookup(LocalExtensionRepository.class);
     }
 
     @Override
@@ -53,48 +68,57 @@ public class DefaultCoreExtensionRepositoryTest extends AbstractComponentTestCas
     @Test
     public void testInit()
     {
-        Assert.assertTrue(this.coreExtensionRepository.countExtensions() > 0);
+        Assert.assertTrue(this.localExtensionRepository.countExtensions() > 0);
     }
 
     @Test
-    public void testGetCoreExtension()
+    public void testGetLocalExtension()
     {
-        Assert.assertNull(this.coreExtensionRepository.getCoreExtension("unexistingextension"));
+        Assert.assertNull(this.localExtensionRepository.getLocalExtension("unexistingextension"));
 
-        this.coreExtensionRepository.addExtensions("existingextension", "version");
-
-        Extension extension = this.coreExtensionRepository.getCoreExtension("existingextension");
+        Extension extension = this.localExtensionRepository.getLocalExtension("existingextension");
 
         Assert.assertNotNull(extension);
         Assert.assertEquals("existingextension", extension.getName());
         Assert.assertEquals("version", extension.getVersion());
+        Assert.assertEquals("type", extension.getType());
     }
 
     @Test
     public void testResolve() throws ResolveException
     {
         try {
-            this.coreExtensionRepository.resolve(new ExtensionId("unexistingextension", "version"));
+            this.localExtensionRepository.resolve(new ExtensionId("unexistingextension", "version"));
 
             Assert.fail("Resolve should have failed");
         } catch (ResolveException expected) {
             // expected
         }
-
-        this.coreExtensionRepository.addExtensions("existingextension", "version");
 
         try {
-            this.coreExtensionRepository.resolve(new ExtensionId("existingextension", "wrongversion"));
+            this.localExtensionRepository.resolve(new ExtensionId("existingextension", "wrongversion"));
 
             Assert.fail("Resolve should have failed");
         } catch (ResolveException expected) {
             // expected
         }
 
-        Extension extension = this.coreExtensionRepository.resolve(new ExtensionId("existingextension", "version"));
+        Extension extension = this.localExtensionRepository.resolve(new ExtensionId("existingextension", "version"));
 
         Assert.assertNotNull(extension);
         Assert.assertEquals("existingextension", extension.getName());
         Assert.assertEquals("version", extension.getVersion());
+    }
+
+    @Test
+    public void testInstallExtension() throws ResolveException
+    {
+        // TODO
+    }
+
+    @Test
+    public void testUninstallExtension() throws ResolveException
+    {
+        // TODO
     }
 }

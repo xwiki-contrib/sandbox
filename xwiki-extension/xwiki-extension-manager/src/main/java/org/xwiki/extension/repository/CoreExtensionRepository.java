@@ -23,14 +23,13 @@ import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.extension.CoreExtension;
-import org.xwiki.extension.ResolveException;
 
 @ComponentRole
 public interface CoreExtensionRepository extends ExtensionRepository
 {
     List<CoreExtension> getCoreExtensions(int nb, int offset);
 
-    CoreExtension getCoreExtension(String name) throws ResolveException;
+    CoreExtension getCoreExtension(String name);
 
     boolean exists(String name);
 }

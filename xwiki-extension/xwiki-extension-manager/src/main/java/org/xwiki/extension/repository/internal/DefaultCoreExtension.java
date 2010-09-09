@@ -38,7 +38,6 @@ import org.xml.sax.SAXException;
 import org.xwiki.extension.CoreExtension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
-import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.repository.ExtensionRepository;
 
 public class DefaultCoreExtension implements CoreExtension
@@ -49,7 +48,7 @@ public class DefaultCoreExtension implements CoreExtension
 
     private String version;
 
-    private ExtensionType type;
+    private String type;
 
     private String description;
 
@@ -137,7 +136,7 @@ public class DefaultCoreExtension implements CoreExtension
         return this.version;
     }
 
-    public ExtensionType getType()
+    public String getType()
     {
         return this.type;
     }

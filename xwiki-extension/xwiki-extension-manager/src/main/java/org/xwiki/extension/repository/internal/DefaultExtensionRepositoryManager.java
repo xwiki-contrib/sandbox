@@ -67,21 +67,21 @@ public class DefaultExtensionRepositoryManager extends AbstractLogEnabled implem
         this.repositories.remove(repositoryId);
     }
 
-    public Extension resolve(ExtensionId artifactId) throws ResolveException
+    public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
         Extension artifact = null;
 
         for (ExtensionRepository repository : this.repositories.values()) {
             try {
-                artifact = repository.resolve(artifactId);
+                artifact = repository.resolve(extensionId);
 
                 return artifact;
             } catch (ResolveException e) {
                 getLogger().debug(
-                    "Could not find extension [" + artifactId + "] in repository [" + repository.getId() + "]");
+                    "Could not find extension [" + extensionId + "] in repository [" + repository.getId() + "]");
             }
         }
 
-        throw new ResolveException("Could not find extension [" + artifactId + "]");
+        throw new ResolveException("Could not find extension [" + extensionId + "]");
     }
 }

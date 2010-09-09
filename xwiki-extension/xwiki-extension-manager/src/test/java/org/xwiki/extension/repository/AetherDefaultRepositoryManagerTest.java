@@ -9,13 +9,13 @@ import java.util.zip.ZipInputStream;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
 import org.xwiki.extension.ExtensionId;
-import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.test.AbstractComponentTestCase;
 
@@ -30,14 +30,20 @@ public class AetherDefaultRepositoryManagerTest extends AbstractComponentTestCas
     {
         super.setUp();
 
-        getConfigurationSource().setProperty("extension.aether.localRepository", "target/test-aether-repository");
-        
+        getConfigurationSource().setProperty("extension.aether.localRepository",
+            "target/AetherDefaultRepositoryManagerTest/test-aether-repository");
+
+        File testDirectory = new File("target/AetherDefaultRepositoryManagerTest");
+        if (testDirectory.exists()) {
+            FileUtils.deleteDirectory(testDirectory);
+        }
+
         this.repositoryManager = getComponentManager().lookup(ExtensionRepositoryManager.class);
 
         this.repositoryManager.addRepository(new ExtensionRepositoryId("xwiki-releases", "maven", new URI(
             "http://maven.xwiki.org/releases/")));
 
-        this.rubyArtifactId = new ExtensionId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.3.1");        
+        this.rubyArtifactId = new ExtensionId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.3.1");
     }
 
     @Test
@@ -48,7 +54,7 @@ public class AetherDefaultRepositoryManagerTest extends AbstractComponentTestCas
         Assert.assertNotNull(artifact);
         Assert.assertEquals("org.xwiki.platform:xwiki-core-rendering-macro-ruby", artifact.getName());
         Assert.assertEquals("2.3.1", artifact.getVersion());
-        Assert.assertEquals(ExtensionType.JAR, artifact.getType());
+        Assert.assertEquals("jar", artifact.getType());
 
         ExtensionDependency dependency = artifact.getDependencies().get(1);
         Assert.assertEquals("org.jruby:jruby", dependency.getName());

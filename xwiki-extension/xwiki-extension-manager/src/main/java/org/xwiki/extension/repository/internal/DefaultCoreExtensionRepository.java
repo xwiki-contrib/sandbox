@@ -23,10 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -53,7 +53,7 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
 
     private ExtensionRepositoryId repositoryId;
 
-    protected Map<String, CoreExtension> extensions = new ConcurrentHashMap<String, CoreExtension>();
+    protected Map<String, CoreExtension> extensions;
 
     /**
      * {@inheritDoc}
@@ -76,6 +76,8 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
         Reflections reflections = new Reflections(configurationBuilder);
 
         Set<String> descriptors = reflections.getResources(Predicates.equalTo("pom.xml"));
+
+        this.extensions = new LinkedHashMap<String, CoreExtension>(descriptors.size());
 
         for (String descriptor : descriptors) {
             URL descriptorUrl = getClass().getClassLoader().getResource(descriptor);
@@ -109,7 +111,14 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
      */
     public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
-        return getCoreExtension(extensionId.getName());
+        Extension extension = getCoreExtension(extensionId.getName());
+
+        if (extension == null
+            || (extensionId.getVersion() != null && !extension.getVersion().equals(extensionId.getVersion()))) {
+            throw new ResolveException("Could not find extension [" + extensionId + "]");
+        }
+
+        return extension;
     }
 
     /**
@@ -119,7 +128,14 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
      */
     public boolean exists(ExtensionId extensionId)
     {
-        return exists(extensionId.getName());
+        Extension extension = getCoreExtension(extensionId.getName());
+
+        if (extension == null
+            || (extensionId.getVersion() != null && !extension.getVersion().equals(extensionId.getVersion()))) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -169,7 +185,7 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
      * 
      * @see org.xwiki.extension.repository.CoreExtensionRepository#getCoreExtension(java.lang.String)
      */
-    public CoreExtension getCoreExtension(String name) throws ResolveException
+    public CoreExtension getCoreExtension(String name)
     {
         return this.extensions.get(name);
     }

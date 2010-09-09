@@ -21,13 +21,14 @@ package org.xwiki.extension.repository.internal;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
@@ -49,7 +50,8 @@ import org.xwiki.extension.repository.LocalExtensionRepository;
  * </ul>
  */
 @Component
-public class DefaultLocalExtensionRepository implements LocalExtensionRepository, Initializable
+public class DefaultLocalExtensionRepository extends AbstractLogEnabled implements LocalExtensionRepository,
+    Initializable
 {
     @Requirement
     private ExtensionManagerConfiguration configuration;
@@ -73,7 +75,37 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
         this.repositoryId = new ExtensionRepositoryId("local", "xwiki", this.rootFolder.toURI());
 
-        // TODO: load local extensions from repository
+        loadExtensions();
+    }
+
+    // TODO: define real extension descriptor instead of looking at files names7
+    // TODO: add support for any extension type
+    private void loadExtensions()
+    {
+        File rootFolder = getRootFolder();
+
+        if (rootFolder.exists()) {
+            for (File child : rootFolder.listFiles()) {
+                if (!child.isDirectory()) {
+                    String fileName = child.getName();
+
+                    int versionIndex = fileName.lastIndexOf('-');
+                    int dotIndex = fileName.lastIndexOf('.');
+
+                    if (versionIndex != -1 && dotIndex != -1) {
+                        String name = fileName.substring(0, versionIndex);
+                        String version = fileName.substring(versionIndex + 1, dotIndex);
+                        String type = fileName.substring(dotIndex + 1, fileName.length());
+
+                        LocalExtension localExtension = new DefaultLocalExtension(this, name, version, type);
+
+                        this.extensions.put(name, localExtension);
+                    } else {
+                        getLogger().warn("Invalid file name [" + child + "]");
+                    }
+                }
+            }
+        }
     }
 
     public File getRootFolder()
@@ -87,7 +119,8 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
     {
         LocalExtension localExtension = getLocalExtension(extensionId.getName());
 
-        if (localExtension == null) {
+        if (localExtension == null
+            || (extensionId.getVersion() != null && !localExtension.getVersion().equals(extensionId.getVersion()))) {
             throw new ResolveException("Can't find extension [" + extensionId + "]");
         }
 
@@ -96,8 +129,14 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     public boolean exists(ExtensionId extensionId)
     {
-        // TODO
-        return false;
+        LocalExtension localExtension = getLocalExtension(extensionId.getName());
+
+        if (localExtension == null
+            || (extensionId.getVersion() != null && !localExtension.getVersion().equals(extensionId.getVersion()))) {
+            return false;
+        }
+
+        return true;
     }
 
     public ExtensionRepositoryId getId()
@@ -109,8 +148,7 @@ public class DefaultLocalExtensionRepository implements LocalExtensionRepository
 
     public List<LocalExtension> getLocalExtensions(int nb, int offset)
     {
-        // TODO
-        return Collections.emptyList();
+        return new ArrayList<LocalExtension>(this.extensions.values()).subList(offset, offset + nb);
     }
 
     public LocalExtension getLocalExtension(String name)

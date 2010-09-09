@@ -33,5 +33,5 @@ public interface ExtensionRepositoryManager
 
     void removeRepository(ExtensionRepositoryId repositoryId);
 
-    Extension resolve(ExtensionId artifactId) throws ResolveException;
+    Extension resolve(ExtensionId extensionId) throws ResolveException;
 }

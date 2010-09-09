@@ -36,7 +36,6 @@ import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
 import org.xwiki.extension.ExtensionId;
-import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.repository.ExtensionRepository;
 import org.xwiki.extension.repository.internal.plexus.PlexusComponentManager;
 
@@ -50,7 +49,7 @@ public class AetherExtension implements Extension
 
     private ExtensionId artifactId;
 
-    private ExtensionType extensionType;
+    private String extensionType;
 
     private List<ExtensionDependency> dependencies;
 
@@ -68,14 +67,7 @@ public class AetherExtension implements Extension
 
         this.artifactId = artifactId;
         this.artifactDescriptorResult = artifactDescriptorResult;
-
-        if (artifactDescriptorResult.getArtifact().getExtension().equals("jar")) {
-            this.extensionType = ExtensionType.JAR;
-        } else if (artifactDescriptorResult.getArtifact().getExtension().equals("xar")) {
-            this.extensionType = ExtensionType.PAGES;
-        } else {
-            this.extensionType = ExtensionType.UNKNOWN;
-        }
+        this.extensionType = artifactDescriptorResult.getArtifact().getExtension();
 
         this.repositorySystem = this.plexusComponentManager.getPlexus().lookup(RepositorySystem.class);
     }
@@ -106,7 +98,7 @@ public class AetherExtension implements Extension
         return null;// return this.project.getUrl();
     }
 
-    public ExtensionType getType()
+    public String getType()
     {
         return this.extensionType;
     }
@@ -159,9 +151,9 @@ public class AetherExtension implements Extension
         } catch (ArtifactResolutionException e) {
             throw new ExtensionException("Failed to resolve artifact", e);
         }
-        
+
         File aetherFile = artifactResult.getArtifact().getFile();
-        
+
         try {
             FileUtils.copyFile(aetherFile, file);
         } catch (IOException e) {

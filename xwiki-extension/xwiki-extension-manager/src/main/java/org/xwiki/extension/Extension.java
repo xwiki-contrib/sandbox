@@ -30,7 +30,7 @@ public interface Extension
 
     String getVersion();
 
-    ExtensionType getType();
+    String getType();
 
     String getDescription();
 

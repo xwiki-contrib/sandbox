@@ -33,7 +33,6 @@ import org.apache.log4j.lf5.util.StreamUtils;
 import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
-import org.xwiki.extension.ExtensionType;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.repository.ExtensionRepository;
 
@@ -49,7 +48,7 @@ public class DefaultLocalExtension implements LocalExtension
 
     private String version;
 
-    private ExtensionType type;
+    private String type;
 
     private String description;
 
@@ -61,8 +60,7 @@ public class DefaultLocalExtension implements LocalExtension
 
     private DefaultLocalExtensionRepository repository;
 
-    public DefaultLocalExtension(DefaultLocalExtensionRepository repository, String name, String version,
-        ExtensionType type)
+    public DefaultLocalExtension(DefaultLocalExtensionRepository repository, String name, String version, String type)
     {
         this.repository = repository;
 
@@ -70,7 +68,7 @@ public class DefaultLocalExtension implements LocalExtension
         this.version = version;
         this.type = type;
 
-        this.file = new File(repository.getRootFolder(), name + "-" + version + "." + type.getFileExtension());
+        this.file = new File(repository.getRootFolder(), name + "-" + version + "." + type);
     }
 
     public DefaultLocalExtension(DefaultLocalExtensionRepository repository, Extension extension)
@@ -144,7 +142,7 @@ public class DefaultLocalExtension implements LocalExtension
         return this.version;
     }
 
-    public ExtensionType getType()
+    public String getType()
     {
         return this.type;
     }

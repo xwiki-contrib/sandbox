@@ -208,4 +208,21 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
         // Remove from local repository
         this.localExtensionRepository.uninstallExtension(localExtension);
     }
+    
+    public Extension resolveExtension(ExtensionId extensionId) throws ResolveException
+    {
+        Extension extension = null;
+        
+        extension = this.coreExtensionRepository.resolve(extensionId);
+        
+        if (extension == null) {
+            extension = this.localExtensionRepository.resolve(extensionId);
+
+            if (extension == null) {
+                extension = this.repositoryManager.resolve(extensionId);
+            }
+        }
+        
+        return extension;
+    }
 }
