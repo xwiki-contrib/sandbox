@@ -35,7 +35,7 @@ Assigning programming rights to the following pages:
 [Confirm assigning programming rights to the following pages:&gt;$doc.fullName?confirm=1]
 #end
 
-#foreach($item in ["Admin.CheckConfig", "Admin.CheckConfigInstall", "Admin.CheckDBEncoding", "Admin.CheckIndexes"])
+#foreach($item in ["Admin.CheckConfig", "Admin.CheckConfigInstall", "Admin.CheckDBEncoding", "Admin.CheckIndexes", "Admin.CheckRights"])
 * $item #if($request.confirm=="1") $xwiki.getDocument($item).save() #end
 
 #end

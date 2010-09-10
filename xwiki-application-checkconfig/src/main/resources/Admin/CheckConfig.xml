@@ -33,4 +33,5 @@ This script allows to check the XWiki and MySQL Configuration:
 
 * [[XWiki Configuration Check&gt;&gt;CheckXWikiConfig]]
 * [[MySQL Database Encoding Check&gt;&gt;CheckDBEncoding]]
-* [[MySQL Indexes Check&gt;&gt;CheckIndexes]]</content></xwikidoc>
+* [[MySQL Indexes Check&gt;&gt;CheckIndexes]]
+* [[Rights Check&gt;&gt;CheckRights]]</content></xwikidoc>

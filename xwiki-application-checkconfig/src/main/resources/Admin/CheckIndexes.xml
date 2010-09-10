@@ -22,13 +22,7 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/1.0</syntaxId>
 <hidden>false</hidden>
-<content>
-#if (!$context.context)
-#warning("This application is not fully installed. Please visit [CheckConfigInstall] to complete it's installation")
-#end
-
-
-&lt;%
+<content>&lt;%
 def context2 = context.getContext();
 def store = xwiki.getXWiki().getStore().getStore();
 def wikilist =  xwiki.isVirtual() ? xwiki.wikimanager.getAllWikis() : [ "xwiki" ];
@@ -44,14 +38,14 @@ try {
   def session = store.getSession(context2);
   def connection = session.connection();
   def stmt = connection.createStatement();
-  stmt.execute("show indexes from ${wiki}.activitystream_events where column_name='ase_stream'");
+  stmt.execute("show indexes from ${wiki}.xwikiattrecyclebin where column_name='xda_deleter'");
   def rset = stmt.getResultSet();
   def result = null;
   try {
     rset.first();
     result = rset.getObject(1);
   } catch (Exception e2) {}
-  if (result!=null &amp;&amp; result.equals("activitystream_events")) {
+  if (result!=null &amp;&amp; result.equals("xwikiattrecyclebin")) {
    println "* Indexes created for wiki ${wiki}" 
   } else {
    println "* &lt;font color='red'&gt;Indexes not created for wiki ${wiki}&lt;/font&gt;"

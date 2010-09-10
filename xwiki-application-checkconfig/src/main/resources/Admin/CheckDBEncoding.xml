@@ -22,13 +22,7 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/1.0</syntaxId>
 <hidden>false</hidden>
-<content>
-#if (!$context.context)
-#warning("This application is not fully installed. Please visit [CheckConfigInstall] to complete it's installation")
-#end
-
-
-&lt;%
+<content>&lt;%
 
 println context.getDatabase()
 println context.getOriginalDatabase()

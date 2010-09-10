@@ -24,11 +24,6 @@
 <hidden>false</hidden>
 <content>1 XWiki Configuration Check
 
-#if (!$context.context)
-#warning("This application is not fully installed. Please visit [CheckConfigInstall] to complete it's installation")
-#end
-
-
 &lt;%
  import com.xpn.xwiki.util.Util;
  //
