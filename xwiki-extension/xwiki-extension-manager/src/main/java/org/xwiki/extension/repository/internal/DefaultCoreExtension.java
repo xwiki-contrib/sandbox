@@ -27,14 +27,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.xwiki.extension.CoreExtension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionException;
@@ -60,6 +56,8 @@ public class DefaultCoreExtension implements CoreExtension
 
     private DefaultCoreExtensionRepository repository;
 
+    private Model mavenModel;
+
     public DefaultCoreExtension(String name, String version)
     {
         this.name = name;
@@ -67,7 +65,7 @@ public class DefaultCoreExtension implements CoreExtension
     }
 
     public DefaultCoreExtension(DefaultCoreExtensionRepository repository, URL url, InputStream descriptorStream)
-        throws ParserConfigurationException, SAXException, IOException
+        throws IOException, XmlPullParserException
     {
         this.repository = repository;
 
@@ -76,47 +74,28 @@ public class DefaultCoreExtension implements CoreExtension
         parseDescriptor(descriptorStream);
     }
 
-    private void parseDescriptor(InputStream descriptorStream) throws ParserConfigurationException, SAXException,
-        IOException
+    private void parseDescriptor(InputStream descriptorStream) throws IOException, XmlPullParserException
     {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(descriptorStream);
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        this.mavenModel = reader.read(descriptorStream);
 
-        Node projectNode = extractElement(doc, "project");
+        String version = this.mavenModel.getVersion();
+        String groupId = this.mavenModel.getGroupId();
 
-        Node groupIdNode = extractElement(projectNode, "groupId");
-        Node artifactIdNode = extractElement(projectNode, "artifactId");
-        Node versionNode = extractElement(projectNode, "version");
+        if (version == null || groupId == null) {
+            Parent parent = this.mavenModel.getParent();
 
-        if (versionNode == null || groupIdNode == null) {
-            Node parentNode = extractElement(projectNode, "parent");
-
-            if (groupIdNode == null) {
-                groupIdNode = extractElement(parentNode, "groupId");
+            if (groupId == null) {
+                groupId = parent.getGroupId();
             }
 
-            if (versionNode == null) {
-                versionNode = extractElement(parentNode, "version");
+            if (version == null) {
+                version = parent.getVersion();
             }
         }
 
-        this.name = groupIdNode.getTextContent() + ":" + artifactIdNode.getTextContent();
-        this.version = versionNode.getTextContent();
-    }
-
-    private Node extractElement(Node node, String elementName)
-    {
-        NodeList nodeChildren = node.getChildNodes();
-        for (int i = 0; i < nodeChildren.getLength(); ++i) {
-            Node childNode = nodeChildren.item(i);
-
-            if (childNode.getNodeName().equals(elementName)) {
-                return childNode;
-            }
-        }
-
-        return null;
+        this.name = groupId + ":" + this.mavenModel.getArtifactId();
+        this.version = version;
     }
 
     // Extension
