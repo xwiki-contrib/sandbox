@@ -40,10 +40,12 @@ public class AetherDefaultRepositoryManagerTest extends AbstractComponentTestCas
 
         this.repositoryManager = getComponentManager().lookup(ExtensionRepositoryManager.class);
 
+        this.repositoryManager.addRepository(new ExtensionRepositoryId("central", "maven", new URI(
+            "http://repo1.maven.org/maven2/")));
         this.repositoryManager.addRepository(new ExtensionRepositoryId("xwiki-releases", "maven", new URI(
             "http://maven.xwiki.org/releases/")));
 
-        this.rubyArtifactId = new ExtensionId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.3.1");
+        this.rubyArtifactId = new ExtensionId("org.xwiki.platform:xwiki-core-rendering-macro-ruby", "2.4");
     }
 
     @Test
@@ -53,12 +55,17 @@ public class AetherDefaultRepositoryManagerTest extends AbstractComponentTestCas
 
         Assert.assertNotNull(artifact);
         Assert.assertEquals("org.xwiki.platform:xwiki-core-rendering-macro-ruby", artifact.getId());
-        Assert.assertEquals("2.3.1", artifact.getVersion());
+        Assert.assertEquals("2.4", artifact.getVersion());
         Assert.assertEquals("jar", artifact.getType());
+        Assert.assertEquals("xwiki-releases", artifact.getRepository().getId().getId());
 
         ExtensionDependency dependency = artifact.getDependencies().get(1);
         Assert.assertEquals("org.jruby:jruby", dependency.getId());
-        Assert.assertEquals("1.3.0", dependency.getVersion());
+        Assert.assertEquals("1.5.0", dependency.getVersion());
+
+        // check that a new resolve of an already resolved extension provide the proper repository
+        artifact = this.repositoryManager.resolve(this.rubyArtifactId);
+        Assert.assertEquals("xwiki-releases", artifact.getRepository().getId().getId());
     }
 
     @Test
