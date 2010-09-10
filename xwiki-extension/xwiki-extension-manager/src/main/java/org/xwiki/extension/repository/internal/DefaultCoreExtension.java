@@ -172,4 +172,10 @@ public class DefaultCoreExtension implements CoreExtension
     {
         return this.url;
     }
+
+    @Override
+    public String toString()
+    {
+        return getName() + '-' + getVersion();
+    }
 }

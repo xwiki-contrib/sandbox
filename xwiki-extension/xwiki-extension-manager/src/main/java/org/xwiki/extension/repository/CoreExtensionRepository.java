@@ -27,7 +27,7 @@ import org.xwiki.extension.CoreExtension;
 @ComponentRole
 public interface CoreExtensionRepository extends ExtensionRepository
 {
-    List<CoreExtension> getCoreExtensions(int nb, int offset);
+    List<CoreExtension> getCoreExtensions();
 
     CoreExtension getCoreExtension(String name);
 

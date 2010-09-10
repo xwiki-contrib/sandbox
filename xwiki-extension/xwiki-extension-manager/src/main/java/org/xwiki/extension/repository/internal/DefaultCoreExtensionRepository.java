@@ -104,11 +104,6 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
 
     // Repository
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.extension.repository.ExtensionRepository#resolve(org.xwiki.extension.ExtensionId)
-     */
     public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
         Extension extension = getCoreExtension(extensionId.getName());
@@ -121,11 +116,6 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
         return extension;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.extension.repository.ExtensionRepository#exists(org.xwiki.extension.ExtensionId)
-     */
     public boolean exists(ExtensionId extensionId)
     {
         Extension extension = getCoreExtension(extensionId.getName());
@@ -138,21 +128,11 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.extension.repository.CoreExtensionRepository#exists(java.lang.String)
-     */
     public boolean exists(String name)
     {
         return this.extensions.containsKey(name);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.extension.repository.ExtensionRepository#getId()
-     */
     public ExtensionRepositoryId getId()
     {
         return this.repositoryId;
@@ -160,43 +140,23 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
 
     // LocalRepository
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.extension.repository.ExtensionRepository#countExtensions()
-     */
     public int countExtensions()
     {
         return this.extensions.size();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.extension.repository.CoreExtensionRepository#getCoreExtensions(int, int)
-     */
-    public List<CoreExtension> getCoreExtensions(int nb, int offset)
+    public List<CoreExtension> getCoreExtensions()
     {
-        return new ArrayList<CoreExtension>(this.extensions.values()).subList(offset, offset + nb);
+        return new ArrayList<CoreExtension>(this.extensions.values());
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.extension.repository.CoreExtensionRepository#getCoreExtension(java.lang.String)
-     */
     public CoreExtension getCoreExtension(String name)
     {
         return this.extensions.get(name);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.extension.repository.ExtensionRepository#getExtensions(int, int)
-     */
     public List< ? extends CoreExtension> getExtensions(int nb, int offset)
     {
-        return getCoreExtensions(nb, offset);
+        return getCoreExtensions().subList(offset, offset + nb);
     }
 }

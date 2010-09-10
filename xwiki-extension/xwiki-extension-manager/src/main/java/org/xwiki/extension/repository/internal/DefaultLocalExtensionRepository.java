@@ -146,9 +146,9 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
     // LocalRepository
 
-    public List<LocalExtension> getLocalExtensions(int nb, int offset)
+    public List<LocalExtension> getLocalExtensions()
     {
-        return new ArrayList<LocalExtension>(this.extensions.values()).subList(offset, offset + nb);
+        return new ArrayList<LocalExtension>(this.extensions.values());
     }
 
     public LocalExtension getLocalExtension(String name)
@@ -174,7 +174,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
     public List< ? extends LocalExtension> getExtensions(int nb, int offset)
     {
-        return getLocalExtensions(nb, offset);
+        return getLocalExtensions().subList(offset, offset + nb);
     }
 
     public LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException
@@ -187,6 +187,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
             try {
                 extension.download(localExtension.getFile());
+                this.extensions.put(localExtension.getName(), localExtension);
             } catch (ExtensionException e) {
                 // TODO: clean
 

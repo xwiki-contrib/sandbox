@@ -30,7 +30,7 @@ import org.xwiki.extension.UninstallException;
 @ComponentRole
 public interface LocalExtensionRepository extends ExtensionRepository
 {
-    List<LocalExtension> getLocalExtensions(int nb, int offset);
+    List<LocalExtension> getLocalExtensions();
 
     LocalExtension getLocalExtension(String name);
 

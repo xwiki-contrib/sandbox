@@ -188,4 +188,10 @@ public class DefaultLocalExtension implements LocalExtension
     {
         return this.isDependency;
     }
+
+    @Override
+    public String toString()
+    {
+        return getName() + '-' + getVersion();
+    }
 }

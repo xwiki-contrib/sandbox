@@ -19,10 +19,12 @@
  */
 package org.xwiki.extension.internal;
 
+import java.net.URI;
 import java.util.List;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.Initializable;
@@ -38,22 +40,23 @@ import org.xwiki.extension.UninstallException;
 import org.xwiki.extension.install.ExtensionInstaller;
 import org.xwiki.extension.install.ExtensionInstallerException;
 import org.xwiki.extension.repository.CoreExtensionRepository;
-import org.xwiki.extension.repository.ExtensionRepository;
-import org.xwiki.extension.repository.ExtensionRepositoryFactory;
+import org.xwiki.extension.repository.ExtensionRepositoryException;
+import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
 import org.xwiki.extension.repository.LocalExtensionRepository;
+import org.xwiki.extension.repository.RepositoriesSource;
 
 /**
  * TODO: cut installation process in steps (create and validate an install plan, install, etc.)
  */
 @Component
-public class DefaultExtensionManager implements ExtensionManager, Initializable
+public class DefaultExtensionManager extends AbstractLogEnabled implements ExtensionManager, Initializable
 {
     @Requirement
     private ExtensionRepositoryManager repositoryManager;
 
-    @Requirement(role = ExtensionRepositoryFactory.class)
-    private List<ExtensionRepositoryFactory> extensionRepositoryFactory;
+    @Requirement(role = RepositoriesSource.class)
+    private List<RepositoriesSource> repositoriesSources;
 
     @Requirement
     private CoreExtensionRepository coreExtensionRepository;
@@ -75,13 +78,35 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
     public void initialize() throws InitializationException
     {
         // Load extension repositories
-        for (ExtensionRepositoryFactory repositoryFactory : this.extensionRepositoryFactory) {
-            for (ExtensionRepository repository : repositoryFactory.getDefaultExtensionRepositories()) {
-                this.repositoryManager.addRepository(repository);
+        for (RepositoriesSource repositoriesSource : this.repositoriesSources) {
+            for (ExtensionRepositoryId repositoryId : repositoriesSource.getExtensionRepositories()) {
+                try {
+                    this.repositoryManager.addRepository(repositoryId);
+                } catch (ExtensionRepositoryException e) {
+                    getLogger().error("Failed to add repository [" + repositoryId + "]", e);
+                }
             }
         }
 
-        // TODO: Load extensions from local repository
+        // Load extensions from local repository
+        List<LocalExtension> localExtensions = this.localExtensionRepository.getLocalExtensions();
+        for (LocalExtension localExtension : localExtensions) {
+            try {
+                installExtension(localExtension);
+            } catch (Exception e) {
+                getLogger().error("Failed to install local extension [" + localExtension + "]", e);
+            }
+        }
+
+        // FIXME: get repository from wiki
+        try {
+            this.repositoryManager.addRepository(new ExtensionRepositoryId("xwiki-releases", "maven", new URI(
+                "http://maven.xwiki.org/releases/")));
+            this.repositoryManager.addRepository(new ExtensionRepositoryId("central", "maven", new URI(
+                "http://repo1.maven.org/maven2/")));
+        } catch (Exception e) {
+            throw new InitializationException("Failed to add initial repositories", e);
+        }
     }
 
     public int coundAvailableExtensions()
@@ -167,6 +192,14 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
         // Store extension in local repository
         LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);
 
+        installExtension(localExtension);
+
+        return localExtension;
+    }
+
+    private LocalExtension installExtension(LocalExtension localExtension) throws ComponentLookupException,
+        ExtensionInstallerException
+    {
         // Load extension
         ExtensionInstaller extensionInstaller =
             this.componentManager.lookup(ExtensionInstaller.class, localExtension.getType().toString().toLowerCase());
@@ -208,21 +241,21 @@ public class DefaultExtensionManager implements ExtensionManager, Initializable
         // Remove from local repository
         this.localExtensionRepository.uninstallExtension(localExtension);
     }
-    
+
     public Extension resolveExtension(ExtensionId extensionId) throws ResolveException
     {
         Extension extension = null;
-        
-        extension = this.coreExtensionRepository.resolve(extensionId);
-        
+
+        extension = this.coreExtensionRepository.getCoreExtension(extensionId.getName());
+
         if (extension == null) {
-            extension = this.localExtensionRepository.resolve(extensionId);
+            extension = this.localExtensionRepository.getLocalExtension(extensionId.getName());
 
             if (extension == null) {
                 extension = this.repositoryManager.resolve(extensionId);
             }
         }
-        
+
         return extension;
     }
 }

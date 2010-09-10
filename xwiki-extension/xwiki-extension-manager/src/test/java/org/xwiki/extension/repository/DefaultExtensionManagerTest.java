@@ -9,12 +9,11 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.bridge.DocumentAccessBridge;
-import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManager;
+import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
-import org.xwiki.extension.repository.internal.DefaultCoreExtension;
 import org.xwiki.extension.test.ConfigurableDefaultCoreExtensionRepository;
 import org.xwiki.model.reference.AttachmentReferenceResolver;
 import org.xwiki.rendering.macro.Macro;
@@ -87,5 +86,12 @@ public class DefaultExtensionManagerTest extends AbstractComponentTestCase
         Macro rubyMacro = getComponentManager().lookup(Macro.class, "ruby");
 
         Assert.assertNotNull(rubyMacro);
+
+        try {
+            this.extensionManager.installExtension(this.rubyArtifactId);
+            Assert.fail("installExtension should have failed");
+        } catch (InstallException expected) {
+            // expected
+        }
     }
 }

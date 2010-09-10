@@ -10,13 +10,13 @@ import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.script.service.ScriptService;
 
-@Component
+@Component("extension")
 public class ExtensionManagerScriptService implements ScriptService
 {
     @Requirement
     private ExtensionManager extensionManager;
 
-    public LocalExtension installExtension(String name, String version) throws InstallException
+    public LocalExtension install(String name, String version) throws InstallException
     {
         // TODO: check rights
 
