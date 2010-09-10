@@ -47,7 +47,7 @@ public class AetherExtension implements Extension
 
     private ArtifactDescriptorResult artifactDescriptorResult;
 
-    private ExtensionId artifactId;
+    private ExtensionId extensionId;
 
     private String extensionType;
 
@@ -65,21 +65,21 @@ public class AetherExtension implements Extension
 
         this.repository = repository;
 
-        this.artifactId = artifactId;
+        this.extensionId = artifactId;
         this.artifactDescriptorResult = artifactDescriptorResult;
         this.extensionType = artifactDescriptorResult.getArtifact().getExtension();
 
         this.repositorySystem = this.plexusComponentManager.getPlexus().lookup(RepositorySystem.class);
     }
 
-    public String getName()
+    public String getId()
     {
-        return this.artifactId.getName();
+        return this.extensionId.getId();
     }
 
     public String getVersion()
     {
-        return this.artifactId.getVersion();
+        return this.extensionId.getVersion();
     }
 
     public String getAuthor()

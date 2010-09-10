@@ -21,19 +21,19 @@ package org.xwiki.extension;
 
 public class ExtensionId
 {
-    private String name;
+    private String id;
 
     private String version;
 
-    public ExtensionId(String name, String version)
+    public ExtensionId(String id, String version)
     {
-        this.name = name;
+        this.id = id;
         this.version = version;
     }
 
-    public String getName()
+    public String getId()
     {
-        return name;
+        return id;
     }
 
     public String getVersion()
@@ -52,7 +52,7 @@ public class ExtensionId
         if (obj instanceof ExtensionId) {
             ExtensionId extensionId = (ExtensionId) obj;
 
-            return getName().equals(extensionId.getName()) && getVersion().equals(extensionId.getVersion());
+            return getId().equals(extensionId.getId()) && getVersion().equals(extensionId.getVersion());
         }
 
         return false;
@@ -77,6 +77,6 @@ public class ExtensionId
     @Override
     public String toString()
     {
-        return getName() + '-' + getVersion();
+        return getId() + '-' + getVersion();
     }
 }

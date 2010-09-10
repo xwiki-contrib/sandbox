@@ -88,7 +88,7 @@ public class AetherExtensionRepository implements ExtensionRepository
 
     public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
-        Artifact artifact = new DefaultArtifact(extensionId.getName() + ':' + extensionId.getVersion());
+        Artifact artifact = new DefaultArtifact(extensionId.getId() + ':' + extensionId.getVersion());
 
         ArtifactDescriptorRequest artifactDescriptorRequest = new ArtifactDescriptorRequest();
         artifactDescriptorRequest.setArtifact(artifact);

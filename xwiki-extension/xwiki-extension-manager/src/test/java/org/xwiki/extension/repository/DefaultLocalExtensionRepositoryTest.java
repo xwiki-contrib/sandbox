@@ -79,7 +79,7 @@ public class DefaultLocalExtensionRepositoryTest extends AbstractComponentTestCa
         Extension extension = this.localExtensionRepository.getLocalExtension("existingextension");
 
         Assert.assertNotNull(extension);
-        Assert.assertEquals("existingextension", extension.getName());
+        Assert.assertEquals("existingextension", extension.getId());
         Assert.assertEquals("version", extension.getVersion());
         Assert.assertEquals("type", extension.getType());
     }
@@ -106,7 +106,7 @@ public class DefaultLocalExtensionRepositoryTest extends AbstractComponentTestCa
         Extension extension = this.localExtensionRepository.resolve(new ExtensionId("existingextension", "version"));
 
         Assert.assertNotNull(extension);
-        Assert.assertEquals("existingextension", extension.getName());
+        Assert.assertEquals("existingextension", extension.getId());
         Assert.assertEquals("version", extension.getVersion());
     }
 

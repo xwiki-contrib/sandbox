@@ -44,7 +44,7 @@ public class DefaultLocalExtension implements LocalExtension
 
     private boolean isDependency;
 
-    private String name;
+    private String id;
 
     private String version;
 
@@ -60,20 +60,20 @@ public class DefaultLocalExtension implements LocalExtension
 
     private DefaultLocalExtensionRepository repository;
 
-    public DefaultLocalExtension(DefaultLocalExtensionRepository repository, String name, String version, String type)
+    public DefaultLocalExtension(DefaultLocalExtensionRepository repository, String id, String version, String type)
     {
         this.repository = repository;
 
-        this.name = name;
+        this.id = id;
         this.version = version;
         this.type = type;
 
-        this.file = new File(repository.getRootFolder(), name + "-" + version + "." + type);
+        this.file = new File(repository.getRootFolder(), id + "-" + version + "." + type);
     }
 
     public DefaultLocalExtension(DefaultLocalExtensionRepository repository, Extension extension)
     {
-        this(repository, extension.getName(), extension.getVersion(), extension.getType());
+        this(repository, extension.getId(), extension.getVersion(), extension.getType());
 
         // TODO
     }
@@ -132,9 +132,9 @@ public class DefaultLocalExtension implements LocalExtension
         }
     }
 
-    public String getName()
+    public String getId()
     {
-        return this.name;
+        return this.id;
     }
 
     public String getVersion()
@@ -192,6 +192,6 @@ public class DefaultLocalExtension implements LocalExtension
     @Override
     public String toString()
     {
-        return getName() + '-' + getVersion();
+        return getId() + '-' + getVersion();
     }
 }

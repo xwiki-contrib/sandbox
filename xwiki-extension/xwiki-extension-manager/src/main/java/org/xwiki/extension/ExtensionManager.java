@@ -38,7 +38,7 @@ public interface ExtensionManager
 
     LocalExtension installExtension(ExtensionId extensionId) throws InstallException;
 
-    void uninstallExtension(String name) throws UninstallException;
+    void uninstallExtension(String id) throws UninstallException;
 
     Extension resolveExtension(ExtensionId extensionId) throws ResolveException;
 }

@@ -29,7 +29,7 @@ public interface CoreExtensionRepository extends ExtensionRepository
 {
     List<CoreExtension> getCoreExtensions();
 
-    CoreExtension getCoreExtension(String name);
+    CoreExtension getCoreExtension(String id);
 
-    boolean exists(String name);
+    boolean exists(String id);
 }

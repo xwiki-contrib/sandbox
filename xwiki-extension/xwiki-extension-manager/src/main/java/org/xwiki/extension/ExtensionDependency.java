@@ -21,7 +21,7 @@ package org.xwiki.extension;
 
 public interface ExtensionDependency
 {
-    String getName();
+    String getId();
 
     String getVersion();
     

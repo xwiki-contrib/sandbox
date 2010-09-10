@@ -24,7 +24,7 @@ public class ConfigurableDefaultCoreExtensionRepository extends DefaultCoreExten
 
     public void addExtensions(CoreExtension extension)
     {
-        this.extensions.put(extension.getName(), extension);
+        this.extensions.put(extension.getId(), extension);
     }
 
     public void addExtensions(String name, String version)

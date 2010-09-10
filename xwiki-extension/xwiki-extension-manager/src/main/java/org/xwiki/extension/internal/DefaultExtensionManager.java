@@ -135,19 +135,19 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
 
     public LocalExtension installExtension(ExtensionId extensionId) throws InstallException
     {
-        if (this.coreExtensionRepository.exists(extensionId.getName())) {
-            throw new InstallException("[" + extensionId.getName() + "]: core extension");
+        if (this.coreExtensionRepository.exists(extensionId.getId())) {
+            throw new InstallException("[" + extensionId.getId() + "]: core extension");
         }
 
-        LocalExtension localExtension = this.localExtensionRepository.getLocalExtension(extensionId.getName());
+        LocalExtension localExtension = this.localExtensionRepository.getLocalExtension(extensionId.getId());
 
         if (localExtension != null) {
             int diff = this.versionManager.compareVersions(extensionId.getVersion(), localExtension.getVersion());
 
             if (diff == 0) {
-                throw new InstallException("[" + extensionId.getName() + "]: already installed");
+                throw new InstallException("[" + extensionId.getId() + "]: already installed");
             } else if (diff < 0) {
-                throw new InstallException("[" + extensionId.getName()
+                throw new InstallException("[" + extensionId.getId()
                     + "]: a more recent version is already installed");
             }
         }
@@ -182,9 +182,9 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     {
         for (ExtensionDependency dependencyDependency : remoteExtension.getDependencies()) {
             ExtensionId dependencyId =
-                new ExtensionId(dependencyDependency.getName(), dependencyDependency.getVersion());
+                new ExtensionId(dependencyDependency.getId(), dependencyDependency.getVersion());
 
-            if (!this.coreExtensionRepository.exists(dependencyId.getName())
+            if (!this.coreExtensionRepository.exists(dependencyId.getId())
                 && !this.localExtensionRepository.exists(dependencyId)) {
                 installExtension(dependencyId, true);
             }
@@ -247,10 +247,10 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     {
         Extension extension = null;
 
-        extension = this.coreExtensionRepository.getCoreExtension(extensionId.getName());
+        extension = this.coreExtensionRepository.getCoreExtension(extensionId.getId());
 
         if (extension == null) {
-            extension = this.localExtensionRepository.getLocalExtension(extensionId.getName());
+            extension = this.localExtensionRepository.getLocalExtension(extensionId.getId());
 
             if (extension == null) {
                 extension = this.repositoryManager.resolve(extensionId);

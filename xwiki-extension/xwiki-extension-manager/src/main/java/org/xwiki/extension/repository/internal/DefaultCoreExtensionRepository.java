@@ -88,7 +88,7 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
             try {
                 CoreExtension coreExtension = new DefaultCoreExtension(this, descriptorUrl, descriptorStream);
 
-                this.extensions.put(coreExtension.getName(), coreExtension);
+                this.extensions.put(coreExtension.getId(), coreExtension);
             } catch (Exception e) {
                 getLogger().error("Failed to parse descriptor [" + descriptorUrl + "]", e);
             } finally {
@@ -106,7 +106,7 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
 
     public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
-        Extension extension = getCoreExtension(extensionId.getName());
+        Extension extension = getCoreExtension(extensionId.getId());
 
         if (extension == null
             || (extensionId.getVersion() != null && !extension.getVersion().equals(extensionId.getVersion()))) {
@@ -118,7 +118,7 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
 
     public boolean exists(ExtensionId extensionId)
     {
-        Extension extension = getCoreExtension(extensionId.getName());
+        Extension extension = getCoreExtension(extensionId.getId());
 
         if (extension == null
             || (extensionId.getVersion() != null && !extension.getVersion().equals(extensionId.getVersion()))) {
@@ -128,9 +128,9 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
         return true;
     }
 
-    public boolean exists(String name)
+    public boolean exists(String id)
     {
-        return this.extensions.containsKey(name);
+        return this.extensions.containsKey(id);
     }
 
     public ExtensionRepositoryId getId()
@@ -150,9 +150,9 @@ public class DefaultCoreExtensionRepository extends AbstractLogEnabled implement
         return new ArrayList<CoreExtension>(this.extensions.values());
     }
 
-    public CoreExtension getCoreExtension(String name)
+    public CoreExtension getCoreExtension(String id)
     {
-        return this.extensions.get(name);
+        return this.extensions.get(id);
     }
 
     public List< ? extends CoreExtension> getExtensions(int nb, int offset)

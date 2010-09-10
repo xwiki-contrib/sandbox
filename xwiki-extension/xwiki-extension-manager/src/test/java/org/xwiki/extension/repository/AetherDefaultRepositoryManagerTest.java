@@ -52,12 +52,12 @@ public class AetherDefaultRepositoryManagerTest extends AbstractComponentTestCas
         Extension artifact = this.repositoryManager.resolve(this.rubyArtifactId);
 
         Assert.assertNotNull(artifact);
-        Assert.assertEquals("org.xwiki.platform:xwiki-core-rendering-macro-ruby", artifact.getName());
+        Assert.assertEquals("org.xwiki.platform:xwiki-core-rendering-macro-ruby", artifact.getId());
         Assert.assertEquals("2.3.1", artifact.getVersion());
         Assert.assertEquals("jar", artifact.getType());
 
         ExtensionDependency dependency = artifact.getDependencies().get(1);
-        Assert.assertEquals("org.jruby:jruby", dependency.getName());
+        Assert.assertEquals("org.jruby:jruby", dependency.getId());
         Assert.assertEquals("1.3.0", dependency.getVersion());
     }
 

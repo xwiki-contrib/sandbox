@@ -26,7 +26,7 @@ import org.xwiki.extension.repository.ExtensionRepository;
 
 public interface Extension
 {
-    String getName();
+    String getId();
 
     String getVersion();
 

@@ -16,15 +16,15 @@ public class ExtensionManagerScriptService implements ScriptService
     @Requirement
     private ExtensionManager extensionManager;
 
-    public LocalExtension install(String name, String version) throws InstallException
+    public LocalExtension install(String id, String version) throws InstallException
     {
         // TODO: check rights
 
-        return this.extensionManager.installExtension(new ExtensionId(name, version));
+        return this.extensionManager.installExtension(new ExtensionId(id, version));
     }
 
-    public Extension resolve(String name, String version) throws ResolveException
+    public Extension resolve(String id, String version) throws ResolveException
     {
-        return this.extensionManager.resolveExtension(new ExtensionId(name, version));
+        return this.extensionManager.resolveExtension(new ExtensionId(id, version));
     }
 }

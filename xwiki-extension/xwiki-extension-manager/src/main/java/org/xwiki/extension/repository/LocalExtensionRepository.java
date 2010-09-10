@@ -32,7 +32,7 @@ public interface LocalExtensionRepository extends ExtensionRepository
 {
     List<LocalExtension> getLocalExtensions();
 
-    LocalExtension getLocalExtension(String name);
+    LocalExtension getLocalExtension(String id);
 
     LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException;
 

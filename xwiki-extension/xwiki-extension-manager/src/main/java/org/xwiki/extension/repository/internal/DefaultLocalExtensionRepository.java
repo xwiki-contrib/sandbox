@@ -117,7 +117,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
     public Extension resolve(ExtensionId extensionId) throws ResolveException
     {
-        LocalExtension localExtension = getLocalExtension(extensionId.getName());
+        LocalExtension localExtension = getLocalExtension(extensionId.getId());
 
         if (localExtension == null
             || (extensionId.getVersion() != null && !localExtension.getVersion().equals(extensionId.getVersion()))) {
@@ -129,7 +129,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
     public boolean exists(ExtensionId extensionId)
     {
-        LocalExtension localExtension = getLocalExtension(extensionId.getName());
+        LocalExtension localExtension = getLocalExtension(extensionId.getId());
 
         if (localExtension == null
             || (extensionId.getVersion() != null && !localExtension.getVersion().equals(extensionId.getVersion()))) {
@@ -151,9 +151,9 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
         return new ArrayList<LocalExtension>(this.extensions.values());
     }
 
-    public LocalExtension getLocalExtension(String name)
+    public LocalExtension getLocalExtension(String id)
     {
-        LocalExtension extension = this.extensions.get(name);
+        LocalExtension extension = this.extensions.get(id);
 
         return extension != null ? extension : null;
     }
@@ -179,7 +179,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
     public LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException
     {
-        LocalExtension localExtension = getLocalExtension(extension.getName());
+        LocalExtension localExtension = getLocalExtension(extension.getId());
 
         if (localExtension == null
             || this.versionManager.compareVersions(extension.getVersion(), localExtension.getVersion()) != 0) {
@@ -187,7 +187,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
             try {
                 extension.download(localExtension.getFile());
-                this.extensions.put(localExtension.getName(), localExtension);
+                this.extensions.put(localExtension.getId(), localExtension);
             } catch (ExtensionException e) {
                 // TODO: clean
 

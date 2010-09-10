@@ -31,9 +31,9 @@ public class AetherExtensionDependency implements ExtensionDependency
         this.artifactId = artifactId;
     }
 
-    public String getName()
+    public String getId()
     {
-        return this.artifactId.getName();
+        return this.artifactId.getId();
     }
 
     public String getVersion()

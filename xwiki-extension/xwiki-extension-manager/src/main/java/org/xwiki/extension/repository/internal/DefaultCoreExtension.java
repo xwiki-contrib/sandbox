@@ -40,7 +40,7 @@ public class DefaultCoreExtension implements CoreExtension
 {
     private URL url;
 
-    private String name;
+    private String id;
 
     private String version;
 
@@ -58,9 +58,9 @@ public class DefaultCoreExtension implements CoreExtension
 
     private Model mavenModel;
 
-    public DefaultCoreExtension(String name, String version)
+    public DefaultCoreExtension(String id, String version)
     {
-        this.name = name;
+        this.id = id;
         this.version = version;
     }
 
@@ -94,7 +94,7 @@ public class DefaultCoreExtension implements CoreExtension
             }
         }
 
-        this.name = groupId + ":" + this.mavenModel.getArtifactId();
+        this.id = groupId + ":" + this.mavenModel.getArtifactId();
         this.version = version;
     }
 
@@ -105,9 +105,9 @@ public class DefaultCoreExtension implements CoreExtension
         // TODO
     }
 
-    public String getName()
+    public String getId()
     {
-        return this.name;
+        return this.id;
     }
 
     public String getVersion()
@@ -155,6 +155,6 @@ public class DefaultCoreExtension implements CoreExtension
     @Override
     public String toString()
     {
-        return getName() + '-' + getVersion();
+        return getId() + '-' + getVersion();
     }
 }
