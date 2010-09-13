@@ -73,7 +73,7 @@ public class DefaultExtensionManagerConfiguration extends AbstractLogEnabled imp
 
         List<String> repositoryStrings = this.configurationSource.getProperty("extension.localRepository", List.class);
 
-        if (repositoryStrings != null) {
+        if (repositoryStrings != null && !repositoryStrings.isEmpty()) {
             for (String repositoryString : repositoryStrings) {
                 try {
                     ExtensionRepositoryId extensionRepositoryId = parseRepository(repositoryString);

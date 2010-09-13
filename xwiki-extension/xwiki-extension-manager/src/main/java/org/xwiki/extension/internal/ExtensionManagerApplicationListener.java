@@ -17,25 +17,46 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.install.internal.jar;
+package org.xwiki.extension.internal;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.component.manager.ComponentManagerInitializer;
 import org.xwiki.extension.ExtensionManager;
+import org.xwiki.observation.EventListener;
+import org.xwiki.observation.event.ApplicationStartedEvent;
+import org.xwiki.observation.event.Event;
 
-@Component
-public class JarExtensionComponentManagerInitializer extends AbstractLogEnabled implements ComponentManagerInitializer
+@Component("ExtensionManagerApplicationStarted")
+public class ExtensionManagerApplicationListener extends AbstractLogEnabled implements EventListener
 {
-    public void initialize(ComponentManager componentManager)
+    private static final List<Event> EVENTS = Collections.<Event> singletonList(new ApplicationStartedEvent());
+
+    @Requirement
+    private ComponentManager componentManager;
+
+    public List<Event> getEvents()
+    {
+        return EVENTS;
+    }
+
+    public String getName()
+    {
+        return "ExtensionManagerApplicationStarted";
+    }
+
+    public void onEvent(Event arg0, Object arg1, Object arg2)
     {
         try {
             // local extensions are loaded in default ExtensionManager initialization
-            componentManager.lookup(ExtensionManager.class);
+            this.componentManager.lookup(ExtensionManager.class);
         } catch (ComponentLookupException e) {
-            getLogger().error("Failed to initialize Exctension Manager", e);
+            getLogger().error("Failed to initialize Extension Manager", e);
         }
     }
 }

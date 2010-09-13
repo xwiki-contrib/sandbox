@@ -14,6 +14,7 @@ public class DefaultAetherConfiguration extends AbstractLogEnabled implements Ae
     @Requirement("xwikiproperties")
     private ConfigurationSource configurationSource;
 
+    @Requirement
     private ExtensionManagerConfiguration extensionManagerConfiguration;
 
     public File getLocalRepository()
