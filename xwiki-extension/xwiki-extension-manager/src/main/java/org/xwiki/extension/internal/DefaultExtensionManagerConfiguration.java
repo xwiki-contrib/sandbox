@@ -43,7 +43,7 @@ public class DefaultExtensionManagerConfiguration extends AbstractLogEnabled imp
 
     private static final File EXTENSIONSHOME = new File(XWIKIHOME, "extensions");
 
-    private static final Pattern REPOSITORYIDPATTERN = Pattern.compile("([^]+):([^]+):(.+)");
+    private static final Pattern REPOSITORYIDPATTERN = Pattern.compile("([^:]+):([^:]+):(.+)");
 
     @Requirement("xwikiproperties")
     private ConfigurationSource configurationSource;
