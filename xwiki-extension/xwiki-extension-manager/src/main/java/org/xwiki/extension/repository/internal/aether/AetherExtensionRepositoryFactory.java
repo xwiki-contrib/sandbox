@@ -68,13 +68,6 @@ public class AetherExtensionRepositoryFactory extends AbstractLogEnabled impleme
         this.session.setIgnoreInvalidArtifactDescriptor(false);
     }
 
-    public List<ExtensionRepository> getDefaultExtensionRepositories()
-    {
-        List<ExtensionRepository> repositories = new ArrayList<ExtensionRepository>();
-
-        return repositories;
-    }
-
     public ExtensionRepository createRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException
     {
         try {

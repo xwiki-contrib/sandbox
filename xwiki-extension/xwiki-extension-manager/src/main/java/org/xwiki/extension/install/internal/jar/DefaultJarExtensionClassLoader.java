@@ -17,12 +17,25 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository;
+package org.xwiki.extension.install.internal.jar;
 
-import org.xwiki.component.annotation.ComponentRole;
+import java.net.URI;
 
-@ComponentRole
-public interface ExtensionRepositoryFactory
+import org.xwiki.classloader.ExtendedURLClassLoader;
+import org.xwiki.classloader.URIClassLoader;
+import org.xwiki.component.annotation.Component;
+
+@Component
+public class DefaultJarExtensionClassLoader implements JarExtensionClassLoader
 {
-    ExtensionRepository createRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException;
+    private ExtendedURLClassLoader classLoader;
+
+    public ExtendedURLClassLoader getURLClassLoader()
+    {
+        if (this.classLoader == null) {
+            this.classLoader = new URIClassLoader(new URI[] {}, getClass().getClassLoader());
+        }
+
+        return this.classLoader;
+    }
 }

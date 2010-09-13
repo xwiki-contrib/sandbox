@@ -17,12 +17,27 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository;
+package org.xwiki.extension.install.internal.jar;
 
-import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+import org.xwiki.context.ExecutionContext;
+import org.xwiki.context.ExecutionContextException;
+import org.xwiki.context.ExecutionContextInitializer;
 
-@ComponentRole
-public interface ExtensionRepositoryFactory
+@Component("jarextension")
+public class JarExtensionExecutionContextInitializer implements ExecutionContextInitializer
 {
-    ExtensionRepository createRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException;
+    @Requirement
+    private JarExtensionClassLoader jarExtensionClassLoader;
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.xwiki.context.ExecutionContextInitializer#initialize(org.xwiki.context.ExecutionContext)
+     */
+    public void initialize(ExecutionContext context) throws ExecutionContextException
+    {
+        Thread.currentThread().setContextClassLoader(this.jarExtensionClassLoader.getURLClassLoader());
+    }
 }

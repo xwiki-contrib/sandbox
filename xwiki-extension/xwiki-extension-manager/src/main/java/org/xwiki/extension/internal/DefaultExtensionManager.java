@@ -19,7 +19,6 @@
  */
 package org.xwiki.extension.internal;
 
-import java.net.URI;
 import java.util.List;
 
 import org.xwiki.component.annotation.Component;
@@ -33,6 +32,7 @@ import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManager;
+import org.xwiki.extension.ExtensionManagerConfiguration;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.ResolveException;
@@ -70,6 +70,9 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     @Requirement
     private VersionManager versionManager;
 
+    @Requirement
+    private ExtensionManagerConfiguration configuration;
+
     /**
      * {@inheritDoc}
      * 
@@ -97,16 +100,6 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
             } catch (Exception e) {
                 getLogger().error("Failed to install local extension [" + localExtension + "]", e);
             }
-        }
-
-        // FIXME: get repository from wiki
-        try {
-            this.repositoryManager.addRepository(new ExtensionRepositoryId("xwiki-releases", "maven", new URI(
-                "http://maven.xwiki.org/releases/")));
-            this.repositoryManager.addRepository(new ExtensionRepositoryId("central", "maven", new URI(
-                "http://repo1.maven.org/maven2/")));
-        } catch (Exception e) {
-            throw new InitializationException("Failed to add initial repositories", e);
         }
     }
 
@@ -147,8 +140,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
             if (diff == 0) {
                 throw new InstallException("[" + extensionId.getId() + "]: already installed");
             } else if (diff < 0) {
-                throw new InstallException("[" + extensionId.getId()
-                    + "]: a more recent version is already installed");
+                throw new InstallException("[" + extensionId.getId() + "]: a more recent version is already installed");
             }
         }
 
@@ -181,8 +173,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         throws ComponentLookupException, InstallException, ExtensionInstallerException
     {
         for (ExtensionDependency dependencyDependency : remoteExtension.getDependencies()) {
-            ExtensionId dependencyId =
-                new ExtensionId(dependencyDependency.getId(), dependencyDependency.getVersion());
+            ExtensionId dependencyId = new ExtensionId(dependencyDependency.getId(), dependencyDependency.getVersion());
 
             if (!this.coreExtensionRepository.exists(dependencyId.getId())
                 && !this.localExtensionRepository.exists(dependencyId)) {

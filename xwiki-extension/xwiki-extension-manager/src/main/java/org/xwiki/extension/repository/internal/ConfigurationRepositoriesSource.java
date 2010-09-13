@@ -17,12 +17,24 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository;
+package org.xwiki.extension.repository.internal;
 
-import org.xwiki.component.annotation.ComponentRole;
+import java.util.List;
 
-@ComponentRole
-public interface ExtensionRepositoryFactory
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+import org.xwiki.extension.ExtensionManagerConfiguration;
+import org.xwiki.extension.repository.ExtensionRepositoryId;
+import org.xwiki.extension.repository.RepositoriesSource;
+
+@Component
+public class ConfigurationRepositoriesSource implements RepositoriesSource
 {
-    ExtensionRepository createRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException;
+    @Requirement
+    private ExtensionManagerConfiguration configuration;
+
+    public List<ExtensionRepositoryId> getExtensionRepositories()
+    {
+        return configuration.getRepositories();
+    }
 }

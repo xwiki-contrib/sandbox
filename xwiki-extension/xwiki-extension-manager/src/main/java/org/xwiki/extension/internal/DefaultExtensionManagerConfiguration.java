@@ -20,16 +20,31 @@
 package org.xwiki.extension.internal;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.extension.ExtensionManagerConfiguration;
+import org.xwiki.extension.repository.ExtensionRepositoryId;
 
 @Component
-public class DefaultExtensionManagerConfiguration implements ExtensionManagerConfiguration
+public class DefaultExtensionManagerConfiguration extends AbstractLogEnabled implements ExtensionManagerConfiguration
 {
+    private static final String USERHOME = System.getProperty("user.home");
+
+    private static final File XWIKIHOME = new File(USERHOME, ".xwiki");
+
+    private static final File EXTENSIONSHOME = new File(XWIKIHOME, "extensions");
+
+    private static final Pattern REPOSITORYIDPATTERN = Pattern.compile("([^]+):([^]+):(.+)");
+
     @Requirement("xwikiproperties")
     private ConfigurationSource configurationSource;
 
@@ -37,19 +52,59 @@ public class DefaultExtensionManagerConfiguration implements ExtensionManagerCon
 
     private File localRepository;
 
-    public File getLocalRepository() throws IOException
+    public File getLocalRepository()
     {
         if (this.localRepository == null) {
             String localRepositoryPath = this.configurationSource.getProperty("extension.localRepository");
 
             if (localRepositoryPath == null) {
-                this.localRepository =
-                    new File(File.createTempFile("extension", ".xml").getParentFile(), "repository/");
+                this.localRepository = new File(EXTENSIONSHOME, "repository/");
             } else {
                 this.localRepository = new File(localRepositoryPath);
             }
         }
 
         return this.localRepository;
+    }
+
+    public List<ExtensionRepositoryId> getRepositories()
+    {
+        List<ExtensionRepositoryId> repositories = new ArrayList<ExtensionRepositoryId>();
+
+        List<String> repositoryStrings = this.configurationSource.getProperty("extension.localRepository", List.class);
+
+        if (repositoryStrings != null) {
+            for (String repositoryString : repositoryStrings) {
+                try {
+                    ExtensionRepositoryId extensionRepositoryId = parseRepository(repositoryString);
+                    repositories.add(extensionRepositoryId);
+                } catch (Exception e) {
+                    getLogger().warn("Faild to parse repository [" + repositoryString + "] from configuration", e);
+                }
+            }
+        } else {
+            try {
+                repositories.add(new ExtensionRepositoryId("xwiki-releases", "maven", new URI(
+                    "http://maven.xwiki.org/releases/")));
+                repositories.add(new ExtensionRepositoryId("central", "maven",
+                    new URI("http://repo1.maven.org/maven2/")));
+            } catch (Exception e) {
+                // Should never happen
+            }
+        }
+
+        return repositories;
+    }
+
+    private ExtensionRepositoryId parseRepository(String repositoryString) throws URISyntaxException
+    {
+        Matcher matcher = REPOSITORYIDPATTERN.matcher(repositoryString);
+
+        if (matcher.matches()) {
+            new ExtensionRepositoryId(matcher.group(1), matcher.group(2), new URI(matcher.group(3)));
+        }
+
+        // TODO: throw exception
+        return null;
     }
 }

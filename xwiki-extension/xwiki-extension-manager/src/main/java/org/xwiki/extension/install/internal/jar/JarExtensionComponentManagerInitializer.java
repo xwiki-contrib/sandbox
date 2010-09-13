@@ -17,12 +17,25 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository;
+package org.xwiki.extension.install.internal.jar;
 
-import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.logging.AbstractLogEnabled;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.component.manager.ComponentManagerInitializer;
+import org.xwiki.extension.ExtensionManager;
 
-@ComponentRole
-public interface ExtensionRepositoryFactory
+@Component
+public class JarExtensionComponentManagerInitializer extends AbstractLogEnabled implements ComponentManagerInitializer
 {
-    ExtensionRepository createRepository(ExtensionRepositoryId repositoryId) throws ExtensionRepositoryException;
+    public void initialize(ComponentManager componentManager)
+    {
+        try {
+            // local extensions are loaded in default ExtensionManager initialization
+            componentManager.lookup(ExtensionManager.class);
+        } catch (ComponentLookupException e) {
+            getLogger().error("Failed to initialize Exctension Manager", e);
+        }
+    }
 }

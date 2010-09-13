@@ -67,11 +67,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
     public void initialize() throws InitializationException
     {
-        try {
-            this.rootFolder = this.configuration.getLocalRepository();
-        } catch (IOException e) {
-            new InitializationException("Failed to access local repository", e);
-        }
+        this.rootFolder = this.configuration.getLocalRepository();
 
         this.repositoryId = new ExtensionRepositoryId("local", "xwiki", this.rootFolder.toURI());
 

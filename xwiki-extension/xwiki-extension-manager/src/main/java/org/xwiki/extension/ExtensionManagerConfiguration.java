@@ -20,12 +20,15 @@
 package org.xwiki.extension;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.extension.repository.ExtensionRepositoryId;
 
 @ComponentRole
 public interface ExtensionManagerConfiguration
 {
-    File getLocalRepository() throws IOException;
+    File getLocalRepository();
+    
+    List<ExtensionRepositoryId> getRepositories();
 }
