@@ -29,7 +29,7 @@
     <artifactId>xwiki</artifactId>
     <version>32-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-extension</artifactId>
+  <artifactId>xwiki-core-extension</artifactId>
   <version>2.5-SNAPSHOT</version>
   <name>XWiki Platform - Extension</name>
   <packaging>pom</packaging>

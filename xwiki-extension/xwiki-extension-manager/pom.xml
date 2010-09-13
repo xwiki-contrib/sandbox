@@ -26,10 +26,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-extension</artifactId>
+    <artifactId>xwiki-core-extension</artifactId>
     <version>2.5-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-extension-manager</artifactId>
+  <artifactId>xwiki-core-extension-manager</artifactId>
   <name>XWiki Platform - Core - Extension - Repository</name>
   <packaging>jar</packaging>
   <description>XWiki Platform - Extension - Repository</description>
