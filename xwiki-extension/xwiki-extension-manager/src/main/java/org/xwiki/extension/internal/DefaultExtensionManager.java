@@ -32,7 +32,6 @@ import org.xwiki.extension.Extension;
 import org.xwiki.extension.ExtensionDependency;
 import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManager;
-import org.xwiki.extension.ExtensionManagerConfiguration;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.ResolveException;
@@ -69,9 +68,6 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
 
     @Requirement
     private VersionManager versionManager;
-
-    @Requirement
-    private ExtensionManagerConfiguration configuration;
 
     /**
      * {@inheritDoc}
