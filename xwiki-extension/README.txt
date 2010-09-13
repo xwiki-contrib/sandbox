@@ -14,10 +14,12 @@
 
 = TODO
 
+* miscellaneous rights protections in extension manager script service
 * find a way to not loose initialization events like ApplicationStartedEvent
-* directly download into XWiki local repository instead of having a Aether repository and a XWiki repository
+* directly download into XWiki local repository instead of having an Aether local repository
 * asynchronous install UI (resolve, download, etc...) with events
 * xar installer
 * uninstall
 * local repository descriptors
 * create install/uninstall plans
+* install extension not coming from a repository
