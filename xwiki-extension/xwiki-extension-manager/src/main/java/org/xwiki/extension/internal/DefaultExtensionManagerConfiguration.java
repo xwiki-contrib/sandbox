@@ -71,7 +71,7 @@ public class DefaultExtensionManagerConfiguration extends AbstractLogEnabled imp
     {
         List<ExtensionRepositoryId> repositories = new ArrayList<ExtensionRepositoryId>();
 
-        List<String> repositoryStrings = this.configurationSource.getProperty("extension.localRepository", List.class);
+        List<String> repositoryStrings = this.configurationSource.getProperty("extension.repositories", List.class);
 
         if (repositoryStrings != null && !repositoryStrings.isEmpty()) {
             for (String repositoryString : repositoryStrings) {
