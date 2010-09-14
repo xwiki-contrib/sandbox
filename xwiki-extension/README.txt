@@ -23,3 +23,4 @@
 * local repository descriptors
 * create install/uninstall plans
 * install extension not coming from a repository
+* make possible to disable an extension without uninstall it
