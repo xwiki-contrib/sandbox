@@ -38,12 +38,13 @@ import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.UninstallException;
 import org.xwiki.extension.install.ExtensionInstaller;
 import org.xwiki.extension.install.ExtensionInstallerException;
+import org.xwiki.extension.install.ExtensionInstallerManager;
 import org.xwiki.extension.repository.CoreExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryException;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
-import org.xwiki.extension.repository.LocalExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositorySource;
+import org.xwiki.extension.repository.LocalExtensionRepository;
 
 /**
  * TODO: cut installation process in steps (create and validate an install plan, install, etc.)
@@ -68,6 +69,9 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
 
     @Requirement
     private VersionManager versionManager;
+
+    @Requirement
+    private ExtensionInstallerManager extensionInstallerManager;
 
     /**
      * {@inheritDoc}
@@ -180,7 +184,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         // Store extension in local repository
         LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);
 
-        installExtension(localExtension);
+        this.extensionInstallerManager.install(localExtension);
 
         return localExtension;
     }
