@@ -73,8 +73,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
         loadExtensions();
     }
 
-    // TODO: define real extension descriptor instead of looking at files names7
-    // TODO: add support for any extension type
+    // TODO: define real extension descriptor instead of looking at files names
     private void loadExtensions()
     {
         File rootFolder = getRootFolder();
@@ -92,9 +91,14 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
                         String version = fileName.substring(versionIndex + 1, dotIndex);
                         String type = fileName.substring(dotIndex + 1, fileName.length());
 
-                        LocalExtension localExtension = new DefaultLocalExtension(this, name, version, type);
+                        LocalExtension existingExtension = this.extensions.get(name);
 
-                        this.extensions.put(name, localExtension);
+                        if (existingExtension == null
+                            || this.versionManager.compareVersions(existingExtension.getVersion(), version) < 0) {
+                            LocalExtension localExtension = new DefaultLocalExtension(this, name, version, type);
+
+                            this.extensions.put(name, localExtension);
+                        }
                     } else {
                         getLogger().warn("Invalid file name [" + child + "]");
                     }
@@ -176,8 +180,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
     {
         LocalExtension localExtension = getLocalExtension(extension.getId());
 
-        if (localExtension == null
-            || this.versionManager.compareVersions(extension.getVersion(), localExtension.getVersion()) != 0) {
+        if (localExtension == null || !extension.getVersion().equals(localExtension.getVersion())) {
             localExtension = createExtension(extension, dependency);
 
             try {
@@ -195,6 +198,12 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
     public void uninstallExtension(LocalExtension extension) throws UninstallException
     {
-        // TODO: delete artifact file and descriptor
+        extension.getFile().delete();
+
+        LocalExtension existingExtension = getLocalExtension(extension.getId());
+
+        if (existingExtension == extension) {
+            this.extensions.remove(extension.getId());
+        }
     }
 }

@@ -25,7 +25,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentLookupException;
-import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.Extension;
@@ -63,13 +62,10 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     private LocalExtensionRepository localExtensionRepository;
 
     @Requirement
-    private ComponentManager componentManager;
-
-    @Requirement
     private VersionManager versionManager;
 
     @Requirement
-    private ExtensionHandlerManager extensionInstallerManager;
+    private ExtensionHandlerManager extensionHandlerManager;
 
     /**
      * {@inheritDoc}
@@ -94,7 +90,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         for (LocalExtension localExtension : localExtensions) {
             try {
                 // TODO: validate dependencies
-                this.extensionInstallerManager.install(localExtension);
+                this.extensionHandlerManager.install(localExtension);
             } catch (Exception e) {
                 getLogger().error("Failed to install local extension [" + localExtension + "]", e);
             }
@@ -126,12 +122,18 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
 
     public LocalExtension installExtension(ExtensionId extensionId) throws InstallException
     {
+        return installExtension(extensionId, false);
+    }
+
+    private LocalExtension installExtension(ExtensionId extensionId, boolean dependency) throws InstallException
+    {
         if (this.coreExtensionRepository.exists(extensionId.getId())) {
             throw new InstallException("[" + extensionId.getId() + "]: core extension");
         }
 
-        LocalExtension localExtension = this.localExtensionRepository.getLocalExtension(extensionId.getId());
+        LocalExtension previousExtension = null;
 
+        LocalExtension localExtension = this.localExtensionRepository.getLocalExtension(extensionId.getId());
         if (localExtension != null) {
             int diff = this.versionManager.compareVersions(extensionId.getVersion(), localExtension.getVersion());
 
@@ -139,14 +141,43 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
                 throw new InstallException("[" + extensionId.getId() + "]: already installed");
             } else if (diff < 0) {
                 throw new InstallException("[" + extensionId.getId() + "]: a more recent version is already installed");
+            } else {
+                // upgrade
+                previousExtension = localExtension;
             }
         }
 
-        return installExtension(extensionId, false);
-
+        return installExtension(previousExtension, extensionId, dependency);
     }
 
-    private LocalExtension installExtension(ExtensionId extensionId, boolean dependency) throws InstallException
+    // TODO: support version range
+    private LocalExtension installExtensionDependency(ExtensionDependency extensionDependency) throws InstallException
+    {
+        if (this.coreExtensionRepository.exists(extensionDependency.getId())) {
+            return null;
+        }
+
+        LocalExtension previousExtension = null;
+
+        LocalExtension localExtension = this.localExtensionRepository.getLocalExtension(extensionDependency.getId());
+        if (localExtension != null) {
+            int diff =
+                this.versionManager.compareVersions(extensionDependency.getVersion(), localExtension.getVersion());
+
+            if (diff > 0) {
+                // upgrade
+                previousExtension = localExtension;
+            } else {
+                return null;
+            }
+        }
+
+        return installExtension(previousExtension,
+            new ExtensionId(extensionDependency.getId(), extensionDependency.getVersion()), true);
+    }
+
+    private LocalExtension installExtension(LocalExtension previousExtension, ExtensionId extensionId,
+        boolean dependency) throws InstallException
     {
         // Resolve extension
         Extension remoteExtension;
@@ -161,28 +192,34 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         }
 
         try {
-            return installExtension(remoteExtension, dependency);
+            return installExtension(previousExtension, remoteExtension, dependency);
         } catch (Exception e) {
             throw new InstallException("Failed to install extension", e);
         }
     }
 
-    private LocalExtension installExtension(Extension remoteExtension, boolean dependency)
-        throws ComponentLookupException, InstallException
+    private LocalExtension installExtension(LocalExtension previousExtension, Extension remoteExtension,
+        boolean dependency) throws ComponentLookupException, InstallException
     {
         for (ExtensionDependency dependencyDependency : remoteExtension.getDependencies()) {
-            ExtensionId dependencyId = new ExtensionId(dependencyDependency.getId(), dependencyDependency.getVersion());
-
-            if (!this.coreExtensionRepository.exists(dependencyId.getId())
-                && !this.localExtensionRepository.exists(dependencyId)) {
-                installExtension(dependencyId, true);
-            }
+            installExtensionDependency(dependencyDependency);
         }
 
         // Store extension in local repository
         LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);
 
-        this.extensionInstallerManager.install(localExtension);
+        if (previousExtension != null) {
+            this.extensionHandlerManager.upgrade(previousExtension, localExtension);
+
+            // clean local repository
+            try {
+                this.localExtensionRepository.uninstallExtension(previousExtension);
+            } catch (UninstallException e) {
+                getLogger().error("Failed to remove previous local extension after upgrade", e);
+            }
+        } else {
+            this.extensionHandlerManager.install(localExtension);
+        }
 
         return localExtension;
     }
