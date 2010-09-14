@@ -35,12 +35,13 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
+import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
-import org.xwiki.extension.install.ExtensionInstaller;
-import org.xwiki.extension.install.ExtensionInstallerException;
+import org.xwiki.extension.UninstallException;
+import org.xwiki.extension.install.ExtensionHandler;
 
 @Component("jar")
-public class JarExtensionInstaller extends AbstractLogEnabled implements ExtensionInstaller, Initializable
+public class JarExtensionHandler extends AbstractLogEnabled implements ExtensionHandler, Initializable
 {
     private ComponentAnnotationLoader jarLoader;
 
@@ -63,22 +64,22 @@ public class JarExtensionInstaller extends AbstractLogEnabled implements Extensi
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.extension.install.ExtensionInstaller#install(org.xwiki.extension.LocalExtension)
+     * @see org.xwiki.extension.install.ExtensionHandler#install(org.xwiki.extension.LocalExtension)
      */
-    public void install(LocalExtension localExtension) throws ExtensionInstallerException
+    public void install(LocalExtension localExtension) throws InstallException
     {
         // 1) load jar into classloader
         try {
             this.jarExtensionClassLoader.getURLClassLoader().addURL(localExtension.getFile().toURL());
         } catch (MalformedURLException e) {
-            throw new ExtensionInstallerException("Failed to load jar file", e);
+            throw new InstallException("Failed to load jar file", e);
         }
 
         // 2) load and register components
         loadComponents(localExtension.getFile());
     }
 
-    private void loadComponents(File jarFile) throws ExtensionInstallerException
+    private void loadComponents(File jarFile) throws InstallException
     {
         try {
             List<String>[] components = getDeclaredComponents(jarFile);
@@ -91,7 +92,7 @@ public class JarExtensionInstaller extends AbstractLogEnabled implements Extensi
             this.jarLoader.initialize(this.componentManager, this.jarExtensionClassLoader.getURLClassLoader(),
                 components[0], components[1] == null ? Collections.<String> emptyList() : components[1]);
         } catch (Exception e) {
-            throw new ExtensionInstallerException("Failed to load jar file components", e);
+            throw new InstallException("Failed to load jar file components", e);
         }
     }
 
@@ -116,5 +117,16 @@ public class JarExtensionInstaller extends AbstractLogEnabled implements Extensi
         }
 
         return new List[] {componentClassNames, componentOverrideClassNames};
+    }
+
+    public void uninstall(LocalExtension localExtension) throws UninstallException
+    {
+        // TODO
+    }
+
+    public void upgrade(LocalExtension previousLocalExtension, LocalExtension newLocalExtension)
+        throws InstallException
+    {
+        // TODO
     }
 }

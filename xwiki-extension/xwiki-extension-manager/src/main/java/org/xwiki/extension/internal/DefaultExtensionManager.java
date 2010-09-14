@@ -36,9 +36,7 @@ import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.ResolveException;
 import org.xwiki.extension.UninstallException;
-import org.xwiki.extension.install.ExtensionInstaller;
-import org.xwiki.extension.install.ExtensionInstallerException;
-import org.xwiki.extension.install.ExtensionInstallerManager;
+import org.xwiki.extension.install.ExtensionHandlerManager;
 import org.xwiki.extension.repository.CoreExtensionRepository;
 import org.xwiki.extension.repository.ExtensionRepositoryException;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
@@ -71,7 +69,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     private VersionManager versionManager;
 
     @Requirement
-    private ExtensionInstallerManager extensionInstallerManager;
+    private ExtensionHandlerManager extensionInstallerManager;
 
     /**
      * {@inheritDoc}
@@ -96,7 +94,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         for (LocalExtension localExtension : localExtensions) {
             try {
                 // TODO: validate dependencies
-                installExtension(localExtension);
+                this.extensionInstallerManager.install(localExtension);
             } catch (Exception e) {
                 getLogger().error("Failed to install local extension [" + localExtension + "]", e);
             }
@@ -170,7 +168,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     }
 
     private LocalExtension installExtension(Extension remoteExtension, boolean dependency)
-        throws ComponentLookupException, InstallException, ExtensionInstallerException
+        throws ComponentLookupException, InstallException
     {
         for (ExtensionDependency dependencyDependency : remoteExtension.getDependencies()) {
             ExtensionId dependencyId = new ExtensionId(dependencyDependency.getId(), dependencyDependency.getVersion());
@@ -185,18 +183,6 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);
 
         this.extensionInstallerManager.install(localExtension);
-
-        return localExtension;
-    }
-
-    private LocalExtension installExtension(LocalExtension localExtension) throws ComponentLookupException,
-        ExtensionInstallerException
-    {
-        // Load extension
-        ExtensionInstaller extensionInstaller =
-            this.componentManager.lookup(ExtensionInstaller.class, localExtension.getType().toString().toLowerCase());
-
-        extensionInstaller.install(localExtension);
 
         return localExtension;
     }
@@ -221,14 +207,10 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         }
     }
 
-    public void uninstallExtension(LocalExtension localExtension) throws ComponentLookupException,
-        ExtensionInstallerException, UninstallException
+    public void uninstallExtension(LocalExtension localExtension) throws ComponentLookupException, UninstallException
     {
         // Unload extension
-        ExtensionInstaller extensionInstaller =
-            this.componentManager.lookup(ExtensionInstaller.class, localExtension.getType().toString().toLowerCase());
-
-        extensionInstaller.install(localExtension);
+        // TODO: this.extensionInstallerManager.uninstall(localExtension);
 
         // Remove from local repository
         this.localExtensionRepository.uninstallExtension(localExtension);

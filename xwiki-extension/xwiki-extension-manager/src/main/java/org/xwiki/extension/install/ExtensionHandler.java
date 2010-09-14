@@ -20,10 +20,16 @@
 package org.xwiki.extension.install;
 
 import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
+import org.xwiki.extension.UninstallException;
 
 @ComponentRole
-public interface ExtensionInstaller
+public interface ExtensionHandler
 {
-    void install(LocalExtension localExtension) throws ExtensionInstallerException;
+    void install(LocalExtension localExtension) throws InstallException;
+
+    void uninstall(LocalExtension localExtension) throws UninstallException;
+
+    void upgrade(LocalExtension previousLocalExtension, LocalExtension newLocalExtension) throws InstallException;
 }
