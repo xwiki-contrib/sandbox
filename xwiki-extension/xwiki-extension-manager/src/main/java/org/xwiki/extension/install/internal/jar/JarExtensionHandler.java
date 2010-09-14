@@ -31,17 +31,16 @@ import java.util.zip.ZipInputStream;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.ComponentAnnotationLoader;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.UninstallException;
-import org.xwiki.extension.install.ExtensionHandler;
+import org.xwiki.extension.install.internal.AbstractExtensionHandler;
 
 @Component("jar")
-public class JarExtensionHandler extends AbstractLogEnabled implements ExtensionHandler, Initializable
+public class JarExtensionHandler extends AbstractExtensionHandler implements Initializable
 {
     private ComponentAnnotationLoader jarLoader;
 
@@ -120,12 +119,6 @@ public class JarExtensionHandler extends AbstractLogEnabled implements Extension
     }
 
     public void uninstall(LocalExtension localExtension) throws UninstallException
-    {
-        // TODO
-    }
-
-    public void upgrade(LocalExtension previousLocalExtension, LocalExtension newLocalExtension)
-        throws InstallException
     {
         // TODO
     }
