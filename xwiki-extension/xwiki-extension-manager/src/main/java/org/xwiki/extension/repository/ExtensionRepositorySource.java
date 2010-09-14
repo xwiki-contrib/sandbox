@@ -5,7 +5,7 @@ import java.util.List;
 import org.xwiki.component.annotation.ComponentRole;
 
 @ComponentRole
-public interface RepositoriesSource
+public interface ExtensionRepositorySource
 {
     List<ExtensionRepositoryId> getExtensionRepositories();
 }

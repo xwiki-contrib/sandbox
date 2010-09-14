@@ -25,10 +25,10 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.extension.ExtensionManagerConfiguration;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
-import org.xwiki.extension.repository.RepositoriesSource;
+import org.xwiki.extension.repository.ExtensionRepositorySource;
 
 @Component
-public class ConfigurationRepositoriesSource implements RepositoriesSource
+public class ConfigurationExtensionRepositorySource implements ExtensionRepositorySource
 {
     @Requirement
     private ExtensionManagerConfiguration configuration;

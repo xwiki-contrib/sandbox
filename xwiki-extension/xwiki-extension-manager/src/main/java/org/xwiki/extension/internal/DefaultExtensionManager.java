@@ -43,7 +43,7 @@ import org.xwiki.extension.repository.ExtensionRepositoryException;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.ExtensionRepositoryManager;
 import org.xwiki.extension.repository.LocalExtensionRepository;
-import org.xwiki.extension.repository.RepositoriesSource;
+import org.xwiki.extension.repository.ExtensionRepositorySource;
 
 /**
  * TODO: cut installation process in steps (create and validate an install plan, install, etc.)
@@ -54,8 +54,8 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     @Requirement
     private ExtensionRepositoryManager repositoryManager;
 
-    @Requirement(role = RepositoriesSource.class)
-    private List<RepositoriesSource> repositoriesSources;
+    @Requirement(role = ExtensionRepositorySource.class)
+    private List<ExtensionRepositorySource> repositoriesSources;
 
     @Requirement
     private CoreExtensionRepository coreExtensionRepository;
@@ -77,7 +77,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     public void initialize() throws InitializationException
     {
         // Load extension repositories
-        for (RepositoriesSource repositoriesSource : this.repositoriesSources) {
+        for (ExtensionRepositorySource repositoriesSource : this.repositoriesSources) {
             for (ExtensionRepositoryId repositoryId : repositoriesSource.getExtensionRepositories()) {
                 try {
                     this.repositoryManager.addRepository(repositoryId);
