@@ -84,17 +84,6 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
                 }
             }
         }
-
-        // Load extensions from local repository
-        List<LocalExtension> localExtensions = this.localExtensionRepository.getLocalExtensions();
-        for (LocalExtension localExtension : localExtensions) {
-            try {
-                // TODO: validate dependencies
-                this.extensionHandlerManager.install(localExtension);
-            } catch (Exception e) {
-                getLogger().error("Failed to install local extension [" + localExtension + "]", e);
-            }
-        }
     }
 
     public int coundAvailableExtensions()

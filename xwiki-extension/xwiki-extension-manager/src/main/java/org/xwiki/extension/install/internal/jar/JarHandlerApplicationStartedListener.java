@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.internal;
+package org.xwiki.extension.install.internal.jar;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,20 +25,23 @@ import java.util.List;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
-import org.xwiki.component.manager.ComponentLookupException;
-import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.extension.ExtensionManager;
+import org.xwiki.extension.LocalExtension;
+import org.xwiki.extension.install.ExtensionHandlerManager;
+import org.xwiki.extension.repository.LocalExtensionRepository;
 import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.ApplicationStartedEvent;
 import org.xwiki.observation.event.Event;
 
 @Component("ExtensionManagerApplicationStarted")
-public class ExtensionManagerApplicationListener extends AbstractLogEnabled implements EventListener
+public class JarHandlerApplicationStartedListener extends AbstractLogEnabled implements EventListener
 {
     private static final List<Event> EVENTS = Collections.<Event> singletonList(new ApplicationStartedEvent());
 
     @Requirement
-    private ComponentManager componentManager;
+    private LocalExtensionRepository localExtensionRepository;
+
+    @Requirement
+    private ExtensionHandlerManager extensionHandlerManager;
 
     public List<Event> getEvents()
     {
@@ -52,11 +55,17 @@ public class ExtensionManagerApplicationListener extends AbstractLogEnabled impl
 
     public void onEvent(Event arg0, Object arg1, Object arg2)
     {
-        try {
-            // local extensions are loaded in default ExtensionManager initialization
-            this.componentManager.lookup(ExtensionManager.class);
-        } catch (ComponentLookupException e) {
-            getLogger().error("Failed to initialize Extension Manager", e);
+        // Load extensions from local repository
+        List<LocalExtension> localExtensions = this.localExtensionRepository.getLocalExtensions();
+        for (LocalExtension localExtension : localExtensions) {
+            if (localExtension.getType().equals("jar")) {
+                try {
+                    // TODO: validate dependencies
+                    this.extensionHandlerManager.install(localExtension);
+                } catch (Exception e) {
+                    getLogger().error("Failed to install local extension [" + localExtension + "]", e);
+                }
+            }
         }
     }
 }
