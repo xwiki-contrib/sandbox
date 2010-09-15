@@ -32,7 +32,7 @@ import org.xwiki.csrftoken.CSRFTokenConfiguration;
  * </ul>
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 @Component
 public class DefaultCSRFTokenConfiguration extends AbstractLogEnabled implements CSRFTokenConfiguration

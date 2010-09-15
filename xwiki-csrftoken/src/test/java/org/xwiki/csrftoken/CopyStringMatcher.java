@@ -29,7 +29,7 @@ import org.jmock.api.Invocation;
  * (prepend/append something to the value).
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 public final class CopyStringMatcher extends BaseMatcher<String> implements Action
 {

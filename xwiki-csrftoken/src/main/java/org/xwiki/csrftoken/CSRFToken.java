@@ -30,7 +30,7 @@ import org.xwiki.component.annotation.ComponentRole;
  * 
  * @see http://www.owasp.org/index.php/Cross-Site_Request_Forgery_%28CSRF%29_Prevention_Cheat_Sheet
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 @ComponentRole
 public interface CSRFToken

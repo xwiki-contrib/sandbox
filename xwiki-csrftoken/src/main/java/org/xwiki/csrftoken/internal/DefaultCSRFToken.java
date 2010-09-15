@@ -58,7 +58,7 @@ import org.xwiki.model.reference.DocumentReference;
  * </p>
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 @Component
 @InstantiationStrategy(ComponentInstantiationStrategy.SINGLETON)

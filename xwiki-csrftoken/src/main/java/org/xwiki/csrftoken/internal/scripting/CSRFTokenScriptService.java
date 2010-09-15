@@ -29,7 +29,7 @@ import org.xwiki.script.service.ScriptService;
  * Script service wrapping a {@link CSRFToken} component.
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 @Component(roles = ScriptService.class, hints = "csrf")
 public class CSRFTokenScriptService extends AbstractLogEnabled implements CSRFToken, ScriptService

@@ -46,7 +46,7 @@ import org.xwiki.test.annotation.MockingRequirement;
  * Tests for the {@link DefaultCSRFToken} component.
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 public class DefaultCSRFTokenTest extends AbstractMockingComponentTestCase
 {
