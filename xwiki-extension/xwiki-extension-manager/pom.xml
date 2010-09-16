@@ -42,32 +42,17 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-component-api</artifactId>
-      <version>${pom.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-classloader</artifactId>
-      <version>${pom.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-component-default</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-configuration-api</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-context</artifactId>
-      <version>${pom.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-script</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
@@ -78,6 +63,29 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     
+    <!-- Jar extensions -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-classloader</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-component-default</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-script</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-observation-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <!-- Core extensions -->
     <dependency>
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
@@ -165,19 +173,19 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-shared-tests</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-rendering-api</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-bridge</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
