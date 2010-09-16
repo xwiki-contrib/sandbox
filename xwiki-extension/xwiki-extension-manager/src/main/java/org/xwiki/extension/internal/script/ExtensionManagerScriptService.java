@@ -8,6 +8,7 @@ import org.xwiki.extension.ExtensionManager;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.ResolveException;
+import org.xwiki.extension.UninstallException;
 import org.xwiki.script.service.ScriptService;
 
 @Component("extension")
@@ -26,5 +27,12 @@ public class ExtensionManagerScriptService implements ScriptService
     public Extension resolve(String id, String version) throws ResolveException
     {
         return this.extensionManager.resolveExtension(new ExtensionId(id, version));
+    }
+
+    public void uninstall(String id) throws UninstallException
+    {
+        // TODO: check rights
+
+        this.extensionManager.uninstallExtension(id);
     }
 }

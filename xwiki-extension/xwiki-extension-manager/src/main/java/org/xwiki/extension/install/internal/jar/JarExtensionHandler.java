@@ -30,7 +30,9 @@ import java.util.zip.ZipInputStream;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.ComponentAnnotationLoader;
+import org.xwiki.component.annotation.ComponentDescriptorFactory;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.component.descriptor.ComponentDescriptor;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
@@ -120,6 +122,36 @@ public class JarExtensionHandler extends AbstractExtensionHandler implements Ini
 
     public void uninstall(LocalExtension localExtension) throws UninstallException
     {
-        // TODO
+        // unregister components
+        unloadComponents(localExtension.getFile());
+
+        // TODO: find a way to unload the jar
+    }
+
+    private void unloadComponents(File jarFile) throws UninstallException
+    {
+        try {
+            List<String>[] components = getDeclaredComponents(jarFile);
+
+            if (components[0] == null) {
+                getLogger().debug(jarFile + " does not contains any component");
+                return;
+            }
+
+            for (String componentImplementation : components[0]) {
+                try {
+                    for (ComponentDescriptor componentDescriptor : this.jarLoader
+                        .getComponentsDescriptors(this.jarExtensionClassLoader.getURLClassLoader().loadClass(
+                            componentImplementation))) {
+                        this.componentManager.unregisterComponent(componentDescriptor.getRole(),
+                            componentDescriptor.getRoleHint());
+                    }
+                } catch (ClassNotFoundException e) {
+                    getLogger().error("Failed to load class [" + componentImplementation + "]", e);
+                }
+            }
+        } catch (Exception e) {
+            throw new UninstallException("Failed to load jar file components", e);
+        }
     }
 }

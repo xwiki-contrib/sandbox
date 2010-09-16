@@ -236,7 +236,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
     public void uninstallExtension(LocalExtension localExtension) throws ComponentLookupException, UninstallException
     {
         // Unload extension
-        // TODO: this.extensionInstallerManager.uninstall(localExtension);
+        this.extensionHandlerManager.uninstall(localExtension);
 
         // Remove from local repository
         this.localExtensionRepository.uninstallExtension(localExtension);

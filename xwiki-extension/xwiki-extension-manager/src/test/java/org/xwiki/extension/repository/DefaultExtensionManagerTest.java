@@ -14,6 +14,7 @@ import org.xwiki.extension.ExtensionId;
 import org.xwiki.extension.ExtensionManager;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
+import org.xwiki.extension.repository.internal.DefaultLocalExtensionRepository;
 import org.xwiki.extension.test.ConfigurableDefaultCoreExtensionRepository;
 import org.xwiki.model.reference.AttachmentReferenceResolver;
 import org.xwiki.rendering.macro.Macro;
@@ -29,6 +30,8 @@ public class DefaultExtensionManagerTest extends AbstractComponentTestCase
 
     private ConfigurableDefaultCoreExtensionRepository coreExtensionRepository;
 
+    private LocalExtensionRepository localExtensionRepository;
+    
     @Before
     public void setUp() throws Exception
     {
@@ -56,6 +59,8 @@ public class DefaultExtensionManagerTest extends AbstractComponentTestCase
         this.extensionManager = getComponentManager().lookup(ExtensionManager.class);
         this.coreExtensionRepository =
             (ConfigurableDefaultCoreExtensionRepository) getComponentManager().lookup(CoreExtensionRepository.class);
+        this.localExtensionRepository =
+            (DefaultLocalExtensionRepository) getComponentManager().lookup(LocalExtensionRepository.class);
     }
 
     @Override
@@ -67,7 +72,7 @@ public class DefaultExtensionManagerTest extends AbstractComponentTestCase
     }
 
     @Test
-    public void testInstallExtension() throws ComponentLookupException, Exception
+    public void testInstallAndUninstallExtension() throws Exception
     {
         // way too big for a unit test so lets skip it
         this.coreExtensionRepository.addExtensions("org.jruby:jruby", "1.5");
@@ -91,6 +96,17 @@ public class DefaultExtensionManagerTest extends AbstractComponentTestCase
             this.extensionManager.installExtension(this.rubyArtifactId);
             Assert.fail("installExtension should have failed");
         } catch (InstallException expected) {
+            // expected
+        }
+
+        this.extensionManager.uninstallExtension(this.rubyArtifactId.getId());
+
+        Assert.assertNull(this.localExtensionRepository.getLocalExtension(this.rubyArtifactId.getId()));
+        
+        try {
+            getComponentManager().lookup(Macro.class, "ruby");
+            Assert.fail("the extension has not been uninstalled");
+        } catch (ComponentLookupException expected) {
             // expected
         }
     }
