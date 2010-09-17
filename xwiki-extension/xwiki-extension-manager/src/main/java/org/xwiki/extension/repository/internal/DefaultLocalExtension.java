@@ -67,15 +67,17 @@ public class DefaultLocalExtension implements LocalExtension
         this.id = id;
         this.version = version;
         this.type = type;
-
-        this.file = new File(repository.getRootFolder(), id + "-" + version + "." + type);
     }
 
     public DefaultLocalExtension(DefaultLocalExtensionRepository repository, Extension extension)
     {
         this(repository, extension.getId(), extension.getVersion(), extension.getType());
 
-        // TODO
+        this.dependencies.addAll(extension.getDependencies());
+        
+        setDescription(extension.getDescription());
+        setAuthor(extension.getAuthor());
+        setWebsite(extension.getWebSite());
     }
 
     public void setFile(File file)
@@ -94,6 +96,21 @@ public class DefaultLocalExtension implements LocalExtension
     }
 
     // Extension
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public void setAuthor(String author)
+    {
+        this.author = author;
+    }
+
+    public void setWebsite(String website)
+    {
+        this.website = website;
+    }
 
     public void download(File file) throws ExtensionException
     {
@@ -160,6 +177,11 @@ public class DefaultLocalExtension implements LocalExtension
     public String getWebSite()
     {
         return this.website;
+    }
+
+    public void addDependency(ExtensionDependency dependency)
+    {
+        this.dependencies.add(dependency);
     }
 
     public List<ExtensionDependency> getDependencies()

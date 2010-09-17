@@ -233,8 +233,19 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         }
     }
 
-    public void uninstallExtension(LocalExtension localExtension) throws ComponentLookupException, UninstallException
+    public void uninstallExtension(LocalExtension localExtension) throws UninstallException
     {
+        // Uninstall backward dependencies
+        try {
+            for (LocalExtension backardDependency : this.localExtensionRepository
+                .getBackwardDependencies(localExtension.getId())) {
+                uninstallExtension(backardDependency);
+            }
+        } catch (ResolveException e) {
+            throw new UninstallException("Failed to resolve backward dependencies of extension [" + localExtension
+                + "]", e);
+        }
+
         // Unload extension
         this.extensionHandlerManager.uninstall(localExtension);
 

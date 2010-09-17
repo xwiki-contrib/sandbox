@@ -20,10 +20,13 @@
 package org.xwiki.extension.repository;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.extension.Extension;
@@ -50,11 +53,24 @@ public class DefaultLocalExtensionRepositoryTest extends AbstractComponentTestCa
             FileUtils.deleteDirectory(testDirectory);
         }
 
-        FileUtils.touch(new File(
-            "target/DefaultLocalExtensionRepositoryTest/test-repository/existingextension-version.type"));
-
+        copyResourceToFile("/localextensions/existingextension-version.type", new File("target/DefaultLocalExtensionRepositoryTest/test-repository/existingextension-version.type"));
+        copyResourceToFile("/localextensions/existingextension-version.xed", new File("target/DefaultLocalExtensionRepositoryTest/test-repository/existingextension-version.xed"));
+        copyResourceToFile("/localextensions/existingextensiondependency-version.type", new File("target/DefaultLocalExtensionRepositoryTest/test-repository/existingextensiondependency-version.type"));
+        copyResourceToFile("/localextensions/existingextensiondependency-version.xed", new File("target/DefaultLocalExtensionRepositoryTest/test-repository/existingextensiondependency-version.xed"));
+        
         this.localExtensionRepository =
             (DefaultLocalExtensionRepository) getComponentManager().lookup(LocalExtensionRepository.class);
+    }
+    
+    private void copyResourceToFile(String resource, File file) throws IOException
+    {
+        file.getParentFile().mkdirs();
+        
+        FileOutputStream fileStream = new FileOutputStream(file);
+        
+        IOUtils.copy(getClass().getResourceAsStream(resource), fileStream);
+        
+        fileStream.close();
     }
 
     @Override
@@ -82,6 +98,8 @@ public class DefaultLocalExtensionRepositoryTest extends AbstractComponentTestCa
         Assert.assertEquals("existingextension", extension.getId());
         Assert.assertEquals("version", extension.getVersion());
         Assert.assertEquals("type", extension.getType());
+        Assert.assertEquals("existingextensiondependency", extension.getDependencies().get(0).getId());
+        Assert.assertEquals("version", extension.getDependencies().get(0).getVersion());
     }
 
     @Test

@@ -17,27 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.extension.repository;
+package org.xwiki.extension.repository.internal;
 
-import java.util.List;
+import org.xwiki.extension.ExtensionDependency;
 
-import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.extension.Extension;
-import org.xwiki.extension.InstallException;
-import org.xwiki.extension.LocalExtension;
-import org.xwiki.extension.ResolveException;
-import org.xwiki.extension.UninstallException;
-
-@ComponentRole
-public interface LocalExtensionRepository extends ExtensionRepository
+public class LocalExtensionDependency implements ExtensionDependency
 {
-    List<LocalExtension> getLocalExtensions();
+    private String id;
+    private String version;
 
-    LocalExtension getLocalExtension(String id);
+    public LocalExtensionDependency(String id, String version)
+    {
+        this.id = id;
+        this.version = version;
+    }
 
-    LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException;
+    public String getId()
+    {
+        return this.id;
+    }
 
-    void uninstallExtension(LocalExtension extension) throws UninstallException;
-
-    List<LocalExtension> getBackwardDependencies(String id) throws ResolveException;
+    public String getVersion()
+    {
+        return this.version;
+    }
 }
