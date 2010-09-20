@@ -25,6 +25,7 @@ import java.util.List;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
+import org.xwiki.extension.ExtensionManager;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.install.ExtensionHandlerManager;
 import org.xwiki.extension.repository.LocalExtensionRepository;
@@ -36,6 +37,9 @@ import org.xwiki.observation.event.Event;
 public class JarHandlerApplicationStartedListener extends AbstractLogEnabled implements EventListener
 {
     private static final List<Event> EVENTS = Collections.<Event> singletonList(new ApplicationStartedEvent());
+
+    @Requirement
+    private ExtensionManager extensionManager;
 
     @Requirement
     private LocalExtensionRepository localExtensionRepository;

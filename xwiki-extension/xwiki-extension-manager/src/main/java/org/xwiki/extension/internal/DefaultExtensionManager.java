@@ -195,7 +195,9 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         }
 
         // Store extension in local repository
-        LocalExtension localExtension = this.localExtensionRepository.installExtension(remoteExtension, dependency);
+        LocalExtension localExtension =
+            this.localExtensionRepository.installExtension(remoteExtension, previousExtension != null
+                ? previousExtension.isDependency() : dependency);
 
         if (previousExtension != null) {
             this.extensionHandlerManager.upgrade(previousExtension, localExtension);
@@ -262,7 +264,7 @@ public class DefaultExtensionManager extends AbstractLogEnabled implements Exten
         if (extension == null) {
             extension = this.localExtensionRepository.getLocalExtension(extensionId.getId());
 
-            if (extension == null) {
+            if (extension == null || !extension.getVersion().equals(extensionId.getVersion())) {
                 extension = this.repositoryManager.resolve(extensionId);
             }
         }
