@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1284043167000</creationDate>
-<date>1284979726000</date>
-<contentUpdateDate>1284979726000</contentUpdateDate>
+<date>1285052214000</date>
+<contentUpdateDate>1285052214000</contentUpdateDate>
 <version>1.1</version>
 <title>Extension Manager</title>
 <template></template>
@@ -169,13 +169,16 @@
 <propertiesToShow/>
 </property>
 </object>
-<content>{{velocity}}
+<content>{{warning}}
+This application is experimental, use it at your own risk.
+{{/warning}}
+
+{{velocity}}
 #set($extensionManager = $services.extension)
 #set($versionManager = $extensionManager.versionManager)
 {{/velocity}}
 
 {{velocity}}
-#if ($hasProgramming)
 {{html}}
 &lt;form action="$xwiki.requestURL" enctype="multipart/form-data" method="post"&gt;
 &lt;fieldset&gt;
@@ -191,12 +194,13 @@
   &lt;/p&gt;
 
   &lt;span class="buttonwrapper"&gt;&lt;input type="submit" value="Resolve" name="actionresolve" class="button"/&gt;&lt;/span&gt;
+  #if ($hasProgramming)
   &lt;span class="buttonwrapper"&gt;&lt;input type="submit" value="Install" name="actioninstall" class="button"/&gt;&lt;/span&gt;
+  #end
 
 &lt;/fieldset&gt;
 &lt;/form&gt;
 {{/html}}
-#end
 {{/velocity}}
 
 {{velocity}}
@@ -308,7 +312,7 @@
       #end
 
       {{html}}
-      &lt;form action="$xwiki.requestURL" enctype="multipart/form-data" method="post"&gt;
+      &lt;form action="$xwiki.requestURL" enctype="multipart/form-data" method="get"&gt;
         &lt;fieldset&gt;
           &lt;input name="extensionname" value="${escapetool.xml($request.extensionname)}" type="hidden" /&gt;
           &lt;input name="extensionversion" value="${escapetool.xml($request.extensionversion)}" type="hidden" /&gt;
@@ -326,9 +330,12 @@
 = Installed extensions
 
 #set($extensions = $extensionManager.installedExtensions)
-|=Id|=Version|=Type|=Actions
+|=Id|=Version|=Type#if ($hasProgramming)
+|=Actions
+#end
 #foreach($extension in $extensions)
-|$extension.id|$extension.version|$extension.type|{{html clean="false"}}
+|$extension.id#if ($hasProgramming)
+|$extension.version|$extension.type|{{html clean="false"}}
       &lt;form action="$xwiki.requestURL" enctype="multipart/form-data" method="post"&gt;
         &lt;fieldset&gt;
           &lt;input name="extensionname" value="${escapetool.xml($extension.id)}" type="hidden" /&gt;
@@ -337,5 +344,6 @@
         &lt;/fieldset&gt;
       &lt;/form&gt;
       {{/html}}
+#end
 #end
 {{/velocity}}</content></xwikidoc>
