@@ -45,7 +45,7 @@
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-velocity</artifactId>
+      <artifactId>xwiki-core-script</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -84,10 +84,6 @@
         <configuration>
           <failsOnError>true</failsOnError>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <!-- New code should follow checkstyle rules. -->
-          <excludes>
-            org/xwiki/officepreview/internal/DefaultOfficePreviewBuilderTest.java
-          </excludes>
         </configuration>
       </plugin>
     </plugins>
