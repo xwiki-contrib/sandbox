@@ -28,10 +28,11 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.context.Execution;
+import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.AttachmentReference;
-import org.xwiki.model.reference.AttachmentReferenceResolver;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.EntityReferenceResolver;
 import org.xwiki.officepreview.OfficePreviewBuilder;
 import org.xwiki.officepreview.OfficePreviewScriptService;
 import org.xwiki.rendering.block.Block;
@@ -71,16 +72,10 @@ public class DefaultOfficePreviewScriptService extends AbstractLogEnabled implem
     private Execution execution;
 
     /**
-     * The component used for constructing {@link AttachmentReference}s from strings references.
+     * The component used to parse string entity references.
      */
-    @Requirement
-    private AttachmentReferenceResolver<String> attachmentReferenceResolver;
-
-    /**
-     * The component used for constructing {@link DocumentReference}s from strings references.
-     */
-    @Requirement
-    private DocumentReferenceResolver<String> documentReferenceResolver;
+    @Requirement("explicit")
+    private EntityReferenceResolver<String> explicitStringEntityReferenceResolver;
 
     /**
      * The component used to check access rights on the document holding the office attachment to be previewed.
@@ -105,7 +100,10 @@ public class DefaultOfficePreviewScriptService extends AbstractLogEnabled implem
      */
     public String preview(String attachmentStringReference, boolean filterStyles)
     {
-        return preview(attachmentReferenceResolver.resolve(attachmentStringReference), filterStyles);
+        EntityReference entityReference =
+            explicitStringEntityReferenceResolver.resolve(attachmentStringReference, EntityType.ATTACHMENT,
+                documentAccessBridge.getCurrentDocumentReference());
+        return preview(new AttachmentReference(entityReference), filterStyles);
     }
 
     /**
@@ -115,7 +113,10 @@ public class DefaultOfficePreviewScriptService extends AbstractLogEnabled implem
      */
     public String preview(String documentStringReference, String fileName, boolean filterStyles)
     {
-        return preview(documentReferenceResolver.resolve(documentStringReference), fileName, filterStyles);
+        EntityReference entityReference =
+            explicitStringEntityReferenceResolver.resolve(documentStringReference, EntityType.DOCUMENT,
+                documentAccessBridge.getCurrentDocumentReference());
+        return preview(new DocumentReference(entityReference), fileName, filterStyles);
     }
 
     /**
