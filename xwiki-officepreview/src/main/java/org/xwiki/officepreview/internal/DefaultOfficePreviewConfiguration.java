@@ -27,7 +27,7 @@ import org.xwiki.officepreview.OfficePreviewConfiguration;
 /**
  * Default implementation of {@link OfficePreviewConfiguration}.
  * 
- * @since 2.4M1
+ * @since 2.5M2
  * @version $Id$
  */
 @Component

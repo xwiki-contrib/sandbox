@@ -36,7 +36,7 @@ import org.xwiki.rendering.renderer.printer.WikiPrinter;
 /**
  * Exposes office preview utility methods to velocity scripts.
  * 
- * @since 2.4M1
+ * @since 2.5M2
  * @version $Id$
  */
 public class OfficePreviewVelocityBridge
@@ -133,7 +133,7 @@ public class OfficePreviewVelocityBridge
             throw new Exception("Inadequate privileges.");
         }
 
-        OfficePreviewBuilder builder = componentManager.lookup(OfficePreviewBuilder.class);      
+        OfficePreviewBuilder builder = componentManager.lookup(OfficePreviewBuilder.class);
         if (isPresentation(attachmentReference.getName())) {
             builder = componentManager.lookup(OfficePreviewBuilder.class, "presentation");
         }

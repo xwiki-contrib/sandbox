@@ -25,14 +25,14 @@ import org.xwiki.component.annotation.ComponentRole;
  * Defines the interface for the component responsible for providing configuration details for the office-preview
  * module.
  * 
- * @since 2.4M1
+ * @since 2.5M2
  * @version $Id$
  */
 @ComponentRole
 public interface OfficePreviewConfiguration
 {
     /**
-     * @return how many previews to be cached.
+     * @return how many previews to be cached
      */
     int getCacheSize();
 }

@@ -39,9 +39,9 @@ import org.xwiki.rendering.block.XDOM;
 import org.xwiki.rendering.listener.URLImage;
 
 /**
- * Default implementation of {@link OfficePreviewBuilder}.
+ * Default implementation of {@link org.xwiki.officepreview.OfficePreviewBuilder}.
  * 
- * @since 2.4M1
+ * @since 2.5M2
  * @version $Id$
  */
 @Component

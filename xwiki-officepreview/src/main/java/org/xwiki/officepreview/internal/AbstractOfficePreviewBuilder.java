@@ -36,10 +36,8 @@ import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.container.Container;
-import org.xwiki.context.Execution;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.officepreview.OfficePreviewBuilder;
 import org.xwiki.officepreview.OfficePreviewConfiguration;
@@ -48,16 +46,22 @@ import org.xwiki.rendering.block.XDOM;
 /**
  * An abstract implementation of {@link OfficePreviewBuilder} which provides caching and other utility functions.
  * 
- * @since 2.4M1
+ * @since 2.5M2
  * @version $Id$
  */
 public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled implements OfficePreviewBuilder,
     Initializable
 {
     /**
-     * Default encoding used for encodng wiki, space, page and attachment names.
+     * Default encoding used for encoding wiki, space, page and attachment names.
      */
     private static final String DEFAULT_ENCODING = "UTF-8";
+
+    /**
+     * Used to read configuration details.
+     */
+    @Requirement
+    protected OfficePreviewConfiguration conf;
 
     /**
      * Used to access the temporary directory.
@@ -66,33 +70,16 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
     private Container container;
 
     /**
-     * Reference to current execution.
-     */
-    @Requirement
-    private Execution execution;
-    
-    /**
-     * Used to query attachment versions.
-     */
-    private AttachmentVersionProvider attachmentVersionProvider;
-
-    /**
      * Used to access attachment content.
      */
     @Requirement
     private DocumentAccessBridge docBridge;
 
     /**
-     * Used for serialzing {@link EntityReference} instances.
+     * Used for serializing {@link AttachmentReference}s.
      */
     @Requirement
     private EntityReferenceSerializer<String> serializer;
-
-    /**
-     * Used to read configuration details.
-     */
-    @Requirement
-    protected OfficePreviewConfiguration conf;
 
     /**
      * Used to initialize the previews cache.
@@ -119,7 +106,6 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         } catch (CacheException ex) {
             throw new InitializationException("Error while initializing previews cache.", ex);
         }
-        this.attachmentVersionProvider = new DefaultAttachmentVersionProvider(execution);
     }
 
     /**
@@ -143,7 +129,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
         }
 
         // Query the current version of the attachment.
-        String currentVersion = attachmentVersionProvider.getAttachmentVersion(attachmentReference);
+        String currentVersion = docBridge.getAttachmentVersion(attachmentReference);
 
         // Check if the preview has been expired.
         if (null != preview && !currentVersion.equals(preview.getVersion())) {
@@ -209,6 +195,7 @@ public abstract class AbstractOfficePreviewBuilder extends AbstractLogEnabled im
      * 
      * @param attachmentReference reference to the attachment.
      * @return temporary directory for the specified attachment.
+     * @throws Exception if creating or accessing the temporary directory fails
      */
     protected File getTemporaryDirectory(AttachmentReference attachmentReference) throws Exception
     {

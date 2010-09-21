@@ -38,9 +38,10 @@ import org.xwiki.rendering.transformation.TransformationContext;
 import org.xwiki.rendering.transformation.TransformationManager;
 
 /**
- * Implementation of {@link OfficePreviewBuilder} which is responsible for building previews of office presentations.
+ * Implementation of {@link org.xwiki.officepreview.OfficePreviewBuilder} which is responsible for building previews of
+ * office presentations.
  * 
- * @since 2.4M1
+ * @since 2.5M2
  * @version $Id$
  */
 @Component("presentation")
