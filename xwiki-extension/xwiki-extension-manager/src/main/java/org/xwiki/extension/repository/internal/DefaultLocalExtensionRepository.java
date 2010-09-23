@@ -25,8 +25,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -61,12 +63,7 @@ import org.xwiki.extension.UninstallException;
 import org.xwiki.extension.repository.ExtensionRepositoryId;
 import org.xwiki.extension.repository.LocalExtensionRepository;
 
-/**
- * <ul>
- * <li>TODO: decide local repository format (probably maven-like)</li>
- * <li>TODO: make it threadsafe bulletproof</li>
- * </ul>
- */
+//TODO: make it threadsafe bulletproof
 @Component
 public class DefaultLocalExtensionRepository extends AbstractLogEnabled implements LocalExtensionRepository,
     Initializable
@@ -80,8 +77,7 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
 
     private Map<String, LocalExtension> extensions = new ConcurrentHashMap<String, LocalExtension>();
 
-    private Map<String, List<LocalExtension>> backwardDependenciesMap =
-        new ConcurrentHashMap<String, List<LocalExtension>>();
+    private Map<String, Set<String>> backwardDependenciesMap = new ConcurrentHashMap<String, Set<String>>();
 
     public void initialize() throws InitializationException
     {
@@ -125,19 +121,26 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
     {
         this.backwardDependenciesMap.remove(localExtension.getId());
         this.extensions.remove(localExtension.getId());
+        for (ExtensionDependency dependency : localExtension.getDependencies()) {
+            Set<String> backwardDependencies = this.backwardDependenciesMap.get(dependency.getId());
+
+            if (backwardDependencies != null) {
+                backwardDependencies.remove(localExtension.getId());
+            }
+        }
     }
 
     private void addLocalExtension(LocalExtension localExtension)
     {
         for (ExtensionDependency dependency : localExtension.getDependencies()) {
-            List<LocalExtension> backwardDependencies = this.backwardDependenciesMap.get(dependency.getId());
+            Set<String> backwardDependencies = this.backwardDependenciesMap.get(dependency.getId());
 
             if (backwardDependencies == null) {
-                backwardDependencies = new ArrayList<LocalExtension>();
+                backwardDependencies = new HashSet<String>();
                 this.backwardDependenciesMap.put(dependency.getId(), backwardDependencies);
             }
 
-            backwardDependencies.add(localExtension);
+            backwardDependencies.add(localExtension.getId());
         }
 
         this.extensions.put(localExtension.getId(), localExtension);
@@ -408,8 +411,18 @@ public class DefaultLocalExtensionRepository extends AbstractLogEnabled implemen
             throw new ResolveException("Extension [" + id + "] does not exists");
         }
 
-        List<LocalExtension> backwardDependencies = this.backwardDependenciesMap.get(id);
-        return backwardDependencies != null ? Collections.unmodifiableList(backwardDependencies) : Collections
-            .<LocalExtension> emptyList();
+        Set<String> backwardDependencyNames = this.backwardDependenciesMap.get(id);
+
+        List<LocalExtension> backwardDependencies;
+        if (backwardDependencyNames != null) {
+            backwardDependencies = new ArrayList<LocalExtension>(backwardDependencyNames.size());
+            for (String extensionId : backwardDependencyNames) {
+                backwardDependencies.add(getLocalExtension(extensionId));
+            }
+        } else {
+            backwardDependencies = Collections.<LocalExtension> emptyList();
+        }
+
+        return backwardDependencies;
     }
 }
