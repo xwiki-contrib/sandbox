@@ -27,6 +27,7 @@ import org.xwiki.rendering.transformation.MacroTransformationContext;
  * enhanced with other layout styles, it should be split in multiple classes, one to handle each
  * 
  * @version $Id$
+ * @since 2.5M1
  */
 @Component(ContainerMacro.MACRO_NAME)
 public class ContainerMacro extends AbstractMacro<ContainerMacroParameters>
@@ -74,7 +75,7 @@ public class ContainerMacro extends AbstractMacro<ContainerMacroParameters>
         try {
             // parse the content of the wiki macro that has been injected by the
             // component manager
-            parsedDom = parser.parse(new StringReader(content));
+            parsedDom = parser.parse(new StringReader(content == null ? "" : content));
         } catch (ParseException e) {
             throw new MacroExecutionException("Failed to parse content [" + content + "] with Syntax parser ["
                 + parser.getSyntax() + "]", e);
