@@ -29,6 +29,7 @@ import org.xwiki.test.ComponentManagerTestSetup;
  * All Rendering integration tests defined in text files using a special format.
  * 
  * @version $Id$
+ * @since 2.5M2
  */
 public class RenderingTests extends TestCase
 {
@@ -36,7 +37,7 @@ public class RenderingTests extends TestCase
      * Builds the test suite.
      * 
      * @return the test suite for the container tests.
-     * @throws Exception if an exception occurrs while preparing the tests from the test files.
+     * @throws Exception if an exception occurs while preparing the tests from the test files.
      */
     public static Test suite() throws Exception
     {
@@ -44,11 +45,12 @@ public class RenderingTests extends TestCase
 
         suite.addTestsFromResource("macrocontainer1", true);
         suite.addTestsFromResource("macrocontainer2", true);
+        suite.addTestsFromResource("macrocontainer3", true);
+        suite.addTestsFromResource("macrocontainer4", true);
         suite.addTestsFromResource("macrocontainercolumns1", true);
         suite.addTestsFromResource("macrocontainercolumns2", true);
         suite.addTestsFromResource("macrocontainercolumns3", true);
         suite.addTestsFromResource("macrocontainercolumns4", true);
-        suite.addTestsFromResource("macrocontainer3", true);
 
         return new ComponentManagerTestSetup(suite);
     }

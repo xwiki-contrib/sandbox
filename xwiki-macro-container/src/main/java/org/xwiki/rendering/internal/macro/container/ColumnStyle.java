@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
  * generate the proper style code to be given to the div enclosing the targeted column.
  * 
  * @version $Id$
+ * @since 2.5M2
  */
 public class ColumnStyle
 {

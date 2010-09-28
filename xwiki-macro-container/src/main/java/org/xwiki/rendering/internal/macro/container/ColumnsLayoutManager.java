@@ -33,7 +33,7 @@ import org.xwiki.rendering.macro.container.LayoutManager;
  * Layout manager implementation to layout the group blocks inside a container as columns.
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 @Component("columns")
 public class ColumnsLayoutManager implements LayoutManager

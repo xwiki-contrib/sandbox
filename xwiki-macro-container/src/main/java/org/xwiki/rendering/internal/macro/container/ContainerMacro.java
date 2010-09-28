@@ -27,7 +27,7 @@ import org.xwiki.rendering.transformation.MacroTransformationContext;
  * enhanced with other layout styles, it should be split in multiple classes, one to handle each
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 @Component(ContainerMacro.MACRO_NAME)
 public class ContainerMacro extends AbstractMacro<ContainerMacroParameters>

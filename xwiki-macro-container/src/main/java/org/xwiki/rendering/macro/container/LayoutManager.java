@@ -31,7 +31,7 @@ import org.xwiki.rendering.block.Block;
  * options, etc).
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 @ComponentRole
 public interface LayoutManager

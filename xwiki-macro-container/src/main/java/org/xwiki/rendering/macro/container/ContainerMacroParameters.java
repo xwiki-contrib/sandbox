@@ -7,7 +7,7 @@ import org.xwiki.properties.annotation.PropertyDescription;
  * properties for the container.
  * 
  * @version $Id$
- * @since 2.5M1
+ * @since 2.5M2
  */
 public class ContainerMacroParameters
 {
