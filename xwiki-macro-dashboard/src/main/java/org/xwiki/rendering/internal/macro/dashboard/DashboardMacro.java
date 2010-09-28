@@ -35,6 +35,7 @@ import org.xwiki.rendering.transformation.MacroTransformationContext;
  * The dashboard macro, to display other macros as gadgets in a dashboard, using a container to include its contents.
  * 
  * @version $Id$
+ * @since 2.5M2
  */
 @Component(DashboardMacro.MACRO_NAME)
 public class DashboardMacro extends AbstractMacro<DashboardMacroParameters>

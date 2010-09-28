@@ -17,38 +17,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.rendering.macro.dashboard;
+package org.xwiki.rendering;
 
-import org.xwiki.properties.annotation.PropertyDescription;
+import junit.framework.Test;
+import junit.framework.TestCase;
+
+import org.xwiki.rendering.scaffolding.RenderingTestSuite;
+import org.xwiki.test.ComponentManagerTestSetup;
 
 /**
- * Parameters for the dashboard macro.
+ * All Rendering integration tests defined in text files using a special format.
  * 
  * @version $Id$
- * @since 2.5M2
  */
-public class DashboardMacroParameters
+public class RenderingTests extends TestCase
 {
     /**
-     * The identifier of the layout to be used for this dashboard. If none specified, columns will be used.
+     * Builds the test suite.
+     * 
+     * @return the test suite for the container tests.
+     * @throws Exception if an exception occurs while preparing the tests from the test files.
      */
-    private String layout = "columns";
-
-    /**
-     * @return the layout style of this dashboard
-     */
-    public String getLayout()
+    public static Test suite() throws Exception
     {
-        return layout;
-    }
+        RenderingTestSuite suite = new RenderingTestSuite("Test Dashboard Macro");
 
-    /**
-     * @param layout the layout to set
-     */
-    @PropertyDescription("The identifier of the layout to use for this dashboard (e.g. columns, etc). "
-        + "If none specified, columns will be used.")
-    public void setLayout(String layout)
-    {
-        this.layout = layout;
+        suite.addTestsFromResource("macrodashboard1", true);
+        suite.addTestsFromResource("macrodashboard2", true);
+
+        return new ComponentManagerTestSetup(suite);
     }
 }
