@@ -17,16 +17,27 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.rendering.xdomxml.internal.parameters;
+package org.xwiki.rendering.xdomxml.internal.current.renderer;
 
-import org.dom4j.Element;
-import org.xml.sax.ContentHandler;
-import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.component.annotation.Component;
+import org.xwiki.rendering.internal.renderer.AbstractPrintRendererFactory;
+import org.xwiki.rendering.internal.renderer.xml.AbstractRenderer;
+import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
 
-@ComponentRole
-public interface ParameterManager
+/**
+ * @version $Id$
+ */
+@Component("xdom+xml/current")
+public class XDOMXMLRenderer extends AbstractRenderer
 {
-    void serialize(Object object, ContentHandler xmlContent);
-
-    Object unSerialize(Element rootElement);
+    /**
+     * {@inheritDoc}
+     * 
+     * @see AbstractPrintRendererFactory#getSyntax()
+     */
+    public Syntax getSyntax()
+    {
+        return XDOMXMLConstants.XDOMXML_1_0;
+    }
 }

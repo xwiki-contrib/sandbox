@@ -17,43 +17,29 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.rendering.xdomxml.internal.parameters;
+package org.xwiki.rendering.xdomxml.internal.current.parameter;
 
 import java.util.LinkedHashMap;
 
 import org.dom4j.Element;
 import org.xml.sax.ContentHandler;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.logging.AbstractLogEnabled;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
-import org.xwiki.rendering.listener.DefaultAttachment;
-import org.xwiki.rendering.listener.DocumentImage;
-import org.xwiki.rendering.listener.Format;
-import org.xwiki.rendering.listener.HeaderLevel;
-import org.xwiki.rendering.listener.Link;
-import org.xwiki.rendering.listener.ListType;
-import org.xwiki.rendering.listener.URLImage;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.Dom4JReader;
 import com.thoughtworks.xstream.io.xml.SaxWriter;
 
 @Component
-public class XStreamParameterManager implements ParameterManager, Initializable
+public class XStreamParameterManager extends AbstractLogEnabled implements ParameterManager, Initializable
 {
     private XStream xstream;
 
     public void initialize() throws InitializationException
     {
         this.xstream = new XStream();
-
-        this.xstream.alias("format", Format.class);
-        this.xstream.alias("link", Link.class);
-        this.xstream.alias("documentImage", DocumentImage.class);
-        this.xstream.alias("urlImage", URLImage.class);
-        this.xstream.alias("attachement", DefaultAttachment.class);
-        this.xstream.alias("listType", ListType.class);
-        this.xstream.alias("headerLevel", HeaderLevel.class);
 
         this.xstream.alias("map", LinkedHashMap.class);
     }

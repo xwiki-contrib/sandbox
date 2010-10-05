@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.rendering.xdomxml.internal.renderer;
+package org.xwiki.rendering.xdomxml.internal.current.renderer;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
@@ -31,12 +31,12 @@ import org.xwiki.rendering.listener.chaining.EmptyBlockChainingListener;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
-import org.xwiki.rendering.xdomxml.internal.parameters.ParameterManager;
+import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;
 
 /**
  * @version $Id$
  */
-@Component("xdom+xml/1.0")
+@Component("xdom+xml/current")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class XDOMXMLContentHandlerStreamRenderer extends AbstractChainingContentHandlerStreamRenderer
 {

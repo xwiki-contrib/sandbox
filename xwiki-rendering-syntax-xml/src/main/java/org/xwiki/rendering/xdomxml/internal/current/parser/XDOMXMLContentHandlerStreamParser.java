@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.rendering.xdomxml.internal.parser;
+package org.xwiki.rendering.xdomxml.internal.current.parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +37,12 @@ import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.parser.xml.ContentHandlerStreamParser;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
-import org.xwiki.rendering.xdomxml.internal.parameters.ParameterManager;
+import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;
 
 /**
  * @version $Id$
  */
-@Component("xdom+xml/1.0")
+@Component("xdom+xml/current")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class XDOMXMLContentHandlerStreamParser extends DefaultHandler implements ContentHandlerStreamParser,
     XDOMXMLConstants
