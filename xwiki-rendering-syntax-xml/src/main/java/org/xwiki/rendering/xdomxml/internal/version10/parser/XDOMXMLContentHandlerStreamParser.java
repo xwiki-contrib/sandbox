@@ -30,8 +30,8 @@ import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.parser.xml.ContentHandlerStreamParser;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
-import org.xwiki.rendering.xdomxml.internal.parser.parameters.BlockParser;
-import org.xwiki.rendering.xdomxml.internal.parser.parameters.DefaultBlockParser;
+import org.xwiki.rendering.xdomxml.internal.parser.BlockParser;
+import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
 
 /**
  * @version $Id: XDOMXMLContentHandlerStreamParser.java 29769 2010-06-27 11:01:42Z tmortagne $

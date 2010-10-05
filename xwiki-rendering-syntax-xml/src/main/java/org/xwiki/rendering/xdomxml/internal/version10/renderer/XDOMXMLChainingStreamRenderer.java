@@ -184,8 +184,12 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
         startBlock(EventType.BEGIN_MACRO_MARKER, parameters);
 
         serializeParameter("id", id);
-        serializeParameter("content", content);
-        serializeParameter("inline", isInline);
+        if (content != null) {
+            serializeParameter("content", content);
+        }
+        if (isInline) {
+            serializeParameter("inline", isInline);
+        }
     }
 
     @Override
@@ -326,8 +330,12 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
         startBlock(EventType.ON_MACRO, parameters);
 
         serializeParameter("id", id);
-        serializeParameter("inline", isInline);
-        serializeParameter("content", content);
+        if (content != null) {
+            serializeParameter("content", content);
+        }
+        if (isInline) {
+            serializeParameter("inline", isInline);
+        }
 
         endBlock(EventType.ON_MACRO);
     }
@@ -363,7 +371,7 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     {
         startBlock(EventType.ON_RAW_TEXT);
 
-        serializeParameter("text", text);
+        serializeParameter("content", text);
         serializeParameter("syntax", syntax.toIdString());
 
         endBlock(EventType.ON_RAW_TEXT);
@@ -390,7 +398,9 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     {
         startBlock(EventType.ON_EMPTY_LINES);
 
-        serializeParameter("count", count);
+        if (count > 1) {
+            serializeParameter("count", count);
+        }
 
         endBlock(EventType.ON_EMPTY_LINES);
     }
@@ -401,7 +411,9 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
         startBlock(EventType.ON_VERBATIM);
 
         serializeParameter("content", protectedString);
-        serializeParameter("inline", isInline);
+        if (isInline) {
+            serializeParameter("inline", isInline);
+        }
 
         endBlock(EventType.ON_VERBATIM);
     }

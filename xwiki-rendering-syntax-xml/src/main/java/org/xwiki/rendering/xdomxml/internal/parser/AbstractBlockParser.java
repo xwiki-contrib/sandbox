@@ -1,4 +1,4 @@
-package org.xwiki.rendering.xdomxml.internal.parser.parameters;
+package org.xwiki.rendering.xdomxml.internal.parser;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -43,7 +43,7 @@ public abstract class AbstractBlockParser extends DefaultHandler implements Bloc
     {
         return this.listener;
     }
-    
+
     public String getVersion()
     {
         return this.version;
@@ -116,15 +116,15 @@ public abstract class AbstractBlockParser extends DefaultHandler implements Bloc
 
         if (this.currentHandler != null) {
             this.currentHandler.endElement(uri, localName, qName);
-        } else {
-            endElementInternal(uri, localName, qName);
         }
 
         if (this.level == 0) {
             flushBeginBlock();
+            endElementInternal(uri, localName, qName);
             endBlock();
         } else if (this.level == this.currentHandlerLevel) {
             this.currentHandler = null;
+            endElementInternal(uri, localName, qName);
         }
     }
 
