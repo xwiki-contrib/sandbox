@@ -10,7 +10,7 @@ import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
-import org.xwiki.rendering.xdomxml.internal.version10.parser.parameter.ImageParser;
+import org.xwiki.rendering.xdomxml.internal.version10.parser.parameter.ResourceReferenceParser;
 
 @Component("image")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
@@ -23,7 +23,7 @@ public class ImageBlockParser extends DefaultBlockParser
         }
     };
 
-    private ImageParser imageParser = new ImageParser();
+    private ResourceReferenceParser referenceParser = new ResourceReferenceParser();
 
     public ImageBlockParser(Listener listener)
     {
@@ -34,8 +34,8 @@ public class ImageBlockParser extends DefaultBlockParser
     protected void startElementInternal(String uri, String localName, String qName, Attributes attributes)
         throws SAXException
     {
-        if (qName.equals("image")) {
-            setCurrentHandler(this.imageParser);
+        if (qName.equals("reference")) {
+            setCurrentHandler(this.referenceParser);
         } else {
             super.startElementInternal(uri, localName, qName, attributes);
         }
@@ -49,7 +49,7 @@ public class ImageBlockParser extends DefaultBlockParser
     @Override
     protected void beginBlock() throws SAXException
     {
-        getListener().onImage(this.imageParser.getImage(), getParameterAsBoolean("freestanding", false),
-            getCustomParameters());
+        getListener().onImage(this.referenceParser.getResourceReference(),
+            getParameterAsBoolean("freestanding", false), getCustomParameters());
     }
 }

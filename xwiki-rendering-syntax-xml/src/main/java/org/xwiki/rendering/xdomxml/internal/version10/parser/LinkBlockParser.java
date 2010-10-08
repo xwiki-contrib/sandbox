@@ -10,7 +10,7 @@ import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
-import org.xwiki.rendering.xdomxml.internal.version10.parser.parameter.LinkParser;
+import org.xwiki.rendering.xdomxml.internal.version10.parser.parameter.ResourceReferenceParser;
 
 @Component("link")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
@@ -23,7 +23,7 @@ public class LinkBlockParser extends DefaultBlockParser
         }
     };
 
-    private LinkParser linkParser = new LinkParser();
+    private ResourceReferenceParser referenceParser = new ResourceReferenceParser();
 
     public LinkBlockParser(Listener listener)
     {
@@ -35,7 +35,7 @@ public class LinkBlockParser extends DefaultBlockParser
         throws SAXException
     {
         if (qName.equals("link")) {
-            setCurrentHandler(this.linkParser);
+            setCurrentHandler(this.referenceParser);
         } else {
             super.startElementInternal(uri, localName, qName, attributes);
         }
@@ -49,14 +49,14 @@ public class LinkBlockParser extends DefaultBlockParser
     @Override
     protected void beginBlock() throws SAXException
     {
-        getListener().beginLink(this.linkParser.getLink(), getParameterAsBoolean("freestanding", false),
+        getListener().beginLink(this.referenceParser.getResourceReference(), getParameterAsBoolean("freestanding", false),
             getCustomParameters());
     }
 
     @Override
     protected void endBlock() throws SAXException
     {
-        getListener().endLink(this.linkParser.getLink(), getParameterAsBoolean("freestanding", false),
+        getListener().endLink(this.referenceParser.getResourceReference(), getParameterAsBoolean("freestanding", false),
             getCustomParameters());
     }
 }

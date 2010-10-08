@@ -26,9 +26,8 @@ import org.xml.sax.helpers.AttributesImpl;
 import org.xwiki.rendering.internal.renderer.xml.AbstractChainingContentHandlerStreamRenderer;
 import org.xwiki.rendering.listener.Format;
 import org.xwiki.rendering.listener.HeaderLevel;
-import org.xwiki.rendering.listener.Image;
-import org.xwiki.rendering.listener.Link;
 import org.xwiki.rendering.listener.ListType;
+import org.xwiki.rendering.listener.ResourceReference;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.syntax.Syntax;
@@ -37,9 +36,8 @@ import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;
 import org.xwiki.rendering.xdomxml.internal.renderer.parameters.DefaultSerializer;
 import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.FormatConverter;
 import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.HeaderLevelConverter;
-import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.ImageSerializer;
-import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.LinkSerializer;
 import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.ListTypeConverter;
+import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.ResourceReferenceSerializer;
 
 /**
  * Current version of the XDOM+XML stream based renderer.
@@ -57,9 +55,7 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
 
     private ListTypeConverter listTypeConverter = new ListTypeConverter();
 
-    private LinkSerializer linkSerializer = new LinkSerializer();
-
-    private ImageSerializer imageSerializer = new ImageSerializer();
+    private ResourceReferenceSerializer linkSerializer = new ResourceReferenceSerializer();
 
     public XDOMXMLChainingStreamRenderer(ListenerChain listenerChain, ParameterManager parameterManager)
     {
@@ -95,11 +91,11 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     }
 
     @Override
-    public void beginLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
+    public void beginLink(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
         startBlock(EventType.BEGIN_LINK, parameters);
 
-        this.linkSerializer.serialize(link, getContentHandler());
+        this.linkSerializer.serialize(reference, getContentHandler());
         if (isFreeStandingURI) {
             serializeParameter("freestanding", isFreeStandingURI);
         }
@@ -229,7 +225,7 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     }
 
     @Override
-    public void endLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
+    public void endLink(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
         endBlock(EventType.END_LINK);
     }
@@ -419,12 +415,12 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     }
 
     @Override
-    public void onImage(Image image, boolean isFreeStandingURI, Map<String, String> parameters)
+    public void onImage(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
         startBlock(EventType.ON_IMAGE);
 
         serializeParameter("freestanding", isFreeStandingURI);
-        this.imageSerializer.serialize(image, getContentHandler());
+        this.linkSerializer.serialize(reference, getContentHandler());
 
         endBlock(EventType.ON_IMAGE);
     }

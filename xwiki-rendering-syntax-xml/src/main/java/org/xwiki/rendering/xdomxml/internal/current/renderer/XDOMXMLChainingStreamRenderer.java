@@ -28,9 +28,8 @@ import org.xml.sax.helpers.AttributesImpl;
 import org.xwiki.rendering.internal.renderer.xml.AbstractChainingContentHandlerStreamRenderer;
 import org.xwiki.rendering.listener.Format;
 import org.xwiki.rendering.listener.HeaderLevel;
-import org.xwiki.rendering.listener.Image;
-import org.xwiki.rendering.listener.Link;
 import org.xwiki.rendering.listener.ListType;
+import org.xwiki.rendering.listener.ResourceReference;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.syntax.Syntax;
@@ -42,7 +41,8 @@ import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;
  * 
  * @version $Id$
  */
-public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandlerStreamRenderer implements XDOMXMLConstants
+public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandlerStreamRenderer implements
+    XDOMXMLConstants
 {
     private ParameterManager parameterManager;
 
@@ -92,9 +92,9 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     }
 
     @Override
-    public void beginLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
+    public void beginLink(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
-        beginEvent(EventType.BEGIN_LINK, link, isFreeStandingURI, new LinkedHashMap<String, String>(parameters));
+        beginEvent(EventType.BEGIN_LINK, reference, isFreeStandingURI, new LinkedHashMap<String, String>(parameters));
     }
 
     @Override
@@ -214,7 +214,7 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     }
 
     @Override
-    public void endLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
+    public void endLink(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
         endEvent(EventType.END_LINK);
     }
@@ -368,9 +368,9 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     }
 
     @Override
-    public void onImage(Image image, boolean isFreeStandingURI, Map<String, String> parameters)
+    public void onImage(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
-        onEvent(EventType.ON_IMAGE, image, isFreeStandingURI, new LinkedHashMap<String, String>(parameters));
+        onEvent(EventType.ON_IMAGE, reference, isFreeStandingURI, new LinkedHashMap<String, String>(parameters));
     }
 
     // Tools
