@@ -28,7 +28,7 @@ public abstract class AbstractBlockParser extends DefaultHandler implements Bloc
 
     private int level = 0;
 
-    private String version;
+    private String blockVersion;
 
     private boolean beginBlockFlushed = false;
 
@@ -46,12 +46,12 @@ public abstract class AbstractBlockParser extends DefaultHandler implements Bloc
 
     public String getVersion()
     {
-        return this.version;
+        return this.blockVersion;
     }
 
     public void setVersion(String version)
     {
-        this.version = version;
+        this.blockVersion = version;
     }
 
     public String getBlockName()
@@ -71,9 +71,11 @@ public abstract class AbstractBlockParser extends DefaultHandler implements Bloc
     {
         if (qName.equals(XDOMXMLConstants.ELEM_BLOCK)) {
             String name = attributes.getValue(XDOMXMLConstants.ATT_BLOCK_NAME);
+            String version = attributes.getValue(XDOMXMLConstants.ATT_BLOCK_VERSION);
 
             if (this.level == 0 && this.blockName == null) {
                 this.blockName = name;
+                this.blockVersion = version;
             } else {
                 flushBeginBlock();
 

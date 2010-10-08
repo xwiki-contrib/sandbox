@@ -49,6 +49,8 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
 {
     private static final DefaultSerializer SERIALIZER = new DefaultSerializer();
 
+    private static final String VERSION = "1.0";
+
     private FormatConverter formatConverter = new FormatConverter();
 
     private HeaderLevelConverter headerLevelConverter = new HeaderLevelConverter();
@@ -56,6 +58,8 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     private ListTypeConverter listTypeConverter = new ListTypeConverter();
 
     private ResourceReferenceSerializer linkSerializer = new ResourceReferenceSerializer();
+
+    private boolean versionSerialized = false;
 
     public XDOMXMLChainingStreamRenderer(ListenerChain listenerChain, ParameterManager parameterManager)
     {
@@ -441,6 +445,9 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
 
         AttributesImpl attributes = new AttributesImpl();
         attributes.addAttribute(null, null, ATT_BLOCK_NAME, null, name);
+        if (!this.versionSerialized) {
+            attributes.addAttribute(null, null, ATT_BLOCK_VERSION, null, VERSION);
+        }
 
         startElement(ELEM_BLOCK, attributes);
 

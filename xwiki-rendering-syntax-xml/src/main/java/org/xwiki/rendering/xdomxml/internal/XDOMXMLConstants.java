@@ -32,5 +32,7 @@ public interface XDOMXMLConstants
 
     String ATT_BLOCK_NAME = "name";
 
+    String ATT_BLOCK_VERSION = "version";
+
     String ELEM_PARAMETERS = "parameters";
 }
