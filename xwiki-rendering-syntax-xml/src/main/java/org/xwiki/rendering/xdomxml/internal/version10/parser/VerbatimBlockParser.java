@@ -7,7 +7,6 @@ import org.xml.sax.SAXException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
 
 @Component("verbatim")
@@ -22,9 +21,9 @@ public class VerbatimBlockParser extends DefaultBlockParser
         }
     };
 
-    public VerbatimBlockParser(Listener listener)
+    public VerbatimBlockParser()
     {
-        super(listener, NAMES);
+        super(NAMES);
     }
 
     /**

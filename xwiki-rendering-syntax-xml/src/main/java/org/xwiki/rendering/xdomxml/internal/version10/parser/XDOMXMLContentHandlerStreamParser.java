@@ -25,7 +25,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
+import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.parser.xml.ContentHandlerStreamParser;
 import org.xwiki.rendering.syntax.Syntax;
@@ -44,6 +46,9 @@ public class XDOMXMLContentHandlerStreamParser extends DefaultHandler implements
     private Listener listener;
 
     private BlockParser documentParser;
+
+    @Requirement
+    private ComponentManager componentManager;
 
     /**
      * Avoid create a new SAXContentHandler for each block when the same can be used for all.
@@ -77,8 +82,17 @@ public class XDOMXMLContentHandlerStreamParser extends DefaultHandler implements
         if (this.documentParser != null) {
             this.documentParser.startElement(uri, localName, qName, attributes);
         } else if (ELEM_BLOCK.equals(qName)) {
-            this.documentParser = new DefaultBlockParser(this.listener);
+            this.documentParser = new DefaultBlockParser(this.listener, this.componentManager);
             this.documentParser.setVersion(XDOMXML_1_0.getVersion());
+            this.documentParser.startElement(uri, localName, qName, attributes);
+        }
+    }
+
+    @Override
+    public void characters(char[] ch, int start, int length) throws SAXException
+    {
+        if (this.documentParser != null) {
+            this.documentParser.characters(ch, start, length);
         }
     }
 

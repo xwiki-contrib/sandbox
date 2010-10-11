@@ -27,9 +27,9 @@ import org.xwiki.rendering.internal.renderer.xml.AbstractChainingContentHandlerS
 import org.xwiki.rendering.listener.Format;
 import org.xwiki.rendering.listener.HeaderLevel;
 import org.xwiki.rendering.listener.ListType;
-import org.xwiki.rendering.listener.ResourceReference;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
+import org.xwiki.rendering.listener.reference.ResourceReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
 import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;
@@ -103,8 +103,6 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
         if (isFreeStandingURI) {
             serializeParameter("freestanding", isFreeStandingURI);
         }
-
-        endElement("link");
     }
 
     @Override
@@ -421,7 +419,7 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     @Override
     public void onImage(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
-        startBlock(EventType.ON_IMAGE);
+        startBlock(EventType.ON_IMAGE, parameters);
 
         serializeParameter("freestanding", isFreeStandingURI);
         this.linkSerializer.serialize(reference, getContentHandler());
@@ -447,6 +445,7 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
         attributes.addAttribute(null, null, ATT_BLOCK_NAME, null, name);
         if (!this.versionSerialized) {
             attributes.addAttribute(null, null, ATT_BLOCK_VERSION, null, VERSION);
+            this.versionSerialized = true;
         }
 
         startElement(ELEM_BLOCK, attributes);

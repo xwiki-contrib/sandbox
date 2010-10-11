@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
@@ -27,15 +28,22 @@ public class DefaultBlockParser extends AbstractBlockParser
 
     private StringBuffer value;
 
-    public DefaultBlockParser(Listener listener)
+    public DefaultBlockParser(Listener listener, ComponentManager componentManager)
     {
-        super(listener);
+        setListener(listener);
+        setComponentManager(componentManager);
     }
 
-    protected DefaultBlockParser(Listener listener, Set<String> parameterNames)
+    /**
+     * Called by the component manager.
+     */
+    public DefaultBlockParser()
     {
-        super(listener);
 
+    }
+
+    protected DefaultBlockParser(Set<String> parameterNames)
+    {
         if (parameterNames != null) {
             this.parameterNames = parameterNames;
             this.parameters = new HashMap<String, String>();
@@ -84,11 +92,13 @@ public class DefaultBlockParser extends AbstractBlockParser
     protected void startElementInternal(String uri, String localName, String qName, Attributes attributes)
         throws SAXException
     {
-        if (this.parameterNames.contains(qName)) {
-            this.value = new StringBuffer();
-        } else if (qName.equals(XDOMXMLConstants.ELEM_PARAMETERS)) {
-            // Start parsing custom parameters
-            setCurrentHandler(new CustomParametersParser());
+        if (getLevel() > 0) {
+            if (this.parameterNames != null && this.parameterNames.contains(qName)) {
+                this.value = new StringBuffer();
+            } else if (qName.equals(XDOMXMLConstants.ELEM_PARAMETERS)) {
+                // Start parsing custom parameters
+                setCurrentHandler(new CustomParametersParser());
+            }
         }
     }
 
@@ -103,12 +113,14 @@ public class DefaultBlockParser extends AbstractBlockParser
     @Override
     protected void endElementInternal(String uri, String localName, String qName) throws SAXException
     {
-        if (this.value != null) {
-            this.parameters.put(qName, this.value.toString());
-        } else if (qName.equals(XDOMXMLConstants.ELEM_PARAMETERS)) {
-            // Custom parameters has been parsed
-            CustomParametersParser parametersParser = (CustomParametersParser) getCurrentHandler();
-            this.customParameters = parametersParser.getParameters();
+        if (getLevel() > 0) {
+            if (this.value != null) {
+                this.parameters.put(qName, this.value.toString());
+            } else if (qName.equals(XDOMXMLConstants.ELEM_PARAMETERS)) {
+                // Custom parameters has been parsed
+                CustomParametersParser parametersParser = (CustomParametersParser) getCurrentHandler();
+                this.customParameters = parametersParser.getParameters();
+            }
         }
     }
 

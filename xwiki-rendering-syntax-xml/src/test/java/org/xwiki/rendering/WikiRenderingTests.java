@@ -17,27 +17,30 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.rendering.internal.renderer.xml;
+package org.xwiki.rendering;
 
-import org.xml.sax.ContentHandler;
-import org.xwiki.rendering.listener.chaining.AbstractChainingListener;
-import org.xwiki.rendering.renderer.xml.ContentHandlerStreamRenderer;
+import junit.framework.TestCase;
+
+import org.xwiki.rendering.scaffolding.MockWikiModel;
+import org.xwiki.rendering.scaffolding.RenderingTestSuite;
+import org.xwiki.rendering.wiki.WikiModel;
+import org.xwiki.test.ComponentManagerTestSetup;
 
 /**
- * @version $Id$
+ * Rendering tests requiring a {@link WikiModel} implementation (ie tests that must have the notion of a wiki to run
+ * fine).
+ * 
+ * @version $Id: WikiRenderingTests.java 31703 2010-10-11 09:03:14Z vmassol $
  */
-public abstract class AbstractChainingContentHandlerStreamRenderer extends AbstractChainingListener implements
-    ContentHandlerStreamRenderer
+public class WikiRenderingTests extends TestCase
 {
-    private ContentHandler contentHandler;
-
-    public ContentHandler getContentHandler()
+    public static junit.framework.Test suite() throws Exception
     {
-        return this.contentHandler;
-    }
+        RenderingTestSuite suite = new RenderingTestSuite("Rendering tests requiring the wiki notion", "wiki");
 
-    public void setContentHandler(ContentHandler contentHandler)
-    {
-        this.contentHandler = contentHandler;
+        ComponentManagerTestSetup testSetup = new ComponentManagerTestSetup(suite);
+        testSetup.addComponentDescriptor(MockWikiModel.getComponentDescriptor());
+
+        return testSetup;
     }
 }

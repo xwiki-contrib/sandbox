@@ -7,7 +7,6 @@ import org.xml.sax.SAXException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
 import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.FormatConverter;
 
@@ -24,9 +23,9 @@ public class FormatBlockParser extends DefaultBlockParser
         }
     };
 
-    public FormatBlockParser(Listener listener)
+    public FormatBlockParser()
     {
-        super(listener, NAMES);
+        super(NAMES);
     }
 
     @Override

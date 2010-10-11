@@ -8,7 +8,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.parser.ParseException;
 import org.xwiki.rendering.syntax.SyntaxFactory;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
@@ -28,9 +27,9 @@ public class RawTextBlockParser extends DefaultBlockParser
     @Requirement
     private SyntaxFactory syntaxFactory;
 
-    public RawTextBlockParser(Listener listener)
+    public RawTextBlockParser()
     {
-        super(listener, NAMES);
+        super(NAMES);
     }
 
     /**

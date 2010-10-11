@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.xml.sax.SAXException;
-import org.xwiki.rendering.listener.ResourceReference;
-import org.xwiki.rendering.listener.ResourceType;
+import org.xwiki.rendering.listener.reference.ResourceReference;
+import org.xwiki.rendering.listener.reference.ResourceType;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
 
 public class ResourceReferenceParser extends DefaultBlockParser
@@ -23,7 +23,7 @@ public class ResourceReferenceParser extends DefaultBlockParser
 
     public ResourceReferenceParser()
     {
-        super(null);
+        super(NAMES);
     }
 
     public ResourceReference getResourceReference()

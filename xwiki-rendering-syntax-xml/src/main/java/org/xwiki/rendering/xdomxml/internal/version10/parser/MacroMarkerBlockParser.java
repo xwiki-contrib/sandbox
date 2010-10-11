@@ -7,7 +7,6 @@ import org.xml.sax.SAXException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
 
 @Component("macro_marker")
@@ -23,9 +22,9 @@ public class MacroMarkerBlockParser extends DefaultBlockParser
         }
     };
 
-    public MacroMarkerBlockParser(Listener listener)
+    public MacroMarkerBlockParser()
     {
-        super(listener, NAMES);
+        super(NAMES);
     }
 
     /**

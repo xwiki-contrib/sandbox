@@ -7,7 +7,6 @@ import org.xml.sax.SAXException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
 
 @Component("empty_lines")
@@ -16,9 +15,9 @@ public class EmptyLinesBlockParser extends DefaultBlockParser
 {
     private static final Set<String> NAMES = Collections.singleton("count");
 
-    public EmptyLinesBlockParser(Listener listener)
+    public EmptyLinesBlockParser()
     {
-        super(listener, NAMES);
+        super(NAMES);
     }
 
     /**

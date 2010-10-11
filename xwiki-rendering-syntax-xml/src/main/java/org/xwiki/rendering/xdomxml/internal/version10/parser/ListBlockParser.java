@@ -7,9 +7,7 @@ import org.xml.sax.SAXException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
-import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.FormatConverter;
 import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.ListTypeConverter;
 
 @Component("list")
@@ -25,9 +23,9 @@ public class ListBlockParser extends DefaultBlockParser
         }
     };
 
-    public ListBlockParser(Listener listener)
+    public ListBlockParser()
     {
-        super(listener, NAMES);
+        super(NAMES);
     }
 
     @Override

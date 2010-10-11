@@ -29,9 +29,9 @@ import org.xwiki.rendering.internal.renderer.xml.AbstractChainingContentHandlerS
 import org.xwiki.rendering.listener.Format;
 import org.xwiki.rendering.listener.HeaderLevel;
 import org.xwiki.rendering.listener.ListType;
-import org.xwiki.rendering.listener.ResourceReference;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
+import org.xwiki.rendering.listener.reference.ResourceReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
 import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;

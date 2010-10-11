@@ -8,7 +8,6 @@ import org.xml.sax.SAXException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
 import org.xwiki.rendering.xdomxml.internal.version10.parser.parameter.ResourceReferenceParser;
 
@@ -25,9 +24,9 @@ public class ImageBlockParser extends DefaultBlockParser
 
     private ResourceReferenceParser referenceParser = new ResourceReferenceParser();
 
-    public ImageBlockParser(Listener listener)
+    public ImageBlockParser()
     {
-        super(listener, NAMES);
+        super(NAMES);
     }
 
     @Override

@@ -1,10 +1,10 @@
-org.xwiki.rendering.xdomxml.internal.current.parameters.XStreamParameterManager
+org.xwiki.rendering.xdomxml.internal.current.parameter.XStreamParameterManager
 org.xwiki.rendering.xdomxml.internal.current.parser.XDOMXMLContentHandlerStreamParser
 org.xwiki.rendering.xdomxml.internal.current.parser.XDOMXMLParser
 org.xwiki.rendering.xdomxml.internal.current.renderer.XDOMXMLContentHandlerStreamRenderer
 org.xwiki.rendering.xdomxml.internal.current.renderer.XDOMXMLRenderer
 
-org.xwiki.rendering.xdomxml.internal.parser.parameters.DefaultBlockParser
+org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser
 
 org.xwiki.rendering.xdomxml.internal.version10.parser.XDOMXMLContentHandlerStreamParser
 org.xwiki.rendering.xdomxml.internal.version10.parser.XDOMXMLParser

@@ -19,6 +19,7 @@
  */
 package org.xwiki.rendering.xdomxml.internal.version10.renderer;
 
+import org.xml.sax.ContentHandler;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.annotation.Requirement;
@@ -26,11 +27,7 @@ import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.rendering.internal.renderer.xml.AbstractChainingContentHandlerStreamRenderer;
-import org.xwiki.rendering.listener.chaining.BlockStateChainingListener;
-import org.xwiki.rendering.listener.chaining.EmptyBlockChainingListener;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
-import org.xwiki.rendering.syntax.Syntax;
-import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
 import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;
 
 /**
@@ -38,7 +35,8 @@ import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;
  */
 @Component("xdom+xml/1.0")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
-public class XDOMXMLContentHandlerStreamRenderer extends AbstractChainingContentHandlerStreamRenderer
+public class XDOMXMLContentHandlerStreamRenderer extends AbstractChainingContentHandlerStreamRenderer implements
+    Initializable
 {
     @Requirement
     private ParameterManager parameterManager;
@@ -46,18 +44,7 @@ public class XDOMXMLContentHandlerStreamRenderer extends AbstractChainingContent
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.parser.xml.ContentHandlerStreamParser#getSyntax()
-     */
-    public Syntax getSyntax()
-    {
-        return XDOMXMLConstants.XDOMXML_1_0;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see Initializable#initialize()
-     * @since 2.0M3
+     * @see org.xwiki.component.phase.Initializable#initialize()
      */
     public void initialize() throws InitializationException
     {
@@ -67,8 +54,15 @@ public class XDOMXMLContentHandlerStreamRenderer extends AbstractChainingContent
         // Construct the listener chain in the right order. Listeners early in the chain are called before listeners
         // placed later in the chain.
         chain.addListener(this);
-        chain.addListener(new BlockStateChainingListener(chain));
-        chain.addListener(new EmptyBlockChainingListener(chain));
-        chain.addListener(new XDOMXMLChainingStreamRenderer(chain, parameterManager));
+        chain.addListener(new XDOMXMLChainingStreamRenderer(chain, this.parameterManager));
+    }
+
+    @Override
+    public void setContentHandler(ContentHandler contentHandler)
+    {
+        super.setContentHandler(contentHandler);
+
+        ((XDOMXMLChainingStreamRenderer) getListenerChain().getListener(XDOMXMLChainingStreamRenderer.class))
+            .setContentHandler(contentHandler);
     }
 }

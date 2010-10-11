@@ -8,7 +8,6 @@ import org.xml.sax.SAXException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.rendering.listener.Listener;
 import org.xwiki.rendering.xdomxml.internal.parser.DefaultBlockParser;
 import org.xwiki.rendering.xdomxml.internal.version10.parser.parameter.ResourceReferenceParser;
 
@@ -25,16 +24,16 @@ public class LinkBlockParser extends DefaultBlockParser
 
     private ResourceReferenceParser referenceParser = new ResourceReferenceParser();
 
-    public LinkBlockParser(Listener listener)
+    public LinkBlockParser()
     {
-        super(listener, NAMES);
+        super(NAMES);
     }
 
     @Override
     protected void startElementInternal(String uri, String localName, String qName, Attributes attributes)
         throws SAXException
     {
-        if (qName.equals("link")) {
+        if (qName.equals("reference")) {
             setCurrentHandler(this.referenceParser);
         } else {
             super.startElementInternal(uri, localName, qName, attributes);
@@ -49,14 +48,14 @@ public class LinkBlockParser extends DefaultBlockParser
     @Override
     protected void beginBlock() throws SAXException
     {
-        getListener().beginLink(this.referenceParser.getResourceReference(), getParameterAsBoolean("freestanding", false),
-            getCustomParameters());
+        getListener().beginLink(this.referenceParser.getResourceReference(),
+            getParameterAsBoolean("freestanding", false), getCustomParameters());
     }
 
     @Override
     protected void endBlock() throws SAXException
     {
-        getListener().endLink(this.referenceParser.getResourceReference(), getParameterAsBoolean("freestanding", false),
-            getCustomParameters());
+        getListener().endLink(this.referenceParser.getResourceReference(),
+            getParameterAsBoolean("freestanding", false), getCustomParameters());
     }
 }
