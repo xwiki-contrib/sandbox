@@ -25,7 +25,7 @@ public abstract class AbstractBlockParser extends DefaultHandler implements Bloc
 
     private String blockVersion;
 
-    private boolean beginBlockFlushed = false;
+    private boolean beginBlockFlushed;
 
     private Listener listener;
 
