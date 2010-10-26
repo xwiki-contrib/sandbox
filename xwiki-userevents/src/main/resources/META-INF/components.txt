@@ -1,3 +1,0 @@
-org.xwiki.user.internal.UserCreationEventListener
-org.xwiki.user.internal.UserRegistrationNotifier
-org.xwiki.user.internal.DefaultRegistrationNotifierConfiguration
