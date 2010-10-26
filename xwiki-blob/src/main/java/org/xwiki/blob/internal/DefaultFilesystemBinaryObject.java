@@ -49,8 +49,10 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
     /** True if the files created by this BinaryObject should be deleted on JVM exit. */
     private final boolean deleteOnExit;
 
+    /** This holds the unsaved version, all write actions go to this file. */
     private FilesystemStorageItem temporaryFile;
 
+    /** This holds the saved version, all read actions got to this file. */
     private FilesystemStorageItem persistentFile;
 
     /**
@@ -102,7 +104,7 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
         final TwoFileIOLock ffl = this.lock;
         ffl.lock(TwoFileIOLock.Action.ADD);
         // Content is always added to temporary storage.
-        return new RunOnCloseOutputStream(this.temporaryFile.write(true), new Runnable() {
+        return new RunOnCloseOutputStream(this.temporaryFile.write(), new Runnable() {
 
             private TwoFileIOLock lock = ffl;
 
@@ -156,7 +158,7 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
             final FilesystemStorageItem newPersist =
                 new FilesystemStorageItem(this.storageDirectory, this.deleteOnExit);
 
-            final OutputStream os = newPersist.write(false);
+            final OutputStream os = newPersist.write();
             final InputStream is1 = this.persistentFile.read();
             IOUtils.copy(is1, os);
             is1.close();
@@ -279,8 +281,10 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
             }
         }
 
+        /** True if one of the current actions is using the temporary file. */
         private boolean temporaryFileLocked;
 
+        /** True if one of the current actions is using the persistent file. */
         private boolean persistentFileLocked;
 
         /**
@@ -309,7 +313,13 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
             }
         }
 
-        /** Called when the streams are closed. */
+        /**
+         * Unlock the resources.
+         * Called when the streams are closed. Whatever resources were locked by the given action are unlocked
+         * and any threads waiting are notified.
+         *
+         * @param action the action which the lock was set for.
+         */
         public synchronized void unlock(Action action)
         {
             if (action.locksTemporaryFile()) {
@@ -322,20 +332,37 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
         }
     }
 
+    /** An item which allows binary data to be stored in a file on the filesystem and referenced by a UUID. */
     private static class FilesystemStorageItem
     {
         /** The names of all files which back BinaryObjects of this class will begin with this. */
         private static final String FILE_NAME_PREFIX = "BinaryObj_";
 
+        /** The key to allow the same item to be recovered later. */
         private final UUID key;
 
+        /** The file which backs this item. */
         private final File file;
 
+        /**
+         * The Constructor.
+         *
+         * @param storageDirectory the directory where the files should be stored.
+         * @param deleteOnExit if true then the JVM will be instructed to delete all of the files when it exits.
+         */
         public FilesystemStorageItem(final File storageDirectory, final boolean deleteOnExit)
         {
             this(storageDirectory, deleteOnExit, UUID.randomUUID());
         }
 
+        /**
+         * The Constructor.
+         * Construct a new item around an existing file.
+         *
+         * @param storageDirectory the directory where the files should be stored.
+         * @param deleteOnExit if true then the JVM will be instructed to delete all of the files when it exits.
+         * @param key the UUID which will be used to locate the correct file.
+         */
         public FilesystemStorageItem(final File storageDirectory, final boolean deleteOnExit, final UUID key)
         {
             this.key = key;
@@ -345,6 +372,10 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
             }
         }
 
+        /**
+         * @return a stream containing the content of the item.
+         * @throws FileNotFoundException if the requested file does not exist.
+         */
         public InputStream read() throws FileNotFoundException
         {
             if (this.file.exists()) {
@@ -354,11 +385,19 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
             }
         }
 
-        public OutputStream write(final boolean append) throws FileNotFoundException
+        /**
+         * Write content into this item.
+         * Each write will append content to the last, to avoid appending, use clear first.
+         *
+         * @return a stream to which content can be written into the item.
+         * @throws FileNotFoundException if the file to write to cannot be created.
+         */
+        public OutputStream write() throws FileNotFoundException
         {
-            return new FileOutputStream(this.file, append);
+            return new FileOutputStream(this.file, true);
         }
 
+        /** Get rid of all the content in the item. */
         public void clear()
         {
             if (this.file.exists()) {
@@ -366,6 +405,7 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
             }
         }
 
+        /** @return the key for getting this item again later. */
         public UUID getKey()
         {
             return this.key;
