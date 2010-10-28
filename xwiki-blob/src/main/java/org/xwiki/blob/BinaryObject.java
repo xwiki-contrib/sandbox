@@ -27,8 +27,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.xwiki.component.annotation.ComponentRole;
-import org.xwiki.component.annotation.InstantiationStrategy;
-import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 
 /**
  * BinaryObject represents a potentially large amount of binary content.
@@ -37,9 +35,8 @@ import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
  * @version $Id$
  * @since 2.6M1
  */
-@ComponentRole()
-@InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
-public interface BinaryObject extends Cloneable
+@ComponentRole
+public interface BinaryObject
 {
     /**
      * Put content into this BinaryObject.

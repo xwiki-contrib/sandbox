@@ -140,7 +140,7 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
         this.lock.lock(TwoFileIOLock.Action.SAVE);
 
         /*
-         * One of 2 things is happening. Either the user wants us to make the content of the scratchpad final, 
+         * One of 2 things is happening. Either the user wants us to make the content of the scratchpad final,
          * or the user wants us to append the content of the scratchpad to the content of the persistent storage.
          */
         if (this.wasCleared)
@@ -154,7 +154,7 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
             // Case 2, Create a new file, copy the content of the persistent then the temporary file to the
             //         new file, then delete the temporary file and let the old persistent file set in case it
             //         might be loaded again.
-            
+
             final FilesystemStorageItem newPersist =
                 new FilesystemStorageItem(this.storageDirectory, this.deleteOnExit);
 
@@ -297,7 +297,7 @@ public class DefaultFilesystemBinaryObject implements BinaryObject
         {
             try {
                 while ((action.locksTemporaryFile() && this.temporaryFileLocked)
-                       || (action.locksPersistentFile() && this.persistentFileLocked)) 
+                       || (action.locksPersistentFile() && this.persistentFileLocked))
                 {
                     this.wait();
                 }

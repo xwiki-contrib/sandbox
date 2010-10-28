@@ -33,9 +33,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.blob.BinaryObject;
 
 /**
- * Tests the DefaultFilesystemBinaryObject
+ * Tests the DefaultBinaryObject
  *
  * @version $Id$
  * @since 2.6M1
@@ -46,12 +47,16 @@ public class DefaultFilesystemBinaryObjectTest
 
     private final String otherTestContent = "This is different content.";
 
-    private DefaultFilesystemBinaryObject binaryObj;
+    private BinaryObject binaryObj;
 
     @Before
     public void setUp() throws Exception
     {
-        this.binaryObj = new DefaultFilesystemBinaryObject(new File(System.getProperty("java.io.tmpdir")), true);
+        this.binaryObj = new DefaultBinaryObject(
+            new FilesystemFastStorageItem(new File(System.getProperty("java.io.tmpdir"))),
+            new FilesystemFastStorageItem(new File(System.getProperty("java.io.tmpdir"))),
+            new FilesystemFastStorageItem(new File(System.getProperty("java.io.tmpdir")))
+        );
     }
 
     @After
