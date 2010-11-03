@@ -80,4 +80,7 @@ public interface StorageItem
 
     /** @return the key for getting this item again later. */
     UUID getKey();
+
+    /** @return the number of bytes of data in this storage item. */
+    long size();
 }

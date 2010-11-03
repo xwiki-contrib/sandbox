@@ -197,6 +197,21 @@ public class DefaultBinaryObject implements BinaryObject
     /**
      * {@inheritDoc}
      *
+     * @see BinaryObject#size()
+     */
+    public long size()
+    {
+        this.lock.lock(DualItemLock.Action.SIZE);
+        try {
+            return this.readStore.size();
+        } finally {
+            this.lock.unlock(DualItemLock.Action.SIZE);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see BinaryObject#getContent(OutputStream)
      */
     public void getContent(final OutputStream writeTo) throws IOException
@@ -234,7 +249,10 @@ public class DefaultBinaryObject implements BinaryObject
             SAVE(true, true),
 
             /** Action which represents loading of a binary object. */
-            LOAD(false, true);
+            LOAD(false, true),
+
+            /** Get the size of the read store. */
+            SIZE(false, true);
 
             /** True if this action uses the temporary file. */
             private final boolean locksWriteStore;
@@ -278,9 +296,8 @@ public class DefaultBinaryObject implements BinaryObject
          * Will block if a request is make on a resource which is being held.
          *
          * @param action the action which we are locking for (used to give more helpfull exception messages)
-         * @throws IOException if the lock is already being held.
          */
-        public synchronized void lock(Action action) throws IOException
+        public synchronized void lock(Action action)
         {
             try {
                 while ((action.locksWriteStore() && this.writeStoreLocked)

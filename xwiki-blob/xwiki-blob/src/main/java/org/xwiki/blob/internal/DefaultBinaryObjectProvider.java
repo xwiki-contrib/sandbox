@@ -69,7 +69,7 @@ public class DefaultBinaryObjectProvider extends AbstractLogEnabled
      *
      * @see org.xwiki.blob.BinaryObjectProvider#get(String)
      */
-    public BinaryObject get(String storageItemRoleHint)
+    public BinaryObject get(final String storageItemRoleHint)
     {
         FastStorageItem readStore;
         FastStorageItem writeStore;

@@ -27,11 +27,11 @@
   <parent>
     <groupId>org.xwiki.platform</groupId>
     <artifactId>xwiki-core-parent</artifactId>
-    <version>2.5-SNAPSHOT</version>
+    <version>2.6-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-core-blob</artifactId>
-  <name>XWiki Platform - Core - Binary Objects</name>
-  <description>XWiki Platform - Core - Binary Objects</description>
+  <artifactId>xwiki-core-blob-attachments</artifactId>
+  <name>XWiki Platform - Core - Binary Object Based Attachments</name>
+  <description>XWiki Platform - Core - Binary Object Based Attachments</description>
   <properties>
     <!-- Skip Clirr execution, since this is a new component -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
@@ -43,13 +43,9 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-configuration-api</artifactId>
+      <groupId>com.xpn.xwiki.platform</groupId>
+      <artifactId>xwiki-core</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
     </dependency>
   </dependencies>
   <build>

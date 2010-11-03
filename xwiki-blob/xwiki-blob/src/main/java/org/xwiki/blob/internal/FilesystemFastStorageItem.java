@@ -83,7 +83,7 @@ public class FilesystemFastStorageItem implements FastStorageItem
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.blob.StorageItem#init()
+     * @see org.xwiki.blob.FastStorageItem#init()
      */
     public void init(final UUID key)
     {
@@ -94,7 +94,7 @@ public class FilesystemFastStorageItem implements FastStorageItem
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.blob.StorageItem#read()
+     * @see org.xwiki.blob.FastStorageItem#read()
      */
     public InputStream read() throws IOException
     {
@@ -108,7 +108,7 @@ public class FilesystemFastStorageItem implements FastStorageItem
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.blob.StorageItem#write()
+     * @see org.xwiki.blob.FastStorageItem#write()
      */
     public OutputStream write() throws IOException
     {
@@ -121,7 +121,7 @@ public class FilesystemFastStorageItem implements FastStorageItem
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.blob.StorageItem#clear()
+     * @see org.xwiki.blob.FastStorageItem#clear()
      */
     public void clear()
     {
@@ -133,11 +133,21 @@ public class FilesystemFastStorageItem implements FastStorageItem
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.blob.StorageItem#getKey()
+     * @see org.xwiki.blob.FastStorageItem#getKey()
      */
     public UUID getKey()
     {
         return this.key;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.blob.FastStorageItem#size()
+     */
+    public long size()
+    {
+        return this.file.length();
     }
 
     /**

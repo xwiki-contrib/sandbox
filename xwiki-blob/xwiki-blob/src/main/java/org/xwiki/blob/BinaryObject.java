@@ -36,7 +36,7 @@ import org.xwiki.component.annotation.ComponentRole;
  * @since 2.6M1
  */
 @ComponentRole
-public interface BinaryObject
+public interface BinaryObject extends Cloneable
 {
     /**
      * Put content into this BinaryObject.
@@ -81,8 +81,6 @@ public interface BinaryObject
     /**
      * Load content from the persistent storage location.
      * If it is being written to, any further writing to the same stream will have no effect.
-     * If key is null then this BinaryObject will be returned to the state of the last save,
-     * similar to a database rollback.
      *
      * @param key the UUID of the BinaryObject data to load.
      * @throws IOException if the BinaryObject is unable to read from the persistent storage.
@@ -108,4 +106,7 @@ public interface BinaryObject
      * @throws IOException if the BinaryObject is unable to read from the storage location.
      */
     void getContent(final OutputStream writeTo) throws IOException;
+
+    /** @return the number of bytes of data in this BinaryObject. */
+    long size();
 }
