@@ -38,6 +38,9 @@ import org.hibernate.usertype.UserType;
  */
 public class UUIDToBinaryType implements UserType
 {
+    /** The SQL type which is used to store the UUID. */
+    private static final int TYPE = Types.VARBINARY;
+
     /**
      * {@inheritDoc}
      * 
@@ -84,6 +87,9 @@ public class UUIDToBinaryType implements UserType
      */
     public boolean equals(final Object x, final Object y)
     {
+        if (x == null) {
+            return (x == y);
+        }
         return x.equals(y);
     }
 
@@ -94,7 +100,7 @@ public class UUIDToBinaryType implements UserType
      */
     public int hashCode(final Object obj)
     {
-        return obj.hashCode();
+        return (obj == null) ? 0 : obj.hashCode();
     }
 
     /**
@@ -129,7 +135,7 @@ public class UUIDToBinaryType implements UserType
         throws SQLException
     {
         if (value == null) {
-            statement.setNull(parameterIndex, Types.BINARY);
+            statement.setNull(parameterIndex, UUIDToBinaryType.TYPE);
         } else if (value.getClass() != UUID.class) {
             throw new ClassCastException("Expecting a java.lang.UUID, instead got a: " + value.getClass());
         } else {
@@ -165,7 +171,7 @@ public class UUIDToBinaryType implements UserType
     public int[] sqlTypes()
     {
         // create a new int[] per call lest a wiley user change the value.
-        return new int[] {Types.BINARY};
+        return new int[] {UUIDToBinaryType.TYPE};
     }
 
     /**
