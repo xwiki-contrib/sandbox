@@ -35,6 +35,7 @@ import org.hibernate.usertype.UserType;
  * Hibernate UserType to store UUIDs as BINARY in the database.
  *
  * @version $Id$
+ * @since 2.7M1
  */
 public class UUIDToBinaryType implements UserType
 {
