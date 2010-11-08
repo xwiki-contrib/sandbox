@@ -17,17 +17,22 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.portlet;
+package org.xwiki.portlet.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+
+import org.apache.commons.lang.StringUtils;
+import org.xwiki.portlet.util.ByteArrayServletOutputStream;
+import org.xwiki.portlet.util.StringServletPrintWriter;
 
 /**
  * Wraps a servlet response object dispatched from a portlet's render or serve resource method.
@@ -53,13 +58,22 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     private boolean outputPreserved;
 
     /**
+     * The set of content types that must suffer transformations and thus can't be written directly to the original
+     * response object.
+     */
+    private final Set<String> knownMimeTypes;
+
+    /**
      * Wraps the given servlet response that has been dispatched from a portlet's render or serve resource method.
      * 
      * @param response the response object to be wrapped
+     * @param knownMimeTypes the set of known mime types, i.e. the content types for which the output is not preserved
      */
-    public DispatchedMimeResponse(HttpServletResponse response)
+    public DispatchedMimeResponse(HttpServletResponse response, Set<String> knownMimeTypes)
     {
         super(response);
+
+        this.knownMimeTypes = knownMimeTypes;
     }
 
     /**
@@ -70,7 +84,7 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     @Override
     public ServletOutputStream getOutputStream() throws IOException
     {
-        if (isHTML()) {
+        if (isOutputIntercepted()) {
             if (writerWrapper == null) {
                 if (outputStreamWrapper == null) {
                     outputStreamWrapper = new ByteArrayServletOutputStream();
@@ -93,7 +107,7 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     @Override
     public PrintWriter getWriter() throws IOException
     {
-        if (isHTML()) {
+        if (isOutputIntercepted()) {
             if (outputStreamWrapper == null) {
                 if (writerWrapper == null) {
                     writerWrapper = new StringServletPrintWriter();
@@ -109,20 +123,13 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     }
 
     /**
-     * @return {@code true} if the response output is not preserved and either it was already wrapped or the content
-     *         type is HTML, {@code false} otherwise
+     * @return {@code true} if the response output was intercepted and not committed to the original response object,
+     *         {@code false} otherwise
      */
-    public boolean isHTML()
+    public boolean isOutputIntercepted()
     {
-        return !outputPreserved && (outputStreamWrapper != null || writerWrapper != null || hasHTMLContentType());
-    }
-
-    /**
-     * @return {@code true} if this response has HTML content type, {@code false} otherwise
-     */
-    private boolean hasHTMLContentType()
-    {
-        return getContentType() == null || getContentType().startsWith("text/html");
+        return !outputPreserved
+            && (outputStreamWrapper != null || writerWrapper != null || knownMimeTypes.contains(getMimeType()));
     }
 
     /**
@@ -139,5 +146,13 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
         } else {
             return new StringReader("");
         }
+    }
+
+    /**
+     * @return the mime type of the resource that is being served
+     */
+    public String getMimeType()
+    {
+        return StringUtils.substringBefore(getContentType(), ";");
     }
 }

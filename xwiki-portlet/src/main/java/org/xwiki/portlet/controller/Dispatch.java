@@ -17,21 +17,50 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.portlet;
+package org.xwiki.portlet.controller;
 
 /**
- * Enumerates the ways in which a request can be dispatched.
+ * Convenient way of passing dispatch information.
  * 
  * @version $Id$
  */
-public enum DispatchType
+public class Dispatch
 {
     /**
-     * @see javax.servlet.RequestDispatcher#include(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     * The dispatch type.
      */
-    INCLUDE,
+    private final DispatchType type;
+
     /**
-     * @see javax.servlet.RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     * The dispatch path.
      */
-    FORWARD
+    private final String path;
+
+    /**
+     * Creates a new dispatch object with the given information.
+     * 
+     * @param type the dispatch type
+     * @param path the dispatch type
+     */
+    public Dispatch(DispatchType type, String path)
+    {
+        this.type = type;
+        this.path = path;
+    }
+
+    /**
+     * @return the dispatch type
+     */
+    public DispatchType getType()
+    {
+        return type;
+    }
+
+    /**
+     * @return the dispatch path
+     */
+    public String getPath()
+    {
+        return path;
+    }
 }

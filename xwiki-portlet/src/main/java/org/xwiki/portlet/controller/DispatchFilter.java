@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.portlet;
+package org.xwiki.portlet.controller;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -33,6 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.xwiki.portlet.DispatchPortlet;
+import org.xwiki.portlet.model.RequestType;
+import org.xwiki.portlet.model.ResponseData;
+import org.xwiki.portlet.view.StreamFilterManager;
 
 /**
  * Wraps servlet requests that are dispatched from a portlet to overcome some of the limitations enforced by the JSR286
@@ -48,6 +52,11 @@ public class DispatchFilter implements Filter
      * attribute is a string. The associated boolean value is determined using {@link Boolean#valueOf(String)}.
      */
     private static final String ATTRIBUTE_APPLIED = DispatchFilter.class.getName() + ".applied";
+
+    /**
+     * The configuration object.
+     */
+    private FilterConfig config;
 
     /**
      * {@inheritDoc}
@@ -143,14 +152,23 @@ public class DispatchFilter implements Filter
     private void doRender(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws IOException, ServletException
     {
-        DispatchedMimeResponse responseWrapper = new DispatchedMimeResponse(response);
+        // The content type is not always set for static resources. The dispatched response needs to know the content
+        // type before its writer or output stream are requested in order to determine if the output should be written
+        // directly to the original response or stored for processing.
+        String mimeType = config.getServletContext().getMimeType(request.getRequestURI());
+        if (mimeType != null && response.getContentType() == null) {
+            response.setContentType(mimeType);
+        }
+
+        StreamFilterManager streamFilterManager =
+            (StreamFilterManager) request.getAttribute(DispatchPortlet.ATTRIBUTE_STREAM_FILTER_MANAGER);
+        DispatchedMimeResponse responseWrapper =
+            new DispatchedMimeResponse(response, streamFilterManager.getKnownMimeTypes());
         chain.doFilter(new DispatchedRequest(request, false), responseWrapper);
 
-        if (responseWrapper.isHTML()) {
-            URLRewriter rewriter =
-                new URLRewriter((DispatchURLFactory) request
-                    .getAttribute(DispatchPortlet.ATTRIBUTE_DISPATCH_URL_FACTORY), request.getContextPath());
-            rewriter.rewrite(responseWrapper.getReader(), response.getWriter());
+        if (responseWrapper.isOutputIntercepted()) {
+            streamFilterManager
+                .filter(responseWrapper.getMimeType(), responseWrapper.getReader(), response.getWriter());
         }
     }
 
@@ -176,6 +194,7 @@ public class DispatchFilter implements Filter
      */
     public void init(FilterConfig config) throws ServletException
     {
+        this.config = config;
     }
 
     /**

@@ -17,25 +17,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.portlet;
+package org.xwiki.portlet.view;
+
+import java.io.Reader;
+import java.io.Writer;
 
 /**
- * Portlet request types.
+ * Filters a stream of characters.
  * 
  * @version $Id$
  */
-public enum RequestType
+public interface StreamFilter
 {
     /**
-     * Action request, triggered by an URL created with {@link javax.portlet.MimeResponse#createActionURL()}.
+     * Filters the given character stream.
+     * 
+     * @param reader the character stream to be filtered
+     * @param writer the resulting character stream
      */
-    ACTION,
-    /**
-     * Render request, triggered by an URL created with {@link javax.portlet.MimeResponse#createRenderURL()}.
-     */
-    RENDER,
-    /**
-     * Resource request, triggered by an URL created with {@link javax.portlet.MimeResponse#createResourceURL()}.
-     */
-    RESOURCE
+    void filter(Reader reader, Writer writer);
 }

@@ -40,21 +40,21 @@ import javax.portlet.ResourceResponse;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.lang.StringUtils;
+import org.xwiki.portlet.model.RequestType;
+import org.xwiki.portlet.model.ResponseData;
+import org.xwiki.portlet.url.DispatchURLFactory;
+import org.xwiki.portlet.url.URLRequestTypeMapper;
+import org.xwiki.portlet.view.StreamFilterManager;
 
 /**
  * Dispatches portlet requests coming from a JSR286 compatible portal to the URL provided in the
- * {@link #PARAMETER_DISPATCH_URL} request parameter. The dispatch target must be on the same context path as the
- * dispatch portlet.
+ * {@link DispatchURLFactory#PARAMETER_DISPATCH_URL} request parameter. The dispatch target must be on the same context
+ * path as the dispatch portlet.
  * 
  * @version $Id$
  */
 public class DispatchPortlet extends GenericPortlet
 {
-    /**
-     * The name of the portlet request parameter holding the URL to dispatch the request to.
-     */
-    public static final String PARAMETER_DISPATCH_URL = "org.xwiki.portlet.parameter.dispatchURL";
-
     /**
      * The key to access the data of a dispatched response from the session.
      */
@@ -83,9 +83,9 @@ public class DispatchPortlet extends GenericPortlet
     public static final String ATTRIBUTE_REQUEST_TYPE = "org.xwiki.portlet.attribute.requestType";
 
     /**
-     * The request attribute used to pass the {@link DispatchURLFactory} to the dispatch target.
+     * The request attribute used to pass the {@link StreamFilterManager} to the dispatch target.
      */
-    public static final String ATTRIBUTE_DISPATCH_URL_FACTORY = "org.xwiki.portlet.attribute.dispatchURLFactory";
+    public static final String ATTRIBUTE_STREAM_FILTER_MANAGER = "org.xwiki.portlet.attribute.streamFilterManager";
 
     /**
      * The map of response data, stored on the session.
@@ -98,8 +98,8 @@ public class DispatchPortlet extends GenericPortlet
     public static final String ATTRIBUTE_RESPONSE_DATA = "org.xwiki.portlet.attribute.responseData";
 
     /**
-     * The attribute used to pass the URL to the home (landing) page to the dispatch target. The dispatch target can
-     * used this URL to create "Back to home" links.
+     * The attribute used to pass the URL to the home (landing) page to the dispatch target. The dispatch target can use
+     * this URL to create "Back to home" links.
      */
     public static final String ATTRIBUTE_HOME_URL = "org.xwiki.portlet.attribute.homeURL";
 
@@ -111,7 +111,7 @@ public class DispatchPortlet extends GenericPortlet
      * Forwarding the request multiple times is not enough because some portlet containers send all the requests to the
      * same dispatch target, the target of the first dispatch.
      * 
-     * @see #PARAMETER_DISPATCH_URL
+     * @see DispatchURLFactory#PARAMETER_DISPATCH_URL
      */
     public static final String ATTRIBUTE_REDIRECT_URL = "org.xwiki.portlet.attribute.redirectURL";
 
@@ -185,7 +185,7 @@ public class DispatchPortlet extends GenericPortlet
                 response.setRenderParameter(PARAMETER_DISPATCHED_RESPONSE_KEY, responseKey);
                 // Pass the last dispatch URL as a render parameter because the response data is removed from the
                 // session when it is first accessed and the portal can trigger a render requests at any time.
-                response.setRenderParameter(PARAMETER_DISPATCH_URL, dispatchURL);
+                response.setRenderParameter(DispatchURLFactory.PARAMETER_DISPATCH_URL, dispatchURL);
                 break;
             }
         } while (++i < MAX_REDIRECT_COUNT);
@@ -226,15 +226,17 @@ public class DispatchPortlet extends GenericPortlet
     {
         String dispatchURL = getDispatchURL(request);
         DispatchURLFactory dispatchURLFactory = new DispatchURLFactory(response, urlRequestTypeMapper, dispatchURL);
+        StreamFilterManager streamFilterManager =
+            new StreamFilterManager(dispatchURLFactory, request.getContextPath(), response.getNamespace(),
+                RequestType.RENDER);
         ResponseData responseData = getResponseData(request);
         if (responseData != null) {
-            URLRewriter rewriter = new URLRewriter(dispatchURLFactory, request.getContextPath());
-            renderResponseData(responseData, response, rewriter);
+            renderResponseData(responseData, response, streamFilterManager);
         } else {
             request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RENDER);
             request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
                 + getDefaultDispatchURL(request.getPreferences()));
-            request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, dispatchURLFactory);
+            request.setAttribute(ATTRIBUTE_STREAM_FILTER_MANAGER, streamFilterManager);
             getPortletContext().getRequestDispatcher(dispatchURL).forward(request, response);
         }
     }
@@ -249,8 +251,11 @@ public class DispatchPortlet extends GenericPortlet
     {
         String editURL = request.getPreferences().getValue(PREFERENCE_EDIT_URL, null);
         DispatchURLFactory dispatchURLFactory = new DispatchURLFactory(response, urlRequestTypeMapper, editURL);
+        StreamFilterManager streamFilterManager =
+            new StreamFilterManager(dispatchURLFactory, request.getContextPath(), response.getNamespace(),
+                RequestType.RENDER);
         request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RENDER);
-        request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, dispatchURLFactory);
+        request.setAttribute(ATTRIBUTE_STREAM_FILTER_MANAGER, streamFilterManager);
         exposePortletPreferences(request);
         getPortletContext().getRequestDispatcher(editURL).forward(request, response);
     }
@@ -267,9 +272,14 @@ public class DispatchPortlet extends GenericPortlet
         request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
             + getDefaultDispatchURL(request.getPreferences()));
         String dispatchURL = getDispatchURL(request);
-        request.setAttribute(ATTRIBUTE_DISPATCH_URL_FACTORY, new DispatchURLFactory(response, urlRequestTypeMapper,
-            dispatchURL));
-        getPortletContext().getRequestDispatcher(dispatchURL).forward(request, response);
+        DispatchURLFactory dispatchURLFactory = new DispatchURLFactory(response, urlRequestTypeMapper, dispatchURL);
+        StreamFilterManager streamFilterManager =
+            new StreamFilterManager(dispatchURLFactory, request.getContextPath(), response.getNamespace(),
+                RequestType.RESOURCE);
+        request.setAttribute(ATTRIBUTE_STREAM_FILTER_MANAGER, streamFilterManager);
+        // We do an include instead of a forward because GateIn's DispatchedHttpServletRequest#getDateHeader(String)
+        // returns 0 instead on -1 which makes forward expectations fail when requesting static resources.
+        getPortletContext().getRequestDispatcher(dispatchURL).include(request, response);
     }
 
     /**
@@ -278,7 +288,7 @@ public class DispatchPortlet extends GenericPortlet
      */
     private String getDispatchURL(PortletRequest request)
     {
-        String dispatchURL = request.getParameter(PARAMETER_DISPATCH_URL);
+        String dispatchURL = request.getParameter(DispatchURLFactory.PARAMETER_DISPATCH_URL);
         if (dispatchURL == null) {
             dispatchURL = getDefaultDispatchURL(request.getPreferences());
         }
@@ -340,11 +350,11 @@ public class DispatchPortlet extends GenericPortlet
      * 
      * @param responseData the data of a dispatched response
      * @param response the portlet response object used to render the data
-     * @param rewriter the object used to rewrite servlet URLs into portlet URLs
+     * @param streamFilterManager the object used to filter the output returned by the dispatch target
      * @throws IOException if the rendering fails
      */
-    private void renderResponseData(ResponseData responseData, RenderResponse response, URLRewriter rewriter)
-        throws IOException
+    private void renderResponseData(ResponseData responseData, RenderResponse response,
+        StreamFilterManager streamFilterManager) throws IOException
     {
         // Set cookies.
         for (Cookie cookie : responseData.getCookies()) {
@@ -368,7 +378,7 @@ public class DispatchPortlet extends GenericPortlet
         }
         // Set response body.
         // Follow portlet recommendations to use the writer for text-based markup (PLT.12.5.2).
-        rewriter.rewrite(responseData.getReader(), response.getWriter());
+        streamFilterManager.filter(responseData.getMimeType(), responseData.getReader(), response.getWriter());
         response.flushBuffer();
     }
 

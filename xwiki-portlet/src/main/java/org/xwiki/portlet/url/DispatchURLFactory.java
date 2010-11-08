@@ -17,12 +17,13 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.portlet;
+package org.xwiki.portlet.url;
 
 import javax.portlet.BaseURL;
 import javax.portlet.MimeResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.xwiki.portlet.model.RequestType;
 
 /**
  * Creates portlet URLs that tell to their target where to dispatch the associated request.
@@ -31,6 +32,11 @@ import org.apache.commons.lang.StringUtils;
  */
 public class DispatchURLFactory
 {
+    /**
+     * The name of the portlet URL parameter holding the URL to dispatch the request to.
+     */
+    public static final String PARAMETER_DISPATCH_URL = "org.xwiki.portlet.parameter.dispatchURL";
+
     /**
      * The object used to create the portlet URLs.
      */
@@ -116,7 +122,7 @@ public class DispatchURLFactory
         // We remove the fragment identifier from the dispatch URL. It would have been nice if we could add the fragment
         // identifier to the created portlet URL but the portlet specification doesn't support it so we just ignore the
         // portlet identifier.
-        url.setParameter(DispatchPortlet.PARAMETER_DISPATCH_URL, StringUtils.substringBefore(dispatchURL, "#"));
+        url.setParameter(PARAMETER_DISPATCH_URL, StringUtils.substringBefore(dispatchURL, "#"));
         return url;
     }
 }

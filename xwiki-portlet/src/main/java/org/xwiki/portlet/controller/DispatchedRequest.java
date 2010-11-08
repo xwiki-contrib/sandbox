@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.portlet;
+package org.xwiki.portlet.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.xwiki.portlet.util.QueryStringParser;
 
 /**
  * Wraps a servlet request object dispatched from a portlet.

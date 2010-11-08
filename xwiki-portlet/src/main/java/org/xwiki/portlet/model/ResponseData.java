@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.portlet;
+package org.xwiki.portlet.model;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -34,6 +34,10 @@ import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
+
+import org.apache.commons.lang.StringUtils;
+import org.xwiki.portlet.util.ByteArrayServletOutputStream;
+import org.xwiki.portlet.util.StringServletPrintWriter;
 
 /**
  * Stores the response data.
@@ -172,6 +176,14 @@ public class ResponseData
     public String getContentType()
     {
         return contentType;
+    }
+
+    /**
+     * @return the mime type of this response data
+     */
+    public String getMimeType()
+    {
+        return StringUtils.substringBefore(getContentType(), ";");
     }
 
     /**
