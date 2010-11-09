@@ -1,0 +1,169 @@
+package org.xwiki.tools.reporter.internal;
+
+import java.io.FileNotFoundException;
+import java.util.Map;
+
+import org.xwiki.tools.reporter.TestCase;
+import org.xwiki.tools.reporter.TestCase.Status;
+
+public class DefaultTestCase implements TestCase
+{
+    private final Status status;
+
+    private final int failedSince;
+
+    private final int age;
+
+    private final float duration;
+
+    private final String className;
+
+    private final String name;
+
+    private final String url;
+
+    private final Reporter parent;
+
+    private final int buildNumber;
+
+    /** Thise are lazy loaded. */
+    private String errorDetails;
+
+    private String errorStackTrace;
+
+    private String stdout;
+
+    private String stderr;
+
+    public DefaultTestCase(final Map<String, String> map, final Reporter parent)
+    {
+        this.parent = parent;
+
+        Status stat = Status.UNKNOWN;
+        try {
+            stat = Status.valueOf(map.get("status"));
+        } catch (Exception e) {
+            // Do nothing since it's already UNKNOWN.
+        }
+        this.status = stat;
+
+        this.failedSince = Integer.parseInt(map.get("failedSince"));
+        this.age = Integer.parseInt(map.get("age"));
+        this.duration = Float.parseFloat(map.get("duration"));
+        this.className = map.get("className");
+        this.name = map.get("name");
+        this.url = map.get("url");
+        this.buildNumber = Integer.parseInt(map.get("buildNumber"));
+
+        // If this testCase is loaded directly from it's own page then these will be populated
+        // otherwise they won't until asked for.
+        this.errorDetails = map.get("errorDetails");
+        this.errorStackTrace = map.get("errorStackTrace");
+        this.stdout = map.get("stdout");
+        this.stderr = map.get("stderr");
+    }
+
+    public Status getStatus()
+    {
+        return this.status;
+    }
+
+    public int getFailedSince()
+    {
+        return this.failedSince;
+    }
+
+    public int getAge()
+    {
+        return this.age;
+    }
+
+    public float getDuration()
+    {
+        return this.duration;
+    }
+
+    public String getClassName()
+    {
+        return this.className;
+    }
+
+    public String getName()
+    {
+        return this.name;
+    }
+
+    public String getURL()
+    {
+        return this.url;
+    }
+
+    public int getBuildNumber()
+    {
+        return this.buildNumber;
+    }
+
+    public String getErrorDetails()
+    {
+        if (this.errorDetails == null) {
+            this.lazyLoad();
+        }
+        return this.errorDetails;
+    }
+
+    public String getErrorStackTrace()
+    {
+        if (this.errorStackTrace == null) {
+            this.lazyLoad();
+        }
+        return this.errorStackTrace;
+    }
+
+    public String getStdout()
+    {
+        if (this.stdout == null) {
+            this.lazyLoad();
+        }
+        return this.stdout;
+    }
+
+    public String getStderr()
+    {
+        if (this.stderr == null) {
+            this.lazyLoad();
+        }
+        return this.stderr;
+    }
+
+    /** @return the TestCase from when this test was last run or null if the record was deleted. */
+    public TestCase getLastRun()
+    {
+        // Very cheap way of changing the URL, change if you think of a better one.
+        final String lastURL = this.getURL().replaceFirst("/" + this.getBuildNumber() + "/",
+                                                          "/" + (this.getBuildNumber() - 1) + "/");
+        try {
+            return this.parent.testCaseFromURL(lastURL);
+        } catch (FileNotFoundException e) {
+            // Guessing it's a 404 because there aren't any more versions older than the one loaded.
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to older revision of the test case", e);
+        }
+    }
+
+    private void lazyLoad()
+    {
+        final DefaultTestCase fullCase;
+        try {
+            fullCase = this.parent.testCaseFromURL(this.getURL());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load rest of test case", e);
+        }
+        // Have to fill the fields in with something ("") because a passing test will not have these
+        // and a report may still call the methods on it and we don't want to load again.
+        this.errorDetails = (fullCase.errorDetails == null) ? "" : fullCase.errorDetails;
+        this.errorStackTrace = (fullCase.errorStackTrace == null) ? "" : fullCase.errorStackTrace;
+        this.stdout = (fullCase.stdout == null) ? "" : fullCase.stdout;
+        this.stderr = (fullCase.stderr == null) ? "" : fullCase.stderr;
+    }
+}
