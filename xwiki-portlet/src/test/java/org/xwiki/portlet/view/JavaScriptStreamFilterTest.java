@@ -50,6 +50,9 @@ public class JavaScriptStreamFilterTest extends AbstractStreamFilterTest
 
     /**
      * Tests that a variable declaration AST node is properly decompiled.
+     * 
+     * @see https://bugzilla.mozilla.org/show_bug.cgi?id=491621
+     * @see https://sourceforge.net/tracker/?func=detail&atid=448266&aid=3105264&group_id=47038
      */
     @Test
     public void testDecompileVariableDeclaration()
@@ -69,6 +72,16 @@ public class JavaScriptStreamFilterTest extends AbstractStreamFilterTest
     @Test
     public void testSpecialIdentifierName()
     {
+        // "float" has been removed from the list of reserved keywords.
         assertFilterOutput("style.float='left'", "style.float = 'left';\n");
+    }
+
+    /**
+     * Tests that the void operator is properly serialized into JavaScript source code.
+     */
+    @Test
+    public void testVoidOperator()
+    {
+        assertFilterOutput("x=void f()", "x = void f();\n");
     }
 }

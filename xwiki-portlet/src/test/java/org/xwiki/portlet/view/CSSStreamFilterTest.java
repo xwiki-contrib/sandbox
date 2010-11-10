@@ -142,4 +142,22 @@ public class CSSStreamFilterTest extends AbstractStreamFilterTest
         // Note: only HTML selectors that are followed by element, id or class selectors are correctly name-spaced.
         assertFilterOutput("html>body{color:yellow}", "*#x html > *#x-body { color: yellow }");
     }
+
+    /**
+     * Tests if filter CSS property is parsed when its value contains a colon.
+     * 
+     * @see http://sourceforge.net/tracker/?func=detail&atid=448266&aid=3106039&group_id=47038
+     */
+    @Test
+    public void testParseFilterProperty()
+    {
+        assertFilterOutput(".foo{filter:\"progid:DXImageTransform.Microsoft.gradient"
+            + "(startColorStr='#FFFFFF',EndColorStr='#FAFAFA')\";"
+            + "-ms-filter:\"progid:DXImageTransform.Microsoft.gradient"
+            + "(startColorStr='#FFFFFF',EndColorStr='#FAFAFA')\";}",
+            "*#x *.foo { filter: \"progid:DXImageTransform.Microsoft.gradient"
+                + "(startColorStr='#FFFFFF',EndColorStr='#FAFAFA')\"; "
+                + "-ms-filter: \"progid:DXImageTransform.Microsoft.gradient"
+                + "(startColorStr='#FFFFFF',EndColorStr='#FAFAFA')\" }");
+    }
 }
