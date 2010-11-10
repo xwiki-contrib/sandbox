@@ -27,7 +27,7 @@
   <parent>
     <groupId>org.xwiki.platform</groupId>
     <artifactId>xwiki-core-newmodel</artifactId>
-    <version>2.4-SNAPSHOT</version>
+    <version>2.7-SNAPSHOT</version>
   </parent>
   <artifactId>xwiki-core-newmodel-bridge</artifactId>
   <name>XWiki Platform - Core - Model - Implementation based on old Model</name>
@@ -37,18 +37,18 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-newmodel-api</artifactId>
-      <version>2.4-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.xpn.xwiki.platform</groupId>
       <artifactId>xwiki-core</artifactId>
-      <version>2.4-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <!-- Testing dependencies -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-shared-tests</artifactId>
-      <version>2.4-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>  

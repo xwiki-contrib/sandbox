@@ -35,12 +35,15 @@ public interface Entity extends Persistable
     /**
      * Represents a link to another Entity.
      *
-     * @return the targetted entity or null if the current Entity isn't a link but an actual object  
+     * @return the targeted entity or null if the current Entity isn't a link but an actual object
      */
     Entity getTarget();
 
     EntityReference getReference();
 
+    /**
+     * @todo Shouldn't this be typed and moved to each Entity class instead?
+     */
     Entity getParent();
 
     List<Entity> getChildren();

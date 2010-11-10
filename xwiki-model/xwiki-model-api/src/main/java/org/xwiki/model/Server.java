@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * An XWiki Server is made of one or several {@link org.xwiki.model.Wiki}s. This is the top most
- * object of the XWiki Model.
+ * concept of the XWiki Model.
  */
 public interface Server extends Persistable
 {
@@ -42,6 +42,7 @@ public interface Server extends Persistable
 
     boolean hasWiki(String wikiName);
 
+    // Direct access to any Entity of the Model.
     Entity getEntity(EntityReference reference) throws EntityNotFoundException;
     boolean hasEntity(EntityReference reference);
     void removeEntity(EntityReference reference) throws EntityNotFoundException;

@@ -51,6 +51,7 @@ public interface Document extends Entity
 
     void removeObject(String objectName);
 
+    // Q: Could attachments be an Object?
     List<Attachment> getAttachments();
 
     Attachment getAttachment(String attachmentName);
