@@ -2,9 +2,11 @@ package org.xwiki.tools.reporter.internal;
 
 import java.io.FileNotFoundException;
 import java.util.Map;
+import java.util.List;
 
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
+import org.xwiki.tools.reporter.Change;
 
 public class DefaultTestCase implements TestCase
 {
@@ -35,7 +37,7 @@ public class DefaultTestCase implements TestCase
 
     private String stderr;
 
-    public DefaultTestCase(final Map<String, String> map, final Reporter parent)
+    DefaultTestCase(final Map<String, String> map, final Reporter parent)
     {
         this.parent = parent;
 
@@ -136,6 +138,18 @@ public class DefaultTestCase implements TestCase
     /**
      * {@inheritDoc}
      *
+     * @see org.xwiki.tools.reporter.TestCase#getJobName()
+     */
+    public String getJobName()
+    {
+        final String url = this.getURL();
+        final String beginningWithJob = url.substring(url.indexOf("/job/") + 5);
+        return beginningWithJob.substring(0, beginningWithJob.indexOf('/'));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.xwiki.tools.reporter.TestCase#getBuildNumber()
      */
     public int getBuildNumber()
@@ -230,5 +244,10 @@ public class DefaultTestCase implements TestCase
         this.errorStackTrace = (fullCase.errorStackTrace == null) ? "" : fullCase.errorStackTrace;
         this.stdout = (fullCase.stdout == null) ? "" : fullCase.stdout;
         this.stderr = (fullCase.stderr == null) ? "" : fullCase.stderr;
+    }
+
+    public List<Change> getChanges()
+    {
+        return this.parent.getChangesForTestCase(this);
     }
 }

@@ -8,6 +8,7 @@ import java.util.Comparator;
 import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
+import org.xwiki.tools.reporter.Change;
 
 public class DetailedFailureReport extends Report
 {
@@ -100,6 +101,7 @@ public class DetailedFailureReport extends Report
             sb.append("\n\nFailures:\n");
             sb.append("These tests have failed multiple times in a row.\n");
             for (TestCase testCase : this.failures) {
+
                 sb.append("\nFailing for the past " + testCase.getAge() + " builds.");
                 sb.append("\nName: " + testCase.getName());
 

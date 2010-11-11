@@ -21,6 +21,7 @@ import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.Publisher;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
+import org.xwiki.tools.reporter.Change;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -64,6 +65,8 @@ public class Reporter
 
     private final List<Pattern> denyPatterns = new ArrayList<Pattern>();
 
+    private final HudsonChangesExtractor changeLoader;
+
     public static void main(String[] args) throws Exception
     {
         final Configuration config = Reporter.getConfiguration();
@@ -90,6 +93,8 @@ public class Reporter
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
         this.testReportXPath = xpath.compile("/mavenModuleSetBuild/action/urlName/text()='testReport'");
+
+        this.changeLoader = new HudsonChangesExtractor(this.builder, xpath);
 
         // Set up all of the reports.
         final List<String> reportNameList = (List<String>) config.getList(REPORT_LIST_CONFIG_PARAM);
@@ -208,7 +213,7 @@ public class Reporter
         }
     }
 
-    private static Node getChildNamed(final Node parent, final String name)
+    static Node getChildNamed(final Node parent, final String name)
     {
         final NodeList nl = parent.getChildNodes();
         Node node;
@@ -313,8 +318,8 @@ public class Reporter
         return new DefaultTestCase(nodeMap, this);
     }
 
-    public List<Revision> revisionsOfDependenciesFromTestCaseURL(final String testCaseURL) throws Exception
+    public List<Change> getChangesForTestCase(final TestCase testCase)
     {
-        
+        return this.changeLoader.getChangesForTestCase(testCase);
     }
 }
