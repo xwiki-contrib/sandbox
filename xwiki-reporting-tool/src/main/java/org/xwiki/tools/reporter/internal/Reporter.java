@@ -312,4 +312,9 @@ public class Reporter
 
         return new DefaultTestCase(nodeMap, this);
     }
+
+    public List<Revision> revisionsOfDependenciesFromTestCaseURL(final String testCaseURL) throws Exception
+    {
+        
+    }
 }

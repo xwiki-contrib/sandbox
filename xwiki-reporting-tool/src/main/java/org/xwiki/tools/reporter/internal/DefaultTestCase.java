@@ -63,46 +63,91 @@ public class DefaultTestCase implements TestCase
         this.stderr = map.get("stderr");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getStatus()
+     */
     public Status getStatus()
     {
         return this.status;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getFailedSince()
+     */
     public int getFailedSince()
     {
         return this.failedSince;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getAge()
+     */
     public int getAge()
     {
         return this.age;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getDuration()
+     */
     public float getDuration()
     {
         return this.duration;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getClassName()
+     */
     public String getClassName()
     {
         return this.className;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getName()
+     */
     public String getName()
     {
         return this.name;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getURL()
+     */
     public String getURL()
     {
         return this.url;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getBuildNumber()
+     */
     public int getBuildNumber()
     {
         return this.buildNumber;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getErrorDetails()
+     */
     public String getErrorDetails()
     {
         if (this.errorDetails == null) {
@@ -111,6 +156,11 @@ public class DefaultTestCase implements TestCase
         return this.errorDetails;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getErrorStackTrace()
+     */
     public String getErrorStackTrace()
     {
         if (this.errorStackTrace == null) {
@@ -119,6 +169,11 @@ public class DefaultTestCase implements TestCase
         return this.errorStackTrace;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getStdout()
+     */
     public String getStdout()
     {
         if (this.stdout == null) {
@@ -127,6 +182,11 @@ public class DefaultTestCase implements TestCase
         return this.stdout;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getStderr()
+     */
     public String getStderr()
     {
         if (this.stderr == null) {
@@ -135,7 +195,11 @@ public class DefaultTestCase implements TestCase
         return this.stderr;
     }
 
-    /** @return the TestCase from when this test was last run or null if the record was deleted. */
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.tools.reporter.TestCase#getLastRun()
+     */
     public TestCase getLastRun()
     {
         // Very cheap way of changing the URL, change if you think of a better one.
@@ -151,6 +215,7 @@ public class DefaultTestCase implements TestCase
         }
     }
 
+    /** Load all of the entities which are not included in the job test report. */
     private void lazyLoad()
     {
         final DefaultTestCase fullCase;
