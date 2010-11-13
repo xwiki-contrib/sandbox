@@ -9,6 +9,8 @@ import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
 import org.xwiki.tools.reporter.Change;
+import org.xwiki.tools.reporter.Publisher;
+
 
 public class DetailedFailureReport extends Report
 {
@@ -17,6 +19,11 @@ public class DetailedFailureReport extends Report
     final List<TestCase> regressions = new ArrayList<TestCase>();
 
     final List<TestCase[]> flickers = new ArrayList<TestCase[]>();
+
+    public DetailedFailureReport(final Publisher publisher)
+    {
+        super(publisher);
+    }
 
     @Override
     public void handleTest(final TestCase testCase)
@@ -38,29 +45,17 @@ public class DetailedFailureReport extends Report
         }        
     }
 
-    private static TestCase lastFailingRun(final TestCase currentRun)
-    {
-        if (currentRun == null) {
-            return null;
-        }
-        if (currentRun.getStatus() == Status.FAILED || currentRun.getStatus() == Status.REGRESSION) {
-            return currentRun;
-        }
-        return lastFailingRun(currentRun.getLastRun());
-    }
-
     @Override
-    public String toString()
+    public String[] getSubjectAndContent()
     {
+        final String[] out = new String[2];
+        out[0] = "Test Report: " + this.regressions.size() + " Regressions, "
+                                 + this.flickers.size() + " Flickers, and "
+                                 + this.failures.size() + " Test Failures.";
+
         this.sortLists();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Detailed Failure Report:\n");
-        sb.append(this.regressions.size() + " Regressions,\n");
-        sb.append(this.flickers.size() + " Tests are Probably Flickering,\n");
-        sb.append(this.failures.size() + " Failures\n");
-        sb.append("-------------------------------------------------------------------------------");
-
         if (this.regressions.size() > 0) {
             sb.append("\n\nRegressions:\n");
             sb.append("These tests have failed for the first time in stored history.\n");
@@ -116,8 +111,8 @@ public class DetailedFailureReport extends Report
             sb.append("-------------------------------------------------------------------------------");
         }
 
-        System.out.println(sb.toString());
-        return "";
+        out[1] = sb.toString();
+        return out;
     }
 
     private void sortLists()
@@ -129,6 +124,17 @@ public class DetailedFailureReport extends Report
     public Status[] skipStatuses()
     {
         return new Status[] {Status.PASSED, Status.FIXED};
+    }
+
+    private static TestCase lastFailingRun(final TestCase currentRun)
+    {
+        if (currentRun == null) {
+            return null;
+        }
+        if (currentRun.getStatus() == Status.FAILED || currentRun.getStatus() == Status.REGRESSION) {
+            return currentRun;
+        }
+        return lastFailingRun(currentRun.getLastRun());
     }
 
     private static class TestCaseComparitor implements Comparator<TestCase>

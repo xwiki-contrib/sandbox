@@ -11,10 +11,17 @@ import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
 import org.xwiki.tools.reporter.Change;
+import org.xwiki.tools.reporter.Publisher;
+
 
 public class RegressionAlertReport extends Report
 {
     final List<TestCase> regressions = new ArrayList<TestCase>();
+
+    public RegressionAlertReport(final Publisher publisher)
+    {
+        super(publisher);
+    }
 
     @Override
     public void handleTest(final TestCase regression)
@@ -38,17 +45,17 @@ public class RegressionAlertReport extends Report
     }
 
     @Override
-    public String toString()
+    public String[] getSubjectAndContent()
     {
         if (this.regressions.size() == 0) {
-            return "";
+            return null;
         }
+        final String[] out = new String[2];
+        out[0] = "REGRESSION ALERT: " + this.regressions.size() + " Regressions";
+
         final Map<String, List<TestCase>> regressionsByJobName = this.getRegressionsByJobName();
 
         final StringBuilder sb = new StringBuilder();
-        sb.append("REGRESSION ALERT:\n");
-        sb.append(this.regressions.size() + " Regressions,\n");
-        sb.append("-------------------------------------------------------------------------------");
 
         for (String jobName : regressionsByJobName.keySet()) {
             sb.append("\n\nRegressions in " + jobName + ":\n");
@@ -73,8 +80,8 @@ public class RegressionAlertReport extends Report
             }
         }
 
-        System.out.println(sb.toString());
-        return "";
+        out[1] = sb.toString();
+        return out;
     }
 
     private Map<String, List<TestCase>> getRegressionsByJobName()

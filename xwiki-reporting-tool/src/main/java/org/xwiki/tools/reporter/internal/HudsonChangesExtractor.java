@@ -25,8 +25,6 @@ import org.xwiki.tools.reporter.TestCase;
 
 import org.apache.commons.io.IOUtils;
 
-//import org.w3c.tidy.Tidy;
-
 public class HudsonChangesExtractor
 {
     private final XPath xpath;
@@ -184,13 +182,27 @@ public class HudsonChangesExtractor
             final NodeList changeList = (NodeList) changeItem.evaluate(doc, XPathConstants.NODESET);
             for (int i = 0; i < changeList.getLength(); i++) {
                 final Node item = changeList.item(i);
-                final String date = Reporter.getChildNamed(item, "date").getFirstChild().getNodeValue();
-                final String commitLog = Reporter.getChildNamed(item, "msg").getFirstChild().getNodeValue();
-                int revision = Integer.parseInt(Reporter.getChildNamed(item, "revision").getFirstChild().getNodeValue());
-                final String committer = committerNameByFullname.get(Reporter.getChildNamed(item, "user").getFirstChild().getNodeValue());
+                final String date = getChildNamed(item, "date").getFirstChild().getNodeValue();
+                final String commitLog = getChildNamed(item, "msg").getFirstChild().getNodeValue();
+                int revision = Integer.parseInt(getChildNamed(item, "revision").getFirstChild().getNodeValue());
+                final String committer = 
+                    committerNameByFullname.get(getChildNamed(item, "user").getFirstChild().getNodeValue());
                 out.add(new DefaultChange(date, commitLog, revision, committer));
             }
         }
         return out;
+    }
+
+    private static Node getChildNamed(final Node parent, final String name)
+    {
+        final NodeList nl = parent.getChildNodes();
+        Node node;
+        for (int i = 0; i < nl.getLength(); i++) {
+            node = nl.item(i);
+            if (name.equals(node.getNodeName())) {
+                return node;
+            }
+        }
+        return null;
     }
 }

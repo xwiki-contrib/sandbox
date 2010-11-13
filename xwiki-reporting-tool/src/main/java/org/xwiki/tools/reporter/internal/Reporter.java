@@ -1,61 +1,32 @@
 package org.xwiki.tools.reporter.internal;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathConstants;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import groovy.lang.GroovyShell;
+import org.apache.commons.io.IOUtils;
 import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.Publisher;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
 import org.xwiki.tools.reporter.Change;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
-
 
 public class Reporter
 {
-    private static final String DEFAULT_CONFIG_FILE = "reporter.properties";
+    private static final String DEFAULT_CONFIG_FILE = "reporterConfig.groovy";
 
-    private static final String CONFIG_FILE_PROPERTY = "reporterConfigFile";
+    private static final String CONFIG_FILE_PROPERTY = "reporterConfigScript";
 
     private static final String PARAM_HUDSON_URL = "reporter.hudsonURL";
 
-    private static final String PARAM_HUDSON_URL_DEFAULT = "http://hudson.xwiki.org/";
+    private final String hudsonURL;
 
-    private static final String APPEND_TO_URL = "api/xml";
-
-    private static final String TEST_REPORT = "testReport/";
-
-    private static final String LAST_BUILD = "lastBuild/";
-
-    private static final String REPORT_LIST_CONFIG_PARAM = "reporter.runReport";
-
-    private static final String PUBLISHER_LIST_CONFIG_PARAM = "reporter.usePublisher";
-
-    private static final String ALLOW_ONLY_JOB_REGEX = "reporter.onlyReportOnJobsMatchingRegex";
-
-    private static final String DENY_JOB_REGEX = "reporter.doNotReportOnJobsMatchingRegex";
-
-    private final Configuration config;
-
-    private final DocumentBuilder builder;
-
-    private final XPathExpression testReportXPath;
+    private int buildNumber = -1;
 
     private final List<Report> reports = new ArrayList<Report>();
 
@@ -65,74 +36,77 @@ public class Reporter
 
     private final List<Pattern> denyPatterns = new ArrayList<Pattern>();
 
-    private final HudsonChangesExtractor changeLoader;
+    private final HudsonTestCaseExtractor testCaseExtractor;
 
     public static void main(String[] args) throws Exception
     {
-        final Configuration config = Reporter.getConfiguration();
-        final Reporter reporter = new Reporter(config);
-        reporter.addHudson(PARAM_HUDSON_URL_DEFAULT);
-        reporter.publish();
+        final String configScriptName = (System.getProperty(CONFIG_FILE_PROPERTY) == null) ?
+                                            DEFAULT_CONFIG_FILE : System.getProperty(CONFIG_FILE_PROPERTY);
+
+        final URL configScriptURL =
+            Thread.currentThread().getContextClassLoader().getResource(configScriptName);
+
+        if (configScriptURL == null) {
+            throw new RuntimeException("Could not find configuration file" + configScriptName);
+        }
+
+        final String script = IOUtils.toString(configScriptURL.openStream());
+        new GroovyShell().evaluate(script);
     }
 
-    private static Configuration getConfiguration() throws Exception
+    public Reporter(final String hudsonURL) throws Exception
     {
-        String fileName = System.getProperty(CONFIG_FILE_PROPERTY);
-        if (fileName == null) {
-            fileName = DEFAULT_CONFIG_FILE;
-        }
-        return new PropertiesConfiguration(fileName);
+        this.hudsonURL = hudsonURL;
+        this.testCaseExtractor = new HudsonTestCaseExtractor();
     }
 
-    public Reporter(Configuration config) throws Exception
+    public void runReport(final Report report)
     {
-        this.config = config;
-        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        this.builder = dbf.newDocumentBuilder();
-        XPathFactory xpathFactory = XPathFactory.newInstance();
-        XPath xpath = xpathFactory.newXPath();
-        this.testReportXPath = xpath.compile("/mavenModuleSetBuild/action/urlName/text()='testReport'");
+        this.reports.add(report);
+    }
 
-        this.changeLoader = new HudsonChangesExtractor(this.builder, xpath);
+    public void usePublisher(final Publisher publisher)
+    {
+        this.publishers.add(publisher);
+    }
 
-        // Set up all of the reports.
-        final List<String> reportNameList = (List<String>) config.getList(REPORT_LIST_CONFIG_PARAM);
-        for (String reportName : reportNameList) {
-            try {
-                this.reports.add((Report) Class.forName(reportName).newInstance());
-            } catch (Throwable t) {
-                System.err.println("Failed to instantiate Report: " + reportName);
+    public void runJobsMatching(final String regex)
+    {
+        try {
+            final Pattern p = Pattern.compile(regex);
+            this.allowPatterns.add(p);
+        } catch (Exception e) {
+            System.err.println("Failed to compile regex " + e.getMessage());
+        }
+    }
+
+    public void doNotRunJobsMatching(final String regex)
+    {
+        try {
+            final Pattern p = Pattern.compile(regex);
+            this.denyPatterns.add(p);
+        } catch (Exception e) {
+            System.err.println("Failed to compile regex " + e.getMessage());
+        }
+    }
+
+    public void reportOnBuildNumber(final int buildNumber)
+    {
+        this.buildNumber = buildNumber;
+    }
+
+    public void run() throws Exception
+    {
+        for (String jobURL : this.testCaseExtractor.getAllHudsonJobURLs(this.hudsonURL)) {
+            if (patternValidate(jobURL, this.allowPatterns, this.denyPatterns)) {
+                System.out.println("Running reports on: " + jobURL);
+                for (TestCase testCase : this.testCaseExtractor.getTestCasesForJob(jobURL, this.buildNumber)) {
+                    runReports(testCase, this.reports);
+                }
             }
         }
-
-        // And the publishers.
-        final List<String> publisherNameList = (List<String>) config.getList(PUBLISHER_LIST_CONFIG_PARAM);
-        for (String publisherName : publisherNameList) {
-            try {
-                this.publishers.add((Publisher) Class.forName(publisherName).newInstance());
-            } catch (Throwable t) {
-                System.err.println("Failed to instantiate Publisher: " + publisherName);
-            }
-        }
-
-        // set up the list of regular expressions for job allowing
-        final List<String> allowRegexes = (List<String>) config.getList(ALLOW_ONLY_JOB_REGEX);
-        for (String regex : allowRegexes) {
-            try {
-                this.allowPatterns.add(Pattern.compile(regex));
-            } catch (Throwable t) {
-                System.err.println("Failed to compile regular expression: " + regex);
-            }
-        }
-        // And denial
-        final List<String> denyRegexes = (List<String>) config.getList(DENY_JOB_REGEX);
-        for (String regex : denyRegexes) {
-            try {
-                this.denyPatterns.add(Pattern.compile(regex));
-            } catch (Throwable t) {
-                System.err.println("Failed to compile regular expression: " + regex);
-            }
+        for (Report report : this.reports) {
+            report.publish();
         }
     }
 
@@ -143,140 +117,34 @@ public class Reporter
         }
     }
 
-    public void addHudson(final String hudsonURL) throws Exception
-    {
-        final Document doc = this.builder.parse(hudsonURL + APPEND_TO_URL);
-        doc.getDocumentElement().normalize();
-        NodeList list = doc.getElementsByTagName("job");
-        for (int i = 0; i < list.getLength(); i++) {
-            this.addJob(list.item(i));
-        }
-    }
+    /* ---------------- There is no state below this line. All others are stateless functions. ---------------- */
 
-    private boolean patternValidate(final String jobURL)
+    private static boolean patternValidate(final String jobURL,
+                                           final List<Pattern> allowPatterns,
+                                           final List<Pattern> denyPatterns)
     {
-        for (Pattern p : this.denyPatterns) {
+        for (Pattern p : denyPatterns) {
             if (p.matcher(jobURL).matches()) {
-                System.out.println("Skipping (matched deny regex): " + jobURL);
+                //System.out.println("Skipping (matched deny regex): " + jobURL);
                 return false;
             }
         }
-        if (this.allowPatterns.size() > 0) {
-            for (Pattern p : this.allowPatterns) {
+        if (allowPatterns.size() > 0) {
+            for (Pattern p : allowPatterns) {
                 if (p.matcher(jobURL).matches()) {
                     return true;
                 }
             }
-            System.out.println("Skipping (didn't match any allow regex): " + jobURL);
+            //System.out.println("Skipping (didn't match any allow regex): " + jobURL);
             return false;
         }
         return true;
     }
 
-    public void addJob(final Node job) throws Exception
-    {
-        final String jobURL = getChildNamed(job, "url").getFirstChild().getNodeValue();
-
-        if (!this.patternValidate(jobURL)) {
-            return;
-        }
-
-        System.out.println("Parsing: " + jobURL);
-
-        final Document doc = this.builder.parse(jobURL + LAST_BUILD + APPEND_TO_URL);
-        doc.getDocumentElement().normalize();
-
-        if (Boolean.TRUE.equals(this.testReportXPath.evaluate(doc, XPathConstants.BOOLEAN))) {
-            this.addTestReport(jobURL + LAST_BUILD + TEST_REPORT + APPEND_TO_URL);
-        }
-    }
-
-    private void addTestReport(final String contentURL) throws Exception
-    {
-        Document doc = this.builder.parse(contentURL);
-        doc.getDocumentElement().normalize();
-        Node root = doc;
-        while (!"surefireAggregatedReport".equals(root.getNodeName())) {
-            root = root.getFirstChild();
-            if (root == null) {
-                System.out.println("Skipping for lack of tests: " + contentURL);
-                return;
-            } 
-        }
-        final NodeList nl = root.getChildNodes();
-        Node node;
-        for (int i = 0; i < nl.getLength(); i++) {
-            node = nl.item(i);
-            if ("childReport".equals(node.getNodeName())) {
-                this.addChildReport(node);
-            }
-        }
-    }
-
-    static Node getChildNamed(final Node parent, final String name)
-    {
-        final NodeList nl = parent.getChildNodes();
-        Node node;
-        for (int i = 0; i < nl.getLength(); i++) {
-            node = nl.item(i);
-            if (name.equals(node.getNodeName())) {
-                return node;
-            }
-        }
-        return null;
-    }
-
-    private void addChildReport(final Node childReport)
-    {
-        // Get the child and store the url and test number.
-        final Node child = childReport.getFirstChild();
-        int number = Integer.parseInt(child.getFirstChild().getFirstChild().getNodeValue());
-        final String url = child.getLastChild().getFirstChild().getNodeValue();
-
-        // Get the suite and index through the cases.
-        final Node suite = childReport.getLastChild().getLastChild();
-        final NodeList nl = suite.getChildNodes();
-        Node node;
-        for (int i = 0; i < nl.getLength(); i++) {
-            node = nl.item(i);
-            if ("case".equals(node.getNodeName())) {
-                this.addTestCase(node, number, url);
-            }
-        }
-    }
-
-    private void addTestCase(final Node node, final int buildNumber, final String url)
-    {
-        final NodeList nl = node.getChildNodes();
-        final Map<String, String> nodeMap = new HashMap<String, String>();
-        Node child;
-        for (int i = 0; i < nl.getLength(); i++) {
-            child = nl.item(i);
-            nodeMap.put(child.getNodeName(), child.getFirstChild().getNodeValue());
-        }
-        this.addTestCase(nodeMap, buildNumber, url);
-    }
-
-    private void addTestCase(final Map<String, String> nodeMap, final int buildNumber, final String url)
-    {
-        final String fullClassName = nodeMap.get("className");
-        final String classPackage = fullClassName.substring(0, fullClassName.lastIndexOf("."));
-        final String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1);
-
-        // This seems to be how hudson cleans the names to make them URL friendly.
-        final String cleanedName = nodeMap.get("name").replaceAll("[^a-zA-Z0-9]", "_");
-
-        final String thisTestUrl = url + TEST_REPORT + classPackage + "/" + className + "/" + cleanedName + "/";
-
-        nodeMap.put("url", thisTestUrl);
-        nodeMap.put("buildNumber", Integer.valueOf(buildNumber).toString());
-        this.runReports(new DefaultTestCase(nodeMap, this));
-    }
-
-    private void runReports(final TestCase testCase)
+    private static void runReports(final TestCase testCase, final List<Report> reports)
     {
         reportLoop:
-        for (Report report : this.reports) {
+        for (Report report : reports) {
             final Status[] toSkip = report.skipStatuses();
             for (int i = 0; i < toSkip.length; i++) {
                 if (testCase.getStatus() == toSkip[i]) {
@@ -294,32 +162,5 @@ public class Reporter
                 }
             }
         }
-    }
-
-    public DefaultTestCase testCaseFromURL(final String testCaseURL) throws Exception
-    {
-        final Document doc = this.builder.parse(testCaseURL + APPEND_TO_URL);
-        doc.getDocumentElement().normalize();
-        final NodeList nl = doc.getFirstChild().getChildNodes();
-
-        final Map<String, String> nodeMap = new HashMap<String, String>();
-        nodeMap.put("url", testCaseURL);
-
-        // Horrible way of getting the build number because it's not provided.
-        final String urlUpToBuildNumber = testCaseURL.substring(0, testCaseURL.indexOf("/" + TEST_REPORT));
-        final String buildNumber = urlUpToBuildNumber.substring(urlUpToBuildNumber.lastIndexOf("/") + 1);
-        nodeMap.put("buildNumber", buildNumber);
-
-        for (int i = 0; i < nl.getLength(); i++) {
-            Node child = nl.item(i);
-            nodeMap.put(child.getNodeName(), child.getFirstChild().getNodeValue());
-        }
-
-        return new DefaultTestCase(nodeMap, this);
-    }
-
-    public List<Change> getChangesForTestCase(final TestCase testCase)
-    {
-        return this.changeLoader.getChangesForTestCase(testCase);
     }
 }

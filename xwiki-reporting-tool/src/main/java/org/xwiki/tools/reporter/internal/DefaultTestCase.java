@@ -24,7 +24,7 @@ public class DefaultTestCase implements TestCase
 
     private final String url;
 
-    private final Reporter parent;
+    private final HudsonTestCaseExtractor parent;
 
     private final int buildNumber;
 
@@ -37,7 +37,7 @@ public class DefaultTestCase implements TestCase
 
     private String stderr;
 
-    DefaultTestCase(final Map<String, String> map, final Reporter parent)
+    DefaultTestCase(final Map<String, String> map, final HudsonTestCaseExtractor parent)
     {
         this.parent = parent;
 
@@ -225,7 +225,7 @@ public class DefaultTestCase implements TestCase
             // Guessing it's a 404 because there aren't any more versions older than the one loaded.
             return null;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to older revision of the test case", e);
+            throw new RuntimeException("Failed to get older revision of the test case at URL " + lastURL, e);
         }
     }
 

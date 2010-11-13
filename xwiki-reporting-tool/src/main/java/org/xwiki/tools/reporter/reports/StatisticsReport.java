@@ -8,6 +8,8 @@ import java.util.Comparator;
 import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
+import org.xwiki.tools.reporter.Publisher;
+
 
 public class StatisticsReport extends Report
 {
@@ -26,6 +28,11 @@ public class StatisticsReport extends Report
     private int totalWebstandards;
 
     private int totalWebstandardsTime;
+
+    public StatisticsReport(final Publisher publisher)
+    {
+        super(publisher);
+    }
 
     @Override
     public void handleTest(final TestCase testCase)
@@ -59,10 +66,14 @@ public class StatisticsReport extends Report
     }
 
     @Override
-    public String toString()
+    public String[] getSubjectAndContent()
     {
+        final String[] out = new String[2];
+
+        out[0] = "Statistics Report";
+
         StringBuilder sb = new StringBuilder();
-        sb.append("\n\nStatistics Report:\n");
+
         if (this.fixes > 0) {
             sb.append(this.fixes + " tests stopped failing, yay :)\n");
         }
@@ -79,9 +90,8 @@ public class StatisticsReport extends Report
             sb.append("and the average speed of a webstandards test (a good indication of page load speed) was ");
             sb.append((webstandardsAverage * 1000) + " milliseconds.\n");
         }
-        sb.append("-------------------------------------------------------------------------------");
 
-        System.out.println(sb.toString());
-        return "";
+        out[1] = sb.toString();
+        return out;
     }
 }
