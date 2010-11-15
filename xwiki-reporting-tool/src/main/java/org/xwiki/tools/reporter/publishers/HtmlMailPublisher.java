@@ -21,7 +21,7 @@ public class HtmlMailPublisher implements Publisher
 
     public HtmlMailPublisher()
     {
-        this.mailPlugin = new MailSenderPlugin(null, null, null);
+        this.mailPlugin = new MailSenderPlugin("", "", null);
     }
 
     public void addRecipient(final String to)
@@ -43,22 +43,32 @@ public class HtmlMailPublisher implements Publisher
     public void setMailConfig(Map<String, String> configMap)
     {
         if (configMap.get("from") == null) {
-            this.mailConfig.setFrom("i.did.not.edit.the.config@localhost");
+            this.mailConfig.setFrom("i.did.not.edit.the.config@localhost.localdomain");
         } else {
             this.mailConfig.setFrom(configMap.get("from"));
         }
-        this.mailConfig.setPort(Integer.parseInt(configMap.get("port")));
-        this.mailConfig.setHost(configMap.get("host"));
-        this.mailConfig.setSmtpUsername(configMap.get("smtpUsername"));
-        this.mailConfig.setSmtpPassword(configMap.get("smtpPassword"));
-        this.mailConfig.setExtraProperties(configMap.get("javamailExtraProperties"));
+        if (configMap.get("port") != null) {
+            this.mailConfig.setPort(Integer.parseInt(configMap.get("port")));
+        }
+        if (configMap.get("host") != null) {
+            this.mailConfig.setHost(configMap.get("host"));
+        }
+        if (configMap.get("smtpUsername") != null) {
+            this.mailConfig.setSmtpUsername(configMap.get("smtpUsername"));
+        }
+        if (configMap.get("smtpPassword") != null) {
+            this.mailConfig.setSmtpPassword(configMap.get("smtpPassword"));
+        }
+        if (configMap.get("javamailExtraProperties") != null) {
+            this.mailConfig.setExtraProperties(configMap.get("javamailExtraProperties"));
+        }
     }
 
     public void publish(final String subject, final String content)
     {
         final List<Mail> messages = new ArrayList<Mail>();
         for (String recipient : recipients) {
-            messages.add(new Mail(null, recipient, "", "", subject, "", content));
+            messages.add(new Mail(this.mailConfig.getFrom(), recipient, null, null, subject, "", content));
         }
         try {
             this.mailPlugin.sendMails(messages, this.mailConfig, null);

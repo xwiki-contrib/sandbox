@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.xwiki.tools.reporter.Format;
 import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
@@ -18,9 +19,12 @@ public class RegressionAlertReport extends Report
 {
     final List<TestCase> regressions = new ArrayList<TestCase>();
 
-    public RegressionAlertReport(final Publisher publisher)
+    final Format formatTool;
+
+    public RegressionAlertReport(final Publisher publisher, final Format format)
     {
         super(publisher);
+        this.formatTool = format;
     }
 
     @Override
@@ -51,32 +55,46 @@ public class RegressionAlertReport extends Report
             return null;
         }
         final String[] out = new String[2];
-        out[0] = "REGRESSION ALERT: " + this.regressions.size() + " Regressions";
+        out[0] = "Regression Alert: " + this.regressions.size() + " Regressions";
 
         final Map<String, List<TestCase>> regressionsByJobName = this.getRegressionsByJobName();
 
         final StringBuilder sb = new StringBuilder();
 
+        sb.append(this.formatTool.formatHeader("Regression Alert: " + this.regressions.size() + " Regressions"));
+
         for (String jobName : regressionsByJobName.keySet()) {
-            sb.append("\n\nRegressions in " + jobName + ":\n");
+            sb.append(this.formatTool.newLine());
+            sb.append(this.formatTool.newLine());
+            sb.append(this.formatTool.formatSubheader("Regressions in " + this.formatTool.escape(jobName)));
+            sb.append(this.formatTool.newLine());
             for (TestCase regression : regressionsByJobName.get(jobName)) {
-                sb.append("\nName: " + regression.getName());
+                sb.append(this.formatTool.newLine());
+                sb.append(this.formatTool.link(regression.getName(), regression.getURL()));
 
                 String errorDetails = regression.getErrorDetails();
                 if (errorDetails.length() > 500) {
                     errorDetails = errorDetails.substring(0, 500);
                 }
-                sb.append("\nDetails: " + errorDetails);
-
-                sb.append("\nLink: " + regression.getURL() + "\n");
+                sb.append("Details: ").append(this.formatTool.formatMessage(errorDetails));
             }
-            sb.append("-----------------------------------");
-            sb.append("\nChanges which might have caused this:");
-            for (Change ch : regressionsByJobName.get(jobName).get(0).getChanges()) {
-                sb.append("\nRevision: " + ch.getRevision());
-                sb.append("\nCommit Log: " + ch.getCommitLog());
-                sb.append("\nCommitter: " + ch.getCommitter());
-                sb.append("\n------------------");
+            sb.append(this.formatTool.horizontalRuler());
+            sb.append(this.formatTool.newLine());
+            sb.append("Changes which might have caused this:");
+            final List<Change> changes = regressionsByJobName.get(jobName).get(0).getChanges();
+            if (changes.size() == 0) {
+                sb.append(this.formatTool.newLine());
+                sb.append("No changes since last build.");
+            }
+            for (Change ch : changes) {
+                sb.append(this.formatTool.newLine());
+                sb.append("Revision: ").append(ch.getRevision());
+                sb.append(this.formatTool.newLine());
+                sb.append("Commit Log: ").append(ch.getCommitLog());
+                sb.append(this.formatTool.newLine());
+                sb.append("Committer: ").append(ch.getCommitter());
+                sb.append(this.formatTool.newLine());
+                sb.append(this.formatTool.horizontalRuler());
             }
         }
 

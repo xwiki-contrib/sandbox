@@ -1,19 +1,21 @@
 package org.xwiki.tools.reporter.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.URL;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import groovy.lang.GroovyShell;
 import org.apache.commons.io.IOUtils;
-import org.xwiki.tools.reporter.Report;
+import org.xwiki.tools.reporter.Change;
 import org.xwiki.tools.reporter.Publisher;
+import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
-import org.xwiki.tools.reporter.Change;
 
 
 public class Reporter
@@ -21,8 +23,6 @@ public class Reporter
     private static final String DEFAULT_CONFIG_FILE = "reporterConfig.groovy";
 
     private static final String CONFIG_FILE_PROPERTY = "reporterConfigScript";
-
-    private static final String PARAM_HUDSON_URL = "reporter.hudsonURL";
 
     private final String hudsonURL;
 
@@ -40,17 +40,32 @@ public class Reporter
 
     public static void main(String[] args) throws Exception
     {
-        final String configScriptName = (System.getProperty(CONFIG_FILE_PROPERTY) == null) ?
-                                            DEFAULT_CONFIG_FILE : System.getProperty(CONFIG_FILE_PROPERTY);
+        String script = null;
 
-        final URL configScriptURL =
-            Thread.currentThread().getContextClassLoader().getResource(configScriptName);
-
-        if (configScriptURL == null) {
-            throw new RuntimeException("Could not find configuration file" + configScriptName);
+        if (System.getProperty(CONFIG_FILE_PROPERTY) != null) {
+            final File scriptFile = new File(System.getProperty(CONFIG_FILE_PROPERTY));
+            if (!scriptFile.exists()) {
+                System.err.println("Could not find custom configuration file ["
+                                   + System.getProperty(CONFIG_FILE_PROPERTY)
+                                   + "] Using default instead");
+            } else {
+                script = IOUtils.toString(new FileInputStream(scriptFile));
+                System.out.println("Using custom configuration script: "
+                                   + System.getProperty(CONFIG_FILE_PROPERTY));
+            }
         }
 
-        final String script = IOUtils.toString(configScriptURL.openStream());
+        if (script == null) {
+            final URL configScriptURL =
+                Thread.currentThread().getContextClassLoader().getResource(DEFAULT_CONFIG_FILE);
+
+            if (configScriptURL == null) {
+                throw new RuntimeException("Could not find default configuration file" + DEFAULT_CONFIG_FILE);
+            }
+
+            script = IOUtils.toString(configScriptURL.openStream());
+        }
+
         new GroovyShell().evaluate(script);
     }
 
@@ -107,13 +122,6 @@ public class Reporter
         }
         for (Report report : this.reports) {
             report.publish();
-        }
-    }
-
-    public void publish()
-    {
-        for (Report report : this.reports) {
-            report.toString();
         }
     }
 

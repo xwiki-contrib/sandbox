@@ -19,7 +19,7 @@ public class DeferredPublisher implements Publisher
 
     public void publish(final String subject, final String content)
     {
-        System.out.println(content);
+        this.subjectsAndContents.add(new String[] {subject, content});
     }
 
     public void run()

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.xwiki.tools.reporter.Format;
 import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.TestCase;
 import org.xwiki.tools.reporter.TestCase.Status;
@@ -20,9 +21,12 @@ public class DetailedFailureReport extends Report
 
     final List<TestCase[]> flickers = new ArrayList<TestCase[]>();
 
-    public DetailedFailureReport(final Publisher publisher)
+    final Format formatTool;
+
+    public DetailedFailureReport(final Publisher publisher, final Format format)
     {
         super(publisher);
+        this.formatTool = format;
     }
 
     @Override
@@ -48,6 +52,10 @@ public class DetailedFailureReport extends Report
     @Override
     public String[] getSubjectAndContent()
     {
+        if (this.regressions.size() + this.flickers.size() + this.failures.size() == 0) {
+            return null;
+        }
+
         final String[] out = new String[2];
         out[0] = "Test Report: " + this.regressions.size() + " Regressions, "
                                  + this.flickers.size() + " Flickers, and "
@@ -55,60 +63,84 @@ public class DetailedFailureReport extends Report
 
         this.sortLists();
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(this.formatTool.formatHeader("Detailed Failure Report"));
+        sb.append(this.formatTool.newLine());
+        sb.append("Summary:");
+        sb.append(this.formatTool.newLine());
+        sb.append(this.regressions.size()).append(" Regressions");
+        sb.append(this.formatTool.newLine());
+        sb.append(this.flickers.size()).append(" Flickers");
+        sb.append(this.formatTool.newLine());
+        sb.append(this.failures.size()).append(" Failures");
+        sb.append(this.formatTool.newLine());
+
         if (this.regressions.size() > 0) {
-            sb.append("\n\nRegressions:\n");
-            sb.append("These tests have failed for the first time in stored history.\n");
+            sb.append(this.formatTool.newLine());
+            sb.append(this.formatTool.newLine());
+            sb.append(this.formatTool.formatSubheader("Regressions:"));
+            sb.append(this.formatTool.newLine());
+            sb.append("These tests have failed for the first time in stored history.");
+            sb.append(this.formatTool.newLine());
             for (TestCase testCase : this.regressions) {
-                sb.append("\nName: " + testCase.getName());
+                sb.append(this.formatTool.newLine());
+                sb.append(this.formatTool.link(testCase.getName(), testCase.getURL()));
 
                 String errorDetails = testCase.getErrorDetails();
                 if (errorDetails.length() > 500) {
                     errorDetails = errorDetails.substring(0, 500);
                 }
-                sb.append("\nDetails: " + errorDetails);
-
-                sb.append("\nLink: " + testCase.getURL() + "\n");
+                sb.append("Details: " + this.formatTool.formatMessage(errorDetails));
             }
-            sb.append("-------------------------------------------------------------------------------");
+            sb.append(this.formatTool.horizontalRuler());
         }
 
         if (this.flickers.size() > 0) {
-            sb.append("\n\nProbable Flickers:\n");
-            sb.append("These are regressions which have failed before and might be faulty tests.\n");
+            sb.append(this.formatTool.newLine());
+            sb.append(this.formatTool.newLine());
+            sb.append(this.formatTool.formatSubheader("Probable Flickers:"));
+            sb.append(this.formatTool.newLine());
+            sb.append("These are regressions which have failed before and might be faulty tests.");
+            sb.append(this.formatTool.newLine());
             for (TestCase[] testCases : this.flickers) {
                 TestCase testCase = testCases[0];
-                sb.append("\nName: " + testCase.getName());
+                sb.append(this.formatTool.newLine());
+                sb.append(this.formatTool.link(testCase.getName(), testCase.getURL()));
 
                 String errorDetails = testCase.getErrorDetails();
                 if (errorDetails.length() > 500) {
                     errorDetails = errorDetails.substring(0, 500);
                 }
-                sb.append("\nDetails: " + errorDetails);
+                sb.append("Details: " + this.formatTool.formatMessage(errorDetails));
 
-                sb.append("\nLink: " + testCase.getURL());
-                sb.append("\nLink to prior failure: " + testCases[1].getURL() + "\n");
+                sb.append(this.formatTool.link("Link to prior failure", testCases[1].getURL()));
+                sb.append(this.formatTool.newLine());
             }
-            sb.append("-------------------------------------------------------------------------------");
+            sb.append(this.formatTool.horizontalRuler());
         }
 
         if (this.failures.size() > 0) {
-            sb.append("\n\nFailures:\n");
-            sb.append("These tests have failed multiple times in a row.\n");
+            sb.append(this.formatTool.newLine());
+            sb.append(this.formatTool.newLine());
+            sb.append(this.formatTool.formatSubheader("Failures:"));
+            sb.append(this.formatTool.newLine());
+            sb.append("These tests have failed multiple times in a row.");
+            sb.append(this.formatTool.newLine());
             for (TestCase testCase : this.failures) {
 
-                sb.append("\nFailing for the past " + testCase.getAge() + " builds.");
-                sb.append("\nName: " + testCase.getName());
+                sb.append(this.formatTool.newLine());
+                sb.append("Failing for the past " + testCase.getAge() + " builds.");
+                sb.append(this.formatTool.newLine());
+                sb.append(this.formatTool.link(testCase.getName(), testCase.getURL()));
 
                 String errorDetails = testCase.getErrorDetails();
                 if (errorDetails.length() > 500) {
                     errorDetails = errorDetails.substring(0, 500);
                 }
-                sb.append("\nDetails: " + errorDetails);
-
-                sb.append("\nLink: " + testCase.getURL() + "\n");
+                sb.append("Details: ").append(this.formatTool.formatMessage(errorDetails));
             }
-            sb.append("-------------------------------------------------------------------------------");
+            sb.append(this.formatTool.horizontalRuler());
         }
 
         out[1] = sb.toString();
