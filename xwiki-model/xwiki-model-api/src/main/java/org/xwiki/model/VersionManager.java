@@ -23,5 +23,6 @@ import org.xwiki.model.reference.EntityReference;
 
 public interface VersionManager
 {
+    // TODO: Problem if we want to get a doc in a specific version + language (for ex)
     Entity getEntity(EntityReference reference, Version version);
 }

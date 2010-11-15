@@ -43,7 +43,8 @@ public interface Server extends Persistable
     boolean hasWiki(String wikiName);
 
     // Direct access to any Entity of the Model.
-    Entity getEntity(EntityReference reference) throws EntityNotFoundException;
+
+    <T extends Entity> T getEntity(EntityReference reference) throws EntityNotFoundException;
     boolean hasEntity(EntityReference reference);
     void removeEntity(EntityReference reference) throws EntityNotFoundException;
 }

@@ -33,7 +33,7 @@ public interface Entity extends Persistable
     EntityType getType();
 
     /**
-     * Represents a link to another Entity.
+     * Represents a link to another Entity (Example use cases: renames, aliases)
      *
      * @return the targeted entity or null if the current Entity isn't a link but an actual object
      */
@@ -41,15 +41,11 @@ public interface Entity extends Persistable
 
     EntityReference getReference();
 
-    /**
-     * @todo Shouldn't this be typed and moved to each Entity class instead?
-     */
-    Entity getParent();
+    <T> Entity getParent();
 
-    List<Entity> getChildren();
+    List<Entity> getChildren(EntityType type);
 
     /**
-     * @return the space's description
      * @todo Should not be implemented with the old model
      */
     String getDescription();
@@ -58,4 +54,27 @@ public interface Entity extends Persistable
     // - last modification author
     // - last modified date
     // - pretty name
+
+    /**
+     * @return the list of object definitions defined inside this document
+     */
+    List<ObjectDefinition> getObjectDefinitions();
+
+    ObjectDefinition getObjectDefinition(String objectDefinitionName);
+
+    ObjectDefinition addObjectDefinition(String objectDefinitionName);
+
+    void removeObjectDefinition(String objectDefinitionName);
+
+    boolean hasObjectDefinition(String objectDefinitionName);
+
+    List<Object> getObjects();
+
+    Object getObject(String objectName);
+
+    Object addObject(String objectName);
+
+    void removeObject(String objectName);
+
+    boolean hasObject(String objectName);
 }

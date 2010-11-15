@@ -46,12 +46,26 @@
     </dependency>
     <!-- Testing dependencies -->
     <dependency>
+      <groupId>com.xpn.xwiki.platform</groupId>
+      <artifactId>xwiki-core</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-shared-tests</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-  </dependencies>  
+    <!-- Used to mock XWiki class -->
+    <dependency>
+      <groupId>org.jmock</groupId>
+      <artifactId>jmock-legacy</artifactId>
+      <version>2.5.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
   <properties>
     <!-- Skip Clirr execution since this is the first release of this module. Remove once it's been relased once. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>

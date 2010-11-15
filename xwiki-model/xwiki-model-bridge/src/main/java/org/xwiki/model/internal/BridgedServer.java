@@ -19,25 +19,27 @@
  */
 package org.xwiki.model.internal;
 
+import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.api.XWiki;
+import com.xpn.xwiki.XWiki;
 import org.xwiki.model.Entity;
 import org.xwiki.model.EntityNotFoundException;
 import org.xwiki.model.Server;
 import org.xwiki.model.Wiki;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.WikiReference;
 
 import java.util.List;
 import java.util.Map;
 
 public class BridgedServer implements Server
 {
-    private XWiki xwiki;
+    private XWikiContext xcontext;
 
-    public BridgedServer(XWiki xwiki)
+    public BridgedServer(XWikiContext xcontext)
     {
-        this.xwiki = xwiki;
+        this.xcontext = xcontext;
     }
 
     public Wiki addWiki(String wikiName)
@@ -45,16 +47,20 @@ public class BridgedServer implements Server
         throw new RuntimeException("Not supported");
     }
 
-    public Entity getEntity(EntityReference reference) throws EntityNotFoundException
+    public <T extends Entity> T getEntity(EntityReference reference) throws EntityNotFoundException
     {
-        Entity result;
+        T result;
         switch (reference.getType()) {
             case DOCUMENT:
                 try {
-                    result = new BridgedDocument(getXWiki().getDocument(new DocumentReference(reference)));
+                    result = (T) new BridgedDocument(getXWiki().getDocument(
+                        new DocumentReference(reference), getXWikiContext()));
                 } catch (XWikiException e) {
                     throw new EntityNotFoundException("Couldn't locate Document from reference [" + reference + "]", e);
                 }
+                break;
+            case WIKI:
+                result = (T) new BridgedWiki(new WikiReference(reference), getXWikiContext());
                 break;
             default:
                 throw new RuntimeException("Not supported");
@@ -100,6 +106,11 @@ public class BridgedServer implements Server
 
     public XWiki getXWiki()
     {
-        return this.xwiki;
+        return this.xcontext.getWiki();
+    }
+
+    public XWikiContext getXWikiContext()
+    {
+        return this.xcontext;
     }
 }

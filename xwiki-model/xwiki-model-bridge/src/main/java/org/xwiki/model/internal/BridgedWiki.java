@@ -19,39 +19,56 @@
  */
 package org.xwiki.model.internal;
 
+import java.util.List;
+import java.util.Map;
+
 import org.xwiki.model.*;
 import org.xwiki.model.Object;
 import org.xwiki.model.reference.EntityReference;
-import org.xwiki.rendering.syntax.Syntax;
+import org.xwiki.model.reference.WikiReference;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import com.xpn.xwiki.XWiki;
+import com.xpn.xwiki.XWikiContext;
 
-import com.xpn.xwiki.doc.XWikiDocument;
-
-public class BridgedDocument implements Document
+public class BridgedWiki implements Wiki
 {
-    private XWikiDocument document;
+    private XWikiContext xcontext;
 
-    public BridgedDocument(XWikiDocument document)
+    private WikiReference reference;
+
+    public BridgedWiki(WikiReference reference, XWikiContext xcontext)
     {
-        this.document = document;
+        this.xcontext = xcontext;
     }
 
-    public Version getVersion()
+    public Space addSpace(String spaceName)
     {
         throw new RuntimeException("Not supported");
     }
 
-    public List<Entity> getChildren(EntityType type)
+    public Space getSpace(String spaceName)
     {
         throw new RuntimeException("Not supported");
     }
 
-    public Attachment addAttachment(String attachmentName)
+    public List<Space> getSpaces()
     {
         throw new RuntimeException("Not supported");
+    }
+
+    public boolean hasSpace(String spaceName)
+    {
+        throw new RuntimeException("Not supported");
+    }
+
+    public void removeSpace(String spaceName)
+    {
+        throw new RuntimeException("Not supported");
+    }
+
+    public XWiki getXWiki()
+    {
+        return this.xcontext.getWiki();
     }
 
     public org.xwiki.model.Object addObject(String objectName)
@@ -64,22 +81,17 @@ public class BridgedDocument implements Document
         throw new RuntimeException("Not supported");
     }
 
-    public Attachment getAttachment(String attachmentName)
+    public List<Entity> getChildren(EntityType type)
     {
         throw new RuntimeException("Not supported");
     }
 
-    public List<Attachment> getAttachments()
+    public String getDescription()
     {
         throw new RuntimeException("Not supported");
     }
 
-    public String getContent()
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public Locale getLocale()
+    public String getIdentifier()
     {
         throw new RuntimeException("Not supported");
     }
@@ -104,62 +116,7 @@ public class BridgedDocument implements Document
         throw new RuntimeException("Not supported");
     }
 
-    public Syntax getSyntax()
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public boolean hasAttachment(String attachmentName)
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public boolean hasObject(String objectName)
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public boolean hasObjectDefinition(String objectDefinitionName)
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public void removeAttachment(String attachmentName)
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public void removeObject(String objectName)
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public void removeObjectDefinition(String objectDefinitionName)
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public void setContent(String content)
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public void setSyntax(Syntax syntax)
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public String getDescription()
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public String getIdentifier()
-    {
-        throw new RuntimeException("Not supported");
-    }
-
-    public Entity getParent()
+    public <T> Entity getParent()
     {
         throw new RuntimeException("Not supported");
     }
@@ -179,8 +136,38 @@ public class BridgedDocument implements Document
         throw new RuntimeException("Not supported");
     }
 
+    public boolean hasObject(String objectName)
+    {
+        throw new RuntimeException("Not supported");
+    }
+
+    public boolean hasObjectDefinition(String objectDefinitionName)
+    {
+        throw new RuntimeException("Not supported");
+    }
+
+    public void removeObject(String objectName)
+    {
+        throw new RuntimeException("Not supported");
+    }
+
+    public void removeObjectDefinition(String objectDefinitionName)
+    {
+        throw new RuntimeException("Not supported");
+    }
+
     public void save(String comment, boolean isMinorEdit, Map<String, String> extraParameters)
     {
         throw new RuntimeException("Not supported");
+    }
+
+    public XWikiContext getXWikiContext()
+    {
+        return this.xcontext;
+    }
+
+    public WikiReference getWikiReferene()
+    {
+        return this.reference;
     }
 }
