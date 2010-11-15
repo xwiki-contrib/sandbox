@@ -44,8 +44,8 @@ public class JavaScriptStreamFilterTest extends AbstractStreamFilterTest
     @Test
     public void testNamespaceHTMLElementIdentifiers()
     {
-        assertFilterOutput("$('foo').value=7;", "$('x-foo').value = 7;\n");
-        assertFilterOutput("var x=ID('foo')", "var x = ID('x-foo');\n");
+        assertFilterOutput("$('foo').value=7;", "x$('x-foo').value = 7;\n");
+        assertFilterOutput("var a=ID('foo')", "var xa = xID('x-foo');\n");
     }
 
     /**
@@ -57,13 +57,15 @@ public class JavaScriptStreamFilterTest extends AbstractStreamFilterTest
     @Test
     public void testDecompileVariableDeclaration()
     {
-        assertFilterOutput("var x=0;x++;", "var x = 0;\nx++;\n");
-        assertFilterOutput("for(var i=0;i<10;i++)x[i]=i;a++;", "for (var i = 0; i < 10; i++) \n  x[i] = i;\na++;\n");
-        assertFilterOutput("var a;if(true)a=1;", "var a;\nif (true) \na = 1;\n");
-        assertFilterOutput("switch(x){case 1:var y;z++}", "switch (x) {\n  case 1:\n    var y;\n    z++;\n}\n");
-        assertFilterOutput("for(var p in o)s+=o[p]", "for (var p in o) \n  s += o[p];\n");
-        assertFilterOutput("if(c)var a=0;else a=1", "if (c) \nvar a = 0; else a = 1;\n");
-        assertFilterOutput("for(var i=0;i<10;i++)var x=i;x++;", "for (var i = 0; i < 10; i++) \n  var x = i;\nx++;\n");
+        assertFilterOutput("var a=0;a++;", "var xa = 0;\nxa++;\n");
+        assertFilterOutput("for(var i=0;i<10;i++)a[i]=i;b++;",
+            "for (var xi = 0; xi < 10; xi++) \n  xa[xi] = xi;\nxb++;\n");
+        assertFilterOutput("var a;if(true)a=1;", "var xa;\nif (true) \nxa = 1;\n");
+        assertFilterOutput("switch(a){case 1:var b;c++}", "switch (xa) {\n  case 1:\n    var xb;\n    xc++;\n}\n");
+        assertFilterOutput("for(var p in o)s+=o[p]", "for (var xp in xo) \n  xs += xo[xp];\n");
+        assertFilterOutput("if(c)var a=0;else a=1", "if (xc) \nvar xa = 0; else xa = 1;\n");
+        assertFilterOutput("function f(){for(var i=0;i<10;i++)var a=i;a++;}",
+            "function xf() {\n  for (var i = 0; i < 10; i++) \n    var a = i;\n  a++;\n}\n");
     }
 
     /**
@@ -73,7 +75,7 @@ public class JavaScriptStreamFilterTest extends AbstractStreamFilterTest
     public void testSpecialIdentifierName()
     {
         // "float" has been removed from the list of reserved keywords.
-        assertFilterOutput("style.float='left'", "style.float = 'left';\n");
+        assertFilterOutput("element.style.float='left'", "xelement.style.float = 'left';\n");
     }
 
     /**
@@ -82,6 +84,17 @@ public class JavaScriptStreamFilterTest extends AbstractStreamFilterTest
     @Test
     public void testVoidOperator()
     {
-        assertFilterOutput("x=void f()", "x = void f();\n");
+        assertFilterOutput("a=void f()", "xa = void xf();\n");
+    }
+
+    /**
+     * Tests how global names are name-spaced.
+     */
+    @Test
+    public void testNamespaceGlobalNames()
+    {
+        assertFilterOutput("var a={b:c};", "var xa = {b: xc};\n");
+        assertFilterOutput("var wnd=window;", "var xwnd = window;\n");
+        assertFilterOutput("var Node={};", "var Node = {};\n");
     }
 }

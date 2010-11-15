@@ -22,10 +22,13 @@ package org.xwiki.portlet.view;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.sourceforge.htmlunit.corejs.javascript.CompilerEnvirons;
 import net.sourceforge.htmlunit.corejs.javascript.Parser;
 import net.sourceforge.htmlunit.corejs.javascript.ast.AstRoot;
+import net.sourceforge.htmlunit.corejs.javascript.ast.NodeVisitor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,9 +47,9 @@ public class JavaScriptStreamFilter implements StreamFilter
     private static final Log LOG = LogFactory.getLog(JavaScriptStreamFilter.class);
 
     /**
-     * The object used to filter the abstract syntax tree computed from the JavaScript source code.
+     * The objects used to filter the abstract syntax tree computed from the JavaScript source code.
      */
-    private final JavaScriptASTFilter astFilter;
+    private final List<NodeVisitor> filters = new ArrayList<NodeVisitor>();
 
     /**
      * Creates a new JavaScript stream filter that updates all occurrences or element identifiers inside the JavaScript
@@ -56,7 +59,8 @@ public class JavaScriptStreamFilter implements StreamFilter
      */
     public JavaScriptStreamFilter(String namespace)
     {
-        astFilter = new JavaScriptASTFilter(namespace);
+        filters.add(new JavaScriptIdASTFilter(namespace));
+        filters.add(new JavaScriptNameASTFilter(namespace));
     }
 
     /**
@@ -70,9 +74,17 @@ public class JavaScriptStreamFilter implements StreamFilter
             CompilerEnvirons config = new CompilerEnvirons();
             // 'float' is otherwise considered a reserved keyword (usage: element.style.float = 'left').
             config.setReservedKeywordAsIdentifier(true);
+            // Force the parser to build the parent scope chain.
+            config.setIdeMode(true);
             Parser parser = new Parser(config);
             AstRoot root = parser.parse(reader, null, 0);
-            astFilter.filter(root);
+
+            // Filter the AST.
+            for (NodeVisitor filter : filters) {
+                root.visit(filter);
+            }
+
+            // Back to source.
             writer.write(root.toSource());
         } catch (IOException e) {
             LOG.error("Failed to rewrite JavaScript code.", e);

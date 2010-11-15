@@ -24,18 +24,17 @@ import java.util.List;
 
 import net.sourceforge.htmlunit.corejs.javascript.Token;
 import net.sourceforge.htmlunit.corejs.javascript.ast.AstNode;
-import net.sourceforge.htmlunit.corejs.javascript.ast.AstRoot;
 import net.sourceforge.htmlunit.corejs.javascript.ast.FunctionCall;
 import net.sourceforge.htmlunit.corejs.javascript.ast.Name;
 import net.sourceforge.htmlunit.corejs.javascript.ast.NodeVisitor;
 import net.sourceforge.htmlunit.corejs.javascript.ast.StringLiteral;
 
 /**
- * Filters an abstract syntax tree corresponding to a JavaScript code fragment.
+ * Name-spaces all occurrences of HTML element identifiers inside the AST tree.
  * 
  * @version $Id$
  */
-public class JavaScriptASTFilter implements NodeVisitor
+public class JavaScriptIdASTFilter implements NodeVisitor
 {
     /**
      * The list of JavaScript functions that accept only one argument, of type {@code String}, which is an HTML element
@@ -53,21 +52,11 @@ public class JavaScriptASTFilter implements NodeVisitor
      * Creates a new filter that uses the given string to name-space all occurrences of HTML element identifiers inside
      * the AST tree.
      * 
-     * @param namespace the portlet name-space
+     * @param namespace the name-space
      */
-    public JavaScriptASTFilter(String namespace)
+    public JavaScriptIdASTFilter(String namespace)
     {
         this.namespace = namespace;
-    }
-
-    /**
-     * Filters the given AST.
-     * 
-     * @param root the root of the abstract syntax tree to be filtered
-     */
-    public void filter(AstRoot root)
-    {
-        root.visit(this);
     }
 
     /**

@@ -21,11 +21,14 @@ package org.xwiki.portlet.view;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.XMLFilterImpl;
 import org.xwiki.portlet.url.URLRewriter;
 
@@ -36,6 +39,19 @@ import org.xwiki.portlet.url.URLRewriter;
  */
 public class HTMLInlineCodeXMLFilter extends XMLFilterImpl
 {
+    /**
+     * The list of HTML event attributes. They take JavaScript code as value.
+     */
+    private static final List<String> EVENT_ATTRIBUTES =
+        Arrays.asList("onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover", "onmousemove", "onmouseout",
+            "onkeypress", "onkeydown", "onkeyup", "onfocus", "onblur", "onload", "onunload", "onsubmit", "onreset",
+            "onselect", "onchange");
+
+    /**
+     * The name of the HTML {@code <script>} tag.
+     */
+    private static final String SCRIPT = "script";
+
     /**
      * The current stream filter. It depends on the current element.
      */
@@ -60,7 +76,7 @@ public class HTMLInlineCodeXMLFilter extends XMLFilterImpl
     public HTMLInlineCodeXMLFilter(URLRewriter urlRewriter, String namespace)
     {
         filters.put("style", new CSSStreamFilter(namespace, urlRewriter));
-        filters.put("script", new JavaScriptStreamFilter(namespace));
+        filters.put(SCRIPT, new JavaScriptStreamFilter(namespace));
     }
 
     /**
@@ -72,7 +88,34 @@ public class HTMLInlineCodeXMLFilter extends XMLFilterImpl
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
     {
         currentFilter = filters.get(qName);
-        super.startElement(uri, localName, qName, atts);
+        super.startElement(uri, localName, qName, rewriteEventAttributes(atts));
+    }
+
+    /**
+     * Rewrites the JavaScript code in-lined in HTML event attributes.
+     * 
+     * @param atts some element attributes
+     * @return the given attributes, where the value of the event attributes have been rewritten
+     */
+    private Attributes rewriteEventAttributes(Attributes atts)
+    {
+        AttributesImpl newAtts = null;
+        for (int i = 0; i < atts.getLength(); i++) {
+            if (EVENT_ATTRIBUTES.contains(atts.getQName(i))) {
+                if (newAtts == null) {
+                    newAtts = atts instanceof AttributesImpl ? (AttributesImpl) atts : new AttributesImpl(atts);
+                }
+                // Add the function wrapper to prevent exceptions like "invalid return".
+                String script = String.format("function (event) {\n%s}", atts.getValue(i));
+                StringReader reader = new StringReader(script);
+                StringWriter writer = new StringWriter();
+                filters.get(SCRIPT).filter(reader, writer);
+                script = writer.toString();
+                // Remove the function wrapper.
+                newAtts.setValue(i, script.substring(20, script.length() - 2));
+            }
+        }
+        return newAtts != null ? newAtts : atts;
     }
 
     /**

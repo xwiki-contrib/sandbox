@@ -44,7 +44,7 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
     public void setUp()
     {
         mockURLRewriter = mockery.mock(URLRewriter.class);
-        filter = new HTMLStreamFilter(mockURLRewriter, "x", true);
+        filter = new HTMLStreamFilter(mockURLRewriter, "x", false);
     }
 
     /**
@@ -150,7 +150,17 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
     @Test
     public void testRewriteJavaScript()
     {
-        assertFilterOutput("<script>$('bar').foo()</script>", "<script>$('x-bar').foo();\n</script>");
+        assertFilterOutput("<script>$('bar').foo()</script>", "<script>x$('x-bar').foo();\n</script>");
+    }
+
+    /**
+     * Tests that HTML event attributes (which hold JavaScript code) are rewritten.
+     */
+    @Test
+    public void testRewriteEventAttributes()
+    {
+        assertFilterOutput("<div onclick=\"doAction(); return false;\">text</div>",
+            "<div onclick=\"xdoAction();\n  return false;\n\">text</div>");
     }
 
     /**
@@ -195,15 +205,21 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * Wrap the output in the container element.
-     * 
-     * @see AbstractStreamFilterTest#assertFilterOutput(String, String)
+     * Tests the HTML generated when {@code wrapOutput} flag is set.
      */
-    @Override
-    protected void assertFilterOutput(String input, String expectedOutput)
+    @Test
+    public void testWrapOutput()
     {
-        super.assertFilterOutput(input, "<div id=\"x\">" + expectedOutput + "</div>");
+        filter = new HTMLStreamFilter(mockURLRewriter, "z", true);
+        mockery.checking(new Expectations()
+        {
+            {
+                allowing(mockURLRewriter).rewrite("", RequestType.ACTION);
+                will(returnValue("action/url"));
+            }
+        });
+
+        assertFilterOutput("test",
+            "<div id=\"z\"><input id=\"z-actionURL\" type=\"hidden\" value=\"action/url\"/>test</div>");
     }
 }

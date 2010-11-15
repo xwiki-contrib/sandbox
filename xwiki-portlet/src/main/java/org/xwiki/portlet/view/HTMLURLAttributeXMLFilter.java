@@ -114,9 +114,8 @@ public class HTMLURLAttributeXMLFilter extends XMLFilterImpl
      * Creates a new HTML XML filter which rewrites servlet URLs into portlet URLs.
      * 
      * @param urlRewriter the object used to rewrite URLs
-     * @param portletNamespace the string used to name-space HTML element identifiers in the context of the portal page
      */
-    public HTMLURLAttributeXMLFilter(URLRewriter urlRewriter, String portletNamespace)
+    public HTMLURLAttributeXMLFilter(URLRewriter urlRewriter)
     {
         urlAttributeRewriters.put("a", new URLAttributeRewriter(HREF, null, urlRewriter));
         urlAttributeRewriters.put("form", new URLAttributeRewriter("action", RequestType.ACTION, urlRewriter));
