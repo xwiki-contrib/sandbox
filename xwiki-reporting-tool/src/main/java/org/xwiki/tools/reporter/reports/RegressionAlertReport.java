@@ -1,5 +1,8 @@
 package org.xwiki.tools.reporter.reports;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.apache.commons.io.IOUtils;
 import org.xwiki.tools.reporter.Format;
 import org.xwiki.tools.reporter.Report;
 import org.xwiki.tools.reporter.TestCase;
@@ -21,15 +25,36 @@ public class RegressionAlertReport extends Report
 
     final Format formatTool;
 
+    final File tempFile;
+
+    final StringBuilder tempContent = new StringBuilder();
+
+    final StringBuilder nextTempContent = new StringBuilder();
+
     public RegressionAlertReport(final Publisher publisher, final Format format)
     {
         super(publisher);
         this.formatTool = format;
+
+        this.tempFile = new File(new File(System.getProperty("java.io.tmpdir")),
+                                 "xwiki-reporting-tool.RegressionAlertReport.tmp");
+        this.loadTempContent();
     }
 
     @Override
     public void handleTest(final TestCase regression)
     {
+        this.nextTempContent.append("\n" + regression.getURL());
+        if (this.tempContent.indexOf(regression.getURL()) != -1) {
+            // This job is still on the same build number, skip.
+            return;
+        }
+
+        if (regression.getChanges().size() == 0) {
+            // No changes since last build. This regression must be a flicker.
+            return;
+        }
+
         final TestCase lastFailingRun = lastFailingRun(regression.getLastRun());
         // Only counts as a regression if it has not failed in recent history.
         if (lastFailingRun == null) {
@@ -81,12 +106,7 @@ public class RegressionAlertReport extends Report
             sb.append(this.formatTool.horizontalRuler());
             sb.append(this.formatTool.newLine());
             sb.append("Changes which might have caused this:");
-            final List<Change> changes = regressionsByJobName.get(jobName).get(0).getChanges();
-            if (changes.size() == 0) {
-                sb.append(this.formatTool.newLine());
-                sb.append("No changes since last build.");
-            }
-            for (Change ch : changes) {
+            for (Change ch : regressionsByJobName.get(jobName).get(0).getChanges()) {
                 sb.append(this.formatTool.newLine());
                 sb.append("Revision: ").append(ch.getRevision());
                 sb.append(this.formatTool.newLine());
@@ -100,6 +120,42 @@ public class RegressionAlertReport extends Report
 
         out[1] = sb.toString();
         return out;
+    }
+
+    @Override
+    public void publish()
+    {
+        super.publish();
+        this.storeTempContent();
+    }
+
+    private void loadTempContent()
+    {
+        if (this.tempFile.exists()) {
+            final FileInputStream fis;
+            try {
+                fis = new FileInputStream(this.tempFile);
+                this.tempContent.append(IOUtils.toString(fis));
+                IOUtils.closeQuietly(fis);
+            } catch (Exception e) {
+                throw new RuntimeException("failed to load temporary file.", e);
+            }
+        }
+    }
+
+    private void storeTempContent()
+    {
+        final FileOutputStream fos;
+        try {
+            if (this.tempFile.exists()) {
+                this.tempFile.delete();
+            }
+            fos = new FileOutputStream(this.tempFile, false);
+            IOUtils.write(this.nextTempContent, fos);
+            IOUtils.closeQuietly(fos);
+        } catch (Exception e) {
+            throw new RuntimeException("failed to store run tests in temporary file.", e);
+        }
     }
 
     private Map<String, List<TestCase>> getRegressionsByJobName()
