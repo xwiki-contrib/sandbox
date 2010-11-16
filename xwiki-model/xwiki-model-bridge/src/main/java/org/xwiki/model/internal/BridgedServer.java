@@ -22,6 +22,8 @@ package org.xwiki.model.internal;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.XWiki;
+import com.xpn.xwiki.doc.XWikiDocument;
+
 import org.xwiki.model.Entity;
 import org.xwiki.model.EntityNotFoundException;
 import org.xwiki.model.Server;
@@ -30,6 +32,7 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.WikiReference;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -49,18 +52,25 @@ public class BridgedServer implements Server
 
     public <T extends Entity> T getEntity(EntityReference reference) throws EntityNotFoundException
     {
-        T result;
+        T result = null;
         switch (reference.getType()) {
             case DOCUMENT:
                 try {
-                    result = (T) new BridgedDocument(getXWiki().getDocument(
-                        new DocumentReference(reference), getXWikiContext()));
+                    // Since the old model API always return a XWikiDocument even if it doesn't exist, we need to check
+                    // if the document is new or not.
+                    XWikiDocument xdoc = getXWiki().getDocument(new DocumentReference(reference), getXWikiContext());
+                    if (!xdoc.isNew()) {
+                        result = (T) new BridgedDocument(xdoc);
+                    }
                 } catch (XWikiException e) {
                     throw new EntityNotFoundException("Couldn't locate Document from reference [" + reference + "]", e);
                 }
                 break;
             case WIKI:
-                result = (T) new BridgedWiki(new WikiReference(reference), getXWikiContext());
+                // TODO: Need to load the wiki details. FTM only checking if it exists
+                if (hasEntity(reference)) {
+                    result = (T) new BridgedWiki(new WikiReference(reference), getXWikiContext());
+                }
                 break;
             default:
                 throw new RuntimeException("Not supported");
@@ -81,7 +91,22 @@ public class BridgedServer implements Server
 
     public boolean hasEntity(EntityReference reference)
     {
-        throw new RuntimeException("Not supported");
+        boolean result;
+        switch (reference.getType()) {
+            case DOCUMENT:
+                result = getXWiki().exists(new DocumentReference(reference), getXWikiContext());
+                break;
+            case WIKI:
+                try {
+                    result = getXWiki().getServerURL(new WikiReference(reference).getName(), getXWikiContext()) != null;
+                } catch (MalformedURLException e) {
+                    result = false;
+                }
+                break;
+            default:
+                throw new RuntimeException("Not supported");
+        }
+        return result;
     }
 
     public boolean hasWiki(String wikiName)

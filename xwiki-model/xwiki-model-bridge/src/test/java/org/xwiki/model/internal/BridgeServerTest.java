@@ -19,6 +19,8 @@
  */
 package org.xwiki.model.internal;
 
+import java.net.URL;
+
 import org.jmock.Expectations;
 import org.junit.*;
 import org.xwiki.model.Document;
@@ -28,7 +30,6 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.xpn.xwiki.XWiki;
-import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.test.AbstractBridgedComponentTestCase;
 
@@ -43,12 +44,14 @@ public class BridgeServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void testGetReferenceForDocument() throws Exception
+    public void testGetReferenceForDocumentThatExists() throws Exception
     {
         final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
+        final XWikiDocument xdoc = new XWikiDocument(documentReference);
+        xdoc.setNew(false);
         getMockery().checking(new Expectations() {{
             oneOf(getContext().getWiki()).getDocument(documentReference, getContext());
-                will(returnValue(new XWikiDocument(documentReference)));
+                will(returnValue(xdoc));
         }});
 
         Server server = new BridgedServer(getContext());
@@ -57,12 +60,70 @@ public class BridgeServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void testGetReferenceForWiki() throws Exception
+    public void testGetReferenceForDocumentThatDoesntExist() throws Exception
+    {
+        final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
+        final XWikiDocument xdoc = new XWikiDocument(documentReference);
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getDocument(documentReference, getContext());
+                will(returnValue(xdoc));
+        }});
+
+        Server server = new BridgedServer(getContext());
+        Document doc = server.getEntity(documentReference);
+        Assert.assertNull(doc);
+    }
+
+    @Test
+    public void testGetReferenceForWikiThatExists() throws Exception
     {
         final WikiReference wikiReference = new WikiReference("wiki");
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
+                will(returnValue(new URL("http://whatever/not/null")));
+        }});
 
         Server server = new BridgedServer(getContext());
         Wiki wiki = server.getEntity(wikiReference);
         Assert.assertNotNull(wiki);
+    }
+
+    @Test
+    public void testHasReferenceForDocumentThatExists() throws Exception
+    {
+        final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).exists(documentReference, getContext());
+                will(returnValue(true));
+        }});
+
+        Server server = new BridgedServer(getContext());
+        Assert.assertTrue(server.hasEntity(documentReference));
+    }
+
+    @Test
+    public void testHasReferenceForWikiThatExists() throws Exception
+    {
+        final WikiReference wikiReference = new WikiReference("wiki");
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
+                will(returnValue(new URL("http://whatever/not/null")));
+        }});
+
+        Server server = new BridgedServer(getContext());
+        Assert.assertTrue(server.hasEntity(wikiReference));
+    }
+
+    @Test
+    public void testHasReferenceForWikiThatDoesntExist() throws Exception
+    {
+        final WikiReference wikiReference = new WikiReference("wiki");
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
+                will(returnValue(null));
+        }});
+
+        Server server = new BridgedServer(getContext());
+        Assert.assertFalse(server.hasEntity(wikiReference));
     }
 }

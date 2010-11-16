@@ -44,6 +44,9 @@ public interface Server extends Persistable
 
     // Direct access to any Entity of the Model.
 
+    /**
+     * @return the Entity or null if it doesn't exist
+     */
     <T extends Entity> T getEntity(EntityReference reference) throws EntityNotFoundException;
     boolean hasEntity(EntityReference reference);
     void removeEntity(EntityReference reference) throws EntityNotFoundException;
