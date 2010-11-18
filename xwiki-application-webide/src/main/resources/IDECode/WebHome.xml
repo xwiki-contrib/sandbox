@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>IDECode</web>
+<name>WebHome</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>CACode.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1288566000000</creationDate>
+<date>1288566000000</date>
+<contentUpdateDate>1288566000000</contentUpdateDate>
+<version>1.1</version>
+<title>IDE</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.JavaScriptExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>onDemand=On demand|always=Always</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>IDECode.WebHome</name>
+<number>0</number>
+<className>XWiki.JavaScriptExtension</className>
+<guid>b960d645-c7cd-4787-b1ad-9abc1b039d9e</guid>
+<property>
+<cache>default</cache>
+</property>
+<property>
+<code>var frames = {};
+var framesTabs = {};
+
+function loadSidebar(sp) {
+  new Ajax.Request('$doc.getURL("get", "sidebar=1")&amp;space=' + sp,{
+      method: 'get',
+      onSuccess: function(transport){
+        $('idesidebar').innerHTML = transport.responseText;
+      }
+    });
+}
+
+function showHideSidebar() {
+  var el = $('idesidebar');
+  if (el.visible())
+   el.hide();
+  else
+   el.show();
+  onResize();
+}
+
+function hideAllFrames() {
+  for (var i in frames) {
+    $(frames[i]).hide();  
+  }
+  for (var i in framesTabs) {
+    $(framesTabs[i]).removeClassName("active");  
+  }
+}
+
+function onResize() {
+ if ($('idesidebar').visible()) {
+   width = $('ide').getWidth() - 240;
+ } else {
+   width = $('ide').getWidth();
+ }
+ $('idecontent').style.width = width + "px";
+ $('ide').style.height = window.innerHeight + "px";
+ var height = ($('ide').getHeight() - $('ideheader').getHeight() - 20);
+ $('idesidebar').style.height = height + "px";
+ $('idecontent').style.height = height + "px";
+ $('body').style.height = height + "px";
+ $('xwikimaincontainer').style.height = height + "px";
+ $('xwikimaincontainerinner').style.height = height + "px";
+ for (var i in frames) {
+    var frame = frames[i];
+    frame.style.width = width + "px";
+    frame.style.height = height + "px";
+ }
+}
+
+function resize(frame) {
+ if ($('idesidebar').visible()) {
+   width = $('ide').getWidth() - 240;
+ } else {
+   width = $('ide').getWidth();
+ }
+ $('ide').style.height = window.innerHeight;
+ height = ($('ide').getHeight() - $('ideheader').getHeight() - 20);
+ frame.style.width = width + "px";
+ frame.style.height = height + "px";
+}
+
+function closeFrame(item) {
+  var frame = frames[item];
+  frame.remove();
+  var frametab = framesTabs[item];
+  frametab.remove();
+}
+
+function openFrame(item, itemurl) {
+  hideAllFrames()
+  if (frames[item] &amp;&amp; frames[item].contentWindow!=null) {
+    frames[item].show();
+    framesTabs[item].addClassName("active");
+    resize(frames[item]);
+    var curl = "" + window.frames[item].contentWindow.location;
+    if (curl.indexOf(itemurl)==-1) {
+       window.frames[item].contentWindow.location = itemurl;
+    }
+  } else {
+    var frame = new Element('iframe', { id : item, src: itemurl, width: '100%', height: '100%'});
+    var tab = new Element('div', { class: 'idetab active'}).update(item + ' ');
+    tab.item = item;
+    tab.itemurl = itemurl;
+    tab.observe('click', function (event) {
+         var tabel = Event.element(event);
+         openFrame(tabel.item, tabel.itemurl);
+    });
+    tabclose = new Element('span').update("X");
+    tabclose.item = item;
+    tab.insert(tabclose);
+    tabclose.observe('click', function (event) {
+         var tabel = Event.element(event);
+         closeFrame(tabel.item);
+         event.cancelBubble = true;
+    });
+    $('idecontent').insert(frame);
+    $('ideheader').insert(tab);
+    frames[item] = frame;
+    framesTabs[item] = tab;
+    resize(frames[item]);
+  }
+}
+
+function pageSuggest(field, url) {
+ if (!pageSuggestVar) {
+   var pageSuggestVar = new ajaxSuggest(field, {script: url + '&amp;', 
+                                 varname: 'input', seps:'', offsety: 13,
+                                 callback: function(obj) {  
+                                   openFrame(obj.value, obj.info);
+                                   field.value = '';
+                                   return false;
+                                 }});
+  }
+}
+
+document.observe("dom:loaded", function(){
+  var width = $('ide').getWidth() - 240;
+  $('idecontent').style.width = width + "px";
+  $('ide').style.height = window.innerHeight + "px";
+  var height = ($('ide').getHeight() - $('ideheader').getHeight() - 20);
+  $('idesidebar').style.height = height + "px";
+  $('idecontent').style.height = height + "px";
+  $('body').style.height = height + "px";
+  $('xwikimaincontainer').style.height = height + "px";
+  $('xwikimaincontainerinner').style.height = height + "px";
+  window.onresize = onResize;
+  loadSidebar(currentSpace);
+});
+</code></property><property><name></name></property><property><parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>onDemand=On demand|always=Always</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>IDECode.WebHome</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>4a5bb916-f692-41f6-a0d2-719112c8774f</guid>
+<property>
+<cache>long</cache>
+</property>
+<property>
+<code>#idesidebar {
+  float: left;
+  width: 200px;
+  padding: 5px;
+  border-right: 1px solid grey;
+  clear: left;
+}
+
+#idecontent {
+  float: right;
+  padding: 5px;
+}
+
+#ideheader {
+  height: 50px;
+  padding: 5px;
+  border-bottom: 1px solid grey;
+}
+
+.idetab {
+  float: left;
+  border-left: 1px solid grey;
+  border-right: 1px solid grey;
+  border-top: 1px solid grey;
+  padding: 2px;
+}
+
+.active {
+  background-color: white; 
+}</code>
+</property>
+<property>
+<name></name>
+</property>
+<property>
+<parse></parse>
+</property>
+<property>
+<use>currentPage</use>
+</property>
+</object>
+<content>{{velocity}}
+#if($doc.web=="IDECode"&amp;&amp;!$request.space&amp;&amp;!$request.sidebar)
+Choose space:
+
+ #foreach($space in $xwiki.spaces)
+  * [[$space&gt;&gt;?xpage=plain&amp;space=$space]]
+ #end
+#else
+#if($request.space)
+ #set($space = $request.space)
+#else
+ #set($space = $doc.web)
+#end
+#if($request.sidebar)
+{{html clean=false}}
+#set($pagelist = $util.arrayList)
+#macro(idegroup $gtitle $mode $hql)
+&lt;div class="idegroup"&gt;
+&lt;span class="idegrouptitle"&gt;&lt;strong&gt;${gtitle}&lt;strong&gt;&lt;/span&gt;
+&lt;div class="idegroupcontent"&gt;
+&lt;ul&gt;
+#foreach($item in $xwiki.searchDocuments($hql))
+#if(!$pagelist.contains($item))
+#set($ok = $pagelist.add($item))
+#set($itemdoc = $xwiki.getDocument($item))
+#if($mode=="inline")
+#set($itemurl = $itemdoc.getURL("inline"))
+#else
+#set($itemurl = $itemdoc.getURL("edit", "editor=${mode}"))
+#end
+&lt;li&gt;&lt;a href="javascript:void(0)" onclick="openFrame('$item', '${itemurl}')"&gt;$itemdoc.name&lt;/a&gt;&lt;/li&gt;
+#end
+#end
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+#end
+#set($url = $xwiki.getDocument("IDECode.IDEPageSuggest").getURL("get", "xpage=plain&amp;amp;outputSyntax=plain&amp;amp;"))
+Choose page: &lt;br /&gt;
+&lt;input type="text" name="name" value="" size="27" onfocus="pageSuggest(this, '${url}');" /&gt;
+&lt;br /&gt;
+#idegroup("Classes", "class", "where doc.xWikiClassXML&lt;&gt;'' and doc.web='$space'")
+#idegroup("Extensions", "object", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('XWiki.JavaScriptExtension', 'XWiki.StyleSheetExtension') and doc.web='$space'")
+#idegroup("Macros", "object", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('XWiki.WikiMacroClass') and doc.web='$space'")
+#idegroup("Sheets", "wiki", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('XWiki.SheetClass') and doc.web='$space'")
+#idegroup("Groovy", "wiki", "where doc.name like '%Groovy' and doc.web='$space'")
+#idegroup("Translations", "wiki", "where doc.name like '%Translations' and doc.web='$space'")
+#idegroup("Panels", "inline", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('Panels.PanelClass') and doc.web='$space'")
+#idegroup("Templates", "inline", "where doc.name like '%Template' and doc.web='$space'")
+#idegroup("Template Providers", "inline", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('XWiki.TemplateProviderClass') and doc.web='$space'")
+#idegroup("Other", "wiki", "where doc.web='$space'")
+&lt;br /&gt;
+#else
+#if(!$request.xpage)
+$response.sendRedirect($doc.getURL("view","xpage=plain"))
+#else
+#set($ok = $xwiki.jsx.use("IDECode.WebHome"))
+#set($ok = $xwiki.ssx.use("IDECode.WebHome"))
+{{html clean=false}}
+#template("xwikivars.vm")
+#template("layoutvars.vm")
+#template("htmlheader.vm")
+&lt;script type="text/javascript"&gt;
+var currentSpace = '$space';
+&lt;/script&gt;
+&lt;div id="ide"&gt;
+&lt;div id="ideheader"&gt;
+&lt;a href="javascript:void(0)" onclick="showHideSidebar()"&gt;Show/Hide Sidebar&lt;/a&gt; |
+&lt;a href="javascript:void(0)" onclick="loadSidebar(currentSpace)"&gt;Refresh&lt;/a&gt;
+&lt;div id="idetabs"&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="idesidebar"&gt;
+Loading, please wait...
+&lt;/div&gt;
+&lt;div id="idecontent"&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="clearfloats"&gt;&lt;/div&gt;
+#template("htmlfooter.vm")
+{{/html}}
+#end
+#end
+#end
+{{/velocity}}</content></xwikidoc>
