@@ -319,6 +319,10 @@ document.observe("dom:loaded", function(){
 </property>
 <property>
 <code>#idesidebar {
+  font-size: 60%;
+}
+
+#idesidebar {
   float: left;
   width: 200px;
   padding: 5px;
