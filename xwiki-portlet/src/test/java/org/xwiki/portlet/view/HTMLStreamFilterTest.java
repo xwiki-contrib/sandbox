@@ -154,6 +154,16 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
     }
 
     /**
+     * Tests that in-line code filter input is properly reset.
+     */
+    @Test
+    public void testResetInlineCodeFilterInput()
+    {
+        assertFilterOutput("<script>a++</script>foo<script>a--</script>",
+            "<script>xa++;\n</script>foo<script>xa--;\n</script>");
+    }
+
+    /**
      * Tests that HTML event attributes (which hold JavaScript code) are rewritten.
      */
     @Test

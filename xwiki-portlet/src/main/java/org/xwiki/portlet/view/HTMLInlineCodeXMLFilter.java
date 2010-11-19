@@ -127,11 +127,18 @@ public class HTMLInlineCodeXMLFilter extends XMLFilterImpl
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
         if (currentFilter != null) {
-            StringWriter writer = new StringWriter();
-            currentFilter.filter(new StringReader(filterInput.toString()), writer);
+            String output = filterInput.toString();
             filterInput.delete(0, filterInput.length());
-            String result = writer.toString();
-            super.characters(result.toCharArray(), 0, result.length());
+
+            String input = output.trim();
+            if (input.length() > 0) {
+                StringWriter writer = new StringWriter();
+                currentFilter.filter(new StringReader(input), writer);
+                output = writer.toString();
+            }
+
+            currentFilter = null;
+            super.characters(output.toCharArray(), 0, output.length());
         }
         super.endElement(uri, localName, qName);
     }

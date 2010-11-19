@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xwiki.portlet.DispatchPortlet;
 import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.model.ResponseData;
@@ -46,6 +48,11 @@ import org.xwiki.portlet.view.StreamFilterManager;
  */
 public class DispatchFilter implements Filter
 {
+    /**
+     * The logger instance.
+     */
+    private static final Log LOG = LogFactory.getLog(DispatchFilter.class);
+
     /**
      * The name of the request attribute that specifies if this filter has already been applied to the current request.
      * This flag is required to prevent prevent processing the same request multiple times. The value of this request
@@ -167,6 +174,7 @@ public class DispatchFilter implements Filter
         chain.doFilter(new DispatchedRequest(request, false), responseWrapper);
 
         if (responseWrapper.isOutputIntercepted()) {
+            LOG.debug("Filtering " + request.getRequestURI());
             streamFilterManager
                 .filter(responseWrapper.getMimeType(), responseWrapper.getReader(), response.getWriter());
         }

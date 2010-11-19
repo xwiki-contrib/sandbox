@@ -6,6 +6,8 @@ Integration steps:
 1.2. Copy nekohtml-1.9.14.jar
 1.3. Copy htmlunit-core-js-2.9-101110.jar
 1.4. Copy xwiki-core-portlet-2.7-SNAPSHOT.jar
+1.5. Rename boilerpipe-1.1.0.jar to z-boilerpipe-1.1.0.jar because it conflicts with NekoHTML parser
+1.6. You may have to update the prototype.js used by the portal with the one used by XWiki
 
 2. Configuration
 -----------------------------------------------------------
@@ -36,3 +38,18 @@ Integration steps:
 </filter-mapping>
 
 2.5. Wrap HTML element identifiers used in JavaScript code with ID('someHTMLElementId')
+2.5.1. Add the ID function to javascript.vm
+
+function ID(id){return id}
+
+2.5.2. Wrap the WYSIWYG editor 'hookId' configuration parameter (wysiwyg_writeConfig macro in macros.vm)
+
+#if($entry.key.equals('hookId'))
+  ${separator}$entry.key: ID('$!{escapetool.javascript($entry.value)}')
+#else
+  ${separator}$entry.key: '$!{escapetool.javascript($entry.value)}'
+#end
+
+2.5.3. Wrap the id passed to XWiki.displayDocExtra() in docextra.vm
+
+XWiki.displayDocExtra(ID("${extraAnchor}"), "${extraTemplate}", true);
