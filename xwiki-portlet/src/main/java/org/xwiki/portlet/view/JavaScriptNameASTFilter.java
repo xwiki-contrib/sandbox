@@ -47,7 +47,7 @@ public class JavaScriptNameASTFilter implements NodeVisitor
             "decodeURIComponent", "encodeURI", "encodeURIComponent", "eval", "isFinite", "isNaN", "parseFloat",
             "parseInt", "Infinity", "Math", "NaN", "undefined", "window", "document", "navigator", "arguments", "Node",
             "Element", "HTMLElement", "Document", "Window", "Event", "Selection", "Range", "XPathResult",
-            "XMLHttpRequest", "ActiveXObject", "self", "console", "setTimeout", "clearTimeout");
+            "XMLHttpRequest", "ActiveXObject", "self", "console", "setTimeout", "clearTimeout", "location");
 
     /**
      * The string used to name-space all global variable names.

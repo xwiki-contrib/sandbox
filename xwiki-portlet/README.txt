@@ -53,3 +53,13 @@ function ID(id){return id}
 2.5.3. Wrap the id passed to XWiki.displayDocExtra() in docextra.vm
 
 XWiki.displayDocExtra(ID("${extraAnchor}"), "${extraTemplate}", true);
+
+2.5.4 Wrap 'Comments' with ID function in js/uicomponents/viewers/comments.js
+
+2.6 Modify javascript.vm by adding the following lines before prototype.js
+
+#if($isInPortletMode)
+$xwiki.jsfx.use('js/xwiki/portletOverwrites.js')
+#end
+
+2.7 Copy portletOverwrites.js

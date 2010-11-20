@@ -82,9 +82,9 @@ public class HTMLMetaDataXMLFilter extends XMLFilterImpl
     {
         super.startDocument();
 
-        // Make the action URL available to client side scripts. The action URL could be used to create portlet URLs
+        // Make the resource URL available to client side scripts. The resource URL could be used to create portlet URLs
         // from the client side.
-        outputMetaData("actionURL", urlRewriter.rewrite("", RequestType.ACTION));
+        outputMetaData("resourceURL", urlRewriter.rewrite("", RequestType.RESOURCE));
     }
 
     /**

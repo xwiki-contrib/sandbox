@@ -92,7 +92,8 @@ public class DispatchURLFactory
      */
     public BaseURL createURL(RequestType requestType)
     {
-        return createURL(defaultDispatchURL, requestType);
+        // (PLT.13.6) Resource URLs preserve the current render parameters (including the default dispatch URL).
+        return createURL(requestType == RequestType.RESOURCE ? null : defaultDispatchURL, requestType);
     }
 
     /**
@@ -119,10 +120,13 @@ public class DispatchURLFactory
                 url = response.createRenderURL();
                 break;
         }
-        // We remove the fragment identifier from the dispatch URL. It would have been nice if we could add the fragment
-        // identifier to the created portlet URL but the portlet specification doesn't support it so we just ignore the
-        // portlet identifier.
-        url.setParameter(PARAMETER_DISPATCH_URL, StringUtils.substringBefore(dispatchURL, "#"));
+        // (PLT.13.6) Resource URLs preserve the current render parameters (including the default dispatch URL).
+        if (requestType != RequestType.RESOURCE || !StringUtils.isEmpty(dispatchURL)) {
+            // We remove the fragment identifier from the dispatch URL. It would have been nice if we could add the
+            // fragment identifier to the created portlet URL but the portlet specification doesn't support it so we
+            // just ignore the portlet identifier.
+            url.setParameter(PARAMETER_DISPATCH_URL, StringUtils.substringBefore(dispatchURL, "#"));
+        }
         return url;
     }
 }

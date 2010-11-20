@@ -224,12 +224,12 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
         mockery.checking(new Expectations()
         {
             {
-                allowing(mockURLRewriter).rewrite("", RequestType.ACTION);
-                will(returnValue("action/url"));
+                allowing(mockURLRewriter).rewrite("", RequestType.RESOURCE);
+                will(returnValue("resource/url"));
             }
         });
 
         assertFilterOutput("test",
-            "<div id=\"z\"><input id=\"z-actionURL\" type=\"hidden\" value=\"action/url\"/>test</div>");
+            "<div id=\"z\"><input id=\"z-resourceURL\" type=\"hidden\" value=\"resource/url\"/>test</div>");
     }
 }

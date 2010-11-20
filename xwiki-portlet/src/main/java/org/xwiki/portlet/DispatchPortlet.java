@@ -289,9 +289,11 @@ public class DispatchPortlet extends GenericPortlet
     private String getDispatchURL(PortletRequest request)
     {
         String dispatchURL = request.getParameter(DispatchURLFactory.PARAMETER_DISPATCH_URL);
-        if (dispatchURL == null) {
+        if (StringUtils.isEmpty(dispatchURL)) {
             dispatchURL = getDefaultDispatchURL(request.getPreferences());
         }
+        // Remove the context path. This is required for dispatch URLs received from the client side.
+        dispatchURL = StringUtils.removeStart(dispatchURL, request.getContextPath());
         // Remove the fragment identifier if present.
         return StringUtils.substringBefore(dispatchURL, "#");
     }
