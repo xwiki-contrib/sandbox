@@ -9,7 +9,7 @@ IBM WebSphere Portal PUMA api based authentication.
 
 = How to build it =
 
-You will need to following jars to build the authenticator (you can find them in your WebSphere install):
+You will need the following jars to build the authenticator (you can find them in your WebSphere install):
 * wp.user.api.jar
 * wp.portletservices.api.legacy.jar
 * wp.portletservices.api.standard.jar
@@ -27,7 +27,7 @@ Put them in the /lib folder and that's all you can build with maven (mvn package
 #-# Retrieve the following fields from PUMA and store them in the XWiki user object (puma-attribute=xwiki-attribute)
 # xwiki.authentication.puma.userMapping=sn=last_name,givenName=first_name,mail=email
 
-#-# Maps XWiki groups to PUMA groups, separator is "|"
+#-# Maps XWiki groups to PUMA groups, separator is "|". The XWiki groups are not automatically created.
 # xwiki.authentication.puma.groupsMapping=XWiki.XWikiAdminGroup=cn=AdminRole,ou=groups,o=MegaNova,c=US|\
 #                                         XWiki.Organisation=cn=testers,ou=groups,o=MegaNova,c=US
 

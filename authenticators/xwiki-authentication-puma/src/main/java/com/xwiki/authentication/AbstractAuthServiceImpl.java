@@ -297,7 +297,12 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
             XWikiDocument groupDoc = context.getWiki().getDocument(groupName, context);
 
             // Add a member object to document
-            BaseObject memberObj = groupDoc.newObject(groupClass.getName(), context);
+            BaseObject memberObj = groupDoc.getObject(groupClass.getName());
+
+            if (memberObj == null) {
+                throw new Exception("Group [" + groupName + "] does not exists");
+            }
+
             Map<String, String> map = new HashMap<String, String>();
             map.put("member", xwikiUserName);
             groupClass.fromMap(map, memberObj);
@@ -306,9 +311,7 @@ public abstract class AbstractAuthServiceImpl extends XWikiAuthServiceImpl
             context.getWiki().saveDocument(groupDoc, context);
 
             if (LOG.isDebugEnabled()) {
-                LOG
-                    .debug(MessageFormat
-                        .format("Finished adding user {0} to xwiki group {1}", xwikiUserName, groupName));
+                LOG.debug(MessageFormat.format("Finished adding user {0} to xwiki group {1}", xwikiUserName, groupName));
             }
 
         } catch (Exception e) {
