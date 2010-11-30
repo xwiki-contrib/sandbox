@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <xwikidoc>
 <web>SVNCode</web>
 <name>SVNConfigSheet</name>
@@ -34,6 +33,7 @@
 <nameField></nameField>
 <validationScript></validationScript>
 <defaultEditMode>
+<disabled>0</disabled>
 <name>defaultEditMode</name>
 <number>1</number>
 <prettyName>Default Edit Mode</prettyName>
@@ -135,9 +135,16 @@ function tsuggest(field) {
 &lt;li&gt;$status.status &lt;input type="checkbox" name="page" value="${page}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${page}&amp;spaces=$!{spaces}||target=_blank]]
 #end
 &lt;/ul&gt;
-&lt;input type="submit" name="commit" value="$msg.get("svn.configsheet.commitall")" /&gt; &lt;input type="submit" name="update" value="$msg.get("svn.configsheet.updateall")" /&gt;
+&lt;input type="submit" name="commit" value="$msg.get("svn.configsheet.commitall")" /&gt; &lt;input type="submit" name="update" value="$msg.get("svn.configsheet.updateall")" /&gt; &lt;input type="submit" name="export" value="$msg.get("svn.configsheet.exportall")" /&gt;
 &lt;/form&gt;
 {{/html}}
+#elseif($request.export)
+#set($pagelist = $xwiki.arrayList)
+#foreach($page in $request.getParameterValues("page"))
+#set($ok = $pagelist.add($page))
+#end
+$svnr.exportPages($doc.name, $pagelist)
+#set($ok = $context.setFinished(true))
 #elseif($request.update)
 #set($pagelist = $xwiki.arrayList)
 #foreach($page in $request.getParameterValues("page"))
@@ -217,5 +224,4 @@ $msg.get("svn.configsheet.debug"):
 $svnr.getDebug()
 #end
 #end
-{{/velocity}}</content>
-</xwikidoc>
+{{/velocity}}</content></xwikidoc>

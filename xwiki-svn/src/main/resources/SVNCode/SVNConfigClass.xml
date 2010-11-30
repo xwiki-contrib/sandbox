@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <xwikidoc>
 <web>SVNCode</web>
 <name>SVNConfigClass</name>
@@ -11,9 +10,9 @@
 <author>XWiki.Admin</author>
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
-<creationDate>1262304000000</creationDate>
-<date>1262304000000</date>
-<contentUpdateDate>1262304000000</contentUpdateDate>
+<creationDate>1262300400000</creationDate>
+<date>1262300400000</date>
+<contentUpdateDate>1262300400000</contentUpdateDate>
 <version>1.1</version>
 <title></title>
 <template></template>
@@ -35,6 +34,7 @@
 <defaultdate>
 <customDisplay></customDisplay>
 <dateFormat>dd/MM/yyyy</dateFormat>
+<disabled>0</disabled>
 <emptyIsToday>0</emptyIsToday>
 <name>defaultdate</name>
 <number>6</number>
@@ -48,6 +48,7 @@
 </defaultdate>
 <defaultspace>
 <customDisplay></customDisplay>
+<disabled>0</disabled>
 <name>defaultspace</name>
 <number>4</number>
 <picker>0</picker>
@@ -60,6 +61,7 @@
 </defaultspace>
 <defaultuser>
 <customDisplay></customDisplay>
+<disabled>0</disabled>
 <name>defaultuser</name>
 <number>7</number>
 <picker>0</picker>
@@ -73,6 +75,7 @@
 <password>
 <algorithm></algorithm>
 <customDisplay></customDisplay>
+<disabled>0</disabled>
 <name>password</name>
 <number>3</number>
 <picker>0</picker>
@@ -86,6 +89,7 @@
 </password>
 <repository>
 <customDisplay></customDisplay>
+<disabled>0</disabled>
 <name>repository</name>
 <number>1</number>
 <picker>0</picker>
@@ -100,6 +104,7 @@
 <cache>0</cache>
 <classname>XWiki.SavedListClass</classname>
 <customDisplay></customDisplay>
+<disabled>0</disabled>
 <displayType>input</displayType>
 <idField>doc.fullName</idField>
 <multiSelect>0</multiSelect>
@@ -121,6 +126,7 @@
 </savedlist>
 <status>
 <customDisplay></customDisplay>
+<disabled>0</disabled>
 <editor>Text</editor>
 <name>status</name>
 <number>8</number>
@@ -135,6 +141,7 @@
 </status>
 <username>
 <customDisplay></customDisplay>
+<disabled>0</disabled>
 <name>username</name>
 <number>2</number>
 <picker>0</picker>
@@ -146,5 +153,4 @@
 <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
 </username>
 </class>
-<content>{{include document="XWiki.ClassSheet"/}}</content>
-</xwikidoc>
+<content>{{include document="XWiki.ClassSheet"/}}</content></xwikidoc>
