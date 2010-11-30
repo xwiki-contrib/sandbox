@@ -1,0 +1,175 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ *
+ */
+
+package com.xpn.xwiki.doc;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+
+import org.apache.commons.io.IOUtils;
+
+
+/**
+ * The content of an attachment. This implementation is based on a file on the filesystem.
+ * This implementation is immutable and is only created by the 
+ * {@link com.xpn.xwiki.store.FilesystemAttachmentStore}.
+ *
+ * @version $Id$
+ * @since TODO
+ */
+public class FilesystemAttachmentContent extends XWikiAttachmentContent
+{
+    /** The underlying storage mechanism. */
+    private final File storageFile;
+
+    /** A lock which is locked when the attachment content is being read. */
+    private final ReadWriteLock lock;
+
+    /**
+     * The Constructor.
+     *
+     * @param storage the file where the data is stored.
+     */
+    public FilesystemAttachmentContent(final File storage,
+                                       final XWikiAttachment attachment,
+                                       final ReadWriteLock lock)
+    {
+        // TODO patch this!
+        //super(null, attachment);
+        super(attachment);
+
+        this.storageFile = storage;
+        this.lock = lock;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.xpn.xwiki.doc.XWikiAttachmentContent#clone()
+     */
+    @Override
+    public FilesystemAttachmentContent clone()
+    {
+        return new FilesystemAttachmentContent(this.storageFile, this.getAttachment(), this.lock);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.xpn.xwiki.doc.XWikiAttachmentContent#getContent()
+     */
+    @Deprecated
+    public byte[] getContent()
+    {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            IOUtils.copy(this.getContentInputStream(), baos);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load attachment content", e);
+        }
+        return baos.toByteArray();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.xpn.xwiki.doc.XWikiAttachmentContent#getContentInputStream()
+     */
+    public InputStream getContentInputStream()
+    {
+        /** An InputStream which locks a lock while it is being read. */
+        final class LockingFileInputStream extends FileInputStream
+        {
+            /** The lock to lock while reading the file. */
+            private final Lock lock;
+
+            /**
+             * The Constructor.
+             *
+             * @param toRead the file for this stream to read.
+             * @param lock the lock to lock on creation of the stream and unlock when it is closed.
+             * @throws IOException if the extended FileInputStream throws one.
+             */
+            public LockingFileInputStream(final File toRead, final Lock lock) throws IOException
+            {
+                super(toRead);
+                this.lock = lock;
+                lock.lock();
+            }
+
+            /** {@inheritDoc} */
+            public void close() throws IOException
+            {
+                this.lock.unlock();
+                super.close();
+            }
+        }
+
+        try {
+            return new LockingFileInputStream(this.storageFile, this.lock.readLock());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get InputStream", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.xpn.xwiki.doc.XWikiAttachmentContent#setContent(InputStream is)
+     */
+    public void setContent(final InputStream is) throws IOException
+    {
+        throw new IllegalStateException("FilesystemAttachmentContent is immutable and content cannot "
+                                        + "be set. Instead, a new XWikiAttachmentContent object must "
+                                        + "be created.");
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.xpn.xwiki.doc.XWikiAttachmentContent#getSize()
+     */
+    public int getSize()
+    {
+        long size = this.storageFile.length();
+        // The most important thing is that it doesn't roll over into the negative space.
+        if (size > ((long) Integer.MAX_VALUE)) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) size;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.xpn.xwiki.doc.XWikiAttachmentContent#setContentDirty(boolean)
+     */
+    public void setContentDirty(final boolean contentDirty)
+    {
+        // Do nothing here, the content is never dirty since this implementation is only ever loaded from
+        // the store and is immutable.
+    }
+}
