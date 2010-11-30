@@ -132,7 +132,7 @@ function tsuggest(field) {
 #set($cmap = $!svnr.getChangedPages($spaces, $savedlist))
 #foreach($page in $cmap.keySet())
  #set($status = $cmap.get($page))
-&lt;li&gt;$status.status &lt;input type="checkbox" name="page" value="${page}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${page}&amp;spaces=$!{spaces}||target=_blank]]
+&lt;li&gt;$status.status &lt;input type="hidden" name="${status.fullname}_language" value="${status.language}" /&gt;&lt;input type="checkbox" name="page" value="${status.fullname}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${status.fullname}&amp;language=${status.language}&amp;spaces=$!{spaces}||target=_blank]]
 #end
 &lt;/ul&gt;
 &lt;input type="submit" name="commit" value="$msg.get("svn.configsheet.commitall")" /&gt; &lt;input type="submit" name="update" value="$msg.get("svn.configsheet.updateall")" /&gt; &lt;input type="submit" name="export" value="$msg.get("svn.configsheet.exportall")" /&gt;
@@ -190,6 +190,7 @@ $msg.get("svn.configsheet.confirmcommittingpage")
 #foreach($page in $request.getParameterValues("page"))
 * $page
 &lt;input type="hidden" name="page" value="$!{page}" /&gt;
+&lt;input type="hidden" name="${page}_language" value="$!{request.get("${page}_language")}" /&gt;
 #end
 
 $msg.get("svn.configsheet.commitmessage"):
@@ -209,7 +210,11 @@ $svnr.getCommitStatus("|", "|", false)
 #elseif($request.action=="compare")
 
 {{html clean=false}}
-$svnr.showXMLDiff($xwiki.getDocument($request.page))
+#set($pagedoc = $xwiki.getDocument($request.page))
+#if($request.language)
+#set($pagedoc = $pagedoc.getTranslatedDocument($request.language))
+#end
+$svnr.showXMLDiff($pagedoc)
 {{/html}}
 
 ## OTHER ACTION

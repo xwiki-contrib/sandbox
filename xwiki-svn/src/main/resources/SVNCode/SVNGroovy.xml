@@ -90,7 +90,7 @@ public class SVNLogReader {
        def smap = new HashMap();
        for (sline in StringUtils.split(status, "\r\n")) {
           def items = sline.split(";");
-          smap.put(items[0], [ "xwikiversion" : (items.length&gt;0) ? items[1] : "", "xwikihash" : (items.length&gt;1) ? items[2] : "", "svnversion" : (items.length&gt;2) ? items[3] : "" ])
+          smap.put(items[0], [ "xwikiversion" : (items.length&gt;1) ? items[1] : "", "xwikihash" : (items.length&gt;2) ? items[2] : "", "svnversion" : (items.length&gt;3) ? items[3] : "" ])
        }
        return smap;
     }
@@ -141,6 +141,15 @@ public class SVNLogReader {
         if (language!=null&amp;&amp;language!="")
           filePath += "." + language;
         filePath += ".xml"
+        return filePath;
+    }
+
+    public getStatusPath(pagedoc) {
+       // get page
+        def filePath = pagedoc.getSpace() + "/" + pagedoc.getName();
+        def language = pagedoc.getLanguage();
+        if (language!=null&amp;&amp;language!="")
+          filePath += "." + language;
         return filePath;
     }
 
@@ -410,6 +419,10 @@ public class SVNLogReader {
 
         for (pagename in pagelist) {
            def pagedoc = xwiki.getDocument(pagename);
+           // make sure we get the right translations
+           def lang = context.getRequest().get("${pagename}_language")
+           if (lang!=null &amp;&amp; lang!="")
+             pagedoc = pagedoc.getTranslatedDocument(lang);
            def space = pagedoc.getSpace();
            def page = pagedoc.getName();
            def language = pagedoc.getLanguage();
@@ -562,11 +575,11 @@ public class SVNLogReader {
                 editor.closeFile(filePath, checksum);
 
                 // updating status to check for changes
-                committedPages.add(pagedoc.getFullName());
-                def pageStatus = status.get(pagedoc.getFullName());
+                committedPages.add(getStatusPath(pagedoc));
+                def pageStatus = status.get(getStatusPath(pagedoc));
                 if (pageStatus==null)
                  pageStatus = [ "xwikiversion" : "", "xwikihash" : "", "svnversion" : ""];
-                status.put(pagedoc.getFullName(), pageStatus);
+                status.put(getStatusPath(pagedoc), pageStatus);
                 pageStatus.xwikiversion = "${pagedoc.getVersion()}";
                 pageStatus.xwikihash = "${newXML.hashCode()}";
               }
@@ -601,8 +614,8 @@ public class SVNLogReader {
 
          // we need to save the status
          def rev = commitInfo.getNewRevision();
-         for (def page in committedPages) {
-           status.get(page).svnversion = "${rev}";
+         for (def pagepath in committedPages) {
+           status.get(pagepath).svnversion = "${rev}";
          }
          saveStatus();
          return commitInfo;
@@ -840,16 +853,19 @@ public class SVNLogReader {
 
     protected checkPage(page, pagedoc, changedMap, samePages, svnEntries) {
            def wikicontent = getXML(pagedoc);
-           def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), "")
+           def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), pagedoc.getLanguage())
            svncontent = (svncontent == null) ? null : svncontent.trim();
            if (!wikicontent.equals(svncontent)) {
             def filePath = getFilePath(pagedoc);
-            def pageStatus = getPageStatus(pagedoc.getFullName());
+            def pageStatus = getPageStatus(getStatusPath(pagedoc));
             if (pageStatus==null) {
                pageStatus = [ "xwikiversion" : pagedoc.getVersion(), "xwikihash" : "", "svnversion" : "" ];
+               status.put(getStatusPath(pagedoc), pageStatus);
             }
             pageStatus.filePath = filePath;
             pageStatus.page = page;
+            pageStatus.fullname = pagedoc.fullName;
+            pageStatus.language = pagedoc.language
             pageStatus.status = "";
 
             // debug("Checking page ${page} version ${pagedoc.getVersion()} pageStatus ${pageStatus}")
@@ -884,10 +900,10 @@ public class SVNLogReader {
            } else {
              def filePath = getFilePath(pagedoc);
              samePages.add(filePath);
-             def pageStatus = getPageStatus(pagedoc.getFullName());
+             def pageStatus = getPageStatus(getStatusPath(pagedoc));
              if (pageStatus==null) {
                 pageStatus = [ "xwikiversion" : "", "xwikihash" : "", "svnversion" : "" ];
-                status.put(pagedoc.getFullName(), pageStatus);
+                status.put(getStatusPath(pagedoc), pageStatus);
              }   
              pageStatus.xwikiversion = pagedoc.getVersion();
              pageStatus.xwikihash = wikicontent.hashCode();
@@ -943,12 +959,16 @@ public class SVNLogReader {
 
         for (page in pageList) {
            def pagedoc = xwiki.getDocument(page);
+           // make sure we are getting the right translation
+           def lang = context.getRequest().get("${pagename}_language")
+           if (lang!=null &amp;&amp; lang!="")
+             pagedoc = pagedoc.getTranslatedDocument(lang);
            def wikicontent = getXML(pagedoc);
-           def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), "")
+           def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), pagedoc.getLanguage())
            def svnversion = "";
            if (!wikicontent.equals(svncontent)) {
             def filePath = getFilePath(pagedoc);
-            def pageStatus = getPageStatus(pagedoc.getFullName());
+            def pageStatus = getPageStatus(getStatusPath(pagedoc));
             if (pageStatus==null) {
                pageStatus = [ "xwikiversion" : pagedoc.getVersion(), "xwikihash" : "", "svnversion" : "" ];
             }
@@ -1094,7 +1114,7 @@ public class SVNLogReader {
 
                  def fileProperties = new SVNProperties();
                  def baos = new ByteArrayOutputStream();
-                 debug("reading file: ${space}/${fileName}")
+                 // debug("reading file: ${space}/${fileName}")
                  repository.getFile(space + "/" + fileName, -1, fileProperties, baos);
                  def svncontent = new String(baos.toByteArray())
 
@@ -1128,7 +1148,7 @@ public class SVNLogReader {
                  def filePath = space + "/" + fileName;
                  def fileProperties = new SVNProperties();
                  def baos = new ByteArrayOutputStream();
-                 debug("reading file: ${space}/${fileName}")
+                 // debug("reading file: ${space}/${fileName}")
                  repository.getFile(filePath, -1, fileProperties, baos);
                  def svncontent = new String(baos.toByteArray())
                  def svnversion = pageEntry.getRevision().toString();
