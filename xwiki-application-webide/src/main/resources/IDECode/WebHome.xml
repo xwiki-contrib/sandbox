@@ -406,7 +406,20 @@ Choose space:
 #else
 #set($itemurl = $itemdoc.getURL("edit", "editor=${mode}"))
 #end
-&lt;li&gt;&lt;a href="javascript:void(0)" onclick="openFrame('$item', '${itemurl}')"&gt;$itemdoc.name&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="javascript:void(0)" onclick="openFrame('$item', '${itemurl}')"&gt;$itemdoc.name&lt;/a&gt;
+#if($itemdoc.getObject("XWiki.JavaScriptExtension")||$itemdoc.getObject("XWiki.StyleSheetExtension"))
+&lt;ul&gt;
+#foreach($obj in $itemdoc.getObjects("XWiki.JavaScriptExtension"))
+#set($itemurl = $itemdoc.getURL("edit", "editor=object&amp;classname=XWiki.JavaScriptExtension&amp;object=${obj.number}"))
+&lt;li&gt;&lt;a href="javascript:void(0)" onclick="openFrame('${item}_JS_${obj.number}', '${itemurl}')"&gt;JSExtension $obj.number&lt;/a&gt;
+#end
+#foreach($obj in $itemdoc.getObjects("XWiki.StyleSheetExtension"))
+#set($itemurl = $itemdoc.getURL("edit", "editor=object&amp;classname=XWiki.StyleSheetExtension&amp;object=${obj.number}"))
+&lt;li&gt;&lt;a href="javascript:void(0)" onclick="openFrame('${item}_CSS_${obj.number}', '${itemurl}')"&gt;CSSExtension $obj.number&lt;/a&gt;
+#end
+&lt;/ul&gt;
+#end
+&lt;/li&gt;
 #end
 #end
 &lt;/ul&gt;
@@ -421,7 +434,7 @@ Choose page: &lt;br /&gt;
 &lt;/form&gt;
 &lt;br /&gt;
 #idegroup("Classes", "class", "where doc.xWikiClassXML&lt;&gt;'' and doc.web='$space' order by doc.fullName" false)
-#idegroup("Extensions", "object", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('XWiki.JavaScriptExtension', 'XWiki.StyleSheetExtension') and doc.web='$space' order by doc.fullName" true)
+#idegroup("Extensions", "wiki", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('XWiki.JavaScriptExtension', 'XWiki.StyleSheetExtension') and doc.web='$space' order by doc.fullName" false)
 #idegroup("LiveTables", "wiki", "where lower(doc.name) like '%livetable%' and doc.web='$space' order by doc.fullName" false)
 #idegroup("WikiMacros", "object", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('XWiki.WikiMacroClass') and doc.web='$space' order by doc.fullName" false)
 #idegroup("VMacros", "wiki", "where doc.name like '%Macros' and doc.web='$space' order by doc.fullName" false)
@@ -432,7 +445,7 @@ Choose page: &lt;br /&gt;
 #idegroup("Panels", "inline", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('Panels.PanelClass') and doc.web='$space' order by doc.fullName" false)
 #idegroup("Templates", "inline", "where doc.name like '%Template' and doc.web='$space' order by doc.fullName")
 #idegroup("Template Providers", "inline", ", BaseObject as obj where doc.fullName=obj.name and obj.className in ('XWiki.TemplateProviderClass') and doc.web='$space' order by doc.fullName" false)
-#idegroup("Other", "wiki", "where doc.web='$space' and doc.fullName not in (select obj.name from BaseObject as obj where obj.className in ('XWiki.JavaScriptExtension', 'XWiki.StyleSheetExtension'))order by doc.fullName" false)
+#idegroup("Other", "wiki", "where doc.web='$space' order by doc.fullName" false)
 &lt;br /&gt;
 #else
 #if(!$request.xpage)
