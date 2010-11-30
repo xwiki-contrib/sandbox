@@ -838,25 +838,7 @@ public class SVNLogReader {
         return getChangedPages(spaces, "");
     }
 
-    public getChangedPages(String spaces, String savedlist) {
-        def changedMap = new TreeMap();
-        def svnEntries = getEntries();
-        def spaceList = null;
-        def samePages = new ArrayList();
-        def list;
-
-        if (!savedlist || savedlist=="") {
-         spaceList = Arrays.asList(StringUtils.split(spaces," ,"));
-         def sspaces = StringUtils.join(spaceList, "','");
-         def sql = "select doc.fullName from XWikiDocument as doc where doc.space in ('${sspaces}')";
-         debug("Searching for ${sql}");
-         list = xwiki.search(sql)
-        } else {
-         list = StringUtils.split(xwiki.getDocument(savedlist).getValue("list"), "|");
-        }
-
-        for (page in list) {
-           def pagedoc = xwiki.getDocument(page);
+    protected checkPage(page, pagedoc, changedMap, samePages, svnEntries) {
            def wikicontent = getXML(pagedoc);
            def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), "")
            svncontent = (svncontent == null) ? null : svncontent.trim();
@@ -910,6 +892,32 @@ public class SVNLogReader {
              pageStatus.xwikiversion = pagedoc.getVersion();
              pageStatus.xwikihash = wikicontent.hashCode();
              pageStatus.svnversion = svnEntries.get(filePath).svnversion;
+           }
+    }
+
+    public getChangedPages(String spaces, String savedlist) {
+        def changedMap = new TreeMap();
+        def svnEntries = getEntries();
+        def spaceList = null;
+        def samePages = new ArrayList();
+        def list;
+
+        if (!savedlist || savedlist=="") {
+         spaceList = Arrays.asList(StringUtils.split(spaces," ,"));
+         def sspaces = StringUtils.join(spaceList, "','");
+         def sql = "select doc.fullName from XWikiDocument as doc where doc.space in ('${sspaces}')";
+         debug("Searching for ${sql}");
+         list = xwiki.search(sql)
+        } else {
+         list = StringUtils.split(xwiki.getDocument(savedlist).getValue("list"), "|");
+        }
+
+        for (page in list) {
+           def pagedoc = xwiki.getDocument(page);
+           checkPage(page, pagedoc, changedMap, samePages, svnEntries);
+           for (trans in pagedoc.getTranslationList()) {
+               def tpagedoc = pagedoc.getTranslatedDocument(trans);
+               checkPage(page + ".fr", tpagedoc, changedMap, samePages, svnEntries);
            }
         }
  
