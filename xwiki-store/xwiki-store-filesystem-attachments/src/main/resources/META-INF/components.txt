@@ -1,0 +1,3 @@
+org.xwiki.model.internal.reference.PathStringEntityReferenceSerializer
+com.xpn.xwiki.store.FilesystemAttachmentStore
+org.xwiki.store.filesystem.internal.DefaultFilesystemStoreTools

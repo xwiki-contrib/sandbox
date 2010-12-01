@@ -22,6 +22,7 @@ package com.xpn.xwiki.store;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.List;
@@ -203,6 +204,12 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
             if (this.attachFile.exists()) {
                 // If this fails, there isn't a lot which can be done, simply ignore it.
                 this.attachFile.renameTo(backupFile);
+            }
+
+            if (!this.attachFile.getParentFile().exists() && !this.attachFile.getParentFile().mkdirs()) {
+                throw new IOException("Could not make directory tree to place file in. "
+                                      + "Do you have permission to write to ["
+                                      + this.attachFile.getAbsolutePath() + "] ?");
             }
 
             // Copy the file.
