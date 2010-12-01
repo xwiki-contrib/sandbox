@@ -19,13 +19,11 @@
  */
 package com.xpn.xwiki.store;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-//import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.List;
@@ -264,6 +262,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
         if (attachFile.exists()) {
             attachment.setAttachment_content(
                 new FilesystemAttachmentContent(attachFile, attachment, this.getLockForFile(attachFile)));
+            return;
         }
 
         // If there is no attachment file then try loading from the Hibernate attachment store.
@@ -523,53 +522,108 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
         }
     }
 
+    /**
+     * A Transaction based on XWikiHibernateStore.
+     */
     private static class XWikiHibernateTransaction implements Transaction
     {
+        /** The storage engine. */
         private final XWikiHibernateBaseStore store;
 
+        /** The XWikiContext associated with the request which started this Transaction. */
         private final XWikiContext context;
 
+        /**
+         * True if the transaction should be ended when finished.
+         * This will only be false if the transaction could not be started because another transaction
+         * was already open and associated with the same XWikiContext.
+         */
         private boolean shouldCloseTransaction;
 
+        /**
+         * The Constructor.
+         *
+         * @param context the XWikiContext associated with the request which started this Transaction.
+         */
         public XWikiHibernateTransaction(final XWikiContext context)
         {
             this.store = context.getWiki().getHibernateStore();
             this.context = context;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see Transaction#begin()
+         */
         public void begin() throws XWikiException
         {
             this.store.checkHibernate(this.context);
             this.shouldCloseTransaction = this.store.beginTransaction(this.context);
         }
 
-        public void rollback()
-        {
-            if (this.shouldCloseTransaction) {
-                this.store.endTransaction(this.context, false);
-            }
-        }
-
+        /**
+         * {@inheritDoc}
+         *
+         * @see Transaction#commit()
+         */
         public void commit()
         {
             if (this.shouldCloseTransaction) {
                 this.store.endTransaction(this.context, true);
             }
         }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see Transaction#rollback()
+         */
+        public void rollback()
+        {
+            if (this.shouldCloseTransaction) {
+                this.store.endTransaction(this.context, false);
+            }
+        }
     }
 
+    /**
+     * A Transaction represents an atomic unit of work on the storage engine.
+     * Implementations may use whatever type of storage they like as long as it supports
+     * beginning a transaction, and committing or rolling back that transaction.
+     */
     private static interface Transaction
     {
+        /**
+         * Start the transaction.
+         * Prepare the storage engine to handle a transaction.
+         *
+         * @throws Exception if something goes wrong with the storage engine.
+         */
         void begin() throws Exception;
+
+        /**
+         * Commit the transaction.
+         * Save the work which was done during this transaction.
+         *
+         * @throws Exception if something goes wrong with the storage.
+         */
         void commit() throws Exception;
+
+        /**
+         * Rollback the transaction.
+         * Return the storage engine to the state it was before the transaction began.
+         *
+         * @throws Exception if something goes wrong with the storage.
+         */
         void rollback() throws Exception;
     }
 
 
     /**
      * A TransactionRunnable is a closure which is meant to run inside of a transaction.
-     * The runnable does things in the transaction and also does something after the transaction is
-     * complete.
+     * The runnable contains a method which will run inside of the transaction and provides hooks 
+     * to execute custom code when the transaction succeeded, failed, or completed in any way.
      */
     private static abstract class TransactionRunnable
     {
@@ -598,11 +652,12 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                     // This exception cannot be thrown reliably so it will be swallowed.
                 }
                 throw e;
-            }
-            try {
-                this.onComplete();
-            } catch (Throwable t) {
-                // This exception cannot be thrown reliably so it will be swallowed.
+            } finally {
+                try {
+                    this.onComplete();
+                } catch (Throwable t) {
+                    // This exception cannot be thrown reliably so it will be swallowed.
+                }
             }
         }
 
