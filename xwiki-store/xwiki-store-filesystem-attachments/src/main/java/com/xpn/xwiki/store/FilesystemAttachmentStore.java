@@ -22,13 +22,9 @@ package com.xpn.xwiki.store;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
@@ -61,10 +57,6 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
      */
     @Requirement
     private FilesystemStoreTools fileTools;
-
-    /** A map which holds locks by the file path so that the same lock is used for the same file. */
-    private final Map<String, WeakReference<ReadWriteLock>> fileLockMap =
-        new WeakHashMap<String, WeakReference<ReadWriteLock>>();
 
     /**
      * {@inheritDoc}
@@ -110,11 +102,10 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
     }
 
     /**
-     * Get a TransactionRunnable for saving the attachment content.
-     *
      * @param attachment the XWikiAttachment whose content should be saved.
      * @param updateDocument whether or not to update the document at the same time.
      * @param context the XWikiContext for the request.
+     * @return a TransactionRunnable for saving the attachment content.
      */
     private TransactionRunnable runnableToSaveAttachmentContent(final XWikiAttachment attachment,
                                                                 final boolean updateDocument,
@@ -134,68 +125,125 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
         // if it fails then this file will be renamed back.
         final File backupFile = this.fileTools.getBackupFile(attachFile);
 
-        final ReadWriteLock lock = this.getLockForFile(attachFile);
+        final ReadWriteLock lock = this.fileTools.getLockForFile(attachFile);
 
-        final class SaveTransaction extends TransactionRunnable
+        return new AttachmentSaveTransactionRunnable(attachment,
+                                                     updateDocument,
+                                                     context,
+                                                     attachFile,
+                                                     backupFile,
+                                                     lock);
+    }
+
+    /**
+     * A TransactionRunnable for saving an attachment.
+     */
+    private class AttachmentSaveTransactionRunnable extends TransactionRunnable
+    {
+        /** The XWikiAttachment whose content should be saved. */
+        private final XWikiAttachment attachment;
+
+        /** Whether or not to update the document at the same time. */
+        private final boolean updateDocument;
+
+        /** The XWikiContext for the request. */
+        private final XWikiContext context;
+
+        /** The File to store the attachment in. */
+        private final File attachFile;
+
+        /** The File to backup the content of the existing attachment in. */
+        private final File backupFile;
+
+        /** This Lock will be locked while the attachment file is being written to. */
+        private final ReadWriteLock lock;
+
+        /**
+         * Construct a TransactionRunnable for saving the attachment content.
+         *
+         * @param attachment the XWikiAttachment whose content should be saved.
+         * @param updateDocument whether or not to update the document at the same time.
+         * @param context the XWikiContext for the request.
+         * @param attachFile the File to store the attachment in.
+         * @param backupFile the File to backup the content of the existing attachment in.
+         * @param lock this Lock will be locked while the attachment file is being written to.
+         */
+        public AttachmentSaveTransactionRunnable(final XWikiAttachment attachment,
+                                                 final boolean updateDocument,
+                                                 final XWikiContext context,
+                                                 final File attachFile,
+                                                 final File backupFile,
+                                                 final ReadWriteLock lock)
         {
-            /** This will run in the transaction. */
-            protected void run() throws Exception
-            {
-                // Update the archive of the attachment.
-                // This must happen before the content is saved since it depends on the
-                // old version of the attachment content.
-                attachment.updateContentArchive(context);
+            this.attachment = attachment;
+            this.updateDocument = updateDocument;
+            this.context = context;
+            this.attachFile = attachFile;
+            this.backupFile = backupFile;
+            this.lock = lock;
+        }
 
-                // Lock the attachment file so it won't be read while it's being written to.
-                lock.writeLock().lock();
+        /**
+         * This will run in the transaction.
+         *
+         * @throws Exception if an exception is thrown copying the file,
+         *         saving the attachment version, or updating the document which contains the attachment.
+         */
+        protected void run() throws Exception
+        {
+            // Update the archive of the attachment.
+            // This must happen before the content is saved since it depends on the
+            // old version of the attachment content.
+            this.attachment.updateContentArchive(context);
 
-                // Move the current attachment file to a backup location.
-                if (attachFile.exists()) {
-                    // If this fails, there isn't a lot which can be done, simply ignore it.
-                    attachFile.renameTo(backupFile);
-                }
+            // Lock the attachment file so it won't be read while it's being written to.
+            this.lock.writeLock().lock();
 
-                // Copy the file.
-                OutputStream out = null;
-                try {
-                    out = new FileOutputStream(attachFile);
-                    IOUtils.copy(attachment.getContentInputStream(context), out);
-                } finally {
-                    IOUtils.closeQuietly(out);
-                }
-
-                // Persist the attachment archive.
-                context.getWiki().getAttachmentVersioningStore().saveArchive(
-                    attachment.getAttachment_archive(), context, false);
-
-                // If the parent document is to be saved as well, save it.
-                if (updateDocument) {
-                    context.getWiki().getStore().saveXWikiDoc(attachment.getDoc(), context, false);
-                }
+            // Move the current attachment file to a backup location.
+            if (this.attachFile.exists()) {
+                // If this fails, there isn't a lot which can be done, simply ignore it.
+                this.attachFile.renameTo(backupFile);
             }
 
-            /** This will happen if the transaction fails. */
-            protected void onRollback()
-            {
-                try {
-                    if (attachFile.exists()) {
-                        attachFile.delete();
-                    }
-                } finally {
-                    backupFile.renameTo(attachFile);
-                }
+            // Copy the file.
+            OutputStream out = null;
+            try {
+                out = new FileOutputStream(this.attachFile);
+                IOUtils.copy(this.attachment.getContentInputStream(this.context), out);
+            } finally {
+                IOUtils.closeQuietly(out);
             }
 
-            /** This will run if the transaction succeeds. */
-            protected void onCommit()
-            {
-                if (backupFile.exists()) {
-                    backupFile.delete();
-                }
+            // Persist the attachment archive.
+            context.getWiki().getAttachmentVersioningStore().saveArchive(
+                this.attachment.getAttachment_archive(), this.context, false);
+
+            // If the parent document is to be saved as well, save it.
+            if (this.updateDocument) {
+                this.context.getWiki().getStore().saveXWikiDoc(this.attachment.getDoc(),
+                                                               this.context, false);
             }
         }
 
-        return new SaveTransaction();
+        /** This will happen if the transaction fails. */
+        protected void onRollback()
+        {
+            try {
+                if (this.attachFile.exists()) {
+                    this.attachFile.delete();
+                }
+            } finally {
+                this.backupFile.renameTo(this.attachFile);
+            }
+        }
+
+        /** This will run if the transaction succeeds. */
+        protected void onCommit()
+        {
+            if (this.backupFile.exists()) {
+                this.backupFile.delete();
+            }
+        }
     }
 
     /**
@@ -261,7 +309,9 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
         final File attachFile = this.fileTools.fileForAttachment(attachment);
         if (attachFile.exists()) {
             attachment.setAttachment_content(
-                new FilesystemAttachmentContent(attachFile, attachment, this.getLockForFile(attachFile)));
+                new FilesystemAttachmentContent(attachFile,
+                                                attachment,
+                                                this.fileTools.getLockForFile(attachFile)));
             return;
         }
 
@@ -300,8 +350,8 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                                       final boolean bTransaction)
         throws XWikiException
     {
-        final File attachFile = this.fileTools.fileForAttachment(attachment);;
-        final ReadWriteLock lock = this.getLockForFile(attachFile);
+        final File attachFile = this.fileTools.fileForAttachment(attachment);
+        final ReadWriteLock lock = this.fileTools.getLockForFile(attachFile);
         try {
             lock.writeLock().lock();
             if (attachFile.exists()) {
@@ -327,39 +377,6 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
     public void cleanUp(XWikiContext context)
     {
         // Do nothing.
-    }
-
-    /* ------------------------------------------------------------------------------------------------ *
-     * ---------------------------- Private helper functions (and classes) ---------------------------- *
-     * ------------------------------------------------------------------------------------------------ */
-
-    /**
-     * Get a {@link java.util.concurrent.locks.ReadWriteLock} which is unique to the given file.
-     * This method will always return the same lock for the path on the filesystem even if the 
-     * {@link java.io.File} object is different.
-     *
-     * @param toLock the file to get a lock for.
-     * @return a lock for the given file.
-     */
-    private synchronized ReadWriteLock getLockForFile(final File toLock)
-    {
-        final String path = toLock.getAbsolutePath();
-        WeakReference<ReadWriteLock> lock = this.fileLockMap.get(path);
-        ReadWriteLock strongLock = null;
-        if (lock != null) {
-            strongLock = lock.get();
-        }
-        if (strongLock == null) {
-            strongLock = new ReentrantReadWriteLock() {
-                /**
-                 * A strong reference on the string to make sure that the
-                 * mere existence of the lock will keep it in the map.
-                 */
-                private final String lockMapReference = path;
-            };
-            this.fileLockMap.put(path, new WeakReference<ReadWriteLock>(strongLock));
-        }
-        return strongLock;
     }
 
     /* ---------------------------- Nested Classes. ---------------------------- */
@@ -484,16 +501,6 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                 }
             }
         }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see TransactionRunnable#run()
-         */
-        protected void run()
-        {
-            // Since start() is overridden, this is not used.
-        }
     }
 
     /**
@@ -507,16 +514,6 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
          * @see TransactionRunnable#start(Transaction)
          */
         public void start(final Transaction transaction)
-        {
-            // No op. Hence why it's void.
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see TransactionRunnable#run()
-         */
-        protected void run()
         {
             // No op. Hence why it's void.
         }
@@ -625,7 +622,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
      * The runnable contains a method which will run inside of the transaction and provides hooks 
      * to execute custom code when the transaction succeeded, failed, or completed in any way.
      */
-    private static abstract class TransactionRunnable
+    private static class TransactionRunnable
     {
         /**
          * This is called to start a transaction which will run this runnable.
@@ -661,8 +658,16 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
             }
         }
 
-        /** This will be run inside of a database transaction. */
-        protected abstract void run() throws Exception;
+        /**
+         * This will be run inside of a database transaction.
+         *
+         * @throws Exception which will cause a rollback of the transaction and then execution of
+         *         onRollback then onComplete before being thrown up the calling stack.
+         */
+        protected void run() throws Exception
+        {
+            // By default this will do nothing.
+        }
 
         /**
          * This will be run if the transaction succeeds.
@@ -670,7 +675,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
          */
         protected void onCommit()
         {
-            // This is optional so by default it will do nothing.
+            // By default this will do nothing.
         }
 
         /**
@@ -679,7 +684,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
          */
         protected void onRollback()
         {
-            // This is optional so by default it will do nothing.
+            // By default this will do nothing.
         }
 
         /**
@@ -688,7 +693,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
          */
         protected void onComplete()
         {
-            // This is optional so by default it will do nothing.
+            // By default this will do nothing.
         }
     }
 }

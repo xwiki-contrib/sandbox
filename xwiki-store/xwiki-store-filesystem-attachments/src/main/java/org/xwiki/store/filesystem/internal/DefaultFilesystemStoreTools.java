@@ -20,8 +20,13 @@
 package org.xwiki.store.filesystem.internal;
 
 import java.io.File;
-import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
+import java.net.URLEncoder;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -56,6 +61,10 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /** This is the directory where all of the attachments will stored. */
     private File storageDir;
 
+    /** A map which holds locks by the file path so that the same lock is used for the same file. */
+    private final Map<String, WeakReference<ReadWriteLock>> fileLockMap =
+        new WeakHashMap<String, WeakReference<ReadWriteLock>>();
+
     /** {@inheritDoc} */
     public void initialize()
     {
@@ -67,7 +76,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.store.filesystem.internal.getBackupFile(File)
+     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#getBackupFile(File)
      */
     public File getBackupFile(final File storageFile)
     {
@@ -77,7 +86,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.store.filesystem.internal.fileForAttachment(XWikiAttachment)
+     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#fileForAttachment(XWikiAttachment)
      */
     public File fileForAttachment(final XWikiAttachment attachment)
     {
@@ -93,6 +102,32 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException("UTF-8 not available, this Java VM is not standards compliant!");
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#getLockForFile(File)
+     */
+    public synchronized ReadWriteLock getLockForFile(final File toLock)
+    {
+        final String path = toLock.getAbsolutePath();
+        WeakReference<ReadWriteLock> lock = this.fileLockMap.get(path);
+        ReadWriteLock strongLock = null;
+        if (lock != null) {
+            strongLock = lock.get();
+        }
+        if (strongLock == null) {
+            strongLock = new ReentrantReadWriteLock() {
+                /**
+                 * A strong reference on the string to make sure that the
+                 * mere existence of the lock will keep it in the map.
+                 */
+                private final String lockMapReference = path;
+            };
+            this.fileLockMap.put(path, new WeakReference<ReadWriteLock>(strongLock));
+        }
+        return strongLock;
     }
 
     /**

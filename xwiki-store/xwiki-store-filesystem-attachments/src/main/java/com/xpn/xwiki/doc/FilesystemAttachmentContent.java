@@ -52,6 +52,8 @@ public class FilesystemAttachmentContent extends XWikiAttachmentContent
      * The Constructor.
      *
      * @param storage the file where the data is stored.
+     * @param attachment the attachment to associate this content with.
+     * @param lock this will be locked for reading when the attachment file is being read.
      */
     public FilesystemAttachmentContent(final File storage,
                                        final XWikiAttachment attachment,
