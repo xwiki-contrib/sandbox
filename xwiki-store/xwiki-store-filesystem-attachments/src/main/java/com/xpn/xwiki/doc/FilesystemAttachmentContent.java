@@ -21,7 +21,6 @@
 
 package com.xpn.xwiki.doc;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -30,6 +29,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import org.apache.commons.io.IOUtils;
+import org.xwiki.store.generic.internal.CloseAtEndInputStream;
 
 
 /**
@@ -86,13 +86,14 @@ public class FilesystemAttachmentContent extends XWikiAttachmentContent
     @Deprecated
     public byte[] getContent()
     {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final InputStream is = this.getContentInputStream();
         try {
-            IOUtils.copy(this.getContentInputStream(), baos);
+            return IOUtils.toByteArray(is);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load attachment content", e);
+        } finally {
+            IOUtils.closeQuietly(is);
         }
-        return baos.toByteArray();
     }
 
     /**
@@ -125,13 +126,14 @@ public class FilesystemAttachmentContent extends XWikiAttachmentContent
             /** {@inheritDoc} */
             public void close() throws IOException
             {
-                this.lock.unlock();
                 super.close();
+                this.lock.unlock();
             }
         }
 
         try {
-            return new LockingFileInputStream(this.storageFile, this.lock.readLock());
+            return new CloseAtEndInputStream(
+                new LockingFileInputStream(this.storageFile, this.lock.readLock()));
         } catch (IOException e) {
             throw new RuntimeException("Failed to get InputStream", e);
         }

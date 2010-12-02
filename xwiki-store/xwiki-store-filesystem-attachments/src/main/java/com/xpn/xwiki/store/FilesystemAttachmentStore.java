@@ -365,6 +365,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                 attachFile.delete();
             }
 
+            // TODO Only delete if it is contained in the database.
             // If the attachment is also stored in the database, delete that one as well.
             this.hibernateAttachStore.deleteXWikiAttachment(attachment,
                                                             parentUpdate,

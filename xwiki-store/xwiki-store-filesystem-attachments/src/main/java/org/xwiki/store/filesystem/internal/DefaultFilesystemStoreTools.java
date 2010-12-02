@@ -96,12 +96,18 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
                                            + "associated with a document.");
         }
 
+        final String encodedName;
         try {
-            return new File(getDocumentDir(doc.getDocumentReference(), this.storageDir, this.pathSerializer),
-                            URLEncoder.encode(attachment.getFilename(), "UTF-8"));
+            encodedName = URLEncoder.encode(attachment.getFilename(), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException("UTF-8 not available, this Java VM is not standards compliant!");
         }
+
+        final File attachmentsDir =
+            getDocumentDir(doc.getDocumentReference(), this.storageDir, this.pathSerializer);
+
+        final File attachmentDir = new File(attachmentsDir, encodedName);
+        return new File(attachmentDir, encodedName);
     }
 
     /**
