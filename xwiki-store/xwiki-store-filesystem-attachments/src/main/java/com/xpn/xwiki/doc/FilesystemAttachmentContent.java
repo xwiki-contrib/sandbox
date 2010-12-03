@@ -29,7 +29,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import org.apache.commons.io.IOUtils;
-import org.xwiki.store.generic.internal.CloseAtEndInputStream;
+import org.apache.commons.io.input.AutoCloseInputStream;
 
 
 /**
@@ -132,7 +132,7 @@ public class FilesystemAttachmentContent extends XWikiAttachmentContent
         }
 
         try {
-            return new CloseAtEndInputStream(
+            return new AutoCloseInputStream(
                 new LockingFileInputStream(this.storageFile, this.lock.readLock()));
         } catch (IOException e) {
             throw new RuntimeException("Failed to get InputStream", e);
