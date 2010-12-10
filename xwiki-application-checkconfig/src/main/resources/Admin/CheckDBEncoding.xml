@@ -24,8 +24,6 @@
 <hidden>false</hidden>
 <content>&lt;%
 
-println context.getDatabase()
-println context.getOriginalDatabase()
 def context2 = context.getContext();
 def store = xwiki.getXWiki().getStore().getStore();
 def wikilist =  xwiki.isVirtual() ? xwiki.wikimanager.getAllWikis() : [ context.getOriginalDatabase() ];

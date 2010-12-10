@@ -3,7 +3,7 @@
 <web>Admin</web>
 <name>CheckRights</name>
 <language></language>
-<defaultLanguage>en</defaultLanguage>
+<defaultLanguage></defaultLanguage>
 <translation>0</translation>
 <parent>Admin.CheckConfig</parent>
 <creator>XWiki.Admin</creator>
