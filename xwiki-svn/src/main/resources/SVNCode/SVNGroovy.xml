@@ -960,7 +960,7 @@ public class SVNLogReader {
         for (page in pageList) {
            def pagedoc = xwiki.getDocument(page);
            // make sure we are getting the right translation
-           def lang = context.getRequest().get("${pagename}_language")
+           def lang = context.getRequest().get("${page}_language")
            if (lang!=null &amp;&amp; lang!="")
              pagedoc = pagedoc.getTranslatedDocument(lang);
            def wikicontent = getXML(pagedoc);
