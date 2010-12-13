@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.List;
 
+import org.hibernate.Session;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.store.filesystem.internal.FilesystemStoreTools;
@@ -91,7 +92,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
     {
         final Transaction trans = new XWikiHibernateTransaction(context);
         try {
-            this.runnableToSaveAttachmentContent(attachment, updateDocument, context).start(trans);
+            this.getAttachmentContentSaveRunnable(attachment, updateDocument, context).start(trans);
         } catch (Exception e) {
             if (e instanceof XWikiException) {
                 throw (XWikiException) e;
@@ -103,14 +104,16 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
     }
 
     /**
+     * Get a TransactionRunnable for saving the attachment content.
+     *
      * @param attachment the XWikiAttachment whose content should be saved.
      * @param updateDocument whether or not to update the document at the same time.
      * @param context the XWikiContext for the request.
      * @return a TransactionRunnable for saving the attachment content.
      */
-    private TransactionRunnable runnableToSaveAttachmentContent(final XWikiAttachment attachment,
-                                                                final boolean updateDocument,
-                                                                final XWikiContext context)
+    private TransactionRunnable getAttachmentContentSaveRunnable(final XWikiAttachment attachment,
+                                                                 final boolean updateDocument,
+                                                                 final XWikiContext context)
     {
         final XWikiAttachmentContent content = attachment.getAttachment_content();
 
@@ -277,7 +280,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
             chain.start(new XWikiHibernateTransaction(context));
 
             for (XWikiAttachment attach : attachments) {
-                chain.run(this.runnableToSaveAttachmentContent(attach, false, context));
+                chain.run(this.getAttachmentContentSaveRunnable(attach, false, context));
             }
 
             // Save the parent document only once.
@@ -357,22 +360,161 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                                       final boolean bTransaction)
         throws XWikiException
     {
-        final File attachFile = this.fileTools.fileForAttachment(attachment);
-        final ReadWriteLock lock = this.fileTools.getLockForFile(attachFile);
+        final Transaction trans = new XWikiHibernateTransaction(context);
         try {
-            lock.writeLock().lock();
-            if (attachFile.exists()) {
-                attachFile.delete();
+            this.getAttachmentDeletetionRunnable(attachment, parentUpdate, context).start(trans);
+        } catch (Exception e) {
+            if (e instanceof XWikiException) {
+                throw (XWikiException) e;
+            }
+            throw new XWikiException(XWikiException.MODULE_XWIKI_STORE,
+                                     XWikiException.ERROR_XWIKI_STORE_HIBERNATE_SAVING_ATTACHMENT,
+                                     "Exception while deleting attachment.", e);
+        }
+    }
+
+    /**
+     * Get a TransactionRunnable for deleting an attachment.
+     *
+     * @param attachment the XWikiAttachment to delete.
+     * @param updateDocument whether or not to update the document at the same time.
+     * @param context the XWikiContext for the request.
+     * @return a TransactionRunnable for deleting the attachment.
+     */
+    private TransactionRunnable getAttachmentDeletetionRunnable(final XWikiAttachment attachment,
+                                                                final boolean updateDocument,
+                                                                final XWikiContext context)
+    {
+        // We want the directory for this attachment, not the file itself so .parentFile().
+        final File attachDir = this.fileTools.fileForAttachment(attachment).getParentFile();
+
+        final ReadWriteLock lock = this.fileTools.getLockForFiles(this.fileTools.allChildrenOf(attachDir));
+
+        return new AttachmentDeleteTransactionRunnable(attachment,
+                                                       updateDocument,
+                                                       context,
+                                                       attachDir,
+                                                       this.fileTools.getBackupFile(attachDir),
+                                                       lock,
+                                                       this.fileTools);
+    }
+
+    /**
+     * A TransactionRunnable for deleting an attachment.
+     */
+    private class AttachmentDeleteTransactionRunnable extends TransactionRunnable
+    {
+        /** The XWikiAttachment whose content should be saved. */
+        private final XWikiAttachment attachment;
+
+        /** Whether or not to update the document at the same time. */
+        private final boolean updateDocument;
+
+        /** The XWikiContext for the request. */
+        private final XWikiContext context;
+
+        /** The directory where the arttachment content is stored. */
+        private final File attachDir;
+
+        /** The directory name to move the attachment content to temporarily while the transaction runs. */
+        private final File tempDir;
+
+        /** This Lock will be locked while the attachment file is being written to. */
+        private final ReadWriteLock lock;
+
+        /** Used for getting all files in a given directory. */
+        private final FilesystemStoreTools fileTools;
+
+        /**
+         * Construct a TransactionRunnable for deleting the attachment.
+         *
+         * @param attachment the XWikiAttachment to delete
+         * @param updateDocument whether or not to update the document at the same time.
+         * @param context the XWikiContext for the request.
+         * @param attachDir the directory to where the attachment content is stored.
+         * @param tempDir the directory to to move the attachment content to temporarily.
+         * @param lock this Lock will be locked while the attachment file is being written to.
+         * @param fileTools an instance of FilesystemStoreTools for finding all children of a directory.
+         */
+        public AttachmentDeleteTransactionRunnable(final XWikiAttachment attachment,
+                                                   final boolean updateDocument,
+                                                   final XWikiContext context,
+                                                   final File attachDir,
+                                                   final File tempDir,
+                                                   final ReadWriteLock lock,
+                                                   final FilesystemStoreTools fileTools)
+        {
+            this.attachment = attachment;
+            this.updateDocument = updateDocument;
+            this.context = context;
+            this.attachDir = attachDir;
+            this.tempDir = tempDir;
+            this.lock = lock;
+            this.fileTools = fileTools;
+        }
+
+        /**
+         * This will run in the transaction.
+         *
+         * @throws Exception if an exception is thrown moving the file,
+         *         saving the attachment version, or updating the document which contains the attachment.
+         */
+        protected void run() throws Exception
+        {
+            // Get the lock on the file. This will be released onComplete().
+            this.lock.writeLock().lock();
+
+            final Session session = this.context.getWiki().getHibernateStore().getSession(this.context);
+
+            // Delete the content from the attachment.
+            // In case it was stored in the database by XWikiHibernateAttachmentStore.
+            session.delete(new XWikiAttachmentContent(this.attachment));
+
+            // TODO: This needs to be run in the same transaction.
+            this.context.getWiki().getAttachmentVersioningStore().deleteArchive(attachment, context, false);
+
+            // TODO: This needs to be run in the same transaction.
+            if (this.updateDocument) {
+                final String filename = this.attachment.getFilename();
+                final List<XWikiAttachment> list = attachment.getDoc().getAttachmentList();
+                for (int i = 0; i < list.size(); i++) {
+                    if (filename.equals(list.get(i).getFilename())) {
+                        list.remove(i);
+                        break;
+                    }
+                }
+                context.getWiki().getStore().saveXWikiDoc(attachment.getDoc(), context, false);
             }
 
-            // TODO Only delete if it is contained in the database.
-            // If the attachment is also stored in the database, delete that one as well.
-            this.hibernateAttachStore.deleteXWikiAttachment(attachment,
-                                                            parentUpdate,
-                                                            context,
-                                                            bTransaction);
-        } finally {
-            lock.writeLock().unlock();
+            // Delete the attachment metadata.
+            session.delete(attachment);
+
+            // Move the file to a temporary location where it will be out of the way
+            // but can be moved back if the transaction fails.
+            this.attachDir.renameTo(this.tempDir);
+        }
+
+        /** This will happen if the transaction fails. */
+        protected void onRollback()
+        {
+            // Try to put the attachment dir back where it should be.
+            if (this.tempDir.exists()) {
+                this.tempDir.renameTo(this.attachDir);
+            }
+        }
+
+        /** This will run if the transaction succeeds. */
+        protected void onCommit()
+        {
+            // Delete the attachment dir since everything went well.
+            // If you put symlinks into the dir tree then this will eat your filesystem!
+            this.fileTools.deleteDir(this.tempDir);
+        }
+
+        /** This will run after onCommit or onRollback. */
+        protected void onComplete()
+        {
+            this.lock.writeLock().unlock();
         }
     }
 

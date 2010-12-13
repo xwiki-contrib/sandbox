@@ -19,12 +19,17 @@
  */
 package org.xwiki.store.filesystem.internal;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.TimeUnit;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -86,6 +91,62 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
+     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#getTempFile(File)
+     */
+    public File getTempFile(final File storageFile)
+    {
+        return new File(storageFile.getAbsolutePath() + TEMP_FILE_SUFFIX);
+    }
+
+    /**
+     * {@inheritDoc}
+     * This implementation knows nothing about symlinks and will stack overflow with cyclical symlinks.
+     *
+     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#allChildrenOf(File)
+     */
+    public List<File> allChildrenOf(final File parent)
+    {
+        final List<File> out = new ArrayList<File>();
+        final File[] children = parent.listFiles();
+        for (int i = 0; i < children.length; i++) {
+            out.add(children[i]);
+            if (children[i].isDirectory()) {
+                out.addAll(allChildrenOf(children[i]));
+            }
+        }
+        return out;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#deleteDir(File)
+     */
+    public boolean deleteDir(final File directory)
+    {
+        final File[] children = directory.listFiles();
+        for (int i = 0; i < children.length; i++) {
+            if (children[i].isDirectory()) {
+                this.deleteDir(children[i]);
+            } else {
+                children[i].delete();
+            }
+        }
+        // Now move up the chain until a non-empty directory is found.
+        File parent = directory;
+        File dir;
+        while (parent.listFiles().length == 0) {
+            dir = parent;
+            parent = dir.getParentFile();
+            dir.delete();
+        }
+
+        return directory.exists();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#fileForAttachment(XWikiAttachment)
      */
     public File fileForAttachment(final XWikiAttachment attachment)
@@ -137,6 +198,20 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#getLockForFiles(List)
+     */
+    public synchronized ReadWriteLock getLockForFiles(final List<File> toLock)
+    {
+        final List<ReadWriteLock> locks = new ArrayList<ReadWriteLock>(toLock.size());
+        for (File file : toLock) {
+            locks.add(this.getLockForFile(file));
+        }
+        return new CompositeReadWriteLock(locks);
+    }
+
+    /**
      * Get the directory to store the attachment in.
      * This is a path obtained from the owner document reference, where each reference segment
      * (wiki, spaces, document name) contributes to the final path.
@@ -157,5 +232,166 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
         final File path = new File(storageDir, pathSerializer.serialize(docRef));
         final File docDir = new File(path, DOCUMENT_DIR_NAME);
         return new File(docDir, ATTACHMENT_DIR_NAME);
+    }
+
+    /**
+     * A ReadWriteLock made up of many ReadWriteLocks.
+     * To acquire this lock means acquiring all of it's component locks.
+     */
+    private static class CompositeReadWriteLock implements ReadWriteLock
+    {
+        /** The composite lock made of all the read locks. */
+        private final Lock readLock;
+
+        /** The composite lock made of all the write locks. */
+        private final Lock writeLock;
+
+        /**
+         * The Constructor.
+         *
+         * @param members the locks to make this composite lock out of.
+         */
+        public CompositeReadWriteLock(final List<ReadWriteLock> members)
+        {
+            final List<Lock> readLocks = new ArrayList<Lock>();
+            final List<Lock> writeLocks = new ArrayList<Lock>();
+            for (ReadWriteLock member : members) {
+                readLocks.add(member.readLock());
+                writeLocks.add(member.writeLock());
+            }
+            this.readLock = new CompositeLock(readLocks);
+            this.writeLock = new CompositeLock(writeLocks);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.concurrent.locks.ReadWriteLock#readLock()
+         */
+        public Lock readLock()
+        {
+            return this.readLock;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.concurrent.locks.ReadWriteLock#writeLock()
+         */
+        public Lock writeLock()
+        {
+            return this.writeLock;
+        }
+    }
+
+    /**
+     * A Lock made up of a number of other Locks.
+     * Acquiring this lock means acquiring all of it's component locks.
+     */
+    private static class CompositeLock implements Lock
+    {
+        /** Exception to throw when a function is called which has not been written. */
+        private static final String NOT_IMPLEMENTED = "Function not implemented.";
+
+        /** The locks which make up this composite lock. */
+        private final List<Lock> locks = new ArrayList<Lock>();
+
+        /**
+         * The Constructor.
+         *
+         * @param locks the locks which should make up this composite lock.
+         */
+        public CompositeLock(final List<Lock> locks)
+        {
+            this.locks.addAll(locks);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.concurrent.locks.Lock#lock()
+         */
+        public void lock()
+        {
+            final List<Lock> toLock = new ArrayList(this.locks);
+            try {
+                // Get all of the locks which we can.
+                int i = 0;
+                while (i < toLock.size()) {
+                    if (toLock.get(i).tryLock()) {
+                        toLock.remove(i);
+                    } else {
+                        i++;
+                    }
+                }
+                // Force the locks which we haven't locked yet.
+                for (Lock stillWaiting : toLock) {
+                    stillWaiting.lock();
+                }
+            } catch (RuntimeException e) {
+                this.unlock();
+                throw e;
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         * Not implemented.
+         *
+         * @see java.util.concurrent.locks.Lock#lockInterruptibly()
+         */
+        public void lockInterruptibly()
+        {
+            throw new RuntimeException(NOT_IMPLEMENTED);
+        }
+
+        /**
+         * {@inheritDoc}
+         * Not implemented.
+         *
+         * @see java.util.concurrent.locks.Lock#newCondition()
+         */
+        public Condition newCondition()
+        {
+            throw new RuntimeException(NOT_IMPLEMENTED);
+        }
+
+        /**
+         * {@inheritDoc}
+         * Not implemented.
+         *
+         * @see java.util.concurrent.locks.Lock#tryLock()
+         */
+        public boolean tryLock()
+        {
+            throw new RuntimeException(NOT_IMPLEMENTED);
+        }
+
+        /**
+         * {@inheritDoc}
+         * Not implemented.
+         *
+         * @see java.util.concurrent.locks.Lock#tryLock(long, TimeUnit)
+         */
+        public boolean tryLock(final long time, final TimeUnit unit)
+        {
+            throw new RuntimeException(NOT_IMPLEMENTED);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.concurrent.locks.Lock#unlock()
+         */
+        public void unlock()
+        {
+            for (Lock lock : this.locks) {
+                try {
+                    lock.unlock();
+                } catch (RuntimeException e) {
+                    // We probably don't own this lock so we just move on.
+                }
+            }
+        }
     }
 }
