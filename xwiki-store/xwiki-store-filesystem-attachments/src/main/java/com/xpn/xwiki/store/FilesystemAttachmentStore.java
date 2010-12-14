@@ -274,28 +274,26 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
             return;
         }
 
-        final ChainingTransactionRunnable chain = new ChainingTransactionRunnable();
-
         try {
-            chain.start(new XWikiHibernateTransaction(context));
+            final ChainingTransactionRunnable chain = new ChainingTransactionRunnable();
 
             for (XWikiAttachment attach : attachments) {
-                chain.run(this.getAttachmentContentSaveRunnable(attach, false, context));
+                chain.add(this.getAttachmentContentSaveRunnable(attach, false, context));
             }
 
             // Save the parent document only once.
             if (updateDocument) {
-                context.getWiki().getStore().saveXWikiDoc(doc, context, false);
+                chain.add(new TransactionRunnable() {
+                    protected void run() throws Exception
+                    {
+                        context.getWiki().getStore().saveXWikiDoc(doc, context, false);
+                    }
+                });
             }
 
-            chain.commit();
+            chain.start(new XWikiHibernateTransaction(context));
+
         } catch (Exception e) {
-            try {
-                chain.rollback();
-            } catch (Throwable t) {
-                // This should not happen but must not squash the original exception.
-            }
-
             if (e instanceof XWikiException) {
                 throw (XWikiException) e;
             }
@@ -454,6 +452,15 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
         }
 
         /**
+         * Acquire the lock.
+         */
+        protected void preRun()
+        {
+            // Get the lock on the file. This will be released onComplete().
+            this.lock.writeLock().lock();
+        }
+
+        /**
          * This will run in the transaction.
          *
          * @throws Exception if an exception is thrown moving the file,
@@ -461,9 +468,6 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
          */
         protected void run() throws Exception
         {
-            // Get the lock on the file. This will be released onComplete().
-            this.lock.writeLock().lock();
-
             final Session session = this.context.getWiki().getHibernateStore().getSession(this.context);
 
             // Delete the content from the attachment.
@@ -537,71 +541,41 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
      */
     private static class ChainingTransactionRunnable extends TransactionRunnable
     {
-        /** Hold the transaction while the runnable runs. */
-        private Transaction transaction;
-
         /** All of the runnables to be run then committed. */
-        private List<TransactionRunnable> allRunnables = new ArrayList<TransactionRunnable>();
+        private final List<TransactionRunnable> allRunnables = new ArrayList<TransactionRunnable>();
+
+        /**
+         * Add a TransactionRunnable to this chain.
+         *
+         * @param runnable the TransactioRunnable to run in this transaction.
+         */
+        public void add(final TransactionRunnable runnable)
+        {
+            this.allRunnables.add(runnable);
+        }
 
         /**
          * {@inheritDoc}
          *
-         * @see TransactionRunnable#start(Transaction)
+         * @see TransactionRunnable#preRun()
          */
-        public void start(final Transaction transaction) throws Exception
+        protected void preRun() throws Exception
         {
-            this.transaction = transaction;
-            transaction.begin();
+            for (TransactionRunnable run : this.allRunnables) {
+                run.run();
+            }
         }
 
         /**
-         * Run a TransactionRunnable in this transaction.
+         * {@inheritDoc}
          *
-         * @param runnable the TransactioRunnable to run in this transaction.
-         * @throws Exception whatever exception is thrown by the passed runnable  
+         * @see TransactionRunnable#run()
          */
-        public void run(final TransactionRunnable runnable) throws Exception
+        protected void run() throws Exception
         {
-            if (this.transaction == null) {
-                throw new IllegalStateException("Trying to run TransactionRunnables before the transaction"
-                                                + " has been started");
+            for (TransactionRunnable run : this.allRunnables) {
+                run.run();
             }
-            try {
-                this.allRunnables.add(runnable);
-                runnable.run();
-            } catch (Exception e) {
-                this.rollback();
-                throw e;
-            }
-        }
-
-        /**
-         * Commit the transaction.
-         */
-        public void commit()
-        {
-            try {
-                this.transaction.commit();
-            } catch (Exception e) {
-                this.rollback();
-                return;
-            }
-            this.onCommit();
-            this.onComplete();
-        }
-
-        /**
-         * Rollback the transaction.
-         */
-        public void rollback()
-        {
-            try {
-                this.transaction.rollback();
-            } catch (Exception e) {
-                // The database is in an inconsistent state, this should be ERROR logged.
-            }
-            this.onRollback();
-            this.onComplete();
         }
 
         /**
@@ -616,6 +590,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                     run.onCommit();
                 } catch (Throwable t) {
                     // onCommit should not throw anything.
+                    // TODO Log this since it means the storage engine may be in an inconsistant state.
                 }
             }
         }
@@ -632,6 +607,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                     run.onRollback();
                 } catch (Throwable t) {
                     // onRollback should not throw anything.
+                    // TODO Log this since it means the storage engine may be in an inconsistant state.
                 }
             }
         }
@@ -648,6 +624,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                     run.onComplete();
                 } catch (Throwable t) {
                     // onComplete should not throw anything.
+                    // TODO Log this since it means the storage engine may be in an inconsistant state.
                 }
             }
         }
@@ -782,21 +759,29 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
          */
         public void start(final Transaction transaction) throws Exception
         {
+            boolean transactionOpen = false;
             try {
+                this.preRun();
+                transactionOpen = true;
                 transaction.begin();
                 this.run();
                 transaction.commit();
                 this.onCommit();
             } catch (Exception e) {
-                try {
-                    transaction.rollback();
-                } catch (Exception ee) {
-                    // Not much we can do here, failed to rollback. Throw the original exception anyway.
+                if (transactionOpen) {
+                    try {
+                        transaction.rollback();
+                    } catch (Exception ee) {
+                        // Not much we can do here, failed to rollback.
+                        // Throw the original exception anyway.
+                        // TODO Log this since it means the storage engine may be in an inconsistant state.
+                    }
                 }
                 try {
                     this.onRollback();
                 } catch (Throwable t) {
                     // This exception cannot be thrown reliably so it will be swallowed.
+                    // TODO Log this since it means the storage engine may be in an inconsistant state.
                 }
                 throw e;
             } finally {
@@ -804,8 +789,20 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                     this.onComplete();
                 } catch (Throwable t) {
                     // This exception cannot be thrown reliably so it will be swallowed.
+                    // TODO Log this since it means the storage engine may be in an inconsistant state.
                 }
             }
+        }
+
+        /**
+         * This will be run before the transaction is opened.
+         *
+         * @throws Exception which will cause the execution of
+         *         onRollback then onComplete before being thrown up the calling stack.
+         */
+        protected void preRun() throws Exception
+        {
+            // By default this will do nothing.
         }
 
         /**
