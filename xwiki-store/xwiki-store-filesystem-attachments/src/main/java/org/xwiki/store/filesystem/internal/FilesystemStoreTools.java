@@ -51,6 +51,12 @@ public interface FilesystemStoreTools
     String ATTACHMENT_DIR_NAME = "attachments";
 
     /**
+     * This stores the attachment metadata for each revision of the attachment in XML format.
+     * @see #metaFileForAttachment(XWikiAttachment)
+     */
+    String ATTACH_ARCHIVE_META_FILENAME = "~METADATA.xml";
+
+    /**
      * When a file is being saved, the original will be moved to the same name with this after it.
      * If the save operation fails then this file will be moved back to the regular position to come as
      * close as possible to ACID transaction handling.
@@ -63,6 +69,14 @@ public interface FilesystemStoreTools
      * temp file will be renamed back to the original filename.
      */
     String TEMP_FILE_SUFFIX = "~tmp";
+
+    /**
+     * This must precede the version of a file. It has to be URL invalid so that it cannot collide with
+     * the name of another file. Also no other key can start with ~v because the name of the version
+     * might be anything. If the prefix was "~b" and a version was made called "ak" then it would collide
+     * with the BACKUP_FILE_SUFFIX.
+     */
+    String FILE_VERSION_PREFIX = "~v";
 
     /**
      * Get a backup file which for a given storage file.
@@ -83,12 +97,46 @@ public interface FilesystemStoreTools
     File getTempFile(final File storageFile);
 
     /**
-     * Get a File for loading or storing this attachment.
+     * Get the meta file for the attachment.
+     * The meta file contains information about each version of the attachment such as who saved it.
+     * This will be a file named ~METADATA.xml which will reside in the dame directory as the content
+     * file gotten by fileForAttachment().
+     *
+     * @param attachment the attachment to get the metadata for.
+     * @return a File which corrisponds to this attachment for holding the attachment's metadata history.
+     */
+    File metaFileForAttachment(final XWikiAttachment attachment);
+
+    /**
+     * Get a File for loading or storing this attachment's content.
+     * This file is derived from the name of the document which the attachment resides in and the
+     * attachment filename. The file will be placed in the storage area in a directory structure
+     * called <storage dir>/<wiki>/<space>/<document name>/~this/attachments/<attachment file name>/
+     * So an attachment called file.txt in a document called Sandbox.Test in a the main wiki ("xwiki")
+     * would go in the following file:
+     * <storage dir>/xwiki/Sandbox/Test/~this/attachments/file.txt/file.txt
      *
      * @param attachment the attachment to get a file for content storage.
      * @return a file to store the content of the given attachment.
      */
     File fileForAttachment(final XWikiAttachment attachment);
+
+    /**
+     * Get a file corrisponding to this version of this attachment.
+     * This file's path is derived from the name of the document with space and wiki.
+     * The file path is the same as the path for fileForAttachment() but the name
+     * has a version number added.
+     * If the file has one or more dots ('.') in it then the version number is inserted before
+     * the last dot. Otherwise it is appended to the end. Version numbers always have "~v" prepended
+     * to prevent collision.
+     * version 1.1 of an attachment called file.txt will be stored as file~v1.1.txt
+     * version 1.2 of an attachment called noExtension will be stored as noExtension~v1.2
+     *
+     * @param attachment the attachment to get the version of.
+     * @param versionName the name of the version for example "1.1" or "1.2".
+     */
+    File fileForAttachmentVersion(final XWikiAttachment attachment,
+                                  final String versionName);
 
     /**
      * Get a {@link java.util.concurrent.locks.ReadWriteLock} which is unique to the given file.

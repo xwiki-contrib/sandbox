@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<!--
- *
+/*
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
@@ -19,23 +16,24 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
--->
+ */
+package org.xwiki.store;
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-core-parent</artifactId>
-    <version>2.7-SNAPSHOT</version>
-  </parent>
-  <artifactId>xwiki-core-store-parent</artifactId>
-  <name>XWiki Platform - Core - Storage - Parent POM</name>
-  <packaging>pom</packaging>
-  <description>XWiki Platform - Core - Storage - Parent POM</description>
-  <modules>
-    <module>xwiki-store-api</module>
-    <module>xwiki-store-serialization</module>
-    <module>xwiki-store-filesystem-attachments</module>
-  </modules>
-</project>
+/**
+ * A TransactionRunnable which does nothing.
+ *
+ * @version $Id$
+ * @since TODO
+ */
+public class VoidTransactionRunnable extends TransactionRunnable
+{
+    /**
+     * {@inheritDoc}
+     *
+     * @see AbstractTransactionRunnable#start(Transaction)
+     */
+    public void start(final Transaction transaction)
+    {
+        // No op. Hence why it's void.
+    }
+}

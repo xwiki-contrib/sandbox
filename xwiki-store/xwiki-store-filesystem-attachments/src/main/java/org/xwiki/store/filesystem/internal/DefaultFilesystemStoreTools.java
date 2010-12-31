@@ -81,7 +81,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#getBackupFile(File)
+     * @see FilesystemStoreTools#getBackupFile(File)
      */
     public File getBackupFile(final File storageFile)
     {
@@ -91,7 +91,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#getTempFile(File)
+     * @see FilesystemStoreTools#getTempFile(File)
      */
     public File getTempFile(final File storageFile)
     {
@@ -102,7 +102,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
      * {@inheritDoc}
      * This implementation knows nothing about symlinks and will stack overflow with cyclical symlinks.
      *
-     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#allChildrenOf(File)
+     * @see FilesystemStoreTools#allChildrenOf(File)
      */
     public List<File> allChildrenOf(final File parent)
     {
@@ -120,7 +120,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#deleteDir(File)
+     * @see FilesystemStoreTools#deleteDir(File)
      */
     public boolean deleteDir(final File directory)
     {
@@ -147,26 +147,23 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#fileForAttachment(XWikiAttachment)
+     * @see FilesystemStoreTools#metaFileForAttachment(XWikiAttachment)
+     */
+    public File metaFileForAttachment(final XWikiAttachment attachment)
+    {
+        final File attachFile = this.fileForAttachment(attachment);
+        return new File(attachFile.getParentFile(), ATTACH_ARCHIVE_META_FILENAME);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see FilesystemStoreTools#fileForAttachment(XWikiAttachment)
      */
     public File fileForAttachment(final XWikiAttachment attachment)
     {
-        final XWikiDocument doc = attachment.getDoc();
-        if (doc == null) {
-            throw new NullPointerException("Could not store attachment because it is not "
-                                           + "associated with a document.");
-        }
-
-        final String encodedName;
-        try {
-            encodedName = URLEncoder.encode(attachment.getFilename(), "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException("UTF-8 not available, this Java VM is not standards compliant!");
-        }
-
-        final File attachmentsDir =
-            getDocumentDir(doc.getDocumentReference(), this.storageDir, this.pathSerializer);
-
+        final File attachmentsDir getAttachmentDir(attachment);
+        final String encodedName = this.getURLEncoded(attachment.getFilename());
         final File attachmentDir = new File(attachmentsDir, encodedName);
         return new File(attachmentDir, encodedName);
     }
@@ -174,7 +171,71 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#getLockForFile(File)
+     * @see FilesystemStoreTools#fileForAttachmentVersion(XWikiAttachment)
+     */
+    public File fileForAttachmentVersion(final XWikiAttachment attachment,
+                                         final String versionName)
+    {
+        return new File(this.getAttachmentDir(attachment),
+                        getVersionedFilename(attachment.getFilename(), versionName));
+    }
+
+    /**
+     * Get a version of a filename.
+     * The filename is URL encoded and the version has "~v" prepended so that it cannot be
+     * mistaken for part of the filename.
+     * If the filename contains one or more '.' characters then the version is inserted before
+     * the last '.' character. Otherwise it is appended to the end.
+     * This means a file such as:
+     * file.txt version 1.1 will become file~v1.1.txt and will still be recognized by a text editor
+     * A file with no extension such as myUnknownFile version 1.1 will become myUnknownFile~v1.1
+     * Because of URL encoding, a file named file~v1.3.txt of version 1.1 will become 
+     * file%7Ev1.3~1.1.txt and thus will not collide with file.txt version 1.1.
+     *
+     * @param filename the name of the file to save. This will be URL encoded.
+     * @param versionName the name of the version of the file. This will also be URL encoded.
+     */
+    private static String getVersionedFilename(final String filename, final String versionName)
+    {
+        final String attachFilename = getURLEncoded(filename);
+        final String version = getURLEncoded(versionName);
+        if (attachfileName.contains('.')) {
+            // file.txt version 1.1 --> file~v1.1.txt
+            return attachfileName.substring(0, attachfileName.lastIndexOf('.'))
+                     + FILE_VERSION_PREFIX + version
+                     + attachfileName.substring(attachfileName.lastIndexOf('.'));
+        }
+        // someFile version 2.2 --> someFile~v2.2
+        return attachfileName + FILE_VERSION_PREFIX + version;
+    }
+
+    private File getAttachmentDir(final XWikiAttachment attachment)
+    {
+        final XWikiDocument doc = attachment.getDoc();
+        if (doc == null) {
+            throw new NullPointerException("Could not store attachment because it is not "
+                                           + "associated with a document.");
+        }
+        final File docDir = getDocumentDir(doc.getDocumentReference(),
+                                           this.storageDir,
+                                           this.pathSerializer);
+        final File attachmentsDir = new File(docDir, ATTACHMENT_DIR_NAME);
+        return new File(attachmentsDir, getURLEncoded(attachment.getFilename()));
+    }
+
+    private static String getURLEncoded(final String toEncode)
+    {
+        try {
+            return URLEncoder.encode(toEncode, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException("UTF-8 not available, this Java VM is not standards compliant!");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see FilesystemStoreTools#getLockForFile(File)
      */
     public synchronized ReadWriteLock getLockForFile(final File toLock)
     {
@@ -200,7 +261,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see org.xwiki.store.filesystem.internal.FilesystemStoreTools#getLockForFiles(List)
+     * @see FilesystemStoreTools#getLockForFiles(List)
      */
     public synchronized ReadWriteLock getLockForFiles(final List<File> toLock)
     {
@@ -212,11 +273,11 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     }
 
     /**
-     * Get the directory to store the attachment in.
+     * Get the directory associated with this document.
      * This is a path obtained from the owner document reference, where each reference segment
      * (wiki, spaces, document name) contributes to the final path.
      * For a document called xwiki:Main.WebHome, the directory will be:
-     * <code>(storageDir)/xwiki/Main/WebHome/~this/attachments/</code>
+     * <code>(storageDir)/xwiki/Main/WebHome/~this/</code>
      * 
      * @param docRef the DocumentReference for the document to get the directory for.
      * @param storageDir the directory to place the directory hirearcy for attachments in.
@@ -230,8 +291,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
                                        final EntityReferenceSerializer<String> pathSerializer)
     {
         final File path = new File(storageDir, pathSerializer.serialize(docRef));
-        final File docDir = new File(path, DOCUMENT_DIR_NAME);
-        return new File(docDir, ATTACHMENT_DIR_NAME);
+        return new File(path, DOCUMENT_DIR_NAME);
     }
 
     /**

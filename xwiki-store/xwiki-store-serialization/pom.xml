@@ -22,18 +22,16 @@
  *
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.xwiki.platform</groupId>
     <artifactId>xwiki-core-parent</artifactId>
     <version>2.7-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-store-filesystem-attachments</artifactId>
-  <name>XWiki Platform - Core - Storage - Filesystem - Attachments</name>
-  <description>XWiki Platform - Core - Storage - Filesystem - Attachments</description>
+  <artifactId>xwiki-core-store-serialization</artifactId>
+  <name>XWiki Platform - Core - Storage - Serialization</name>
+  <description>XWiki Platform - Core - Storage - Serialization</description>
   <properties>
     <!-- Skip Clirr execution, since this is a new component -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
@@ -45,37 +43,23 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Needed for DocumentReferenceSerializer implementation. -->
+    <!-- Used by XMLSerializer and XMLWriter -->
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-model</artifactId>
-      <version>${project.version}</version>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>1.6.1</version>
     </dependency>
 
-    <!-- Used to serialize the metadata for attachments -->
+    <!-- XMLSerializer uses Base64OutputStream -->
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-store-serialization</artifactId>
-      <version>${project.version}</version>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
     </dependency>
 
-    <!-- TransactionRunnable -->
+    <!-- CloseShieldOutputStream and IOUtils used by XMLWriter -->
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-store-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <!--
-     * Needed for:
-     * XWikiAttachment, XWikiDocument, XWikiHibernateStore,
-     * XWikiAttachmentStoreInterface, XWikiAttachmentVersioningStore,
-     * XWikiAttachmentRecyclebinStore
-     --> 
-    <dependency>
-      <groupId>com.xpn.xwiki.platform</groupId>
-      <artifactId>xwiki-core</artifactId>
-      <version>${project.version}</version>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
     </dependency>
 
     <dependency>
