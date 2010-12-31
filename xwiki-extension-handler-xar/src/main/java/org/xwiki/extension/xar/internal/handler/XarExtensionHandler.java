@@ -26,8 +26,6 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
-import org.xwiki.extension.DisableException;
-import org.xwiki.extension.EnableException;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.UninstallException;
@@ -81,16 +79,6 @@ public class XarExtensionHandler extends AbstractExtensionHandler implements Ini
     {
         // delete pages from the wiki which belong only to this extension (several extension could have some common
         // pages which is not very nice but still could happen technically)
-    }
-
-    public void enable(LocalExtension localExtension, String namespace) throws EnableException
-    {
-        // what should we do ?
-    }
-
-    public void disable(LocalExtension localExtension, String namespace) throws DisableException
-    {
-        // TODO throw unsupported exception
     }
 
     @Override

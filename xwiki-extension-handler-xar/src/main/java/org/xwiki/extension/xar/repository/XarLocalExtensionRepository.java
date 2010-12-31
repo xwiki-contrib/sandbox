@@ -19,18 +19,18 @@
  */
 package org.xwiki.extension.xar.repository;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.extension.LocalExtension;
-import org.xwiki.extension.repository.ExtensionRepository;
+import org.xwiki.extension.repository.LocalExtensionRepository;
 import org.xwiki.extension.xar.LocalPage;
 import org.xwiki.extension.xar.XarLocalExtension;
 
 @ComponentRole
-public interface XarLocalExtensionRepository extends ExtensionRepository
+public interface XarLocalExtensionRepository extends LocalExtensionRepository
 {
-    List<XarLocalExtension> getExensionsByPage(LocalPage page);
+    Collection<XarLocalExtension> getExensionsByPage(LocalPage page);
 
     XarLocalExtension getXarExtension(LocalExtension extension, String namespace);
 }

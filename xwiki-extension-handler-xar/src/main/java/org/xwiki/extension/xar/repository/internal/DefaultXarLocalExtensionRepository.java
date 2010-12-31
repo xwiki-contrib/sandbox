@@ -1,6 +1,7 @@
 package org.xwiki.extension.xar.repository.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -78,12 +79,12 @@ public class DefaultXarLocalExtensionRepository implements XarLocalExtensionRepo
         return this.localExtensionRepository.countExtensions();
     }
 
-    public List< ? extends Extension> getExtensions(int nb, int offset)
+    public Collection< ? extends Extension> getExtensions(int nb, int offset)
     {
         return this.localExtensionRepository.getExtensions(nb, offset);
     }
 
-    public List<LocalExtension> getLocalExtensions()
+    public Collection<LocalExtension> getLocalExtensions()
     {
         return this.localExtensionRepository.getLocalExtensions();
     }
@@ -93,24 +94,30 @@ public class DefaultXarLocalExtensionRepository implements XarLocalExtensionRepo
         return this.localExtensionRepository.getLocalExtension(id);
     }
 
-    public LocalExtension installExtension(Extension extension, boolean dependency) throws InstallException
+    public LocalExtension installExtension(Extension extension, boolean dependency, String namespace)
+        throws InstallException
     {
-        return this.localExtensionRepository.installExtension(extension, dependency);
+        return this.localExtensionRepository.installExtension(extension, dependency, namespace);
     }
 
-    public void uninstallExtension(LocalExtension extension) throws UninstallException
+    public void uninstallExtension(LocalExtension extension, String namespace) throws UninstallException
     {
-        this.localExtensionRepository.uninstallExtension(extension);
+        this.localExtensionRepository.uninstallExtension(extension, namespace);
     }
 
-    public List<LocalExtension> getBackwardDependencies(String id) throws ResolveException
+    public Collection<LocalExtension> getBackwardDependencies(String id, String namespace) throws ResolveException
+    {
+        return this.localExtensionRepository.getBackwardDependencies(id, namespace);
+    }
+
+    public Collection<LocalExtension> getBackwardDependencies(ExtensionId id) throws ResolveException
     {
         return this.localExtensionRepository.getBackwardDependencies(id);
     }
 
     // XarLocalExtensionRepository
 
-    public List<XarLocalExtension> getExensionsByPage(LocalPage page)
+    public Collection<XarLocalExtension> getExensionsByPage(LocalPage page)
     {
         return this.extensionsByPage.get(page);
     }
