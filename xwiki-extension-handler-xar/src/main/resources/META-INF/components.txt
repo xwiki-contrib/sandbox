@@ -1,2 +1,2 @@
-org.xwiki.extension.handler.xar.internal.XarExtensionHandler
-org.xwiki.extension.handler.xar.internal.packager.DefaultPackager
+org.xwiki.extension.xar.internal.handler.XarExtensionHandler
+org.xwiki.extension.xar.internal.handler.packager.DefaultPackager
