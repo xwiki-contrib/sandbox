@@ -162,9 +162,16 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
      */
     public File fileForAttachment(final XWikiAttachment attachment)
     {
-        final File attachmentsDir getAttachmentDir(attachment);
+        // storage/xwiki/Main/WebHome/~this/attachments/
+        final File attachmentsDir = this.getAttachmentDir(attachment);
+
+        // some.file
         final String encodedName = this.getURLEncoded(attachment.getFilename());
+
+        // storage/xwiki/Main/WebHome/~this/attachments/some.file/
         final File attachmentDir = new File(attachmentsDir, encodedName);
+
+        // storage/xwiki/Main/WebHome/~this/attachments/some.file/some.file
         return new File(attachmentDir, encodedName);
     }
 
@@ -194,21 +201,30 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
      *
      * @param filename the name of the file to save. This will be URL encoded.
      * @param versionName the name of the version of the file. This will also be URL encoded.
+     * @return a string representing the filename and version which is guaranteed not to collide
+     *         with any other file gotten through DefaultFilesystemStoreTools.
      */
     private static String getVersionedFilename(final String filename, final String versionName)
     {
         final String attachFilename = getURLEncoded(filename);
         final String version = getURLEncoded(versionName);
-        if (attachfileName.contains('.')) {
+        if (attachFilename.contains(".")) {
             // file.txt version 1.1 --> file~v1.1.txt
-            return attachfileName.substring(0, attachfileName.lastIndexOf('.'))
+            return attachFilename.substring(0, attachFilename.lastIndexOf('.'))
                      + FILE_VERSION_PREFIX + version
-                     + attachfileName.substring(attachfileName.lastIndexOf('.'));
+                     + attachFilename.substring(attachFilename.lastIndexOf('.'));
         }
         // someFile version 2.2 --> someFile~v2.2
-        return attachfileName + FILE_VERSION_PREFIX + version;
+        return attachFilename + FILE_VERSION_PREFIX + version;
     }
 
+    /**
+     * Get the directory for storing files for an attachment.
+     * This will look like storage/xwiki/Main/WebHome/~this/attachments/file.name/
+     *
+     * @param attachment the attachment to get the directory for.
+     * @return a File representing the directory. Note: The directory may not exist.
+     */
     private File getAttachmentDir(final XWikiAttachment attachment)
     {
         final XWikiDocument doc = attachment.getDoc();
@@ -223,6 +239,14 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
         return new File(attachmentsDir, getURLEncoded(attachment.getFilename()));
     }
 
+    /**
+     * Get a URL encoded version of the string.
+     * same as URLEncoder.encode(toEncode, "UTF-8") but the checked exception is
+     * caught since UTF-8 is mandatory for all Java virtual machines.
+     *
+     * @param toEncode the string to URL encode.
+     * @return a URL encoded version of toEncode.
+     */
     private static String getURLEncoded(final String toEncode)
     {
         try {

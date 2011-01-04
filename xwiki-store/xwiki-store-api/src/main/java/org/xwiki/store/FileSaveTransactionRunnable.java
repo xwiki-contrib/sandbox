@@ -106,7 +106,7 @@ public class FileSaveTransactionRunnable extends TransactionRunnable
      *
      * @see TransactionRunnable#run()
      */
-    protected void run() throws IOException
+    protected void run() throws Exception
     {
         final InputStream in = this.provider.getStream();
         try {
@@ -117,9 +117,9 @@ public class FileSaveTransactionRunnable extends TransactionRunnable
                 out.close();
             }
         } finally {
+            this.runComplete = true;
             in.close();
         }
-        this.runComplete = true;
     }
 
     /**
@@ -167,8 +167,9 @@ public class FileSaveTransactionRunnable extends TransactionRunnable
             this.clearTempAndBackup();
         } catch (IOException e) {
             // TODO log
+        } finally {
+            this.lock.writeLock().unlock();
         }
-        this.lock.writeLock().unlock();
     }
 
     /**

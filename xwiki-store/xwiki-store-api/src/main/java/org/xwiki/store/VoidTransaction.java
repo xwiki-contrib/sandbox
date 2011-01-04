@@ -19,22 +19,45 @@
  */
 package org.xwiki.store;
 
-import java.io.InputStream;
-
-
 /**
- * A generic thing which provides access to an InputStream on demand.
+ * A VoidTransaction is a Transaction which does nothing.
+ * To be used in cases when there is no need to open or close transactions with any database.
  *
  * @version $Id$
  * @since TODO
  */
-public interface StreamProvider
+public class VoidTransaction implements Transaction
 {
+    /** A single instance since VoidTransaction has no state. */
+    public static final VoidTransaction INSTANCE = new VoidTransaction();
+
     /**
-     * Get the stream provided by this StreamProvider.
+     * {@inheritDoc}
      *
-     * @return the stream which this StreamProvider provides.
-     * @throws Exception if something goes wrong while trying to get the stream.
+     * @see Transaction#begin()
      */
-    InputStream getStream() throws Exception;
+    public void begin() throws Exception
+    {
+        // No op, which is why it's void.
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see Transaction#commit()
+     */
+    public void commit() throws Exception
+    {
+        // No op, which is why it's void.
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see Transaction#rollback()
+     */
+    public void rollback() throws Exception
+    {
+        // No op, which is why it's void.
+    }
 }

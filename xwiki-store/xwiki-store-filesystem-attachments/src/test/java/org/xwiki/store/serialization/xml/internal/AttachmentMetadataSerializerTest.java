@@ -19,7 +19,7 @@
  *
  */
 
-package com.xpn.xwiki.store;
+package org.xwiki.store.serialization.xml.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

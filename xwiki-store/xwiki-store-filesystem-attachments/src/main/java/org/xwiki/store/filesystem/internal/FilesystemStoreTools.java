@@ -134,6 +134,8 @@ public interface FilesystemStoreTools
      *
      * @param attachment the attachment to get the version of.
      * @param versionName the name of the version for example "1.1" or "1.2".
+     * @return a File for this version of this attachment which is guaranteed not to collide with any
+     *         file gotten through this or any other function in FilesystemStoreTools.
      */
     File fileForAttachmentVersion(final XWikiAttachment attachment,
                                   final String versionName);

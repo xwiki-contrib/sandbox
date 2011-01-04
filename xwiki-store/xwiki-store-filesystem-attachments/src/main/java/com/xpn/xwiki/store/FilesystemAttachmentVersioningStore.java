@@ -20,12 +20,17 @@
 package com.xpn.xwiki.store;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.doc.XWikiAttachmentArchive;
+import com.xpn.xwiki.doc.FilesystemAttachmentContent;
+import com.xpn.xwiki.doc.ListAttachmentArchive;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import org.suigeneris.jrcs.rcs.Version;
@@ -34,10 +39,15 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.store.filesystem.internal.FilesystemStoreTools;
 import org.xwiki.store.serialization.Serializer;
 import org.xwiki.store.TransactionRunnable;
+import org.xwiki.store.ChainingTransactionRunnable;
+import org.xwiki.store.FileSaveTransactionRunnable;
+import org.xwiki.store.FileDeleteTransactionRunnable;
+import org.xwiki.store.StreamProvider;
+import org.xwiki.store.VoidTransaction;
 
 
 /**
- * Interface for storing attachment versions.
+ * Filesystem based AttachmentVersioningStore implementation.
  * 
  * @version $Id$
  * @since TODO
@@ -45,6 +55,9 @@ import org.xwiki.store.TransactionRunnable;
 @Component("file")
 public class FilesystemAttachmentVersioningStore implements AttachmentVersioningStore
 {
+    /** To put in an exception message if the document name or filename cannot be determined. */
+    private static final String UNKNOWN_NAME = "UNKNOWN";
+
     /** Tools for getting files to store given content in. */
     @Requirement
     private FilesystemStoreTools fileTools;
@@ -54,20 +67,50 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
     private Serializer<List<XWikiAttachment>> metaSerializer;
 
     /**
-     * Load attachment archive from store.
-     * 
-     * @return attachment archive. not null. return empty archive if it is not exist in store.
-     * @param attachment The attachment of archive.
-     * @param context The current context.
-     * @param bTransaction Should use old transaction (false) or create new (true).
-     * @throws XWikiException If an error occurs.
+     * {@inheritDoc}
+     *
+     * @see com.xpn.xwiki.store.AttachmentVersioningStore#loadArchive(XWikiAttachment, XWikiContext, boolean)
      */
     public XWikiAttachmentArchive loadArchive(final XWikiAttachment attachment,
                                               final XWikiContext context,
                                               final boolean bTransaction)
         throws XWikiException
     {
-        return null;
+        final File metaFile = this.fileTools.metaFileForAttachment(attachment);
+        final ReadWriteLock lock = this.fileTools.getLockForFile(metaFile);
+        final List<XWikiAttachment> attachList;
+        lock.readLock().lock();
+        try {
+            final InputStream is = new FileInputStream(metaFile);
+            attachList = this.metaSerializer.parse(is);
+            is.close();
+        } catch (Exception e) {
+            if (e instanceof XWikiException) {
+                throw (XWikiException) e;
+            }
+            final Object[] args = {attachment.getFilename(), UNKNOWN_NAME};
+            if (attachment.getDoc() != null) {
+                args[1] = attachment.getDoc().getFullName();
+            }
+            throw new XWikiException(XWikiException.MODULE_XWIKI_STORE,
+                                     XWikiException.ERROR_XWIKI_UNKNOWN,
+                                     "Exception while loading attachment archive {0} for document {1}",
+                                     e, args);
+        } finally {
+            lock.readLock().unlock();
+        }
+
+        // Get the content file and lock for each revision.
+        for (XWikiAttachment attach : attachList) {
+            final File contentFile =
+                this.fileTools.fileForAttachmentVersion(attachment, attachment.getVersion());
+            attach.setAttachment_content(
+                new FilesystemAttachmentContent(contentFile,
+                                                attachment,
+                                                this.fileTools.getLockForFile(contentFile)));
+        }
+
+        return ListAttachmentArchive.newInstance(attachList);
     }
 
     /**
@@ -77,24 +120,26 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
      *
      * @see AttachmentVersioningStore#saveArchive(XWikiAttachmentArchive, XWikiContext, boolean)
      */
-    public void saveArchive(XWikiAttachmentArchive archive, XWikiContext context, boolean bTransaction)
+    public void saveArchive(final XWikiAttachmentArchive archive,
+                            final XWikiContext context,
+                            final boolean bTransaction)
         throws XWikiException
     {
         try {
-            this.getArchiveSaveRunnable(archive, context).start()
+            this.getArchiveSaveRunnable(archive, context).start(VoidTransaction.INSTANCE);
         } catch (Exception e) {
             if (e instanceof XWikiException) {
                 throw (XWikiException) e;
             }
-            final Object[] args = { "UNKNOWN", "UNKNOWN" };
-            if (archive.getAttachment()) {
+            final Object[] args = {UNKNOWN_NAME, UNKNOWN_NAME};
+            if (archive.getAttachment() != null) {
                 args[0] = archive.getAttachment().getFilename();
-            }
-            if (archive.getDoc()) {
-                args[1] = archive.getAttachment().getDoc().getFullName();
+                if (archive.getAttachment().getDoc() != null) {
+                    args[1] = archive.getAttachment().getDoc().getFullName();
+                }
             }
             throw new XWikiException(XWikiException.MODULE_XWIKI_STORE,
-                                     XWikiException.ERROR_UNKNOWN,
+                                     XWikiException.ERROR_XWIKI_UNKNOWN,
                                      "Exception while saving attachment archive {0} of document {1}",
                                      e, args);
         }
@@ -107,35 +152,141 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
      * @param archive The attachment archive to save.
      * @param context An XWikiContext used for getting the attachments from the archive with getRevision()
      *                and for getting the content from the attachments with getContentInputStream().
+     * @return a new TransactionRunnable for saving this attachment archive.
      */
-    private TransactionRunnable getArchiveSaveRunnable(final XWikiAttachmentArchive archive,
-                                                       final XWikiContext context)
+    public TransactionRunnable getArchiveSaveRunnable(final XWikiAttachmentArchive archive,
+                                                      final XWikiContext context)
     {
         return new ArchiveSaveRunnable(archive, this.fileTools, this.metaSerializer, context);
     }
 
     /**
-     * Permanently delete attachment archive.
-     * 
-     * @param attachment The attachment to delete.
-     * @param context The current context.
-     * @param bTransaction Should use old transaction (false) or create new (true).
-     * @throws XWikiException If an error occurs.
+     * {@inheritDoc}
+     * bTransaction is ignored by this implementation.
+     * If you need to delete an archive inside of a larger transaction,
+     * please use getArchiveDeleteRunnable()
+     *
+     * @see com.xpn.xwiki.store.AttachmentVersioningStore#deleteArchive(XWikiAttachment, XWikiContext, boolean)
      */
-    public void deleteArchive(XWikiAttachment attachment, XWikiContext context, boolean bTransaction)
+    public void deleteArchive(final XWikiAttachment attachment,
+                              final XWikiContext context,
+                              final boolean bTransaction)
         throws XWikiException
     {
+        try {
+            final XWikiAttachmentArchive archive = this.loadArchive(attachment, context, bTransaction);
+            this.getArchiveDeleteRunnable(archive).start(VoidTransaction.INSTANCE);
+        } catch (Exception e) {
+            if (e instanceof XWikiException) {
+                throw (XWikiException) e;
+            }
+            final Object[] args = {attachment.getFilename(), UNKNOWN_NAME};
+            if (attachment.getDoc() != null) {
+                args[1] = attachment.getDoc().getFullName();
+            }
+            throw new XWikiException(XWikiException.MODULE_XWIKI_STORE,
+                                     XWikiException.ERROR_XWIKI_UNKNOWN,
+                                     "Exception while deleting attachment archive {0} from document {1}",
+                                     e, args);
+        }
+    }
+
+    /**
+     * Get a TransactionRunnable for deleting an attachment archive.
+     * this runnable can be run with any transaction including a VoidTransaction.
+     * 
+     * @param archive The attachment archive to delete.
+     * @return a TransactionRunnable for deleting the attachment archive.
+     */
+    public TransactionRunnable getArchiveDeleteRunnable(final XWikiAttachmentArchive archive)
+    {
+        return new ArchiveDeleteRunnable(archive, this.fileTools);
     }
 
     /*--------------------- Nested classes ---------------------*/
 
+    /**
+     * A TransactionRunnable for deleting attachment archives.
+     * It uses FileDeleteTransactionRunnable so the attachment will either be deleted or fail
+     * safely, it should not hang in a halfway state.
+     */
+    private static class ArchiveDeleteRunnable extends ChainingTransactionRunnable
+    {
+        /**
+         * Filesystem storage tools for getting files for each revision of the attachment, it's
+         * metadata, and locks for each.
+         */
+        private final FilesystemStoreTools fileTools;
+
+        /** The attachment which this archive is associated with. */
+        private final XWikiAttachment attachment;
+
+        /** The archive to delete. */
+        private final XWikiAttachmentArchive archive;
+
+        /**
+         * @param archive the attachment archive to save.
+         * @param fileTools tools for getting the metadata and versions of the attachment and locks.
+         */
+        public ArchiveDeleteRunnable(final XWikiAttachmentArchive archive,
+                                     final FilesystemStoreTools fileTools)
+        {
+            if (archive == null) {
+                throw new NullPointerException("Cannot construct ArchiveDeleteRunnable because archive is null");
+            }
+            if (fileTools == null) {
+                throw new NullPointerException("Cannot construct ArchiveDeleteRunnable because fileTools is null");
+            }
+            this.fileTools = fileTools;
+            this.archive = archive;
+            this.attachment = archive.getAttachment();
+            if (this.attachment == null) {
+                throw new IllegalArgumentException("Cannot delete an archive unless it is associated with an "
+                                                   + "attachment.");
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         * Create FileDeleteTransactionRunnables for each version of the attachment content as well
+         * as it's metadata store.
+         *
+         * @see TransactionRunnable#preRun()
+         */
+        protected void preRun() throws Exception
+        {
+            final List<File> toDelete = new ArrayList<File>();
+            toDelete.add(this.fileTools.metaFileForAttachment(this.attachment));
+
+            final Version[] versions = this.archive.getVersions();
+            for (int i = 0; i < versions.length; i++) {
+                toDelete.add(this.fileTools.fileForAttachmentVersion(attachment, versions[i].toString()));
+            }
+
+            for (File file : toDelete) {
+                final TransactionRunnable contentDeleteRunnable =
+                    new FileDeleteTransactionRunnable(file,
+                                                      this.fileTools.getBackupFile(file),
+                                                      this.fileTools.getLockForFile(file));
+                this.add(contentDeleteRunnable);
+            }
+
+            super.preRun();
+        }
+    }
+
+    /**
+     * A TransactionRunnable for saving attachment archives.
+     * It uses a chain of FileSaveTransactionRunnable so the attachment will either be saved or fail
+     * safely, it should not hang in a halfway state.
+     */
     private static class ArchiveSaveRunnable extends ChainingTransactionRunnable
     {
         /** The XWikiAttachmentArchive to save. */
         private final XWikiAttachmentArchive archive;
 
         /** Filesystem storage tools for getting files for each revision of the attachment. */
-        private final FilesystemStoreTools filetools;
+        private final FilesystemStoreTools fileTools;
 
         /** For serializing the metadata from each revision of the attachment. */
         private final Serializer<List<XWikiAttachment>> attachmentListMetaSerilizer;
@@ -172,7 +323,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
          *
          * @see TransactionRunnable#preRun()
          */
-        protected void preRun()
+        protected void preRun() throws Exception
         {
             final Version[] versions = this.archive.getVersions();
 
@@ -182,7 +333,9 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
             // Add the content files which need updating and add the attachments to the list.
             for (int i = 0; i < versions.length; i++) {
                 final String versionName = versions[i].toString();
-                final XWikiAttachment attachVer = archive.getRevision(versionName, this.context);
+                final XWikiAttachment attachVer = archive.getRevision(this.archive.getAttachment(),
+                                                                      versionName,
+                                                                      this.context);
                 attachmentVersions.add(attachVer);
 
                 if (attachVer.isContentDirty()) {
@@ -194,11 +347,11 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
                         new AttachmentContentStreamProvider(attachVer, this.context);
 
                     final TransactionRunnable contentSaveRunnable =
-                        new FileSaveRunnable(contentFile,
-                                             this.fileTools.getTempFile(contentFile),
-                                             this.fileTools.getBackupFile(contentFile),
-                                             this.fileTools.getLockForFile(contentFile),
-                                             provider);
+                        new FileSaveTransactionRunnable(contentFile,
+                                                        this.fileTools.getTempFile(contentFile),
+                                                        this.fileTools.getBackupFile(contentFile),
+                                                        this.fileTools.getLockForFile(contentFile),
+                                                        contentProvider);
 
                     this.add(contentSaveRunnable);
                 }
@@ -212,11 +365,11 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
                 new AttachmentListMetadataStreamProvider(this.attachmentListMetaSerilizer,
                                                          attachmentVersions);
             final TransactionRunnable metaSaveRunnable =
-                new FileSaveRunnable(attachMetaFile,
-                                     this.fileTools.getTempFile(attachMetaFile),
-                                     this.fileTools.getBackupFile(attachMetaFile),
-                                     this.fileTools.getLockForFile(attachMetaFile),
-                                     provider);
+                new FileSaveTransactionRunnable(attachMetaFile,
+                                                this.fileTools.getTempFile(attachMetaFile),
+                                                this.fileTools.getBackupFile(attachMetaFile),
+                                                this.fileTools.getLockForFile(attachMetaFile),
+                                                provider);
 
             this.add(metaSaveRunnable);
  
@@ -226,12 +379,24 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
         }
     }
 
+    /**
+     * A stream provider based on the metadata for each attachment in a list.
+     * Used to save the metadata file for the list of attachments.
+     */
     private static class AttachmentListMetadataStreamProvider implements StreamProvider
     {
+        /** The serializer for converting the list of attachments into a stream of metadata. */
         private final Serializer<List<XWikiAttachment>> serializer;
 
+        /** The list of attachments to get the stream of metadata from. */
         private final List<XWikiAttachment> attachList;
 
+        /**
+         * The Constructor.
+         *
+         * @param serializer the serializer for converting the list of attachments into a stream of data.
+         * @param attachList the list of attachments to serialize.
+         */
         public AttachmentListMetadataStreamProvider(final Serializer<List<XWikiAttachment>> serializer,
                                                     final List<XWikiAttachment> attachList)
         {
@@ -239,28 +404,49 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
             this.attachList = attachList;
         }
 
-        public InputStream getStream()
+        /**
+         * {@inheritDoc}
+         *
+         * @see StreamProvider#getStream()
+         */
+        public InputStream getStream() throws IOException
         {
-            this.serializer.serialize(attachList);
+            return this.serializer.serialize(this.attachList);
         }
     }
 
+    /**
+     * A stream provider based on the content of an attachment.
+     * Used to save the content of each attachment to the correct file.
+     */
     private static class AttachmentContentStreamProvider implements StreamProvider
     {
         /** The attachment to save content of. */
-        private final XWikiAttachment attach;
+        private final XWikiAttachment attachment;
 
         /** The XWikiContext for getting the content of the attachment. */
         private final XWikiContext context;
 
-        public AttachmentContentStreamProvider(final XWikiAttachment attach,
+        /**
+         * The Constructor.
+         *
+         * @param attachment the attachment whose content should become the stream.
+         * @param context the XWikiContext needed to get the content from the attachment
+         *                using {@link XWikiAttachment#getContentInputStream(XWikiContext)}
+         */
+        public AttachmentContentStreamProvider(final XWikiAttachment attachment,
                                                final XWikiContext context)
         {
-            this.attach = attach;
+            this.attachment = attachment;
             this.context = context;
         }
 
-        public InputStream getStream()
+        /**
+         * {@inheritDoc}
+         *
+         * @see StreamProvider#getStream()
+         */
+        public InputStream getStream() throws XWikiException
         {
             return this.attachment.getContentInputStream(this.context);
         }
