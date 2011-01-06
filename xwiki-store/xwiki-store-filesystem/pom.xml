@@ -29,14 +29,27 @@
     <artifactId>xwiki-core-parent</artifactId>
     <version>2.7-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-core-store-api</artifactId>
-  <name>XWiki Platform - Core - Storage - Api</name>
-  <description>XWiki Platform - Core - Storage - Api</description>
+  <artifactId>xwiki-core-store-filesystem</artifactId>
+  <name>XWiki Platform - Core - Storage - Filesystem</name>
+  <description>XWiki Platform - Core - Storage - Filesystem</description>
   <properties>
     <!-- Skip Clirr execution, since this is a new component -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
   </properties>
   <dependencies>
+
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-store-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- IOUtils is used by FileSaveTransactionRunnable -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

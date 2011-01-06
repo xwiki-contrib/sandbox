@@ -184,15 +184,15 @@ public class FileSaveTransactionRunnable extends TransactionRunnable
      * 1. No backup file and no main file. There was probably no file to begin with
      *    and it failed before anything could be saved in the temp file. Do nothing.
      *
-     * 2. No backup file but there is a main file, assume onCommit happened successfully but there 
-     *    was no file here to begin with so there was nothing to back up. Move the main file back 
+     * 2. No backup file but there is a main file, assume onCommit happened successfully but there
+     *    was no file here to begin with so there was nothing to back up. Move the main file back
      *    to the temporary location.
      *
      * 3. If there is a backup file, but no main file, this is unexpected but since the backup file
      *    should be the previous main file, move it back to the main location and log a warning
      *    that the storage engine encountered an unexpected albeit probably recoverable state.
      *
-     * 4. If there is a backup file and a main file, onCommit probably went smoothly and a problem 
+     * 4. If there is a backup file and a main file, onCommit probably went smoothly and a problem
      *    was encountered somewhere else forcing the rollback. Move the main file back to the
      *    temporary location and the backup file back to the main location.
      */

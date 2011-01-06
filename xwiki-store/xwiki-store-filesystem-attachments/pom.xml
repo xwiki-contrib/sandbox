@@ -66,6 +66,13 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- FileSaveTransactionRunnable, FileDeleteTransactionRunnable -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-store-filesystem</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!--
      * Needed for:
      * XWikiAttachment, XWikiDocument, XWikiHibernateStore,

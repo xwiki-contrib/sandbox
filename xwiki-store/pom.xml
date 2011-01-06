@@ -36,6 +36,7 @@
   <modules>
     <module>xwiki-store-api</module>
     <module>xwiki-store-serialization</module>
+    <module>xwiki-store-filesystem</module>
     <module>xwiki-store-filesystem-attachments</module>
   </modules>
 </project>
