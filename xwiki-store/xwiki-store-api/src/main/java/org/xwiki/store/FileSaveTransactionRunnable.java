@@ -108,6 +108,12 @@ public class FileSaveTransactionRunnable extends TransactionRunnable
      */
     protected void run() throws Exception
     {
+        if (!this.toSave.getParentFile().exists() && !this.toSave.getParentFile().mkdirs()) {
+            throw new IOException("Could not make directory tree to place file in. "
+                                  + "Do you have permission to write to ["
+                                  + this.toSave.getAbsolutePath() + "] ?");
+        }
+
         final InputStream in = this.provider.getStream();
         try {
             final OutputStream out = new FileOutputStream(this.tempFile);

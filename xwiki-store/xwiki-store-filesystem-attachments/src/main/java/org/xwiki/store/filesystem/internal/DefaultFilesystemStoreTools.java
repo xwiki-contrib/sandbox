@@ -70,12 +70,51 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     private final Map<String, WeakReference<ReadWriteLock>> fileLockMap =
         new WeakHashMap<String, WeakReference<ReadWriteLock>>();
 
+    /**
+     * Testing Constructor.
+     *
+     * @param pathSerializer an EntityReferenceSerializer for generating file paths.
+     * @param storageDir the directory to store the content in.
+     */
+    public DefaultFilesystemStoreTools(final EntityReferenceSerializer<String> pathSerializer,
+                                       final File storageDir)
+    {
+        this.pathSerializer = pathSerializer;
+        this.storageDir = storageDir;
+    }
+
     /** {@inheritDoc} */
     public void initialize()
     {
         final XWikiContext context = ((XWikiContext) this.exec.getContext().getProperty("xwikicontext"));
         final File workDir = context.getWiki().getWorkDirectory(context);
         this.storageDir = new File(workDir, STORAGE_DIR_NAME);
+
+        deleteEmptyDirs(this.storageDir);
+    }
+
+    /**
+     * Delete all empty directories under the given directory.
+     * A directory which contains only empty directories is also considered an empty ditectory.
+     *
+     * @param location a directory to delete.
+     * @return true if the directory existed, was empty and was deleted.
+     */
+    private static boolean deleteEmptyDirs(final File location)
+    {
+        if (location != null && location.exists() && location.isDirectory()) {
+            final File[] dirs = location.listFiles();
+            boolean empty = true;
+            for (int i = 0; i < dirs.length; i++) {
+                if (!deleteEmptyDirs(dirs[i])) {
+                    empty = false;
+                }
+            }
+            if (empty) {
+                location.delete();
+            }
+        }
+        return false;
     }
 
     /**
@@ -100,52 +139,6 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
 
     /**
      * {@inheritDoc}
-     * This implementation knows nothing about symlinks and will stack overflow with cyclical symlinks.
-     *
-     * @see FilesystemStoreTools#allChildrenOf(File)
-     */
-    public List<File> allChildrenOf(final File parent)
-    {
-        final List<File> out = new ArrayList<File>();
-        final File[] children = parent.listFiles();
-        for (int i = 0; i < children.length; i++) {
-            out.add(children[i]);
-            if (children[i].isDirectory()) {
-                out.addAll(allChildrenOf(children[i]));
-            }
-        }
-        return out;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see FilesystemStoreTools#deleteDir(File)
-     */
-    public boolean deleteDir(final File directory)
-    {
-        final File[] children = directory.listFiles();
-        for (int i = 0; i < children.length; i++) {
-            if (children[i].isDirectory()) {
-                this.deleteDir(children[i]);
-            } else {
-                children[i].delete();
-            }
-        }
-        // Now move up the chain until a non-empty directory is found.
-        File parent = directory;
-        File dir;
-        while (parent.listFiles().length == 0) {
-            dir = parent;
-            parent = dir.getParentFile();
-            dir.delete();
-        }
-
-        return directory.exists();
-    }
-
-    /**
-     * {@inheritDoc}
      *
      * @see FilesystemStoreTools#metaFileForAttachment(XWikiAttachment)
      */
@@ -162,17 +155,11 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
      */
     public File fileForAttachment(final XWikiAttachment attachment)
     {
-        // storage/xwiki/Main/WebHome/~this/attachments/
-        final File attachmentsDir = this.getAttachmentDir(attachment);
-
-        // some.file
-        final String encodedName = this.getURLEncoded(attachment.getFilename());
-
         // storage/xwiki/Main/WebHome/~this/attachments/some.file/
-        final File attachmentDir = new File(attachmentsDir, encodedName);
+        final File attachmentDir = this.getAttachmentDir(attachment);
 
         // storage/xwiki/Main/WebHome/~this/attachments/some.file/some.file
-        return new File(attachmentDir, encodedName);
+        return new File(attachmentDir, this.getURLEncoded(attachment.getFilename()));
     }
 
     /**

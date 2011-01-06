@@ -69,7 +69,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
     /**
      * {@inheritDoc}
      *
-     * @see com.xpn.xwiki.store.AttachmentVersioningStore#loadArchive(XWikiAttachment, XWikiContext, boolean)
+     * @see AttachmentVersioningStore#loadArchive(XWikiAttachment, XWikiContext, boolean)
      */
     public XWikiAttachmentArchive loadArchive(final XWikiAttachment attachment,
                                               final XWikiContext context,
@@ -166,7 +166,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
      * If you need to delete an archive inside of a larger transaction,
      * please use getArchiveDeleteRunnable()
      *
-     * @see com.xpn.xwiki.store.AttachmentVersioningStore#deleteArchive(XWikiAttachment, XWikiContext, boolean)
+     * @see AttachmentVersioningStore#deleteArchive(XWikiAttachment, XWikiContext, boolean)
      */
     public void deleteArchive(final XWikiAttachment attachment,
                               final XWikiContext context,
@@ -232,17 +232,19 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
                                      final FilesystemStoreTools fileTools)
         {
             if (archive == null) {
-                throw new NullPointerException("Cannot construct ArchiveDeleteRunnable because archive is null");
+                throw new NullPointerException(
+                    "Cannot construct ArchiveDeleteRunnable because archive is null.");
             }
             if (fileTools == null) {
-                throw new NullPointerException("Cannot construct ArchiveDeleteRunnable because fileTools is null");
+                throw new NullPointerException(
+                    "Cannot construct ArchiveDeleteRunnable because fileTools is null.");
             }
             this.fileTools = fileTools;
             this.archive = archive;
             this.attachment = archive.getAttachment();
             if (this.attachment == null) {
-                throw new IllegalArgumentException("Cannot delete an archive unless it is associated with an "
-                                                   + "attachment.");
+                throw new IllegalArgumentException(
+                    "Cannot delete an archive unless it is associated with an attachment.");
             }
         }
 
@@ -412,43 +414,6 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
         public InputStream getStream() throws IOException
         {
             return this.serializer.serialize(this.attachList);
-        }
-    }
-
-    /**
-     * A stream provider based on the content of an attachment.
-     * Used to save the content of each attachment to the correct file.
-     */
-    private static class AttachmentContentStreamProvider implements StreamProvider
-    {
-        /** The attachment to save content of. */
-        private final XWikiAttachment attachment;
-
-        /** The XWikiContext for getting the content of the attachment. */
-        private final XWikiContext context;
-
-        /**
-         * The Constructor.
-         *
-         * @param attachment the attachment whose content should become the stream.
-         * @param context the XWikiContext needed to get the content from the attachment
-         *                using {@link XWikiAttachment#getContentInputStream(XWikiContext)}
-         */
-        public AttachmentContentStreamProvider(final XWikiAttachment attachment,
-                                               final XWikiContext context)
-        {
-            this.attachment = attachment;
-            this.context = context;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see StreamProvider#getStream()
-         */
-        public InputStream getStream() throws XWikiException
-        {
-            return this.attachment.getContentInputStream(this.context);
         }
     }
 }

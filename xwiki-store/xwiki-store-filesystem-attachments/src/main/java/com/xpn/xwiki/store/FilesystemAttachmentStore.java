@@ -20,24 +20,28 @@
 package com.xpn.xwiki.store;
 
 import java.io.File;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.List;
 
-import org.hibernate.Session;
-import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Requirement;
-import org.xwiki.store.filesystem.internal.FilesystemStoreTools;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.FilesystemAttachmentContent;
 import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.doc.XWikiAttachmentContent;
+import com.xpn.xwiki.doc.XWikiAttachmentArchive;
 import com.xpn.xwiki.doc.XWikiDocument;
-import org.apache.commons.io.IOUtils;
+import org.hibernate.Session;
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+import org.xwiki.store.filesystem.internal.FilesystemStoreTools;
+import org.xwiki.store.ChainingTransactionRunnable;
+import org.xwiki.store.FileSaveTransactionRunnable;
+import org.xwiki.store.FileDeleteTransactionRunnable;
+import org.xwiki.store.StreamProvider;
+import org.xwiki.store.TransactionRunnable;
+import org.xwiki.store.Transaction;
+import org.xwiki.store.VoidTransactionRunnable;
+
 
 /**
  * Filesystem based implementation of XWikiAttachmentStoreInterface.
@@ -59,6 +63,19 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
      */
     @Requirement
     private FilesystemStoreTools fileTools;
+
+    /**
+     * Testing Constructor.
+     *
+     * @param hibernateAttachStore the attachment store to defer to if an attachment cannot be found.
+     * @param fileTools tools for getting files to store given content in and locks.
+     */
+    public FilesystemAttachmentStore(final XWikiAttachmentStoreInterface hibernateAttachStore,
+                                     final FilesystemStoreTools fileTools)
+    {
+        this.hibernateAttachStore = hibernateAttachStore;
+        this.fileTools = fileTools;
+    }
 
     /**
      * {@inheritDoc}
@@ -135,125 +152,9 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                                                      updateDocument,
                                                      context,
                                                      attachFile,
-                                                     backupFile,
+                                                     this.fileTools.getTempFile(attachFile),
+                                                     this.fileTools.getBackupFile(attachFile),
                                                      lock);
-    }
-
-    /**
-     * A TransactionRunnable for saving an attachment.
-     */
-    private class AttachmentSaveTransactionRunnable extends TransactionRunnable
-    {
-        /** The XWikiAttachment whose content should be saved. */
-        private final XWikiAttachment attachment;
-
-        /** Whether or not to update the document at the same time. */
-        private final boolean updateDocument;
-
-        /** The XWikiContext for the request. */
-        private final XWikiContext context;
-
-        /** The File to store the attachment in. */
-        private final File attachFile;
-
-        /** The File to backup the content of the existing attachment in. */
-        private final File backupFile;
-
-        /** This Lock will be locked while the attachment file is being written to. */
-        private final ReadWriteLock lock;
-
-        /**
-         * Construct a TransactionRunnable for saving the attachment content.
-         *
-         * @param attachment the XWikiAttachment whose content should be saved.
-         * @param updateDocument whether or not to update the document at the same time.
-         * @param context the XWikiContext for the request.
-         * @param attachFile the File to store the attachment in.
-         * @param backupFile the File to backup the content of the existing attachment in.
-         * @param lock this Lock will be locked while the attachment file is being written to.
-         */
-        public AttachmentSaveTransactionRunnable(final XWikiAttachment attachment,
-                                                 final boolean updateDocument,
-                                                 final XWikiContext context,
-                                                 final File attachFile,
-                                                 final File backupFile,
-                                                 final ReadWriteLock lock)
-        {
-            this.attachment = attachment;
-            this.updateDocument = updateDocument;
-            this.context = context;
-            this.attachFile = attachFile;
-            this.backupFile = backupFile;
-            this.lock = lock;
-        }
-
-        /**
-         * This will run in the transaction.
-         *
-         * @throws Exception if an exception is thrown copying the file,
-         *         saving the attachment version, or updating the document which contains the attachment.
-         */
-        protected void run() throws Exception
-        {
-            // Update the archive of the attachment.
-            // This must happen before the content is saved since it depends on the
-            // old version of the attachment content.
-            this.attachment.updateContentArchive(context);
-
-            // Lock the attachment file so it won't be read while it's being written to.
-            this.lock.writeLock().lock();
-
-            // Move the current attachment file to a backup location.
-            if (this.attachFile.exists()) {
-                // If this fails, there isn't a lot which can be done, simply ignore it.
-                this.attachFile.renameTo(backupFile);
-            }
-
-            if (!this.attachFile.getParentFile().exists() && !this.attachFile.getParentFile().mkdirs()) {
-                throw new IOException("Could not make directory tree to place file in. "
-                                      + "Do you have permission to write to ["
-                                      + this.attachFile.getAbsolutePath() + "] ?");
-            }
-
-            // Copy the file.
-            OutputStream out = null;
-            try {
-                out = new FileOutputStream(this.attachFile);
-                IOUtils.copy(this.attachment.getContentInputStream(this.context), out);
-            } finally {
-                IOUtils.closeQuietly(out);
-            }
-
-            // Persist the attachment archive.
-            context.getWiki().getAttachmentVersioningStore().saveArchive(
-                this.attachment.getAttachment_archive(), this.context, false);
-
-            // If the parent document is to be saved as well, save it.
-            if (this.updateDocument) {
-                this.context.getWiki().getStore().saveXWikiDoc(this.attachment.getDoc(),
-                                                               this.context, false);
-            }
-        }
-
-        /** This will happen if the transaction fails. */
-        protected void onRollback()
-        {
-            try {
-                if (this.attachFile.exists()) {
-                    this.attachFile.delete();
-                }
-            } finally {
-                this.backupFile.renameTo(this.attachFile);
-            }
-        }
-
-        /** This will run if the transaction succeeds. */
-        protected void onCommit()
-        {
-            if (this.backupFile.exists()) {
-                this.backupFile.delete();
-            }
-        }
     }
 
     /**
@@ -360,7 +261,7 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
     {
         final Transaction trans = new XWikiHibernateTransaction(context);
         try {
-            this.getAttachmentDeletetionRunnable(attachment, parentUpdate, context).start(trans);
+            this.getAttachmentDeleteRunnable(attachment, parentUpdate, context).start(trans);
         } catch (Exception e) {
             if (e instanceof XWikiException) {
                 throw (XWikiException) e;
@@ -379,148 +280,20 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
      * @param context the XWikiContext for the request.
      * @return a TransactionRunnable for deleting the attachment.
      */
-    private TransactionRunnable getAttachmentDeletetionRunnable(final XWikiAttachment attachment,
-                                                                final boolean updateDocument,
-                                                                final XWikiContext context)
+    private TransactionRunnable getAttachmentDeleteRunnable(final XWikiAttachment attachment,
+                                                            final boolean updateDocument,
+                                                            final XWikiContext context)
     {
-        // We want the directory for this attachment, not the file itself so .parentFile().
-        final File attachDir = this.fileTools.fileForAttachment(attachment).getParentFile();
-
-        final ReadWriteLock lock = this.fileTools.getLockForFiles(this.fileTools.allChildrenOf(attachDir));
+        final File attachFile = this.fileTools.fileForAttachment(attachment);
 
         return new AttachmentDeleteTransactionRunnable(attachment,
                                                        updateDocument,
                                                        context,
-                                                       attachDir,
-                                                       this.fileTools.getBackupFile(attachDir),
-                                                       lock,
-                                                       this.fileTools);
+                                                       attachFile,
+                                                       this.fileTools.getBackupFile(attachFile),
+                                                       this.fileTools.getLockForFile(attachFile));
     }
 
-    /**
-     * A TransactionRunnable for deleting an attachment.
-     */
-    private class AttachmentDeleteTransactionRunnable extends TransactionRunnable
-    {
-        /** The XWikiAttachment whose content should be saved. */
-        private final XWikiAttachment attachment;
-
-        /** Whether or not to update the document at the same time. */
-        private final boolean updateDocument;
-
-        /** The XWikiContext for the request. */
-        private final XWikiContext context;
-
-        /** The directory where the arttachment content is stored. */
-        private final File attachDir;
-
-        /** The directory name to move the attachment content to temporarily while the transaction runs. */
-        private final File tempDir;
-
-        /** This Lock will be locked while the attachment file is being written to. */
-        private final ReadWriteLock lock;
-
-        /** Used for getting all files in a given directory. */
-        private final FilesystemStoreTools fileTools;
-
-        /**
-         * Construct a TransactionRunnable for deleting the attachment.
-         *
-         * @param attachment the XWikiAttachment to delete
-         * @param updateDocument whether or not to update the document at the same time.
-         * @param context the XWikiContext for the request.
-         * @param attachDir the directory to where the attachment content is stored.
-         * @param tempDir the directory to to move the attachment content to temporarily.
-         * @param lock this Lock will be locked while the attachment file is being written to.
-         * @param fileTools an instance of FilesystemStoreTools for finding all children of a directory.
-         */
-        public AttachmentDeleteTransactionRunnable(final XWikiAttachment attachment,
-                                                   final boolean updateDocument,
-                                                   final XWikiContext context,
-                                                   final File attachDir,
-                                                   final File tempDir,
-                                                   final ReadWriteLock lock,
-                                                   final FilesystemStoreTools fileTools)
-        {
-            this.attachment = attachment;
-            this.updateDocument = updateDocument;
-            this.context = context;
-            this.attachDir = attachDir;
-            this.tempDir = tempDir;
-            this.lock = lock;
-            this.fileTools = fileTools;
-        }
-
-        /**
-         * Acquire the lock.
-         */
-        protected void preRun()
-        {
-            // Get the lock on the file. This will be released onComplete().
-            this.lock.writeLock().lock();
-        }
-
-        /**
-         * This will run in the transaction.
-         *
-         * @throws Exception if an exception is thrown moving the file,
-         *         saving the attachment version, or updating the document which contains the attachment.
-         */
-        protected void run() throws Exception
-        {
-            final Session session = this.context.getWiki().getHibernateStore().getSession(this.context);
-
-            // Delete the content from the attachment.
-            // In case it was stored in the database by XWikiHibernateAttachmentStore.
-            session.delete(new XWikiAttachmentContent(this.attachment));
-
-            // TODO: This needs to be run in the same transaction.
-            this.context.getWiki().getAttachmentVersioningStore().deleteArchive(attachment, context, false);
-
-            // TODO: This needs to be run in the same transaction.
-            if (this.updateDocument) {
-                final String filename = this.attachment.getFilename();
-                final List<XWikiAttachment> list = attachment.getDoc().getAttachmentList();
-                for (int i = 0; i < list.size(); i++) {
-                    if (filename.equals(list.get(i).getFilename())) {
-                        list.remove(i);
-                        break;
-                    }
-                }
-                context.getWiki().getStore().saveXWikiDoc(attachment.getDoc(), context, false);
-            }
-
-            // Delete the attachment metadata.
-            session.delete(attachment);
-
-            // Move the file to a temporary location where it will be out of the way
-            // but can be moved back if the transaction fails.
-            this.attachDir.renameTo(this.tempDir);
-        }
-
-        /** This will happen if the transaction fails. */
-        protected void onRollback()
-        {
-            // Try to put the attachment dir back where it should be.
-            if (this.tempDir.exists()) {
-                this.tempDir.renameTo(this.attachDir);
-            }
-        }
-
-        /** This will run if the transaction succeeds. */
-        protected void onCommit()
-        {
-            // Delete the attachment dir since everything went well.
-            // If you put symlinks into the dir tree then this will eat your filesystem!
-            this.fileTools.deleteDir(this.tempDir);
-        }
-
-        /** This will run after onCommit or onRollback. */
-        protected void onComplete()
-        {
-            this.lock.writeLock().unlock();
-        }
-    }
 
     /**
      * {@inheritDoc}
@@ -536,113 +309,179 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
     /* ---------------------------- Nested Classes. ---------------------------- */
 
     /**
-     * A TransactionRunnable which is made up of a bunch of other runnables
-     * which need to run in the same transaction.
+     * A TransactionRunnable for saving an attachment.
      */
-    private static class ChainingTransactionRunnable extends TransactionRunnable
+    private static class AttachmentSaveTransactionRunnable extends ChainingTransactionRunnable
     {
-        /** All of the runnables to be run then committed. */
-        private final List<TransactionRunnable> allRunnables = new ArrayList<TransactionRunnable>();
+        /** The XWikiAttachment whose content should be saved. */
+        private final XWikiAttachment attachment;
+
+        /** Whether or not to update the document at the same time. */
+        private final boolean updateDocument;
+
+        /** The XWikiContext for the request. */
+        private final XWikiContext context;
 
         /**
-         * Add a TransactionRunnable to this chain.
+         * Construct a TransactionRunnable for saving the attachment content.
          *
-         * @param runnable the TransactioRunnable to run in this transaction.
+         * @param attachment the XWikiAttachment whose content should be saved.
+         * @param updateDocument whether or not to update the document at the same time.
+         * @param context the XWikiContext for the request.
+         * @param attachFile the File to store the attachment in.
+         * @param tempFile the File to put the attachment content in until the transaction is complete.
+         * @param backupFile the File to backup the content of the existing attachment in.
+         * @param lock this Lock will be locked while the attachment file is being written to.
          */
-        public void add(final TransactionRunnable runnable)
+        public AttachmentSaveTransactionRunnable(final XWikiAttachment attachment,
+                                                 final boolean updateDocument,
+                                                 final XWikiContext context,
+                                                 final File attachFile,
+                                                 final File tempFile,
+                                                 final File backupFile,
+                                                 final ReadWriteLock lock)
         {
-            this.allRunnables.add(runnable);
+            final StreamProvider provider = new AttachmentContentStreamProvider(attachment, context);
+            this.add(new FileSaveTransactionRunnable(attachFile, tempFile, backupFile, lock, provider));
+
+            this.attachment = attachment;
+            this.updateDocument = updateDocument;
+            this.context = context;
         }
 
-        /**
-         * {@inheritDoc}
-         *
-         * @see TransactionRunnable#preRun()
-         */
+        @Override
         protected void preRun() throws Exception
         {
-            for (TransactionRunnable run : this.allRunnables) {
-                run.run();
-            }
-        }
+            // Add a new version of the attachment. We should be working with a clone of the attachment
+            // so this should not break anything if the save operation fails.
+            this.attachment.updateContentArchive(context);
 
-        /**
-         * {@inheritDoc}
-         *
-         * @see TransactionRunnable#run()
-         */
-        protected void run() throws Exception
-        {
-            for (TransactionRunnable run : this.allRunnables) {
-                run.run();
+            // If the versioning store supports TransactionRunnable then use it, otherwise don't.
+            final AttachmentVersioningStore avs = this.context.getWiki().getAttachmentVersioningStore();
+            final XWikiAttachmentArchive archive = this.attachment.getAttachment_archive();
+            if (avs instanceof FilesystemAttachmentVersioningStore) {
+                final FilesystemAttachmentVersioningStore favs = (FilesystemAttachmentVersioningStore) avs;
+                this.add(favs.getArchiveSaveRunnable(archive, this.context));
+            } else {
+                this.add(new TransactionRunnable() {
+                    protected void run() throws XWikiException
+                    {
+                        avs.saveArchive(archive, context, false);
+                    }
+                });
             }
-        }
 
-        /**
-         * {@inheritDoc}
-         *
-         * @see TransactionRunnable#onCommit()
-         */
-        protected void onCommit()
-        {
-            for (TransactionRunnable run : this.allRunnables) {
-                try {
-                    run.onCommit();
-                } catch (Throwable t) {
-                    // onCommit should not throw anything.
-                    // TODO Log this since it means the storage engine may be in an inconsistant state.
-                }
+            // If updating of the parent document is required then add a TransactionRunnable to do that.
+            if (this.updateDocument) {
+                final XWikiStoreInterface store = this.context.getWiki().getStore();
+                final XWikiDocument doc = this.attachment.getDoc();
+                this.add(new TransactionRunnable() {
+                    protected void run() throws XWikiException
+                    {
+                        store.saveXWikiDoc(doc, context, false);
+                    }
+                });
             }
-        }
 
-        /**
-         * {@inheritDoc}
-         *
-         * @see TransactionRunnable#onRollback()
-         */
-        protected void onRollback()
-        {
-            for (TransactionRunnable run : this.allRunnables) {
-                try {
-                    run.onRollback();
-                } catch (Throwable t) {
-                    // onRollback should not throw anything.
-                    // TODO Log this since it means the storage engine may be in an inconsistant state.
-                }
-            }
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see TransactionRunnable#onComplete()
-         */
-        protected void onComplete()
-        {
-            for (TransactionRunnable run : this.allRunnables) {
-                try {
-                    run.onComplete();
-                } catch (Throwable t) {
-                    // onComplete should not throw anything.
-                    // TODO Log this since it means the storage engine may be in an inconsistant state.
-                }
-            }
+            super.preRun();
         }
     }
 
     /**
-     * A TransactionRunnable which does nothing.
+     * A TransactionRunnable for deleting an attachment.
      */
-    private static class VoidTransactionRunnable extends TransactionRunnable
+    private static class AttachmentDeleteTransactionRunnable extends ChainingTransactionRunnable
     {
+        /** The XWikiAttachment whose content should be saved. */
+        private final XWikiAttachment attachment;
+
+        /** Whether or not to update the document at the same time. */
+        private final boolean updateDocument;
+
+        /** The XWikiContext for the request. */
+        private final XWikiContext context;
+
+        /**
+         * Construct a TransactionRunnable for deleting the attachment.
+         *
+         * @param attachment the XWikiAttachment to delete
+         * @param updateDocument whether or not to update the document at the same time.
+         * @param context the XWikiContext for the request.
+         * @param attachFile the file to where the attachment content is stored.
+         * @param tempFile the file to to move the attachment content to temporarily.
+         * @param lock this Lock will be locked while the attachment file is being written to.
+         */
+        public AttachmentDeleteTransactionRunnable(final XWikiAttachment attachment,
+                                                   final boolean updateDocument,
+                                                   final XWikiContext context,
+                                                   final File attachFile,
+                                                   final File tempFile,
+                                                   final ReadWriteLock lock)
+        {
+            this.add(new FileDeleteTransactionRunnable(attachFile, tempFile, lock));
+
+            this.attachment = attachment;
+            this.updateDocument = updateDocument;
+            this.context = context;
+        }
+
         /**
          * {@inheritDoc}
          *
-         * @see TransactionRunnable#start(Transaction)
+         * @see ChainingTransactionRunnable#run()
          */
-        public void start(final Transaction transaction)
+        public void preRun()
         {
-            // No op. Hence why it's void.
+            // If the store supports deleting in the same transaction then do it.
+            final AttachmentVersioningStore avs =
+                this.context.getWiki().getAttachmentVersioningStore();
+
+            if (avs instanceof FilesystemAttachmentVersioningStore) {
+                final FilesystemAttachmentVersioningStore favs = (FilesystemAttachmentVersioningStore) avs;
+                this.add(favs.getArchiveDeleteRunnable(this.attachment.getAttachment_archive()));
+            } else {
+                this.add(new TransactionRunnable() {
+                    protected void run() throws XWikiException
+                    {
+                        avs.deleteArchive(attachment, context, false);
+                    }
+                });
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see ChainingTransactionRunnable#run()
+         */
+        protected void run() throws Exception
+        {
+            // TODO: When the rest of storage is rewritten using TransactionRunnable,
+            //       this method should be disolved.
+
+            final Session session = this.context.getWiki().getHibernateStore().getSession(this.context);
+
+            // Delete the content from the attachment.
+            // In case it was stored in the database by XWikiHibernateAttachmentStore.
+            session.delete(new XWikiAttachmentContent(this.attachment));
+
+            // Update the document if required.
+            if (this.updateDocument) {
+                final String filename = this.attachment.getFilename();
+                final List<XWikiAttachment> list = attachment.getDoc().getAttachmentList();
+                for (int i = 0; i < list.size(); i++) {
+                    if (filename.equals(list.get(i).getFilename())) {
+                        list.remove(i);
+                        break;
+                    }
+                }
+                context.getWiki().getStore().saveXWikiDoc(attachment.getDoc(), context, false);
+            }
+
+            // Delete the attachment metadata.
+            session.delete(attachment);
+
+            super.run();
         }
     }
 
@@ -708,139 +547,6 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
             if (this.shouldCloseTransaction) {
                 this.store.endTransaction(this.context, false);
             }
-        }
-    }
-
-    /**
-     * A Transaction represents an atomic unit of work on the storage engine.
-     * Implementations may use whatever type of storage they like as long as it supports
-     * beginning a transaction, and committing or rolling back that transaction.
-     */
-    private static interface Transaction
-    {
-        /**
-         * Start the transaction.
-         * Prepare the storage engine to handle a transaction.
-         *
-         * @throws Exception if something goes wrong with the storage engine.
-         */
-        void begin() throws Exception;
-
-        /**
-         * Commit the transaction.
-         * Save the work which was done during this transaction.
-         *
-         * @throws Exception if something goes wrong with the storage.
-         */
-        void commit() throws Exception;
-
-        /**
-         * Rollback the transaction.
-         * Return the storage engine to the state it was before the transaction began.
-         *
-         * @throws Exception if something goes wrong with the storage.
-         */
-        void rollback() throws Exception;
-    }
-
-
-    /**
-     * A TransactionRunnable is a closure which is meant to run inside of a transaction.
-     * The runnable contains a method which will run inside of the transaction and provides hooks 
-     * to execute custom code when the transaction succeeded, failed, or completed in any way.
-     */
-    private static class TransactionRunnable
-    {
-        /**
-         * This is called to start a transaction which will run this runnable.
-         *
-         * @param transaction a transaction which this runnable should run in.
-         * @throws Exception if the runnable throws an Exception or if something else goes wrong.
-         */
-        public void start(final Transaction transaction) throws Exception
-        {
-            boolean transactionOpen = false;
-            try {
-                this.preRun();
-                transactionOpen = true;
-                transaction.begin();
-                this.run();
-                transaction.commit();
-                this.onCommit();
-            } catch (Exception e) {
-                if (transactionOpen) {
-                    try {
-                        transaction.rollback();
-                    } catch (Exception ee) {
-                        // Not much we can do here, failed to rollback.
-                        // Throw the original exception anyway.
-                        // TODO Log this since it means the storage engine may be in an inconsistant state.
-                    }
-                }
-                try {
-                    this.onRollback();
-                } catch (Throwable t) {
-                    // This exception cannot be thrown reliably so it will be swallowed.
-                    // TODO Log this since it means the storage engine may be in an inconsistant state.
-                }
-                throw e;
-            } finally {
-                try {
-                    this.onComplete();
-                } catch (Throwable t) {
-                    // This exception cannot be thrown reliably so it will be swallowed.
-                    // TODO Log this since it means the storage engine may be in an inconsistant state.
-                }
-            }
-        }
-
-        /**
-         * This will be run before the transaction is opened.
-         *
-         * @throws Exception which will cause the execution of
-         *         onRollback then onComplete before being thrown up the calling stack.
-         */
-        protected void preRun() throws Exception
-        {
-            // By default this will do nothing.
-        }
-
-        /**
-         * This will be run inside of a database transaction.
-         *
-         * @throws Exception which will cause a rollback of the transaction and then execution of
-         *         onRollback then onComplete before being thrown up the calling stack.
-         */
-        protected void run() throws Exception
-        {
-            // By default this will do nothing.
-        }
-
-        /**
-         * This will be run if the transaction succeeds.
-         * This function should not throw any exceptions, if it does they will disappear.
-         */
-        protected void onCommit()
-        {
-            // By default this will do nothing.
-        }
-
-        /**
-         * This will run if the transaction fails.
-         * This function should not throw any exceptions, if it does they will disappear.
-         */
-        protected void onRollback()
-        {
-            // By default this will do nothing.
-        }
-
-        /**
-         * This will be run when after onCommit or onRollback no matter the outcome.
-         * This function should not throw any exceptions, if it does they will disappear.
-         */
-        protected void onComplete()
-        {
-            // By default this will do nothing.
         }
     }
 }

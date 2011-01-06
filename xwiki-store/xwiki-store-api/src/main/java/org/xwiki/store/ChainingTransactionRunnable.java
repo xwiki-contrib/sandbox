@@ -52,7 +52,7 @@ public class ChainingTransactionRunnable extends TransactionRunnable
     protected void preRun() throws Exception
     {
         for (TransactionRunnable run : this.allRunnables) {
-            run.run();
+            run.preRun();
         }
     }
 

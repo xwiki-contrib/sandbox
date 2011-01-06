@@ -158,25 +158,4 @@ public interface FilesystemStoreTools
      * @return a lock for the given files.
      */
     ReadWriteLock getLockForFiles(final List<File> toLock);
-
-    /**
-     * Given a directory, get all of the files in that directory and all of the files in any
-     * directories inside of it recursively.
-     *
-     * @param parent a directory.
-     * @return every file under the parent directory.
-     */
-    List<File> allChildrenOf(final File parent);
-
-    /**
-     * Delete a perhaps non-empty directory.
-     * Delete all files inside of this directory.
-     * If this directory is the only file in it's parent directory, delete the parent too.
-     * Repeat for all parents until a non-empty parent directory is found.
-     * If the given directory contains a symlink, follow it and DELETE EVERYTHING under it.
-     *
-     * @param directory the directory to delete.
-     * @return true if the given directory does not exist when the delete action is finished.
-     */
-    boolean deleteDir(final File directory);
 }
