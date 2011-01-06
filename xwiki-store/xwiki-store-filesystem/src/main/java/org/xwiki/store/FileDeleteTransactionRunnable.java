@@ -101,7 +101,7 @@ public class FileDeleteTransactionRunnable extends TransactionRunnable
      * if preRun() has not completed then we know there is nothing to rollback.
      * Otherwise:
      * 1. There is a backup file but no main file, it has been renamed, rename it back to the main location.
-     * 2. There is a main file and no backup. Nothing has probably happened yey do nothing to rollback.
+     * 2. There is a main file and no backup. Nothing has probably happened, do nothing to rollback.
      * 3. There are neither backup nor main files, this means we tried to delete a file which didn't exist
      *    to begin with.
      * 4. There are both main and backup files. AAAAAaaa what do we do?! Log and do nothing.
