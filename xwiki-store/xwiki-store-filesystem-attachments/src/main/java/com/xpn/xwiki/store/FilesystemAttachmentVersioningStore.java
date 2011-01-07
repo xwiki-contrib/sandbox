@@ -39,11 +39,10 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.store.filesystem.internal.FilesystemStoreTools;
 import org.xwiki.store.serialization.Serializer;
 import org.xwiki.store.TransactionRunnable;
-import org.xwiki.store.ChainingTransactionRunnable;
+import org.xwiki.store.StartableTransactionRunnable;
 import org.xwiki.store.FileSaveTransactionRunnable;
 import org.xwiki.store.FileDeleteTransactionRunnable;
 import org.xwiki.store.StreamProvider;
-import org.xwiki.store.VoidTransaction;
 
 
 /**
@@ -126,7 +125,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
         throws XWikiException
     {
         try {
-            this.getArchiveSaveRunnable(archive, context).start(VoidTransaction.INSTANCE);
+            this.getArchiveSaveRunnable(archive, context).start();
         } catch (Exception e) {
             if (e instanceof XWikiException) {
                 throw (XWikiException) e;
@@ -152,10 +151,10 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
      * @param archive The attachment archive to save.
      * @param context An XWikiContext used for getting the attachments from the archive with getRevision()
      *                and for getting the content from the attachments with getContentInputStream().
-     * @return a new TransactionRunnable for saving this attachment archive.
+     * @return a new StartableTransactionRunnable for saving this attachment archive.
      */
-    public TransactionRunnable getArchiveSaveRunnable(final XWikiAttachmentArchive archive,
-                                                      final XWikiContext context)
+    public StartableTransactionRunnable getArchiveSaveRunnable(final XWikiAttachmentArchive archive,
+                                                               final XWikiContext context)
     {
         return new ArchiveSaveRunnable(archive, this.fileTools, this.metaSerializer, context);
     }
@@ -175,7 +174,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
     {
         try {
             final XWikiAttachmentArchive archive = this.loadArchive(attachment, context, bTransaction);
-            this.getArchiveDeleteRunnable(archive).start(VoidTransaction.INSTANCE);
+            this.getArchiveDeleteRunnable(archive).start();
         } catch (Exception e) {
             if (e instanceof XWikiException) {
                 throw (XWikiException) e;
@@ -196,9 +195,9 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
      * this runnable can be run with any transaction including a VoidTransaction.
      * 
      * @param archive The attachment archive to delete.
-     * @return a TransactionRunnable for deleting the attachment archive.
+     * @return a StartableTransactionRunnable for deleting the attachment archive.
      */
-    public TransactionRunnable getArchiveDeleteRunnable(final XWikiAttachmentArchive archive)
+    public StartableTransactionRunnable getArchiveDeleteRunnable(final XWikiAttachmentArchive archive)
     {
         return new ArchiveDeleteRunnable(archive, this.fileTools);
     }
@@ -210,7 +209,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
      * It uses FileDeleteTransactionRunnable so the attachment will either be deleted or fail
      * safely, it should not hang in a halfway state.
      */
-    private static class ArchiveDeleteRunnable extends ChainingTransactionRunnable
+    private static class ArchiveDeleteRunnable extends StartableTransactionRunnable
     {
         /**
          * Filesystem storage tools for getting files for each revision of the attachment, it's
@@ -255,7 +254,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
          *
          * @see TransactionRunnable#preRun()
          */
-        protected void preRun() throws Exception
+        protected void onPreRun() throws Exception
         {
             final List<File> toDelete = new ArrayList<File>();
             toDelete.add(this.fileTools.metaFileForAttachment(this.attachment));
@@ -270,10 +269,8 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
                     new FileDeleteTransactionRunnable(file,
                                                       this.fileTools.getBackupFile(file),
                                                       this.fileTools.getLockForFile(file));
-                this.add(contentDeleteRunnable);
+                contentDeleteRunnable.runIn(this);
             }
-
-            super.preRun();
         }
     }
 
@@ -282,7 +279,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
      * It uses a chain of FileSaveTransactionRunnable so the attachment will either be saved or fail
      * safely, it should not hang in a halfway state.
      */
-    private static class ArchiveSaveRunnable extends ChainingTransactionRunnable
+    private static class ArchiveSaveRunnable extends StartableTransactionRunnable
     {
         /** The XWikiAttachmentArchive to save. */
         private final XWikiAttachmentArchive archive;
@@ -325,7 +322,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
          *
          * @see TransactionRunnable#preRun()
          */
-        protected void preRun() throws Exception
+        protected void onPreRun() throws Exception
         {
             final Version[] versions = this.archive.getVersions();
 
@@ -355,7 +352,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
                                                         this.fileTools.getLockForFile(contentFile),
                                                         contentProvider);
 
-                    this.add(contentSaveRunnable);
+                    contentSaveRunnable.runIn(this);
                 }
             }
 
@@ -373,11 +370,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
                                                 this.fileTools.getLockForFile(attachMetaFile),
                                                 provider);
 
-            this.add(metaSaveRunnable);
- 
-
-            // Now manually preRun() each runnable.
-            super.preRun();
+            metaSaveRunnable.runIn(this);
         }
     }
 

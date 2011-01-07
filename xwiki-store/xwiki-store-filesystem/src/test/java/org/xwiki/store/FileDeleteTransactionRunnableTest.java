@@ -81,7 +81,7 @@ public class FileDeleteTransactionRunnableTest
     public void simpleTest() throws Exception
     {
         Assert.assertTrue(this.toDelete.exists());
-        this.runnable.start(new VoidTransaction());
+        this.runnable.start();
         Assert.assertFalse(this.toDelete.exists());
         Assert.assertFalse(this.temp.exists());
     }
@@ -93,17 +93,17 @@ public class FileDeleteTransactionRunnableTest
 
         // After preRun(), before run.
         final TransactionRunnable failRunnable = new TransactionRunnable() {
-            public void run() throws Exception
+            public void onRun() throws Exception
             {
                 Assert.assertFalse(temp.exists());
                 Assert.assertTrue(toDelete.exists());
                 throw new Exception("Simulate something going wrong.");
             }
         };
-        this.validateRollback(new ChainingTransactionRunnable() {{
-            add(failRunnable);
-            add(runnable);
-        }});
+        final StartableTransactionRunnable str = new StartableTransactionRunnable();
+        failRunnable.runIn(str);
+        runnable.runIn(str);
+        this.validateRollback(str);
     }
 
     @Test
@@ -113,17 +113,17 @@ public class FileDeleteTransactionRunnableTest
 
         // After run() before onCommit()
         final TransactionRunnable failRunnable = new TransactionRunnable() {
-            public void run() throws Exception
+            public void onRun() throws Exception
             {
                 Assert.assertTrue(temp.exists());
                 Assert.assertFalse(toDelete.exists());
                 throw new Exception("Simulate something going wrong.");
             }
         };
-        this.validateRollback(new ChainingTransactionRunnable() {{
-            add(runnable);
-            add(failRunnable);
-        }});
+        final StartableTransactionRunnable str = new StartableTransactionRunnable();
+        runnable.runIn(str);
+        failRunnable.runIn(str);
+        this.validateRollback(str);
     }
 
     @Test
@@ -131,7 +131,7 @@ public class FileDeleteTransactionRunnableTest
     {
         this.toDelete.delete();
         Assert.assertFalse(this.toDelete.exists());
-        this.runnable.start(new VoidTransaction());
+        this.runnable.start();
         Assert.assertFalse(this.toDelete.exists());
         Assert.assertFalse(this.temp.exists());
     }
@@ -143,7 +143,7 @@ public class FileDeleteTransactionRunnableTest
         Assert.assertFalse(this.toDelete.exists());
 
         final TransactionRunnable failRunnable = new TransactionRunnable() {
-            public void run() throws Exception
+            public void onRun() throws Exception
             {
                 Assert.assertFalse(temp.exists());
                 Assert.assertFalse(toDelete.exists());
@@ -151,10 +151,10 @@ public class FileDeleteTransactionRunnableTest
             }
         };
         try {
-            new ChainingTransactionRunnable() {{
-                add(runnable);
-                add(failRunnable);
-            }}.start(new VoidTransaction());
+            final StartableTransactionRunnable str = new StartableTransactionRunnable();
+            runnable.runIn(str);
+            failRunnable.runIn(str);
+            str.start();
         } catch (Exception e) {
             Assert.assertFalse(this.toDelete.exists());
             Assert.assertFalse(this.temp.exists());
@@ -162,11 +162,11 @@ public class FileDeleteTransactionRunnableTest
         }
     }
 
-    private void validateRollback(final TransactionRunnable tr)
+    private void validateRollback(final StartableTransactionRunnable str)
     {
         try {
-            tr.start(new VoidTransaction());
-            Assert.fail("TransactionRunnable#start() did not throw the exception thrown by run.");
+            str.start();
+            Assert.fail("StartableTransactionRunnable#start() did not throw the exception thrown by run.");
         } catch (Exception e) { }
         Assert.assertTrue(this.toDelete.exists());
         Assert.assertFalse(this.temp.exists());

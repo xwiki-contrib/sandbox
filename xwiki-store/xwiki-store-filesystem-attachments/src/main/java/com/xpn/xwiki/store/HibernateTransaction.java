@@ -17,47 +17,19 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.store;
+package com.xpn.xwiki.store;
+
+import org.xwiki.store.RootTransactionRunnable;
 
 /**
- * A VoidTransaction is a Transaction which does nothing.
- * To be used in cases when there is no need to open or close transactions with any database.
+ * A Transaction based on Hibernate storage engine.
+ * SQL based TransactionRunnables MUST extend RootTransactionRunnable because
+ * SQL storage engines are incapable of rolling back after commit.
  *
  * @version $Id$
  * @since TODO
  */
-public class VoidTransaction implements Transaction
+public class HibernateTransaction extends RootTransactionRunnable
 {
-    /** A single instance since VoidTransaction has no state. */
-    public static final VoidTransaction INSTANCE = new VoidTransaction();
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see Transaction#begin()
-     */
-    public void begin() throws Exception
-    {
-        // No op, which is why it's void.
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see Transaction#commit()
-     */
-    public void commit() throws Exception
-    {
-        // No op, which is why it's void.
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see Transaction#rollback()
-     */
-    public void rollback() throws Exception
-    {
-        // No op, which is why it's void.
-    }
+    // Do nothing.
 }

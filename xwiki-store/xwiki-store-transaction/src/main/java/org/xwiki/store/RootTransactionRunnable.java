@@ -20,36 +20,23 @@
 package org.xwiki.store;
 
 /**
- * A Transaction represents an atomic unit of work on the storage engine.
- * Implementations may use whatever type of storage they like as long as it supports
- * beginning a transaction, and committing or rolling back that transaction.
+ * A TransactionRunnable which cannot be run inside of another runnable.
+ * A TransactionRunnable must extend this if it cannot safely rollback after committing.
  *
  * @version $Id$
  * @since TODO
  */
-public interface Transaction
+public class RootTransactionRunnable extends StartableTransactionRunnable<FinalTransactionRunnable>
 {
-    /**
-     * Start the transaction.
-     * Prepare the storage engine to handle a transaction.
-     *
-     * @throws Exception if something goes wrong with the storage engine.
-     */
-    void begin() throws Exception;
+    // No differences from StartableTransactionRunnable.
+}
 
-    /**
-     * Commit the transaction.
-     * Save the work which was done during this transaction.
-     *
-     * @throws Exception if something goes wrong with the storage.
-     */
-    void commit() throws Exception;
-
-    /**
-     * Rollback the transaction.
-     * Return the storage engine to the state it was before the transaction began.
-     *
-     * @throws Exception if something goes wrong with the storage.
-     */
-    void rollback() throws Exception;
+/**
+ * This is here to prevent this runnable ever being run inside of another TransactionRunnable.
+ *
+ * @version $Id$
+ */
+final class FinalTransactionRunnable extends RootTransactionRunnable
+{
+    // Do nothing.
 }

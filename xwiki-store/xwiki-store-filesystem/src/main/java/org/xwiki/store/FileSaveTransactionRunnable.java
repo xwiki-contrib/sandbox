@@ -37,7 +37,7 @@ import org.apache.commons.io.IOUtils;
  * @version $Id$
  * @since TODO
  */
-public class FileSaveTransactionRunnable extends TransactionRunnable
+public class FileSaveTransactionRunnable extends StartableTransactionRunnable<TransactionRunnable>
 {
     /** The location of the file to save the attachment content in. */
     private final File toSave;
@@ -94,7 +94,7 @@ public class FileSaveTransactionRunnable extends TransactionRunnable
      *
      * @see TransactionRunnable#preRun()
      */
-    protected void preRun() throws IOException
+    protected void onPreRun() throws IOException
     {
         this.lock.writeLock().lock();
         this.clearTempAndBackup();
@@ -106,7 +106,7 @@ public class FileSaveTransactionRunnable extends TransactionRunnable
      *
      * @see TransactionRunnable#run()
      */
-    protected void run() throws Exception
+    protected void onRun() throws Exception
     {
         if (!this.toSave.getParentFile().exists() && !this.toSave.getParentFile().mkdirs()) {
             throw new IOException("Could not make directory tree to place file in. "

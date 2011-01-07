@@ -17,23 +17,17 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.store;
+package com.xpn.xwiki.store;
+
+import org.xwiki.store.TransactionRunnable;
 
 /**
- * A TransactionRunnable which does nothing.
+ * A TransactionRunnable which must be run inside of a Hibernate transaction.
  *
  * @version $Id$
  * @since TODO
  */
-public class VoidTransactionRunnable extends TransactionRunnable
+public class HibernateTransactionRunnable extends TransactionRunnable<HibernateTransaction>
 {
-    /**
-     * {@inheritDoc}
-     *
-     * @see AbstractTransactionRunnable#start(Transaction)
-     */
-    public void start(final Transaction transaction)
-    {
-        // No op. Hence why it's void.
-    }
+    // Does nothing by default.
 }

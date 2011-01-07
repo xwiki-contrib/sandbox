@@ -103,7 +103,7 @@ public class FileSaveTransactionRunnableTest
     {
         Assert.assertEquals(IOUtils.toString(new FileInputStream(this.toSave)), "Version1");
 
-        this.runnable.start(new VoidTransaction());
+        this.runnable.start();
 
         Assert.assertFalse(this.backup.exists());
         Assert.assertFalse(this.temp.exists());
@@ -117,17 +117,17 @@ public class FileSaveTransactionRunnableTest
 
         // After preRun(), before run.
         final TransactionRunnable failRunnable = new TransactionRunnable() {
-            public void run() throws Exception
+            public void onRun() throws Exception
             {
                 Assert.assertFalse("Temp file was not cleared in preRun.", temp.exists());
                 Assert.assertFalse("Backup file was not cleared in preRun.", backup.exists());
                 throw new Exception("Simulate something going wrong.");
             }
         };
-        this.validateRollback(new ChainingTransactionRunnable() {{
-            add(failRunnable);
-            add(runnable);
-        }});
+        final StartableTransactionRunnable str = new StartableTransactionRunnable();
+        failRunnable.runIn(str);
+        runnable.runIn(str);
+        this.validateRollback(str);
 
         Assert.assertEquals(IOUtils.toString(new FileInputStream(this.toSave)), "Version1");
     }
@@ -139,16 +139,16 @@ public class FileSaveTransactionRunnableTest
 
         // After run() before onCommit()
         final TransactionRunnable failRunnable = new TransactionRunnable() {
-            public void run() throws Exception
+            public void onRun() throws Exception
             {
                 Assert.assertTrue("Content was not saved to temp file.", temp.exists());
                 throw new Exception("Simulate something going wrong.");
             }
         };
-        this.validateRollback(new ChainingTransactionRunnable() {{
-            add(runnable);
-            add(failRunnable);
-        }});
+        final StartableTransactionRunnable str = new StartableTransactionRunnable();
+        runnable.runIn(str);
+        failRunnable.runIn(str);
+        this.validateRollback(str);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class FileSaveTransactionRunnableTest
         this.toSave.delete();
         Assert.assertFalse(this.toSave.exists());
 
-        this.runnable.start(new VoidTransaction());
+        this.runnable.start();
 
         Assert.assertTrue(this.toSave.exists());
         Assert.assertEquals(IOUtils.toString(new FileInputStream(this.toSave)), "Version2");
@@ -173,7 +173,7 @@ public class FileSaveTransactionRunnableTest
         Assert.assertFalse(this.toSave.exists());
 
         final TransactionRunnable failRunnable = new TransactionRunnable() {
-            public void run() throws Exception
+            public void onRun() throws Exception
             {
                 Assert.assertFalse(backup.exists());
                 Assert.assertTrue(temp.exists());
@@ -182,10 +182,10 @@ public class FileSaveTransactionRunnableTest
             }
         };
         try {
-            new ChainingTransactionRunnable() {{
-                add(runnable);
-                add(failRunnable);
-            }}.start(new VoidTransaction());
+            final StartableTransactionRunnable str = new StartableTransactionRunnable();
+            runnable.runIn(str);
+            failRunnable.runIn(str);
+            str.start();
         } catch (Exception e) {
             Assert.assertFalse(this.toSave.exists());
             Assert.assertFalse(this.temp.exists());
@@ -194,10 +194,10 @@ public class FileSaveTransactionRunnableTest
         }
     }
 
-    private void validateRollback(final TransactionRunnable tr) throws Exception
+    private void validateRollback(final StartableTransactionRunnable tr) throws Exception
     {
         try {
-            tr.start(new VoidTransaction());
+            tr.start();
             Assert.fail("TransactionRunnable#start() did not throw the exception thrown by run.");
         } catch (Exception e) { }
         Assert.assertTrue(this.toSave.exists());

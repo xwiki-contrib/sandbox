@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReadWriteLock;
  * @version $Id$
  * @since TODO
  */
-public class FileDeleteTransactionRunnable extends TransactionRunnable
+public class FileDeleteTransactionRunnable extends StartableTransactionRunnable<TransactionRunnable>
 {
     /** The location of the file to sdelete. */
     private final File toDelete;
@@ -73,9 +73,9 @@ public class FileDeleteTransactionRunnable extends TransactionRunnable
      * {@inheritDoc}
      * Obtain the lock and make sure the temporary and backup files are deleted.
      *
-     * @see TransactionRunnable#preRun()
+     * @see StartableTransactionRunnable#onPreRun()
      */
-    protected void preRun() throws IOException
+    protected void onPreRun() throws IOException
     {
         this.lock.writeLock().lock();
         this.clearBackup();
@@ -85,9 +85,9 @@ public class FileDeleteTransactionRunnable extends TransactionRunnable
     /**
      * {@inheritDoc}
      *
-     * @see TransactionRunnable#run()
+     * @see StartableTransactionRunnable#onRun()
      */
-    protected void run() throws IOException
+    protected void onRun() throws IOException
     {
         if (this.toDelete.exists()) {
             this.toDelete.renameTo(this.backupFile);
@@ -106,7 +106,7 @@ public class FileDeleteTransactionRunnable extends TransactionRunnable
      *    to begin with.
      * 4. There are both main and backup files. AAAAAaaa what do we do?! Log and do nothing.
      *
-     * @see TransactionRunnable#onRollback()
+     * @see StartableTransactionRunnable#onRollback()
      */
     protected void onRollback()
     {
@@ -144,7 +144,7 @@ public class FileDeleteTransactionRunnable extends TransactionRunnable
      * Once this is called, there is no going back.
      * Remove backup file and unlock the lock.
      *
-     * @see TransactionRunnable#onComplete()
+     * @see StartableTransactionRunnable#onComplete()
      */
     protected void onComplete()
     {

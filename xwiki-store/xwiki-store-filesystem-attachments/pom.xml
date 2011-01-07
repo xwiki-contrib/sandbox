@@ -59,10 +59,17 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- TransactionRunnable -->
+    <!-- StreamProvider -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-core-store-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- TransactionRunnable -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-core-store-transaction</artifactId>
       <version>${project.version}</version>
     </dependency>
 
