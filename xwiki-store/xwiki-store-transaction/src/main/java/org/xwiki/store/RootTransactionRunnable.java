@@ -26,17 +26,7 @@ package org.xwiki.store;
  * @version $Id$
  * @since TODO
  */
-public class RootTransactionRunnable extends StartableTransactionRunnable<FinalTransactionRunnable>
+public class RootTransactionRunnable extends StartableTransactionRunnable<Void>
 {
     // No differences from StartableTransactionRunnable.
-}
-
-/**
- * This is here to prevent this runnable ever being run inside of another TransactionRunnable.
- *
- * @version $Id$
- */
-final class FinalTransactionRunnable extends RootTransactionRunnable
-{
-    // Do nothing.
 }

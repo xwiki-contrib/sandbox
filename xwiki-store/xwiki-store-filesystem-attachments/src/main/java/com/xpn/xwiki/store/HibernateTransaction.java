@@ -19,17 +19,13 @@
  */
 package com.xpn.xwiki.store;
 
-import org.xwiki.store.RootTransactionRunnable;
-
 /**
  * A Transaction based on Hibernate storage engine.
- * SQL based TransactionRunnables MUST extend RootTransactionRunnable because
- * SQL storage engines are incapable of rolling back after commit.
  *
  * @version $Id$
  * @since TODO
  */
-public class HibernateTransaction extends RootTransactionRunnable
+public interface HibernateTransaction
 {
     // Do nothing.
 }

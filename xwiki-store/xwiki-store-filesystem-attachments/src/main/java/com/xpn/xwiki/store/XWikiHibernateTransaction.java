@@ -22,6 +22,8 @@ package com.xpn.xwiki.store;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 
+import org.xwiki.store.RootTransactionRunnable;
+
 /**
  * A Transaction based on XWikiHibernateStore.
  * SQL based TransactionRunnables MUST extend RootTransactionRunnable because
@@ -30,7 +32,7 @@ import com.xpn.xwiki.XWikiException;
  * @version $Id$
  * @since TODO
  */
-public class XWikiHibernateTransaction extends HibernateTransaction
+public class XWikiHibernateTransaction extends RootTransactionRunnable implements HibernateTransaction
 {
     /** The storage engine. */
     private final XWikiHibernateBaseStore store;
