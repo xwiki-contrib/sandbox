@@ -77,7 +77,7 @@ public class TransactionRunnable<T>
      * TransactionRunnable<DbTransaction> runnableRequiringDb = new DbRequiringTransactionRunnable();
      *
      * // This will not compile:
-     * runnableRequiringDb.addTo(standalone);
+     * runnableRequiringDb.runIn(standalone);
      * // Because if it did, it would allow you to do this:
      * standalone.start();
      * // Ut oh, using the database outside of a transaction!

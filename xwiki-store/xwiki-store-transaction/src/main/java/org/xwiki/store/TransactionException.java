@@ -186,7 +186,9 @@ public class TransactionException extends Exception
      */
     private void printInfo(final PrintWriter writeTo, final boolean includeStackTrace)
     {
-        writeTo.println(super.getMessage());
+        if (super.getMessage() != null) {
+            writeTo.println(super.getMessage());
+        }
         writeTo.println("Caused by:");
 
         for (Throwable cause : causes) {
