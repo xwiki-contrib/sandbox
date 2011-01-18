@@ -31,7 +31,7 @@ import java.util.List;
  * @version $Id$
  * @since TODO
  */
-public class StartableTransactionRunnable<T> extends TransactionRunnable
+public class StartableTransactionRunnable<T> extends ProvidingTransactionRunnable<Object, T>
 {
     /** True after this runnable has been started and once true, this runnable may not be run again. */
     private boolean alreadyRun;

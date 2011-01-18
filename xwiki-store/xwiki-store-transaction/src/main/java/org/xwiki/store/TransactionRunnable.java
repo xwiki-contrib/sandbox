@@ -92,7 +92,7 @@ public class TransactionRunnable<T>
      *            This defines the state which the state which the storage engine is guaranteed to be in
      *            when this runnable starts. It must extend the type of capabilities required by this
      *            runnable.
-     * @param parentRunnable the TransactionRunnables to run this runnable inside of.
+     * @param parentRunnable the TransactionRunnable to run this runnable inside of.
      * @return this runnable casted to a TransactionRunnable with the capabilities of it's parent.
      * @throws IllegalStateException if this function has already been called on this runnable because a
      *                               TransactionRunnable may only be run once.
@@ -116,6 +116,30 @@ public class TransactionRunnable<T>
         // Since this runnable runs inside of parentRunnable this cast is safe because all of the
         // pre-run and post-run operations will be executed by the parent.
         return (TransactionRunnable<U>) this;
+    }
+
+    /**
+     * Get whatever is required by this TransactionRunnable.
+     * In the case of a {@link ProvidingTransactionRunnable} this will get what is <i>required</i>
+     * by that runnable, not what is <i>provided</i>. To get the provided context from a
+     * {@link ProvidingTransactionRunnable} use {@link ProvidingTransactionRunnable#getProvidedContext()}
+     *
+     * @return an implementation of T, the context which is required by this TransactionRunnable.
+     */
+    protected T getContext()
+    {
+        if (this.parent != null) {
+            if (this.parent instanceof ProvidingTransactionRunnable) {
+                // Casting this.parent to ProvidingTransactionRunnable is safe because instanceof says so.
+                // Casting the provided context to T is safe because T be what it provides and to add it
+                // as a ProvidingTR, what it provides (P) must extend T, and adding it as a plain
+                // TransactionRunnable, what it requires must extend T and what it provides must extend
+                // what it requires so this.parent.getProvidedContext() is guarenteed to extend T.
+                return (T) ((ProvidingTransactionRunnable) this.parent).getProvidedContext();
+            }
+            return this.parent.getContext();
+        }
+        return null;
     }
 
     /**
