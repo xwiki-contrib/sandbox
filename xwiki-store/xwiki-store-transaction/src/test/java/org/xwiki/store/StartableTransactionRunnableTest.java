@@ -39,6 +39,7 @@ public class StartableTransactionRunnableTest
     {
         this.testRunnable.start();
         this.testRunnable.start();
+        Assert.fail("exception was not thrown");
     }
 
     @Test(expected=TransactionException.class)
@@ -63,6 +64,7 @@ public class StartableTransactionRunnableTest
             Assert.assertTrue("Rollback did not run after exception", hasRun());
             throw e;
         }
+        Assert.fail("exception was not thrown");
     }
 
     @Test(expected=TransactionException.class)
@@ -94,6 +96,7 @@ public class StartableTransactionRunnableTest
             Assert.assertTrue("Complete did not run after exception", hasRun());
             throw e;
         }
+        Assert.fail("exception was not thrown");
     }
 
     /** Make sure an exception or error in onComplete is caught and reported. */
@@ -108,6 +111,7 @@ public class StartableTransactionRunnableTest
         } .runIn(this.testRunnable);
 
         this.testRunnable.start();
+        Assert.fail("exception was not thrown");
     }
 
     public boolean hasRun()

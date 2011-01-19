@@ -20,6 +20,7 @@
 package org.xwiki.store;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -50,8 +51,8 @@ public class TransactionRunnableTest
     }
 
     /** preRun: Parent before child, exceptions cause everything to stop. */
-    @Test(expected=CustomException.class)
-    public void preRunChildTest() throws Exception
+    @Test(expected=TransactionException.class)
+    public void preRunChildTest() throws Throwable
     {
         new TransactionRunnable() {
             protected void onPreRun()
@@ -65,12 +66,21 @@ public class TransactionRunnableTest
             }
         } .runIn(this.testCase));
 
-        this.testCase.preRun();
+        try {
+            this.testCase.preRun();
+        } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
+            throw e;
+        }
     }
 
     /** preRun: Siblings in same order as registered, exceptions cause everything to stop. */
-    @Test(expected=CustomException.class)
-    public void preRunSiblingTest() throws Exception
+    @Test(expected=TransactionException.class)
+    public void preRunSiblingTest() throws Throwable
     {
         new TransactionRunnable() {
             protected void onPreRun() throws Exception
@@ -86,12 +96,21 @@ public class TransactionRunnableTest
             }
         } .runIn(this.testCase);
 
-        this.testCase.preRun();
+        try {
+            this.testCase.preRun();
+        } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
+            throw e;
+        }
     }
 
     /** Run: Parent before child, exceptions cause everything to stop. */
-    @Test(expected=CustomException.class)
-    public void runChildTest() throws Exception
+    @Test(expected=TransactionException.class)
+    public void runChildTest() throws Throwable
     {
         new TransactionRunnable() {
             protected void onRun()
@@ -105,12 +124,21 @@ public class TransactionRunnableTest
             }
         } .runIn(this.testCase));
 
-        this.testCase.run();
+        try {
+            this.testCase.run();
+        } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
+            throw e;
+        }
     }
 
     /** Run: Siblings in same order as registered, exceptions cause everything to stop. */
-    @Test(expected=CustomException.class)
-    public void runSiblingTest() throws Exception
+    @Test(expected=TransactionException.class)
+    public void runSiblingTest() throws Throwable
     {
         new TransactionRunnable() {
             protected void onRun() throws Exception
@@ -126,12 +154,21 @@ public class TransactionRunnableTest
             }
         } .runIn(this.testCase);
 
-        this.testCase.run();
+        try {
+            this.testCase.run();
+        } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
+            throw e;
+        }
     }
 
     /** Commit: Child before parent, exceptions cause everything to stop. */
-    @Test(expected=CustomException.class)
-    public void commitChildTest() throws Exception
+    @Test(expected=TransactionException.class)
+    public void commitChildTest() throws Throwable
     {
         new TransactionRunnable() {
             // Child first
@@ -147,12 +184,21 @@ public class TransactionRunnableTest
             }
         } .runIn(this.testCase));
 
-        this.testCase.commit();
+        try {
+            this.testCase.commit();
+        } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
+            throw e;
+        }
     }
 
     /** Commit: Siblings in reverse order as registered, exceptions cause everything to stop. */
-    @Test(expected=CustomException.class)
-    public void commitSiblingTest() throws Exception
+    @Test(expected=TransactionException.class)
+    public void commitSiblingTest() throws Throwable
     {
         new TransactionRunnable() {
             protected void onCommit()
@@ -168,7 +214,16 @@ public class TransactionRunnableTest
             }
         } .runIn(this.testCase);
 
-        this.testCase.commit();
+        try {
+            this.testCase.commit();
+        } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
+            throw e;
+        }
     }
 
     /**
@@ -176,24 +231,29 @@ public class TransactionRunnableTest
      * Exception must indicate possibility of corruption.
      */
     @Test(expected=TransactionException.class)
-    public void rollbackChildTest() throws Exception
+    public void rollbackChildTest() throws Throwable
     {
         new TransactionRunnable() {
             protected void onRollback() throws Exception
             {
-                itRan();
+                Assert.assertFalse("Child rolled back after parent.", hasRun());
+                throw new CustomException();
             }
         } .runIn(new TransactionRunnable() {
             protected void onRollback() throws Exception
             {
-                Assert.assertFalse("Child rolled back after parent.", hasRun());
-                throw new CustomException();
+                itRan();
             }
         } .runIn(this.testCase));
 
         try {
             this.testCase.rollback();
         } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
             Assert.assertTrue("onRollback failed and exception did not indicate "
                               + "the possibility of storage corruption.", e.isNonRecoverable());
             Assert.assertTrue("onRollback did not run for a child of a "
@@ -207,7 +267,7 @@ public class TransactionRunnableTest
      * Exception must indicate possibility of corruption.
      */
     @Test(expected=TransactionException.class)
-    public void rollbackSiblingTest() throws Exception
+    public void rollbackSiblingTest() throws Throwable
     {
         new TransactionRunnable() {
             protected void onRollback()
@@ -227,6 +287,11 @@ public class TransactionRunnableTest
         try {
             this.testCase.rollback();
         } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
             Assert.assertTrue("onRollback failed and exception did not indicate "
                               + "the possibility of storage corruption.", e.isNonRecoverable());
             Assert.assertTrue("onRollback did not run for the sibling of a runnable "
@@ -236,28 +301,33 @@ public class TransactionRunnableTest
     }
 
     /**
-     * Complete: Parent before child, exceptions are collected and thrown at end.
+     * Complete: Child before parent, exceptions are collected and thrown at end.
      * Exception must not indicate possibility of corruption.
      */
     @Test(expected=TransactionException.class)
-    public void completeChildTest() throws Exception
+    public void completeChildTest() throws Throwable
     {
         new TransactionRunnable() {
-            protected void onComplete()
-            {
-                itRan();
-            }
-        } .runIn(new TransactionRunnable() {
             protected void onComplete() throws Exception
             {
-                Assert.assertTrue("Child run before parent.", hasRun());
+                itRan();
                 throw new CustomException();
+            }
+        } .runIn(new TransactionRunnable() {
+            protected void onComplete()
+            {
+                Assert.assertTrue("Child run after parent.", hasRun());
             }
         } .runIn(this.testCase));
 
         try {
             this.testCase.complete();
         } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
             Assert.assertFalse("onComplete failed and exception erroniously indicated "
                                + "the possibility of storage corruption.", e.isNonRecoverable());
             Assert.assertTrue("onComplete did not run for a child of a "
@@ -267,12 +337,21 @@ public class TransactionRunnableTest
     }
 
     /**
-     * Complete: Siblings in same order as registered, exceptions are collected and thrown at end.
+     * Complete: Siblings in opposite as registered, exceptions are collected and thrown at end.
      * Exception must not indicate possibility of corruption.
      */
     @Test(expected=TransactionException.class)
-    public void completeSiblingTest() throws Exception
+    public void completeSiblingTest() throws Throwable
     {
+        new TransactionRunnable() {
+            protected void onComplete() throws Exception
+            {
+                Assert.assertTrue("onComplete for siblings run in same order as registered.",
+                                  hasRun());
+                throw new CustomException();
+            }
+        } .runIn(this.testCase);
+
         new TransactionRunnable() {
             protected void onComplete()
             {
@@ -280,22 +359,94 @@ public class TransactionRunnableTest
             }
         } .runIn(this.testCase);
 
-        new TransactionRunnable() {
-            protected void onComplete() throws Exception
-            {
-                Assert.assertTrue("onComplete for siblings run in opposite order than registered.",
-                                  hasRun());
-                throw new CustomException();
-            }
-        } .runIn(this.testCase);
-
         try {
             this.testCase.complete();
         } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
             Assert.assertFalse("onComplete failed and exception erroniously indicated "
                                + "the possibility of storage corruption.", e.isNonRecoverable());
             Assert.assertTrue("onComplete did not run for the sibling of a runnable "
                               + "which threw an exception.", hasRun());
+            throw e;
+        }
+    }
+
+    /**
+     * onComplete should run for any TR which has had onPreRun called on it but not for ones which didn't.
+     */
+    @Test(expected=TransactionException.class)
+    public void noCompleteUnlessPreRunTest() throws Throwable
+    {
+        new TransactionRunnable() {
+            protected void onPreRun() throws Exception
+            {
+                throw new CustomException();
+            }
+            protected void onComplete()
+            {
+                itRan();
+            }
+        } .runIn(this.testCase);
+
+        new TransactionRunnable() {
+            protected void onComplete()
+            {
+                Assert.fail("onComplete ran for a TransactionRunnable which did not have onPreRun called.");
+            }
+        } .runIn(this.testCase);
+
+        try {
+            this.testCase.preRun();
+        } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
+            Assert.assertTrue("onComplete did not run for runnable which was preRun.", hasRun());
+            throw e;
+        }
+        Assert.fail("preRun did not throw an exception");
+    }
+
+    /**
+     * onComplete should run for any TR which has had onPreRun called on it but not for ones which didn't.
+     */
+    @Test(expected=TransactionException.class)
+    public void noRollbackUnlessRunTest() throws Throwable
+    {
+        new TransactionRunnable() {
+            protected void onRun() throws Exception
+            {
+                throw new CustomException();
+            }
+            protected void onRollback()
+            {
+                itRan();
+            }
+        } .runIn(this.testCase);
+
+        new TransactionRunnable() {
+            protected void onRollback()
+            {
+                Assert.fail("onRollback ran for a TransactionRunnable which did not have onRun called.");
+            }
+        } .runIn(this.testCase);
+
+        try {
+            this.testCase.run();
+            Assert.fail("run did not throw an exception");
+        } catch (TransactionException e) {
+            for (Throwable t : e.getCauses()) {
+                if (!(t instanceof CustomException)) {
+                    throw t;
+                }
+            }
+            Assert.assertTrue("onRollback did not run for runnable which was run.", hasRun());
             throw e;
         }
     }

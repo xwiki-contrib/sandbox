@@ -19,9 +19,6 @@
  */
 package org.xwiki.store;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A TransactionRunnable which is safe to start.
  * If your TransactionRunnable can safely be started on it's own, and does not need to be run inside of
@@ -51,37 +48,9 @@ public class StartableTransactionRunnable<T> extends ProvidingTransactionRunnabl
         }
         this.alreadyRun = true;
 
-        List<Throwable> causes = null;
-
-        try {
-
-            this.preRun();
-            this.run();
-            this.commit();
-
-        } catch (Throwable t) {
-            causes = new ArrayList<Throwable>();
-            causes.add(t);
-
-            try {
-                this.rollback();
-            } catch (TransactionException e) {
-                causes.add(e);
-            }
-
-        } finally {
-            try {
-                this.complete();
-            } catch (TransactionException e) {
-                if (causes == null) {
-                    causes = new ArrayList<Throwable>();
-                }
-                causes.add(e);
-            }
-        }
-
-        if (causes != null) {
-            throw new TransactionException(causes);
-        }
+        this.preRun();
+        this.run();
+        this.commit();
+        this.complete();
     }
 }

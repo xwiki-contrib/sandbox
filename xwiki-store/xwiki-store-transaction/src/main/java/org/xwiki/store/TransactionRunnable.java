@@ -21,6 +21,7 @@ package org.xwiki.store;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * A construct for altering storage in a safe way.
@@ -185,6 +186,9 @@ public class TransactionRunnable<T>
     /**
      * This will run if the transaction fails.
      * This function is guaranteed to be run nomatter what happens before in this transaction.
+     * onRollback() will NOT run for a given TransactionRunnable unless onRun() has been called.
+     * onRollback() will be called for each transaction in thr reverse order as they are run, children
+     * first, siblings in oposite order as registered.
      *
      * This MUST roll the storage engine back to it's prior state even after onCommit has been invoked.
      * TransactionRunnables which cannot rollback after a successful onCommit must extend
@@ -202,6 +206,9 @@ public class TransactionRunnable<T>
      * This will be run when after onCommit or onRollback no matter the outcome.
      * This function is guaranteed to be run nomatter what happens before in this transaction.
      * This is intended to do post commit cleanup and it MUST NOT be used to finalize a commit.
+     * onComplete() will NOT run for a given TransactionRunnable unless onPreRun() has been called.
+     * onComplete() will be called for each transaction in thr reverse order as they are run, children
+     * first, siblings in oposite order as registered.
      *
      * @throws Exception which will be reported as a failure which cannot cause database corruption.
      */
@@ -231,115 +238,213 @@ public class TransactionRunnable<T>
 
     /**
      * PreRun this and all of the chained runnables.
-     * Run in the same order as they were registered.
+     * Run in the order as they were registered in a deep first tree walk.
+     * If an exception occures, call onComplete on each runnable in the reverse order preRun was called.
      *
-     * @throws Exception if thrown by this or one of the chained runnables' onPreRun() functions.
+     * @throws TransactionException if an exception is thrown by this or one of the chained runnables'
+     *                              onPreRun() functions, also may contain exceptions thrown by one or more
+     *                              of the chained runnables' onComplete() functions.
      */
-    protected final void preRun() throws Exception
+    protected final void preRun() throws TransactionException
     {
-        this.onPreRun();
+        final ListIterator<TransactionRunnable> runPathIterator = this.getRunPath().listIterator();
+        try {
+            while (runPathIterator.hasNext()) {
+                runPathIterator.next().onPreRun();
+            }
+        } catch (Throwable t) {
+            final List<Throwable> errors = new ArrayList<Throwable>();
+            errors.add(t);
+            try {
+                completeAll(runPathIterator);
+            } catch (TransactionException e) {
+                errors.add(e);
+            }
+            throw new TransactionException("Failure in onPreRun()", errors, false);
+        }
+    }
+
+    /**
+     * @return all TransactionRunnables under and including this one in the order they need to be run.
+     */
+    private List<TransactionRunnable> getRunPath()
+    {
+        List<TransactionRunnable> runPath = new ArrayList<TransactionRunnable>();
+        this.addAllToRunPath(runPath);
+        return runPath;
+    }
+
+    /**
+     * Get all TransactionRunnables under and including this one in the order they need to be run.
+     *
+     * @param runPath a list of TransactionRunnable, every transactionRunnable in the chain
+     *        under this will be added in the order they should be run.
+     */
+    private void addAllToRunPath(final List<TransactionRunnable> runPath)
+    {
+        runPath.add(this);
         for (TransactionRunnable run : this.allRunnables) {
-            run.preRun();
+            run.addAllToRunPath(runPath);
         }
     }
 
     /**
      * Run this and all of the chained runnables.
-     * Run in the same order as they were registered.
+     * Run in the same order as they were registered, deep first tree walking.
+     * If an exception is thrown, all runnables so far run will be rollback'd and all runnables will be
+     * completed. Rollback and complete will happen in the reverse order as run.
      *
-     * @throws Exception if thrown by this or one of the chained runnables' onRun() functions.
+     * @throws TransactionException made by grouping together whatever is thrown by this or one of the
+     *                              chained runnables' onRun() functions and whatever might be thrown by
+     *                              onRollback() or onComplete() which are called if somethign goes wrong.
      */
-    protected final void run() throws Exception
+    protected final void run() throws TransactionException
     {
-        this.onRun();
-        for (TransactionRunnable run : this.allRunnables) {
-            run.run();
+        final ListIterator<TransactionRunnable> runPathIterator = this.getRunPath().listIterator();
+        try {
+            while (runPathIterator.hasNext()) {
+                runPathIterator.next().onRun();
+            }
+        } catch (Throwable t) {
+            final List<Throwable> errors = new ArrayList<Throwable>();
+            errors.add(t);
+            try {
+                rollbackAll(runPathIterator);
+            } catch (TransactionException e) {
+                errors.add(e);
+            }
+            try {
+                this.complete();
+            } catch (TransactionException e) {
+                errors.add(e);
+            }
+            throw new TransactionException("Failure in onRun()", errors, false);
         }
     }
 
     /**
      * Commit this and all of the chained runnables.
-     * Run in the reverse order as they were registered.
+     * Committed in the reverse order as they were run().
+     * If any of the runnables throws an exception while committing, all will be rollback'd in reverse the
+     * order they were run, starting at the last one, not starting at the one which failed.
+     * After all are rolled back, onComplete() will be called on each, also in reverse order.
      *
-     * @throws Exception if thrown by onCommit in this or one of the chained runnables.
+     * @throws TransactionException made from the exception thrown by this or one of the child runnables'
+     *                              onCommit function or rollback or complete.
      */
-    protected final void commit() throws Exception
+    protected final void commit() throws TransactionException
     {
-        for (int i = this.allRunnables.size() - 1; i >= 0; i--) {
-            this.allRunnables.get(i).commit();
+        final List<TransactionRunnable> runPath = this.getRunPath();
+        final ListIterator<TransactionRunnable> runPathReverseIterator =
+            runPath.listIterator(runPath.size());
+
+        try {
+            while (runPathReverseIterator.hasPrevious()) {
+                runPathReverseIterator.previous().onCommit();
+            }
+        } catch (Throwable t) {
+            final List<Throwable> errors = new ArrayList<Throwable>();
+            errors.add(t);
+            try {
+                this.rollback();
+            } catch (TransactionException e) {
+                errors.add(e);
+            }
+            try {
+                this.complete();
+            } catch (TransactionException e) {
+                errors.add(e);
+            }
+            throw new TransactionException("Failure in onCommit()", errors, false);
         }
-        this.onCommit();
     }
 
     /**
      * Rollback this and all of the chained runnables.
-     * Run in the reverse order as they were registered so that each runnable
+     * Run in the reverse order as they were run so that each runnable
      * will be rolling back a storage engine which is in as close as possible a state to what it was
      * when onRun() was called for that runnable.
+     * onRollback() will NOT run for a given TransactionRunnable unless onRun() has been called.
      *
      * @throws TransactionException made from gathering whatever exceptions were thrown
      *                              running onRollback() on this and the child runnables.
      */
     protected final void rollback() throws TransactionException
     {
-        final List<ExceptionThrowingRunnable> list =
-            new ArrayList<ExceptionThrowingRunnable>(this.allRunnables.size());
-
-        // Then every one chained to it.
-        for (int i = this.allRunnables.size() - 1; i >= 0; i--) {
-            final TransactionRunnable transRun = this.allRunnables.get(i);
-            list.add(new ExceptionThrowingRunnable() {
-                public void run() throws Exception
-                {
-                    transRun.rollback();
-                }
-            });
-        }
-
-        // Do this runnable.
-        list.add(new ExceptionThrowingRunnable() {
-            public void run() throws Exception
-            {
-                onRollback();
-            }
-        });
-
-        doAllAndCollectThrowables(list, "Failure in onRollback() the storage engine might be "
-                                        + "in an inconsistent state", true);
+        final List<TransactionRunnable> runPath = this.getRunPath();
+        final ListIterator<TransactionRunnable> runPathReverseIterator =
+            runPath.listIterator(runPath.size());
+        rollbackAll(runPathReverseIterator);
     }
 
     /**
      * Run onComplete() on this and each of the chained runnables.
-     * Run in the same order as they were registered because it should make no difference.
+     * Run in the opposite order as they were registered, child before parent.
      *
      * @throws TransactionException if one or more of the runnables throw any exception.
      */
     protected final void complete() throws TransactionException
     {
-        final List<ExceptionThrowingRunnable> list =
-            new ArrayList<ExceptionThrowingRunnable>(this.allRunnables.size());
+        final List<TransactionRunnable> runPath = this.getRunPath();
+        final ListIterator<TransactionRunnable> runPathReverseIterator =
+            runPath.listIterator(runPath.size());
+        completeAll(runPathReverseIterator);
+    }
 
-        // Do this runnable.
-        list.add(new ExceptionThrowingRunnable() {
-            public void run() throws Exception
-            {
-                onComplete();
-            }
-        });
+    /*--------------------Stateless functions--------------------*/
 
-        // Then every one chained to it.
-        for (final TransactionRunnable transRun : this.allRunnables) {
+    /**
+     * Call onComplete() on each TransactionRunnable in the iterator.
+     * Call them in reverse order until hasPrevious() returns false starting at whatever point the
+     * the iterator is left at.
+     *
+     * @param iterator the iterator of TransactionRunnables to complete.
+     * @throws TransactionException made up any exceptions throws by any of the onComplete calls.
+     *         this function does not stop for exceptions.
+     */
+    private static void completeAll(final ListIterator<TransactionRunnable> iterator)
+        throws TransactionException
+    {
+        final List<ExceptionThrowingRunnable> list = new ArrayList<ExceptionThrowingRunnable>();
+
+        while (iterator.hasPrevious()) {
+            final TransactionRunnable runnable = iterator.previous();
             list.add(new ExceptionThrowingRunnable() {
                 public void run() throws Exception
                 {
-                    transRun.complete();
+                    runnable.onComplete();
+                }
+            });
+        }
+        doAllAndCollectThrowables(list, "Failure in onComplete() the storage engine should be "
+                                        + "consistant although it may contain uncollected garbage.",
+                                  false);
+    }
+
+    /**
+     * Call onRollback() on each TransactionRunnable in the iterator.
+     *
+     * @param iterator the iterator of TransactionRunnables to rollback.
+     * @throws TransactionException made up any exceptions throws by any of the onRollback calls.
+     *         this function does not stop for exceptions.
+     */
+    private static void rollbackAll(final ListIterator<TransactionRunnable> iterator)
+        throws TransactionException
+    {
+        final List<ExceptionThrowingRunnable> list = new ArrayList<ExceptionThrowingRunnable>();
+
+        while (iterator.hasPrevious()) {
+            final TransactionRunnable runnable = iterator.previous();
+            list.add(new ExceptionThrowingRunnable() {
+                public void run() throws Exception
+                {
+                    runnable.onRollback();
                 }
             });
         }
 
-        doAllAndCollectThrowables(list, "Failure in onComplete() the storage engine should be "
-                                        + "consistant although it may contain uncollected garbage.",
-                                  false);
+        doAllAndCollectThrowables(list, "Failure in onRollback() the storage engine might be "
+                                        + "in an inconsistent state", true);
     }
 
     /**
