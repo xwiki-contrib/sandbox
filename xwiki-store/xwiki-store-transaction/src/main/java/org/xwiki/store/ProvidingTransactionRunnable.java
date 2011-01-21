@@ -103,7 +103,7 @@ package org.xwiki.store;
  * @version $Id$
  * @since TODO
  */
-public class ProvidingTransactionRunnable<R, P extends R> extends TransactionRunnable
+public class ProvidingTransactionRunnable<R, P extends R> extends TransactionRunnable<R>
 {
     /**
      * Get whatever is provided by this ProvidingTransactionRunnable.
@@ -115,29 +115,6 @@ public class ProvidingTransactionRunnable<R, P extends R> extends TransactionRun
     protected P getProvidedContext()
     {
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see TransactionRunnable#getContext()
-     */
-    protected R getContext()
-    {
-        return this.asRequirer().getContext();
-    }
-
-    /**
-     * View this as what it requires.
-     * Cast this ProvidingTransactionRunnable to the type of
-     * TransactionRunnable which it must run inside of.
-     *
-     * @return this ProvidingTransactionRunnable cast to a TransactionRunnable<R>
-     */
-    public TransactionRunnable<R> asRequirer()
-    {
-        // This cast is ok because P extends R.
-        return (TransactionRunnable<R>) this;
     }
 
     /**

@@ -23,7 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Tests for TransactionRunnable.
+ * Tests for ProvidingTransactionRunnable.
  *
  * @version $Id$
  * @since TODO
@@ -41,7 +41,7 @@ public class ProvidingTransactionRunnableTest
         ProvidingTransactionRunnable<DBTransaction, MyInterfaceWithDataA1> tr1 = new TR1();
         tr1.runIn(run);
         TransactionRunnable<DBTransaction> tr2 = new TR2();
-        TransactionRunnable<MyInterfaceWithDataA1> tr2WithNewCapabilities = tr2.runIn(tr1);
+        TransactionRunnable<MyInterfaceWithDataA1> tr2WithNewCapabilities = tr2.runIn(tr1.asProvider());
 
         new TR3().runIn(tr2WithNewCapabilities);
         // This should fail at compile time: new TR3().runIn(tr2);

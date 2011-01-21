@@ -19,26 +19,25 @@
  */
 package org.xwiki.store;
 
+import org.junit.Test;
+
 /**
- * A TransactionRunnable which cannot be run inside of another runnable.
- * A TransactionRunnable must extend this if it cannot safely rollback after committing.
+ * Make sure RootTransactionRunnable cannot be run in a larger TR.
  *
- * @param <T> see: {@link TransactionRunnable}
  * @version $Id$
  * @since TODO
  */
-public class RootTransactionRunnable<T> extends StartableTransactionRunnable<T>
+public class RootTransactionRunnableTest
 {
-    /**
-     * {@inheritDoc}
-     * This implementation throws an exception because it may not be used in a rootTR.
-     *
-     * @see TransactionRunnable#runIn(TransactionRunnable<U>)
-     */
-    @Override
-    public <U extends T> TransactionRunnable<U> runIn(final TransactionRunnable<U> parentRunnable)
+    @Test(expected=IllegalArgumentException.class)
+    public void runInTest() throws Exception
     {
-        throw new IllegalArgumentException("A RootTransactionRunnable cannot safely be runIn() any other "
-                                           + "TransactionRunnable.");
+        new RootTransactionRunnable().runIn(new TransactionRunnable());
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void runInAsProviderTest() throws Exception
+    {
+        new RootTransactionRunnable().asProvider().runIn(new TransactionRunnable());
     }
 }
