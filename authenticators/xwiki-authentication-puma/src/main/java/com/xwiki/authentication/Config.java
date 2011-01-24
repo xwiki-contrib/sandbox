@@ -38,7 +38,7 @@ import com.xpn.xwiki.XWikiContext;
 /**
  * Get PUMA authenticator configuration.
  * 
- * @version $Id: Config.java 29914 2010-06-30 16:23:44Z tmortagne $
+ * @version $Id$
  */
 public class Config
 {

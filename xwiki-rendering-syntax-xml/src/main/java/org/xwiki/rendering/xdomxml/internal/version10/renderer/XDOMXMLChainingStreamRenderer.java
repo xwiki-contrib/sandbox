@@ -42,7 +42,7 @@ import org.xwiki.rendering.xdomxml.internal.version10.renderer.parameter.Resourc
 /**
  * Current version of the XDOM+XML stream based renderer.
  * 
- * @version $Id: XDOMXMLChainingStreamRenderer.java 29769 2010-06-27 11:01:42Z tmortagne $
+ * @version $Id$
  */
 public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandlerStreamRenderer implements
     XDOMXMLConstants

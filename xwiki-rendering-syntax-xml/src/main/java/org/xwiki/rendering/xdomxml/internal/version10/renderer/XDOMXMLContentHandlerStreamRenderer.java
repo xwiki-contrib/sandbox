@@ -31,7 +31,7 @@ import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.xdomxml.internal.current.parameter.ParameterManager;
 
 /**
- * @version $Id: XDOMXMLContentHandlerStreamRenderer.java 29769 2010-06-27 11:01:42Z tmortagne $
+ * @version $Id$
  */
 @Component("xdom+xml/1.0")
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)

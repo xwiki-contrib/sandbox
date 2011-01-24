@@ -27,7 +27,7 @@ import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
 /**
  * XDOM+XML stream based parser.
  * 
- * @version $Id: XDOMXMLParser.java 29769 2010-06-27 11:01:42Z tmortagne $
+ * @version $Id$
  */
 @Component("xdom+xml/1.0")
 public class XDOMXMLParser extends AbstractParser

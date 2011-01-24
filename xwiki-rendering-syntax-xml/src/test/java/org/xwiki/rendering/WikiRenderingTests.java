@@ -30,7 +30,7 @@ import org.xwiki.test.ComponentManagerTestSetup;
  * Rendering tests requiring a {@link WikiModel} implementation (ie tests that must have the notion of a wiki to run
  * fine).
  * 
- * @version $Id: WikiRenderingTests.java 31703 2010-10-11 09:03:14Z vmassol $
+ * @version $Id$
  */
 public class WikiRenderingTests extends TestCase
 {

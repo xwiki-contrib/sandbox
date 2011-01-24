@@ -26,7 +26,7 @@ import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.rendering.xdomxml.internal.XDOMXMLConstants;
 
 /**
- * @version $Id: XDOMXMLRenderer.java 29769 2010-06-27 11:01:42Z tmortagne $
+ * @version $Id$
  */
 @Component("xdom+xml/1.0")
 public class XDOMXMLRenderer extends AbstractRenderer
