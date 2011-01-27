@@ -138,8 +138,9 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
             return new TransactionRunnable<XWikiHibernateTransaction>();
         }
 
-        // This is the permanent location where the attachment will go.
-        final File attachFile = this.fileTools.fileForAttachment(attachment);
+        // This is the permanent location where the attachment content will go.
+        final File attachFile =
+            this.fileTools.getAttachmentFileProvider(attachment).getAttachmentContentFile();
 
         // The current file will be renamed to this file while the transaction runs,
         // if it fails then this file will be renamed back.
@@ -214,7 +215,9 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                                       final boolean bTransaction)
         throws XWikiException
     {
-        final File attachFile = this.fileTools.fileForAttachment(attachment);
+        final File attachFile =
+            this.fileTools.getAttachmentFileProvider(attachment).getAttachmentContentFile();
+
         if (attachFile.exists()) {
             attachment.setAttachment_content(
                 new FilesystemAttachmentContent(attachFile,
@@ -286,7 +289,8 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
         final boolean updateDocument,
         final XWikiContext context)
     {
-        final File attachFile = this.fileTools.fileForAttachment(attachment);
+        final File attachFile =
+            this.fileTools.getAttachmentFileProvider(attachment).getAttachmentContentFile();
 
         return new AttachmentDeleteTransactionRunnable(attachment,
                                                        updateDocument,

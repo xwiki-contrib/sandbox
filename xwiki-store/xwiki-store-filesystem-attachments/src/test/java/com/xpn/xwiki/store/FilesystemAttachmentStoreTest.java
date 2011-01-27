@@ -162,7 +162,8 @@ public class FilesystemAttachmentStoreTest extends AbstractMockingComponentTestC
             new DefaultFilesystemStoreTools(new PathStringEntityReferenceSerializer(), storageLocation);
 
         this.attachStore = new FilesystemAttachmentStore(null, fileTools);
-        this.storeFile = this.fileTools.fileForAttachment(this.mockAttach);
+        this.storeFile =
+            this.fileTools.getAttachmentFileProvider(this.mockAttach).getAttachmentContentFile();
         HELLO_STREAM.reset();
     }
 
@@ -175,7 +176,8 @@ public class FilesystemAttachmentStoreTest extends AbstractMockingComponentTestC
     @Test
     public void saveContentTest() throws Exception
     {
-        final File storeFile = this.fileTools.fileForAttachment(this.mockAttach);
+        final File storeFile =
+            this.fileTools.getAttachmentFileProvider(this.mockAttach).getAttachmentContentFile();
         Assert.assertFalse(this.storeFile.exists());
         this.attachStore.saveAttachmentContent(this.mockAttach, false, this.mockContext, false);
         Assert.assertTrue("The attachment file was not created.", this.storeFile.exists());

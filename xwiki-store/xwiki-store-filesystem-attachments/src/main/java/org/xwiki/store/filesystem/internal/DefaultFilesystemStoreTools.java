@@ -19,12 +19,11 @@
  */
 package org.xwiki.store.filesystem.internal;
 
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
-import java.net.URLEncoder;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -53,6 +52,36 @@ import org.xwiki.model.reference.DocumentReference;
 @Component
 public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initializable
 {
+    /** The name of the directory in the work directory where the hirearchy will be stored. */
+    private static final String STORAGE_DIR_NAME = "storage";
+
+    /**
+     * The name of the directory where document information is stored.
+     * This must have a URL illegal character in it,
+     * otherwise it will be confused if/when nested spaces are implemented.
+     */
+    private static final String DOCUMENT_DIR_NAME = "~this";
+
+    /** The directory within each document's directory where the document's attachments are stored. */
+    private static final String ATTACHMENT_DIR_NAME = "attachments";
+
+    /** The directory within each document's directory for attachments which have been deleted. */
+    private static final String DELETED_ATTACHMENT_DIR_NAME = "deleted-attachments";
+
+    /**
+     * When a file is being saved, the original will be moved to the same name with this after it.
+     * If the save operation fails then this file will be moved back to the regular position to come as
+     * close as possible to ACID transaction handling.
+     */
+    private static final String BACKUP_FILE_SUFFIX = "~bak";
+
+    /**
+     * When a file is being deleted, it will be renamed with this at the end of the filename in the
+     * transaction. If the transaction succeeds then the temp file will be deleted, if it fails then the
+     * temp file will be renamed back to the original filename.
+     */
+    private static final String TEMP_FILE_SUFFIX = "~tmp";
+
     /** Serializer used for obtaining a safe file path from a document reference. */
     @Requirement("path")
     private EntityReferenceSerializer<String> pathSerializer;
@@ -140,69 +169,24 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
     /**
      * {@inheritDoc}
      *
-     * @see FilesystemStoreTools#metaFileForAttachment(XWikiAttachment)
+     * @see FilesystemStoreTools#getDeletedAttachmentFileProvider(XWikiAttachment, Date)
      */
-    public File metaFileForAttachment(final XWikiAttachment attachment)
+    public AttachmentFileProvider getDeletedAttachmentFileProvider(final XWikiAttachment attachment,
+                                                                   final Date deleteDate)
     {
-        final File attachFile = this.fileForAttachment(attachment);
-        return new File(attachFile.getParentFile(), ATTACH_ARCHIVE_META_FILENAME);
+        return new DefaultDeletedAttachmentFileProvider(
+            this.getDeletedAttachmentDir(attachment, deleteDate), attachment.getFilename());
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see FilesystemStoreTools#fileForAttachment(XWikiAttachment)
+     * @see FilesystemStoreTools#getAttachmentFileProvider(XWikiAttachment)
      */
-    public File fileForAttachment(final XWikiAttachment attachment)
+    public AttachmentFileProvider getAttachmentFileProvider(final XWikiAttachment attachment)
     {
-        // storage/xwiki/Main/WebHome/~this/attachments/some.file/
-        final File attachmentDir = this.getAttachmentDir(attachment);
-
-        // storage/xwiki/Main/WebHome/~this/attachments/some.file/some.file
-        return new File(attachmentDir, this.getURLEncoded(attachment.getFilename()));
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see FilesystemStoreTools#fileForAttachmentVersion(XWikiAttachment)
-     */
-    public File fileForAttachmentVersion(final XWikiAttachment attachment,
-                                         final String versionName)
-    {
-        return new File(this.getAttachmentDir(attachment),
-                        getVersionedFilename(attachment.getFilename(), versionName));
-    }
-
-    /**
-     * Get a version of a filename.
-     * The filename is URL encoded and the version has "~v" prepended so that it cannot be
-     * mistaken for part of the filename.
-     * If the filename contains one or more '.' characters then the version is inserted before
-     * the last '.' character. Otherwise it is appended to the end.
-     * This means a file such as:
-     * file.txt version 1.1 will become file~v1.1.txt and will still be recognized by a text editor
-     * A file with no extension such as myUnknownFile version 1.1 will become myUnknownFile~v1.1
-     * Because of URL encoding, a file named file~v1.3.txt of version 1.1 will become 
-     * file%7Ev1.3~1.1.txt and thus will not collide with file.txt version 1.1.
-     *
-     * @param filename the name of the file to save. This will be URL encoded.
-     * @param versionName the name of the version of the file. This will also be URL encoded.
-     * @return a string representing the filename and version which is guaranteed not to collide
-     *         with any other file gotten through DefaultFilesystemStoreTools.
-     */
-    private static String getVersionedFilename(final String filename, final String versionName)
-    {
-        final String attachFilename = getURLEncoded(filename);
-        final String version = getURLEncoded(versionName);
-        if (attachFilename.contains(".")) {
-            // file.txt version 1.1 --> file~v1.1.txt
-            return attachFilename.substring(0, attachFilename.lastIndexOf('.'))
-                     + FILE_VERSION_PREFIX + version
-                     + attachFilename.substring(attachFilename.lastIndexOf('.'));
-        }
-        // someFile version 2.2 --> someFile~v2.2
-        return attachFilename + FILE_VERSION_PREFIX + version;
+        return new DefaultAttachmentFileProvider(this.getAttachmentDir(attachment),
+                                                 attachment.getFilename());
     }
 
     /**
@@ -223,24 +207,33 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
                                            this.storageDir,
                                            this.pathSerializer);
         final File attachmentsDir = new File(docDir, ATTACHMENT_DIR_NAME);
-        return new File(attachmentsDir, getURLEncoded(attachment.getFilename()));
+        return new File(attachmentsDir, GenericFileUtils.getURLEncoded(attachment.getFilename()));
     }
 
     /**
-     * Get a URL encoded version of the string.
-     * same as URLEncoder.encode(toEncode, "UTF-8") but the checked exception is
-     * caught since UTF-8 is mandatory for all Java virtual machines.
+     * Get a directory for storing the contentes of a deleted attachment.
+     * The format is <document name>/~this/deleted-attachments/<attachment name>-<delete date>/
+     * <delete date> is expressed in "unix time" so it might look like:
+     * WebHome/~this/deleted-attachments/file.txt-0123456789/
      *
-     * @param toEncode the string to URL encode.
-     * @return a URL encoded version of toEncode.
+     * @param attachment the attachment to get the file for.
+     * @param deleteDate the date the attachment was deleted.
+     * @return a directory which will be repeatable only with the same inputs.
      */
-    private static String getURLEncoded(final String toEncode)
+    private File getDeletedAttachmentDir(final XWikiAttachment attachment,
+                                         final Date deleteDate)
     {
-        try {
-            return URLEncoder.encode(toEncode, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException("UTF-8 not available, this Java VM is not standards compliant!");
+        final XWikiDocument doc = attachment.getDoc();
+        if (doc == null) {
+            throw new NullPointerException("Could not store deleted attachment because "
+                                           + "it is not associated with any document.");
         }
+        final File docDir = getDocumentDir(doc.getDocumentReference(),
+                                           this.storageDir,
+                                           this.pathSerializer);
+        final File deletedAttachmentsDir = new File(docDir, DELETED_ATTACHMENT_DIR_NAME);
+        final String fileName = attachment.getFilename() + "-" + deleteDate.getTime();
+        return new File(deletedAttachmentsDir, GenericFileUtils.getURLEncoded(fileName));
     }
 
     /**
