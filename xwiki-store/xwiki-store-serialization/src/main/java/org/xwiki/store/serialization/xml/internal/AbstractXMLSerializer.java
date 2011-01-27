@@ -63,7 +63,7 @@ public abstract class AbstractXMLSerializer<T> implements XMLSerializer<T>
             writer = new XMLWriter(baos, of);
             writer.startDocument();
         } catch (SAXException e) {
-            throw new IOException("Could not open the XML writer.", e);
+            throw new IOException("Could not open the XML writer.");
         }
 
         this.serialize(object, writer);
@@ -71,7 +71,7 @@ public abstract class AbstractXMLSerializer<T> implements XMLSerializer<T>
         try {
             writer.endDocument();
         } catch (SAXException e) {
-            throw new IOException("Could not close the XML writer.", e);
+            throw new IOException("Could not close the XML writer.");
         }
 
         return new ByteArrayInputStream(baos.toByteArray());
@@ -94,7 +94,7 @@ public abstract class AbstractXMLSerializer<T> implements XMLSerializer<T>
         try {
             domdoc = reader.read(stream);
         } catch (DocumentException e) {
-            throw new IOException("Failed to parse XML, probably malformed input.", e);
+            throw new IOException("Failed to parse XML, probably malformed input.");
         }
         return this.parse(domdoc.getRootElement());
     }
