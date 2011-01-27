@@ -31,12 +31,16 @@ import java.util.Map;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
-import org.xwiki.rendering.block.Block;
+import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.block.HeaderBlock;
 import org.xwiki.rendering.block.IdBlock;
 import org.xwiki.rendering.block.ImageBlock;
 import org.xwiki.rendering.block.LinkBlock;
 import org.xwiki.rendering.block.XDOM;
+import org.xwiki.rendering.listener.reference.DocumentResourceReference;
+import org.xwiki.rendering.listener.reference.ResourceReference;
+import org.xwiki.rendering.listener.reference.ResourceType;
 import org.xwiki.rendering.parser.Parser;
 import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
@@ -61,6 +65,10 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
 {
     protected CollectionActivityStream collectionActivityStream;
 
+    private EntityReferenceSerializer<String> defaultEntityReferenceSerializer;
+
+    private DocumentReferenceResolver<String> currentDocumentReferenceResolver;
+
     public CollectionPlugin(String name, String className, XWikiContext context)
     {
         super(name, className, context);
@@ -74,6 +82,10 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
 
     public void init(XWikiContext context)
     {
+        // Initialize components
+        this.defaultEntityReferenceSerializer = Utils.getComponent(EntityReferenceSerializer.class);
+        this.currentDocumentReferenceResolver = Utils.getComponent(DocumentReferenceResolver.class, "current");
+
         try {
             // send notifications to the collection activity stream
             context.getWiki().getNotificationManager().addGeneralRule(new DocChangeRule(collectionActivityStream));
@@ -175,7 +187,6 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     /**
      * Returns a pdf of the transcluded view of the given xwiki 2.0 document.
      *
-     * @param documentName name of the input document, should be a xwiki 2.0 document.
      * @return the transcluded result in xhtml syntax.
      */
     public void exportWithLinks(String packageName, XWikiDocument doc,
@@ -187,7 +198,6 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     /**
      * Returns a pdf of the transcluded view of the given xwiki 2.0 document.
      *
-     * @param documentName name of the input document, should be a xwiki 2.0 document.
      * @return the transcluded result in xhtml syntax.
      */
     public void exportWithLinks(String packageName, XWikiDocument doc,
@@ -403,74 +413,53 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
         List<String> selectlist, List<String> headerIds) throws Exception
     {
         List<String> list = new ArrayList<String>();
-        // Find all the image blocks inside this XDOM to make sure we have
-        // absolute image links
-        // This is necessary as the XDOM will be included in a different
-        // document
-        List<ImageBlock> imageBlocks = xdom.getChildrenByType(ImageBlock.class,
-            true);
-        // Process each image block
-        for (ImageBlock imageBlock : imageBlocks) {
-            // We are only interested in images that are attachments to the
-            // current document
-            if ((imageBlock.getImage().getType() == ImageType.DOCUMENT)
-                && (null != doc.getAttachment(imageBlock.getImage()
-                .getName())))
-            {
-                // new image block with an absolute link
-                Image newImageBlockImage = new DocumentImage(
-                    new DefaultAttachement(doc.getFullName(), imageBlock
-                        .getImage().getName()));
-                ImageBlock newImageBlock = new ImageBlock(newImageBlockImage,
-                    imageBlock.isFreeStandingURI(), imageBlock
-                    .getParameters());
-                // Replace the original link
-                imageBlock.getParent().insertChildBefore(newImageBlock,
-                    imageBlock);
-                imageBlock.getParent().getChildren().remove(imageBlock);
-                addDebug("Image in doc: " + imageBlock.getImage());
+
+        // Step 1: Find all the image blocks inside this XDOM to make sure we have absolute image links.
+        //         This is necessary as the XDOM will be included in a different document
+        for (ImageBlock imageBlock : xdom.getChildrenByType(ImageBlock.class, true)) {
+            ResourceReference reference = imageBlock.getReference();
+            if (reference.getType().equals(ResourceType.ATTACHMENT)) {
+                // It's an image coming from an attachment
+                String resolvedReference =
+                    this.defaultEntityReferenceSerializer.serialize(this.currentDocumentReferenceResolver.resolve(
+                        reference.getReference()));
+                reference.setReference(resolvedReference);
+                addDebug("Image in doc: " + imageBlock.getReference());
             }
         }
-        // Resolve duplicate anchors
-        List<HeaderBlock> headerBlocks = xdom.getChildrenByType(
-            HeaderBlock.class, true);
-        for (HeaderBlock hBlock : headerBlocks) {
-            // Check if this header id has occured before.
+
+        // Step 2: Resolve duplicate anchors
+        for (HeaderBlock hBlock : xdom.getChildrenByType(HeaderBlock.class, true)) {
+            // Check if this header id has occurred before.
             String oldId = hBlock.getId();
             if (headerIds.contains(oldId)) {
-                // Now we need to replace this header block with a new one (with
-                // a new id).
+                // Now we need to replace this header block with a new one (with a new id).
                 String newId = oldId;
                 int localIndex = 0;
                 while (headerIds.contains(newId)) {
                     newId = oldId + (++localIndex);
                 }
                 // Create a new HeaderBlock
-                HeaderBlock newhBlock = new HeaderBlock(hBlock.getChildren(),
-                    hBlock.getLevel(), hBlock.getParameters(), newId);
+                HeaderBlock newhBlock =
+                    new HeaderBlock(hBlock.getChildren(), hBlock.getLevel(), hBlock.getParameters(), newId);
                 // Replace the old one.
-                List<Block> replacement = new ArrayList<Block>();
-                replacement.add(newhBlock);
-                hBlock.getParent().replaceChild(replacement, hBlock);
+                hBlock.getParent().replaceChild(newhBlock, hBlock);
                 // Finally, add the newId into the headerIds list.
                 headerIds.add(newId);
             } else {
                 headerIds.add(oldId);
             }
         }
-        // Find all the link blocks inside this XDOM
-        List<LinkBlock> linkBlocks = xdom.getChildrenByType(LinkBlock.class,
-            true);
-        // Process each link block
-        for (LinkBlock linkBlock : linkBlocks) {
+
+        // Step 3: Find all the link blocks inside this XDOM
+        for (LinkBlock linkBlock : xdom.getChildrenByType(LinkBlock.class, true)) {
             // We are only interested in links to other pages.
-            if (linkBlock.getLink().getType() == LinkType.DOCUMENT) {
-                String childDocumentName = linkBlock.getLink().getReference();
+            if (linkBlock.getReference().getType().equals(ResourceType.DOCUMENT)) {
+                String childDocumentName = linkBlock.getReference().getReference();
                 if (childDocumentName != null) {
                     // Create the child xdom
                     if (childDocumentName.indexOf(".") == -1) {
-                        childDocumentName = doc.getSpace() + "."
-                            + childDocumentName;
+                        childDocumentName = doc.getSpace() + "." + childDocumentName;
                     }
                     addDebug("Found one link to: " + childDocumentName);
 
@@ -478,29 +467,23 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
                         list.add(childDocumentName);
                     }
 
-                    if ((selectlist == null)
-                        || selectlist.contains(childDocumentName))
+                    if ((selectlist == null) || selectlist.contains(childDocumentName))
                     {
-                        // Now we need to recreate the link (which was pointing
-                        // to child document) into this anchor (id macro)
-                        // We create a new link and replace the original one.
-                        Link newLinkBlockLink = new Link();
-                        newLinkBlockLink.setType(LinkType.DOCUMENT);
-                        newLinkBlockLink.setAnchor("child_"
-                            + childDocumentName.hashCode());
-                        LinkBlock newLinkBlock = new LinkBlock(linkBlock
-                            .getChildren(), newLinkBlockLink, false);
+                        // Now we need to recreate the link (which was pointing to child document) into this anchor
+                        // (id macro). We create a new link and replace the original one.
+                        DocumentResourceReference newLinkBlockReference = new DocumentResourceReference("");
+                        newLinkBlockReference.setAnchor("child_" + childDocumentName.hashCode());
+                        LinkBlock newLinkBlock = new LinkBlock(linkBlock.getChildren(), newLinkBlockReference, false);
 
                         // if there was no children we need to create a Label
                         if (linkBlock.getChildren().isEmpty()) {
                             Parser parser = Utils.getComponent(Parser.class, Syntax.PLAIN_1_0.toIdString());
                             newLinkBlock.addChildren(
-                                parser.parse(new StringReader(linkBlock.getLink().getReference())).getChildren());
+                                parser.parse(new StringReader(linkBlock.getReference().getReference())).getChildren());
                         }
 
                         // Replace the original link
-                        linkBlock.getParent().insertChildBefore(newLinkBlock,
-                            linkBlock);
+                        linkBlock.getParent().insertChildBefore(newLinkBlock, linkBlock);
                         linkBlock.getParent().getChildren().remove(linkBlock);
                     } // if in selectlist or selectlist is null
                 } // if childDocumentName
@@ -537,13 +520,11 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     {
         List<String> linkList = new ArrayList<String>();
         // Find all the link blocks inside this XDOM
-        List<LinkBlock> linkBlocks = xdom.getChildrenByType(LinkBlock.class,
-            true);
         // Process each link block
-        for (LinkBlock linkBlock : linkBlocks) {
+        for (LinkBlock linkBlock : xdom.getChildrenByType(LinkBlock.class, true)) {
             // We are only interested in links to other pages.
-            if (linkBlock.getLink().getType() == LinkType.DOCUMENT) {
-                String childDocumentName = linkBlock.getLink().getReference();
+            if (linkBlock.getReference().getType().equals(ResourceType.DOCUMENT)) {
+                String childDocumentName = linkBlock.getReference().getReference();
                 if (childDocumentName != null) {
                     // Create the child xdom
                     if (childDocumentName.indexOf(".") == -1) {
