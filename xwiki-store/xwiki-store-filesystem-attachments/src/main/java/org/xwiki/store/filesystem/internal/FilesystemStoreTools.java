@@ -22,7 +22,6 @@ package org.xwiki.store.filesystem.internal;
 import java.io.File;
 import java.util.Date;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.List;
 
 import com.xpn.xwiki.doc.XWikiAttachment;
 import org.xwiki.component.annotation.ComponentRole;
@@ -87,13 +86,4 @@ public interface FilesystemStoreTools
      * @return a lock for the given file.
      */
     ReadWriteLock getLockForFile(final File toLock);
-
-    /**
-     * Get a {@link java.util.concurrent.locks.ReadWriteLock} which when locked, will lock on
-     * each of a list of files.
-     *
-     * @param toLock the list of files to get a lock for.
-     * @return a lock for the given files.
-     */
-    ReadWriteLock getLockForFiles(final List<File> toLock);
 }
