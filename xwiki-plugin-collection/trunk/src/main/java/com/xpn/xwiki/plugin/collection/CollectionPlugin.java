@@ -31,7 +31,10 @@ import java.util.Map;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
+import org.xwiki.model.reference.AttachmentReferenceResolver;
 import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.block.HeaderBlock;
 import org.xwiki.rendering.block.IdBlock;
@@ -68,6 +71,8 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     private EntityReferenceSerializer<String> defaultEntityReferenceSerializer;
 
     private DocumentReferenceResolver<String> currentDocumentReferenceResolver;
+    
+    private AttachmentReferenceResolver<String> currentAttachmentReferenceResolver;
 
     public CollectionPlugin(String name, String className, XWikiContext context)
     {
@@ -85,6 +90,7 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
         // Initialize components
         this.defaultEntityReferenceSerializer = Utils.getComponent(EntityReferenceSerializer.class);
         this.currentDocumentReferenceResolver = Utils.getComponent(DocumentReferenceResolver.class, "current");
+        this.currentAttachmentReferenceResolver = Utils.getComponent(AttachmentReferenceResolver.class, "current");
 
         try {
             // send notifications to the collection activity stream
@@ -105,6 +111,7 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     private void addDebug(String string)
     {
         // TODO Auto-generated method stub
+        // System.out.println(string);
     }
 
     public Api getPluginApi(XWikiPluginInterface plugin, XWikiContext context)
@@ -419,12 +426,16 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
         for (ImageBlock imageBlock : xdom.getChildrenByType(ImageBlock.class, true)) {
             ResourceReference reference = imageBlock.getReference();
             if (reference.getType().equals(ResourceType.ATTACHMENT)) {
+                addDebug("Image old reference: " + imageBlock.getReference());
                 // It's an image coming from an attachment
-                String resolvedReference =
-                    this.defaultEntityReferenceSerializer.serialize(this.currentDocumentReferenceResolver.resolve(
-                        reference.getReference()));
-                reference.setReference(resolvedReference);
-                addDebug("Image in doc: " + imageBlock.getReference());
+                AttachmentReference resolvedReference =
+                    this.currentAttachmentReferenceResolver.resolve(
+                        reference.getReference(), doc.getDocumentReference());
+                addDebug("Image resolved reference: " + resolvedReference);
+                String serializedReference = this.defaultEntityReferenceSerializer.serialize(resolvedReference);
+                addDebug("Image serialized reference: " + serializedReference);
+                reference.setReference(serializedReference);
+                addDebug("Image new reference: " + imageBlock.getReference());
             }
         }
 
