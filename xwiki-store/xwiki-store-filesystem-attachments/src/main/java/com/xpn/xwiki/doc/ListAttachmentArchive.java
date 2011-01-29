@@ -89,6 +89,10 @@ public class ListAttachmentArchive extends XWikiAttachmentArchive
             }
             attach.setAttachment_archive(arch);
         }
+
+        // Set the attachment for this archive to the latest version.
+        arch.setAttachment(arch.revisions.get(arch.revisions.size() - 1));
+
         return arch;
     }
 

@@ -59,8 +59,8 @@ public class FilesystemAttachmentContent extends XWikiAttachmentContent
                                        final XWikiAttachment attachment,
                                        final ReadWriteLock lock)
     {
-        // TODO patch this!
-        //super(null, attachment);
+        // TODO This will cause a new FileItem to be created in XWikiAttachmentContent
+        // but it is the only constructor available. This should be fixed in XAC.
         super(attachment);
 
         this.storageFile = storage;
