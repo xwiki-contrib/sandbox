@@ -59,6 +59,24 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
     private Serializer<List<XWikiAttachment>> metaSerializer;
 
     /**
+     * Testing Constructor.
+     *
+     * @param fileTools the means of getting files and locks.
+     * @param metaSerializer a serializer for attachment versioning metadata.
+     */
+    public FilesystemAttachmentVersioningStore(final FilesystemStoreTools fileTools,
+                                               final Serializer<List<XWikiAttachment>> metaSerializer)
+    {
+        this.fileTools = fileTools;
+        this.metaSerializer = metaSerializer;
+    }
+
+    /** Constructor for dependency injection. */
+    public FilesystemAttachmentVersioningStore()
+    {
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @see AttachmentVersioningStore#loadArchive(XWikiAttachment, XWikiContext, boolean)
