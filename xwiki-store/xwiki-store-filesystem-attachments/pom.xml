@@ -31,7 +31,7 @@
     <artifactId>xwiki-core-parent</artifactId>
     <version>3.0-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-store-filesystem-attachments</artifactId>
+  <artifactId>xwiki-core-store-filesystem-attachments</artifactId>
   <name>XWiki Platform - Core - Storage - Filesystem - Attachments</name>
   <description>XWiki Platform - Core - Storage - Filesystem - Attachments</description>
   <properties>

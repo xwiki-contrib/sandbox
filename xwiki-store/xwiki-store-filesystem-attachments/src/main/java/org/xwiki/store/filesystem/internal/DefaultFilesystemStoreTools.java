@@ -121,6 +121,11 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
         this.storageDir = storageDir;
     }
 
+    /** Constructor for component manager. */
+    public DefaultFilesystemStoreTools()
+    {
+    }
+
     /** {@inheritDoc} */
     public void initialize()
     {

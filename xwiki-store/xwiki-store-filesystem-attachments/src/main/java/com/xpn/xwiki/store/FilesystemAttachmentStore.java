@@ -74,6 +74,11 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
         this.fileTools = fileTools;
     }
 
+    /** Constructor for component manager. */
+    public FilesystemAttachmentStore()
+    {
+    }
+
     /**
      * {@inheritDoc}
      * This implementation cannot operate in a larger transaction so it starts a new transaction no matter
