@@ -195,7 +195,9 @@ public class DefaultFilesystemStoreToolsTest
                                   final int cState)
     {
         final long time = System.currentTimeMillis();
-        int a, b, c;
+        int a = 0;
+        int b = 0;
+        int c = 0;
         do {
             synchronized (mutex) {
                 mutex.notifyAll();
@@ -204,17 +206,17 @@ public class DefaultFilesystemStoreToolsTest
                 if (System.currentTimeMillis() - time > 10000) {
                     Assert.fail("Calling " + mutex + " and expecting:\n" +
                                 getState(aState, bState, cState) + "\nBut got:\n" +
-                                getState(this.aliceState, this.bobState, this.charleyState));
+                                getState(a, b, c));
                 }
                 try {
                     this.wait(500);
                 } catch (InterruptedException e) {
                     throw new RuntimeException("Interrupted while waiting.");
                 }
+                a = this.aliceState;
+                b = this.bobState;
+                c = this.charleyState;
             }
-            a = this.aliceState;
-            b = this.bobState;
-            c = this.charleyState;
         } while(a != aState || b != bState || c != cState);
     }
 
@@ -232,8 +234,8 @@ public class DefaultFilesystemStoreToolsTest
 
     private String getState(int aliceState, int bobState, int charleyState)
     {
-        return "Alice is at event #" + this.aliceState + " Bob is at event #"
-               + this.bobState + " and Charley is at event #" + this.charleyState;
+        return "Alice is at event #" + aliceState + " Bob is at event #"
+               + bobState + " and Charley is at event #" + charleyState;
     }
 
     private boolean isState(int aliceState, int bobState, int charleyState)

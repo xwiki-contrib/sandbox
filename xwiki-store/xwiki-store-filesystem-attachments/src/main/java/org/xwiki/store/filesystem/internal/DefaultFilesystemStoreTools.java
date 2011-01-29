@@ -464,17 +464,21 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
             }
             this.lockBlockingThread.put(currentThread, this);
 
-            while (true) {
-
-                // We must be sure that the lock will not be acquired and forced simultaniously.
+            for (;;)
+            {
+                // We must insure that the thread which owns this lock does not force the lock which it is
+                // waiting on while at the same time this thread forces this lock.
                 // Specifically, we want to make sure that this.ownsAllLocks(currentThread) remains
                 // the same throughout.
-                synchronized (this.locksHeldByThread.get(currentThread))
+                //
+                // For now, sync on a global object.
+                // TODO We only need to sync on this "ring" of blocked threads, can that be done?
+                synchronized (this.locksHeldByThread)
                 {
                     // If the current thread does not own all of it's locks then by no means should it be
                     // forcing this lock, it should not be able to acquire it at all.
-                    if (this.ownsAllLocks(currentThread)) {
-
+                    if (this.ownsAllLocks(currentThread))
+                    {
                         // If 1. the lock is unlocked, 2. reentrance, or 3. it's deadlocked.
                         if (this.owners.empty()
                             || this.owners.peek() == currentThread
@@ -492,7 +496,7 @@ public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initia
                     this.wait(100);
                 } catch (InterruptedException e) {
                     this.lockBlockingThread.remove(currentThread);
-                    throw new RuntimeException("the thread was interrupted while waiting on the lock.");
+                    throw new RuntimeException("The thread was interrupted while waiting on the lock.");
                 }
             }
         }
