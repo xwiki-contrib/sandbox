@@ -1422,7 +1422,7 @@
 <admin_email></admin_email>
 </property>
 <property>
-<colorTheme>ColorThemes.DefaultColorTheme</colorTheme>
+<colorTheme></colorTheme>
 </property>
 <property>
 <comment_anonymous>---</comment_anonymous>
