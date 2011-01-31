@@ -22,9 +22,10 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
-<content>{{toc depth="1"/}}
+<content>{{velocity}}
+#if ($xwiki.isVirtual())
+{{toc depth="1"/}}
 
-{{velocity}}
 #set ($periodStart = $xwiki.jodatime.mutableDateTime)
 $!periodStart.addDays(-100)##
 #set ($inactiveWikis = $xwiki.search("select distinct ase.wiki from ActivityEventImpl ase where ase.wiki not in (select distinct ase2.wiki from ActivityEventImpl ase2 where ase2.space &lt;&gt; 'Scheduler' and ase2.date &gt; ?)", [${periodStart.toDate()}]))
@@ -47,6 +48,7 @@ $!periodStart.addDays(-50)##
 |[[$wiki.getWikiPrettyName()&gt;&gt;$wiki.getHomePageUrl()]] (% style="float: right;" %)([[configure&gt;&gt;$wiki.fullName]])(%%)|$row.get(1)
   #end
 #end
+#end## isVirtual
 
 = Complete activity report
 #set($prevWiki = '')
@@ -54,7 +56,9 @@ $!periodStart.addDays(-50)##
 #if ($prevWiki != $row.get(0))
   #set ($prevWiki = $row.get(0))
   #set ($wiki = $xwiki.wikimanager.getWikiFromName($row.get(0)).getFirstWikiAlias())
-  #if (!$wiki)
+  #if (!$xwiki.isVirtual())
+## Only one wiki, don't print a header.
+  #elseif (!$wiki)
     == $prevWiki (deleted) ==
   #else
     == [[$wiki.getWikiPrettyName()&gt;&gt;$wiki.getHomePageUrl()]] ([[configure&gt;&gt;$wiki.fullName]]) ==
