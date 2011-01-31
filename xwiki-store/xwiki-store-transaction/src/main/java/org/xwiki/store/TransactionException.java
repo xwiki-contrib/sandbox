@@ -201,8 +201,7 @@ public class TransactionException extends Exception
 
             writeTo.println(cause.getClass().getName());
             writeTo.print(TAB);
-            // new String() in case cause.getMessage() is null.
-            writeTo.print(new String(cause.getMessage()).replaceAll(NEWLINE, NEWLINE + TAB));
+            writeTo.print(("" + cause.getMessage()).replaceAll(NEWLINE, NEWLINE + TAB));
             writeTo.print(NEWLINE);
 
             if (includeStackTrace) {
@@ -210,7 +209,7 @@ public class TransactionException extends Exception
                 // TODO End the stack trace at the frame which caused the TransactionException to throw.
                 final Writer stw = new StringWriter();
                 final PrintWriter stpw = new PrintWriter(stw);
-                super.printStackTrace(stpw);
+                cause.printStackTrace(stpw);
                 writeTo.print(stw.toString().replaceAll(NEWLINE, NEWLINE + TAB));
             }
         }
