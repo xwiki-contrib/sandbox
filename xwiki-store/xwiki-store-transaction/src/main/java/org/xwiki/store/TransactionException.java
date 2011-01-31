@@ -201,7 +201,8 @@ public class TransactionException extends Exception
 
             writeTo.println(cause.getClass().getName());
             writeTo.print(TAB);
-            writeTo.print(cause.getMessage().replaceAll(NEWLINE, NEWLINE + TAB));
+            // new String() in case cause.getMessage() is null.
+            writeTo.print(new String(cause.getMessage()).replaceAll(NEWLINE, NEWLINE + TAB));
             writeTo.print(NEWLINE);
 
             if (includeStackTrace) {
