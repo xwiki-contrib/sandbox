@@ -23,7 +23,7 @@
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <content>{{velocity}}
-#if ($xwiki.isVirtual())
+#if ($xwiki.isVirtual() && $xcontext.isMainWiki())
 {{toc depth="1"/}}
 
 #set ($periodStart = $xwiki.jodatime.mutableDateTime)
@@ -56,7 +56,7 @@ $!periodStart.addDays(-50)##
 #if ($prevWiki != $row.get(0))
   #set ($prevWiki = $row.get(0))
   #set ($wiki = $xwiki.wikimanager.getWikiFromName($row.get(0)).getFirstWikiAlias())
-  #if (!$xwiki.isVirtual())
+  #if (!$xwiki.isVirtual() || !$xcontext.isMainWiki())
 ## Only one wiki, don't print a header.
   #elseif (!$wiki)
     == $prevWiki (deleted) ==
