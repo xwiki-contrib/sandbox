@@ -55,7 +55,7 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
     private FilesystemStoreTools fileTools;
 
     /** A serializer for the list of attachment metdata. */
-    @Requirement
+    @Requirement("attachment-list-meta/1.0")
     private Serializer<List<XWikiAttachment>> metaSerializer;
 
     /**
