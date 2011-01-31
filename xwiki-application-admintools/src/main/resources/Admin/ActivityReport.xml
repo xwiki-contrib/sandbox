@@ -22,15 +22,18 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
-<content>{{toc/}}
+<content>{{toc depth="1"/}}
 
 {{velocity}}
 #set ($periodStart = $xwiki.jodatime.mutableDateTime)
 $!periodStart.addDays(-100)##
 #set ($inactiveWikis = $xwiki.search("select distinct ase.wiki from ActivityEventImpl ase where ase.wiki not in (select distinct ase2.wiki from ActivityEventImpl ase2 where ase2.space &lt;&gt; 'Scheduler' and ase2.date &gt; ?)", [${periodStart.toDate()}]))
-= Wikis with no activity in the past 100 days ((% class="itemCount" %)$inactiveWikis.size()(%%)) =
+= Wikis with no activity in the past 100 days =
 #foreach ($row in $inactiveWikis)
-* $row
+  #set ($wiki = $xwiki.wikimanager.getWikiFromName($row).getFirstWikiAlias())
+  #if ($wiki)
+    * [[$wiki.getWikiPrettyName()&gt;&gt;$wiki.getHomePageUrl()]] ([[configure&gt;&gt;$wiki.fullName]])
+  #end
 #end
 
 = Least active wikis in the past 50 days =
@@ -39,7 +42,10 @@ $!periodStart.addDays(-100)##
 $!periodStart.addDays(-50)##
 |=Wiki|=Events
 #foreach ($row in $xwiki.search("select ase.wiki, count(*) from ActivityEventImpl ase where ase.space &lt;&gt; 'Scheduler' and year(ase.date) = ? and month(ase.date) = ? group by ase.wiki order by 2", 30, 0, [${periodStart.year}, ${periodStart.monthOfYear}]))
-|$row.get(0)|$row.get(1)
+  #set ($wiki = $xwiki.wikimanager.getWikiFromName($row.get(0)).getFirstWikiAlias())
+  #if ($wiki)
+|[[$wiki.getWikiPrettyName()&gt;&gt;$wiki.getHomePageUrl()]] (% style="float: right;" %)([[configure&gt;&gt;$wiki.fullName]])(%%)|$row.get(1)
+  #end
 #end
 
 = Complete activity report
@@ -47,7 +53,13 @@ $!periodStart.addDays(-50)##
 #foreach ($row in $xwiki.search("select ase.wiki, year(ase.date), month(ase.date), count(*) from ActivityEventImpl ase where ase.space &lt;&gt; 'Scheduler' group by ase.wiki, year(ase.date), month(ase.date) order by 1,2,3,4"))
 #if ($prevWiki != $row.get(0))
   #set ($prevWiki = $row.get(0))
-  == $prevWiki
+  #set ($wiki = $xwiki.wikimanager.getWikiFromName($row.get(0)).getFirstWikiAlias())
+  #if (!$wiki)
+    == $prevWiki (deleted) ==
+  #else
+    == [[$wiki.getWikiPrettyName()&gt;&gt;$wiki.getHomePageUrl()]] ([[configure&gt;&gt;$wiki.fullName]]) ==
+  #end
+
   |=Date|=Events
 #end
 |$row.get(2)/$row.get(1)|$row.get(3)
