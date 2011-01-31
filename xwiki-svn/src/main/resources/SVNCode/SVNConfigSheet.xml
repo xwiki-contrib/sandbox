@@ -36,8 +36,8 @@
 <disabled>0</disabled>
 <name>defaultEditMode</name>
 <number>1</number>
-<prettyName>Default Edit Mode</prettyName>
-<size>15</size>
+<prettyName>defaultEditMode</prettyName>
+<size>30</size>
 <unmodifiable>0</unmodifiable>
 <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
 </defaultEditMode>
@@ -132,7 +132,7 @@ function tsuggest(field) {
 #set($cmap = $!svnr.getChangedPages($spaces, $savedlist))
 #foreach($page in $cmap.keySet())
  #set($status = $cmap.get($page))
-&lt;li&gt;$status.status &lt;input type="hidden" name="${status.fullname}_language" value="${status.language}" /&gt;&lt;input type="checkbox" name="page" value="${status.fullname}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${status.fullname}&amp;language=${status.language}&amp;spaces=$!{spaces}||target=_blank]]
+&lt;li&gt;$status.status &lt;input type="hidden" name="${status.fullname}_language" value="${status.language}" /&gt;&lt;input type="checkbox" name="page" value="${status.fullname}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${status.fullname}&amp;svnlanguage=${status.language}&amp;spaces=$!{spaces}||target=_blank]]
 #end
 &lt;/ul&gt;
 &lt;input type="submit" name="commit" value="$msg.get("svn.configsheet.commitall")" /&gt; &lt;input type="submit" name="update" value="$msg.get("svn.configsheet.updateall")" /&gt; &lt;input type="submit" name="export" value="$msg.get("svn.configsheet.exportall")" /&gt;
@@ -211,8 +211,8 @@ $svnr.getCommitStatus("|", "|", false)
 
 {{html clean=false}}
 #set($pagedoc = $xwiki.getDocument($request.page))
-#if($request.language)
-#set($pagedoc = $pagedoc.getTranslatedDocument($request.language))
+#if($request.svnlanguage)
+#set($pagedoc = $pagedoc.getTranslatedDocument($request.svnlanguage))
 #end
 $svnr.showXMLDiff($pagedoc)
 {{/html}}

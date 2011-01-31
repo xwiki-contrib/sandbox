@@ -23,7 +23,7 @@
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <content>svn.title=Application SVN
-svn.description=Bienvenue sur l'application SVN. You can configure SVN repositories to connect to your wiki and commit your wiki content in these repositories.
+svn.description=Bienvenue sur l'application SVN. Vous pouvez configurer votre repository SVN et commiter votre code XWiki dans ces votre repository.
 svn.currentconfigs.title=Current SVN Configs
 svn.currentconfigs.noconfigs=There are currently no configs created
 svn.createnewconfig=Create New SVN Config
