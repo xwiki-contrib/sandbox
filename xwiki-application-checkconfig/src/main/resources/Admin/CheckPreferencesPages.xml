@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Admin</web>
+<name>CheckPreferencesPages</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1262300400000</creationDate>
+<date>1262300400000</date>
+<contentUpdateDate>1262300400000</contentUpdateDate>
+<version>1.1</version>
+<title>Admin.CheckConfig</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{groovy}}
+def context2 = xcontext.getContext();
+def wikilist =  xwiki.isVirtual() ? xwiki.wikimanager.getAllWikis() : [ "xwiki" ];
+
+if (!wikilist.contains("xwiki"))
+ wikilist.add(0, "xwiki")
+
+def db = context2.getDatabase()
+try {
+for(wiki in wikilist) {
+ def wikiname = wiki.toString()
+ println "* ${wikiname}"
+ context2.setDatabase(wikiname)
+ def pagelist = xwiki.searchDocuments(", BaseObject as obj where doc.fullName=obj.name and obj.className='XWiki.XWikiPreferences'")
+ for (page in pagelist) {
+    def pagedoc = xwiki.getDocument(page)
+    def content2 = "{{include document=\"XWiki.AdminSheet\" /}}";
+    if (pagedoc.getContent()!=content2) {
+       println "** fixing ${page}"
+       if (request.confirm) {
+         pagedoc.setContent(content2)
+         pagedoc.setSyntaxId("xwiki/2.0")
+         pagedoc.save("Updating preferences page to syntax 2.0")
+       }
+    }
+ }
+}
+} finally {
+ context2.setDatabase(db)
+}
+
+println ""
+if (request.confirm!="1") {
+  println "[[Confirm give programming rights&gt;&gt;$doc.fullName?confirm=1]]"
+}
+{{/groovy}}</content></xwikidoc>

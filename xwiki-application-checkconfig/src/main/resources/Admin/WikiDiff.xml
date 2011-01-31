@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Admin</web>
+<name>WikiDiff</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Admin.Tools</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1262300400000</creationDate>
+<date>1262300400000</date>
+<contentUpdateDate>1262300400000</contentUpdateDate>
+<version>1.1</version>
+<title>Wiki Diff</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity}}
+#if($request.source)
+#set ($diffTool = $xwiki.parseGroovyFromPage("Admin.WikiDiffGroovy"))
+#set ($ok = $diffTool.setContext($context, $xwiki))
+#set ($oldURL = $request.source)
+#set ($newURL = $request.target)
+#set ($oldContents = $diffTool.getZipContent($oldURL))
+#if($newURL &amp;&amp; $newURL!="")
+ #set($newContents = $diffTool.getZipContent($newURL))
+#end
+#foreach ($key in $oldContents.keySet())
+ #if($key != "package.xml")
+  #set($oldDoc = $diffTool.getDocument($oldContents.get($key)))
+  #if(!$oldDoc.getObject("XWiki.XWikiPreferences")&amp;&amp;!$oldDoc.getObject("XWiki.XWikiGroups"))
+   #set($oldContent = $diffTool.getXML($oldDoc))
+   #if($newContents)
+    #set($newContent = $diffTool.getXMLFromString($newContents.get($key)))
+   #else
+    #set($page = $oldDoc.getFullName())
+    #set($newDoc = $xwiki.getDocument($page))
+    #if($oldDoc.getLanguage()!="")
+     #set($newDoc = $newDoc.getTranslatedDocument($oldDoc.getLanguage()))
+    #end
+    #set($newContent = $diffTool.getXML($newDoc))
+   #end
+   #if ($oldContent &amp;&amp; $diffTool.compare($oldContent, $newContent))
+* $key has changed [[View Diff&gt;&gt;?page=${key}&amp;source=${request.source}&amp;target=${request.target}]]
+#if($request.page==$key)
+**Differences**:
+{{html clean="false"}}$diffTool.diff($oldContent, $newContent){{/html}}
+#if($request.debug)
+#set($ok = $diffTool.save("file1.txt", $oldContent, true))
+#set($ok = $diffTool.save("file1b.txt", $oldContent, false))
+#set($ok = $diffTool.save("file2.txt", $newContent, true))
+#set($ok = $diffTool.save("file2b.txt", $newContent, false))
+#end
+#end
+   #end
+  #end
+ #end
+#end
+#else
+#set($version = $xwiki.version)
+#set($pos = $version.lastIndexOf("."))
+#set($version = $version.substring(0, $pos))
+#set($pos1 = $version.indexOf("."))
+#set($major = $xwiki.parseInt($version.substring(0, $pos1)))
+#set($pos1 = $pos1 + 1)
+#set($pos2 = $version.indexOf(".", $pos1))
+#if($pos2==-1)
+#set($minor = $xwiki.parseInt($version.substring($pos1)))
+#else
+#set($minor = $xwiki.parseInt($version.substring($pos1, $pos2)))
+#end
+#if($major&lt;2 || ($minor&lt;6 &amp;&amp; $major==2))
+#set($source = "http://maven.xwiki.org/releases/com/xpn/xwiki/products/xwiki-enterprise-wiki/$version/xwiki-enterprise-wiki-${version}.xar")
+#else
+#set($source = "http://maven.xwiki.org/releases/org/xwiki/enterprise/xwiki-enterprise-wiki/$version/xwiki-enterprise-wiki-${version}.xar")
+#end
+{{html clean=false}}
+&lt;form action=""&gt;
+&lt;strong&gt;Source URL:&lt;/strong&gt;&lt;br /&gt;
+&lt;input type="text" name="source" value="$source" size="120" /&gt;
+&lt;br /&gt;
+&lt;strong&gt;Target URL:&lt;/strong&gt;&lt;br /&gt;
+leave empty to compare to current wiki&lt;br /&gt;
+&lt;input type="text" name="target" value="" size="120" /&gt;
+&lt;br /&gt;
+&lt;input type="submit" value="Go" /&gt;
+&lt;/form&gt;
+{{/html}}
+#end
+{{/velocity}}</content></xwikidoc>
