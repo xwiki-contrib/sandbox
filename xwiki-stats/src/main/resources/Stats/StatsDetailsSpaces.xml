@@ -50,7 +50,7 @@ $msg.get("xe.statistics.nav.statsforperiod") ${statsgroovy.statsPeriod}
   #set($nbsaves = "0")
  #end
  #if ($docname=="")
-|Ê[[$msg.get("xe.statistics.details.allwiki")&gt;&gt;Main.WebHome]] | $!nbviews | $!nbsaves
+| [[$msg.get("xe.statistics.details.allwiki")&gt;&gt;Main.WebHome]] | $!nbviews | $!nbsaves
  #else
   #set($sdoc = $xwiki.getDocument("${docname}.WebHome"))
   #if ($sdoc.isNew())
