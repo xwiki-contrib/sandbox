@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.AutoCloseInputStream;
@@ -146,9 +147,18 @@ public class FilesystemAttachmentContent extends XWikiAttachmentContent
      */
     public void setContent(final InputStream is) throws IOException
     {
-        throw new IllegalStateException("FilesystemAttachmentContent is immutable and content cannot "
-                                        + "be set. Instead, a new XWikiAttachmentContent object must "
-                                        + "be created.");
+        // This should be immutable but XWikiAttachment calls this when an attachment is being
+        // saved which already exists. Disconnect this content from the attachment since it
+        // might be being used by another instance of the same attachment, then let the attachment
+        // create a new XWikiAttachmentContent instance with a new file.
+        this.getAttachment().setAttachment_content(null);
+
+        // Bump the version number so if the newly added content is saved, it will be saved with a
+        // new version.
+        this.getAttachment().incrementVersion();
+        this.getAttachment().setDate(new Date());
+
+        this.getAttachment().setContent(is);
     }
 
     /**

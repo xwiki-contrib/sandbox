@@ -119,24 +119,31 @@ public class FilesystemAttachmentVersioningStoreTest extends AbstractMockingComp
     @Test
     public void saveArchiveTest() throws Exception
     {
+        final XWikiAttachmentContent content = this.archive.getAttachment().getAttachment_content();
+        final XWikiAttachment attach = this.archive.getAttachment();
+
         Assert.assertFalse(this.provider.getAttachmentVersioningMetaFile().exists());
         Assert.assertFalse(this.provider.getAttachmentVersionContentFile("1.1").exists());
         Assert.assertFalse(this.provider.getAttachmentVersionContentFile("1.2").exists());
         Assert.assertFalse(this.provider.getAttachmentVersionContentFile("1.3").exists());
 
         // Because the context is only used by the legacy implementation, it is safe to pass null.
-        this.versionStore.saveArchive(archive, null, false);
+        this.versionStore.saveArchive(this.archive, null, false);
 
         Assert.assertTrue(this.provider.getAttachmentVersioningMetaFile().exists());
         Assert.assertTrue(this.provider.getAttachmentVersionContentFile("1.1").exists());
         Assert.assertTrue(this.provider.getAttachmentVersionContentFile("1.2").exists());
         Assert.assertTrue(this.provider.getAttachmentVersionContentFile("1.3").exists());
+
+        // Prove that the attachment and attachment content are the same after saving.
+        Assert.assertSame(attach, this.archive.getAttachment());
+        Assert.assertSame(content, this.archive.getAttachment().getAttachment_content());
     }
 
     @Test
     public void loadArchiveTest() throws Exception
     {
-        this.versionStore.saveArchive(archive, null, false);
+        this.versionStore.saveArchive(this.archive, null, false);
         final XWikiAttachmentArchive newArch =
             this.versionStore.loadArchive(archive.getAttachment(), null, false);
         Assert.assertTrue(newArch.getVersions().length == 3);
@@ -146,15 +153,18 @@ public class FilesystemAttachmentVersioningStoreTest extends AbstractMockingComp
 
         Assert.assertTrue(version1.getVersion().equals("1.1"));
         Assert.assertTrue(version1.getFilename().equals("attachment.txt"));
-        Assert.assertTrue(IOUtils.toString(version1.getContentInputStream(null)).equals("I am version 1.1"));
+        Assert.assertEquals("I am version 1.1", IOUtils.toString(version1.getContentInputStream(null)));
+        Assert.assertSame(version1.getDoc(), this.archive.getAttachment().getDoc());
 
         Assert.assertTrue(version2.getVersion().equals("1.2"));
         Assert.assertTrue(version2.getFilename().equals("attachment.txt"));
-        Assert.assertTrue(IOUtils.toString(version2.getContentInputStream(null)).equals("I am version 1.2"));
+        Assert.assertEquals("I am version 1.2", IOUtils.toString(version2.getContentInputStream(null)));
+        Assert.assertSame(version2.getDoc(), this.archive.getAttachment().getDoc());
 
         Assert.assertTrue(version3.getVersion().equals("1.3"));
         Assert.assertTrue(version3.getFilename().equals("attachment.txt"));
-        Assert.assertTrue(IOUtils.toString(version3.getContentInputStream(null)).equals("I am version 1.3"));
+        Assert.assertEquals("I am version 1.3", IOUtils.toString(version3.getContentInputStream(null)));
+        Assert.assertSame(version3.getDoc(), this.archive.getAttachment().getDoc());
     }
 
     @Test
@@ -175,21 +185,6 @@ public class FilesystemAttachmentVersioningStoreTest extends AbstractMockingComp
         Assert.assertFalse(this.provider.getAttachmentVersionContentFile("1.3").exists());
     }
 
-    private static class StringAttachmentContent extends XWikiAttachmentContent
-    {
-         private final String content;
-
-         public StringAttachmentContent(final String content)
-         {
-             this.content = content;
-         }
-
-         public InputStream getContentInputStream()
-         {
-             return new ByteArrayInputStream(this.content.getBytes());
-         }
-    }
-
     /* -------------------- Helpers -------------------- */
 
     private static void resursiveDelete(final File toDelete) throws IOException
@@ -204,5 +199,30 @@ public class FilesystemAttachmentVersioningStoreTest extends AbstractMockingComp
             }
         }
         toDelete.delete();
+    }
+
+    private static class StringAttachmentContent extends XWikiAttachmentContent
+    {
+         private final String content;
+
+         public StringAttachmentContent(final String content)
+         {
+             this.content = content;
+         }
+
+         public InputStream getContentInputStream()
+         {
+             return new ByteArrayInputStream(this.content.getBytes());
+         }
+
+         public boolean isContentDirty()
+         {
+             return true;
+         }
+
+         public StringAttachmentContent clone()
+         {
+             return this;
+         }
     }
 }

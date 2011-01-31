@@ -34,6 +34,7 @@ import com.xpn.xwiki.XWikiException;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.store.filesystem.internal.FilesystemStoreTools;
+import org.xwiki.store.filesystem.internal.AttachmentFileProvider;
 import org.xwiki.store.serialization.Serializer;
 import org.xwiki.store.StartableTransactionRunnable;
 
@@ -86,8 +87,13 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
                                               final boolean bTransaction)
         throws XWikiException
     {
-        final File metaFile =
-            this.fileTools.getAttachmentFileProvider(attachment).getAttachmentVersioningMetaFile();
+        final AttachmentFileProvider provider = this.fileTools.getAttachmentFileProvider(attachment);
+        final File metaFile = provider.getAttachmentVersioningMetaFile();
+
+        // If no meta file then assume no archive and return an empty archive.
+        if (!metaFile.exists()) {
+            return new ListAttachmentArchive(attachment);
+        }
 
         final ReadWriteLock lock = this.fileTools.getLockForFile(metaFile);
         final List<XWikiAttachment> attachList;
@@ -114,13 +120,13 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
 
         // Get the content file and lock for each revision.
         for (XWikiAttachment attach : attachList) {
-            final File contentFile =
-                this.fileTools.getAttachmentFileProvider(attachment)
-                    .getAttachmentVersionContentFile(attachment.getVersion());
+            final File contentFile = provider.getAttachmentVersionContentFile(attach.getVersion());
             attach.setAttachment_content(
                 new FilesystemAttachmentContent(contentFile,
-                                                attachment,
+                                                attach,
                                                 this.fileTools.getLockForFile(contentFile)));
+            // Pass the document since it will be lost in the serialize/deserialize.
+            attach.setDoc(attachment.getDoc());
         }
 
         return ListAttachmentArchive.newInstance(attachList);
@@ -166,9 +172,11 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
      * @param context An XWikiContext used for getting the attachments from the archive with getRevision()
      *                and for getting the content from the attachments with getContentInputStream().
      * @return a new StartableTransactionRunnable for saving this attachment archive.
+     * @throws XWikiException if versions of the arrachment cannot be loaded form the archive.
      */
     public StartableTransactionRunnable getArchiveSaveRunnable(final XWikiAttachmentArchive archive,
                                                                final XWikiContext context)
+        throws XWikiException
     {
         return new AttachmentArchiveSaveRunnable(
             archive, this.fileTools, this.fileTools.getAttachmentFileProvider(archive.getAttachment()),

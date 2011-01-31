@@ -28,11 +28,11 @@ import java.util.List;
 import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.doc.XWikiAttachmentArchive;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import org.suigeneris.jrcs.rcs.Version;
 import org.xwiki.store.filesystem.internal.FilesystemStoreTools;
 import org.xwiki.store.filesystem.internal.AttachmentFileProvider;
 import org.xwiki.store.serialization.Serializer;
-import org.xwiki.store.TransactionRunnable;
 import org.xwiki.store.StartableTransactionRunnable;
 import org.xwiki.store.FileSaveTransactionRunnable;
 import org.xwiki.store.StreamProvider;
@@ -48,21 +48,6 @@ import org.xwiki.store.StreamProvider;
  */
 public class AttachmentArchiveSaveRunnable extends StartableTransactionRunnable
 {
-    /** The XWikiAttachmentArchive to save. */
-    private final XWikiAttachmentArchive archive;
-
-    /** Filesystem storage tools for getting files for each revision of the attachment. */
-    private final FilesystemStoreTools fileTools;
-
-    /** Used to get the files for storing each version of the attachment. */
-    private final AttachmentFileProvider provider;
-
-    /** For serializing the metadata from each revision of the attachment. */
-    private final Serializer<List<XWikiAttachment>> attachmentListMetaSerilizer;
-
-    /** The XWikiContext used to get the versions of the attachment. */
-    private final XWikiContext context;
-
     /**
      * The Constructor.
      *
@@ -74,78 +59,58 @@ public class AttachmentArchiveSaveRunnable extends StartableTransactionRunnable
      * @param serializer an attachment list metadata serializer for serializing the metadata of each
      *                   version of the attachment.
      * @param context the XWikiContext used to get the revisions of the attachment.
+     * @throws XWikiException if it is unable to get a revision of an attachment using archive.getRevision()
      */
     public AttachmentArchiveSaveRunnable(final XWikiAttachmentArchive archive,
                                          final FilesystemStoreTools fileTools,
                                          final AttachmentFileProvider provider,
                                          final Serializer<List<XWikiAttachment>> serializer,
                                          final XWikiContext context)
+        throws XWikiException
     {
-        this.archive = archive;
-        this.fileTools = fileTools;
-        this.provider = provider;
-        this.attachmentListMetaSerilizer = serializer;
-        this.context = context;
-    }
-
-    /**
-     * {@inheritDoc}
-     * Get attachment versions and acquire locks.
-     * Content of the attachment will only be saved for revisions whose content is dirty.
-     *
-     * @see TransactionRunnable#preRun()
-     */
-    protected void onPreRun() throws Exception
-    {
-        final Version[] versions = this.archive.getVersions();
-
-        final List<XWikiAttachment> attachmentVersions =
-            new ArrayList<XWikiAttachment>(versions.length);
+        final Version[] versions = archive.getVersions();
+        final List<XWikiAttachment> attachmentVersions = new ArrayList<XWikiAttachment>(versions.length);
 
         // Add the content files which need updating and add the attachments to the list.
         for (int i = 0; i < versions.length; i++) {
             final String versionName = versions[i].toString();
-            final XWikiAttachment attachVer = archive.getRevision(this.archive.getAttachment(),
-                                                                  versionName,
-                                                                  this.context);
+            final XWikiAttachment attachVer =
+                archive.getRevision(archive.getAttachment(), versionName, context);
             attachmentVersions.add(attachVer);
 
-            if (attachVer.isContentDirty()) {
-                // If the content is not dirty then it will not be updated.
-                final File contentFile =
-                    this.provider.getAttachmentVersionContentFile(versionName);
-
+            // If the content is not dirty and the file was already saved then we will not update.
+            if (attachVer.isContentDirty()
+                || !provider.getAttachmentVersionContentFile(versionName).exists())
+            {
                 final StreamProvider contentProvider =
-                    new AttachmentContentStreamProvider(attachVer, this.context);
-
-                final TransactionRunnable contentSaveRunnable =
-                    new FileSaveTransactionRunnable(contentFile,
-                                                    this.fileTools.getTempFile(contentFile),
-                                                    this.fileTools.getBackupFile(contentFile),
-                                                    this.fileTools.getLockForFile(contentFile),
-                                                    contentProvider);
-
-                contentSaveRunnable.runIn(this);
+                    new AttachmentContentStreamProvider(attachVer, context);
+                addSaver(contentProvider, fileTools, provider.getAttachmentVersionContentFile(versionName));
             }
         }
 
-        // Now do the metadata.
-        final File attachMetaFile =
-            this.provider.getAttachmentVersioningMetaFile();
-
+        // Then do the metadata.
         final StreamProvider metaProvider =
-            new AttachmentListMetadataStreamProvider(this.attachmentListMetaSerilizer,
-                                                     attachmentVersions);
-        final TransactionRunnable metaSaveRunnable =
-            new FileSaveTransactionRunnable(attachMetaFile,
-                                            this.fileTools.getTempFile(attachMetaFile),
-                                            this.fileTools.getBackupFile(attachMetaFile),
-                                            this.fileTools.getLockForFile(attachMetaFile),
-                                            metaProvider);
-
-        metaSaveRunnable.runIn(this);
+            new AttachmentListMetadataStreamProvider(serializer, attachmentVersions);
+        addSaver(metaProvider, fileTools, provider.getAttachmentVersioningMetaFile());
     }
 
+    /**
+     * Save some content safely in this runnable.
+     *
+     * @param provider the means to get the content to save.
+     * @param fileTools the means to get the backup file, temporary file, and lock.
+     * @param saveHere the location to save the data.
+     */
+    private void addSaver(final StreamProvider provider,
+                          final FilesystemStoreTools fileTools,
+                          final File saveHere)
+    {
+        new FileSaveTransactionRunnable(saveHere,
+                                        fileTools.getTempFile(saveHere),
+                                        fileTools.getBackupFile(saveHere),
+                                        fileTools.getLockForFile(saveHere),
+                                        provider).runIn(this);
+    }
 
     /**
      * A stream provider based on the metadata for each attachment in a list.

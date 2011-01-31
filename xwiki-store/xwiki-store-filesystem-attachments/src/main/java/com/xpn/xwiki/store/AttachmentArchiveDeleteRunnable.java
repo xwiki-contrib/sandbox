@@ -23,12 +23,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.doc.XWikiAttachmentArchive;
 import org.suigeneris.jrcs.rcs.Version;
 import org.xwiki.store.filesystem.internal.FilesystemStoreTools;
 import org.xwiki.store.filesystem.internal.AttachmentFileProvider;
-import org.xwiki.store.TransactionRunnable;
 import org.xwiki.store.StartableTransactionRunnable;
 import org.xwiki.store.FileDeleteTransactionRunnable;
 
@@ -43,18 +41,6 @@ import org.xwiki.store.FileDeleteTransactionRunnable;
  */
 public class AttachmentArchiveDeleteRunnable extends StartableTransactionRunnable
 {
-    /** Filesystem storage tools for getting backup files and locks. */
-    private final FilesystemStoreTools fileTools;
-
-    /** Used to get the files for storing each version of the attachment. */
-    private final AttachmentFileProvider provider;
-
-    /** The attachment which this archive is associated with. */
-    private final XWikiAttachment attachment;
-
-    /** The archive to delete. */
-    private final XWikiAttachmentArchive archive;
-
     /**
      * @param archive the attachment archive to delete.
      * @param fileTools tools for getting the metadata and versions of the attachment and locks.
@@ -64,35 +50,18 @@ public class AttachmentArchiveDeleteRunnable extends StartableTransactionRunnabl
                                            final FilesystemStoreTools fileTools,
                                            final AttachmentFileProvider provider)
     {
-        this.archive = archive;
-        this.fileTools = fileTools;
-        this.provider = provider;
-        this.attachment = archive.getAttachment();
-    }
-
-    /**
-     * {@inheritDoc}
-     * Create FileDeleteTransactionRunnables for each version of the attachment content as well
-     * as it's metadata store.
-     *
-     * @see TransactionRunnable#preRun()
-     */
-    protected void onPreRun() throws Exception
-    {
         final List<File> toDelete = new ArrayList<File>();
-        toDelete.add(this.provider.getAttachmentVersioningMetaFile());
+        toDelete.add(provider.getAttachmentVersioningMetaFile());
 
-        final Version[] versions = this.archive.getVersions();
+        final Version[] versions = archive.getVersions();
         for (int i = 0; i < versions.length; i++) {
-            toDelete.add(this.provider.getAttachmentVersionContentFile(versions[i].toString()));
+            toDelete.add(provider.getAttachmentVersionContentFile(versions[i].toString()));
         }
 
         for (File file : toDelete) {
-            final TransactionRunnable contentDeleteRunnable =
-                new FileDeleteTransactionRunnable(file,
-                                                  this.fileTools.getBackupFile(file),
-                                                  this.fileTools.getLockForFile(file));
-            contentDeleteRunnable.runIn(this);
+            new FileDeleteTransactionRunnable(file,
+                                              fileTools.getBackupFile(file),
+                                              fileTools.getLockForFile(file)).runIn(this);
         }
     }
 }

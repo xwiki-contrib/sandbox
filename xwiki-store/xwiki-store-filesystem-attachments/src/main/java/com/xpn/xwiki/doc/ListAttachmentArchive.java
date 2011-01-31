@@ -65,6 +65,16 @@ public class ListAttachmentArchive extends XWikiAttachmentArchive
     private final List<XWikiAttachment> revisions = new ArrayList<XWikiAttachment>();
 
     /**
+     * The Constructor.
+     *
+     * @param attachment the attachment to associate with this archive.
+     */
+    public ListAttachmentArchive(final XWikiAttachment attachment)
+    {
+        this.attachment = attachment;
+    }
+
+    /**
      * Create a new instance of ListAttachmentArchive from a list of attachments.
      * @param revisions a List of XWikiAttachment revisions to put in this archive.
      *                  All revisions are the same attachment and thus must have the same ID.
@@ -72,7 +82,13 @@ public class ListAttachmentArchive extends XWikiAttachmentArchive
      */
     public static ListAttachmentArchive newInstance(final List<XWikiAttachment> revisions)
     {
-        final ListAttachmentArchive arch = new ListAttachmentArchive();
+        final ListAttachmentArchive arch = new ListAttachmentArchive(null);
+
+        // Empty list:
+        if (revisions.size() == 0) {
+            return arch;
+        }
+
         arch.revisions.addAll(revisions);
         Collections.sort(arch.revisions, XWikiAttachmentVersionComparitor.INSTANCE);
 
@@ -104,15 +120,34 @@ public class ListAttachmentArchive extends XWikiAttachmentArchive
     @Override
     public Object clone()
     {
-        final ListAttachmentArchive out = new ListAttachmentArchive();
-        out.attachment = (XWikiAttachment) this.attachment.clone();
+        final ListAttachmentArchive out = new ListAttachmentArchive(cloneAttachment(this.attachment));
         out.attachment.setAttachment_archive(out);
         for (XWikiAttachment revision : this.revisions) {
-            final XWikiAttachment revClone = (XWikiAttachment) revision.clone();
+            final XWikiAttachment revClone = cloneAttachment(revision);
             revClone.setAttachment_archive(out);
             out.revisions.add(revClone);
         }
         return out;
+    }
+
+    /**
+     * Clone an attachment but not it's archive.
+     * {@link ListAttachmentArchive#clone()} calls {@link XWikiAttachment#clone()}
+     * and if the attachment is associated with an archive it call clone the archive.
+     * This function prevents an infinite loop.
+     *
+     * @param original an attachment to clone.
+     * @return a clone of original which has no XWikiAttachmentArchive attached.
+     */
+    private static XWikiAttachment cloneAttachment(final XWikiAttachment original)
+    {
+        final XWikiAttachmentArchive arch = original.getAttachment_archive();
+        try {
+            original.setAttachment_archive(null);
+            return (XWikiAttachment) original.clone();
+        } finally {
+            original.setAttachment_archive(arch);
+        }
     }
 
     /**
@@ -272,7 +307,10 @@ public class ListAttachmentArchive extends XWikiAttachmentArchive
         final XWikiAttachment attach = this.getAttachment();
         attach.incrementVersion();
         attach.setDate(new Date());
-        this.revisions.add((XWikiAttachment) attach.clone());
+        // Clone the attachment but don't clone this archive.
+        final XWikiAttachment clone = cloneAttachment(attach);
+        clone.setAttachment_archive(this);
+        this.revisions.add(clone);
     }
 
     /**
@@ -327,7 +365,8 @@ public class ListAttachmentArchive extends XWikiAttachmentArchive
 
         for (XWikiAttachment attach : this.revisions) {
             if (rev.equals(attach.getVersion())) {
-                final XWikiAttachment out = (XWikiAttachment) attach.clone();
+                final XWikiAttachment out = cloneAttachment(attach);
+                out.setAttachment_archive(this);
 
                 // This is silly, we set the attachment document and passed value.
                 // Keeping to maintain current behavior.

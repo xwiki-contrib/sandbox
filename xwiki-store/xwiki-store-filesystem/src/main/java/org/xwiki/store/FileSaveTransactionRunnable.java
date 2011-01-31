@@ -167,12 +167,10 @@ public class FileSaveTransactionRunnable extends StartableTransactionRunnable<Tr
      *
      * @see TransactionRunnable#onComplete()
      */
-    protected void onComplete()
+    protected void onComplete() throws IOException
     {
         try {
             this.clearTempAndBackup();
-        } catch (IOException e) {
-            // TODO log
         } finally {
             this.lock.writeLock().unlock();
         }
