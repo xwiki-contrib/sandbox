@@ -23,7 +23,7 @@
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <content>{{velocity}}
-#if ($xwiki.isVirtual() && $xcontext.isMainWiki())
+#if ($xwiki.isVirtual() &amp;&amp; $xcontext.isMainWiki())
 {{toc depth="1"/}}
 
 #set ($periodStart = $xwiki.jodatime.mutableDateTime)
