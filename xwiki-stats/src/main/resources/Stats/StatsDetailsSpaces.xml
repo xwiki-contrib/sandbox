@@ -56,7 +56,7 @@ $msg.get("xe.statistics.nav.statsforperiod") ${statsgroovy.statsPeriod}
   #if ($sdoc.isNew())
 | $msg.get("xe.statistics.details.space") ${docname} | $!nbviews | $!nbsaves
   #else
-|Ê$msg.get("xe.statistics.details.space") [[${docname}&gt;&gt;${docname}.WebHome]] | ${nbviews} | ${nbsaves}
+| $msg.get("xe.statistics.details.space") [[${docname}&gt;&gt;${docname}.WebHome]] | ${nbviews} | ${nbsaves}
   #end
  #end
 #end
