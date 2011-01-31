@@ -14,7 +14,7 @@
 <date>1262300400000</date>
 <contentUpdateDate>1262300400000</contentUpdateDate>
 <version>1.1</version>
-<title></title>
+<title>Application SVN</title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
@@ -23,7 +23,7 @@
 <syntaxId>xwiki/2.0</syntaxId>
 <hidden>false</hidden>
 <content>svn.title=Application SVN
-svn.description=Welcome to the SVN Commit App. You can configure SVN repositories to connect to your wiki and commit your wiki content in these repositories.
+svn.description=Bienvenue sur l'application SVN. You can configure SVN repositories to connect to your wiki and commit your wiki content in these repositories.
 svn.currentconfigs.title=Current SVN Configs
 svn.currentconfigs.noconfigs=There are currently no configs created
 svn.createnewconfig=Create New SVN Config
