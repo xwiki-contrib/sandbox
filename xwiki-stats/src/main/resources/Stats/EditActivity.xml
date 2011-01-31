@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Stats</web>
+<name>EditActivity</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Stats.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1293836400000</creationDate>
+<date>1293836400000</date>
+<contentUpdateDate>1293836400000</contentUpdateDate>
+<version>1.1</version>
+<title>$msg.get("xe.statistics.editactivity.title")</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity filter="none"}}
+
+* #foreach($item in $xwiki.search("select count(*) from XWikiRCSNodeInfo as docv, XWikiRCSNodeContent as docc, XWikiDocument as doc where doc.web&lt;&gt;'XWiki' and docv.author &lt;&gt; '' and docv.author &lt;&gt; 'XWiki.Admin' and doc.id = docv.id.docId  and doc.id=docc.id.docId and docv.id.version1=docc.id.version1 and docv.id.version2=docc.id.version2")) $item #end $msg.get("xe.statistics.editactivity.edits")
+
+#macro(makelist $array)
+#set($list = $xwiki.arrayList)
+#foreach($value in $array)
+#set($ok = $list.add($value))
+#end
+#end
+
+#foreach($totals in $xwiki.search("select sum(length(docc.patch.content)), count(*) from XWikiRCSNodeInfo as docv, XWikiRCSNodeContent as docc, XWikiDocument as doc where doc.web&lt;&gt;'XWiki' and docv.author &lt;&gt; '' and docv.author &lt;&gt; 'XWiki.Admin' and doc.id = docv.id.docId  and doc.id=docc.id.docId and docv.id.version1=docc.id.version1 and docv.id.version2=docc.id.version2"))
+#makelist($totals)
+#set($totalCharsTyped = $list.get(0).floatValue())
+#set($totalEdits = $list.get(1).floatValue())
+#end
+ 
+
+|=$msg.get("xe.statistics.editactivity.table.user")|=$msg.get("xe.statistics.editactivity.table.edits")|=$msg.get("xe.statistics.editactivity.table.lastedit")|=$msg.get("xe.statistics.editactivity.table.percentofedits")|=$msg.get("xe.statistics.editactivity.table.percentofchars")|=$msg.get("xe.statistics.editactivity.table.charsperedit")
+#foreach($participants in $xwiki.search("select docv.author, count(*), max(docv.date), sum(length(docc.patch.content)) from XWikiRCSNodeInfo as docv, XWikiRCSNodeContent as docc, XWikiDocument as doc where doc.web&lt;&gt;'XWiki' and docv.author &lt;&gt; '' and docv.author &lt;&gt; 'XWiki.Admin' and doc.id = docv.id.docId  and doc.id=docc.id.docId and docv.id.version1=docc.id.version1 and docv.id.version2=docc.id.version2 group by docv.author order by 4 desc"))
+#makelist($participants)
+#set($edits = $list.get(1).floatValue())
+#set($charsTyped = $list.get(3).floatValue())
+#set($percentEdits =   $edits * 100 / $totalEdits)
+#set($percentCharsTyped =   $charsTyped * 100 / $totalCharsTyped)
+#set($charPerEdit =   $charsTyped / $edits)
+|$xwiki.getLocalUserName($list.get(0))|$list.get(1)|$xwiki.formatDate($list.get(2))|$percentEdits %|$percentCharsTyped %|$charPerEdit
+#end
+{{/velocity}}</content></xwikidoc>

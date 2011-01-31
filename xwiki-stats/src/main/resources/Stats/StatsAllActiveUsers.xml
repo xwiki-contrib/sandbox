@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Stats</web>
+<name>StatsAllActiveUsers</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1293836400000</creationDate>
+<date>1293836400000</date>
+<contentUpdateDate>1293836400000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity}}
+Unique users: $listtool.get($xwiki.search("select count(distinct stats.name) from VisitStats as stats"),0)
+
+#if($request.withdetails)
+|=User |=Last session|=Page Views|=Page Saves
+#foreach($res in $xwiki.search("select stats.name, max(stats.endDate), sum(stats.pageViews), sum(stats.pageSaves) from VisitStats as stats group by stats.name order by 3 desc"))
+| $listtool.get($res, 0) | $listtool.get($res, 1)| $listtool.get($res, 2)| $listtool.get($res, 3)
+#end
+#else
+[[Show details&gt;&gt;?withdetails=1]]
+#end
+{{/velocity}}</content></xwikidoc>

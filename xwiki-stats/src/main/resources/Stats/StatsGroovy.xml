@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Stats</web>
+<name>StatsGroovy</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1293836400000</creationDate>
+<date>1293836400000</date>
+<contentUpdateDate>1293836400000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/1.0</syntaxId>
+<hidden>false</hidden>
+<content>
+import java.util.*;
+
+public class StatsGroovy {
+ def xwiki;
+ def period;
+ def perioddate;
+ def periodstart;
+ def periodend;
+ def nextperiod;
+ def previousperiod;
+ def today;
+ def isDay = false;
+
+ public setXWiki(com.xpn.xwiki.api.XWiki xwiki, String period) {
+   this.xwiki = xwiki;
+   this.period = period;
+   def cal = Calendar.getInstance();
+   if (period!=null) {
+    if (period.length()==6) {
+     // this is a month
+     this.isDay = false;
+     def dformat = new java.text.SimpleDateFormat("yyyyMMdd") 
+     def speriod = "${period}01"
+     perioddate = dformat.parse(speriod)
+     periodstart = xwiki.formatDate(perioddate, "yyyy-MM-01 00:00:00")
+     periodend =  xwiki.formatDate(perioddate, "yyyy-MM-31 23:59:59")
+     cal.setTime(perioddate);
+     cal.add(2,1);
+     nextperiod = xwiki.formatDate(cal.getTime(), "yyyyMM")
+     cal.setTime(perioddate);
+     cal.add(2,-1)
+     previousperiod = xwiki.formatDate(cal.getTime(), "yyyyMM")
+    } else {
+    // this is a day
+     this.isDay = true;
+     def dformat = new java.text.SimpleDateFormat("yyyyMMdd")
+     perioddate = dformat.parse(period) 
+     periodstart =  xwiki.formatDate(perioddate, "yyyy-MM-dd 00:00:00")
+     periodend =  xwiki.formatDate(perioddate, "yyyy-MM-dd 23:59:59")
+     cal.setTime(perioddate);
+     cal.add(5,1);
+     nextperiod = xwiki.formatDate(cal.getTime(), "yyyyMMdd")
+     cal.setTime(perioddate);
+     cal.add(5,-1);
+     previousperiod = xwiki.formatDate(cal.getTime(), "yyyyMMdd")
+    }
+   } else {
+    perioddate = new Date();
+    this.period = xwiki.formatDate(perioddate, "yyyyMM")
+    periodstart = xwiki.formatDate(perioddate, "yyyy-MM-01 00:00:00")
+    periodend =  xwiki.formatDate(perioddate, "yyyy-MM-31 23:59:59")
+    cal.setTime(perioddate);
+    cal.add(2,1);
+    nextperiod = xwiki.formatDate(cal.getTime(), "yyyyMM")
+    cal.setTime(perioddate);
+    cal.add(2,-1);
+    previousperiod = xwiki.formatDate(cal.getTime(), "yyyyMM")
+   }
+   today = xwiki.formatDate(perioddate, "yyyyMMdd")
+ }
+
+ public getPreviousPeriod() {
+    return previousperiod;
+ }
+
+ public getNextPeriod() {
+    return nextperiod;
+ }
+
+ public getToday() {
+    return today;
+ }
+
+ public getStatsPeriod() {
+    return periodstart + " - " + periodend; 
+ }
+
+ public getPeriodCriteria() {
+    if (isDay)
+     return xwiki.criteriaService.periodFactory.createDayPeriod(perioddate.getTime())
+    else
+     return xwiki.criteriaService.periodFactory.createMonthPeriod(perioddate.getTime())
+ }
+
+ public getSpaceStats(nb, start) {
+   return getStats(false, nb, start);
+ }
+
+ public getPagesStats(nb, start) {
+   return getStats(true, nb, start);
+ }
+
+ public getStats(boolean pageLevel, nb, start) {
+   def stats = new HashMap();
+   def results = new ArrayList();
+   def ope = (pageLevel==true) ? "" : "not"
+   def sqlviews  = "select stats.name, stats.pageViews from DocumentStats as stats where stats.action = 'view' and stats.name " + ope + " like '%.%' and stats.period=${period} order by stats.pageViews desc"
+   for(res in xwiki.search(sqlviews, nb, start)) {
+      def pagename = res[0];
+      def nbs = res[1];
+      def statsObj = new HashMap();
+      statsObj.put("docname", pagename)
+      statsObj.put("views", nbs )
+      stats.put(pagename, statsObj);
+      results.add(statsObj);
+   }
+   def sqlsaves  = "select stats.name, stats.pageViews from DocumentStats as stats where stats.action = 'save' and stats.name " + ope + " like '%.%' and stats.period=${period} order by stats.pageViews desc"
+   for(res in xwiki.search(sqlsaves, 0, 0)) {
+      def pagename = res[0];
+      def nbs = res[1];
+      def statsObj = stats.get(pagename);
+      if (statsObj==null) {
+        statsObj = new HashMap();
+        statsObj.put("docname", pagename)
+        statsObj.put("view", new Integer(0))
+        stats.put(pagename, statsObj);
+        if (results.size()&lt;nb)
+         results.add(statsObj);
+      }
+      statsObj.put("saves", nbs )
+   }
+   return results;
+  }
+
+  public getActiveUsersSQL() {
+   return "select stats.name, max(stats.endDate), sum(stats.pageViews), sum(stats.pageSaves) from VisitStats as stats where stats.endDate&gt;='${periodstart}' and stats.endDate&lt;='${periodend}' group by stats.name order by 3 desc";
+  }
+
+  public List getActiveUsers(nb, start) {
+    return xwiki.search(getActiveUsersSQL(), nb, start);
+  }
+
+  public getActiveUsersByDateSQL() {
+   return "select stats.name, max(stats.endDate), sum(stats.pageViews), sum(stats.pageSaves) from VisitStats as stats where stats.endDate&gt;='${periodstart}' and stats.endDate&lt;='${periodend}' group by stats.name order by 2 desc";
+  }
+
+  public List getActiveUsersByDate(nb, start) {
+    return xwiki.search(getActiveUsersByDateSQL(), nb, start);
+  }
+
+  public getUserActivitySQL(user) {
+   return "select stats.name, max(stats.endDate), sum(stats.pageViews), sum(stats.pageSaves) from VisitStats as stats where stats.endDate&gt;='${periodstart}' and stats.endDate&lt;='${periodend}' and stats.name='${user}' group by stats.name order by 2 desc";
+  }
+
+  public List getUserActivity(user) {
+    return xwiki.search(getUserActivitySQL(user));
+  }
+
+  public getRecentConnectionsSQL() {
+    return "select stats.name, stats.startDate, stats.endDate, stats.pageViews, stats.pageSaves from VisitStats as stats where stats.endDate&gt;='${periodstart}' and stats.endDate&lt;='${periodend}' order by 2 desc";
+  }
+
+  public List getRecentConnections(nb, start) {
+   return xwiki.search(getRecentConnectionsSQL(), nb, start);
+  }
+
+  public getDailyConnectionsSQL() {
+    return "select stats.name, date(stats.startDate), sum(stats.pageViews),sum(stats.pageSaves) from VisitStats as stats where stats.endDate&gt;='${periodstart}' and stats.endDate&lt;='${periodend}' group by stats.name, date(stats.startDate) order by 2 desc";
+  }
+
+  public List getDailyConnections(nb, start) {
+   return xwiki.search(getDailyConnectionsSQL(), nb, start);
+  }
+
+  public getDailyConnectionsByUserSQL(user) {
+    return "select stats.name, date(stats.startDate), sum(stats.pageViews),sum(stats.pageSaves) from VisitStats as stats where stats.endDate&gt;='${periodstart}' and stats.endDate&lt;='${periodend}' and stats.name='${user}' group by stats.name, date(stats.startDate) order by 2 desc";
+  }
+
+  public List getDailyConnectionsByUser(user, nb, start) {
+   return xwiki.search(getDailyConnectionsByUserSQL(user), nb, start);
+  }
+
+}</content></xwikidoc>

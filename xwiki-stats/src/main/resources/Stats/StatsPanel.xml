@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Stats</web>
+<name>StatsPanel</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Panels.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1293836400000</creationDate>
+<date>1293836400000</date>
+<contentUpdateDate>1293836400000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/1.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>Panels.PanelClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<category>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>category</name>
+<number>5</number>
+<prettyName>Category</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Information|Navigation|Tools|Administration|Other</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</category>
+<content>
+<disabled>0</disabled>
+<editor>Text</editor>
+<name>content</name>
+<number>4</number>
+<prettyName>Content</prettyName>
+<rows>25</rows>
+<size>60</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</content>
+<description>
+<disabled>0</disabled>
+<editor>Text</editor>
+<name>description</name>
+<number>3</number>
+<prettyName>Description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<type>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>type</name>
+<number>2</number>
+<prettyName>Panel type</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>view|edit</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</type>
+</class>
+<name>Stats.StatsPanel</name>
+<number>0</number>
+<className>Panels.PanelClass</className>
+<guid>f849c802-750f-4e83-973d-75890b9f8182</guid>
+<property>
+<category>Information</category>
+</property>
+<property>
+<content>#panelheader('Statistics')
+* $msg.get("xe.statistics.menu.overview")
+** [$msg.get("xe.statistics.home")&gt;Stats.WebHome]
+** [$msg.get("xe.statistics.document")&gt;Stats.Document]
+** [$msg.get("xe.statistics.visit")&gt;Stats.Visit]
+** [$msg.get("xe.statistics.activity")&gt;Stats.Activity]
+** [$msg.get("xe.statistics.referrer")&gt;Stats.Referrer]
+* $msg.get("xe.statistics.menu.details")
+** [$msg.get("xe.statistics.details.nbdocs")&gt;StatsDetailsNbDocs]
+** [$msg.get("xe.statistics.details.spacestats")&gt;StatsDetailsSpaces]
+** [$msg.get("xe.statistics.details.pagestats")&gt;StatsDetailsPages]
+** [$msg.get("xe.statistics.details.dailyconnections")&gt;StatsDetailsDailyConnections]
+** [$msg.get("xe.statistics.details.activeusers")&gt;StatsDetailsActiveUsers]
+** [$msg.get("xe.statistics.details.recentsessions")&gt;StatsDetailsRecentConnections]
+** [$msg.get("xe.statistics.editactivity")&gt;EditActivity]
+#panelfooter()</content>
+</property>
+<property>
+<description>Stats Panel</description>
+</property>
+<property>
+<name>Stats Panel</name>
+</property>
+<property>
+<type>view</type>
+</property>
+</object>
+<content>#includeForm("Panels.PanelSheet")</content></xwikidoc>

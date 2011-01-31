@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Stats</web>
+<name>StatsDetailsActiveUsers</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Stats.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1293836400000</creationDate>
+<date>1293836400000</date>
+<contentUpdateDate>1293836400000</contentUpdateDate>
+<version>1.1</version>
+<title>$msg.get("xe.statistics.details.activeusers")</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity}}
+#set($statsgroovy = $xwiki.parseGroovyFromPage("Stats.StatsGroovy"))
+#set($ok = $statsgroovy.setXWiki($xwiki, $request.period))
+
+(% style="text-align:center" %)
+(((
+$msg.get("xe.statistics.nav.statsforperiod") ${statsgroovy.statsPeriod}
+
+[[$msg.get("xe.statistics.nav.previousperiod")&gt;&gt;$doc.fullName?period=${statsgroovy.previousPeriod}]] [[$msg.get("xe.statistics.nav.nextperiod")&gt;&gt;$doc.fullName?period=${statsgroovy.nextPeriod}]]
+
+[[$msg.get("xe.statistics.nav.currentmonth")&gt;&gt;$doc.fullName]] [[$msg.get("xe.statistics.nav.currentday")&gt;&gt;$doc.fullName?period=${statsgroovy.today}]]
+)))
+
+== $msg.get("xe.statistics.details.activeusersbydate") ==
+
+#set($result = $statsgroovy.getActiveUsersByDate(50, 0))
+{{html clean=false}}&lt;!-- ${statsgroovy.getActiveUsersByDateSQL()} --&gt;{{/html}}
+(% style="margin: auto" %)
+|=$msg.get("xe.statistics.details.user") |=$msg.get("xe.statistics.details.lastconnectiondate") |=$msg.get("xe.statistics.details.views") |=$msg.get("xe.statistics.details.edits")
+#foreach($item in $result)
+ #set($user = $listtool.get($item, 0))
+ #set($enddate = $xwiki.formatDate($listtool.get($item, 1)))
+ #set($pageviews = $listtool.get($item,2))
+ #set($pagesaves = $listtool.get($item, 3))
+ #if($xwiki.exists($user))
+  #set($userlink = $xwiki.getUserName($user))
+ #else
+  #set($userlink = $user)
+ #end
+ #set($suser = $escapetool.url($user))
+| {{html}}${userlink}{{/html}} ([[$msg.get("xe.statistics.details.userdetails")&gt;&gt;StatsByUser?user=${suser}]]) | ${enddate} | ${pageviews} | ${pagesaves} 
+#end
+
+== $msg.get("xe.statistics.details.activeusers") ==
+
+#set($result = $statsgroovy.getActiveUsers(50, 0))
+{{html clean=false}}&lt;!-- ${statsgroovy.getActiveUsersSQL()} --&gt;{{/html}}
+(% style="margin: auto" %)
+|=$msg.get("xe.statistics.details.user") |=$msg.get("xe.statistics.details.lastconnectiondate") |=$msg.get("xe.statistics.details.views") |=$msg.get("xe.statistics.details.edits")
+#foreach($item in $result)
+ #set($user = $listtool.get($item, 0))
+ #set($enddate = $xwiki.formatDate($listtool.get($item, 1)))
+ #set($pageviews = $listtool.get($item,2))
+ #set($pagesaves = $listtool.get($item, 3))
+ #if($xwiki.exists($user))
+  #set($userlink = $xwiki.getUserName($user))
+ #else
+  #set($userlink = $user)
+ #end
+ #set($suser = $escapetool.url($user))
+| {{html}}${userlink}{{/html}} ([[$msg.get("xe.statistics.details.userdetails")&gt;&gt;StatsByUser?user=${suser}]]) | ${enddate} | ${pageviews} | ${pagesaves} 
+#end
+{{/velocity}}</content></xwikidoc>

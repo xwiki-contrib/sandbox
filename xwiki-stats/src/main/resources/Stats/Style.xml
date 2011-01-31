@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Stats</web>
+<name>Style</name>
+<language></language>
+<defaultLanguage></defaultLanguage>
+<translation>0</translation>
+<parent>Stats.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1293836400000</creationDate>
+<date>1293836400000</date>
+<contentUpdateDate>1293836400000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/1.0</syntaxId>
+<hidden>false</hidden><attachment>
+<filename>ellipsis.xml</filename>
+<filesize>1588</filesize>
+<author>XWiki.Admin</author>
+<date>1219237397000</date>
+<version>1.1</version>
+<comment></comment><content>PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxiaW5kaW5ncyB4bWxucz0iaHR0cDovL3d3dy5tb3ppbGxh
+Lm9yZy94YmwiIHhtbG5zOmh0bWw9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGh0bWwiPgo8Ymlu
+ZGluZyBpZD0iZWxsaXBzaXMiIGFwcGx5YXV0aG9yc3R5bGVzPSJmYWxzZSI+Cgk8aW1wbGVtZW50
+YXRpb24+CgkJPGNvbnN0cnVjdG9yPgoJCQkvLzwhW0NEQVRBWwoJCQlpZiAodGhpcy5wYXJlbnRO
+b2RlLmNsYXNzTmFtZSA9PSAnbW96LWVsbGlwc2lzLWNvbnRhaW5lcicpIHsKCQkJCXJldHVybjsK
+CQkJfQoJCQkKCQkJdmFyIGVsbGlwc2lzID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnZGl2Jyk7
+CgkJCWVsbGlwc2lzLmFwcGVuZENoaWxkKGRvY3VtZW50LmNyZWF0ZVRleHROb2RlKCdcdTIwMjYn
+KSk7CgkJCWVsbGlwc2lzLmNsYXNzTmFtZSA9ICdtb3otZWxsaXBzaXMnOwoJCQkKCQkJdmFyIGZp
+bmRRbSA9IGZ1bmN0aW9uKHJvb3QpIHsKCQkJCXZhciBxbSA9IG51bGw7CgkJCQl2YXIgY2hpbGQg
+PSByb290Lmxhc3RDaGlsZDsKCQkJCXdoaWxlKCFxbSAmJiBjaGlsZCAmJiBjaGlsZC5jbGFzc05h
+bWUgIT0gJ3dpa2ljcmVhdGVsaW5rcW0nKSB7CgkJCQkJcW0gPSBmaW5kUW0oY2hpbGQpOwoJCQkJ
+CWNoaWxkID0gY2hpbGQucHJldmlvdXNTaWJsaW5nOwoJCQkJfQoJCQkJaWYgKCFxbSAmJiBjaGls
+ZCkgewoJCQkJCXFtID0gY2hpbGQ7CgkJCQl9CgkJCQlyZXR1cm4gcW07CgkJCX0KCQkJCgkJCXZh
+ciBxbSA9IGZpbmRRbSh0aGlzKTsKCQkJaWYgKHFtKSB7CgkJCSAgZWxsaXBzaXMuYXBwZW5kQ2hp
+bGQocW0pOwoJCQl9CgoJCQl2YXIgc2VsZiA9IHRoaXM7CgkJCXZhciB0aXRsZSA9IHNlbGYudGl0
+bGU7CgkJCWlmICh0aXRsZSA9PSBudWxsIHx8IHRpdGxlID09ICcnKSB7CgkJCQl0aXRsZSA9IHNl
+bGYudGV4dENvbnRlbnQ7CgkJCX0KCQkJc2VsZi50aXRsZSA9ICcnOwoKCQkJdmFyIGNvbnRhaW5l
+ciA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2RpdicpOwoJCQljb250YWluZXIuY2xhc3NOYW1l
+ID0gJ21vei1lbGxpcHNpcy1jb250YWluZXInOwoJCQlzZWxmLnBhcmVudE5vZGUucmVwbGFjZUNo
+aWxkKGNvbnRhaW5lciwgc2VsZik7CgkJCWNvbnRhaW5lci5hcHBlbmRDaGlsZChzZWxmKTsKCQkJ
+Y29udGFpbmVyLmFwcGVuZENoaWxkKGVsbGlwc2lzKTsKCgkJCXNlbGYuYWRkRXZlbnRMaXN0ZW5l
+cignb3ZlcmZsb3cnLAoJCQkJZnVuY3Rpb24oKSB7CgkJCQkJZWxsaXBzaXMuc3R5bGUudmlzaWJp
+bGl0eSA9ICd2aXNpYmxlJzsKCQkJCQlzZWxmLnRpdGxlID0gdGl0bGU7CgkJCQkJc2VsZi5wYXJl
+bnROb2RlLnN0eWxlLnBhZGRpbmdSaWdodCA9IGVsbGlwc2lzLm9mZnNldFdpZHRoICsgJ3B4JzsK
+CQkJCX0sIGZhbHNlKTsKCgkJCXNlbGYuYWRkRXZlbnRMaXN0ZW5lcigndW5kZXJmbG93JywKCQkJ
+CWZ1bmN0aW9uKCkgewoJCQkJCWVsbGlwc2lzLnN0eWxlLnZpc2liaWxpdHkgPSAnaGlkZGVuJzsK
+CQkJCQlzZWxmLnRpdGxlID0gJyc7CgkJCQl9LCBmYWxzZSk7CgkJCS8vXV0+CgkJPC9jb25zdHJ1
+Y3Rvcj4KCTwvaW1wbGVtZW50YXRpb24+CjwvYmluZGluZz4KPC9iaW5kaW5ncz4KCg==
+</content></attachment>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>Stats.Style</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>9fb3bf6d-b22f-4e7a-b424-0575f83643d3</guid>
+<property>
+<cache>long</cache>
+</property>
+<property>
+<code>/* CSS Rules for the Statistics Application */
+table.stats {
+  width: 100%;
+  table-layout: fixed;
+}
+table.stats th {
+  font-weight: normal;
+  padding-bottom: 2px;
+}
+table.stats th, table.stats td {
+  padding-right: 6px;
+}
+table.stats .numeric {
+  text-align: right;
+}
+table.stats .ellipsis {
+  white-space: nowrap;
+  text-overflow: ellipsis; /* for Internet Explorer */
+  -o-text-overflow: ellipsis; /* for Opera */
+  -moz-binding: url('${doc.getAttachmentURL("ellipsis.xml")}\#ellipsis'); /* for Firefox */
+  overflow: hidden;
+}
+table.stats .moz-ellipsis {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 500;
+  visibility: hidden;
+}
+table.stats .moz-ellipsis-container {
+  position: relative;
+}</code>
+</property>
+<property>
+<name>Stats tables</name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<content>
+</content></xwikidoc>

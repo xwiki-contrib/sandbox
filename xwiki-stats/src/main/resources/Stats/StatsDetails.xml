@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>Stats</web>
+<name>StatsDetails</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>Stats.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1293836400000</creationDate>
+<date>1293836400000</date>
+<contentUpdateDate>1293836400000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/1.0</syntaxId>
+<hidden>false</hidden>
+<content>1 $msg.get("xe.statistics.details.statsdetails")
+
+&lt;%
+statsgroovy = xwiki.parseGroovyFromPage("Stats.StatsGroovy")
+statsgroovy.setXWiki(xwiki, request.period)
+%&gt;
+&lt;center&gt;
+$msg.get("xe.statistics.nav.statsforperiod") ${statsgroovy.statsPeriod}
+
+[$msg.get("xe.statistics.nav.previousperiod")&gt;$doc.fullName?period=${statsgroovy.previousPeriod}] [$msg.get("xe.statistics.nav.nextperiod")&gt;$doc.fullName?period=${statsgroovy.nextPeriod}]
+
+[$msg.get("xe.statistics.nav.currentmonth")&gt;$doc.fullName] [$msg.get("xe.statistics.nav.currentday")&gt;$doc.fullName?period=${statsgroovy.today}]
+&lt;/center&gt;
+&lt;table border="0"&gt;
+&lt;tr&gt;&lt;td width="50%" valign="top"&gt;
+&lt;h2&gt;$msg.get("xe.statistics.details.spacestats")&lt;/h2&gt;
+&lt;%
+
+println "{table}"
+println "$msg.get("xe.statistics.details.space") | $msg.get("xe.statistics.details.views") | $msg.get("xe.statistics.details.edits")"
+for (data in statsgroovy.getSpaceStats(0, 0)) {
+ docname = data.docname
+ nbviews = (data.views!=null) ? data.views : 0
+ nbsaves = (data.saves!=null) ? data.saves : 0
+ if (docname=="") {
+  println "[$msg.get("xe.statistics.details.allwiki")&gt;Main.WebHome] | ${nbviews} | ${nbsaves}" 
+ } else {
+  sdoc = xwiki.getDocument("${docname}.WebHome")
+  if (sdoc.isNew())
+   println "$msg.get("xe.statistics.details.space") ${docname} | ${nbviews} | ${nbsaves}" 
+  else
+   println "$msg.get("xe.statistics.details.space") [${docname}&gt;${docname}.WebHome] | ${nbviews} | ${nbsaves}" 
+ }
+}
+println "{table}"
+%&gt;
+&lt;h2&gt;$msg.get("xe.statistics.details.pagestats")&lt;/h2&gt;
+&lt;%
+
+println "{table}"
+println "$msg.get("xe.statistics.details.page") | $msg.get("xe.statistics.details.views") | $msg.get("xe.statistics.details.edits")"
+for (data in statsgroovy.getPagesStats(50, 0)) {
+ docname = data.docname
+ nbviews = (data.views!=null) ? data.views : 0
+ nbsaves = (data.saves!=null) ? data.saves : 0
+  if (xwiki.exists(docname)) {
+   sdoc = xwiki.getDocument(docname)
+   if (sdoc.isNew())
+    println "${sdoc.name} $msg.get("xe.statistics.details.inspace") ${sdoc.web} | ${nbviews} | ${nbsaves}" 
+   else
+    println "[${sdoc.name} $msg.get("xe.statistics.details.inspace") ${sdoc.web}&gt;${docname}] | ${nbviews} | ${nbsaves}" 
+  }
+}
+println "{table}"
+%&gt;
+&lt;/td&gt;&lt;td width="50%" valign="top"&gt;
+&lt;h2&gt;$msg.get("xe.statistics.details.dailyconnections")&lt;/h2&gt;
+&lt;%
+result = statsgroovy.getDailyConnections(50, 0)
+connmap = xwiki.hashMap
+
+println "&lt;!-- ${statsgroovy.getDailyConnectionsSQL()} --&gt;"
+println "{table}"
+println "$msg.get("xe.statistics.details.user") | $msg.get("xe.statistics.details.date") | $msg.get("xe.statistics.details.views") | $msg.get("xe.statistics.details.edits")"
+for (item in result) {
+ user = item[0]
+ sdate = item[1]
+ pageviews = item[2]
+ pagesaves = item[3]
+ nb = connmap.get(user)
+ if (nb==null) {
+   nb = new Integer(1)
+   connmap.put(user, nb)
+ } else {
+   connmap.put(user, new Integer(nb.intValue()+1))
+ }
+ try {
+  userlink = xwiki.getUserName(user)
+ } catch(Exception e) {
+  userlink = user
+ }
+ def suser = URLEncoder.encode(user)
+ println "${userlink} ([$msg.get("xe.statistics.details.userdetails")&gt;StatsByUser?user=${suser}]) | ${sdate} | ${pageviews} | ${pagesaves}" 
+}
+println "{table}"
+%&gt;
+
+&lt;h2&gt;$msg.get("xe.statistics.details.activeusersbydate")&lt;/h2&gt;
+&lt;%
+result = statsgroovy.getActiveUsersByDate(50, 0)
+
+println "&lt;!-- ${statsgroovy.getActiveUsersByDateSQL()} --&gt;"
+println "{table}"
+println "$msg.get("xe.statistics.details.user") | $msg.get("xe.statistics.details.lastconnectiondate") | $msg.get("xe.statistics.details.views") | $msg.get("xe.statistics.details.edits") | $msg.get("xe.statistics.details.daysofconnection")"
+for (item in result) {
+ user = item[0]
+ enddate = item[1]
+ pageviews = item[2]
+ pagesaves = item[3]
+ try {
+  userlink = xwiki.getUserName(user)
+ } catch(Exception e) {
+  userlink = user
+ }
+ def suser = URLEncoder.encode(user)
+ println "${userlink} ([$msg.get("xe.statistics.details.userdetails")&gt;StatsByUser?user=${suser}]) | ${enddate} | ${pageviews} | ${pagesaves} | ${connmap.get(user)}" 
+}
+println "{table}"
+%&gt;
+&lt;h2&gt;$msg.get("xe.statistics.details.activeusers")&lt;/h2&gt;
+&lt;%
+result = statsgroovy.getActiveUsers(50, 0)
+
+println "&lt;!-- ${statsgroovy.getActiveUsersSQL()} --&gt;"
+println "{table}"
+println "$msg.get("xe.statistics.details.user") | $msg.get("xe.statistics.details.lastconnectiondate") | $msg.get("xe.statistics.details.views") | $msg.get("xe.statistics.details.edits") | $msg.get("xe.statistics.details.daysofconnection")"
+for (item in result) {
+ user = item[0]
+ enddate = item[1]
+ pageviews = item[2]
+ pagesaves = item[3]
+ try {
+  userlink = xwiki.getUserName(user)
+ } catch(Exception e) {
+  userlink = user
+ }
+ def suser = URLEncoder.encode(user)
+ println "${userlink} ([$msg.get("xe.statistics.details.userdetails")&gt;StatsByUser?user=${suser}])| ${enddate} | ${pageviews} | ${pagesaves} | ${connmap.get(user)}" 
+}
+println "{table}"
+%&gt;
+&lt;h2&gt;$msg.get("xe.statistics.details.recentsessions")&lt;/h2&gt;
+&lt;%
+result = statsgroovy.getRecentConnections(50, 0)
+
+println "&lt;!-- ${statsgroovy.getRecentConnectionsSQL()} --&gt;"
+println "{table}"
+println "$msg.get("xe.statistics.details.user") | $msg.get("xe.statistics.details.startdate") | $msg.get("xe.statistics.details.enddate") | $msg.get("xe.statistics.details.views") | $msg.get("xe.statistics.details.edits")"
+for (item in result) {
+ user = item[0]
+ startdate = item[1]
+ enddate = item[2]
+ pageviews = item[3]
+ pagesaves = item[4]
+ try {
+  userlink = xwiki.getUserName(user)
+ } catch(Exception e) {
+  userlink = user
+ }
+ println "${userlink} | ${startdate}| ${enddate} | ${pageviews} | ${pagesaves}" 
+}
+println "{table}"
+%&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;</content></xwikidoc>
