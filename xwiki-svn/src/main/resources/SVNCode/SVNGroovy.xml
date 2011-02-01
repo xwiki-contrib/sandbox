@@ -37781,14 +37781,11 @@ public class SVNLogReader {
         }
 
         for (page in list) {
-           debug("Checking Page: ${page}")
            def pagedoc = xwiki.getDocument(page);
            checkPage(page, pagedoc, changedMap, samePages, svnEntries);
            def transList = pagedoc.getTranslationList();
-           debug("Checking Translations: ${transList}")
            for (trans in transList) {
                def tpagedoc = pagedoc.getTranslatedDocument(trans);
-               debug("XChecking: ${page}.${tpagedoc.language} ${tpagedoc.fullName} ${tpagedoc.language} ${tpagedoc.defaultLanguage}")
                checkPage(page + "." + tpagedoc.language, tpagedoc, changedMap, samePages, svnEntries);
            }
         }
