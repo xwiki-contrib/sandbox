@@ -40,7 +40,7 @@ import com.xpn.xwiki.XWikiException;
  * Implementation of an archive for XWikiAttachment based on a simple list of XWikiAttachments.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class ListAttachmentArchive extends XWikiAttachmentArchive
 {

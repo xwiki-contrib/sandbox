@@ -26,7 +26,7 @@ package org.xwiki.store;
  *
  * @param <T> see: {@link TransactionRunnable}
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class StartableTransactionRunnable<T> extends ProvidingTransactionRunnable<T, T>
 {

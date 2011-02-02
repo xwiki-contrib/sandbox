@@ -39,7 +39,7 @@ import org.xwiki.store.serialization.xml.XMLSerializer;
  *
  * @param <T> The class of object which the serializer can serialize.
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 @ComponentRole()
 public abstract class AbstractXMLSerializer<T> implements XMLSerializer<T>

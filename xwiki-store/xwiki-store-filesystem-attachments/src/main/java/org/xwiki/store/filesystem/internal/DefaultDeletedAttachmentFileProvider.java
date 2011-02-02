@@ -25,7 +25,7 @@ import java.io.File;
  * A means of getting files for storing information about a given deleted attachment.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class DefaultDeletedAttachmentFileProvider extends DefaultAttachmentFileProvider
     implements DeletedAttachmentFileProvider

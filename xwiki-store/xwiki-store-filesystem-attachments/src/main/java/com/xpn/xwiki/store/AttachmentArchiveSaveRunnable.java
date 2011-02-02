@@ -44,7 +44,7 @@ import org.xwiki.store.StreamProvider;
  * safely, it should not hang in a halfway state.
  * 
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class AttachmentArchiveSaveRunnable extends StartableTransactionRunnable
 {

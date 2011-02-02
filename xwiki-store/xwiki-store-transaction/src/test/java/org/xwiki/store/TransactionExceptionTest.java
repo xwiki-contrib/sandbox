@@ -29,7 +29,7 @@ import org.junit.Test;
  * Tests for TransactionException
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class TransactionExceptionTest
 {

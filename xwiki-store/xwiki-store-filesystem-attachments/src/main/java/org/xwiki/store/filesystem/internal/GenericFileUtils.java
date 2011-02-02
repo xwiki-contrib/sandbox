@@ -26,7 +26,7 @@ import java.net.URLEncoder;
  * Internal class for providing static utilities used by multiple classes in this package.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 final class GenericFileUtils
 {

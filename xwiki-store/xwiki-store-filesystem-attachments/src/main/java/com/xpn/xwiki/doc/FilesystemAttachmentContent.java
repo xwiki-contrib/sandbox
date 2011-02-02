@@ -38,7 +38,7 @@ import org.apache.commons.io.input.AutoCloseInputStream;
  * {@link com.xpn.xwiki.store.FilesystemAttachmentStore}.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class FilesystemAttachmentContent extends XWikiAttachmentContent
 {

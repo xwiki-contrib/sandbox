@@ -30,7 +30,7 @@ import org.junit.Test;
  * Some tests for DefaultFilesystemStoreTools, specifically the locking functionality.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class DefaultFilesystemStoreToolsTest
 {

@@ -31,7 +31,7 @@ import org.xwiki.component.annotation.ComponentRole;
  *
  * @param <T> The class of object which the serializer can serialize.
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 @ComponentRole()
 public interface Serializer<T>

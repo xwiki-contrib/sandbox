@@ -45,6 +45,7 @@ import org.xwiki.store.TransactionRunnable;
  * Filesystem based implementation of XWikiAttachmentStoreInterface.
  * 
  * @version $Id$
+ * @since 3.0M1
  */
 @Component("file")
 public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface

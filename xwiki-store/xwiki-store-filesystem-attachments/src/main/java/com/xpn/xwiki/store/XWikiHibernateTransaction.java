@@ -30,7 +30,7 @@ import org.xwiki.store.RootTransactionRunnable;
  * SQL storage engines are incapable of rolling back after commit.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class XWikiHibernateTransaction extends RootTransactionRunnable implements HibernateTransaction
 {

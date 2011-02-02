@@ -30,7 +30,7 @@ import java.util.concurrent.locks.ReadWriteLock;
  * It is only final when the onComplete function is called.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class FileDeleteTransactionRunnable extends StartableTransactionRunnable<TransactionRunnable>
 {

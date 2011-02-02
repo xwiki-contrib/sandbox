@@ -48,7 +48,7 @@ import org.xwiki.model.reference.DocumentReference;
  * This should be replaced by a module which provides a secure extension of java.io.File.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 @Component
 public class DefaultFilesystemStoreTools implements FilesystemStoreTools, Initializable

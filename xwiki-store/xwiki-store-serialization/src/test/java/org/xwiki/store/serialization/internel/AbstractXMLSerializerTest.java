@@ -37,7 +37,7 @@ import org.xwiki.store.serialization.xml.XMLSerializer;
  *
  * @param <T> The class of object which the serializer can serialize.
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class AbstractXMLSerializerTest extends AbstractXMLSerializer<Element>
 {

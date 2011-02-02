@@ -36,7 +36,7 @@ import org.junit.Test;
  * Tests XMLWriter
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class XMLWriterTest
 {

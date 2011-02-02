@@ -32,7 +32,7 @@ import org.xwiki.component.annotation.ComponentRole;
  * This should be replaced by a module which provides a secure extension of java.io.File.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 @ComponentRole
 public interface FilesystemStoreTools

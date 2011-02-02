@@ -33,7 +33,7 @@ import org.xwiki.store.serialization.Serializer;
  *
  * @param <T> The class of object which the serializer can serialize.
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 @ComponentRole()
 public interface XMLSerializer<T> extends Serializer<T>

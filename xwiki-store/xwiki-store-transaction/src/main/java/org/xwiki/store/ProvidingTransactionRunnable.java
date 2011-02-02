@@ -101,7 +101,7 @@ package org.xwiki.store;
  *            This runnable.
  *
  * @version $Id$
- * @since TODO
+ * @since 3.0M1
  */
 public class ProvidingTransactionRunnable<R, P extends R> extends TransactionRunnable<R>
 {
