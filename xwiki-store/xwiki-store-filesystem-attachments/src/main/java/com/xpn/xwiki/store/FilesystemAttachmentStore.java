@@ -110,6 +110,11 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
                                       final boolean bTransaction)
         throws XWikiException
     {
+        // TODO Move this to XHS
+        if (attachment.isContentDirty()) {
+            attachment.updateContentArchive(context);
+        }
+
         final XWikiHibernateTransaction transaction = new XWikiHibernateTransaction(context);
         this.getAttachmentContentSaveRunnable(attachment, updateDocument, context).runIn(transaction);
         try {
@@ -181,6 +186,12 @@ public class FilesystemAttachmentStore implements XWikiAttachmentStoreInterface
             final XWikiHibernateTransaction transaction = new XWikiHibernateTransaction(context);
 
             for (XWikiAttachment attach : attachments) {
+
+                // TODO Move this to XHS
+                if (attach.isContentDirty()) {
+                    attach.updateContentArchive(context);
+                }
+
                 this.getAttachmentContentSaveRunnable(attach, false, context).runIn(transaction);
             }
 

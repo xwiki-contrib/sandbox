@@ -131,6 +131,13 @@ public class FilesystemAttachmentVersioningStoreTest extends AbstractMockingComp
         this.versionStore.saveArchive(this.archive, null, false);
 
         Assert.assertTrue(this.provider.getAttachmentVersioningMetaFile().exists());
+
+        // Make sure it's not just:
+        // <?xml version="1.0" encoding="UTF-8"?>
+        // <attachment-list serializer="attachment-list-meta/1.0">
+        // </attachment-list>
+        Assert.assertTrue(this.provider.getAttachmentVersioningMetaFile().length() > 120);
+
         Assert.assertTrue(this.provider.getAttachmentVersionContentFile("1.1").exists());
         Assert.assertTrue(this.provider.getAttachmentVersionContentFile("1.2").exists());
         Assert.assertTrue(this.provider.getAttachmentVersionContentFile("1.3").exists());

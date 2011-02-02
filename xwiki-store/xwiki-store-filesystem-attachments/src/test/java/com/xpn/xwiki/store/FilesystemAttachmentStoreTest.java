@@ -152,6 +152,7 @@ public class FilesystemAttachmentStoreTest extends AbstractMockingComponentTestC
             allowing(mockAttach).updateContentArchive(mockContext);
             allowing(mockAttach).getAttachment_archive(); will(returnValue(mockArchive));
             allowing(mockAttach).getAttachment_content(); will(returnValue(mockDirtyContent));
+            allowing(mockAttach).isContentDirty(); will(returnValue(true));
             allowing(mockDirtyContent).isContentDirty(); will(returnValue(true));
         }});
 
