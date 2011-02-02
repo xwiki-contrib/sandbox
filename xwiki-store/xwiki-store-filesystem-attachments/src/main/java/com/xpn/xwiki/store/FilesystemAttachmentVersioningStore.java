@@ -129,7 +129,9 @@ public class FilesystemAttachmentVersioningStore implements AttachmentVersioning
             attach.setDoc(attachment.getDoc());
         }
 
-        return ListAttachmentArchive.newInstance(attachList);
+        final ListAttachmentArchive out = ListAttachmentArchive.newInstance(attachList);
+        out.setAttachment(attachment);
+        return out;
     }
 
     /**

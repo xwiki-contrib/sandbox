@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.AutoCloseInputStream;
@@ -152,12 +151,6 @@ public class FilesystemAttachmentContent extends XWikiAttachmentContent
         // might be being used by another instance of the same attachment, then let the attachment
         // create a new XWikiAttachmentContent instance with a new file.
         this.getAttachment().setAttachment_content(null);
-
-        // Bump the version number so if the newly added content is saved, it will be saved with a
-        // new version.
-        this.getAttachment().incrementVersion();
-        this.getAttachment().setDate(new Date());
-
         this.getAttachment().setContent(is);
     }
 
