@@ -1,2 +1,0 @@
-org.xwiki.store.serialization.xml.internal.AttachmentMetadataSerializer
-org.xwiki.store.serialization.xml.internal.AttachmentListMetadataSerializer
