@@ -35,7 +35,7 @@
   #set($query = $query.replaceAll('__INPUT__', $input))
   #set($discard = $response.setContentType("text/xml"))
   &lt;?xml version="1.0" encoding="UTF-8"?&gt;
-  #set($rawresults = $xwiki.lucene.getSearchResults($query, "$context.language"))
+  #set($rawresults = $xwiki.lucene.getSearchResults($query, $util.null))
   #set($results = $rawresults.getResults("0", "$nb"))
   &lt;results&gt;
     #foreach($item in $results)
