@@ -7,13 +7,13 @@
 <translation>0</translation>
 <parent>XWiki.SearchCode</parent>
 <creator>XWiki.Admin</creator>
-<author>xwiki:XWiki.jvdrean</author>
+<author>XWiki.Admin</author>
 <customClass></customClass>
-<contentAuthor>xwiki:XWiki.jvdrean</contentAuthor>
+<contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1280310893000</creationDate>
 <date>1280671205000</date>
 <contentUpdateDate>1280671205000</contentUpdateDate>
-<version>6.1</version>
+<version>1.1</version>
 <title>Search Suggest Configuration</title>
 <template></template>
 <defaultTemplate></defaultTemplate>
