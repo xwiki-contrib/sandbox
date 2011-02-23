@@ -1,6 +1,27 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
 package org.xwiki.extension.xar.internal.handler.packager.xml;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.Attributes;
@@ -27,12 +48,20 @@ public class AbstractHandler extends DefaultHandler
     private int currentHandlerLevel;
 
     private int depth = 0;
-    
+
     protected StringBuffer value;
+
+    protected Set<String> skippedElements = new HashSet<String>();
+
+    public AbstractHandler(ComponentManager componentManager)
+    {
+        this.componentManager = componentManager;
+    }
 
     public AbstractHandler(ComponentManager componentManager, Object currentBean)
     {
-        this.componentManager = componentManager;
+        this(componentManager);
+
         this.currentBean = currentBean;
     }
 
@@ -45,7 +74,7 @@ public class AbstractHandler extends DefaultHandler
     {
         return currentBean;
     }
-    
+
     protected void setCurrentBean(Object currentBean)
     {
         this.currentBean = currentBean;
@@ -107,8 +136,8 @@ public class AbstractHandler extends DefaultHandler
     protected void startElementInternal(String uri, String localName, String qName, Attributes attributes)
         throws SAXException
     {
-        if (this.currentBean != null) {
-            if (value == null) {
+        if (this.depth == 1 && !this.skippedElements.contains(qName)) {
+            if (this.value == null) {
                 this.value = new StringBuffer();
             } else {
                 this.value.setLength(0);
@@ -118,18 +147,18 @@ public class AbstractHandler extends DefaultHandler
 
     protected void charactersInternal(char[] ch, int start, int length) throws SAXException
     {
-        if (this.currentBean != null) {
+        if (this.depth == 2 && this.currentBean != null && this.value != null) {
             this.value.append(ch, start, length);
         }
     }
 
     protected void endElementInternal(String uri, String localName, String qName) throws SAXException
     {
-        if (this.currentBean != null) {
+        if (this.depth == 1 && this.currentBean != null && this.value != null) {
             Method setter;
             try {
                 setter = this.currentBean.getClass().getMethod("set" + StringUtils.capitalize(qName), String.class);
-                setter.invoke(this.currentBean, this.value);
+                setter.invoke(this.currentBean, this.value.toString());
                 currentBeanModified();
             } catch (Exception e) {
                 // TODO: LOG warn "Unknown element [" + qName + "]"

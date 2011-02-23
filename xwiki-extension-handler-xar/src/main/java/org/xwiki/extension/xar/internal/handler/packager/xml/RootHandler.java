@@ -19,19 +19,38 @@
  */
 package org.xwiki.extension.xar.internal.handler.packager.xml;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 import org.xwiki.component.manager.ComponentManager;
 
-import com.xpn.xwiki.objects.BaseObject;
-
-public class ObjectHandler extends AbstractHandler
+public class RootHandler extends AbstractHandler
 {
-    public ObjectHandler(ComponentManager componentManager)
+    private Map<String, ContentHandler> handlers = new HashMap<String, ContentHandler>();
+
+    public RootHandler(ComponentManager componentManager)
     {
-        super(componentManager, new BaseObject());
+        super(componentManager, null);
     }
 
-    public BaseObject getObject()
+    public void setHandler(String element, ContentHandler handler)
     {
-        return (BaseObject) getCurrentBean();
+        this.handlers.put(element, handler);
+    }
+
+    @Override
+    protected void startHandlerElement(String uri, String localName, String qName, Attributes attributes)
+        throws SAXException
+    {
+        ContentHandler handler = this.handlers.get(qName);
+
+        if (handler != null) {
+            setCurrentHandler(handler);
+        } else {
+            super.startHandlerElement(uri, localName, qName, attributes);
+        }
     }
 }

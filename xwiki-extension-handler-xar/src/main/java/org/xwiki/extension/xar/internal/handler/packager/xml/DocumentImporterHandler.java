@@ -1,26 +1,62 @@
+/*
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
 package org.xwiki.extension.xar.internal.handler.packager.xml;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.model.reference.DocumentReference;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
-public class DocumentHandler extends AbstractHandler
+public class DocumentImporterHandler extends AbstractHandler
 {
     private boolean fromDatabase = false;
 
     private boolean needSave = true;
 
-    public DocumentHandler(ComponentManager componentManager)
+    public DocumentImporterHandler(ComponentManager componentManager)
     {
-        super(componentManager, new XWikiDocument());
+        super(componentManager);
+
+        try {
+            setCurrentBean(new XWikiDocument(new DocumentReference(getXWikiContext().getDatabase(), "XWiki", "Page")));
+        } catch (ComponentLookupException e) {
+            setCurrentBean(new XWikiDocument());
+        }
+        // skip useless known elements
+        this.skippedElements.add("version");
+        this.skippedElements.add("minorEdit");
+        this.skippedElements.add("comment");
     }
 
     public XWikiDocument getDocument()
     {
         return (XWikiDocument) getCurrentBean();
+    }
+
+    public void setWiki(String wiki)
+    {
+        getDocument().setDatabase(wiki);
     }
 
     private void saveDocument(String comment) throws SAXException
@@ -31,7 +67,7 @@ public class DocumentHandler extends AbstractHandler
 
             if (!this.fromDatabase) {
                 XWikiDocument existingDocument =
-                    getXWikiContext().getWiki().getDocument(document.getDocumentReference(), context);
+                    context.getWiki().getDocument(document.getDocumentReference(), context);
                 existingDocument = existingDocument.getTranslatedDocument(document.getLanguage(), context);
 
                 if (!existingDocument.isNew()) {
@@ -41,7 +77,7 @@ public class DocumentHandler extends AbstractHandler
                 this.fromDatabase = true;
             }
 
-            getXWikiContext().getWiki().saveDocument(document, comment, context);
+            context.getWiki().saveDocument(document, comment, context);
 
             setCurrentBean(getXWikiContext().getWiki().getDocument(document.getDocumentReference(), context));
         } catch (Exception e) {
@@ -83,8 +119,8 @@ public class DocumentHandler extends AbstractHandler
             AttachmentHandler handler = (AttachmentHandler) getCurrentHandler();
 
             getDocument().getAttachmentList().add(handler.getAttachment());
-            
-            // TODO: add attachment to document
+
+            // TODO: add attachment to documentxwikidoc
             saveDocument("Import: add attachment");
         } else if (qName.equals("object")) {
             ObjectHandler handler = (ObjectHandler) getCurrentHandler();

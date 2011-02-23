@@ -23,9 +23,6 @@ import java.io.IOException;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.component.phase.Initializable;
-import org.xwiki.component.phase.InitializationException;
 import org.xwiki.extension.InstallException;
 import org.xwiki.extension.LocalExtension;
 import org.xwiki.extension.UninstallException;
@@ -33,23 +30,10 @@ import org.xwiki.extension.handler.internal.AbstractExtensionHandler;
 import org.xwiki.extension.xar.internal.handler.packager.Packager;
 
 @Component("xar")
-public class XarExtensionHandler extends AbstractExtensionHandler implements Initializable
+public class XarExtensionHandler extends AbstractExtensionHandler
 {
     @Requirement
-    private ComponentManager componentManager;
-
-    @Requirement
     private Packager packager;
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.xwiki.component.phase.Initializable#initialize()
-     */
-    public void initialize() throws InitializationException
-    {
-
-    }
 
     // TODO: support question/answer with the UI to resolve conflicts
     public void install(LocalExtension localExtension, String namespace) throws InstallException
@@ -58,7 +42,7 @@ public class XarExtensionHandler extends AbstractExtensionHandler implements Ini
         try {
             this.packager.importXAR(localExtension.getFile(), namespace);
         } catch (IOException e) {
-            throw new InstallException("Failed to import xar for extension [" + localExtension + "]");
+            throw new InstallException("Failed to import xar for extension [" + localExtension + "]", e);
         }
     }
 
@@ -67,23 +51,26 @@ public class XarExtensionHandler extends AbstractExtensionHandler implements Ini
     public void upgrade(LocalExtension previousLocalExtension, LocalExtension newLocalExtension, String namespace)
         throws InstallException
     {
+        // TODO:
         // 1) find all modified pages between old and new version
         // 2) compare old version and wiki (to find pages modified by user)
         // 3) delete pages removed in new version (even if modified ?)
         // 4) merge xar
         // 4.1) merge modified pages in wiki with diff between old/new version
         // 4.2) update unmodified pages different between old and new version
+
+        install(newLocalExtension, namespace);
     }
 
     public void uninstall(LocalExtension localExtension, String namespace) throws UninstallException
     {
-        // delete pages from the wiki which belong only to this extension (several extension could have some common
-        // pages which is not very nice but still could happen technically)
-    }
+        // TODO: delete pages from the wiki which belong only to this extension (several extension could have some
+        // common pages which is not very nice but still could happen technically)
 
-    @Override
-    public boolean isDisableSupported()
-    {
-        return false;
+        try {
+            this.packager.unimportXAR(localExtension.getFile(), namespace);
+        } catch (IOException e) {
+            throw new UninstallException("Failed to import xar for extension [" + localExtension + "]", e);
+        }
     }
 }
