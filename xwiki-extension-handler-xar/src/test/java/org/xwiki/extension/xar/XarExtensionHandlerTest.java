@@ -40,6 +40,9 @@ import org.xwiki.model.reference.DocumentReference;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.objects.classes.NumberClass;
 import com.xpn.xwiki.test.AbstractBridgedComponentTestCase;
 
 public class XarExtensionHandlerTest extends AbstractBridgedComponentTestCase
@@ -147,6 +150,11 @@ public class XarExtensionHandlerTest extends AbstractBridgedComponentTestCase
         Assert.assertEquals("Wrong content", "content", document.getContent());
         Assert.assertEquals("Wrong author", "XWiki.author", document.getAuthor());
         Assert.assertEquals("Wrong versions", "1.1", document.getVersion());
+
+        BaseClass baseClass = document.getXClass();
+        Assert.assertNotNull(baseClass.getField("property"));
+        Assert.assertEquals("property", baseClass.getField("property").getName());
+        Assert.assertSame(NumberClass.class, baseClass.getField("property").getClass());
     }
 
     @Test
@@ -173,6 +181,11 @@ public class XarExtensionHandlerTest extends AbstractBridgedComponentTestCase
         Assert.assertEquals("Wrong content", "content 2", document.getContent());
         Assert.assertEquals("Wrong author", "XWiki.author", document.getAuthor());
         Assert.assertEquals("Wrong versions", "2.1", document.getVersion());
+        
+        BaseClass baseClass = document.getXClass();
+        Assert.assertNotNull(baseClass.getField("property"));
+        Assert.assertEquals("property", baseClass.getField("property").getName());
+        Assert.assertSame(NumberClass.class, baseClass.getField("property").getClass());
     }
 
     @Test

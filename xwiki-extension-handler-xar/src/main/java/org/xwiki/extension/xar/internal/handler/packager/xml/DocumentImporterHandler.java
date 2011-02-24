@@ -19,6 +19,7 @@
  */
 package org.xwiki.extension.xar.internal.handler.packager.xml;
 
+import org.dom4j.io.SAXContentHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xwiki.component.manager.ComponentLookupException;
@@ -26,13 +27,20 @@ import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
 
 public class DocumentImporterHandler extends AbstractHandler
 {
     private boolean fromDatabase = false;
 
     private boolean needSave = true;
+
+    /**
+     * Avoid create a new SAXContentHandler for each object/class when the same can be used for all.
+     */
+    public SAXContentHandler domBuilder = new SAXContentHandler();
 
     public DocumentImporterHandler(ComponentManager componentManager)
     {
@@ -43,6 +51,7 @@ public class DocumentImporterHandler extends AbstractHandler
         } catch (ComponentLookupException e) {
             setCurrentBean(new XWikiDocument());
         }
+
         // skip useless known elements
         this.skippedElements.add("version");
         this.skippedElements.add("minorEdit");
@@ -99,10 +108,9 @@ public class DocumentImporterHandler extends AbstractHandler
     {
         if (qName.equals("attachment")) {
             setCurrentHandler(new AttachmentHandler(getComponentManager()));
-        } else if (qName.equals("object")) {
-            setCurrentHandler(new ObjectHandler(getComponentManager()));
-        } else if (qName.equals("class")) {
-            setCurrentHandler(new ClassHandler(getComponentManager(), getDocument().getXClass()));
+        } else if (qName.equals("class") || qName.equals("object")) {
+            this.domBuilder.startDocument();
+            setCurrentHandler(this.domBuilder);
         } else {
             super.startElementInternal(uri, localName, qName, attributes);
         }
@@ -120,14 +128,25 @@ public class DocumentImporterHandler extends AbstractHandler
 
             getDocument().getAttachmentList().add(handler.getAttachment());
 
-            // TODO: add attachment to documentxwikidoc
+            // TODO: add attachment to document
             saveDocument("Import: add attachment");
         } else if (qName.equals("object")) {
-            ObjectHandler handler = (ObjectHandler) getCurrentHandler();
-            getDocument().addXObject(handler.getObject());
+            try {
+                BaseObject baseObject = new BaseObject();
+                baseObject.fromXML(this.domBuilder.getDocument().getRootElement());
+                getDocument().setXObject(baseObject.getNumber(), baseObject);
+            } catch (XWikiException e) {
+                throw new SAXException("Failed to parse object", e);
+            }
 
             this.needSave = true;
         } else if (qName.equals("class")) {
+            try {
+                getDocument().getXClass().fromXML(this.domBuilder.getDocument().getRootElement());
+            } catch (XWikiException e) {
+                throw new SAXException("Failed to parse object", e);
+            }
+
             this.needSave = true;
         } else {
             super.endElementInternal(uri, localName, qName);
