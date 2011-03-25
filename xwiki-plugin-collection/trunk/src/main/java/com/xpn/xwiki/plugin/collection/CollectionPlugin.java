@@ -36,6 +36,7 @@ import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.rendering.listener.HeaderLevel;
 import org.xwiki.rendering.block.HeaderBlock;
 import org.xwiki.rendering.block.IdBlock;
 import org.xwiki.rendering.block.ImageBlock;
@@ -49,6 +50,14 @@ import org.xwiki.rendering.renderer.BlockRenderer;
 import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
 import org.xwiki.rendering.renderer.printer.WikiPrinter;
 import org.xwiki.rendering.syntax.Syntax;
+
+import org.xwiki.context.Execution;
+import org.xwiki.context.ExecutionContext;
+import org.xwiki.context.ExecutionContextManager;
+import org.xwiki.bridge.DocumentAccessBridge;
+
+import org.xwiki.rendering.transformation.TransformationContext;
+import org.xwiki.rendering.transformation.TransformationManager;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -111,7 +120,7 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     private void addDebug(String string)
     {
         // TODO Auto-generated method stub
-        // System.out.println(string);
+        System.out.println(string);
     }
 
     public Api getPluginApi(XWikiPluginInterface plugin, XWikiContext context)
@@ -186,9 +195,21 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     public void exportWithLinks(String packageName, String documentName,
         List<String> selectlist, String type, XWikiContext context) throws Exception
     {
+		exportWithLinks(packageName, documentName, selectlist, false, type, context);
+    }
+
+    /**
+     * Returns a pdf or rtf of a transcluded view of the given xwiki 2.0 document.
+     *
+     * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @return the transcluded result in xhtml syntax.
+     */
+    public void exportWithLinks(String packageName, String documentName,
+        List<String> selectlist, boolean ignoreInitialPage, String type, XWikiContext context) throws Exception
+    {
         XWikiDocument doc = (documentName == null) ? null
             : context.getWiki().getDocument(documentName, context);
-        exportWithLinks(packageName, (XWikiDocument) doc, selectlist, type, context);
+        exportWithLinks(packageName, (XWikiDocument) doc, selectlist, ignoreInitialPage, type, context);
     }
 
     /**
@@ -197,9 +218,9 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
      * @return the transcluded result in xhtml syntax.
      */
     public void exportWithLinks(String packageName, XWikiDocument doc,
-        List<String> selectlist, String type, XWikiContext context) throws Exception
+        List<String> selectlist, boolean ignoreInitialPage, String type, XWikiContext context) throws Exception
     {
-        exportWithLinks(packageName, doc, selectlist, type, null, context);
+        exportWithLinks(packageName, doc, selectlist, ignoreInitialPage, type, null, context);
     }
 
     /**
@@ -208,7 +229,7 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
      * @return the transcluded result in xhtml syntax.
      */
     public void exportWithLinks(String packageName, XWikiDocument doc,
-        List<String> selectlist, String type, String pdftemplatepage, XWikiContext context) throws Exception
+        List<String> selectlist, boolean ignoreInitialPage, String type, String pdftemplatepage, XWikiContext context) throws Exception
     {
         // XWikiContext context2 = context.getContext();
         // Preparing the PDF Exporter and PDF URL Factory (this last one is
@@ -243,8 +264,10 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
             // transclusion
             tempdir.mkdirs();
             context.put("pdfexportdir", tempdir);
+            context.put("pdfexport-file-mapping", new HashMap<String, File>());
             // running the transclusion and the final rendering to HTML
-            String content = getRenderedContentWithLinks(doc, selectlist, context);
+            String content = getRenderedContentWithLinks(doc, selectlist, ignoreInitialPage, context);
+            addDebug("Content: " + content);
             // preparing velocity context for the adding of the headers and
             // footers
             VelocityContext vcontext = (VelocityContext) context.get("vcontext");
@@ -279,34 +302,41 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
      * Returns a transcluded view of the given xwiki 2.0 document.
      *
      * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @param context XWiki Context 
      * @return the transcluded result in xhtml syntax.
      */
     public String getRenderedContentWithLinks(String documentName, XWikiContext context) throws Exception
     {
-        return getRenderedContentWithLinks(documentName, null, context);
+        return getRenderedContentWithLinks(documentName, null, false, context);
     }
 
     /**
      * Returns a transcluded view of the given xwiki 2.0 document.
      *
      * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @param selectlist list of selected pages
+     * @param ignoreInitialPage ignoreInitialPage
+     * @param context XWiki Context 
      * @return the transcluded result in xhtml syntax.
      */
-    public String getRenderedContentWithLinks(String documentName, List<String> selectlist, XWikiContext context)
+    public String getRenderedContentWithLinks(String documentName, List<String> selectlist, boolean ignoreInitialPage, XWikiContext context)
         throws Exception
     {
         XWikiDocument doc = (documentName == null || documentName.equals("")) ? null
             : context.getWiki().getDocument(documentName, context);
-        return getRenderedContentWithLinks((XWikiDocument) doc, selectlist, context);
+        return getRenderedContentWithLinks((XWikiDocument) doc, selectlist, ignoreInitialPage, context);
     }
 
     /**
      * Returns a transcluded view of the given xwiki 2.0 document.
      *
      * @param doc document, should be a xwiki 2.0 document.
+     * @param selectlist list of selected pages
+     * @param ignoreInitialPage ignoreInitialPage
+     * @param context XWiki Context 
      * @return the transcluded result in xhtml syntax.
      */
-    public String getRenderedContentWithLinks(XWikiDocument doc, List<String> selectlist, XWikiContext context)
+    public String getRenderedContentWithLinks(XWikiDocument doc, List<String> selectlist, boolean ignoreInitialPage, XWikiContext context)
         throws Exception
     {
         List<String> includedList = new ArrayList<String>();
@@ -339,13 +369,22 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
         includedList.add(doc.getFullName());
         // Recursively transclude the root xdom
         getRenderedContentWithLinks(doc, rootXdom, selectlist, includedList, headerIds, context);
+
+        // If we want to ignore the initial page
+        // we want an empty XDOM
+        if (ignoreInitialPage) {
+           XWikiDocument doc2 = (XWikiDocument) doc.clone();
+           doc2.setContent("");
+           rootXdom = doc2.getXDOM();
+        }
+
         // Render the result.
         // we are given a select list so we should append them in order
         // transclude has already modified the link to make them point to
         // anchors inside the document
         if (selectlist != null) {
             for (String childDocumentName : selectlist) {
-                appendChild(childDocumentName.toString(), rootXdom, selectlist,
+                appendChild(doc.getFullName(), childDocumentName.toString(), rootXdom, selectlist,
                     includedList, headerIds, context);
             }
         }
@@ -365,7 +404,7 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     {
         List<String> list = updateXDOM(doc, xdom, selectlist, headerIds);
         for (String childDocumentName : list) {
-            appendChild(childDocumentName.toString(), xdom, selectlist,
+            appendChild(doc.getFullName(), childDocumentName.toString(), xdom, selectlist,
                 includedList, headerIds, context);
         }
     }
@@ -378,7 +417,7 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
      * @param selectlist list of documents that are included in the multi page export
      * @param includedList list of documents already appended
      */
-    protected void appendChild(String childDocumentName, XDOM xdom,
+    protected void appendChild(String mainDocName, String childDocumentName, XDOM xdom,
         List<String> selectlist, List<String> includedList,
         List<String> headerIds, XWikiContext context) throws Exception
     {
@@ -394,13 +433,79 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
         if (childXdom != null) {
             getRenderedContentWithLinks(childDoc, childXdom, selectlist, includedList, headerIds, context);
         }
+
+        // need to render macro of the xdom in the context of the child xdom
+        // Push new Execution Context to isolate the contexts (Velocity, Groovy, etc).
+        ExecutionContextManager executionContextManager = Utils.getComponent(ExecutionContextManager.class);
+        Execution execution = Utils.getComponent(Execution.class);
+        ExecutionContext clonedEc = executionContextManager.clone(execution.getContext());
+
+        execution.pushContext(clonedEc);
+
+        Map<String, Object> backupObjects = new HashMap<String, Object>();
+        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
+        try {
+               documentAccessBridge.pushDocumentInContext(backupObjects, childDoc.getDocumentReference());
+               TransformationManager txManager = Utils.getComponent(TransformationManager.class);
+               TransformationContext tcontext = new TransformationContext(childXdom, childDoc.getSyntax());
+               txManager.performTransformations(childXdom, tcontext);
+        } finally {
+               documentAccessBridge.popDocumentFromContext(backupObjects);
+        }
+
         // Now, before we insert the childXdom into current (parent) xdom, we
         // must place an anchor (id macro)
         // so that we can link to the child's content later.
         Map<String, String> idMacroParams = new HashMap<String, String>();
         IdBlock idBlock = new IdBlock("child_" + childDocumentName.hashCode());
-        // Append the id macro
-        xdom.addChild(idBlock);
+
+        // we also want to add the title unless there is already a title coming from the content
+        String title = childDoc.getTitle();
+        String extractedTitle = childDoc.extractTitle();
+        addDebug("Title: " + title);
+        addDebug("Extracted Title: " + extractedTitle);
+        // we only insert a title if none is found automatically in the content (compatibility mode)
+        if (!title.equals("") && !title.equals(extractedTitle)) {
+           String dtitle = childDoc.getDisplayTitle(context);        
+           addDebug("Inserting Title: " + dtitle);
+           Parser parser = Utils.getComponent(Parser.class, Syntax.PLAIN_1_0.toIdString());
+           List childlist =  parser.parse(new StringReader(dtitle)).getChildren().get(0).getChildren();
+           addDebug("List: " + childlist);
+           addDebug("List: " + childlist.get(0));
+           // Find the title level to use based on the parent child relationships
+           int level = 1;
+           XWikiDocument currentDoc = childDoc;
+           addDebug("Main Doc Name: "  + mainDocName);
+           addDebug("Checking parent for " + currentDoc.getFullName() + ": "  + currentDoc.getParent());
+           while ((level<10) && (!currentDoc.getParent().equals(mainDocName)) && (!currentDoc.getParent().equals(currentDoc.getFullName()))) {
+              addDebug("Checking parent for " + currentDoc.getFullName() + ": "  + currentDoc.getParent());
+              currentDoc = context.getWiki().getDocument(currentDoc.getParent(), context);
+              level++;
+           }
+           addDebug("Final level: " + level);
+           if (level==10)
+            level = 1;
+           if (level>6)
+            level = 6;
+           HeaderLevel hLevel = HeaderLevel.parseInt(level);
+           HeaderBlock hBlock = new HeaderBlock(childlist, hLevel, new HashMap(), idBlock.getName());
+
+           // Now we parse all headers of the child document and add the number of levels of the child main header
+           for (HeaderBlock headerBlock : childXdom.getChildrenByType(HeaderBlock.class, true)) {
+             int clevel = headerBlock.getLevel().getAsInt();
+             clevel += level;
+             if (clevel==7)
+              clevel = 6;
+             HeaderBlock newHeaderBlock = new HeaderBlock(headerBlock.getChildren(), HeaderLevel.parseInt(clevel), headerBlock.getParameters(), headerBlock.getId());
+             headerBlock.getParent().replaceChild(newHeaderBlock, headerBlock);
+           }
+
+           xdom.addChild(hBlock);
+        } else {
+           // Append the id macro
+           xdom.addChild(idBlock);
+        }
+
         // Now append the childXdom
         if (childXdom != null) {
             xdom.addChildren(childXdom.getChildren());
@@ -507,9 +612,10 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
      * Returns the list of linked docs in the given xwiki 2.0 document.
      *
      * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @param space limit search in a specific space
      * @return list of linked docs
      */
-    public List<String> getLinks(String documentName, XWikiContext context) throws Exception
+    public List<String> getLinks(String documentName, String space, XWikiContext context) throws Exception
     {
         XWikiDocument doc = context.getWiki().getDocument(documentName, context);
         XDOM rootXdom = (doc == null) ? null : doc.getXDOM();
@@ -518,7 +624,7 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
             return null;// "could not read the main document";
         }
         // get the links
-        return getLinks(doc, rootXdom);
+        return getLinks(doc, rootXdom, space);
     }
 
     /**
@@ -526,8 +632,9 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
      *
      * @param doc parent doc
      * @param xdom xdom to find links in
+     * @param space limit search in a specific space
      */
-    public List<String> getLinks(XWikiDocument doc, XDOM xdom) throws Exception
+    public List<String> getLinks(XWikiDocument doc, XDOM xdom, String space) throws Exception
     {
         List<String> linkList = new ArrayList<String>();
         // Find all the link blocks inside this XDOM
@@ -542,8 +649,11 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
                         childDocumentName = doc.getSpace() + "."
                             + childDocumentName;
                     }
-                    addDebug("Found one link to: " + childDocumentName);
-                    linkList.add(childDocumentName);
+                    addDebug("Checking link " + childDocumentName + " in page" + doc.getFullName() + " with space " + space);
+                    if (!childDocumentName.endsWith(".") && (space==null || childDocumentName.startsWith(space + "."))) {
+                     addDebug("Found one link to: " + childDocumentName + " in " + doc.getFullName());
+                     linkList.add(childDocumentName);
+                    }
                 }
             }
         }
@@ -559,12 +669,24 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
     public List<ListItem> getLinksTreeList(String documentName, XWikiContext context)
         throws Exception
     {
+        return getLinksTreeList(documentName, null, context);
+    }
+
+    /**
+     * Returns the recursive list of linked docs in the given xwiki 2.0 document.
+     *
+     * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @return th list of linked docs
+     */
+    public List<ListItem> getLinksTreeList(String documentName, String space, XWikiContext context)
+        throws Exception
+    {
         List<ListItem> treeList = new ArrayList<ListItem>();
         List<String> safeList = new ArrayList<String>();
         safeList.add(documentName);
         treeList.add(new ListItem(documentName, context.getWiki().getDocument(documentName, context)
             .getDisplayTitle(context), ""));
-        getLinksTreeList(documentName, treeList, safeList, context);
+        getLinksTreeList(documentName, space, treeList, safeList, context);
         return treeList;
     }
 
@@ -574,15 +696,15 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
      * @param documentName name of the input document, should be a xwiki 2.0 document.
      * @return list of linked docs
      */
-    public void getLinksTreeList(String documentName, List<ListItem> treeList,
+    public void getLinksTreeList(String documentName, String space, List<ListItem> treeList,
         List<String> safeList, XWikiContext context) throws Exception
     {
-        for (String link : getLinks(documentName, context)) {
+        for (String link : getLinks(documentName, space, context)) {
             if (!safeList.contains(link)) {
                 safeList.add(link);
                 treeList.add(new ListItem(link.toString(), context.getWiki().getDocument(
                     link.toString(), context).getDisplayTitle(context), documentName));
-                getLinksTreeList(link.toString(), treeList, safeList, context);
+                getLinksTreeList(link.toString(), space, treeList, safeList, context);
             }
         }
     }

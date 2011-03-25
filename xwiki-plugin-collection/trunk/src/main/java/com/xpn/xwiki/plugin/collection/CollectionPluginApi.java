@@ -75,20 +75,34 @@ public class CollectionPluginApi extends Api
      */
     public String getRenderedContentWithLinks(String documentName)
     {
-        return getRenderedContentWithLinks(documentName, null);
+        return getRenderedContentWithLinks(documentName, null, false);
     }
 
     /**
      * Returns a transcluded view of the given xwiki 2.0 document.
      *
      * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @param selectlist list of pages to include 
      * @return the transcluded result in xhtml syntax.
      */
     public String getRenderedContentWithLinks(String documentName, List<String> selectlist)
     {
+        return getRenderedContentWithLinks(documentName, null, false);
+    }
+
+    /**
+     * Returns a transcluded view of the given xwiki 2.0 document.
+     *
+     * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @param selectlist list of pages to include 
+     * @param ignoreInitialPage ignore initial page 
+     * @return the transcluded result in xhtml syntax.
+     */
+    public String getRenderedContentWithLinks(String documentName, List<String> selectlist, boolean ignoreInitialPage)
+    {
         try {
             if ((documentName == null) || hasAccessLevel("view", documentName)) {
-                return plugin.getRenderedContentWithLinks(documentName, selectlist, context);
+                return plugin.getRenderedContentWithLinks(documentName, selectlist, ignoreInitialPage, context);
             } else {
                 return null;
             }
@@ -163,6 +177,28 @@ public class CollectionPluginApi extends Api
         }
     }
 
+   /**
+     * Returns a pdf or rtf of a transcluded view of the given xwiki 2.0 document.
+     *
+     * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @return the transcluded result in xhtml syntax.
+     */
+    public boolean exportWithLinks(String packageName, String documentName, List<String> selectlist, boolean ignoreInitialPage, String type)
+    {
+        try {
+            if ((documentName == null) || hasAccessLevel("view", documentName)) {
+                plugin.exportWithLinks(packageName, documentName,
+                    selectlist, ignoreInitialPage, type, context);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            context.put("exception", e);
+            return false;
+        }
+    }
+
     /**
      * Split a string to a List
      *
@@ -218,7 +254,28 @@ public class CollectionPluginApi extends Api
     {
         try {
             if (hasAccessLevel("view", documentName)) {
-                return plugin.getLinks(documentName, context);
+                return plugin.getLinks(documentName, null, context);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            context.put("exception", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the list of linked docs in the given xwiki 2.0 document.
+     *
+     * @param documentName name of the input document, should be a xwiki 2.0 document.
+     * @param space space to limit the search for 
+     * @return list of linked docs
+     */
+    public List<String> getLinks(String documentName, String space)
+    {
+        try {
+            if (hasAccessLevel("view", documentName)) {
+                return plugin.getLinks(documentName, space, context);
             } else {
                 return null;
             }
@@ -236,6 +293,23 @@ public class CollectionPluginApi extends Api
         try {
             if (hasAccessLevel("view", documentName)) {
                 return plugin.getLinksTreeList(documentName, context);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            context.put("exception", e);
+            return null;
+        }
+    }
+
+    /**
+     * Get links for the given xdom
+     */
+    public List<ListItem> getLinksTreeList(String documentName, String space)
+    {
+        try {
+            if (hasAccessLevel("view", documentName)) {
+                return plugin.getLinksTreeList(documentName, space, context);
             } else {
                 return null;
             }
