@@ -36,8 +36,8 @@
 <disabled>0</disabled>
 <name>defaultEditMode</name>
 <number>1</number>
-<prettyName>defaultEditMode</prettyName>
-<size>30</size>
+<prettyName>Default Edit Mode</prettyName>
+<size>15</size>
 <unmodifiable>0</unmodifiable>
 <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
 </defaultEditMode>
@@ -51,7 +51,11 @@
 </property>
 </object>
 <content>{{velocity}}
+#if ("$!request.action" == "compare")
+= $msg.get('svn.configsheet.compare.title'): $request.page =
+#else
 = $msg.get("svn.configsheet.title"): $doc.name =
+#end
 
 #if(!$xwiki.hasProgrammingRights())
 #warning("This application cannot work without programming rights on the current page. Resave this page as an admin and retry.")
@@ -132,7 +136,8 @@ function tsuggest(field) {
 #set($cmap = $!svnr.getChangedPages($spaces, $savedlist))
 #foreach($page in $cmap.keySet())
  #set($status = $cmap.get($page))
-&lt;li&gt;$status.status &lt;input type="hidden" name="${status.fullname}_language" value="${status.language}" /&gt;&lt;input type="checkbox" name="page" value="${status.fullname}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${status.fullname}&amp;svnlanguage=${status.language}&amp;spaces=$!{spaces}||target=_blank]]
+ ## encode the language of the document after the document name, after a dot. Will be processed on commit
+&lt;li&gt;$status.status &lt;input type="checkbox" name="page" value="${status.fullname}.$!{status.language}" /&gt; ${page} [[$msg.get("svn.configsheet.viewdiff")&gt;&gt;${doc.fullName}?action=compare&amp;page=${status.fullname}&amp;svnlanguage=${status.language}&amp;spaces=$!{spaces}||target=_blank]]
 #end
 &lt;/ul&gt;
 &lt;input type="submit" name="commit" value="$msg.get("svn.configsheet.commitall")" /&gt; &lt;input type="submit" name="update" value="$msg.get("svn.configsheet.updateall")" /&gt; &lt;input type="submit" name="export" value="$msg.get("svn.configsheet.exportall")" /&gt;
@@ -187,10 +192,10 @@ $msg.get("svn.configsheet.confirmcommittingpage")
 &lt;input type="hidden" name="action" value="commit" /&gt;
 &lt;input type="hidden" name="confirm" value="1" /&gt;
 &lt;input type="hidden" name="spaces" value="$!{spaces}" /&gt;
+## just pass the pages to commit further
 #foreach($page in $request.getParameterValues("page"))
 * $page
 &lt;input type="hidden" name="page" value="$!{page}" /&gt;
-&lt;input type="hidden" name="${page}_language" value="$!{request.get("${page}_language")}" /&gt;
 #end
 
 $msg.get("svn.configsheet.commitmessage"):
@@ -208,7 +213,6 @@ $svnr.getCommitStatus("|", "|", false)
 
 ## VIEW STATUS ACTION
 #elseif($request.action=="compare")
-
 {{html clean=false}}
 #set($pagedoc = $xwiki.getDocument($request.page))
 #if($request.svnlanguage)
@@ -229,4 +233,5 @@ $msg.get("svn.configsheet.debug"):
 $svnr.getDebug()
 #end
 #end
-{{/velocity}}</content></xwikidoc>
+{{/velocity}}
+</content></xwikidoc>

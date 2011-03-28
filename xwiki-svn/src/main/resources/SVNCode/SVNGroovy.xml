@@ -37266,11 +37266,18 @@ public class SVNLogReader {
         def pagename2 = "";
 
         for (pagename in pagelist) {
-           def pagedoc = xwiki.getDocument(pagename);
+           // separate the language particle at the end of the page name from the page fullname. The pagename is of form &lt;docfullname&gt;.&lt;doclanguage&gt;
+           def languageSeparator = pagename.lastIndexOf('.');
+           if (languageSeparator &lt; 0) {
+             def pagefullname = pagename;  
+           }
+           def pagefullname = pagename.substring(0, languageSeparator);
+           def lang = pagename.substring(languageSeparator + 1);
+           def pagedoc = xwiki.getDocument(pagefullname);
            // make sure we get the right translations
-           def lang = context.getRequest().get("${pagename}_language")
-           if (lang!=null &amp;&amp; lang!="")
+           if (lang!=null &amp;&amp; lang!="") {
              pagedoc = pagedoc.getTranslatedDocument(lang);
+           }
            def space = pagedoc.getSpace();
            def page = pagedoc.getName();
            def language = pagedoc.getLanguage();
@@ -37811,11 +37818,18 @@ public class SVNLogReader {
         def svnEntries = getEntries();
 
         for (page in pageList) {
-           def pagedoc = xwiki.getDocument(page);
-           // make sure we are getting the right translation
-           def lang = context.getRequest().get("${page}_language")
-           if (lang!=null &amp;&amp; lang!="")
+           // separate the language particle at the end of the page name from the page fullname. The pagename is of form &lt;docfullname&gt;.&lt;doclanguage&gt;
+           def languageSeparator = page.lastIndexOf('.');
+           if (languageSeparator &lt; 0) {
+             def pagefullname = page;  
+           }
+           def pagefullname = page.substring(0, languageSeparator);
+           def lang = page.substring(languageSeparator + 1);
+        
+           def pagedoc = xwiki.getDocument(pagefullname);
+           if (lang!=null &amp;&amp; lang!="") {
              pagedoc = pagedoc.getTranslatedDocument(lang);
+           }
            def wikicontent = getXML(pagedoc);
            def svncontent = getFileContentAsString(pagedoc.getSpace(), pagedoc.getName(), pagedoc.getLanguage())
            def svnversion = "";
@@ -37826,7 +37840,7 @@ public class SVNLogReader {
                pageStatus = [ "xwikiversion" : pagedoc.getVersion(), "xwikihash" : "", "svnversion" : "" ];
             }
             pageStatus.filePath = filePath;
-            pageStatus.page = page;
+            pageStatus.page = pagefullname;
             pageStatus.status = "";
 
             // debug("Checking page ${page} version ${pagedoc.getVersion()} pageStatus ${pageStatus}")
@@ -37848,7 +37862,7 @@ public class SVNLogReader {
  
             if (needUpdate) {
               // updating XWiki document from SVN
-              changedMap.put(page, pageStatus);
+              changedMap.put(pagefullname, pageStatus);
               def archive = pagedoc.document.getDocumentArchive(context.getContext());
               def version = pagedoc.document.getRCSVersion();
 
