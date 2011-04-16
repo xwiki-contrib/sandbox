@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.xwiki.platform</groupId>
     <artifactId>xwiki-core-parent</artifactId>
-    <version>2.5-SNAPSHOT</version>
+    <version>2.5.2</version>
   </parent>
   <artifactId>xwiki-wikiimporter-bridge</artifactId>
   <name>XWiki WikiImporter Bridge</name>
