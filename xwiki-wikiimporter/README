@@ -1,23 +1,15 @@
-This is a "work in progress" project, developed as a Google Summer of Code 2009 project.
+This project started as a Google Summer of Code 2009 (http://gsoc.myxwiki.org/xwiki/bin/view/Import%20Export%20other%20wikis/WebHome) project and now moved into a more generic one called wiki stream. See http://svn.xwiki.org/svnroot/xwiki/contrib/sandbox/xwiki-wiki-stream/.
 
-Title: Import/Export from other wikis
-Author: Arun Reddy
-Mentor: Vincent Massol
-Website: http://gsoc.myxwiki.org/xwiki/bin/view/Import%20Export%20other%20wikis/WebHome
+Title: Import from other wikis
+Authors: Arun Reddy, Thomas Mortagne
 
-------------------------------------------------------------------------------------------
-= TODO
+= Install =
 
-== REFACTORING
+* put the three jar files into WEB-INF/lib
+* import the xar file
+* go to WikiImporter.WebHome
 
-- the importer should produce only events instead of creating custom Page objects and to save it itself using some not efficient bridge (it saves each page metadata one by one...)
-- the logger, even if it's a good idea, is not very well designed:
-   - the logs should be a list of XDOM based content instead of html strings
-   - it should be based on standard log api instead of having to use a special api
-- attachment handling is very bad, there is a mix between pages revision and attachemt revisions
-- the UI should reuse some way the work done for the WYSIWYG for macros on the parameters handling
-
-== Missing
+= Missing =
 
 - import objects
 - import classes
