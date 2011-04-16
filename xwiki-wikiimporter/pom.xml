@@ -36,6 +36,8 @@
   <description>XWiki Platform - Wiki Import</description>
   <properties>
     <platform.version>2.5.2</platform.version>
+    <xwiki.checkstyle.skip>true</xwiki.checkstyle.skip>
+    <xwiki.clirr.skip>true</xwiki.clirr.skip>
   </properties>
   <modules>
     <module>xwiki-wikiimporter-api</module>

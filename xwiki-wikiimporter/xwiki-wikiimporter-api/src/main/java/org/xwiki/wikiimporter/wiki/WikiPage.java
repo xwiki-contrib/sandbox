@@ -21,7 +21,6 @@ hi
 package org.xwiki.wikiimporter.wiki;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * WikiPage Interface represents a Page in Wiki Importer.

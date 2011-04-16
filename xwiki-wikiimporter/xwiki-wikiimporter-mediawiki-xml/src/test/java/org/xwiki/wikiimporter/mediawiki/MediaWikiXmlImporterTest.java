@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.xwiki.test.AbstractComponentTestCase;
 import org.xwiki.wikiimporter.importer.WikiImporter;
 import org.xwiki.wikiimporter.importer.WikiImporterException;
-import org.xwiki.wikiimporter.listener.WikiImporterListener;
 
 /**
  * @version $Id$
@@ -37,10 +36,8 @@ public class MediaWikiXmlImporterTest extends AbstractComponentTestCase
 {
     private WikiImporter wikiimporter;
 
-    private WikiImporterListener listener;
-
     private String dumpPath;
-    
+
     /**
      * {@inheritDoc}
      * 
@@ -55,14 +52,12 @@ public class MediaWikiXmlImporterTest extends AbstractComponentTestCase
         this.dumpPath = this.getClass().getResource("/MediaWikiXML.xml").getPath();
 
         this.wikiimporter = getComponentManager().lookup(WikiImporter.class, "mediawiki/xml");
-        this.listener = getComponentManager().lookup(WikiImporterListener.class, "mediawiki/xml");
     }
 
     @Test
     public void testWikiImporter() throws Exception
     {
         Assert.assertNotNull(this.wikiimporter);
-        Assert.assertNotNull(this.listener);
         Assert.assertEquals("mediawiki/xml", this.wikiimporter.getType().toIdString());
     }
 
