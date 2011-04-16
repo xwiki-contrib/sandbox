@@ -35,7 +35,8 @@ import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.rendering.block.Block;
 import org.xwiki.rendering.block.QuotationBlock;
 import org.xwiki.rendering.internal.parser.XDOMGeneratorListener;
-import org.xwiki.rendering.listener.Link;
+import org.xwiki.rendering.listener.reference.DocumentResourceReference;
+import org.xwiki.rendering.listener.reference.ResourceReference;
 import org.xwiki.wikiimporter.bridge.WikiImporterDocumentBridge;
 import org.xwiki.wikiimporter.internal.importer.WikiImporterLogger;
 import org.xwiki.wikiimporter.internal.mediawiki.wiki.MediaWikiAttachment;
@@ -288,12 +289,12 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.listener.WrappingListener#beginLink(org.xwiki.rendering.listener.Link, boolean,
-     *      java.util.Map)
+     * @see org.xwiki.rendering.listener.WrappingListener#beginLink(org.xwiki.rendering.listener.reference.ResourceReference,
+     *      boolean, java.util.Map)
      */
-    public void beginLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
+    public void beginLink(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
-        String linkReference = link.getReference();
+        String linkReference = reference.getReference();
 
         // Convert Categories to Tags.
         if (linkReference.startsWith("Category")) {
@@ -302,20 +303,20 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
         }
 
         // Convert from MediaWiki link to XWiki link
-        link = convertLink(link);
+        reference = converReference(reference);
 
-        super.beginLink(link, isFreeStandingURI, parameters);
+        super.beginLink(reference, isFreeStandingURI, parameters);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.rendering.listener.WrappingListener#endLink(org.xwiki.rendering.listener.Link, boolean,
-     *      java.util.Map)
+     * @see org.xwiki.rendering.listener.WrappingListener#endLink(org.xwiki.rendering.listener.reference.ResourceReference,
+     *      boolean, java.util.Map)
      */
-    public void endLink(Link link, boolean isFreeStandingURI, Map<String, String> parameters)
+    public void endLink(ResourceReference reference, boolean isFreeStandingURI, Map<String, String> parameters)
     {
-        String linkReference = link.getReference();
+        String linkReference = reference.getReference();
 
         // Convert Categories to Tags.
         if (linkReference.startsWith("Category")) {
@@ -323,38 +324,35 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
         }
 
         // Convert from MediaWiki link to XWiki link
-        link = convertLink(link);
+        reference = converReference(reference);
 
-        super.endLink(link, isFreeStandingURI, parameters);
+        super.endLink(reference, isFreeStandingURI, parameters);
     }
 
     /**
      * Convert from MediaWiki reference to XWiki reference.
      */
-    private Link convertLink(Link mediaWikiLink)
+    private ResourceReference converReference(ResourceReference mediaWikiReference)
     {
         // If link reference is a external url
-        if (-1 != mediaWikiLink.getReference().indexOf("://")) {
-            return mediaWikiLink;
+        if (-1 != mediaWikiReference.getReference().indexOf("://")) {
+            return mediaWikiReference;
         }
 
         // if link reference is an email
-        if (mediaWikiLink.getReference().startsWith("mailto:")) {
-            int spaceOccurence = mediaWikiLink.getReference().indexOf(' ');
+        if (mediaWikiReference.getReference().startsWith("mailto:")) {
+            int spaceOccurence = mediaWikiReference.getReference().indexOf(' ');
             if (-1 != spaceOccurence) {
 
             }
 
-            return mediaWikiLink;
+            return mediaWikiReference;
         }
 
-        Link xwikiLink = new Link();
+        ResourceReference xwikiLink =
+            new ResourceReference(mediaWikiReference.getReference(), mediaWikiReference.getType());
 
-        xwikiLink.setAnchor(mediaWikiLink.getAnchor());
-        xwikiLink.setInterWikiAlias(mediaWikiLink.getInterWikiAlias());
-        xwikiLink.setQueryString(mediaWikiLink.getQueryString());
-        xwikiLink.setReference(mediaWikiLink.getReference());
-        xwikiLink.setType(mediaWikiLink.getType());
+        xwikiLink.setParameters(mediaWikiReference.getParameters());
 
         // Handle Colon (:) - Links like [[Space:Page]]
         if (xwikiLink.getReference().contains(":") && !xwikiLink.getReference().endsWith(":")) {
@@ -390,7 +388,7 @@ public class MediaWikiImporterListener extends AbstractWikiImporterListenerXDOM
             String categoryReference = xwikiLink.getReference().substring(":Category:".length()).trim();
             if (!"".equals(categoryReference)) {
                 xwikiLink.setReference("Main.Tags");
-                xwikiLink.setQueryString("do=viewTag&tag=" + categoryReference);
+                xwikiLink.setParameter(DocumentResourceReference.QUERY_STRING, "do=viewTag&tag=" + categoryReference);
             } else {
 
             }
