@@ -27,6 +27,7 @@ import org.xwiki.rendering.internal.renderer.xml.AbstractChainingContentHandlerS
 import org.xwiki.rendering.listener.Format;
 import org.xwiki.rendering.listener.HeaderLevel;
 import org.xwiki.rendering.listener.ListType;
+import org.xwiki.rendering.listener.MetaData;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.listener.reference.ResourceReference;
@@ -69,9 +70,11 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     // Events
 
     @Override
-    public void beginDocument(Map<String, String> parameters)
+    public void beginDocument(MetaData metaData)
     {
-        startBlock(EventType.BEGIN_DOCUMENT, parameters);
+        startBlock(EventType.BEGIN_DOCUMENT);
+
+        serializeParameter("metaData", metaData.getMetaData());
     }
 
     @Override
@@ -203,7 +206,7 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     }
 
     @Override
-    public void endDocument(Map<String, String> parameters)
+    public void endDocument(MetaData metaData)
     {
         endBlock(EventType.END_DOCUMENT);
     }
@@ -484,6 +487,15 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
         SERIALIZER.serializeParameter(name, map, getContentHandler());
     }
 
+    public void serializeParameter(String name, MetaData metaData)
+    {
+        startElement(name, DefaultSerializer.EMPTY_ATTRIBUTES);
+        for (Map.Entry<String, Object> entry : metaData.getMetaData().entrySet()) {
+            serializeParameter(entry.getKey(), entry.getValue());
+        }
+        endElement(name);
+    }
+
     public void serializeParameter(String name, boolean value)
     {
         SERIALIZER.serializeParameter(name, value, getContentHandler());
@@ -502,6 +514,50 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     public void serializeParameter(String name, String value)
     {
         SERIALIZER.serializeParameter(name, value, getContentHandler());
+    }
+
+    public void serializeParameter(String name, Format value)
+    {
+        SERIALIZER.serializeParameter(name, this.formatConverter.toString(value), getContentHandler());
+    }
+
+    public void serializeParameter(String name, HeaderLevel value)
+    {
+        SERIALIZER.serializeParameter(name, this.headerLevelConverter.toString(value), getContentHandler());
+    }
+
+    public void serializeParameter(String name, ListType value)
+    {
+        SERIALIZER.serializeParameter(name, this.listTypeConverter.toString(value), getContentHandler());
+    }
+
+    public void serializeParameter(String name, ResourceReference value)
+    {
+        startElement(name, DefaultSerializer.EMPTY_ATTRIBUTES);
+        this.linkSerializer.serialize(value, getContentHandler());
+        endElement(name);
+    }
+
+    public void serializeParameter(String name, Number value)
+    {
+        SERIALIZER.serializeParameter(name, value.toString(), getContentHandler());
+    }
+
+    public void serializeParameter(String name, Object value)
+    {
+        if (value instanceof String) {
+            serializeParameter(name, (String) value);
+        } else if (value instanceof Number) {
+            serializeParameter(name, (Number) value);
+        } else if (value instanceof Format) {
+            serializeParameter(name, (Format) value);
+        } else if (value instanceof HeaderLevel) {
+            serializeParameter(name, (HeaderLevel) value);
+        } else if (value instanceof ListType) {
+            serializeParameter(name, (ListType) value);
+        } else if (value instanceof ResourceReference) {
+            serializeParameter(name, (ResourceReference) value);
+        }
     }
 
     private void startElement(String elementName, Attributes attributes)

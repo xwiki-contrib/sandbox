@@ -29,6 +29,7 @@ import org.xwiki.rendering.internal.renderer.xml.AbstractChainingContentHandlerS
 import org.xwiki.rendering.listener.Format;
 import org.xwiki.rendering.listener.HeaderLevel;
 import org.xwiki.rendering.listener.ListType;
+import org.xwiki.rendering.listener.MetaData;
 import org.xwiki.rendering.listener.chaining.EventType;
 import org.xwiki.rendering.listener.chaining.ListenerChain;
 import org.xwiki.rendering.listener.reference.ResourceReference;
@@ -56,12 +57,12 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     // Events
 
     @Override
-    public void beginDocument(Map<String, String> parameters)
+    public void beginDocument(MetaData metaData)
     {
-        if (parameters.isEmpty()) {
+        if (metaData.getMetaData().isEmpty()) {
             beginEvent(EventType.BEGIN_DOCUMENT);
         } else {
-            beginEvent(EventType.BEGIN_DOCUMENT, new LinkedHashMap<String, String>(parameters));
+            beginEvent(EventType.BEGIN_DOCUMENT, new MetaData(metaData.getMetaData()));
         }
     }
 
@@ -190,7 +191,7 @@ public class XDOMXMLChainingStreamRenderer extends AbstractChainingContentHandle
     }
 
     @Override
-    public void endDocument(Map<String, String> parameters)
+    public void endDocument(MetaData metaData)
     {
         endEvent(EventType.END_DOCUMENT);
     }
