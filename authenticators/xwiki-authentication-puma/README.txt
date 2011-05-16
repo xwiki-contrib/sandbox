@@ -10,10 +10,11 @@ IBM WebSphere Portal PUMA api based authentication.
 = How to build it =
 
 You will need the following jars to build the authenticator (you can find them in your WebSphere install):
-* wp.user.api.jar
+* wp.base.jar
+* wp.pe.api.standard.jar
 * wp.portletservices.api.legacy.jar
 * wp.portletservices.api.standard.jar
-* wp.pe.api.standard.jar
+* wp.user.api.jar
 
 Put them in the /lib folder and that's all you can build with maven (mvn package).
 

@@ -1,5 +1,5 @@
-* wp.user.api.jar
+* wp.base.jar
+* wp.pe.api.standard.jar
 * wp.portletservices.api.legacy.jar
 * wp.portletservices.api.standard.jar
-* wp.pe.api.standard.jar
 * wp.user.api.jar
