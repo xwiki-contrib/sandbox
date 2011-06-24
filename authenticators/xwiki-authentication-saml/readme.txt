@@ -1,3 +1,14 @@
+
+This module allows SAML authentication over a SAML server. It has been tested only with a custom SAML server.
+
+The following XWiki Class is needed:
+
+XWiki.SAMLAuthClass
+with field nameid as a string
+
+
+The following configuration is needed in xwiki.cfg
+
 ### SAML SSO configuration
 xwiki.authentication.authclass=com.xwiki.authentication.saml.XWikiSAMLAuthenticator
 xwiki.authentication.saml.fields_mapping=email=mail,first_name=givenName,last_name=sn
