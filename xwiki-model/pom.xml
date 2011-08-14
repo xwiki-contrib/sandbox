@@ -26,13 +26,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-core-parent</artifactId>
-    <version>2.7-SNAPSHOT</version>
+    <artifactId>xwiki-platform-core</artifactId>
+    <version>3.2-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-core-newmodel</artifactId>
-  <name>XWiki Platform - Core - Model - Parent POM</name>
+  <artifactId>xwiki-platform-newmodel</artifactId>
+  <name>XWiki Platform - New Model - Parent POM</name>
   <packaging>pom</packaging>
-  <description>XWiki Platform - Core - Model - Parent POM</description>
+  <description>XWiki Platform - New Model - Parent POM</description>
   <modules>
     <module>xwiki-model-api</module>
     <module>xwiki-model-bridge</module>

@@ -26,36 +26,49 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-core-newmodel</artifactId>
-    <version>2.7-SNAPSHOT</version>
+    <artifactId>xwiki-platform-newmodel</artifactId>
+    <version>3.2-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-core-newmodel-bridge</artifactId>
-  <name>XWiki Platform - Core - Model - Implementation based on old Model</name>
+  <artifactId>xwiki-platform-newmodel-bridge</artifactId>
+  <name>XWiki Platform - New Model - Implementation based on old Model</name>
   <packaging>jar</packaging>
-  <description>XWiki Platform - Core - Model - Implementation based on old Model</description>
+  <description>XWiki Platform - New Model - Implementation based on old Model</description>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-newmodel-api</artifactId>
+      <artifactId>xwiki-platform-newmodel-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.xpn.xwiki.platform</groupId>
-      <artifactId>xwiki-core</artifactId>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${project.version}</version>
     </dependency>
     <!-- Testing dependencies -->
     <dependency>
-      <groupId>com.xpn.xwiki.platform</groupId>
-      <artifactId>xwiki-core</artifactId>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-shared-tests</artifactId>
+      <artifactId>xwiki-platform-test</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-test</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- We need to have the Servlet API JAR available since Component Initialization will initialize
+         com.xpn.xwiki.internal.DefaultXWikiStubContextProvider which requires the Servlet API to be present -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- Used to mock XWiki class -->

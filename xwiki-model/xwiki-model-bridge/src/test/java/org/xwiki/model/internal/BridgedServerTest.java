@@ -33,7 +33,7 @@ import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.test.AbstractBridgedComponentTestCase;
 
-public class BridgeServerTest extends AbstractBridgedComponentTestCase
+public class BridgedServerTest extends AbstractBridgedComponentTestCase
 {
     @Before
     public void setUp() throws Exception
