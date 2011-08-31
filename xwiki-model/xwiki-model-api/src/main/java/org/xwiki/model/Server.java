@@ -21,8 +21,6 @@ package org.xwiki.model;
 
 import org.xwiki.model.reference.EntityReference;
 
-import java.util.List;
-
 /**
  * An XWiki Server is made of one or several {@link org.xwiki.model.Wiki}s. This is the top most
  * concept of the XWiki Model.
@@ -32,7 +30,7 @@ public interface Server extends Persistable
     /**
      * @return the list of all Wiki objects inside this Server
      */
-    List<Wiki> getWikis();
+    EntityIterator<Wiki> getWikis();
 
     Wiki getWiki(String wikiName);
 

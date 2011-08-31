@@ -21,8 +21,6 @@ package org.xwiki.model;
 
 import org.xwiki.model.reference.EntityReference;
 
-import java.util.List;
-
 public interface Entity extends Persistable
 {
     /**
@@ -43,7 +41,7 @@ public interface Entity extends Persistable
 
     <T> Entity getParent();
 
-    List<Entity> getChildren(EntityType type);
+    EntityIterator<Entity> getChildren(EntityType type);
 
     /**
      * @todo Should not be implemented with the old model
@@ -56,9 +54,9 @@ public interface Entity extends Persistable
     // - pretty name
 
     /**
-     * @return the list of object definitions defined inside this document
+     * @return the list of object definitions defined inside this entity
      */
-    List<ObjectDefinition> getObjectDefinitions();
+    EntityIterator<ObjectDefinition> getObjectDefinitions();
 
     ObjectDefinition getObjectDefinition(String objectDefinitionName);
 
@@ -68,7 +66,7 @@ public interface Entity extends Persistable
 
     boolean hasObjectDefinition(String objectDefinitionName);
 
-    List<Object> getObjects();
+    EntityIterator<Object> getObjects();
 
     Object getObject(String objectName);
 

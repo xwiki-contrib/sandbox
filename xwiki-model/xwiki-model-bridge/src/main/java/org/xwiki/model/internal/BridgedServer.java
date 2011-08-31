@@ -25,6 +25,7 @@ import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 import org.xwiki.model.Entity;
+import org.xwiki.model.EntityIterator;
 import org.xwiki.model.ModelException;
 import org.xwiki.model.Server;
 import org.xwiki.model.Wiki;
@@ -95,7 +96,7 @@ public class BridgedServer implements Server
         return getEntity(new WikiReference(wikiName));
     }
 
-    public List<Wiki> getWikis()
+    public EntityIterator<Wiki> getWikis()
     {
         throw new ModelException("Not supported");
     }

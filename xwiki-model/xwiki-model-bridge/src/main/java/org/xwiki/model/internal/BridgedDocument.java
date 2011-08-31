@@ -24,7 +24,6 @@ import org.xwiki.model.Object;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.syntax.Syntax;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public class BridgedDocument implements Document
         throw new ModelException("Not supported");
     }
 
-    public List<Entity> getChildren(EntityType type)
+    public EntityIterator<Entity> getChildren(EntityType type)
     {
         throw new ModelException("Not supported");
     }
@@ -69,7 +68,7 @@ public class BridgedDocument implements Document
         throw new ModelException("Not supported");
     }
 
-    public List<Attachment> getAttachments()
+    public EntityIterator<Attachment> getAttachments()
     {
         throw new ModelException("Not supported");
     }
@@ -94,12 +93,12 @@ public class BridgedDocument implements Document
         throw new ModelException("Not supported");
     }
 
-    public List<ObjectDefinition> getObjectDefinitions()
+    public EntityIterator<ObjectDefinition> getObjectDefinitions()
     {
         throw new ModelException("Not supported");
     }
 
-    public List<Object> getObjects()
+    public EntityIterator<Object> getObjects()
     {
         throw new ModelException("Not supported");
     }

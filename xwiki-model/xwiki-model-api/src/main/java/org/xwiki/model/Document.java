@@ -21,7 +21,6 @@ package org.xwiki.model;
 
 import org.xwiki.rendering.syntax.Syntax;
 
-import java.util.List;
 import java.util.Locale;
 
 public interface Document extends Entity
@@ -35,7 +34,7 @@ public interface Document extends Entity
     void setSyntax(Syntax syntax);
 
     // Q: Should attachments be Objects?
-    List<Attachment> getAttachments();
+    EntityIterator<Attachment> getAttachments();
     Attachment getAttachment(String attachmentName);
     Attachment addAttachment(String attachmentName);
     void removeAttachment(String attachmentName);

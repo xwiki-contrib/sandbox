@@ -19,38 +19,32 @@
  */
 package org.xwiki.model;
 
-public interface Space extends Entity
+import java.lang.*;
+import java.lang.Object;
+import java.util.Iterator;
+
+public class EntityIterator<T> implements Iterator
 {
-    /**
-     * @return the list of top level Space objects in this Space (excluding nested spaces)
-     */
-    EntityIterator<Space> getSpaces();
+    @Override
+    public boolean hasNext()
+    {
+        throw new ModelException("Not supported");
+    }
 
-    /**
-     * @param spaceName the name of the nested space to look for
-     * @return the nested space whose name is passed as parameter
-     */
-    Space getSpace(String spaceName);
+    @Override
+    public Object next()
+    {
+        throw new ModelException("Not supported");
+    }
 
-    /**
-     * @todo Should not be implemented with the old model
-     */
-    Space addSpace(String spaceName);
+    @Override
+    public void remove()
+    {
+        throw new ModelException("Not supported");
+    }
 
-    /**
-     * @todo Should not be implemented with the old model
-     */
-    void removeSpace(String spaceName);
-
-    boolean hasSpace(String spaceName);
-
-    EntityIterator<Document> getDocuments();
-
-    boolean hasDocument(String documentName);
-
-    Document getDocument(String documentName);
-
-    Document addDocument(String documentName);
-
-    void removeDocument(String documentName);
+    public T nextEntity()
+    {
+        throw new ModelException("Not supported");
+    }
 }

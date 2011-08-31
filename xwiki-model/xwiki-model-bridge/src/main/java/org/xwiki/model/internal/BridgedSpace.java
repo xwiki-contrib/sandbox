@@ -19,7 +19,6 @@
  */
 package org.xwiki.model.internal;
 
-import java.util.List;
 import java.util.Map;
 
 import org.xwiki.model.*;
@@ -43,7 +42,7 @@ public class BridgedSpace implements Space
         throw new ModelException("Not supported");
     }
 
-    @Override public List<Document> getDocuments()
+    @Override public EntityIterator<Document> getDocuments()
     {
         throw new ModelException("Not supported");
     }
@@ -53,7 +52,7 @@ public class BridgedSpace implements Space
         throw new ModelException("Not supported");
     }
 
-    @Override public List<Space> getSpaces()
+    @Override public EntityIterator<Space> getSpaces()
     {
         throw new ModelException("Not supported");
     }
@@ -88,7 +87,7 @@ public class BridgedSpace implements Space
         throw new ModelException("Not supported");
     }
 
-    @Override public List<Entity> getChildren(EntityType type)
+    @Override public EntityIterator<Entity> getChildren(EntityType type)
     {
         throw new ModelException("Not supported");
     }
@@ -113,12 +112,12 @@ public class BridgedSpace implements Space
         throw new ModelException("Not supported");
     }
 
-    @Override public List<ObjectDefinition> getObjectDefinitions()
+    @Override public EntityIterator<ObjectDefinition> getObjectDefinitions()
     {
         throw new ModelException("Not supported");
     }
 
-    @Override public List<Object> getObjects()
+    @Override public EntityIterator<Object> getObjects()
     {
         throw new ModelException("Not supported");
     }

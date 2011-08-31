@@ -19,7 +19,6 @@
  */
 package org.xwiki.model.internal;
 
-import java.util.List;
 import java.util.Map;
 
 import org.xwiki.model.*;
@@ -51,7 +50,7 @@ public class BridgedWiki implements Wiki
         throw new ModelException("Not supported");
     }
 
-    public List<Space> getSpaces()
+    public EntityIterator<Space> getSpaces()
     {
         throw new ModelException("Not supported");
     }
@@ -81,7 +80,7 @@ public class BridgedWiki implements Wiki
         throw new ModelException("Not supported");
     }
 
-    public List<Entity> getChildren(EntityType type)
+    public EntityIterator<Entity> getChildren(EntityType type)
     {
         throw new ModelException("Not supported");
     }
@@ -106,12 +105,12 @@ public class BridgedWiki implements Wiki
         throw new ModelException("Not supported");
     }
 
-    public List<ObjectDefinition> getObjectDefinitions()
+    public EntityIterator<ObjectDefinition> getObjectDefinitions()
     {
         throw new ModelException("Not supported");
     }
 
-    public List<Object> getObjects()
+    public EntityIterator<Object> getObjects()
     {
         throw new ModelException("Not supported");
     }
