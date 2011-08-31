@@ -43,27 +43,27 @@ public class BridgedWiki implements Wiki
 
     public Space addSpace(String spaceName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public Space getSpace(String spaceName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public List<Space> getSpaces()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public boolean hasSpace(String spaceName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public void removeSpace(String spaceName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public XWiki getXWiki()
@@ -73,92 +73,92 @@ public class BridgedWiki implements Wiki
 
     public org.xwiki.model.Object addObject(String objectName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public ObjectDefinition addObjectDefinition(String objectDefinitionName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public List<Entity> getChildren(EntityType type)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public String getDescription()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public String getIdentifier()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public Object getObject(String objectName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public ObjectDefinition getObjectDefinition(String objectDefinitionName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public List<ObjectDefinition> getObjectDefinitions()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public List<Object> getObjects()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public <T> Entity getParent()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public EntityReference getReference()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public Entity getTarget()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public EntityType getType()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public boolean hasObject(String objectName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public boolean hasObjectDefinition(String objectDefinitionName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public void removeObject(String objectName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public void removeObjectDefinition(String objectDefinitionName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public void save(String comment, boolean isMinorEdit, Map<String, String> extraParameters)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public XWikiContext getXWikiContext()

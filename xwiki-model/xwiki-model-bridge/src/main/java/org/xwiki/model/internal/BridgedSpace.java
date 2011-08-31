@@ -19,167 +19,151 @@
  */
 package org.xwiki.model.internal;
 
+import java.util.List;
+import java.util.Map;
+
 import org.xwiki.model.*;
 import org.xwiki.model.Object;
 import org.xwiki.model.reference.EntityReference;
-import org.xwiki.rendering.syntax.Syntax;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import com.xpn.xwiki.doc.XWikiDocument;
-
-public class BridgedDocument implements Document
+public class BridgedSpace implements Space
 {
-    private XWikiDocument document;
-
-    public BridgedDocument(XWikiDocument document)
-    {
-        this.document = document;
-    }
-
-    public Version getVersion()
+    @Override public Document addDocument(String documentName)
     {
         throw new ModelException("Not supported");
     }
 
-    public List<Entity> getChildren(EntityType type)
+    @Override public Space addSpace(String spaceName)
     {
         throw new ModelException("Not supported");
     }
 
-    public Attachment addAttachment(String attachmentName)
+    @Override public Document getDocument(String documentName)
     {
         throw new ModelException("Not supported");
     }
 
-    public org.xwiki.model.Object addObject(String objectName)
+    @Override public List<Document> getDocuments()
     {
         throw new ModelException("Not supported");
     }
 
-    public ObjectDefinition addObjectDefinition(String objectDefinitionName)
+    @Override public Space getSpace(String spaceName)
     {
         throw new ModelException("Not supported");
     }
 
-    public Attachment getAttachment(String attachmentName)
+    @Override public List<Space> getSpaces()
     {
         throw new ModelException("Not supported");
     }
 
-    public List<Attachment> getAttachments()
+    @Override public boolean hasDocument(String documentName)
     {
         throw new ModelException("Not supported");
     }
 
-    public String getContent()
+    @Override public boolean hasSpace(String spaceName)
     {
         throw new ModelException("Not supported");
     }
 
-    public Locale getLocale()
+    @Override public void removeDocument(String documentName)
     {
         throw new ModelException("Not supported");
     }
 
-    public Object getObject(String objectName)
+    @Override public void removeSpace(String spaceName)
     {
         throw new ModelException("Not supported");
     }
 
-    public ObjectDefinition getObjectDefinition(String objectDefinitionName)
+    @Override public org.xwiki.model.Object addObject(String objectName)
     {
         throw new ModelException("Not supported");
     }
 
-    public List<ObjectDefinition> getObjectDefinitions()
+    @Override public ObjectDefinition addObjectDefinition(String objectDefinitionName)
     {
         throw new ModelException("Not supported");
     }
 
-    public List<Object> getObjects()
+    @Override public List<Entity> getChildren(EntityType type)
     {
         throw new ModelException("Not supported");
     }
 
-    public Syntax getSyntax()
+    @Override public String getDescription()
     {
         throw new ModelException("Not supported");
     }
 
-    public boolean hasAttachment(String attachmentName)
+    @Override public String getIdentifier()
     {
         throw new ModelException("Not supported");
     }
 
-    public boolean hasObject(String objectName)
+    @Override public Object getObject(String objectName)
     {
         throw new ModelException("Not supported");
     }
 
-    public boolean hasObjectDefinition(String objectDefinitionName)
+    @Override public ObjectDefinition getObjectDefinition(String objectDefinitionName)
     {
         throw new ModelException("Not supported");
     }
 
-    public void removeAttachment(String attachmentName)
+    @Override public List<ObjectDefinition> getObjectDefinitions()
     {
         throw new ModelException("Not supported");
     }
 
-    public void removeObject(String objectName)
+    @Override public List<Object> getObjects()
     {
         throw new ModelException("Not supported");
     }
 
-    public void removeObjectDefinition(String objectDefinitionName)
+    @Override public <T> Entity getParent()
     {
         throw new ModelException("Not supported");
     }
 
-    public void setContent(String content)
+    @Override public EntityReference getReference()
     {
         throw new ModelException("Not supported");
     }
 
-    public void setSyntax(Syntax syntax)
+    @Override public Entity getTarget()
     {
         throw new ModelException("Not supported");
     }
 
-    public String getDescription()
+    @Override public EntityType getType()
     {
         throw new ModelException("Not supported");
     }
 
-    public String getIdentifier()
+    @Override public boolean hasObject(String objectName)
     {
         throw new ModelException("Not supported");
     }
 
-    public Entity getParent()
+    @Override public boolean hasObjectDefinition(String objectDefinitionName)
     {
         throw new ModelException("Not supported");
     }
 
-    public EntityReference getReference()
+    @Override public void removeObject(String objectName)
     {
         throw new ModelException("Not supported");
     }
 
-    public Entity getTarget()
+    @Override public void removeObjectDefinition(String objectDefinitionName)
     {
         throw new ModelException("Not supported");
     }
 
-    public EntityType getType()
-    {
-        throw new ModelException("Not supported");
-    }
-
-    public void save(String comment, boolean isMinorEdit, Map<String, String> extraParameters)
+    @Override public void save(String comment, boolean isMinorEdit, Map<String, String> extraParameters)
     {
         throw new ModelException("Not supported");
     }

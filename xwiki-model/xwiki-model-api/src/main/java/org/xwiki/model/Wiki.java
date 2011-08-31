@@ -25,6 +25,9 @@ public interface Wiki extends Entity
 {
     /**
      * @return the list of top level Space objects in this wiki (excluding nested spaces)
+     * @TODO How do we scale. For ex if we have 100000 spaces. Should we have a getSpaceNames() instead and then call
+     * getSpace(spaceName) for each if we need to get the details? The alternative is to return a Cursor object
+     * containing only a subset of spaces with a getNext() method to return the next batch.
      */
     List<Space> getSpaces();
 

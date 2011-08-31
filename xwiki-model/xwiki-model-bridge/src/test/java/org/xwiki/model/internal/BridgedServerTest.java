@@ -23,9 +23,7 @@ import java.net.URL;
 
 import org.jmock.Expectations;
 import org.junit.*;
-import org.xwiki.model.Document;
-import org.xwiki.model.Server;
-import org.xwiki.model.Wiki;
+import org.xwiki.model.*;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
@@ -44,7 +42,7 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void testGetReferenceForDocumentThatExists() throws Exception
+    public void getReferenceForDocumentThatExists() throws Exception
     {
         final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
         final XWikiDocument xdoc = new XWikiDocument(documentReference);
@@ -60,10 +58,11 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void testGetReferenceForDocumentThatDoesntExist() throws Exception
+    public void getReferenceForDocumentThatDoesntExist() throws Exception
     {
         final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
         final XWikiDocument xdoc = new XWikiDocument(documentReference);
+        xdoc.setNew(true);
         getMockery().checking(new Expectations() {{
             oneOf(getContext().getWiki()).getDocument(documentReference, getContext());
                 will(returnValue(xdoc));
@@ -75,7 +74,7 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void testGetReferenceForWikiThatExists() throws Exception
+    public void getReferenceForWikiThatExists() throws Exception
     {
         final WikiReference wikiReference = new WikiReference("wiki");
         getMockery().checking(new Expectations() {{
@@ -89,7 +88,21 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void testHasReferenceForDocumentThatExists() throws Exception
+    public void getReferenceForWikiThatDoesntExists() throws Exception
+    {
+        final WikiReference wikiReference = new WikiReference("wiki");
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
+                will(returnValue(null));
+        }});
+
+        Server server = new BridgedServer(getContext());
+        Wiki wiki = server.getEntity(wikiReference);
+        Assert.assertNull(wiki);
+    }
+
+    @Test
+    public void hasReferenceForDocumentThatExists() throws Exception
     {
         final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
         getMockery().checking(new Expectations() {{
@@ -102,7 +115,7 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void testHasReferenceForWikiThatExists() throws Exception
+    public void hasReferenceForWikiThatExists() throws Exception
     {
         final WikiReference wikiReference = new WikiReference("wiki");
         getMockery().checking(new Expectations() {{
@@ -115,7 +128,7 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void testHasReferenceForWikiThatDoesntExist() throws Exception
+    public void hasReferenceForWikiThatDoesntExist() throws Exception
     {
         final WikiReference wikiReference = new WikiReference("wiki");
         getMockery().checking(new Expectations() {{
@@ -125,5 +138,18 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
 
         Server server = new BridgedServer(getContext());
         Assert.assertFalse(server.hasEntity(wikiReference));
+    }
+
+    @Test
+    public void getWikiForWikiThatExists() throws Exception
+    {
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
+                will(returnValue(new URL("http://whatever/not/null")));
+        }});
+
+        Server server = new BridgedServer(getContext());
+        Wiki wiki = server.getWiki("wiki");
+        Assert.assertNotNull(wiki);
     }
 }

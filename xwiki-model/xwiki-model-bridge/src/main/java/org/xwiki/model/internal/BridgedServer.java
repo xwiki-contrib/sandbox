@@ -25,7 +25,7 @@ import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 import org.xwiki.model.Entity;
-import org.xwiki.model.EntityNotFoundException;
+import org.xwiki.model.ModelException;
 import org.xwiki.model.Server;
 import org.xwiki.model.Wiki;
 import org.xwiki.model.reference.DocumentReference;
@@ -47,10 +47,10 @@ public class BridgedServer implements Server
 
     public Wiki addWiki(String wikiName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
-    public <T extends Entity> T getEntity(EntityReference reference) throws EntityNotFoundException
+    public <T extends Entity> T getEntity(EntityReference reference)
     {
         T result = null;
         switch (reference.getType()) {
@@ -63,7 +63,18 @@ public class BridgedServer implements Server
                         result = (T) new BridgedDocument(xdoc);
                     }
                 } catch (XWikiException e) {
-                    throw new EntityNotFoundException("Couldn't locate Document from reference [" + reference + "]", e);
+                    throw new ModelException("Error loading document [" + reference + "]", e);
+                }
+                break;
+            case SPACE:
+                // A space exists if there's at least one document in it.
+                try {
+                    List<String> spaces = getXWiki().getSpaces(getXWikiContext());
+                    if (spaces.contains(reference.getName())) {
+                        result = (T) new BridgedSpace();
+                    }
+                } catch (XWikiException e) {
+                    throw new ModelException("Error verifying existence of space [" + reference + "]", e);
                 }
                 break;
             case WIKI:
@@ -73,7 +84,7 @@ public class BridgedServer implements Server
                 }
                 break;
             default:
-                throw new RuntimeException("Not supported");
+                throw new ModelException("Not supported");
         }
 
         return result;
@@ -81,12 +92,12 @@ public class BridgedServer implements Server
 
     public Wiki getWiki(String wikiName)
     {
-        throw new RuntimeException("Not supported");
+        return getEntity(new WikiReference(wikiName));
     }
 
     public List<Wiki> getWikis()
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public boolean hasEntity(EntityReference reference)
@@ -104,29 +115,29 @@ public class BridgedServer implements Server
                 }
                 break;
             default:
-                throw new RuntimeException("Not supported");
+                throw new ModelException("Not supported");
         }
         return result;
     }
 
     public boolean hasWiki(String wikiName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public void removeEntity(EntityReference reference)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public void removeWiki(String wikiName)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public void save(String comment, boolean isMinorEdit, Map<String, String> extraParameters)
     {
-        throw new RuntimeException("Not supported");
+        throw new ModelException("Not supported");
     }
 
     public XWiki getXWiki()
@@ -137,5 +148,11 @@ public class BridgedServer implements Server
     public XWikiContext getXWikiContext()
     {
         return this.xcontext;
+    }
+
+    @Override
+    public <T extends Entity> T addEntity(EntityReference reference)
+    {
+        throw new ModelException("Not supported");
     }
 }
