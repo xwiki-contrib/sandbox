@@ -39,7 +39,7 @@ public interface Entity extends Persistable
 
     EntityReference getReference();
 
-    <T> Entity getParent();
+    Entity getParent();
 
     EntityIterator<Entity> getChildren(EntityType type);
 
@@ -53,26 +53,7 @@ public interface Entity extends Persistable
     // - last modified date
     // - pretty name
 
-    /**
-     * @return the list of object definitions defined inside this entity
-     */
-    EntityIterator<ObjectDefinition> getObjectDefinitions();
+    boolean isModified();
 
-    ObjectDefinition getObjectDefinition(String objectDefinitionName);
-
-    ObjectDefinition addObjectDefinition(String objectDefinitionName);
-
-    void removeObjectDefinition(String objectDefinitionName);
-
-    boolean hasObjectDefinition(String objectDefinitionName);
-
-    EntityIterator<Object> getObjects();
-
-    Object getObject(String objectName);
-
-    Object addObject(String objectName);
-
-    void removeObject(String objectName);
-
-    boolean hasObject(String objectName);
+    boolean isNew();
 }

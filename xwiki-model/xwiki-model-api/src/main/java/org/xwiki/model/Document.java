@@ -23,7 +23,7 @@ import org.xwiki.rendering.syntax.Syntax;
 
 import java.util.Locale;
 
-public interface Document extends Entity
+public interface Document extends Object, Extensible
 {
     Locale getLocale();
 
@@ -32,13 +32,6 @@ public interface Document extends Entity
     // Q: Should we have instead: setContent(Content content) with Content encapsulating the syntax?
     Syntax getSyntax();
     void setSyntax(Syntax syntax);
-
-    // Q: Should attachments be Objects?
-    EntityIterator<Attachment> getAttachments();
-    Attachment getAttachment(String attachmentName);
-    Attachment addAttachment(String attachmentName);
-    void removeAttachment(String attachmentName);
-    boolean hasAttachment(String attachmentName);
 
     // Note: returning a XDOM is a problem because it would require Renderers for all syntaxes (for example).
     String getContent();

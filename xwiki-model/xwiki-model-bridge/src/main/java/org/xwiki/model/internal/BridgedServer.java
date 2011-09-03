@@ -26,6 +26,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
 
 import org.xwiki.model.Entity;
 import org.xwiki.model.EntityIterator;
+import org.xwiki.model.EntityType;
 import org.xwiki.model.ModelException;
 import org.xwiki.model.Server;
 import org.xwiki.model.Wiki;
@@ -48,7 +49,7 @@ public class BridgedServer implements Server
 
     public Wiki addWiki(String wikiName)
     {
-        throw new ModelException("Not supported");
+        return new BridgedWiki(getXWikiContext());
     }
 
     public <T extends Entity> T getEntity(EntityReference reference)
@@ -81,7 +82,7 @@ public class BridgedServer implements Server
             case WIKI:
                 // TODO: Need to load the wiki details. FTM only checking if it exists
                 if (hasEntity(reference)) {
-                    result = (T) new BridgedWiki(new WikiReference(reference), getXWikiContext());
+                    result = (T) new BridgedWiki(getXWikiContext());
                 }
                 break;
             default:
@@ -154,6 +155,15 @@ public class BridgedServer implements Server
     @Override
     public <T extends Entity> T addEntity(EntityReference reference)
     {
-        throw new ModelException("Not supported");
+        Entity result;
+
+        if (reference.getType().equals(EntityType.WIKI)) {
+            result = new BridgedWiki(getXWikiContext());
+
+        } else {
+            throw new ModelException("Not supported");
+        }
+
+        return (T) result;
     }
 }

@@ -19,7 +19,28 @@
  */
 package org.xwiki.model;
 
-public interface Attachment extends Entity
+public interface Extensible
 {
+    /**
+     * @return the list of object definitions defined inside this entity
+     */
+    EntityIterator<ObjectDefinition> getObjectDefinitions();
 
+    ObjectDefinition getObjectDefinition(String objectDefinitionName);
+
+    ObjectDefinition addObjectDefinition(String objectDefinitionName);
+
+    void removeObjectDefinition(String objectDefinitionName);
+
+    boolean hasObjectDefinition(String objectDefinitionName);
+
+    EntityIterator<Object> getObjects();
+
+    Object getObject(String objectName);
+
+    Object addObject(String objectName);
+
+    void removeObject(String objectName);
+
+    boolean hasObject(String objectName);
 }

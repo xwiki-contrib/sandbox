@@ -19,7 +19,7 @@
  */
 package org.xwiki.model;
 
-public interface Space extends Entity
+public interface Space extends Object, Extensible
 {
     /**
      * @return the list of top level Space objects in this Space (excluding nested spaces)

@@ -152,4 +152,12 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
         Wiki wiki = server.getWiki("wiki");
         Assert.assertNotNull(wiki);
     }
+
+    @Test
+    public void addWiki()
+    {
+        Server server = new BridgedServer(getContext());
+        Wiki wiki = server.addWiki("wiki");
+        Assert.assertSame(wiki, server.getWiki("wiki"));
+    }
 }

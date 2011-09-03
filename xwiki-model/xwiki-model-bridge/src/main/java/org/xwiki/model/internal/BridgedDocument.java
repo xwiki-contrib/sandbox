@@ -48,27 +48,12 @@ public class BridgedDocument implements Document
         throw new ModelException("Not supported");
     }
 
-    public Attachment addAttachment(String attachmentName)
-    {
-        throw new ModelException("Not supported");
-    }
-
     public org.xwiki.model.Object addObject(String objectName)
     {
         throw new ModelException("Not supported");
     }
 
     public ObjectDefinition addObjectDefinition(String objectDefinitionName)
-    {
-        throw new ModelException("Not supported");
-    }
-
-    public Attachment getAttachment(String attachmentName)
-    {
-        throw new ModelException("Not supported");
-    }
-
-    public EntityIterator<Attachment> getAttachments()
     {
         throw new ModelException("Not supported");
     }
@@ -108,22 +93,12 @@ public class BridgedDocument implements Document
         throw new ModelException("Not supported");
     }
 
-    public boolean hasAttachment(String attachmentName)
-    {
-        throw new ModelException("Not supported");
-    }
-
     public boolean hasObject(String objectName)
     {
         throw new ModelException("Not supported");
     }
 
     public boolean hasObjectDefinition(String objectDefinitionName)
-    {
-        throw new ModelException("Not supported");
-    }
-
-    public void removeAttachment(String attachmentName)
     {
         throw new ModelException("Not supported");
     }
@@ -179,6 +154,18 @@ public class BridgedDocument implements Document
     }
 
     public void save(String comment, boolean isMinorEdit, Map<String, String> extraParameters)
+    {
+        throw new ModelException("Not supported");
+    }
+
+    @Override
+    public boolean isModified()
+    {
+        throw new ModelException("Not supported");
+    }
+
+    @Override
+    public boolean isNew()
     {
         throw new ModelException("Not supported");
     }

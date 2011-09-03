@@ -24,7 +24,6 @@ import java.util.Map;
 import org.xwiki.model.*;
 import org.xwiki.model.Object;
 import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.WikiReference;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
@@ -33,9 +32,7 @@ public class BridgedWiki implements Wiki
 {
     private XWikiContext xcontext;
 
-    private WikiReference reference;
-
-    public BridgedWiki(WikiReference reference, XWikiContext xcontext)
+    public BridgedWiki(XWikiContext xcontext)
     {
         this.xcontext = xcontext;
     }
@@ -115,9 +112,17 @@ public class BridgedWiki implements Wiki
         throw new ModelException("Not supported");
     }
 
-    public <T> Entity getParent()
+    /**
+     * A Wiki Entity doesn't have any Parent; it's the topmost object in the Entity hierarchy. The user is supposed
+     * to get hold of the {@link Server} instance in a different manner (instance in the Execution Context for
+     * example).
+     *
+     * @return null
+     */
+    @Override
+    public Entity getParent()
     {
-        throw new ModelException("Not supported");
+        return null;
     }
 
     public EntityReference getReference()
@@ -165,8 +170,15 @@ public class BridgedWiki implements Wiki
         return this.xcontext;
     }
 
-    public WikiReference getWikiReferene()
+    @Override
+    public boolean isModified()
     {
-        return this.reference;
+        throw new ModelException("Not supported");
+    }
+
+    @Override
+    public boolean isNew()
+    {
+        throw new ModelException("Not supported");
     }
 }

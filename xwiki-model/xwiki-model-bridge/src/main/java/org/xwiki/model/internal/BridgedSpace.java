@@ -122,7 +122,8 @@ public class BridgedSpace implements Space
         throw new ModelException("Not supported");
     }
 
-    @Override public <T> Entity getParent()
+    @Override
+    public Entity getParent()
     {
         throw new ModelException("Not supported");
     }
@@ -166,4 +167,17 @@ public class BridgedSpace implements Space
     {
         throw new ModelException("Not supported");
     }
+
+    @Override
+    public boolean isModified()
+    {
+        throw new ModelException("Not supported");
+    }
+
+    @Override
+    public boolean isNew()
+    {
+        throw new ModelException("Not supported");
+    }
+
 }
