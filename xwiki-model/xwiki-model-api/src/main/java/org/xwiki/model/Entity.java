@@ -43,16 +43,6 @@ public interface Entity extends Persistable
 
     EntityIterator<Entity> getChildren(EntityType type);
 
-    /**
-     * @todo Should not be implemented with the old model
-     */
-    String getDescription();
-
-    // Add:
-    // - last modification author
-    // - last modified date
-    // - pretty name
-
     boolean isModified();
 
     boolean isNew();

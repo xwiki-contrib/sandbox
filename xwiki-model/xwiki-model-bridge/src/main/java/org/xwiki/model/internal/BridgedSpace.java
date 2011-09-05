@@ -92,11 +92,6 @@ public class BridgedSpace implements Space
         throw new ModelException("Not supported");
     }
 
-    @Override public String getDescription()
-    {
-        throw new ModelException("Not supported");
-    }
-
     @Override public String getIdentifier()
     {
         throw new ModelException("Not supported");

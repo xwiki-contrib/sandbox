@@ -82,11 +82,6 @@ public class BridgedWiki implements Wiki
         throw new ModelException("Not supported");
     }
 
-    public String getDescription()
-    {
-        throw new ModelException("Not supported");
-    }
-
     public String getIdentifier()
     {
         throw new ModelException("Not supported");

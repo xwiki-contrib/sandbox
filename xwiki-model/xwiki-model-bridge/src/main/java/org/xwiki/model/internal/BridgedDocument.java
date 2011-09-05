@@ -22,7 +22,6 @@ package org.xwiki.model.internal;
 import org.xwiki.model.*;
 import org.xwiki.model.Object;
 import org.xwiki.model.reference.EntityReference;
-import org.xwiki.rendering.syntax.Syntax;
 
 import java.util.Locale;
 import java.util.Map;
@@ -109,11 +108,6 @@ public class BridgedDocument implements Document
     }
 
     public void setContent(Content content)
-    {
-        throw new ModelException("Not supported");
-    }
-
-    public String getDescription()
     {
         throw new ModelException("Not supported");
     }
