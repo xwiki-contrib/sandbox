@@ -19,11 +19,49 @@
  */
 package org.xwiki.model;
 
-import org.xwiki.model.reference.EntityReference;
-
 import java.util.Locale;
 
-public interface LocaleManager
+import org.xwiki.model.reference.EntityReference;
+
+public class UniqueReference
 {
-    Entity getEntity(EntityReference reference, Locale locale);
+    private EntityReference reference;
+
+    private Locale locale;
+
+    private Version version;
+
+    public UniqueReference(EntityReference reference)
+    {
+        this(reference, null);
+    }
+
+    public UniqueReference(EntityReference reference, Locale locale)
+    {
+        this(reference, locale, null);
+    }
+
+    public UniqueReference(EntityReference reference, Locale locale, Version version)
+    {
+        this.reference = reference;
+        this.locale = locale;
+        this.version = version;
+    }
+
+    public EntityReference getReference()
+    {
+        return this.reference;
+    }
+
+    public Locale getLocal()
+    {
+        return this.locale;
+    }
+
+    public Version getVersion()
+    {
+        return this.version;
+    }
+
+    // TODO: Implement hashcode, equals, toString
 }

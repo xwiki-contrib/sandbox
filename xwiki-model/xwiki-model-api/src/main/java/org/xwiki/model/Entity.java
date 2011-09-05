@@ -19,6 +19,8 @@
  */
 package org.xwiki.model;
 
+import java.util.Locale;
+
 public interface Entity extends Persistable, Linkable, Referenceable
 {
     /**
@@ -27,6 +29,10 @@ public interface Entity extends Persistable, Linkable, Referenceable
     String getIdentifier();
     
     EntityType getType();
+
+    Locale getLocale();
+
+    Version getVersion();
 
     Entity getParent();
 

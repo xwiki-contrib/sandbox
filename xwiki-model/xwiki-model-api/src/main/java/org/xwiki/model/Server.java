@@ -39,14 +39,4 @@ public interface Server extends Persistable
     void removeWiki(String wikiName);
 
     boolean hasWiki(String wikiName);
-
-    // Direct access to any Entity of the Model.
-
-    /**
-     * @return the Entity or null if it doesn't exist
-     */
-    <T extends Entity> T getEntity(EntityReference reference);
-    boolean hasEntity(EntityReference reference);
-    void removeEntity(EntityReference reference);
-    <T extends Entity> T addEntity(EntityReference reference);
 }

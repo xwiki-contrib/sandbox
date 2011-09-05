@@ -19,13 +19,8 @@
  */
 package org.xwiki.model;
 
-import java.util.Locale;
-
 public interface Document extends Object, Extensible
 {
-    Locale getLocale();
-    Version getVersion();
-
     Content getContent();
     void setContent(Content content);
 }

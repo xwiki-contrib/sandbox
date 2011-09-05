@@ -19,10 +19,12 @@
  */
 package org.xwiki.model;
 
-import org.xwiki.model.reference.EntityReference;
-
-public interface VersionManager
+public interface EntityManager
 {
-    // TODO: Problem if we want to get a doc in a specific version + language (for ex)
-    Entity getEntity(EntityReference reference, Version version);
+    <T extends Entity> T getEntity(UniqueReference reference);
+    boolean hasEntity(UniqueReference reference);
+    void removeEntity(UniqueReference reference);
+    <T extends Entity> T addEntity(UniqueReference reference);
+
+    void rollback(Version versionToRollbackTo);
 }
