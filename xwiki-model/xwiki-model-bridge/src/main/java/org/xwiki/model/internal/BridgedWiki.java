@@ -125,7 +125,14 @@ public class BridgedWiki implements Wiki
         throw new ModelException("Not supported");
     }
 
-    public Entity getTarget()
+    @Override
+    public EntityReference getLinkReference()
+    {
+        throw new ModelException("Not supported");
+    }
+
+    @Override
+    public void setLinkReference(EntityReference linkedReference)
     {
         throw new ModelException("Not supported");
     }

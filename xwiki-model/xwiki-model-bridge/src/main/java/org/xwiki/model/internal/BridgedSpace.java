@@ -128,7 +128,14 @@ public class BridgedSpace implements Space
         throw new ModelException("Not supported");
     }
 
-    @Override public Entity getTarget()
+    @Override
+    public EntityReference getLinkReference()
+    {
+        throw new ModelException("Not supported");
+    }
+
+    @Override
+    public void setLinkReference(EntityReference linkedReference)
     {
         throw new ModelException("Not supported");
     }

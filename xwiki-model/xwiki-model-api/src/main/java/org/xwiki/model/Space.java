@@ -33,12 +33,12 @@ public interface Space extends Object, Extensible
     Space getSpace(String spaceName);
 
     /**
-     * @todo Should not be implemented with the old model
+     * Add a nested space.
      */
     Space addSpace(String spaceName);
 
     /**
-     * @todo Should not be implemented with the old model
+     * Remove a nested space.
      */
     void removeSpace(String spaceName);
 

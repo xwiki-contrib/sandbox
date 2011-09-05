@@ -19,20 +19,24 @@
  */
 package org.xwiki.model;
 
-public interface Entity extends Persistable, Linkable, Referenceable
+import org.xwiki.model.reference.EntityReference;
+
+/**
+ * Indicates that an {@link Entity} can be a link to another Entity. This is useful for example for two
+ * use cases:
+ * <ul>
+ *   <li>renaming an entity</li>
+ *   <li>aliases an entity</li>
+ * </ul>
+ */
+public interface Linkable
 {
     /**
-     * UUID
+     * Represents a link to another Entity
+     *
+     * @return the targeted entity reference or null if the current Entity isn't a link but an actual object
      */
-    String getIdentifier();
-    
-    EntityType getType();
+    EntityReference getLinkReference();
 
-    Entity getParent();
-
-    EntityIterator<Entity> getChildren(EntityType type);
-
-    boolean isModified();
-
-    boolean isNew();
+    void setLinkReference(EntityReference linkedReference);
 }

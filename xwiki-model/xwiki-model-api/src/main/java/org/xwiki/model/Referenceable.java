@@ -19,20 +19,9 @@
  */
 package org.xwiki.model;
 
-public interface Entity extends Persistable, Linkable, Referenceable
+import org.xwiki.model.reference.EntityReference;
+
+public interface Referenceable
 {
-    /**
-     * UUID
-     */
-    String getIdentifier();
-    
-    EntityType getType();
-
-    Entity getParent();
-
-    EntityIterator<Entity> getChildren(EntityType type);
-
-    boolean isModified();
-
-    boolean isNew();
+    EntityReference getReference();
 }
