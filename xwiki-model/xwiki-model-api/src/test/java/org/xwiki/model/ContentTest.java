@@ -19,13 +19,35 @@
  */
 package org.xwiki.model;
 
-import java.util.Locale;
+import org.junit.Assert;
+import org.junit.Test;
+import org.xwiki.rendering.syntax.Syntax;
 
-public interface Document extends Object, Extensible
+/**
+ * Unit tests for {@link Content}.
+ *
+ * @version $Id$
+ */
+public class ContentTest
 {
-    Locale getLocale();
-    Version getVersion();
+    @Test
+    public void equalsAndHashcode()
+    {
+        Content content1 = new Content("text", Syntax.XWIKI_2_0);
+        Content content2 = new Content("other text", Syntax.HTML_4_01);
+        Content content3 = new Content("text", Syntax.XWIKI_2_0);
+        Content content4 = new Content("text", Syntax.HTML_4_01);
 
-    Content getContent();
-    void setContent(Content content);
+        Assert.assertEquals(content1, content3);
+        Assert.assertEquals(content1.hashCode(), content3.hashCode());
+
+        // Different text, different syntax
+        Assert.assertFalse(content1.equals(content2));
+
+        // Same text, different syntax
+        Assert.assertFalse(content1.equals(content4));
+
+        // Different text, same syntax
+        Assert.assertFalse(content2.equals(content4));
+    }
 }

@@ -58,7 +58,7 @@ public class BridgedDocument implements Document
         throw new ModelException("Not supported");
     }
 
-    public String getContent()
+    public Content getContent()
     {
         throw new ModelException("Not supported");
     }
@@ -88,11 +88,6 @@ public class BridgedDocument implements Document
         throw new ModelException("Not supported");
     }
 
-    public Syntax getSyntax()
-    {
-        throw new ModelException("Not supported");
-    }
-
     public boolean hasObject(String objectName)
     {
         throw new ModelException("Not supported");
@@ -113,12 +108,7 @@ public class BridgedDocument implements Document
         throw new ModelException("Not supported");
     }
 
-    public void setContent(String content)
-    {
-        throw new ModelException("Not supported");
-    }
-
-    public void setSyntax(Syntax syntax)
+    public void setContent(Content content)
     {
         throw new ModelException("Not supported");
     }
