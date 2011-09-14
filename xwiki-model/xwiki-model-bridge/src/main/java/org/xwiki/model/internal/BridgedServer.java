@@ -26,9 +26,11 @@ import com.xpn.xwiki.doc.XWikiDocument;
 
 import org.xwiki.model.Entity;
 import org.xwiki.model.EntityIterator;
+import org.xwiki.model.EntityManager;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.ModelException;
 import org.xwiki.model.Server;
+import org.xwiki.model.UniqueReference;
 import org.xwiki.model.Wiki;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
@@ -42,9 +44,12 @@ public class BridgedServer implements Server
 {
     private XWikiContext xcontext;
 
-    public BridgedServer(XWikiContext xcontext)
+    private EntityManager entityManager;
+
+    public BridgedServer(XWikiContext xcontext, EntityManager entityManager)
     {
         this.xcontext = xcontext;
+        this.entityManager = entityManager;
     }
 
     public Wiki addWiki(String wikiName)
@@ -52,49 +57,9 @@ public class BridgedServer implements Server
         return new BridgedWiki(getXWikiContext());
     }
 
-    public <T extends Entity> T getEntity(EntityReference reference)
-    {
-        T result = null;
-        switch (reference.getType()) {
-            case DOCUMENT:
-                try {
-                    // Since the old model API always return a XWikiDocument even if it doesn't exist, we need to check
-                    // if the document is new or not.
-                    XWikiDocument xdoc = getXWiki().getDocument(new DocumentReference(reference), getXWikiContext());
-                    if (!xdoc.isNew()) {
-                        result = (T) new BridgedDocument(xdoc);
-                    }
-                } catch (XWikiException e) {
-                    throw new ModelException("Error loading document [" + reference + "]", e);
-                }
-                break;
-            case SPACE:
-                // A space exists if there's at least one document in it.
-                try {
-                    List<String> spaces = getXWiki().getSpaces(getXWikiContext());
-                    if (spaces.contains(reference.getName())) {
-                        result = (T) new BridgedSpace();
-                    }
-                } catch (XWikiException e) {
-                    throw new ModelException("Error verifying existence of space [" + reference + "]", e);
-                }
-                break;
-            case WIKI:
-                // TODO: Need to load the wiki details. FTM only checking if it exists
-                if (hasEntity(reference)) {
-                    result = (T) new BridgedWiki(getXWikiContext());
-                }
-                break;
-            default:
-                throw new ModelException("Not supported");
-        }
-
-        return result;
-    }
-
     public Wiki getWiki(String wikiName)
     {
-        return getEntity(new WikiReference(wikiName));
+        return this.entityManager.getEntity(new UniqueReference(new WikiReference(wikiName)));
     }
 
     public EntityIterator<Wiki> getWikis()
@@ -102,32 +67,7 @@ public class BridgedServer implements Server
         throw new ModelException("Not supported");
     }
 
-    public boolean hasEntity(EntityReference reference)
-    {
-        boolean result;
-        switch (reference.getType()) {
-            case DOCUMENT:
-                result = getXWiki().exists(new DocumentReference(reference), getXWikiContext());
-                break;
-            case WIKI:
-                try {
-                    result = getXWiki().getServerURL(new WikiReference(reference).getName(), getXWikiContext()) != null;
-                } catch (MalformedURLException e) {
-                    result = false;
-                }
-                break;
-            default:
-                throw new ModelException("Not supported");
-        }
-        return result;
-    }
-
     public boolean hasWiki(String wikiName)
-    {
-        throw new ModelException("Not supported");
-    }
-
-    public void removeEntity(EntityReference reference)
     {
         throw new ModelException("Not supported");
     }
@@ -142,28 +82,8 @@ public class BridgedServer implements Server
         throw new ModelException("Not supported");
     }
 
-    public XWiki getXWiki()
-    {
-        return this.xcontext.getWiki();
-    }
-
     public XWikiContext getXWikiContext()
     {
         return this.xcontext;
-    }
-
-    @Override
-    public <T extends Entity> T addEntity(EntityReference reference)
-    {
-        Entity result;
-
-        if (reference.getType().equals(EntityType.WIKI)) {
-            result = new BridgedWiki(getXWikiContext());
-
-        } else {
-            throw new ModelException("Not supported");
-        }
-
-        return (T) result;
     }
 }

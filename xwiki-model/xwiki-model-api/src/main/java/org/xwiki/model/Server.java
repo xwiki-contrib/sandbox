@@ -19,8 +19,6 @@
  */
 package org.xwiki.model;
 
-import org.xwiki.model.reference.EntityReference;
-
 /**
  * An XWiki Server is made of one or several {@link org.xwiki.model.Wiki}s. This is the top most
  * concept of the XWiki Model.

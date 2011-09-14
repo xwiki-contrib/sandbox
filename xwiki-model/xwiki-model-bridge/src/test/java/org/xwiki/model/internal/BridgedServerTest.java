@@ -42,121 +42,14 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
     }
 
     @Test
-    public void getReferenceForDocumentThatExists() throws Exception
-    {
-        final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
-        final XWikiDocument xdoc = new XWikiDocument(documentReference);
-        xdoc.setNew(false);
-        getMockery().checking(new Expectations() {{
-            oneOf(getContext().getWiki()).getDocument(documentReference, getContext());
-                will(returnValue(xdoc));
-        }});
-
-        Server server = new BridgedServer(getContext());
-        Document doc = server.getEntity(documentReference);
-        Assert.assertNotNull(doc);
-    }
-
-    @Test
-    public void getReferenceForDocumentThatDoesntExist() throws Exception
-    {
-        final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
-        final XWikiDocument xdoc = new XWikiDocument(documentReference);
-        xdoc.setNew(true);
-        getMockery().checking(new Expectations() {{
-            oneOf(getContext().getWiki()).getDocument(documentReference, getContext());
-                will(returnValue(xdoc));
-        }});
-
-        Server server = new BridgedServer(getContext());
-        Document doc = server.getEntity(documentReference);
-        Assert.assertNull(doc);
-    }
-
-    @Test
-    public void getReferenceForWikiThatExists() throws Exception
-    {
-        final WikiReference wikiReference = new WikiReference("wiki");
-        getMockery().checking(new Expectations() {{
-            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
-                will(returnValue(new URL("http://whatever/not/null")));
-        }});
-
-        Server server = new BridgedServer(getContext());
-        Wiki wiki = server.getEntity(wikiReference);
-        Assert.assertNotNull(wiki);
-    }
-
-    @Test
-    public void getReferenceForWikiThatDoesntExists() throws Exception
-    {
-        final WikiReference wikiReference = new WikiReference("wiki");
-        getMockery().checking(new Expectations() {{
-            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
-                will(returnValue(null));
-        }});
-
-        Server server = new BridgedServer(getContext());
-        Wiki wiki = server.getEntity(wikiReference);
-        Assert.assertNull(wiki);
-    }
-
-    @Test
-    public void hasReferenceForDocumentThatExists() throws Exception
-    {
-        final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
-        getMockery().checking(new Expectations() {{
-            oneOf(getContext().getWiki()).exists(documentReference, getContext());
-                will(returnValue(true));
-        }});
-
-        Server server = new BridgedServer(getContext());
-        Assert.assertTrue(server.hasEntity(documentReference));
-    }
-
-    @Test
-    public void hasReferenceForWikiThatExists() throws Exception
-    {
-        final WikiReference wikiReference = new WikiReference("wiki");
-        getMockery().checking(new Expectations() {{
-            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
-                will(returnValue(new URL("http://whatever/not/null")));
-        }});
-
-        Server server = new BridgedServer(getContext());
-        Assert.assertTrue(server.hasEntity(wikiReference));
-    }
-
-    @Test
-    public void hasReferenceForWikiThatDoesntExist() throws Exception
-    {
-        final WikiReference wikiReference = new WikiReference("wiki");
-        getMockery().checking(new Expectations() {{
-            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
-                will(returnValue(null));
-        }});
-
-        Server server = new BridgedServer(getContext());
-        Assert.assertFalse(server.hasEntity(wikiReference));
-    }
-
-    @Test
-    public void getWikiForWikiThatExists() throws Exception
+    public void addWiki() throws Exception
     {
         getMockery().checking(new Expectations() {{
             oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
                 will(returnValue(new URL("http://whatever/not/null")));
         }});
 
-        Server server = new BridgedServer(getContext());
-        Wiki wiki = server.getWiki("wiki");
-        Assert.assertNotNull(wiki);
-    }
-
-    @Test
-    public void addWiki()
-    {
-        Server server = new BridgedServer(getContext());
+        Server server = new BridgedServer(getContext(), new BridgedEntityManager(getContext()));
         Wiki wiki = server.addWiki("wiki");
         Assert.assertSame(wiki, server.getWiki("wiki"));
     }

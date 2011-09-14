@@ -19,6 +19,7 @@
  */
 package org.xwiki.model.internal;
 
+import java.util.Locale;
 import java.util.Map;
 
 import org.xwiki.model.*;
@@ -180,6 +181,18 @@ public class BridgedWiki implements Wiki
 
     @Override
     public boolean isNew()
+    {
+        throw new ModelException("Not supported");
+    }
+
+    @Override
+    public Locale getLocale()
+    {
+        throw new ModelException("Not supported");
+    }
+
+    @Override
+    public Version getVersion()
     {
         throw new ModelException("Not supported");
     }

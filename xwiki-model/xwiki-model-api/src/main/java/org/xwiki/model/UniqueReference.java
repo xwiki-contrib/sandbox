@@ -33,12 +33,17 @@ public class UniqueReference
 
     public UniqueReference(EntityReference reference)
     {
-        this(reference, null);
+        this(reference, null, null);
     }
 
     public UniqueReference(EntityReference reference, Locale locale)
     {
         this(reference, locale, null);
+    }
+
+    public UniqueReference(EntityReference reference, Version version)
+    {
+        this(reference, null, version);
     }
 
     public UniqueReference(EntityReference reference, Locale locale, Version version)
@@ -53,7 +58,7 @@ public class UniqueReference
         return this.reference;
     }
 
-    public Locale getLocal()
+    public Locale getLocale()
     {
         return this.locale;
     }
