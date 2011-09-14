@@ -22,6 +22,10 @@ package org.xwiki.model.internal;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import org.xwiki.cache.Cache;
+import org.xwiki.cache.CacheManager;
+import org.xwiki.cache.config.CacheConfiguration;
+import org.xwiki.cache.eviction.LRUEvictionConfiguration;
 import org.xwiki.model.Entity;
 import org.xwiki.model.EntityManager;
 import org.xwiki.model.EntityType;
@@ -41,15 +45,40 @@ public class BridgedEntityManager implements EntityManager
 {
     private XWikiContext xcontext;
 
-    public BridgedEntityManager(XWikiContext xcontext)
+    /**
+     * Cache holding modified entities not yet saved to persistent storage.
+     */
+    private Cache<Entity> modifiedEntityCache;
+
+    public BridgedEntityManager(XWikiContext xcontext, CacheManager cacheManager)
     {
         this.xcontext = xcontext;
+
+        CacheConfiguration cacheConfiguration = new CacheConfiguration();
+        cacheConfiguration.setConfigurationId("model");
+        LRUEvictionConfiguration lru = new LRUEvictionConfiguration();
+        cacheConfiguration.put(LRUEvictionConfiguration.CONFIGURATIONID, lru);
+
+        try {
+            this.modifiedEntityCache = cacheManager.getCacheFactory().newCache(cacheConfiguration);
+        } catch (Exception e) {
+            throw new ModelException("Failed to create Entity Cache", e);
+        }
     }
 
     @Override
     public <T extends Entity> T getEntity(UniqueReference uniqueReference)
     {
         T result = null;
+
+        // Verify first if the entity requested is in the modified entity cache
+        // TODO: why doesn't the cache api support an Object as key? This makes it complex for us here...
+        // FTM doing something extra simple...
+        T modifiedEntity = (T) this.modifiedEntityCache.get(uniqueReference.toString());
+        if (modifiedEntity != null) {
+            return modifiedEntity;
+        }
+
         EntityReference reference = uniqueReference.getReference();
         switch (reference.getType()) {
             case DOCUMENT:
@@ -92,6 +121,9 @@ public class BridgedEntityManager implements EntityManager
     public boolean hasEntity(UniqueReference uniqueReference)
     {
         boolean result;
+
+        // TOdO: should we return true if the entity has been created but not saved in the DB?
+
         EntityReference reference = uniqueReference.getReference();
         switch (reference.getType()) {
             case DOCUMENT:
@@ -113,17 +145,20 @@ public class BridgedEntityManager implements EntityManager
     @Override
     public <T extends Entity> T addEntity(UniqueReference uniqueReference)
     {
-        Entity result;
+        T result;
 
         EntityReference reference = uniqueReference.getReference();
         if (reference.getType().equals(EntityType.WIKI)) {
-            result = new BridgedWiki(getXWikiContext());
-
+            result = (T) new BridgedWiki(getXWikiContext());
         } else {
             throw new ModelException("Not supported");
         }
 
-        return (T) result;
+        // Save the Entity in the cache
+        // TODO: in the future send it through an event
+        this.modifiedEntityCache.set(uniqueReference.toString(), result);
+
+        return result;
     }
 
     @Override

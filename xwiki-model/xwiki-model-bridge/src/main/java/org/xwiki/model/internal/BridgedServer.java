@@ -20,24 +20,15 @@
 package org.xwiki.model.internal;
 
 import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.XWiki;
-import com.xpn.xwiki.doc.XWikiDocument;
 
-import org.xwiki.model.Entity;
 import org.xwiki.model.EntityIterator;
 import org.xwiki.model.EntityManager;
-import org.xwiki.model.EntityType;
 import org.xwiki.model.ModelException;
 import org.xwiki.model.Server;
 import org.xwiki.model.UniqueReference;
 import org.xwiki.model.Wiki;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.WikiReference;
 
-import java.net.MalformedURLException;
-import java.util.List;
 import java.util.Map;
 
 public class BridgedServer implements Server
@@ -54,7 +45,8 @@ public class BridgedServer implements Server
 
     public Wiki addWiki(String wikiName)
     {
-        return new BridgedWiki(getXWikiContext());
+        UniqueReference uniqueReference = new UniqueReference(new WikiReference(wikiName));
+        return this.entityManager.addEntity(uniqueReference);
     }
 
     public Wiki getWiki(String wikiName)

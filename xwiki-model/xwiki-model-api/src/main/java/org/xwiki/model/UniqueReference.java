@@ -68,5 +68,11 @@ public class UniqueReference
         return this.version;
     }
 
-    // TODO: Implement hashcode, equals, toString
+    @Override
+    public String toString()
+    {
+        return "reference = [" + getReference() + "], locale = [" + getLocale() + "], version = [" + getVersion() + "]";
+    }
+
+    // TODO: Implement hashcode, equals
 }

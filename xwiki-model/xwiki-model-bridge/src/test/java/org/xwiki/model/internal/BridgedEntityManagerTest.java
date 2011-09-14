@@ -25,8 +25,8 @@ import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.cache.CacheManager;
 import org.xwiki.model.Document;
-import org.xwiki.model.Server;
 import org.xwiki.model.UniqueReference;
 import org.xwiki.model.Wiki;
 import org.xwiki.model.reference.DocumentReference;
@@ -57,7 +57,8 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
                 will(returnValue(xdoc));
         }});
 
-        BridgedEntityManager em = new BridgedEntityManager(getContext());
+        BridgedEntityManager em = new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class));
         Document doc = em.getEntity(new UniqueReference(documentReference));
         Assert.assertNotNull(doc);
     }
@@ -73,7 +74,8 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
                 will(returnValue(xdoc));
         }});
 
-        BridgedEntityManager em = new BridgedEntityManager(getContext());
+        BridgedEntityManager em = new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class));
         Document doc = em.getEntity(new UniqueReference(documentReference));
         Assert.assertNull(doc);
     }
@@ -87,7 +89,8 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
                 will(returnValue(new URL("http://whatever/not/null")));
         }});
 
-        BridgedEntityManager em = new BridgedEntityManager(getContext());
+        BridgedEntityManager em = new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class));
         Wiki wiki = em.getEntity(new UniqueReference(wikiReference));
         Assert.assertNotNull(wiki);
     }
@@ -101,7 +104,8 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
                 will(returnValue(null));
         }});
 
-        BridgedEntityManager em = new BridgedEntityManager(getContext());
+        BridgedEntityManager em = new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class));
         Wiki wiki = em.getEntity(new UniqueReference(wikiReference));
         Assert.assertNull(wiki);
     }
@@ -115,7 +119,8 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
                 will(returnValue(true));
         }});
 
-        BridgedEntityManager em = new BridgedEntityManager(getContext());
+        BridgedEntityManager em = new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class));
         Assert.assertTrue(em.hasEntity(new UniqueReference(documentReference)));
     }
 
@@ -128,7 +133,8 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
                 will(returnValue(new URL("http://whatever/not/null")));
         }});
 
-        BridgedEntityManager em = new BridgedEntityManager(getContext());
+        BridgedEntityManager em = new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class));
         Assert.assertTrue(em.hasEntity(new UniqueReference(wikiReference)));
     }
 
@@ -141,7 +147,8 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
                 will(returnValue(null));
         }});
 
-        BridgedEntityManager em = new BridgedEntityManager(getContext());
+        BridgedEntityManager em = new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class));
         Assert.assertFalse(em.hasEntity(new UniqueReference(wikiReference)));
     }
 }

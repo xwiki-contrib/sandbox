@@ -19,16 +19,11 @@
  */
 package org.xwiki.model.internal;
 
-import java.net.URL;
-
-import org.jmock.Expectations;
 import org.junit.*;
+import org.xwiki.cache.CacheManager;
 import org.xwiki.model.*;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.WikiReference;
 
 import com.xpn.xwiki.XWiki;
-import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.test.AbstractBridgedComponentTestCase;
 
 public class BridgedServerTest extends AbstractBridgedComponentTestCase
@@ -44,13 +39,11 @@ public class BridgedServerTest extends AbstractBridgedComponentTestCase
     @Test
     public void addWiki() throws Exception
     {
-        getMockery().checking(new Expectations() {{
-            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
-                will(returnValue(new URL("http://whatever/not/null")));
-        }});
-
-        Server server = new BridgedServer(getContext(), new BridgedEntityManager(getContext()));
+        Server server = new BridgedServer(getContext(), new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class)));
         Wiki wiki = server.addWiki("wiki");
+
+        // Verify we get the exact same instance since we haven't saved yet.
         Assert.assertSame(wiki, server.getWiki("wiki"));
     }
 }
