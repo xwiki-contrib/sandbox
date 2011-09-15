@@ -43,32 +43,40 @@ public class BridgedServer implements Server
         this.entityManager = entityManager;
     }
 
+    @Override
     public Wiki addWiki(String wikiName)
     {
         UniqueReference uniqueReference = new UniqueReference(new WikiReference(wikiName));
         return this.entityManager.addEntity(uniqueReference);
     }
 
+    @Override
     public Wiki getWiki(String wikiName)
     {
-        return this.entityManager.getEntity(new UniqueReference(new WikiReference(wikiName)));
+        UniqueReference uniqueReference = new UniqueReference(new WikiReference(wikiName));
+        return this.entityManager.getEntity(uniqueReference);
     }
 
+    @Override
     public EntityIterator<Wiki> getWikis()
     {
         throw new ModelException("Not supported");
     }
 
+    @Override
     public boolean hasWiki(String wikiName)
     {
-        throw new ModelException("Not supported");
+        UniqueReference uniqueReference = new UniqueReference(new WikiReference(wikiName));
+        return this.entityManager.hasEntity(uniqueReference);
     }
 
+    @Override
     public void removeWiki(String wikiName)
     {
         throw new ModelException("Not supported");
     }
 
+    @Override
     public void save(String comment, boolean isMinorEdit, Map<String, String> extraParameters)
     {
         throw new ModelException("Not supported");

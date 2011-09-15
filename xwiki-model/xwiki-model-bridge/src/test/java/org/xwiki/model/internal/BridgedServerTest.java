@@ -19,31 +19,49 @@
  */
 package org.xwiki.model.internal;
 
+import java.net.URL;
+
+import org.jmock.Expectations;
 import org.junit.*;
 import org.xwiki.cache.CacheManager;
 import org.xwiki.model.*;
+import org.xwiki.model.reference.WikiReference;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.test.AbstractBridgedComponentTestCase;
 
 public class BridgedServerTest extends AbstractBridgedComponentTestCase
 {
+    private Server server;
+
     @Before
     public void setUp() throws Exception
     {
         super.setUp();
         final XWiki xwiki = getMockery().mock(XWiki.class);
         getContext().setWiki(xwiki);
+
+        this.server = new BridgedServer(getContext(), new BridgedEntityManager(getContext(),
+            getComponentManager().lookup(CacheManager.class)));
     }
 
     @Test
     public void addWiki() throws Exception
     {
-        Server server = new BridgedServer(getContext(), new BridgedEntityManager(getContext(),
-            getComponentManager().lookup(CacheManager.class)));
-        Wiki wiki = server.addWiki("wiki");
+        Wiki wiki = this.server.addWiki("wiki");
 
         // Verify we get the exact same instance since we haven't saved yet.
-        Assert.assertSame(wiki, server.getWiki("wiki"));
+        Assert.assertSame(wiki, this.server.getWiki("wiki"));
+    }
+
+    @Test
+    public void hasWikiWhenWikiExists() throws Exception
+    {
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getServerURL("wiki", getContext());
+                will(returnValue(new URL("http://whatever/not/null")));
+        }});
+
+        Assert.assertTrue(this.server.hasWiki("wiki"));
     }
 }
