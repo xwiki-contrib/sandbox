@@ -19,8 +19,6 @@
  */
 package org.xwiki.model;
 
-import java.lang.Object;
-
 import org.xwiki.rendering.syntax.Syntax;
 
 /**
@@ -70,7 +68,7 @@ public class Content
     }
 
     @Override
-    public boolean equals(Object object)
+    public boolean equals(java.lang.Object object)
     {
         boolean result;
 

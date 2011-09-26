@@ -30,10 +30,12 @@ import org.xwiki.model.Document;
 import org.xwiki.model.UniqueReference;
 import org.xwiki.model.Wiki;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.ObjectReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.test.AbstractBridgedComponentTestCase;
 
 public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
@@ -141,5 +143,61 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
         }});
 
         Assert.assertFalse(this.manager.hasEntity(new UniqueReference(wikiReference)));
+    }
+
+    @Test
+    public void getEntityForObjectThatExists() throws Exception
+    {
+        final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
+        final ObjectReference objectReference = new ObjectReference("object", documentReference);
+        final XWikiDocument xdoc = getMockery().mock(XWikiDocument.class);
+        final BaseObject baseObject = getMockery().mock(BaseObject.class);
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getDocument(documentReference, getContext());
+                will(returnValue(xdoc));
+            oneOf(xdoc).isNew();
+                will(returnValue(false));
+            oneOf(xdoc).getXObject(objectReference);
+                will(returnValue(baseObject));
+        }});
+
+        org.xwiki.model.Object object = this.manager.getEntity(new UniqueReference(objectReference));
+        Assert.assertNotNull(object);
+    }
+
+    @Test
+    public void getEntityForObjectThatDoesntExists() throws Exception
+    {
+        final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
+        final ObjectReference objectReference = new ObjectReference("object", documentReference);
+        final XWikiDocument xdoc = getMockery().mock(XWikiDocument.class);
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getDocument(documentReference, getContext());
+                will(returnValue(xdoc));
+            oneOf(xdoc).isNew();
+                will(returnValue(false));
+            oneOf(xdoc).getXObject(objectReference);
+                will(returnValue(null));
+        }});
+
+        org.xwiki.model.Object object = this.manager.getEntity(new UniqueReference(objectReference));
+        Assert.assertNull(object);
+    }
+
+    @Test
+    public void getEntityForObjectWhenDocumentDoesntExists() throws Exception
+    {
+        final DocumentReference documentReference = new DocumentReference("wiki", "space", "page");
+        final ObjectReference objectReference = new ObjectReference("object", documentReference);
+        final XWikiDocument xdoc = getMockery().mock(XWikiDocument.class);
+        getMockery().checking(new Expectations() {{
+            oneOf(getContext().getWiki()).getDocument(documentReference, getContext());
+                will(returnValue(xdoc));
+            oneOf(xdoc).isNew();
+                will(returnValue(true));
+        }});
+
+        org.xwiki.model.Object object = this.manager.getEntity(new UniqueReference(objectReference));
+        Assert.assertNull(object);
     }
 }

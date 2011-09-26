@@ -34,12 +34,14 @@ import org.xwiki.model.UniqueReference;
 import org.xwiki.model.Version;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.ObjectReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
 
 public class BridgedEntityManager implements EntityManager
 {
@@ -108,6 +110,25 @@ public class BridgedEntityManager implements EntityManager
                 // TODO: Need to load the wiki details. FTM only checking if it exists
                 if (hasEntity(uniqueReference)) {
                     result = (T) new BridgedWiki(getXWikiContext());
+                }
+                break;
+            case OBJECT:
+                // First find the reference to the document containing the object (it's the parent of the passed
+                // reference).
+                EntityReference documentReference = reference.getParent();
+                // Load the parent document since objects are loaded at the same time in the old model
+                XWikiDocument xdoc;
+                try {
+                    xdoc = getXWiki().getDocument(new DocumentReference(documentReference), getXWikiContext());
+                } catch (XWikiException e) {
+                    throw new ModelException("Error loading document [" + documentReference + "]", e);
+                }
+                // Get the requested object if the document isn't new...
+                if (!xdoc.isNew()) {
+                    BaseObject object = xdoc.getXObject(new ObjectReference(reference));
+                    if (object != null) {
+                        result = (T) new BridgedObject(object);
+                    }
                 }
                 break;
             default:
