@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>GoogleApps</web>
+<name>Groovy</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1320014200000</creationDate>
+<date>1320101198000</date>
+<contentUpdateDate>1320101198000</contentUpdateDate>
+<version>4.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>import com.google.gdata.client.*;
+import com.google.gdata.client.docs.*;
+import com.google.gdata.data.*;
+import com.google.gdata.data.acl.*;
+import com.google.gdata.data.docs.*;
+import com.google.gdata.data.extensions.*;
+import com.google.gdata.util.*;
+import com.google.gdata.client.docs.*;
+import com.google.gdata.client.authn.oauth.*;
+import com.google.gdata.data.media.*;
+import org.apache.velocity.tools.generic.EscapeTool;
+import org.apache.commons.lang.RandomStringUtils;
+
+public class GoogleAppsGroovy {
+
+// Config Page
+def CONFIG_PAGE = "GoogleApps.GoogleAppsConfig";
+def CONFIG_CLASS = "GoogleApps.GoogleAppsConfigClass";
+def FEED_URL = "https://docs.google.com/feeds/default/private/full";
+
+// is Application Active
+def active = false;
+
+// OAuth Params
+def OAUTH_PAGE = "GoogleApps.OAuth";
+def APPNAME; 
+def KEY; 
+def SCOPE;
+def DOMAIN;
+
+// xwiki variables
+def xwiki;
+def context;
+def doc;
+
+def escapetool = new EscapeTool();
+def sdebug = new StringBuffer();
+
+public init(xwiki, context, doc) {
+ this.xwiki = xwiki;
+ this.context = context;
+ this.doc = doc;
+ 
+ def configdoc = xwiki.getDocument(CONFIG_PAGE);
+ configdoc.use(CONFIG_CLASS);
+ this.APPNAME  = configdoc.getValue("appname");
+ this.KEY  = configdoc.getDocument().getObject(CONFIG_CLASS).get("key").getValue();
+ this.SCOPE  = configdoc.getValue("scope");
+ this.DOMAIN  = configdoc.getValue("domain");
+ this.active  = configdoc.getValue("active");
+
+ addDebug("APPNAME: ${APPNAME}");
+ addDebug("KEY: ${KEY}");
+ addDebug("SCOPE: ${SCOPE}");
+}
+
+public addDebug(str) {
+ sdebug.append(str);
+ sdebug.append("\n");
+ System.println("GOOGLEAPPS: ${str}");
+}
+
+public getDebug() {
+ return sdebug.toString();
+}
+
+public isActive() {
+ return active;
+}
+
+public prepareAuthParams() {
+ GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+ oauthParameters.setOAuthConsumerKey(APPNAME);
+ oauthParameters.setOAuthConsumerSecret(KEY);
+ oauthParameters.setScope(SCOPE);
+ return oauthParameters;
+}
+
+public checkGrantRequest() {
+ def oauthParameters = prepareAuthParams();
+
+ // set the auth token from URL
+ def accessToken = getAccessToken();
+ oauthParameters.setOAuthToken(accessToken); 
+ addDebug("Token: ${accessToken}");
+
+ GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+ oauthHelper.getOAuthParametersFromCallback(context.request.getQueryString(), oauthParameters);
+
+ // set the auth token secret from persistence
+ def accessTokenSecret = getAccessTokenSecret();
+ addDebug("Token secret: ${accessTokenSecret}");
+ oauthParameters.setOAuthTokenSecret(accessTokenSecret);
+
+ // upgrade the token to an access token
+ def newAccessToken = oauthHelper.getAccessToken(oauthParameters);
+ def newAccessTokenSecret = oauthParameters.getOAuthTokenSecret(); 
+ addDebug("New Token: ${newAccessToken}");
+ addDebug("New Token Secret: ${oauthParameters.getOAuthTokenSecret()}");
+
+ setAccessToken(newAccessToken);
+ setAccessTokenSecret(newAccessTokenSecret);
+
+ addDebug("Authentication done. Continue to do: ${context.request.url}");
+
+ if (context.request.url &amp;&amp; context.request.url!="")
+  context.response.sendRedirect(context.request.url);
+}
+
+public sendGrantRequest() {
+ def oauthParameters = prepareAuthParams();
+
+ def eurl = (context.request.url) ? escapetool.url(context.request.url) : "";
+ def rurl = doc.getExternalURL("view","url=${eurl}");
+ addDebug("Redirect URL: ${rurl}");
+ oauthParameters.setOAuthCallback(rurl);
+
+ GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+ oauthHelper.getUnauthorizedRequestToken(oauthParameters);
+
+ def accessTokenSecret = oauthParameters.getOAuthTokenSecret();
+ addDebug("Token secret: ${accessTokenSecret}");
+ setAccessTokenSecret(accessTokenSecret);
+
+ def approvalPageUrl = oauthHelper.createUserAuthorizationUrl(oauthParameters);
+
+ addDebug("Ready to authenticate on google: ${approvalPageUrl}");
+ context.response.sendRedirect(approvalPageUrl)
+}
+
+public getAccessToken() {
+ return context.request.getSession().getAttribute("gapps_oauth_token");
+}
+
+public setAccessToken(newAccessToken) {
+  context.request.getSession().setAttribute("gapps_oauth_token", newAccessToken);
+}
+
+public getAccessTokenSecret() {
+ return context.request.getSession().getAttribute("gapps_oauth_token_secret");
+}
+
+ public setAccessTokenSecret(newAccessTokenSecret) {
+  context.request.getSession().setAttribute("gapps_oauth_token_secret", newAccessTokenSecret);
+ } 
+
+public isAuthenticated() {
+ def accessToken = getAccessToken();
+ addDebug("AccessToken: ${accessToken}")
+ return (accessToken!=null);
+}
+
+public sendAuthRequest() {
+ // Authentication is needed
+ def eurl = escapetool.url(doc.getURL("view", context.request.getQueryString()))
+ def rurl = xwiki.getDocument(OAUTH_PAGE).getExternalURL("view", "url=${eurl}");
+ context.response.sendRedirect(rurl);
+}
+
+public getDocumentList() {
+ if (isAuthenticated()) {
+   def client = getDocsClient();
+
+  try {
+   def feedUrl = new URL(FEED_URL);
+   def resultFeed = client.getFeed(feedUrl, DocumentListFeed.class);
+   return resultFeed;
+  } catch (Exception e) {
+   addDebug("Authentication Fail")
+   addDebug(e.getMessage())
+   e.printStackTrace();
+   sendAuthRequest();
+  }
+ }  else {
+   sendAuthRequest();
+ }
+}
+
+def byte[] downloadFile(DocsService client, String exportUrl) {
+  def mc = new MediaContent();
+  mc.setUri(exportUrl);
+  def ms = client.getMedia(mc);
+
+  InputStream inStream = null;
+  ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+
+  try {
+    inStream = ms.getInputStream();
+
+    int c;
+    while ((c = inStream.read()) != -1) {
+      outStream.write(c);
+    }
+  } finally {
+    if (inStream != null) {
+      inStream.close();
+    }
+    if (outStream != null) {
+      outStream.flush();
+      outStream.close();
+    }
+  }
+  return outStream.toByteArray();
+}
+
+public saveFileToXWiki(client, adoc, name, data, redirect) {
+  def attachment = adoc.addAttachment(name, data);
+
+  // ready to save now
+  adoc.getDoc().saveAttachmentContent(attachment.getAttachment(), context.getContext());
+  adoc.save("Updated Attachment From Google Apps");   
+  
+  addDebug("Document ${name} has been saved to XWiki")
+
+ if (redirect) {
+   def rurl = adoc.getURL("view", "#Attachments")
+   context.response.sendRedirect(rurl);
+ }
+}
+
+public getExistingFile(client, name) {
+  DocumentQuery dquery = new DocumentQuery(new URL(FEED_URL));
+  dquery.setTitleQuery(name);
+  dquery.setTitleExact(true);
+  dquery.setMaxResults(1);
+  def resultFeed = client.getFeed(dquery, DocumentListFeed.class);
+  def entries = resultFeed.getEntries();
+  if (entries.size()&gt;0)
+    return entries.get(0);
+  else
+    return null;
+}
+
+public saveAttachmentInGoogle(adoc, name, entry) {
+  def data = adoc.getAttachment(name).getContentAsBytes();
+  entry.setMediaSource(new MediaByteArraySource(data, xwiki.getXWiki().getEngineContext().getMimeType(name)));
+  return entry.updateMedia(true);
+}
+
+public createAttachmentInGoogle(client, adoc, name) {
+  def tmaindir = xwiki.getXWiki().getTempDirectory(context.getContext());
+  def tdir = new File(tmaindir, RandomStringUtils.randomAlphanumeric(8));
+  try { 
+       // save temporary file to disk
+       tdir.mkdirs();
+       def file = new File(tdir, name);
+       if (!file.exists())
+            file.createNewFile();
+       def fos = new FileOutputStream(file);
+       fos.write(adoc.getAttachment(name).getContentAsBytes())
+       fos.close();
+
+       String mimeType = DocumentListEntry.MediaType.fromFileName(name).getMimeType();
+       DocumentListEntry newDocument = new DocumentListEntry();
+       newDocument.setFile(file, mimeType);
+       newDocument.setTitle(new PlainTextConstruct(name));
+
+       def result = client.insert(new URL(FEED_URL), newDocument);
+       return result;
+  } finally {
+       if (tmaindir!=null)
+         tmaindir.delete();
+  }
+}
+ 
+public getExportURL(entry, name) {
+ def ext = name.substring(name.indexOf(".")+1);
+ return entry.getContent().getUri() + "&amp;exportFormat=" + ext;
+}
+
+public getDocsClient() {
+   def oauthParameters = prepareAuthParams();
+   oauthParameters.setOAuthToken(getAccessToken()); 
+   oauthParameters.setOAuthTokenSecret(getAccessTokenSecret()); 
+
+   DocsService client = new DocsService("xwiki-googleapps-1.0");
+   client.setOAuthCredentials(oauthParameters, new OAuthHmacSha1Signer());
+   return client;
+}
+
+public retrieveFileFromGoogle(page, id, name) {
+ def adoc = xwiki.getDocument(page);
+ if (isAuthenticated()) {
+   def client = getDocsClient();
+
+   def tmaindir = null;
+   try {
+      def data = downloadFile(client, id);
+      saveFileToXWiki(client, adoc, name, data, true);
+   } catch (Exception e) {
+     addDebug("Authentication Fail")
+     addDebug(e.getMessage())
+     e.printStackTrace();
+     sendAuthRequest();
+   }
+  }  else {
+   sendAuthRequest();
+  }
+}
+
+public checkFileExists(page, name) {
+ def adoc = xwiki.getDocument(page);
+ if (isAuthenticated()) {
+  try {
+   def client = getDocsClient();
+   return getExistingFile(client, name)
+  } catch (Exception e) {
+   addDebug("Authentication Fail")
+   addDebug(e.getMessage())
+   e.printStackTrace();
+   sendAuthRequest();
+  }
+ }  else {
+   sendAuthRequest();
+ } 
+}
+
+public saveAttachmentToGoogle(page, name, overwrite) {
+ def adoc = xwiki.getDocument(page);
+  if (isAuthenticated()) {
+  try {
+    def client = getDocsClient();
+    if (overwrite) {
+      def entry = getExistingFile(client, name);
+      return saveAttachmentInGoogle(adoc, name, entry);
+    } else {
+      return createAttachmentInGoogle(client, adoc, name);
+    }
+  } catch (Exception e) {
+   addDebug("Authentication Fail")
+   addDebug(e.getMessage())
+   e.printStackTrace();
+   sendAuthRequest();
+  }
+ }  else {
+   sendAuthRequest();
+ } 
+}
+
+ public getFileDisplayInfo(rid, docName) {
+  def newDocName;
+  def availableTypes;
+    if (rid.startsWith("document:")) {
+      newDocName = docName.replaceAll("\\.doc\$","").replaceAll("\\.docx\$","").replaceAll("\\.odt\$","");
+      availableTypes = [ "odt", "doc", "pdf" ];
+    } else if (rid.startsWith("spreadsheet:")) {
+      newDocName = docName.replaceAll("\\.xls\$","").replaceAll("\\.xlsx\$","").replaceAll("\\.ods\$","");
+      availableTypes = [ "ods", "xls", "xlsx", "pdf" ];
+    } else if (rid.startsWith("presentation:")) {
+      newDocName = docName.replaceAll("\\.ppt\$","").replaceAll("\\.pptx\$","").replaceAll("\\.odp\$","");
+      availableTypes = [ "pptx", "pdf", "svg", "png", "jpeg" ];
+    } else if (rid.startsWith("pdf:")) {
+      newDocName = docName.replaceAll("\\.pdf\$","").replaceAll("\\.pdf\$","").replaceAll("\\.pdf\$","");
+      availableTypes = [ "pdf" ];
+    } else if (rid.startsWith("drawing:")) {
+      newDocName = docName.replaceAll("\\.svg\$","");
+      availableTypes = [ "svg", "png", "jpeg", "pdf" ];
+    } else {
+      newDocName = docName;
+      availableTypes = [ "" ];
+    }
+   return [ docName : newDocName, availableTypes : availableTypes ]
+ }
+
+ public importFromGoogleApps(feed, query, nbResults) {
+   if (isAuthenticated()) {
+  
+     try {
+        def client = getDocsClient();
+        DocumentListFeed resultFeed;
+        
+        if (feed==null) {
+            def dquery = new DocumentQuery(new URL(FEED_URL));
+            dquery.setTitleQuery(query);
+            dquery.setTitleExact(false);
+            dquery.setMaxResults(nbResults);
+            return client.getFeed(dquery, DocumentListFeed.class);
+        } else {
+            return client.getFeed(new URL(feed), DocumentListFeed.class);
+        }
+   } catch (Exception e) {
+   addDebug("Authentication Fail")
+   addDebug(e.getMessage())
+   e.printStackTrace();
+   sendAuthRequest();
+  }
+ }  else {
+   sendAuthRequest();
+ } 
+}
+
+}</content></xwikidoc>

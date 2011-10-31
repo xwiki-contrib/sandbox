@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>GoogleApps</web>
+<name>WebHome</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1319894685000</creationDate>
+<date>1320101292000</date>
+<contentUpdateDate>1320101292000</contentUpdateDate>
+<version>15.1</version>
+<title>Google Apps Integration</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>
+This is the code for the Google Apps extension, allowing to integrate XWiki with Google's editing application (Google Docs, Spreadsheet, Presentations and Drawing). Thanks to this application it possible to easily import a Google Apps document as an attachment in XWiki (in multiple formats) and also to launch editing of an XWiki attachment in Google Apps. Once your editing session is finished you can reimport it in XWiki.
+
+To use this feature you will first need to [[register your wiki on google&gt;&gt;https://accounts.google.com/ManageDomains]] and obtain a secret key for the OAuth authentication integration. You will need to configure these keys in the [[Google Apps section of the XWiki Preferences&gt;&gt;XWiki.XWikiPreferences?editor=globaladmin&amp;section=googleapps]]
+
+You also need to visit the page [[GoogleApps.Install]] to finalize the installation and install the translations bundle.
+
+You can verify your installation by visiting the page [[TestDocumentList]], which should list you 100 documents of your Google Docs instance.
+
+Once you have properly configured the application, you will be able to see the feature in the Attachments section of XWiki pages. You can either click on the edit link next to each attachment or use the "Import from Google Apps" button.
+
+{{dashboard source="Main.Dashboard" /}}</content></xwikidoc>

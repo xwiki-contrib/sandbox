@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>GoogleApps</web>
+<name>Translations</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1319971241000</creationDate>
+<date>1320101199000</date>
+<contentUpdateDate>1320101199000</contentUpdateDate>
+<version>3.1</version>
+<title>Google Apps Integration Translations</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>admin.googleapps=Google Apps\u2122
+googleapps.config.heading=Google Apps\u2122 Integration Configuration
+googleapps.config.explanation=XWiki can be integrated with Google Apps, which then allows you to edit Office Attachments using the Google Apps\u2122 editors as well as resave them in the wiki. It also allows to upload a Google Apps\u2122 file to any Wiki Page. To activate Google Apps\u2122 you need to [[register for OAuth access on Google.com&gt;&gt;https://accounts.google.com/ManageDomains]] and to insert your domain name and key in the following settings. You will find more information about registration in [[Google's registration documentation&gt;&gt;http://code.google.com/apis/accounts/docs/RegistrationForWebAppsAuto.html]].
+GoogleApps.GoogleAppsConfigClass_appname=Application Name
+GoogleApps.GoogleAppsConfigClass_key=Secret Key
+GoogleApps.GoogleAppsConfigClass_domain=Domain Google Apps
+GoogleApps.GoogleAppsConfigClass_active=Activate
+googleapps.edit.editingoogleapps.link=Edit in Google Apps
+googleapps.edit.title=Edit XWiki Attachment in Google Apps
+googleapps.edit.overwritemessage=There is already a file named {0}. You can either overwrite it or create a new one:
+googleapps.edit.overwrite.button=Overwrite
+googleapps.edit.newfile.button=New file
+googleapps.edit.overwrite.desc=Google Apps document has been overwritten. You can now:
+googleapps.edit.newfile.desc=A new Google Apps document has been created. You can now:
+googleapps.edit.desc=Once you have edited the document in Google Apps, using the following button you can retrieve the document content and resave it as an XWiki attachement:
+googleapps.edit.retrieve.button=Retrieve Document Content
+googleapps.edit.editingoogle.button=Edit Google Apps Document
+googleapps.import.importfromgoogleapps=Import from Google Apps
+googleapps.import.title=Importing a document from Google Apps
+googleapps.import.desc=To import a Google Apps document in the page {0} ({1}) search for the document in the Google Apps repository and click 'Import to XWiki':
+googleapps.import.form.title=Search for Google Documents: 
+googleapps.import.form.button=Search
+googleapps.import.importas=Import to XWiki as
+googleapps.import.nextresults.button=Next results
+googleapps.retrieve.title=Retrieve document from Google Apps
+googleapps.retrieve.fail=Failed to retrieve document from Google Apps
+googleapps.retrieve.nodocument=No document has been given for retrieval.
+
+
+
+</content></xwikidoc>

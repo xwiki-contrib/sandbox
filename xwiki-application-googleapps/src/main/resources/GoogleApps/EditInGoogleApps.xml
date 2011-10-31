@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>GoogleApps</web>
+<name>EditInGoogleApps</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1319921061000</creationDate>
+<date>1320101199000</date>
+<contentUpdateDate>1320101199000</contentUpdateDate>
+<version>4.1</version>
+<title>$msg.get("googleapps.edit.title")</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity}}
+#set($gagroovy = $xwiki.parseGroovyFromPage("GoogleApps.Groovy"))
+#set($ok = $gagroovy.init($xwiki, $context, $doc))
+
+#if(!$request.confirm)
+ #set($entry = $gagroovy.checkFileExists($request.page, $request.name))
+#end
+#if($entry)
+$msg.get("googleapps.edit.overwritemessage", [$request.name])
+
+(% class="buttonwrapper" %)[[$msg.get("googleapps.edit.overwrite.button")&gt;&gt;?page=${escapetool.url($request.page)}&amp;name=${escapetool.url($request.name)}&amp;confirm=1]] (% class="buttonwrapper" %)[[$msg.get("googleapps.edit.newfile.button")&gt;&gt;?page=${escapetool.url($request.page)}&amp;name=${escapetool.url($request.name)}&amp;confirm=2]]
+#else
+ #if($request.confirm=="1")
+  #set($overwrite = true)
+ #else
+  #set($overwrite = false)
+ #end
+ #set($entry = $gagroovy.saveAttachmentToGoogle($request.page, $request.name, $overwrite))
+ #set($exporturl = $gagroovy.getExportURL($entry, $request.name))
+ #if($overwrite)
+$msg.get("googleapps.edit.overwrite.desc")
+ #else
+$msg.get("googleapps.edit.newfile.desc")
+ #end
+
+(% class="buttonwrapper" %)
+{{html clean=false}}&lt;a href="${entry.getHtmlLink().getHref()}" target="_blank"&gt;$msg.get("googleapps.edit.editingoogle.button")&lt;/a&gt;{{/html}}
+
+$msg.get("googleapps.edit.desc")
+
+(% class="buttonwrapper" %)[[$msg.get("googleapps.edit.retrieve.button")&gt;&gt;RetrieveFromGoogleApps?page=${escapetool.url($request.page)}&amp;name=${escapetool.url($request.name)}&amp;id=${escapetool.url($exporturl)}]]
+#end
+{{/velocity}}</content></xwikidoc>

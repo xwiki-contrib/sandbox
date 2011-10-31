@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>GoogleApps</web>
+<name>JSExtension</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1320097179000</creationDate>
+<date>1320101199000</date>
+<contentUpdateDate>1320101199000</contentUpdateDate>
+<version>5.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.JavaScriptExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>GoogleApps.JSExtension</name>
+<number>0</number>
+<className>XWiki.JavaScriptExtension</className>
+<guid>76a4842a-6fbc-4a50-8599-961b0272183a</guid>
+<property>
+<cache>short</cache>
+</property>
+<property>
+<code>#set($configdoc = $xwiki.getDocument("GoogleApps.GoogleAppsConfig"))
+#set($ok = $configdoc.use("GoogleApps.GoogleAppsConfigClass"))
+#set($active = $configdoc.getValue("activate"))
+#if($active)
+var listener = function(event) {
+  if (event.memo.id == 'Attachments') {
+     var buttons = $$(".xwikibuttonlinks")
+     for (i=0;i&lt;=buttons.length;i++)
+     {
+       var dlink = (buttons[i]) ? buttons[i].getElementsByClassName("deletelink") : null;
+       if (dlink &amp;&amp; dlink[0]) {
+        var dlinkurl = dlink[0].href;
+        var dlinkpos = dlinkurl.indexOf("?");
+        var filename = dlinkurl.substring(dlinkurl.lastIndexOf("/", dlinkpos) + 1, dlinkpos)
+        buttons[i].insert('&lt;a class="editlink" href="$xwiki.getURL("GoogleApps.EditInGoogleApps")?page=' + encodeURIComponent(XWiki.currentSpace) + '.' + encodeURIComponent(XWiki.currentPage) + '&amp;name=' + filename + '" title="$msg.get("googleapps.edit.editingoogleapps.link")"&gt;$msg.get("googleapps.edit.editingoogleapps.link")&lt;/a&gt;')
+       }
+     }
+     var attachaddform = $("AddAttachment");
+     attachaddform.insert('&lt;span class="buttonwrapper" style="float: right; position: relative; top: -25px;"&gt;&lt;a href="$xwiki.getURL("GoogleApps.ImportFromGoogleApps")?page=' + encodeURIComponent(XWiki.currentSpace) + '.' + encodeURIComponent(XWiki.currentPage) + '"&gt;$msg.get("googleapps.import.importfromgoogleapps")&lt;/a&gt;&lt;/span&gt;')
+     document.stopObserving("xwiki:docextra:loaded", listener);
+     delete listener;
+  }
+}.bindAsEventListener(this);
+
+document.observe("xwiki:docextra:loaded", listener);
+#end</code>
+</property>
+<property>
+<name>Google Apps Integration</name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>always</use>
+</property>
+</object>
+<content></content></xwikidoc>

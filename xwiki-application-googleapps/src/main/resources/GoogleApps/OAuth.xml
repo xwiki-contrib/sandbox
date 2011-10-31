@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>GoogleApps</web>
+<name>OAuth</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1319910750000</creationDate>
+<date>1320101198000</date>
+<contentUpdateDate>1320101198000</contentUpdateDate>
+<version>4.1</version>
+<title>OAuth Authentication Check Page</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity}}
+
+#set($gagroovy = $xwiki.parseGroovyFromPage("GoogleApps.Groovy"))
+#set($ok = $gagroovy.init($xwiki, $context, $doc))
+#if($request.oauth_token)
+ #set($ok = $gagroovy.checkGrantRequest())
+#else
+ #set($ok = $gagroovy.sendGrantRequest())
+#end
+
+{{/velocity}}</content></xwikidoc>

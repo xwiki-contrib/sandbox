@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>GoogleApps</web>
+<name>ImportFromGoogleApps</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1319973946000</creationDate>
+<date>1320101199000</date>
+<contentUpdateDate>1320101199000</contentUpdateDate>
+<version>7.1</version>
+<title>Importing a document from Google Apps</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity}}
+#set($pagedoc = $xwiki.getDocument($request.page))
+#set($pagetitle = $pagedoc.displayTitle)
+
+To import a Google Apps document in the page "${pagetitle}" ($pagedoc.fullName) search for the document in the Google Apps repository and click 'Import to XWiki':
+
+{{html clean==false}}
+&lt;form action=""&gt;
+Search for Google Documents: 
+&lt;input type="text" name="query" value="$!{request.query}" /&gt;
+&lt;input type="hidden" name="page" value="$!{request.page}" /&gt;
+&lt;input type="hidden" name="form_token" value="$!{services.csrf.getToken()}" /&gt;
+&lt;input type="submit" value="Search" /&gt;
+&lt;/form&gt;
+{{/html}}
+
+#if($request.query)
+#set($gagroovy = $xwiki.parseGroovyFromPage("GoogleApps.Groovy"))
+#set($ok = $gagroovy.init($xwiki, $context, $doc))
+#set($resultFeed = $gagroovy.importFromGoogleApps($request.feed, $request.query, 10))
+#foreach($entry in $resultFeed.entries)
+ #set($docName = $entry.getTitle().getPlainText())
+ #set($rid = $entry.getResourceId())
+ #set($docinfo = $gagroovy.getFileDisplayInfo($rid, $docName))
+ * ${docName} - Import to XWiki as #foreach($type in $docinfo.availableTypes)
+#if($type=="")
+ #set($stype = "file")
+ #set($newDocName = $docinfo.docName)
+#else
+ #set($stype = $type)
+ #set($newDocName = "${docinfo.docName}.${type}")
+#end
+#set($gurl = "${entry.getContent().getUri()}&amp;exportFormat=${type}")
+[[${stype}&gt;&gt;RetrieveFromGoogleApps?page=${escapetool.url($request.page)}&amp;name=${escapetool.url($newDocName)}&amp;id=${escapetool.url($gurl)}]] #end
+
+#end
+
+#set($nextLink = $resultFeed.getNextLink())
+#if($nextLink)
+[[Next results&gt;&gt;?query=${escapetool.url($request.query)}&amp;feed=${escapetool.url($nextLink.getHref())}]]
+#end
+
+#end
+{{/velocity}}</content></xwikidoc>
