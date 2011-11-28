@@ -59,11 +59,7 @@ public class JavaScriptIdASTFilter implements NodeVisitor
         this.namespace = namespace;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see NodeVisitor#visit(AstNode)
-     */
+    @Override
     public boolean visit(AstNode node)
     {
         if (node.getType() == Token.CALL) {

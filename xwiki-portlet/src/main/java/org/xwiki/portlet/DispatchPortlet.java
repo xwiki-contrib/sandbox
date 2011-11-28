@@ -39,7 +39,7 @@ import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.servlet.http.Cookie;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.model.ResponseData;
 import org.xwiki.portlet.url.DispatchURLFactory;
@@ -125,22 +125,12 @@ public class DispatchPortlet extends GenericPortlet
      */
     private URLRequestTypeMapper urlRequestTypeMapper;
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see GenericPortlet#init()
-     */
     @Override
     public void init() throws PortletException
     {
         urlRequestTypeMapper = new URLRequestTypeMapper();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see GenericPortlet#processAction(ActionRequest, ActionResponse)
-     */
     @Override
     public void processAction(ActionRequest request, ActionResponse response) throws PortletException, IOException
     {
@@ -162,8 +152,8 @@ public class DispatchPortlet extends GenericPortlet
     protected void processView(ActionRequest request, ActionResponse response) throws PortletException, IOException
     {
         request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.ACTION);
-        request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
-            + getDefaultDispatchURL(request.getPreferences()));
+        request.setAttribute(ATTRIBUTE_HOME_URL,
+            request.getContextPath() + getDefaultDispatchURL(request.getPreferences()));
         String dispatchURL = getDispatchURL(request);
         String redirectURL = null;
         int i = 0;
@@ -205,22 +195,12 @@ public class DispatchPortlet extends GenericPortlet
         response.setPortletMode(PortletMode.VIEW);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see GenericPortlet#getTitle(RenderRequest)
-     */
     @Override
     protected String getTitle(RenderRequest request)
     {
         return request.getPreferences().getValue(PREFERENCE_TITLE, super.getTitle(request));
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see GenericPortlet#doView(RenderRequest, RenderResponse)
-     */
     @Override
     protected void doView(RenderRequest request, RenderResponse response) throws PortletException, IOException
     {
@@ -234,18 +214,13 @@ public class DispatchPortlet extends GenericPortlet
             renderResponseData(responseData, response, streamFilterManager);
         } else {
             request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RENDER);
-            request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
-                + getDefaultDispatchURL(request.getPreferences()));
+            request.setAttribute(ATTRIBUTE_HOME_URL,
+                request.getContextPath() + getDefaultDispatchURL(request.getPreferences()));
             request.setAttribute(ATTRIBUTE_STREAM_FILTER_MANAGER, streamFilterManager);
             getPortletContext().getRequestDispatcher(dispatchURL).forward(request, response);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see GenericPortlet#doEdit(RenderRequest, RenderResponse)
-     */
     @Override
     protected void doEdit(RenderRequest request, RenderResponse response) throws PortletException, IOException
     {
@@ -260,17 +235,12 @@ public class DispatchPortlet extends GenericPortlet
         getPortletContext().getRequestDispatcher(editURL).forward(request, response);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see GenericPortlet#serveResource(ResourceRequest, ResourceResponse)
-     */
     @Override
     public void serveResource(ResourceRequest request, ResourceResponse response) throws PortletException, IOException
     {
         request.setAttribute(ATTRIBUTE_REQUEST_TYPE, RequestType.RESOURCE);
-        request.setAttribute(ATTRIBUTE_HOME_URL, request.getContextPath()
-            + getDefaultDispatchURL(request.getPreferences()));
+        request.setAttribute(ATTRIBUTE_HOME_URL,
+            request.getContextPath() + getDefaultDispatchURL(request.getPreferences()));
         String dispatchURL = getDispatchURL(request);
         DispatchURLFactory dispatchURLFactory = new DispatchURLFactory(response, urlRequestTypeMapper, dispatchURL);
         StreamFilterManager streamFilterManager =

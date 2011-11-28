@@ -63,11 +63,7 @@ public class NotifyingRequestDispatcher implements RequestDispatcher
         this.path = path;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see RequestDispatcher#forward(ServletRequest, ServletResponse)
-     */
+    @Override
     public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
         dispatchedRequest.pushDispatch(new Dispatch(DispatchType.FORWARD, path));
@@ -78,11 +74,7 @@ public class NotifyingRequestDispatcher implements RequestDispatcher
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see RequestDispatcher#include(ServletRequest, ServletResponse)
-     */
+    @Override
     public void include(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
         dispatchedRequest.pushDispatch(new Dispatch(DispatchType.INCLUDE, path));

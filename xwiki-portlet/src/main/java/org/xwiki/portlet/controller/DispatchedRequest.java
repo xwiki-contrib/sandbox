@@ -34,7 +34,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.xwiki.portlet.util.QueryStringParser;
 
 /**
@@ -75,8 +75,8 @@ public class DispatchedRequest extends HttpServletRequestWrapper
      * initial request.
      * 
      * @param request the request to be wrapped
-     * @param exposeInitialQueryStringParameters {@code true} to expose the initial query string parameters, {@code
-     *            false} otherwise
+     * @param exposeInitialQueryStringParameters {@code true} to expose the initial query string parameters,
+     *            {@code false} otherwise
      * @throws ServletException if wrapping the given request fails
      */
     public DispatchedRequest(HttpServletRequest request, boolean exposeInitialQueryStringParameters)
@@ -199,11 +199,6 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletRequestWrapper#getRequestURI()
-     */
     @Override
     public String getRequestURI()
     {
@@ -214,11 +209,6 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletRequestWrapper#getServletPath()
-     */
     @Override
     public String getServletPath()
     {
@@ -229,11 +219,6 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletRequestWrapper#getPathInfo()
-     */
     @Override
     public String getPathInfo()
     {
@@ -244,11 +229,6 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletRequestWrapper#getQueryString()
-     */
     @Override
     public String getQueryString()
     {
@@ -259,11 +239,6 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletRequestWrapper#getParameter(String)
-     */
     @Override
     public String getParameter(String name)
     {
@@ -275,11 +250,6 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         return value;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletRequestWrapper#getParameterMap()
-     */
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, String[]> getParameterMap()
@@ -296,11 +266,6 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         return Collections.unmodifiableMap(parameterMap);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletRequestWrapper#getParameterNames()
-     */
     @SuppressWarnings("unchecked")
     @Override
     public Enumeration<String> getParameterNames()
@@ -315,11 +280,6 @@ public class DispatchedRequest extends HttpServletRequestWrapper
         return Collections.enumeration(parameterNames);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletRequestWrapper#getParameterValues(String)
-     */
     @Override
     public String[] getParameterValues(String name)
     {

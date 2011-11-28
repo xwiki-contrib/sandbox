@@ -30,7 +30,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.portlet.util.ByteArrayServletOutputStream;
 import org.xwiki.portlet.util.StringServletPrintWriter;
 
@@ -64,6 +64,16 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     private final Set<String> knownMimeTypes;
 
     /**
+     * The media type of this response.
+     * <p>
+     * NOTE: We store the content type because some portlet containers don't allow the content type to be set when the
+     * request has been forwarded (PLT.19.4 from JSR286).
+     * 
+     * @see http://www-01.ibm.com/support/docview.wss?uid=swg1PM22501
+     */
+    private String contentType;
+
+    /**
      * Wraps the given servlet response that has been dispatched from a portlet's render or serve resource method.
      * 
      * @param response the response object to be wrapped
@@ -76,11 +86,6 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
         this.knownMimeTypes = knownMimeTypes;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#getOutputStream()
-     */
     @Override
     public ServletOutputStream getOutputStream() throws IOException
     {
@@ -99,11 +104,6 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#getWriter()
-     */
     @Override
     public PrintWriter getWriter() throws IOException
     {
@@ -129,7 +129,7 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     public boolean isOutputIntercepted()
     {
         return !outputPreserved
-            && (outputStreamWrapper != null || writerWrapper != null || knownMimeTypes.contains(getMimeType()));
+            && (outputStreamWrapper != null || writerWrapper != null || knownMimeTypes.contains(getMediaType()));
     }
 
     /**
@@ -149,10 +149,24 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     }
 
     /**
-     * @return the mime type of the resource that is being served
+     * @return the media type of the resource that is being served
      */
-    public String getMimeType()
+    public String getMediaType()
     {
         return StringUtils.substringBefore(getContentType(), ";");
+    }
+
+    @Override
+    public void setContentType(String contentType)
+    {
+        super.setContentType(contentType);
+        this.contentType = contentType;
+    }
+
+    @Override
+    public String getContentType()
+    {
+        String type = super.getContentType();
+        return type != null ? type : this.contentType;
     }
 }

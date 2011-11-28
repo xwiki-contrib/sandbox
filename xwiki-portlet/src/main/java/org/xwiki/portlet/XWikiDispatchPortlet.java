@@ -38,11 +38,6 @@ public class XWikiDispatchPortlet extends DispatchPortlet
      */
     public static final String PREFERENCE_PATH_INFO = "pathInfo";
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see DispatchPortlet#getDefaultDispatchURL(PortletPreferences)
-     */
     @Override
     protected String getDefaultDispatchURL(PortletPreferences preferences)
     {

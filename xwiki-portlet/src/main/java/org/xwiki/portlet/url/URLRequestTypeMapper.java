@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.util.QueryStringParser;
 
@@ -72,11 +72,7 @@ public class URLRequestTypeMapper
             this.prefix = prefix;
         }
 
-        /**
-         * {@inheritDoc}
-         * 
-         * @see URLMatcher#matches(String)
-         */
+        @Override
         public boolean matches(String url)
         {
             return url.startsWith(prefix);
@@ -103,11 +99,7 @@ public class URLRequestTypeMapper
             this.suffix = suffix;
         }
 
-        /**
-         * {@inheritDoc}
-         * 
-         * @see URLMatcher#matches(String)
-         */
+        @Override
         public boolean matches(String url)
         {
             return url.endsWith(suffix);
@@ -139,11 +131,7 @@ public class URLRequestTypeMapper
             expectedParameters = queryStringParser.parse(queryString);
         }
 
-        /**
-         * {@inheritDoc}
-         * 
-         * @see URLMatcher#matches(String)
-         */
+        @Override
         public boolean matches(String url)
         {
             int queryStringPos = url.lastIndexOf('?');
@@ -168,7 +156,7 @@ public class URLRequestTypeMapper
     /**
      * The logger instance.
      */
-    private static final Log LOG = LogFactory.getLog(URLRequestTypeMapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(URLRequestTypeMapper.class);
 
     /**
      * The list of matchers for each request type.
@@ -185,16 +173,16 @@ public class URLRequestTypeMapper
             try {
                 readURLMapping(is);
             } catch (IOException e) {
-                LOG.error("Failed to read from the URL mapping file.", e);
+                LOGGER.error("Failed to read from the URL mapping file.", e);
             } finally {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    LOG.error("Failed to close URL mapping file.", e);
+                    LOGGER.error("Failed to close URL mapping file.", e);
                 }
             }
         } else {
-            LOG.warn("URL mapping file not found.");
+            LOGGER.warn("URL mapping file not found.");
         }
     }
 

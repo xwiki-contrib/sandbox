@@ -22,7 +22,7 @@ package org.xwiki.portlet.url;
 import javax.portlet.BaseURL;
 import javax.portlet.MimeResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.portlet.model.RequestType;
 
 /**

@@ -24,8 +24,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
@@ -43,7 +43,7 @@ public class HTMLStreamFilter implements StreamFilter
     /**
      * The logger instance.
      */
-    private static final Log LOG = LogFactory.getLog(HTMLStreamFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HTMLStreamFilter.class);
 
     /**
      * The list of XML filters that are applied to the HTML stream.
@@ -77,11 +77,7 @@ public class HTMLStreamFilter implements StreamFilter
         filters.add(new HTMLURLAttributeXMLFilter(urlRewriter));
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see StreamFilter#filter(Reader, Writer)
-     */
+    @Override
     public void filter(Reader reader, Writer writer)
     {
         try {
@@ -100,7 +96,7 @@ public class HTMLStreamFilter implements StreamFilter
             xhtmlWriter.setParent(parent);
             xhtmlWriter.parse(new InputSource(reader));
         } catch (Exception e) {
-            LOG.error("Failed to rewrite servlet HTML.", e);
+            LOGGER.error("Failed to rewrite servlet HTML.", e);
         }
     }
 }

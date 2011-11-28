@@ -56,176 +56,96 @@ public class DispatchedActionResponse extends HttpServletResponseWrapper
         responseData.setLocale(response.getLocale());
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#addCookie(Cookie)
-     */
     @Override
     public void addCookie(Cookie cookie)
     {
         responseData.addCookie(cookie);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#addHeader(String, String)
-     */
     @Override
     public void addHeader(String name, String value)
     {
         responseData.addHeader(name, value);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#containsHeader(String)
-     */
     @Override
     public boolean containsHeader(String name)
     {
         return responseData.containsHeader(name);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#getCharacterEncoding()
-     */
     @Override
     public String getCharacterEncoding()
     {
         return responseData.getCharacterEncoding();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#getContentType()
-     */
     @Override
     public String getContentType()
     {
         return responseData.getContentType();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#getLocale()
-     */
     @Override
     public Locale getLocale()
     {
         return responseData.getLocale();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#getOutputStream()
-     */
     @Override
     public ServletOutputStream getOutputStream() throws IOException
     {
         return responseData.getOutputStream();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#getWriter()
-     */
     @Override
     public PrintWriter getWriter() throws IOException
     {
         return responseData.getWriter();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#setCharacterEncoding(String)
-     */
     @Override
     public void setCharacterEncoding(String charset)
     {
         responseData.setCharacterEncoding(charset);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#setContentLength(int)
-     */
     @Override
     public void setContentLength(int len)
     {
         responseData.setContentLength(len);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#setContentType(String)
-     */
     @Override
     public void setContentType(String type)
     {
         responseData.setContentType(type);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#setHeader(String, String)
-     */
     @Override
     public void setHeader(String name, String value)
     {
         responseData.setHeader(name, value);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#setLocale(Locale)
-     */
     @Override
     public void setLocale(Locale loc)
     {
         responseData.setLocale(loc);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#sendError(int, String)
-     */
     @Override
     public void sendError(int sc, String msg) throws IOException
     {
         responseData.sendError(sc, msg);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#sendRedirect(String)
-     */
     @Override
     public void sendRedirect(String location) throws IOException
     {
         responseData.sendRedirect(location);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see HttpServletResponseWrapper#setStatus(int, String)
-     */
     @Override
     public void setStatus(int sc, String sm)
     {

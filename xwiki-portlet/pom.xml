@@ -25,13 +25,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-core-parent</artifactId>
-    <version>2.7-SNAPSHOT</version>
+    <artifactId>xwiki-platform-core</artifactId>
+    <version>3.2</version>
   </parent>
-  <artifactId>xwiki-core-portlet</artifactId>
-  <name>XWiki Platform - Core - Portlet</name>
+  <artifactId>xwiki-platform-portlet</artifactId>
+  <name>XWiki Platform - Portlet</name>
   <packaging>jar</packaging>
-  <description>Provides a portlet that can be used to integrate an XWiki instance inside a JSR286 compatible portal</description>
+  <description>Provides a portlet that can be used to integrate an XWiki instance inside a JSR286 compatible portal.</description>
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -75,16 +75,22 @@
       <version>2.9-101110</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
+
+    <!-- Logging -->
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
     </dependency>
   </dependencies>
   <build>

@@ -133,11 +133,6 @@ public class HTMLURLAttributeXMLFilter extends XMLFilterImpl
         });
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#startElement(String, String, String, Attributes)
-     */
     @Override
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
     {

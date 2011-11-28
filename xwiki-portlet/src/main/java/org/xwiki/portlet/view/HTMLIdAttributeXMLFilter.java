@@ -69,11 +69,6 @@ public class HTMLIdAttributeXMLFilter extends XMLFilterImpl
         this.wrapOutput = wrapOutput;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#startDocument()
-     */
     @Override
     public void startDocument() throws SAXException
     {
@@ -87,11 +82,6 @@ public class HTMLIdAttributeXMLFilter extends XMLFilterImpl
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#startElement(String, String, String, Attributes)
-     */
     @Override
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
     {
@@ -143,11 +133,6 @@ public class HTMLIdAttributeXMLFilter extends XMLFilterImpl
         return namespace + "-" + id;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#endDocument()
-     */
     @Override
     public void endDocument() throws SAXException
     {

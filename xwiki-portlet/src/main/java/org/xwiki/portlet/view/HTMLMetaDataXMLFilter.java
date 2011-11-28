@@ -72,11 +72,6 @@ public class HTMLMetaDataXMLFilter extends XMLFilterImpl
         this.urlRewriter = urlRewriter;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#startDocument()
-     */
     @Override
     public void startDocument() throws SAXException
     {

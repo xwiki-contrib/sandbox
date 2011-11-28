@@ -30,8 +30,8 @@ import net.sourceforge.htmlunit.corejs.javascript.Parser;
 import net.sourceforge.htmlunit.corejs.javascript.ast.AstRoot;
 import net.sourceforge.htmlunit.corejs.javascript.ast.NodeVisitor;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Synchronizes the JavaScript code with the rewritten HTML code. Precisely, updates all occurrences of element
@@ -44,7 +44,7 @@ public class JavaScriptStreamFilter implements StreamFilter
     /**
      * The logger instance.
      */
-    private static final Log LOG = LogFactory.getLog(JavaScriptStreamFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavaScriptStreamFilter.class);
 
     /**
      * The objects used to filter the abstract syntax tree computed from the JavaScript source code.
@@ -63,11 +63,7 @@ public class JavaScriptStreamFilter implements StreamFilter
         filters.add(new JavaScriptNameASTFilter(namespace));
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see StreamFilter#filter(Reader, Writer)
-     */
+    @Override
     public void filter(Reader reader, Writer writer)
     {
         try {
@@ -87,7 +83,7 @@ public class JavaScriptStreamFilter implements StreamFilter
             // Back to source.
             writer.write(root.toSource());
         } catch (IOException e) {
-            LOG.error("Failed to rewrite JavaScript code.", e);
+            LOGGER.error("Failed to rewrite JavaScript code.", e);
         }
     }
 }

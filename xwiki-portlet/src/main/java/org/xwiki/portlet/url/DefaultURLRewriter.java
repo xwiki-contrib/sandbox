@@ -52,11 +52,7 @@ public class DefaultURLRewriter implements URLRewriter
         this.contextPath = contextPath;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see URLRewriter#rewrite(String, Object...)
-     */
+    @Override
     public String rewrite(String servletURL, Object... parameters)
     {
         BaseURL portletURL = null;

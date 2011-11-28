@@ -35,7 +35,7 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.portlet.util.ByteArrayServletOutputStream;
 import org.xwiki.portlet.util.StringServletPrintWriter;
 

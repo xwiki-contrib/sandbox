@@ -86,11 +86,6 @@ public class XHTMLWriter extends XMLWriter
         setMaximumAllowedCharacter(127);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#endDocument()
-     */
     @Override
     public void endDocument() throws SAXException
     {
@@ -98,11 +93,6 @@ public class XHTMLWriter extends XMLWriter
         super.endDocument();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#startElement(String, String, String, Attributes)
-     */
     @Override
     public void startElement(String namespaceURI, String localName, String qName, Attributes attributes)
         throws SAXException
@@ -128,11 +118,6 @@ public class XHTMLWriter extends XMLWriter
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#endElement(String, String, String)
-     */
     @Override
     public void endElement(String namespaceURI, String localName, String qName) throws SAXException
     {
@@ -142,11 +127,6 @@ public class XHTMLWriter extends XMLWriter
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#characters(char[], int, int)
-     */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
     {
@@ -162,11 +142,6 @@ public class XHTMLWriter extends XMLWriter
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#ignorableWhitespace(char[], int, int)
-     */
     @Override
     public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException
     {
@@ -174,11 +149,6 @@ public class XHTMLWriter extends XMLWriter
         super.ignorableWhitespace(ch, start, length);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#processingInstruction(String, String)
-     */
     @Override
     public void processingInstruction(String target, String data) throws SAXException
     {
@@ -186,11 +156,6 @@ public class XHTMLWriter extends XMLWriter
         super.processingInstruction(target, data);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#startEntity(String)
-     */
     @Override
     public void startEntity(String name) throws SAXException
     {
@@ -198,11 +163,6 @@ public class XHTMLWriter extends XMLWriter
         super.startEntity(name);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#startCDATA()
-     */
     @Override
     public void startCDATA() throws SAXException
     {
@@ -210,11 +170,6 @@ public class XHTMLWriter extends XMLWriter
         super.startCDATA();
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#comment(char[], int, int)
-     */
     @Override
     public void comment(char[] ch, int start, int length) throws SAXException
     {
@@ -222,11 +177,6 @@ public class XHTMLWriter extends XMLWriter
         super.comment(ch, start, length);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#writeClose(String)
-     */
     @Override
     protected void writeClose(String qualifiedName) throws IOException
     {
@@ -238,11 +188,6 @@ public class XHTMLWriter extends XMLWriter
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLWriter#writeEmptyElementClose(String)
-     */
     @Override
     protected void writeEmptyElementClose(String qualifiedName) throws IOException
     {

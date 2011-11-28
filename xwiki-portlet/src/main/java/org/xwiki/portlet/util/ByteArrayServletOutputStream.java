@@ -41,11 +41,6 @@ public class ByteArrayServletOutputStream extends ServletOutputStream
      */
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see ServletOutputStream#write(int)
-     */
     @Override
     public void write(int b) throws IOException
     {

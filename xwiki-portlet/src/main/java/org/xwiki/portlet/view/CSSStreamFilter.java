@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.css.sac.InputSource;
 import org.w3c.dom.css.CSSRuleList;
 import org.w3c.dom.css.CSSStyleSheet;
@@ -51,7 +51,7 @@ public class CSSStreamFilter implements StreamFilter
     /**
      * The logger instance.
      */
-    private static final Log LOG = LogFactory.getLog(CSSStreamFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CSSStreamFilter.class);
 
     /**
      * The object used to parse the CSS.
@@ -75,11 +75,7 @@ public class CSSStreamFilter implements StreamFilter
         styleSheetFilter = new CSSStyleSheetFilter(namespace, urlRewriter);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see StreamFilter#filter(Reader, Writer)
-     */
+    @Override
     public void filter(Reader reader, Writer writer)
     {
         try {
@@ -95,7 +91,7 @@ public class CSSStreamFilter implements StreamFilter
                 writer.write(rules.item(i).getCssText());
             }
         } catch (IOException e) {
-            LOG.error("Failed to rewrite servlet CSS.", e);
+            LOGGER.error("Failed to rewrite servlet CSS.", e);
         }
     }
 }

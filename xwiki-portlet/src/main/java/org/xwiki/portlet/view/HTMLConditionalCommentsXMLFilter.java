@@ -70,11 +70,6 @@ public class HTMLConditionalCommentsXMLFilter extends XMLFilterImpl implements L
         this.urlRewriter = urlRewriter;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#setProperty(String, Object)
-     */
     @Override
     public void setProperty(String uri, Object handler) throws SAXNotSupportedException, SAXNotRecognizedException
     {
@@ -85,11 +80,6 @@ public class HTMLConditionalCommentsXMLFilter extends XMLFilterImpl implements L
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#parse(InputSource)
-     */
     @Override
     public void parse(InputSource in) throws SAXException, IOException
     {
@@ -100,11 +90,7 @@ public class HTMLConditionalCommentsXMLFilter extends XMLFilterImpl implements L
         super.parse(in);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see LexicalHandler#comment(char[], int, int)
-     */
+    @Override
     public void comment(char[] ch, int start, int length) throws SAXException
     {
         if (lexicalHandler != null) {
@@ -127,56 +113,32 @@ public class HTMLConditionalCommentsXMLFilter extends XMLFilterImpl implements L
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see LexicalHandler#endCDATA()
-     */
+    @Override
     public void endCDATA() throws SAXException
     {
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see LexicalHandler#endDTD()
-     */
+    @Override
     public void endDTD() throws SAXException
     {
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see LexicalHandler#endEntity(String)
-     */
+    @Override
     public void endEntity(String name) throws SAXException
     {
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see LexicalHandler#startCDATA()
-     */
+    @Override
     public void startCDATA() throws SAXException
     {
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see LexicalHandler#startDTD(String, String, String)
-     */
+    @Override
     public void startDTD(String name, String publicId, String systemId) throws SAXException
     {
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see LexicalHandler#startEntity(String)
-     */
+    @Override
     public void startEntity(String name) throws SAXException
     {
     }

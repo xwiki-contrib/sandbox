@@ -32,9 +32,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.portlet.DispatchPortlet;
 import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.model.ResponseData;
@@ -51,7 +51,7 @@ public class DispatchFilter implements Filter
     /**
      * The logger instance.
      */
-    private static final Log LOG = LogFactory.getLog(DispatchFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DispatchFilter.class);
 
     /**
      * The name of the request attribute that specifies if this filter has already been applied to the current request.
@@ -65,20 +65,12 @@ public class DispatchFilter implements Filter
      */
     private FilterConfig config;
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see Filter#destroy()
-     */
+    @Override
     public void destroy()
     {
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
-     */
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
         ServletException
     {
@@ -174,9 +166,9 @@ public class DispatchFilter implements Filter
         chain.doFilter(new DispatchedRequest(request, false), responseWrapper);
 
         if (responseWrapper.isOutputIntercepted()) {
-            LOG.debug("Filtering " + request.getRequestURI());
-            streamFilterManager
-                .filter(responseWrapper.getMimeType(), responseWrapper.getReader(), response.getWriter());
+            LOGGER.debug("Filtering " + request.getRequestURI());
+            streamFilterManager.filter(responseWrapper.getMediaType(), responseWrapper.getReader(),
+                response.getWriter());
         }
     }
 
@@ -195,11 +187,7 @@ public class DispatchFilter implements Filter
         doRender(request, response, chain);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see Filter#init(FilterConfig)
-     */
+    @Override
     public void init(FilterConfig config) throws ServletException
     {
         this.config = config;

@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.url.DefaultURLRewriter;
 import org.xwiki.portlet.url.DispatchURLFactory;
@@ -45,7 +45,7 @@ public class StreamFilterManager
     /**
      * The logger instance.
      */
-    private static final Log LOG = LogFactory.getLog(StreamFilterManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StreamFilterManager.class);
 
     /**
      * The mapping between mime types and stream filters.
@@ -87,7 +87,7 @@ public class StreamFilterManager
             try {
                 IOUtils.copy(reader, writer);
             } catch (IOException e) {
-                LOG.error("Failed to copy stream.", e);
+                LOGGER.error("Failed to copy stream.", e);
             }
         }
     }

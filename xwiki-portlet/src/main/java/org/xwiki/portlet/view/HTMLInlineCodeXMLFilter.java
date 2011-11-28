@@ -42,10 +42,9 @@ public class HTMLInlineCodeXMLFilter extends XMLFilterImpl
     /**
      * The list of HTML event attributes. They take JavaScript code as value.
      */
-    private static final List<String> EVENT_ATTRIBUTES =
-        Arrays.asList("onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover", "onmousemove", "onmouseout",
-            "onkeypress", "onkeydown", "onkeyup", "onfocus", "onblur", "onload", "onunload", "onsubmit", "onreset",
-            "onselect", "onchange");
+    private static final List<String> EVENT_ATTRIBUTES = Arrays.asList("onclick", "ondblclick", "onmousedown",
+        "onmouseup", "onmouseover", "onmousemove", "onmouseout", "onkeypress", "onkeydown", "onkeyup", "onfocus",
+        "onblur", "onload", "onunload", "onsubmit", "onreset", "onselect", "onchange");
 
     /**
      * The name of the HTML {@code <script>} tag.
@@ -79,11 +78,6 @@ public class HTMLInlineCodeXMLFilter extends XMLFilterImpl
         filters.put(SCRIPT, new JavaScriptStreamFilter(namespace));
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#startElement(String, String, String, Attributes)
-     */
     @Override
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
     {
@@ -118,11 +112,6 @@ public class HTMLInlineCodeXMLFilter extends XMLFilterImpl
         return newAtts != null ? newAtts : atts;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#endElement(String, String, String)
-     */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
@@ -143,11 +132,6 @@ public class HTMLInlineCodeXMLFilter extends XMLFilterImpl
         super.endElement(uri, localName, qName);
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see XMLFilterImpl#characters(char[], int, int)
-     */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
     {
