@@ -35,6 +35,7 @@ import org.xwiki.model.reference.AttachmentReferenceResolver;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.AttachmentReference;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.rendering.listener.HeaderLevel;
 import org.xwiki.rendering.block.HeaderBlock;
@@ -429,10 +430,6 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
         XWikiDocument childDoc = context.getWiki().getDocument(childDocumentName, context);
         XDOM childXdom = (childDoc == null) ? null : childDoc.getXDOM();
         childXdom = (childXdom == null) ? null : childXdom.clone();
-        // Transclude (recursive call) the child xdom.
-        if (childXdom != null) {
-            getRenderedContentWithLinks(childDoc, childXdom, selectlist, includedList, headerIds, context);
-        }
 
         // need to render macro of the xdom in the context of the child xdom
         // Push new Execution Context to isolate the contexts (Velocity, Groovy, etc).
@@ -444,13 +441,22 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
 
         Map<String, Object> backupObjects = new HashMap<String, Object>();
         DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
+        XWikiContext currentEcXContext = (XWikiContext)clonedEc.getProperty("xwikicontext"); 
+        String oldDatabase = currentEcXContext.getDatabase();
         try {
+               currentEcXContext.setDatabase(childDoc.getDocumentReference().getWikiReference().getName());
                documentAccessBridge.pushDocumentInContext(backupObjects, childDoc.getDocumentReference());
                TransformationManager txManager = Utils.getComponent(TransformationManager.class);
                TransformationContext tcontext = new TransformationContext(childXdom, childDoc.getSyntax());
                txManager.performTransformations(childXdom, tcontext);
         } finally {
                documentAccessBridge.popDocumentFromContext(backupObjects);
+               currentEcXContext.setDatabase(oldDatabase);
+        }
+
+        // Transclude (recursive call) the child xdom.
+        if (childXdom != null) {
+            getRenderedContentWithLinks(childDoc, childXdom, selectlist, includedList, headerIds, context);
         }
 
         // Now, before we insert the childXdom into current (parent) xdom, we
@@ -569,8 +575,10 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
 
         // Step 3: Find all the link blocks inside this XDOM
         for (LinkBlock linkBlock : xdom.getChildrenByType(LinkBlock.class, true)) {
+            boolean relativized = false;
+            ResourceType linkType = linkBlock.getReference().getType();
             // We are only interested in links to other pages.
-            if (linkBlock.getReference().getType().equals(ResourceType.DOCUMENT)) {
+            if (linkType.equals(ResourceType.DOCUMENT)) {
                 String childDocumentName = linkBlock.getReference().getReference();
                 if (childDocumentName != null) {
                     // Create the child xdom
@@ -601,9 +609,38 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
                         // Replace the original link
                         linkBlock.getParent().insertChildBefore(newLinkBlock, linkBlock);
                         linkBlock.getParent().getChildren().remove(linkBlock);
+                        relativized = true;
                     } // if in selectlist or selectlist is null
                 } // if childDocumentName
             } // if LinkType.Document
+
+            // If we don't relativize the link to the pdf it will remain as it is, so we need to absolutize it if it's
+            // document or attachment, since it's gonna be in a different context when the full final xdom will be
+            // assembled
+            // FIXME: however, this still fails to create proper links in the final pdf for attachments, since the pdf
+            // url factory copies the attachments to a temp folder and points all urls to it, in order for the images to
+            // be properly handled. It does not make a difference whether the url is needed for image or for url.
+            // TODO: to make it work, we need to change the link completely to a full external URL for attachments, so
+            // that we bypass the pdf url factory. However, xwiki.getExternalURL() won't work since it uses
+            // pdfurlfactory as well.
+            if (!relativized && (linkType.equals(ResourceType.DOCUMENT) || linkType.equals(ResourceType.ATTACHMENT))) {
+                String linkTarget = linkBlock.getReference().getReference();
+                // parse it depending on its type
+                EntityReference absoluteLinkTarget =
+                    linkType.equals(ResourceType.ATTACHMENT) ? this.currentAttachmentReferenceResolver.resolve(
+                        linkTarget, doc.getDocumentReference()) : this.currentDocumentReferenceResolver.resolve(
+                        linkTarget, doc.getDocumentReference());
+                // serialize it
+                String newLinkTarget = this.defaultEntityReferenceSerializer.serialize(absoluteLinkTarget);
+                // if we have created a new link target, we need to replace it in the xdom
+                if (!newLinkTarget.equals(linkTarget)) {
+                    LinkBlock newLinkBlock =
+                        new LinkBlock(linkBlock.getChildren(), new ResourceReference(newLinkTarget, linkType), false);
+                    // Replace the original link
+                    linkBlock.getParent().insertChildBefore(newLinkBlock, linkBlock);
+                    linkBlock.getParent().getChildren().remove(linkBlock);
+                }
+            }
         } // for linkBlocks
         return list;
     }
