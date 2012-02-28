@@ -247,9 +247,7 @@ public class DispatchPortlet extends GenericPortlet
             new StreamFilterManager(dispatchURLFactory, request.getContextPath(), response.getNamespace(),
                 RequestType.RESOURCE);
         request.setAttribute(ATTRIBUTE_STREAM_FILTER_MANAGER, streamFilterManager);
-        // We do an include instead of a forward because GateIn's DispatchedHttpServletRequest#getDateHeader(String)
-        // returns 0 instead on -1 which makes forward expectations fail when requesting static resources.
-        getPortletContext().getRequestDispatcher(dispatchURL).include(request, response);
+        getPortletContext().getRequestDispatcher(dispatchURL).forward(request, response);
     }
 
     /**

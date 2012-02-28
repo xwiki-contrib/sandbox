@@ -26,7 +26,7 @@
   <parent>
     <groupId>org.xwiki.platform</groupId>
     <artifactId>xwiki-platform-core</artifactId>
-    <version>3.2</version>
+    <version>3.5</version>
   </parent>
   <artifactId>xwiki-platform-portlet</artifactId>
   <name>XWiki Platform - Portlet</name>
@@ -48,7 +48,7 @@
       <!-- SAXParser -->
       <groupId>net.sourceforge.nekohtml</groupId>
       <artifactId>nekohtml</artifactId>
-      <version>1.9.14</version>
+      <version>1.9.15</version>
       <!-- We don't use NekoHTML's SAXParser implementation directly. -->
       <scope>runtime</scope>
     </dependency>
@@ -62,7 +62,7 @@
       <!-- For rewriting CSS. -->
       <groupId>net.sourceforge.cssparser</groupId>
       <artifactId>cssparser</artifactId>
-      <version>0.9.5</version>
+      <version>0.9.6</version>
     </dependency>
     <dependency>
       <!--

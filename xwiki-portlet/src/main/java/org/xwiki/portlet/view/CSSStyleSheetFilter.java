@@ -68,6 +68,14 @@ public class CSSStyleSheetFilter
         Pattern.compile("((?:^|[^\\w\\-\\:\\.#])html)(\\s*(?:[a-zA-Z\\*\\.#]|$))", Pattern.CASE_INSENSITIVE);
 
     /**
+     * Special characters that need to be escaped inside an URI as per http://www.w3.org/TR/CSS2/syndata.html#uri:
+     * <p>
+     * Some characters appearing in an unquoted URI, such as parentheses, white space characters, single quotes (') and
+     * double quotes ("), must be escaped with a backslash so that the resulting URI value is a URI token: '\(', '\)'.
+     */
+    private static final char[] URI_SPECIAL_CHARS = new char[] {'(', ')', ' ', '"', '\'', '\\'};
+
+    /**
      * The string used to name-space all style rules and element identifiers used in CSS selectors.
      */
     private final String namespace;
@@ -128,10 +136,38 @@ public class CSSStyleSheetFilter
      */
     private void filter(CSSImportRule importRule)
     {
-        // It's a pity we can't set the import URL directly..
+        // It's a pity we can't set the import URL directly using the CSSImportRule interface. We don't want to cast the
+        // passed object because we want to keep this class independent of the underlying implementation of
+        // CSSImportRule.
         // Should we rewrite only import rules that target the screen media type?
-        importRule.setCssText(String.format("@import url('%s') %s;", urlRewriter.rewrite(importRule.getHref(),
-            RequestType.RESOURCE), importRule.getMedia().getMediaText()));
+        String media = importRule.getMedia().getMediaText();
+        String url = urlRewriter.rewrite(importRule.getHref(), RequestType.RESOURCE);
+        importRule.setCssText(String.format("@import url(%s) %s;", escapeUnquotedURI(url), media));
+    }
+
+    /**
+     * Escapes URI values in CSS rules, as per http://www.w3.org/TR/CSS2/syndata.html#uri:
+     * <p>
+     * Some characters appearing in an unquoted URI, such as parentheses, white space characters, single quotes (') and
+     * double quotes ("), must be escaped with a backslash so that the resulting URI value is a URI token: '\(', '\)'.
+     * 
+     * @param uri the URI to be escaped
+     * @return the escaped URI
+     */
+    private String escapeUnquotedURI(CharSequence uri)
+    {
+        StringBuilder result = new StringBuilder(uri.length());
+        for (int i = 0; i < uri.length(); i++) {
+            char c = uri.charAt(i);
+            for (int j = 0; j < URI_SPECIAL_CHARS.length; j++) {
+                if (c == URI_SPECIAL_CHARS[j]) {
+                    result.append('\\');
+                    break;
+                }
+            }
+            result.append(c);
+        }
+        return result.toString();
     }
 
     /**

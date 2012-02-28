@@ -43,7 +43,7 @@ public class URLRequestTypeMapper
     /**
      * Interface used to test if an URL matches some description.
      */
-    private static interface URLMatcher
+    private interface URLMatcher
     {
         /**
          * @param url an URL

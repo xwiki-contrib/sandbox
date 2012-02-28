@@ -166,6 +166,8 @@ public class DispatchFilter implements Filter
         chain.doFilter(new DispatchedRequest(request, false), responseWrapper);
 
         if (responseWrapper.isOutputIntercepted()) {
+            // Invalidate the current content length because the content is going to be transformed.
+            response.setContentLength(-1);
             LOGGER.debug("Filtering " + request.getRequestURI());
             streamFilterManager.filter(responseWrapper.getMediaType(), responseWrapper.getReader(),
                 response.getWriter());
