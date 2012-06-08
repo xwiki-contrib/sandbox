@@ -1,0 +1,2 @@
+org.xwiki.pdf.multipageexport.internal.XslFopPdfExporter
+org.xwiki.pdf.multipageexport.internal.MultipagePdfExporterService
