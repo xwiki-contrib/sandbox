@@ -34,13 +34,6 @@
   <version>1.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
-      <groupId>org.xwiki.commons</groupId>
-      <artifactId>xwiki-commons-legacy-component</artifactId>
-      <version>${parent.version}</version>
-      <!-- Don't need to pull this dependency in the war as it's already there, make it provided -->
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <scope>provided</scope>
@@ -48,7 +41,7 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-oldcore</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.parent.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
