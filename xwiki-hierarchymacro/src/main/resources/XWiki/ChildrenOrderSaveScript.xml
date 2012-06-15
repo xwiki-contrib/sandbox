@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>XWiki</web>
+<name>ChildrenOrderSaveScript</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>XWiki.HierarchyMacro</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1325372400000</creationDate>
+<date>1325372400000</date>
+<contentUpdateDate>1325372400000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<content>{{velocity}}
+## saves the order of the children in the passed parent. We need this, we cannot use REST since we don't know whether we need to add an object or update an existing one.
+#set($parent = "$!request.parent")
+#set($parentDocument = $xwiki.getDocument($parent))
+#if($parent != "" || $parentDocument.new)
+  ## check the edit rights of the current user on the document to change, to return a 403 (might as well be 401 but i'm following accessdenied.vm)
+  #if ($xwiki.hasAccessLevel('edit', $xcontext.user, $parentDocument.fullName))
+    ## get the object to put children in
+    #set($childrenOrderObject = $parentDocument.getObject('XWiki.ChildrenOrderClass'))
+    #if(!$childrenOrderObject)
+      ## it's not there, create it
+      #set($childrenOrderObject = $parentDocument.newObject('XWiki.ChildrenOrderClass')) 
+    #end
+    ## prepare the list of children to set. Even an empty list will be set, so be careful with passing params to this script
+    #set($childrenParam = $request.getParameterValues('children'))
+    #set($childrenListToSet = [])
+    ## there's no other way to do this in velocity, afaik. It sucks
+    #foreach($child in $childrenParam)
+      #set($discard = $childrenListToSet.add($child))
+    #end
+    ## put it in the object
+    #set($discard = $childrenOrderObject.set('children', $childrenListToSet))
+    ## and save
+    #set($discard = $parentDocument.save("$msg.get('hierarchy.updateorder')"))
+    ## send a success message to know that it worked and there was no application level exception on save since they still return 200
+    ## the http 200 will be sent anyway 
+    ## In json, since json is cool.
+    $response.setContentType("application/json")
+    {"success" : true} 
+  #else
+    ## user doesn't have edit right on the document
+    #if(!$response.containsHeader('WWW-Authenticate'))
+      $response.setStatus(403)
+      ## Otherwise, unauthenticated user with Basic authentication, a 401 status has been set in Java.
+    #end
+  #end
+#else
+  ## no parent specified or the specified parent doesn't exist as a document, in this case we cannot save order, we should say so
+  ## we're sending an "Unprocessable Entity"
+  $response.setStatus(422)
+#end
+{{/velocity}}
+</content></xwikidoc>

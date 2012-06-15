@@ -1,0 +1,2023 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>XWiki</web>
+<name>HierarchyMacro</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>XWiki.WikiMacros</parent>
+<creator>xwiki:XWiki.Admin</creator>
+<author>xwiki:XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+<creationDate>1325372400000</creationDate>
+<date>1325372400000</date>
+<contentUpdateDate>1325372400000</contentUpdateDate>
+<version>1.1</version>
+<title>Hierarchy Macro</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.JavaScriptExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>0</number>
+<className>XWiki.JavaScriptExtension</className>
+<guid>c9e0eab2-85bb-40ea-9a36-a0a931041200</guid>
+<property>
+<cache>long</cache>
+</property>
+<property>
+<code>// overwrite to fix bug in tree sortables, as described here
+// http://3dmdesign.com/development/scriptaculous-drag-and-drop-tree-fix
+// I could also patch dragdrop.js and attach it to the skin, but I prefer this as it's more transportable
+// do the fix only if droppables exist, since this js will be included in view mode as well 
+if (typeof(Droppables) != 'undefined') {
+  Object.extend(Droppables,
+  {
+    isContained: function(element, drop)
+    {
+      var containmentNode;
+      var containmentNode = element.treeNode || element.parentNode;
+      return drop._containers.detect(function (c) { return containmentNode == c; });
+    }
+  });
+}
+
+// start defining the classes used by this script
+if (typeof (XWiki) == 'undefined') {
+  XWiki = new Object();
+}
+
+/**
+ * Handles an editable hierarchy: initializes drag and drop, updates data when drop is done.
+ */
+XWiki.ReorderHierarchy = Class.create({
+  // the id of the toplevel list
+  containerId : null,
+  // the last moved element in the sortable (fired by onChange). This is to be able to hack grabbing of the dropped element on hierarchy update
+  lastMovedElt : null,
+  // the parent of the last moved element
+  originalParentOfLastMovedElt : null,
+  /**
+   * Constructor, initializes the sortables.
+   * 
+   * @param isBinding whether the changes on the hierarchy need to be performed on the server or not
+   */
+  initialize : function(containerId, isBinding) {
+    this.containerId = containerId;
+    var sortableOptions = {tree : true, 
+                           scroll : window,
+                           hoverclass : 'newparenthover'};
+    // if it's binding, add the update listeners as well
+    if (isBinding) {
+      Object.extend(sortableOptions,
+      {
+        // yeah. this is dirty: we'll add a listener to change and a listener to update.
+        // Change listener will update last moved element and update listener will perform stuff when 
+        // hierarchy was updated as a result of the last move. Kinky, but only because I cannot grab the dropped elt 
+        // from update listener and container is always the toplevel ul, which I know already, thank you update callback.
+        onUpdate : this.onHierarchyUpdate.bind(this),
+        onChange : this.onHierarchyChange.bind(this)        
+      });
+    }
+
+    Sortable.create(containerId, sortableOptions);
+  },
+  
+  /**
+   * Normally documentation says on change is called "whenever the sort order changes while dragging". 
+   * I don't know what this means, but for my settings here it seems to be called only for the moved element, 
+   * when an element is dragged. 
+   * This makes it easy to get the dropped element, I update a variable here and then process it in the update listener.
+   */
+  onHierarchyChange : function(movedElt) {
+    // console.log('moved element', movedElt, movedElt.parentNode);
+    this.lastMovedElt = movedElt;    
+    if (!this.originalParentOfLastMovedElt) {
+      this.originalParentOfLastMovedElt = this.lastMovedElt.parentNode;
+    }
+  },
+
+  /**
+   * Called when the hierarchy is actually modified. Will use lastMoveElt to get the moved element and update the actual
+   * parent of the moved page.
+   * 
+   * FIXME: we won't have this bug in this specific case, but in this function, if a document is changed order on 
+   * roots level it is not actually put in the default parent if it was not there to begin with, which means that
+   * the order will still not work, since order only applies on the elements which are actually children of that 
+   * document. 
+   */
+  onHierarchyUpdate : function(container) {
+    var liToUpdate = this.lastMovedElt;
+    var fromParent = this.originalParentOfLastMovedElt;
+    // reset original parent, a new drag and drop can start
+    this.originalParentOfLastMovedElt = null;
+    // prepare the data for the update    
+    var newParentReference = this.getTreeParentReference(liToUpdate);
+    // if no parent, get the default parent
+    if (!newParentReference) {
+      newParentReference = this.getDefaultParent();
+    }
+    var parentItem = this.getTreeParentElement(liToUpdate);
+    var parentItemToNotifyOn = parentItem ? parentItem : this.getRootOfEditableHierarchy();
+    // and actually update the order of the children of the new parent
+    this.sendRequestToUpdateChildrenOrder(liToUpdate, newParentReference, parentItemToNotifyOn, this.getTreeChildrenList(parentItem), null, null);
+    // if the parent is different than when we started moving, update the parent as well
+    if (fromParent != liToUpdate.parentNode) {
+      // update url for parent update is in the html
+      var updateUrl = this.getUpdateUrl(liToUpdate);
+      // actually update parent
+      this.sendRequestToUpdateParent(liToUpdate, updateUrl, newParentReference, null, null);
+    }
+  },
+  
+  /**
+   * Actually sends the request to update the parent of the page pointed at by updateUrl, to newParent value.
+   */
+  sendRequestToUpdateParent : function(movedItem, updateUrl, newParent, onSuccessCallback, onFailureCallback) {
+    // FIXME: this is crap, adding a method=put here, maybe I should generate it from velocity
+    var ajaxRequest = new Ajax.Request(updateUrl + '?method=PUT', {
+      method : 'post',
+      parameters : {'parent' : newParent},
+      onCreate: function() {
+        // show nice loading message at page bottom
+        // the loading message is connected to the object being updated
+        movedItem._x_notification = new XWiki.widgets.Notification("$msg.get('hierarchy.updateparent.loading')", "inprogress");
+        // add the move in progress classname to the document label
+        var documentLabelNode = this.getDocumentLabelNode(movedItem);
+        if (documentLabelNode) {
+          documentLabelNode.addClassName("moveinprogress");
+        }
+      }.bind(this),
+
+      onSuccess: function(response) {
+        var movedItemName = this.getDocumentReference(movedItem);
+        // show the message at the bottom
+        movedItem._x_notification.replace(
+            new XWiki.widgets.Notification("$msg.get('hierarchy.updateparent.success') " + movedItemName + " $msg.get('hierarchy.updateparent.to') " + newParent, 
+                                           "done", {timeout : 5}));
+        // remove the error class, if it had any
+        var documentLabelNode = this.getDocumentLabelNode(movedItem);
+        if (documentLabelNode) {
+          documentLabelNode.removeClassName("moveerror");
+          this.updateItemTitle(documentLabelNode);
+        }
+        // call the passed callback, if any
+        if(typeof(onSuccessCallback) == 'function') {
+          onSuccessCallback(response);
+        }
+      }.bind(this),
+ 
+      onFailure: function(response) {
+        var movedItemName = this.getDocumentReference(movedItem);        
+        var failureReason = response.statusText;
+        if (response.statusText == '' /* No response */ || response.status == 12031 /* In IE */) {
+          failureReason = 'Server not responding';
+        }
+        // show the error message at the bottom)
+        movedItem._x_notification.replace(
+            new XWiki.widgets.Notification("$msg.get('hierarchy.updateparent.error') " + movedItemName + " $msg.get('hierarchy.updateparent.to') " + newParent + ": " + failureReason, 
+                                           "error", {timeout : 5}));
+        // add an error class name
+        var documentLabelNode = this.getDocumentLabelNode(movedItem);        
+        if (documentLabelNode) {
+          documentLabelNode.addClassName("moveerror");
+          // and a nice tooltip
+          this.updateItemTitle(documentLabelNode);          
+        }
+        // call the passed callback, if any
+        if(typeof(onFailureCallback) == 'function') {
+          onFailureCallback(response);
+        }        
+      }.bind(this),
+      
+      onComplete: function () {
+        // remove the loading flag onComplete
+        var documentLabelNode = this.getDocumentLabelNode(movedItem);
+        if (documentLabelNode) {
+          documentLabelNode.removeClassName("moveinprogress");
+        }
+      }.bind(this),
+
+      on0: function (response) {
+        response.request.options.onFailure(response);
+      }
+    });    
+  },
+  
+  /**
+   * Actually sends the request to update the order of the children of the parent element.
+   */
+  sendRequestToUpdateChildrenOrder : function(movedItem, parentReference, parentItem, childrenList, onSuccessCallback, onFailureCallback) {
+    var ajaxRequest = new Ajax.Request("$xwiki.getURL('XWiki.ChildrenOrderSaveScript', 'get', 'xpage=plain&amp;outputSyntax=plain')", {
+      method : 'post',
+      parameters : {'parent' : parentReference, 
+                    'children' : childrenList},
+      onCreate: function() {
+        // show nice loading message at page bottom
+        // the loading message is connected to the object being updated
+        movedItem._x_orderupdate_notification = new XWiki.widgets.Notification("$msg.get('hierarchy.updateorder.loading')", "inprogress");
+        // add the update in progress classname to the document label
+        if (parentItem) {
+          var documentLabelNode = this.getDocumentLabelNode(parentItem);
+          if (documentLabelNode) {
+            documentLabelNode.addClassName("updateinprogress");
+          }
+        }
+      }.bind(this),
+
+      onSuccess: function(response) {
+        // check that the response contains success = true, since otherwise the 2xx can be misleading, since we cannot 
+        // catch application exceptions from velocity
+        if (!(response.responseJSON &amp;&amp; response.responseJSON.success)) {
+          response.request.options.onFailure(response);
+          return;
+        }
+        // show the message at the bottom
+        movedItem._x_orderupdate_notification.replace(
+            new XWiki.widgets.Notification("$msg.get('hierarchy.updateorder.success') " + parentReference, "done", {timeout : 5}));
+        // remove the error class, if it had any
+        if(parentItem) {
+          var documentLabelNode = this.getDocumentLabelNode(parentItem);
+          if (documentLabelNode) {
+            documentLabelNode.removeClassName("updateerror");
+            this.updateItemTitle(documentLabelNode);
+          }
+        }
+        // call the passed callback, if any
+        if(typeof(onSuccessCallback) == 'function') {
+          onSuccessCallback(response);
+        }
+      }.bind(this),
+ 
+      onFailure: function(response) {        
+        var failureReason = response.statusText;
+        if (response.statusText == '' /* No response */ || response.status == 12031 /* In IE */) {
+          failureReason = 'Server not responding';
+        }
+        // show the error message at the bottom)
+        movedItem._x_orderupdate_notification.replace(
+            new XWiki.widgets.Notification("$msg.get('hierarchy.updateorder.error') " + parentReference + ": " + failureReason,  "error", {timeout : 5}));
+        // add an error class name
+        if(parentItem) {
+          var documentLabelNode = this.getDocumentLabelNode(parentItem);
+          if (documentLabelNode) {
+            documentLabelNode.addClassName("updateerror");
+            // and a nice tooltip
+            this.updateItemTitle(documentLabelNode);
+          }
+        }
+        // call the passed callback, if any
+        if(typeof(onFailureCallback) == 'function') {
+          onFailureCallback(response);
+        }        
+      }.bind(this),
+      
+      onComplete: function () {
+        // remove the loading flag onComplete
+        if(parentItem){
+          var documentLabelNode = this.getDocumentLabelNode(parentItem);
+          if (documentLabelNode) {
+            documentLabelNode.removeClassName("updateinprogress");
+          }
+        }
+      }.bind(this),
+
+      on0: function (response) {
+        response.request.options.onFailure(response);
+      }
+    });
+  },
+  
+  /**
+   * Gets the update URL for an li element.
+   */
+  getUpdateUrl : function(listElement) {
+    return this.getInfoElement(listElement, 'input[name=restupdateurl]', true);
+  },
+  
+  /**
+   * Gets the document reference for an li element.
+   */
+  getDocumentReference : function(listElement) {
+    return this.getInfoElement(listElement, 'input[name=docreference]', true);
+  },
+
+  /**
+   * Gets the document reference of the li which is the tree parent of the passed list element.
+   * it's useful for the instants when tree is out of sync with actual data on the server.  
+   */
+  getTreeParentReference : function(listElement) {
+    var parentLi = this.getTreeParentElement(listElement);
+    if (parentLi) {
+      return this.getDocumentReference(parentLi);
+    }
+    return null;
+  },
+  
+  /**
+   * Gets the element which is the parent li of the passed listElement in the tree.
+   * it's useful for the instants when tree is out of sync with actual data on the server.
+   */
+  getTreeParentElement : function(listElement) {
+    return parentLi = listElement.up('li');
+  },
+  
+  /**
+   * Gets the document label node of the li which is passed.
+   */
+  getDocumentLabelNode : function(listElement) {
+    // special case for the case when the element for which we want the label is the root of whole hierarchy, we need to get the fake label
+    if (listElement == this.getRootOfEditableHierarchy()) {
+      var infoElement = listElement.down('.documentlabel');
+      if (infoElement) {
+        // make sure that it's the direct child of the root
+        if (infoElement.parentNode == listElement) {
+          return infoElement;
+        }
+      }
+      return null;      
+    } else {
+      return this.getInfoElement(listElement, '.documentlabel', false);
+    }
+  },
+  
+  /**
+   * Helper function to get the element holding information under the passed list Element, according to the selector.
+   * 
+   * @param listElement the element to get the information for
+   * @param selector the selector expression to identify the info element
+   * @param value true if the value of the information element should be retrieved, false if the element itself.
+   */
+  getInfoElement : function(listElement, selector, value) {
+    var infoElement = listElement.down(selector);
+    if (infoElement) {
+      // it could be the infoElement from a sublist, so check that we're talking about the infoElement immediately under this li      
+      if (infoElement.up('li') == listElement) {
+        if (value) {
+          return infoElement.getValue();
+        } else {
+          return infoElement;
+        }
+      }
+    }
+    return null;
+  },
+  
+  /**
+   * Gets the root element of this editable hierarchy, which is the div with class editable hierarchy, that encloses everything
+   */
+  getRootOfEditableHierarchy : function() {
+    return $(this.containerId).up('.editablehierarchy');
+  },
+
+  /**
+   * gets the default parent for this editable hierarchy.  
+   */
+  getDefaultParent : function() {
+    var defaultParentInput = this.getRootOfEditableHierarchy().down('input[name=defaultparent]');
+    if (defaultParentInput) {
+      return defaultParentInput.getValue();
+    }
+    return '';
+  },
+  
+  /**
+   * Gets a list of document references for all the direct children of the passed item in the tree. If the passed item 
+   * is null, the returned list will be for the roots. 
+   */
+  getTreeChildrenList : function(parentItem) {
+    var childrenList = new Array();
+    // the actual html element for which we look for all the list items inside to put in a list and return
+    var parentHtmlElement;
+    if (parentItem) {
+      //if the item exists, look in the item
+      parentHtmlElement = parentItem;
+    } else {
+      // otherwise get the children of the default parent
+      parentHtmlElement = this.getRootOfEditableHierarchy();
+    }
+    // find all the ul children of this element (children not descendants) and get all the docreferences of the lis inside
+    var list = parentHtmlElement.childElements().find(function(item){
+      return item.match('ul');
+    });
+
+    if (list) {
+      var childrenElementsList = list.childElements().findAll(function(item){
+        return item.match('li');
+      });
+      childrenElementsList.each(function(item){
+        childrenList.push(this.getDocumentReference(item));
+      }.bind(this));
+      
+      return childrenList;
+    }
+    
+    return [];
+  },
+  
+  /**
+   * Updates the title of the passed list item to show errors, if needed, depending on the classes it has, 
+   * since there are 2 actions that happen 'parallel' on an item, updating its parent and its children order.
+   */
+  updateItemTitle : function(item) {
+    // by default nothing, this will remove the attribute if nothing else is specified
+    var newTitle = false;
+    if (item.match('.moveerror.updateerror')) {
+      // has both errors, title set to both errors
+      newTitle = "$msg.get('hierarchy.updateparentandorder.error.tooltip')";
+    } else if (item.match('.moveerror')) {
+      // has only move error, title set to move error
+      newTitle = "$msg.get('hierarchy.updateparent.error.tooltip')";      
+    } else if (item.match('.updateerror')) {
+      // has only update error, title set to update error
+      newTitle = "$msg.get('hierarchy.updateorder.error.tooltip')";      
+    } else {
+      // nothing, stays false to be removed
+    }
+    item.writeAttribute('title', newTitle);
+  }
+});
+
+/**
+ * Handles a togglable hierarchy: enables toggle buttons to expand / collapse the subtrees, and handles checkboxes, 
+ * if any, on this hierarchy.
+ */
+XWiki.ToggleHierarchy = Class.create({
+  initialize : function(treeContainers) {
+    treeContainers.each(function(containerItem) {
+      containerItem.select('li .togglenodehandler').each(function(item) {
+        // remove the hidden class since we have js to perform the functions
+        item.removeClassName('hidden');
+        // connect the toggle handler to the the click 
+        item.observe('click', this.toggleListener.bindAsEventListener(this));
+      }.bind(this));//end each toggle handler
+      // bind the check all to all "check all" and "uncheck all" buttons, if any
+      containerItem.select('li .checkboxactions .checkall').each(function(item){
+        item.observe('click', this.checkAll.bindAsEventListener(this));
+      }.bind(this));
+      containerItem.select('li .checkboxactions .uncheckall').each(function(item){
+        item.observe('click', this.uncheckAll.bindAsEventListener(this));
+      }.bind(this));
+      // show all the check all uncheck all since we have added action on them, now it makes sense
+      containerItem.select('li .checkboxactions').each(function(item){
+        item.removeClassName('hidden');
+      });      
+    }.bind(this));//end each tree container 
+  },
+
+  /**
+   * Handler to toggle the state of the sublist (open/close).
+   */
+  toggleListener : function(event) {
+    var handler = event.findElement();
+    // get the sublist to toggle
+    var parentLi = handler.up('li');
+    if (parentLi) {
+      var sublist = parentLi.down('ul');
+      if (sublist &amp;&amp; sublist.parentNode == parentLi) {
+        sublist.toggle();
+        handler.toggleClassName('open'); 
+      }
+    }
+  },
+  
+  /**
+   * handler to check all elements in subtree. 
+   */
+  checkAll : function(event) {
+    var handler = event.findElement();
+    this.changeAllStates(handler, true);
+  },
+  
+  /**
+   * handler to uncheck all elements in subtree.
+   */
+  uncheckAll : function(event) {
+    var handler = event.findElement();
+    this.changeAllStates(handler, false);
+  },
+  
+  changeAllStates : function(control, checked) {
+    // prepare value to set. If the writeAttribute value is false, attribute is removed, which is what we want.
+    var valueToSet = false;
+    if (checked) {
+      valueToSet = 'checked';
+    }
+    var parentLi = control.up('li');    
+    if (parentLi) {
+      parentLi.select('input[type=checkbox]').each(function(checkbox) {
+          checkbox.writeAttribute('checked', valueToSet);
+      });
+    }
+  }
+});
+
+// on document load, initialize editable list if needed and togglabe list always
+document.observe("xwiki:dom:loaded", function() {
+  // check if the list element is in an editable hierarchy container. Use id identifier for this.
+  var editableHierarchyElt = $$('.editablehierarchy #hierarchymacrolist');
+  // if so, create the drag and drops
+  if (editableHierarchyElt.size() &gt; 0) {
+    new XWiki.ReorderHierarchy('hierarchymacrolist', true);
+  } else {
+    // check if the non-binding reordering is enabled
+    var reorderableHierarchyElt = $$('.reorderablehierarchy #hierarchymacrolist');
+    if (reorderableHierarchyElt.size() &gt; 0) {
+      new XWiki.ReorderHierarchy('hierarchymacrolist', false);
+    }
+  }
+  // initialize the togglable hierarchy(ies) for all hierarchy macro list
+  new XWiki.ToggleHierarchy($$('.hierarchymacrolist'));
+});
+</code></property><property><name>Hierarchy tree js extension, to edit</name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.RequiredRightClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<level>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>level</name>
+<number>1</number>
+<picker>0</picker>
+<prettyName>level</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<sort>none</sort>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<values>edit|programming</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</level>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>0</number>
+<className>XWiki.RequiredRightClass</className>
+<guid>60a57b04-7b37-4b77-9455-d7ee6038af4a</guid>
+<property>
+<level>programming</level>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>50281939-7a8e-417b-bff4-6ee5970ef75e</guid>
+<property>
+<cache>long</cache>
+</property>
+<property>
+<code>#template('colorThemeInit.vm')
+
+.editablehierarchy #hierarchymacrolist ul,
+.reorderablehierarchy #hierarchymacrolist ul {
+  border-left: 1px dotted #ccc;
+  padding: 5px 0px 5px 5px;
+}
+
+.editablehierarchy .documentlabel, 
+.reorderablehierarchy .documentlabel {
+  cursor: move;
+}
+
+/* when we're editing, we have this fake document label for the default parent which we need to style nicely */
+.editablehierarchy .fakedocumentlabel {
+  cursor: auto;
+  color: #888;
+  line-height: 1.4em;
+  /* put the margin top of the list under above itself, will remove it from the list under just after */
+  margin-top: 1em;
+}
+/* remove the margin top of the hierarchy list if we're editing since there is the fake label to take care of that */
+.editablehierarchy .hierarchymacrolist {
+  margin-top: 0;
+}
+
+.editablehierarchy #hierarchymacrolist ul.newparenthover, 
+.reorderablehierarchy #hierarchymacrolist ul.newparenthover {
+  border: 1px dotted #000;
+  background-color: #eee;
+}
+
+.hierarchymacrolist,
+.hierarchymacrolist ul {
+  list-style: none;
+}
+
+.togglenodehandler {
+  background: url("$xwiki.getSkinFile('icons/silk/bullet_toggle_plus.gif')") no-repeat left center;
+  color: #555;
+  cursor: pointer;
+  display: inline-block;
+  margin-right: 3px;
+  padding-left: 8px;
+  padding-right: 3px;
+  text-indent:-10000px;
+  width: 0;
+}
+
+.togglenodehandler.open {
+  background-image: url("$xwiki.getSkinFile('icons/silk/bullet_toggle_minus.gif')");
+}
+
+.togglenodehandlerplaceholder {
+  display: inline-block;
+  width: 14px;
+}
+
+.documentlabel.moveerror, .documentlabel.updateerror {
+  background: url("$xwiki.getSkinFile('icons/silk/error.gif')") no-repeat left center;
+  padding-left: 22px;
+  color: #D5A13D;
+}
+
+.documentlabel.moveinprogress, .documentlabel.updateinprogress{
+  padding-left: 22px;
+  background: url("$xwiki.getSkinFile('icons/xwiki/spinner.gif')") no-repeat left center;
+  color: #ccc;
+}
+
+/* on a checkable hierarchy, the documents react on hover */
+.checkablehierarchy .hierarchynode {
+  border: 1px dotted transparent;
+}
+
+.checkablehierarchy .hierarchynode:hover {
+  border: 1px dotted #ccc;
+}
+
+/* position checkboxes */
+.hierarchynode {
+  position: relative;
+}
+
+.hierarchynode .checkboxcontrols {
+  position: absolute;
+  right: 10px;
+}
+
+.hierarchynode .checkall, .hierarchynode .uncheckall {
+  cursor: pointer;
+  color: $theme.linkColor;
+}
+
+.hierarchynode .checkall:hover, .hierarchynode .uncheckall:hover {
+  text-decoration: underline;
+}
+</code></property><property><name>Style for the hierarchy tree</name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>9</number>
+<prettyName>Macro code</prettyName>
+<rows>20</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<contentDescription>
+<disabled>0</disabled>
+<name>contentDescription</name>
+<number>8</number>
+<prettyName>Content description (Not applicable for "No content" type)</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</contentDescription>
+<contentType>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>contentType</name>
+<number>7</number>
+<prettyName>Macro content type</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator>|</separator>
+<separators>|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Optional|Mandatory|No content</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</contentType>
+<defaultCategory>
+<disabled>0</disabled>
+<name>defaultCategory</name>
+<number>4</number>
+<prettyName>Default category</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultCategory>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>3</number>
+<prettyName>Macro description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<id>
+<disabled>0</disabled>
+<name>id</name>
+<number>1</number>
+<prettyName>Macro id</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</id>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>2</number>
+<prettyName>Macro name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<supportsInlineMode>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>supportsInlineMode</name>
+<number>5</number>
+<prettyName>Supports inline mode</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</supportsInlineMode>
+<visibility>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>visibility</name>
+<number>6</number>
+<prettyName>Macro visibility</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator>|</separator>
+<separators>|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Current User|Current Wiki|Global</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</visibility>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroClass</className>
+<guid>ec7106f1-8dee-4288-812b-4676f587d2a7</guid>
+<property>
+<code>{{velocity}}
+#*
+  Macro to call recursively to display the node and the children of a node. 
+  it expects $childrenMap variable to be set with the list of children for each parent. 
+  Also, if onlyroots is set to true, it will only display the node, no children, but an empty list for chidren as if it had no children. 
+  Should be called in a html macro.
+*#
+#macro(displayNode $parent)
+  ## we must put this id here since otherwise sortable won't send onUpdate. Counter is defined outside
+  #set($pageCounter = $pageCounter + 1)
+  &lt;li id="hierarchypage_${pageCounter}"&gt;
+    ## has children if there's something in the map for it and it's not roots only
+    #set($hasChildrenList = false)
+    #if ($childrenMap.get($parent) &amp;&amp; $childrenMap.get($parent).size() &gt; 0 &amp;&amp; !$onlyRoots)
+      #set($hasChildrenList = true)
+    #end
+    ## show Children list only if it actually has children or it's editable or reorderable and we're not exporting (we should never put empty lists in export since it complains)
+    #set($showChildrenList = false)
+    #if ($hasChildrenList || (($editable || $reorderable) &amp;&amp; $context.action != "export"))
+      #set($showChildrenList = true)
+    #end
+    &lt;div class="hierarchynode"&gt;
+      ## display the toggle button only if it has children list and we're not in export action (exporting pdf)
+      ## actually we should put this button from js, when loading the handlers, since it can only be used with js. FIXME: move
+      #if($showChildrenList &amp;&amp; $context.action != "export")
+        &lt;span class="togglenodehandler hidden open"&gt;toggle&lt;/span&gt;
+      #else
+        ## for other cases, display anyway a toggle span, for layouting purposes
+        &lt;span class="togglenodehandlerplaceholder"&gt;&lt;/span&gt;
+      #end
+      #set($hasRightToView = true)
+      #set($titleToDisplay = $displayTitleMap.get($parent))
+      ## check rights, if specified
+      #if ($checkRight)
+        #set($hasRightToView = $xwiki.hasAccessLevel('view', $xcontext.user, $parent))
+        ## update the flag
+        #set($hasNonViewablePages = $hasNonViewablePages || !$hasRightToView)
+        ## TODO: implement checkright for edit mode where elements should be non-editable if they're not editable
+      #end
+      ## special display value calculation, if we need to display title, then we compute the display title now. 
+      ## This is to avoid loading all docs on the hierarchy even if we don't display them all
+      #if ($hasRightToView &amp;&amp; ($displayValue == "displayTitle"))
+        #set($titleToDisplay = "$xwiki.getDocument($parent).displayTitle")
+      #end
+      ## don't display link if we're in edit mode since dragging a link is a pain since you'll too often click it. 
+      ## Don't display link if doesn't have right to view
+      #if(!$editable &amp;&amp; !$reorderable &amp;&amp; $hasRightToView)&lt;a href="${xwiki.getURL($parent)}"&gt;#end
+        &lt;span class="documentlabel"&gt;${titleToDisplay}&lt;/span&gt; #if(!$hasRightToView)*#end
+      #if(!$editable &amp;&amp; !$reorderable &amp;&amp; $hasRightToView)&lt;/a&gt;#end
+      ## display reference of this element, to be able to catch it with js and perform the operation
+      &lt;input type="hidden" name="docreference" value="$parent" /&gt;
+      ## display the rest update url of this page to be able to update its parent when moved. 
+      ## I hesitated but I chose to put it as hidden input, which is as hidden as possible (another choice would have been empty anchor).
+      #set($parentReference = $services.model.resolveDocument($parent))
+      #set($restUpdateUrl = "${request.contextPath}/rest/wikis/${parentReference.wikiReference.name}/spaces/${parentReference.lastSpaceReference.name}/pages/${parentReference.name}")
+      &lt;input type="hidden" name="restupdateurl" value="$restUpdateUrl" /&gt;
+      ## if we need to display a checkbox for this element, let's do it
+      #if($showCheckboxes &amp;&amp; $context.action != "export")
+        &lt;span class="checkboxcontrols"&gt;
+          ## if it has children, but a set of select all / none buttons as well
+          #if ($hasChildrenList)
+            ## highjack some translations
+            &lt;span class="checkboxactions hidden"&gt;$msg.get('core.importer.select'): &lt;span class="checkall"&gt;$msg.get('core.importer.selectAll')&lt;/span&gt; &lt;span class="uncheckall"&gt;$msg.get('core.importer.selectNone')&lt;/span&gt;&lt;/span&gt;
+          #end
+          &lt;input type="checkbox" name="$checkboxName" value="$parent" class="hierarchynodecheckbox" #if($checked) checked="checked" #end /&gt;
+        &lt;/span&gt;
+      #end
+    &lt;/div&gt;
+    ## and now the children
+    #if ($showChildrenList)
+      &lt;ul&gt;
+        #if ($hasChildrenList)
+          ## prepare the children list, in the order given by the ChildrenOrder object in the parent
+          #set($childrenListToDisplay = [])
+          ## the one from the map
+          #set($childrenListFromMap = $childrenMap.get($parent))
+          ## go through all the children that have a specified order, and if they are in the actual children list, put them in the list to display
+          ## if they're not, ignore, it means that order object is outdated.
+          #if($xwiki.getDocument($parent).getObject('XWiki.ChildrenOrderClass'))
+            #foreach($orderedChild in $xwiki.getDocument($parent).getObject('XWiki.ChildrenOrderClass').getProperty('children').value)
+              #if($childrenListFromMap.contains($orderedChild))
+                #set($discard = $childrenListToDisplay.add($orderedChild))
+              #end
+            #end
+          #end
+          ## and now go through the list from map and add at the end of children to display all the children that were not already added
+          #foreach($realChild in $childrenListFromMap)
+            #if(!$childrenListToDisplay.contains($realChild))
+              #set($discard = $childrenListToDisplay.add($realChild))
+            #end
+          #end
+          #foreach($child in $childrenListToDisplay)
+            #displayNode($child)
+          #end
+        #end
+      &lt;/ul&gt;
+    #end
+  &lt;/li&gt;
+#end
+## include the css
+#set($discard = $xwiki.ssx.use("$xcontext.macro.doc"))
+## check whether hierarchy is editable
+#set($editable = false)
+#if("$!xcontext.macro.params.editable" == "true" || "$!xcontext.macro.params.editable" == "yes")
+  #set($editable = true)
+#end
+## check whether hierarchy is reorderable (non-binding edit)
+#set($reorderable = false)
+#if("$!xcontext.macro.params.reorderable" == "true" || "$!xcontext.macro.params.reorderable" == "yes")
+  #set($reorderable = true)
+#end
+## if either one of the 2 above, add some js
+#if($editable || $reorderable)
+  ## include the js libraries for drag and drop
+  #set($discard = $xwiki.jsfx.use('js/scriptaculous/scriptaculous.js', {'defer': false}))
+  #set($discard = $xwiki.jsfx.use('js/scriptaculous/effects.js', {'defer': false}))
+  #set($discard = $xwiki.jsfx.use('js/scriptaculous/dragdrop.js', {'defer': false, 'minify' : false}))  
+#end
+## include the current js, which will need to be used anyway since it holds the open close functionality
+#set($discard = $xwiki.jsx.use("$xcontext.macro.doc", {'defer' : false, 'minify': false}))
+## get the parameters, the space to show hierarchy for
+#set($space = "$!xcontext.macro.params.space")
+## the list of documents to exclude, if any
+#set($excludeListString = "$!xcontext.macro.params.excludes")
+#set($excludeListRaw = $excludeListString.split(','))
+## clean a bit the list, remove empty strings and trim
+#set($excludeList = [])
+#foreach($excludedElt in $excludeListRaw)
+  #set($excludedElt = $excludedElt.trim())
+  #if("$!excludedElt" != "")
+    #set($discard = $excludeList.add($excludedElt))
+  #end
+#end
+## whether only roots of the tree should be shown or not
+#set($onlyRoots = false)
+#if("$!xcontext.macro.params.onlyroots" == "true" || "$!xcontext.macro.params.onlyroots" == "yes")
+  #set($onlyRoots = true)
+#end
+## and the value that should be displayed for each document
+#set($displayValue = "$!xcontext.macro.params.displayvalue")
+#if("$!displayValue" != "displayTitle" &amp;&amp; "$!displayValue" != "name" &amp;&amp; "$!displayValue" != "title")
+  #set($displayValue = "fullName") 
+#end
+## whether rights should be checked when displaying the documents
+#set($checkRight = false)
+#if("$!xcontext.macro.params.checkright" == "true" || "$!xcontext.macro.params.checkright" == "yes")
+  #set($checkRight = true)
+#end
+#set($defaultParent = "$!xcontext.macro.params.defaultparent")
+## check whether this hierarchy macro should display a checkbox for each element
+#set($showCheckboxes = false)
+#if("$!xcontext.macro.params.showcheckboxes" == "true" || "$!xcontext.macro.params.showcheckboxes" == "yes")
+  #set($showCheckboxes = true)
+  #set($checkboxName = "$!xcontext.macro.params.checkboxname")
+  #if($checkboxName == "")
+    #set($checkboxName = "hierarchydocs")
+  #end
+  #set($checked = false)
+  #if("$!xcontext.macro.params.checked" == "true" || "$!xcontext.macro.params.checked" == "yes")
+    #set($checked = true)
+  #end
+#end
+## prepare query to get all pages according to criteria
+## TODO: we don't have handling for proper sorting by display title, but it's ok, for now we don't need it.
+#set($order = "order by doc.fullName")
+## prepare the list of selected fields, fullName and parent to build arborescence, and displayValue to build the display title
+#set($selectList = "doc.fullName, doc.parent")
+## display title is a special type of display, so we cannot select it on the third position, we'll handle that after
+#if ($displayValue != "displayTitle")
+  #set($selectList = "$selectList, doc.${displayValue}")
+  #set($order = "order by doc.${displayValue}")
+#elseif($checkRight)
+  ## however, even if displayValue is display title, if we have to check rights, select name to replace the display title which we cannot print if we don't have rights.
+  #set($selectList = "$selectList, doc.name")
+#end
+#set($selectFrom = "select ${selectList}  from XWikiDocument doc")
+## prepare filters
+#set($where = "")
+#set($paramsList = [])
+#if("$!space" != "")
+  #set($where = "doc.space = ?")
+  #set($discard = $paramsList.add($space))
+#end
+#if($excludeList.size() &gt; 0)
+  #if ($where.length() &gt; 0)
+    #set($where = $where + ' and ')
+  #end
+  #set($where = $where + 'doc.fullName not in (')
+  #foreach($excluded in $excludeList)
+    #if($velocityCount &gt; 1)
+      #set($where = $where + ', ') 
+    #end
+    #set($where = $where + '?')
+    #set($discard = $paramsList.add($excluded))
+  #end
+  #set($where = $where + ')')
+#end
+#if($where.length() &gt; 0)
+  #set($where = " where ${where}")
+#end
+#set($sql = "$selectFrom $where $order")
+## get the results
+#set($resultDocs = $xwiki.search($sql, $paramsList))
+## prepare the tree
+#set($childrenMap = {})
+## compute the title to be displayed and put it in the map
+#set($displayTitleMap = {})
+## the list of roots of the tree
+#set($rootsList = [])
+## the parents of the roots in the list above, needed to sort the roots according to the children order in their parents
+#set($rootsParentsList = [])
+## go through the whole list and put each child in a list of children for its parent
+## to find out if it's preserving sorting or not
+#foreach($resultDoc in $resultDocs)
+  #set($currentFullName = $resultDoc.get(0))
+  #set($currentReference = $services.model.resolveDocument($currentFullName))
+  ## filter the docs in the passed space and filter out the excludes from parents
+  #set($currentParent = $resultDoc.get(1))
+  #set($currentParentReference = $services.model.resolveDocument($currentParent, 'currentmixed', $currentReference))
+  #if("$!currentParent" != "" &amp;&amp; !$excludeList.contains($currentParent) &amp;&amp; $currentParentReference.wikiReference.name.equals($xcontext.wiki) &amp;&amp; ("$!space" == "" || $currentParentReference.lastSpaceReference.name.equals($space)))
+    ## it's not an orphan, it has non-excluded parent in the current wiki and in the passed space
+    ## put it in his parent's children list
+    ## we'll get the parent by re-serializing the resolved reference, 
+    ## to cover the cases when parent stored is relative to the child document (therefore parent stored in db is not fullname)
+    #set($currentParentFullName = $services.model.serialize($currentParentReference, 'local'))
+    #set($childrenList = $childrenMap.get($currentParentFullName))
+    #if(!$childrenList)
+      #set($childrenList = [])
+      #set($discard = $childrenMap.put($currentParentFullName, $childrenList))
+    #end
+    #set($discard = $childrenList.add($currentFullName))
+  #else
+    ## put it in the roots map, to be able to order it after
+    #set($discard = $rootsList.add($currentFullName))
+    ## put its parent in the rootsParentsList
+    #if ("$!currentParent" != "" &amp;&amp; !$rootsParentsList.contains($currentParent))
+      #set($discard = $rootsParentsList.add($currentParent))
+    #end
+  #end
+  ## and compute the title to be displayed and put it in the map
+  ## the display title has a special treatment since it needs to load the document, 
+  ## so it will be done only when needed, at display time. Just in case it's onlyRoots, it won't load docs for all the hierarchy. 
+  #if ($displayValue != "displayTitle" || $checkRight)
+    ## get the third position of the select and use it, if not empty. If empty, put fullname
+    #set($currentDisplayTitle = $resultDoc.get(2))
+    #if("$!currentDisplayTitle" == "")
+      #set($currentDisplayTitle = $currentFullName)
+    #end
+    #set($discard = $displayTitleMap.put($currentFullName, $currentDisplayTitle))
+  #end
+#end
+## a bit of post processing of the roots list, to compute the actual list of roots to display according to the order in their parents
+## the rule is: all the parents of the roots are taken in the order in which they are found when going through the roots list 
+## (this way if there is no order defined in any parent, the alphabetical order of roots given by the select will be preserved) 
+## and all the children ordered in these parents will be added in the list to display at the end of all these parents, 
+## all roots that are not yet in the displayed list will be added in the order in which they are found in the $rootsList.
+## note that this can cause children from different parents to be separated by some other children, if some are ordered and some are not
+## in any case all this bullshit algo is useless, since everything will be a child of the default parent in practice, or at most will have no parent
+#set($rootsListToDisplay = [])
+#foreach($rootsParent in $rootsParentsList)
+  #if($xwiki.getDocument($rootsParent).getObject('XWiki.ChildrenOrderClass'))
+    #foreach($orderedRoot in $xwiki.getDocument($rootsParent).getObject('XWiki.ChildrenOrderClass').getProperty('children').value)
+      #if($rootsList.contains($orderedRoot))
+        #set($discard = $rootsListToDisplay.add($orderedRoot))
+      #end
+    #end
+  #end
+#end
+## all the roots in the roots list that have not been added yet go at the end
+#foreach($originalRoot in $rootsList)
+  #if(!$rootsListToDisplay.contains($originalRoot))
+    #set($discard = $rootsListToDisplay.add($originalRoot))
+  #end
+#end
+## done, now let's print stuff
+## page counter allows to set ids to li elements, otherwise sortable doesn't work properly
+#set($pageCounter = 0)
+## remember if there are any pages without rights, to display the little message at the bottom
+#set($hasNonViewablePages = false)
+{{html clean="false"}}
+#set($classname = "")
+#if($editable)
+  #set($classname = "editablehierarchy")
+#elseif($reorderable)
+  #set($classname = "reorderablehierarchy")
+#end
+#if($showCheckboxes)
+  #set($classname = "${classname} checkablehierarchy")
+#end
+&lt;div #if("$!classname" != "")class="${classname}"#end&gt;
+  ## if we're editing, add the default parent to be set for documents which are dragged on the root, and a fake label to be able to add messages to it
+  #if ($editable)
+    &lt;input type="hidden" name="defaultparent" value="$!defaultParent" /&gt;
+    #if ($defaultParent)
+      &lt;div class="documentlabel fakedocumentlabel"&gt;
+      #set($defaultParentDocument = $xwiki.getDocument($defaultParent))
+      #set($titleGetExpression = '$defaultParentDocument')
+      #set($titleGetExpression = "${titleGetExpression}.${displayValue}")
+      #evaluate($titleGetExpression)
+      &lt;/div&gt;
+    #end
+  #end
+  &lt;ul id="hierarchymacrolist" class="hierarchymacrolist"&gt;
+    #foreach($root in $rootsListToDisplay)
+      #displayNode($root)
+    #end
+  &lt;/ul&gt;
+&lt;/div&gt;
+{{/html}}
+
+#if($hasNonViewablePages)
+  {{info}}{{{$msg.get('rightsmanager.documentrequireviewrights')}}}{{/info}}
+#end
+{{/velocity}}
+</code></property><property><contentDescription></contentDescription></property><property><contentType>No content</contentType>
+</property>
+<property>
+<defaultCategory>code</defaultCategory>
+</property>
+<property>
+<description>Displays the pages in the wiki / space in the parent/child tree, editable. Note that you can only use one editable hierarchy macro per page.</description>
+</property>
+<property>
+<id>hierarchy</id>
+</property>
+<property>
+<name>Hierarchy </name>
+</property>
+<property>
+<supportsInlineMode>0</supportsInlineMode>
+</property>
+<property>
+<visibility>Current Wiki</visibility>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>92b0e158-7da3-4132-a8bf-e1372ee1c13c</guid>
+<property>
+<defaultValue></defaultValue>
+</property>
+<property>
+<description>Space for which the pages should be displayed, if a selection should be made for the space. Note that space restriction applies to parents too: pages that have parents outside this space will behave as if they were orphan.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>space</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>1</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>26d39c77-c9c6-492c-823f-f2b757b83b2c</guid>
+<property>
+<defaultValue>false</defaultValue>
+</property>
+<property>
+<description>Parameter that allows to limit the display to only the roots of the hierarchy. Use "true" if only the roots of the hierarchy should be shown, "false" if all the pages should be displayed.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>onlyroots</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>2</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>d57b2ca0-6a8d-456e-9cba-204eb5f762db</guid>
+<property>
+<defaultValue></defaultValue>
+</property>
+<property>
+<description>Comma separated list of pages to exclude from the hierarchy display. These pages will be excluded from parents too (pages that have these pages as parent will behave as if they were orphan).</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>excludes</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>3</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>509a5b9f-252d-47c6-8641-aa637571097e</guid>
+<property>
+<defaultValue>fullName</defaultValue>
+</property>
+<property>
+<description>The value to display for a document: use "fullName" for document fullname (default), "name" for the document name (the fullName without the space name), "title" for the raw title of the document (if it contains velocity code it will not be interpreted) or "displayTitle" for the display title of the document (note that this slows down a lot the execution since it needs to load each document independently to compute its display title).</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>displayvalue</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>4</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>43d06e9c-d51d-4a52-8904-81477bd4fb60</guid>
+<property>
+<defaultValue>false</defaultValue>
+</property>
+<property>
+<description>Whether the hierarchy tree should be editable or not. Note that if there are multiple hierarchy macros on the page, edit mode won't work.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>editable</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>5</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>50d5256f-c063-411a-b261-c30024612578</guid>
+<property>
+<defaultValue>false</defaultValue>
+</property>
+<property>
+<description>Whether the right (view or edit) should be verified when displaying a document in the hierarchy (in view or edit mode). By default it's false since it consumes resources to check rights, since document needs to be loaded in memory. If user doesn't have view right on a document and this parameter is false, a link will be displayed, and when accessing the link the user will get the regular rights error message in xwiki.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>checkright</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>6</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>580076ae-04a3-4b74-98ce-4a3cef437735</guid>
+<property>
+<defaultValue></defaultValue>
+</property>
+<property>
+<description>The default parent to set to a document when it's dragged on the first level, if this is an editable hierarchy. By default this parameter is empty, but it's highly recommended to set it so that you don't create orphaned pages in the wiki. If "editable" is false, this parameter is ignored.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>defaultparent</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>7</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>703dc30c-4d63-4f5a-b9b9-4a73d956e4c4</guid>
+<property>
+<defaultValue>false</defaultValue>
+</property>
+<property>
+<description>Whether this macro should display a checkbox for every document that it displays in the hierarchy. This allows to embed this macro in a form to submit the list of checked documents.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>showcheckboxes</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>8</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>0aa8d740-52a4-48ef-bd44-3769d595ab08</guid>
+<property>
+<defaultValue>hierarchydocs</defaultValue>
+</property>
+<property>
+<description>To be used with the showcheckboxes parameter, it's the name to be used for the generated checkboxes. By default it is hierarchydocs. You can change it to anything besides "docreference" and "restupdateurl" which are reserved for the internal usage of the hierarchy macro.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>checkboxname</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>9</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>1845543b-38d9-4ea8-96c4-adad9c1ea30f</guid>
+<property>
+<defaultValue>false</defaultValue>
+</property>
+<property>
+<description>To be used with the showcheckboxes parameter, it's the default value for the displayed checkboxes, whether all should be checked or not.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>checked</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>10</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>83e72dc9-eedb-4b20-8850-1ae1ed61ea54</guid>
+<property>
+<defaultValue>false</defaultValue>
+</property>
+<property>
+<description>Set this to "true" or "yes" to enable reordering of the elements in visual mode, with no binding to actual data (no changes will be performed, as opposed to the effect of the "editable" parameter). You can see it as a "fake editable". This is usually used in conjunction with the showcheckboxes to put it all in a form to submit a list of pages, in the order selected by the user. If it's set together with the editable parameter, the editable will win (i.e. reordering will be binding).</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>reorderable</name>
+</property>
+</object>
+<content>Document that defines the hierarchy macro, which displays and allows to edit the documents hierarchy in a specific space (the standard parent-child relation) along with a special information, children order, which is saved in each parent to allow ordering its children as set by the user when displayed with this macro (and whenever some code which is aware of this information uses it).
+
+Note that the children order information should be used as a relative order, since a document can have additional children which are not present in the order information, as the order information is not updated when the parent parents / children are changed through other means than this macro. In such situations, hierarchy macro uses the stored children order for a document as follows:
+* for all the documents which are in the stored order, if they are an actual child of the document, they are displayed, as they appear in the stored order
+* for all the actual children of the document in alphabetic order of their display values (with a special case for the displayTitle), if they have not been yet displayed, they are displayed.
+Thus, children in the stored order will appear first, as dictated by the order, followed by the children for which there is no order information.</content></xwikidoc>
