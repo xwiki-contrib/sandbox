@@ -77,7 +77,6 @@ import org.xwiki.velocity.VelocityManager;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.pdf.api.PdfExport;
@@ -163,7 +162,8 @@ public class XslFopPdfExporter implements MultipagePdfExporter
     /**
      * {@inheritDoc}
      * 
-     * @see org.xwiki.pdf.multipageexport.MultipagePdfExporter#export(java.lang.String, java.util.List, boolean, boolean)
+     * @see org.xwiki.pdf.multipageexport.MultipagePdfExporter#export(java.lang.String, java.util.List, boolean,
+     *      boolean)
      */
     public void export(String name, List<String> docs, boolean multiPageSequence, boolean alwaysStartOnRecto)
         throws Exception
@@ -202,6 +202,12 @@ public class XslFopPdfExporter implements MultipagePdfExporter
         context.put("pdfexportdir", tempdir);
         context.put("pdfexport-file-mapping", new HashMap<String, File>());
 
+        // prepare to put the fakedocument on the execution context
+        Map<String, Object> backupObjects = new HashMap<String, Object>();
+        // backup the original velocity context of the xwiki context, since we're gonna replace it with the velocity
+        // context of the execution context when we push the fake document on the context
+        Object originalVContext = context.get("vcontext");
+
         try {
             XWikiDocument fakeDoc = new XWikiDocument(this.currentDRResolver.resolve(""));
             fakeDoc.setTitle(name);
@@ -234,19 +240,25 @@ public class XslFopPdfExporter implements MultipagePdfExporter
             renderer.render(xDom, printer);
             String renderedContent = printer.toString();
 
-            VelocityContext vcontext = (VelocityContext) context.get("vcontext");
             // prepare the content of the fake doc, with a html macro and all this rendered stuff in it
             Map<String, String> parameters = new HashMap<String, String>();
             parameters.put("wiki", Boolean.FALSE.toString());
             parameters.put("clean", Boolean.FALSE.toString());
             xDom = new XDOM(Arrays.<Block> asList(new MacroBlock("html", parameters, renderedContent, false)));
-            // put a fake document on the context, we don't really care that much. Actually we don't even need something
-            // as complicated as pdfmulti, we put some title and stuff to allow a nice cover page to be generated
+            // put the fake document with the rendered content as content on the context
             fakeDoc.setContent(xDom);
-            Document vdoc = new Document(fakeDoc, context);
-            vcontext.put("doc", vdoc);
-            vcontext.put("cdoc", vdoc);
-            vcontext.put("tdoc", vdoc);
+            // set document on the context by re-doing the pushDocumentInContext function, since pushDocumentInContext
+            // takes reference, not object
+            XWikiDocument.backupContext(backupObjects, context);
+            fakeDoc.setAsContextDoc(context);
+            // copy the velocity context of the execution context (with doc pushed in) in the xwiki context as well,
+            // since parseTemplate uses velocity context from xwiki context, not from execution context and we need to
+            // keep them in sync.
+            context.put("vcontext", vManager.getVelocityContext());
+            // also put cdoc on the velocity context, since pushDocumentInContext does not do it but backup and restore
+            // Context take care of it. pdf.vm is using cdoc so we need it on the vcontext
+            VelocityContext vcontext = (VelocityContext) context.get("vcontext");
+            vcontext.put("cdoc", vcontext.get("doc"));
 
             String tcontent = null;
             if (tcontent == null) {
@@ -259,6 +271,12 @@ public class XslFopPdfExporter implements MultipagePdfExporter
             e.printStackTrace();
             throw e;
         } finally {
+            // restore context
+            documentAccessBridge.popDocumentFromContext(backupObjects);
+            // restore vcontext
+            if (originalVContext != null) {
+                context.put("vcontext", originalVContext);
+            }
             // cleaning temporary directories
             File[] filelist = tempdir.listFiles();
             if (filelist != null) {
