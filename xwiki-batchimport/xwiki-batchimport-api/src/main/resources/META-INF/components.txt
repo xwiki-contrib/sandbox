@@ -1,0 +1,4 @@
+org.xwiki.batchimport.BatchImportService
+org.xwiki.batchimport.internal.DefaultBatchImport
+org.xwiki.batchimport.internal.iterators.CSVImportFileIterator
+org.xwiki.batchimport.internal.iterators.ExcelImportFileIterator
