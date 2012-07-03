@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1325372400000</creationDate>
-<date>1341162699000</date>
-<contentUpdateDate>1341162699000</contentUpdateDate>
+<date>1341341265000</date>
+<contentUpdateDate>1341341265000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.import.title', [$doc.space])</title>
 <template></template>
@@ -30,6 +30,8 @@
 #end
 
 #macro(displayDefaultButtons $previousStep $nextStep $currentStep)
+  ## display the current step in hidden so that we know when to save the data in the class
+  &lt;input type="hidden" name="referringstep" value="$currentStep" /&gt;
   &lt;div class="buttonwrapper"&gt;
     #if ("$!previousStep" != "")
       &lt;input type="submit" value='$msg.get("batchimport.import.${currentStep}.previous")' name="step_${previousStep}" class="button previous" /&gt;  
@@ -48,6 +50,43 @@
     #foreach($fieldMapping in $config.fieldsMapping.entrySet())
       &lt;input type="hidden" name="batchimportmapping_${fieldMapping.key}" value="${fieldMapping.value}" /&gt;
     #end
+  #end
+#end
+
+#macro(saveDataToPresetsObject)
+  ## get the previous step
+  #set($referringStep = "$!request.referringstep")
+  ## get the object, create a new one if needed
+  #set($presetsObject = $doc.getObject('BatchImport.BatchImportClass'))
+  #if(!$presetsObject)
+    #set($presetsObject = $doc.newObject('BatchImport.BatchImportClass'))
+  #end
+  #set($madeChanges = false)
+  #if($referringStep == "choosefile")
+    ## save the file in the class, only if different
+    #if ($services.model.serialize($importconfig.attachmentReference) != $presetsObject.getProperty('metadatafilename').value)
+      #set($discard = $presetsObject.set('metadatafilename', $services.model.serialize($importconfig.attachmentReference)))
+      #set($madeChanges = true)
+    #end
+  #elseif($referringStep == "mapping")
+    ## serialize and save the mapping in the classm only if different
+    #set($mappingString = "")
+    #foreach($fieldMapping in $importconfig.fieldsMapping.entrySet())
+      #if ($mappingString != "")
+        #set($mappingString = "${mappingString}${util.newline}")
+      #end
+      ## the other way around since this is the way we save in the class
+      #set($mappingString = "${mappingString}${fieldMapping.value}=${fieldMapping.key}")
+    #end
+    #if ($mappingString != $presetsObject.getProperty('mapping').value)
+      #set($discard = $presetsObject.set('mapping', $mappingString))
+      #set($madeChanges = true)
+    #end
+  #end
+  ## FIXME: add the other properties to this save
+  ## if any changes were made, save the presets
+  #if($madeChanges)
+    $doc.save("Updated presets")
   #end
 #end
 
@@ -82,11 +121,11 @@
           #set($attachmentExtension = "#printAttachmentExtension($attachment)")
           #if ($attachment.mimeType == "text/plain" || $attachmentExtension == ".csv" || $attachmentExtension == "" || $attachmentExtension == ".xls")
             #set($attachmentRef = $services.model.createAttachmentReference($doc.documentReference, $attachment.filename))
-            ## FIXME: read here attachment reference from config to display
-            &lt;li&gt;&lt;input type="radio" name="batchimportattachmentref" value="$services.model.serialize($attachmentRef)" #if($velocityCount == 1 &amp;&amp; $justUploaded)checked="checked"#end /&gt;$attachment.filename&lt;/attachment&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;input type="radio" name="batchimportattachmentref" value="$services.model.serialize($attachmentRef)" #if($velocityCount == 1 &amp;&amp; $justUploaded)checked="checked"#end #if(!$justUploaded &amp;&amp; $attachmentRef.equals($importconfig.attachmentReference))checked="checked"#end/&gt;$attachment.filename&lt;/attachment&gt;&lt;/li&gt;
           #end
         #end
       &lt;/ul&gt;
+      #printBatchImportNonDefaultOptions($importconfig)      
       #displayDefaultButtons("", "mapping", "choosefile")
     &lt;/form&gt;
   {{/html}}
@@ -98,8 +137,7 @@
   #set($applicationClass = $xwiki.getClass($importconfig.mappingClassName))
   
   {{html clean="false" wiki="false"}}
-    &lt;form action="" method="post"&gt;  
-    #printBatchImportNonDefaultOptions($importconfig)
+    &lt;form action="" method="post"&gt;
   {{/html}}
 
   #set($columnsList = $services.batchimport.getColumnHeaders($importconfig))
@@ -112,6 +150,9 @@
   {{/html}}
   
   {{html clean="false" wiki="false"}}
+    ## in order to prevent mappings coming from the object and not overwritten by the UI to be displayed here in hidden, we clean now the mapping of the importconfig (after we displayed it), so that the UI displayed above will always be right
+    #set($discard = $importconfig.clearFieldsMapping())
+    #printBatchImportNonDefaultOptions($importconfig)  
     #displayDefaultButtons("choosefile", "importsimulation", "mapping")
     &lt;/form&gt;
   {{/html}}
@@ -145,7 +186,16 @@
 
 {{velocity}}
 ## read the import config, the import steps will need it
-#set($importconfig = $services.batchimport.readConfigurationFromRequest())
+## first from the stored class for preserving settings, then overwrite from the request
+#set($importconfig = $services.batchimport.readConfigurationFromObject($doc, "BatchImport.BatchImportClass"))
+## here, for all steps besides the mapping step, overwrite the mapping list completely with the list from the request, 
+## so that there are no "hidden" mappings used for the import, since the class has only " fill in presets" role, 
+## the configuration itself to be used will still be passed in params  -&gt; this is to prevent validating a set of 
+## steps and executing a different import because somebody else changed the stored configuration in the mean time.
+#if("$!request.step_mapping" == "")
+  #set($discard = $importconfig.clearFieldsMapping())
+#end
+#set($importconfig = $services.batchimport.readConfigurationFromRequest($importconfig))
 ## and put the default settings
 #set($discard = $importconfig.setHeaderRow(true))
 #set($discard = $importconfig.setDefaultSpace($doc.space))
@@ -159,6 +209,9 @@
 #else
   #set($discard = $importconfig.setType('csv'))
 #end
+
+## before displaying the current step, save the data coming from previous step to the presets object in this document, as it is written in the read config
+#saveDataToPresetsObject()
 
 #if("$!request.step_mapping" != "")
   #displayColumnMapping()

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -38,6 +39,9 @@ import org.xwiki.script.service.ScriptService;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.api.Document;
+import com.xpn.xwiki.api.Object;
+import com.xpn.xwiki.api.Property;
 import com.xpn.xwiki.web.XWikiRequest;
 
 /**
@@ -59,7 +63,11 @@ public class BatchImportService implements ScriptService, BatchImport
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(BatchImportService.class);
 
-    private static final String MAPPING_PARAM_PREFIX = "batchimportmapping_";
+    protected static final String MAPPING_PARAM_PREFIX = "batchimportmapping_";
+
+    @Inject
+    @Named("current")
+    protected AttachmentReferenceResolver<String> currentAttachmentStringResolver;
 
     /**
      * @return a brand new empty import configuration, to fill in and pass as parameters.
@@ -83,12 +91,23 @@ public class BatchImportService implements ScriptService, BatchImport
      *         <li><tt>batchimportemptydocnameprefix</tt> for {@link BatchImportConfiguration#getEmptyDocNamePrefix()}</li>
      *         <li><tt>batchimportdefaultdateformat</tt> for {@link BatchImportConfiguration#getDefaultDateFormat()}</li>
      *         </ul>
+     *         TODO: this method misses some parameters of the config (that might or might not be passable as request
+     *         parameters).
      */
-    @SuppressWarnings("unchecked")
     public BatchImportConfiguration readConfigurationFromRequest()
     {
-        BatchImportConfiguration config = getConfiguration();
+        return readConfigurationFromRequest(getConfiguration());
+    }
 
+    /**
+     * Fills in the passed configuration from the request. Used to be able to chain read methods on the same
+     * configuration, only overwriting the settings contained in the request (leaving the rest unchanged).
+     * 
+     * @see #readConfigurationFromRequest()
+     */
+    @SuppressWarnings("unchecked")
+    public BatchImportConfiguration readConfigurationFromRequest(BatchImportConfiguration config)
+    {
         XWikiRequest request = getRequest();
 
         String separatorValue = request.getParameter("batchimportseparator");
@@ -100,7 +119,6 @@ public class BatchImportService implements ScriptService, BatchImport
         try {
             String attachmentRef = request.getParameter("batchimportattachmentref");
             if (!StringUtils.isEmpty(attachmentRef)) {
-                @SuppressWarnings("unchecked")
                 AttachmentReferenceResolver<String> refResolver =
                     cm.lookup(AttachmentReferenceResolver.class, "current");
                 config.setAttachmentReference(refResolver.resolve(attachmentRef));
@@ -145,6 +163,95 @@ public class BatchImportService implements ScriptService, BatchImport
         String defaultDateFormat = request.getParameter("batchimportdefaultdateformat");
         if (!StringUtils.isEmpty(emptyDocNamePrefix)) {
             config.setDefaultDateFormat(defaultDateFormat);
+        }
+
+        return config;
+    }
+
+    /**
+     * Reads the batch import configuration from an xwiki object in a document. The class description is
+     * BatchImport.BatchImportClass.
+     * 
+     * @param document the document to read object from
+     * @param className the name of the class for the object
+     * @return an instance of {@link BatchImportConfiguration}, filled in with data from the object, if any. Otherwise,
+     *         an empty batch import configuration.
+     */
+    public BatchImportConfiguration readConfigurationFromObject(Document document, String className)
+    {
+        return readConfigurationFromObject(document, className, getConfiguration());
+    }
+
+    /**
+     * Fills in the passed configuration from the object. Used to be able to chain read methods on the same
+     * configuration, only overwriting the settings contained in the object (leaving the rest unchanged).
+     * 
+     * @see #readConfigurationFromObject(Document, String)
+     */
+    public BatchImportConfiguration readConfigurationFromObject(Document document, String className,
+        BatchImportConfiguration config)
+    {
+        Object configObject = document.getObject(className);
+
+        if (configObject != null) {
+            // fill it in
+            Property sourceFileNameProp = configObject.getProperty("metadatafilename");
+            String sourceFileName = sourceFileNameProp != null ? (String) sourceFileNameProp.getValue() : null;
+            if (!StringUtils.isEmpty(sourceFileName)) {
+                // use as attachment, relative to the document storing the object
+                config.setAttachmentReference(currentAttachmentStringResolver.resolve(sourceFileName,
+                    document.getDocumentReference()));
+            }
+
+            Property mappingClassnameProp = configObject.getProperty("classname");
+            String mappingClassname = mappingClassnameProp != null ? (String) mappingClassnameProp.getValue() : null;
+            if (!StringUtils.isEmpty(mappingClassname)) {
+                config.setMappingClassName(mappingClassname);
+            }
+
+            Property defaultSpaceProp = configObject.getProperty("space");
+            String defaultSpace = defaultSpaceProp != null ? (String) defaultSpaceProp.getValue() : null;
+            if (!StringUtils.isEmpty(defaultSpace)) {
+                config.setDefaultSpace(defaultSpace);
+            }
+
+            Property emptyDocnamePagePrefixProp = configObject.getProperty("pageprefix");
+            String emptyDocnamePagePrefix =
+                emptyDocnamePagePrefixProp != null ? (String) emptyDocnamePagePrefixProp.getValue() : null;
+            if (!StringUtils.isEmpty(emptyDocnamePagePrefix)) {
+                config.setEmptyDocNamePrefix(emptyDocnamePagePrefix);
+            }
+
+            Property listSeparatorProp = configObject.getProperty("listseparator");
+            String listSeparatorString = listSeparatorProp != null ? (String) listSeparatorProp.getValue() : null;
+            if (!StringUtils.isEmpty(listSeparatorString)) {
+                config.setListSeparator(listSeparatorString.charAt(0));
+            }
+
+            Property mappingProperty = configObject.getProperty("mapping");
+            String mappingString = mappingProperty != null ? (String) mappingProperty.getValue() : null;
+            if (!StringUtils.isEmpty(mappingString)) {
+                for (String item : mappingString.split("\n")) {
+                    String[] res = item.split("=");
+                    if (res.length == 2) {
+                        // the other way around since the class expects pairs (column, xwiki field) in its field and the
+                        // config uses the pairs the other way around
+                        // if multiple occurrences of a xwiki field are found (multiple mappings), the last one will be
+                        // used
+                        config.addFieldMapping(res[1].trim(), res[0].trim());
+                    } else {
+                        LOGGER.debug("Mapping in the wrong format: " + item + " in document "
+                            + document.getPrefixedFullName());
+                    }
+                }
+            }
+
+            // TODO:
+            // datafilename (datafilename: String)
+            // datafileprefix (datafileprefix: String)
+            // fieldsfortags (fieldsfortags: String)
+            // fileupload (fileupload: Boolean)
+            // fileimport (fileimport: Boolean)
         }
 
         return config;
