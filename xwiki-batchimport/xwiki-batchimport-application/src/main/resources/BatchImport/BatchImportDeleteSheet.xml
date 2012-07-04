@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1340817971000</creationDate>
-<date>1341157840000</date>
-<contentUpdateDate>1341157840000</contentUpdateDate>
+<date>1341346187000</date>
+<contentUpdateDate>1341346187000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.delete.title', [$doc.space])</title>
 <template></template>
@@ -32,14 +32,13 @@
 
     {{html}}&lt;a href="$doc.getURL('view')"&gt;$msg.get('batchimport.delete.success.backtowebhome', [$doc.space])&lt;/a&gt;{{/html}}
   #else
-     ## TODO: fix this shit, exceptions are unreadable because velocity needs programming rights to get the internal
-     ## context / keys from internal context.  
-    #set($exception = $xcontext.get($services.batchimport.xContextExceptionKey))
+    #set($exception = $services.batchimport.exceptionFromContext)
     #if ($exception)
       {{error}}**$msg.get('batchimport.delete.error.exception')**
       
+        [$exception.class.name] $exception.message
         #foreach($elt in $exception.stackTrace)
-          $elt
+          at $elt
         #end
       {{/error}}
     #else

@@ -275,6 +275,7 @@ public class BatchImportService implements ScriptService, BatchImport
         try {
             return batchImport.getColumnHeaders(config);
         } catch (IOException e) {
+            LOGGER.error("Cannot get column headers for config: " + config.toString(), e);
             putExceptionInContext(e);
         }
 
@@ -313,14 +314,23 @@ public class BatchImportService implements ScriptService, BatchImport
     }
 
     /**
-     * TODO: fix this shit, exceptions are unreadable because velocity needs programming rights to get the internal
-     * context / keys from internal context.
+     * Put an exception in the xwiki context, to be read after from velocity to display error.
      * 
-     * @param e
+     * @param e the exception to put in the context
      */
     protected void putExceptionInContext(Exception e)
     {
         getXWikiContext().put(getXContextExceptionKey(), e);
+    }
+
+    /**
+     * Since otherwise we need programming rights to get the exception from context.
+     * 
+     * @return the last exception put in context
+     */
+    public Exception getExceptionFromContext()
+    {
+        return (Exception) getXWikiContext().get(getXContextExceptionKey());
     }
 
     public String getXContextExceptionKey()
