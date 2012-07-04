@@ -398,6 +398,22 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
+    /**
+     * Cleans up tmp folder after the work of office importer.
+     */
+    public void cleanUp()
+    {
+        File tmpdir = new File("/tmp/");
+        for (File tmpsubdir : tmpdir.listFiles()) {
+            if (tmpsubdir.getName().startsWith("sv") && tmpsubdir.getName().endsWith(".tmp")) {
+                for (File file : tmpsubdir.listFiles()) {
+                    file.delete();
+                }
+                tmpsubdir.delete();
+            }
+        }
+    }
+
     public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwrite,
         boolean overwritefile, boolean simulation) throws IOException, XWikiException
     {
@@ -751,11 +767,10 @@ public class DefaultBatchImport implements BatchImport
                                                             newDoc2.setContent("");
                                                             // TODO: fix this because it's very ugly but apparently that
                                                             // function exists like that only there
-                                                            new Document(newDoc, xcontext).save();
+                                                            new Document(newDoc2, xcontext).save();
                                                         }
                                                         // cleaup oo temp files
-                                                        // TODO: we didn't port this because there is no office importer
-                                                        // cleanUp();
+                                                        cleanUp();
                                                     }
                                                 } else {
                                                     log(result, "Imported row " + currentLine.toString() + " in page "
