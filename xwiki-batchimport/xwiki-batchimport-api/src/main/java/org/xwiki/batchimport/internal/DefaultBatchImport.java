@@ -552,9 +552,27 @@ public class DefaultBatchImport implements BatchImport
                 getPageName(data, config.getWiki(), defaultSpace, defaultPrefix, rowIndex, docNameList, ignoreEmpty,
                     config.getClearName());
             if (pageName != null) {
-                this.saveDataToDocument(pageName, data, currentLine, defaultClass, config, xcontext, overwrite,
-                    simulation, withFiles, overwritefile, fileimport, datadir, datadirprefix, zipfile, fieldsfortags,
-                    defaultDateFormat, result);
+                // marshal data to the document objects (this is also creating the document and handling overwrites)
+                XWikiDocument newDoc =
+                    this.marshalDataToDocumentObjects(pageName, data, currentLine, defaultClass, config, xcontext,
+                        overwrite, fieldsfortags, defaultDateFormat, result);
+                // if a new document was created and filled (meaning that overwrite is on the good value)...
+                if (newDoc != null) {
+                    // ... save the file information from the import configuration to it. This function needs to save
+                    // the document beforehand though, in some situations, so it will return a dirty flag, i.e. if it
+                    // still needs to be saved or not.
+                    // TODO: fix this function to return properly
+                    boolean stillDirty =
+                        saveDocumentFiles(newDoc, data, currentLine, config, xcontext, overwrite, simulation,
+                            withFiles, overwritefile, fileimport, datadir, datadirprefix, zipfile, result);
+                    // if we're not simulating and the document is still dirty after handling of files, save it here.
+                    if (!simulation && stillDirty) {
+                        new Document(newDoc, xcontext).save();
+                        log(result,
+                            "Imported row " + currentLine.toString() + " in page [[" + newDoc.getPrefixedFullName()
+                                + "]].");
+                    }
+                }
             } else {
                 log(result, "Ignore " + currentLine.toString() + " because page name could not be built.");
             }
@@ -626,11 +644,10 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
-    public XWikiDocument saveDataToDocument(DocumentReference pageName, Map<String, String> data,
+    public XWikiDocument marshalDataToDocumentObjects(DocumentReference pageName, Map<String, String> data,
         List<String> currentLine, BaseClass defaultClass, BatchImportConfiguration config, XWikiContext xcontext,
-        boolean overwrite, boolean simulation, boolean withFiles, boolean overwritefile, boolean fileimport,
-        String datadir, String datadirprefix, ZipFile zipfile, List<String> fieldsfortags, String defaultDateFormat,
-        StringBuffer result) throws XWikiException, IOException
+        boolean overwrite, List<String> fieldsfortags, String defaultDateFormat, StringBuffer result)
+        throws XWikiException, IOException
     {
         XWiki xwiki = xcontext.getWiki();
         String defaultClassName = config.getMappingClassName();
@@ -640,9 +657,6 @@ public class DefaultBatchImport implements BatchImport
 
         XWikiDocument newDoc = xwiki.getDocument(pageName, xcontext);
         if (newDoc.isNew() || overwrite) {
-            boolean withFile = false;
-            boolean fileOk = true;
-            String path = "";
             BaseObject newDocObj = null;
             if (defaultClassName != null && defaultClassName != "") {
                 newDocObj = newDoc.getXObject(defaultClassReference);
@@ -703,11 +717,7 @@ public class DefaultBatchImport implements BatchImport
                         }
                     }
                 } else if (key.equals("doc.file")) {
-                    withFile = true;
-                    if (withFiles) {
-                        path = getFilePath(datadir, datadirprefix, data.get("doc.file"));
-                        fileOk = checkFile(zipfile, path);
-                    }
+                    // ignore, will be handled by the file function
                 } else if (key.equals("doc.author")) {
                     newDoc.setAuthor(value);
                 } else if (key.equals("doc.title")) {
@@ -728,7 +738,7 @@ public class DefaultBatchImport implements BatchImport
 
             // set tags, only if needed.
             // TODO: fix this test here, maybe it should depend on the overwrite parameter: for now we overwrite
-            // it even with an empty list, if the fields for tags is set to something and that something is
+            // it even with an empty tagList, if the fields for tags is set to something and that something is
             // void, maybe we shouldn't
             if (fieldsfortags != null && fieldsfortags.size() > 0) {
                 BaseObject newTagsObject =
@@ -750,152 +760,177 @@ public class DefaultBatchImport implements BatchImport
                 newDoc.setParentReference(new EntityReference("WebHome", EntityType.DOCUMENT));
             }
 
-            // TODO: I wonder why we do this here
+            // polish a bit the content of the document
             if (newDoc.getContent().trim() == "") {
                 newDoc.setContent("");
             }
 
-            if (withFile) {
-                if (withFiles) {
-                    if (fileOk) {
-                        if (debug || simulation) {
-                            log(result, "Ready to import row " + currentLine.toString() + "in page " + pageName
+        } else {
+            log(result, "Cannot import row " + currentLine.toString() + " because page " + pageName
+                + " already exists.");
+            return null;
+        }
+
+        return newDoc;
+    }
+
+    public boolean saveDocumentFiles(XWikiDocument newDoc, Map<String, String> data, List<String> currentLine,
+        BatchImportConfiguration config, XWikiContext xcontext, boolean overwrite, boolean simulation,
+        boolean withFiles, boolean overwritefile, boolean fileimport, String datadir, String datadirprefix,
+        ZipFile zipfile, StringBuffer result) throws XWikiException, ZipException, IOException
+    {
+        boolean stillDirty = true;
+
+        String pageName = newDoc.getPrefixedFullName();
+
+        boolean withFile = false;
+        boolean fileOk = false;
+        String path = "";
+
+        // if there is a mapping for the doc.file field
+        String fileMapping = config.getFieldsMapping().get("doc.file");
+        if (fileMapping != null) {
+            withFile = true;
+            if (withFiles) {
+                path = getFilePath(datadir, datadirprefix, data.get("doc.file"));
+                fileOk = checkFile(zipfile, path);
+            }
+        }
+
+        if (withFile) {
+            if (withFiles) {
+                if (fileOk) {
+                    if (debug || simulation) {
+                        log(result,
+                            "Ready to import row " + currentLine.toString() + "in page " + newDoc.getPrefixedFullName()
                                 + " and imported file is ok.");
-                        }
+                    }
 
-                        // Need to import file
-                        if (simulation == false) {
-                            // adding the file to the document
-                            String fname = getFileName(data.get("doc.file"));
-                            if (newDoc.getAttachment(fname) != null) {
-                                if (debug) {
-                                    System.out.println("Filename " + fname + " already exists in "
-                                        + newDoc.getPrefixedFullName());
-                                }
+                    // Need to import file
+                    if (simulation == false) {
+                        // adding the file to the document
+                        String fname = getFileName(data.get("doc.file"));
+                        if (newDoc.getAttachment(fname) != null) {
+                            if (debug) {
+                                System.out.println("Filename " + fname + " already exists in "
+                                    + newDoc.getPrefixedFullName());
+                            }
 
-                                // saving the document
-                                // TODO: why exactly are we saving here?
-                                // TODO: fix this because it's very ugly but apparently that function exists
-                                // like that only there
+                            // done here
+                            // FIXME: this should depend on the overwrite file parameter or at least on the overwrite
+                            // one (since overwritefile seems to be about the behavior of the document content when
+                            // there are files attached)
+                            new Document(newDoc, xcontext).save();
+                            stillDirty = false;
+                        } else {
+                            boolean isDirectory = isDirectory(zipfile, path);
+                            if (isDirectory) {
+                                addFiles(newDoc, path);
+
+                                // done here, we save pointed files in the file and we're done
                                 new Document(newDoc, xcontext).save();
+                                stillDirty = false;
                             } else {
-                                boolean isDirectory = isDirectory(zipfile, path);
-                                if (isDirectory) {
-                                    addFiles(newDoc, path);
+                                byte[] filedata = getFileData(zipfile, path);
+                                if (filedata != null) {
+                                    addFile(newDoc, filedata, fname);
+                                    // TODO: why the hell are we doing this here?
+                                    if (overwrite && overwritefile) {
+                                        newDoc.setContent("");
+                                    }
 
-                                    // saving the document
-                                    // TODO: fix this because it's very ugly but apparently that function exists
-                                    // like that only there
+                                    // saving the document, in order to be able to do the import properly after
                                     new Document(newDoc, xcontext).save();
-                                } else {
-                                    byte[] filedata = getFileData(zipfile, path);
-                                    if (filedata != null) {
-                                        addFile(newDoc, filedata, fname);
-                                        if (overwrite && overwritefile) {
-                                            newDoc.setContent("");
-                                        }
 
-                                        // saving the document
-                                        // TODO: fix this because it's very ugly but apparently that function
-                                        // exists like that only there
-                                        new Document(newDoc, xcontext).save();
+                                    // launching the openoffice conversion
+                                    if (fileimport) {
+                                        if (!fname.toLowerCase().endsWith(".pdf")
+                                            && (newDoc.getContent().trim() == "" || (overwrite && overwritefile))) {
+                                            boolean importResult = false;
 
-                                        // launching the openoffice conversion
-                                        if (fileimport) {
-                                            if (!fname.toLowerCase().endsWith(".pdf")
-                                                && (newDoc.getContent().trim() == "" || (overwrite && overwritefile))) {
-                                                boolean importResult = false;
-
-                                                try {
-                                                    OfficeImporterVelocityBridge officeimporter =
-                                                        new OfficeImporterVelocityBridge(this.cm);
-                                                    // import the attachment in the content of the document
-                                                    InputStream fileInputStream = new ByteArrayInputStream(filedata);
-                                                    XDOMOfficeDocument xdomOfficeDoc =
-                                                        officeimporter.officeToXDOM(fileInputStream, fname,
-                                                            newDoc.getPrefixedFullName(), true);
-                                                    importResult =
-                                                        officeimporter.save(xdomOfficeDoc,
-                                                            newDoc.getPrefixedFullName(), newDoc.getSyntax()
-                                                                .toIdString(), null, null, true);
-                                                } catch (OfficeImporterException e) {
-                                                    LOGGER.warn("Failed to import content from office file " + fname
-                                                        + " to document " + newDoc.getPrefixedFullName());
-                                                }
-
-                                                if (!importResult) {
-                                                    log(result, "Imported row " + currentLine.toString()
-                                                        + " in page [[" + newDoc.getPrefixedFullName()
-                                                        + "]] but failed importing office file " + path
-                                                        + " into content.");
-                                                } else {
-                                                    log(result, "Imported row " + currentLine.toString()
-                                                        + " in page [[" + newDoc.getPrefixedFullName()
-                                                        + "]] and imported office file " + path + " into content.");
-                                                }
-
-                                                // in case import was unsuccesfull let's empty the content again
-                                                // to be able to detect it
-                                                XWikiDocument newDoc2 = xwiki.getDocument(pageName, xcontext);
-                                                if (newDoc2.getContent().trim() == "") {
-                                                    newDoc2.setContent("");
-                                                    // TODO: fix this because it's very ugly but apparently that
-                                                    // function exists like that only there
-                                                    new Document(newDoc2, xcontext).save();
-                                                }
-                                                // cleaup oo temp files
-                                                cleanUp();
+                                            try {
+                                                OfficeImporterVelocityBridge officeimporter =
+                                                    new OfficeImporterVelocityBridge(this.cm);
+                                                // import the attachment in the content of the document
+                                                InputStream fileInputStream = new ByteArrayInputStream(filedata);
+                                                XDOMOfficeDocument xdomOfficeDoc =
+                                                    officeimporter.officeToXDOM(fileInputStream, fname,
+                                                        newDoc.getPrefixedFullName(), true);
+                                                importResult =
+                                                    officeimporter.save(xdomOfficeDoc, newDoc.getPrefixedFullName(),
+                                                        newDoc.getSyntax().toIdString(), null, null, true);
+                                            } catch (OfficeImporterException e) {
+                                                LOGGER.warn("Failed to import content from office file " + fname
+                                                    + " to document " + newDoc.getPrefixedFullName());
                                             }
-                                        } else {
-                                            log(result, "Imported row " + currentLine.toString() + " in page "
-                                                + pageName + " and did not need to import the office file.");
+
+                                            if (!importResult) {
+                                                log(result, "Imported row " + currentLine.toString() + " in page [["
+                                                    + newDoc.getPrefixedFullName()
+                                                    + "]] but failed importing office file " + path + " into content.");
+                                            } else {
+                                                log(result, "Imported row " + currentLine.toString() + " in page [["
+                                                    + newDoc.getPrefixedFullName() + "]] and imported office file "
+                                                    + path + " into content.");
+                                            }
+
+                                            // in case import was unsuccessful let's empty the content again
+                                            // to be able to detect it
+                                            XWikiDocument newDoc2 = xcontext.getWiki().getDocument(pageName, xcontext);
+                                            if (newDoc2.getContent().trim() == "") {
+                                                newDoc2.setContent("");
+                                                new Document(newDoc2, xcontext).save();
+                                            }
+                                            // clean up open office temporary files
+                                            cleanUp();
+
+                                            // TODO: I think office import means not dirty, we should return false here,
+                                            // I think
                                         }
                                     } else {
-                                        log(result, "Imported row " + currentLine.toString() + " in page [[" + pageName
-                                            + "]] and failed to read the office file.");
+                                        log(result, "Imported row " + currentLine.toString() + " in page " + pageName
+                                            + " and did not need to import the office file.");
                                     }
+                                } else {
+                                    log(result, "Imported row " + currentLine.toString() + " in page [[" + pageName
+                                        + "]] and failed to read the office file.");
                                 }
                             }
                         }
-                    } else {
-                        String fname = data.get("doc.file");
-                        log(result, "Cannot import row " + currentLine.toString() + " in page " + pageName
-                            + " because imported file ${path} does not exist.");
                     }
                 } else {
-                    if (debug || simulation) {
-                        log(result, "Ready to import row " + currentLine.toString() + " in page " + pageName
-                            + " without file.");
-                    }
-
-                    // we should save the data
-                    if (simulation == false) {
-                        // TODO: fix this because it's very ugly but apparently that function exists like that
-                        // only there
-                        new Document(newDoc, xcontext).save();
-                        log(result, "Imported row " + currentLine.toString() + " in page [[" + pageName + "]].");
-                    }
+                    String fname = data.get("doc.file");
+                    log(result, "Cannot import row " + currentLine.toString() + " in page " + pageName
+                        + " because imported file ${path} does not exist.");
                 }
             } else {
                 if (debug || simulation) {
                     log(result, "Ready to import row " + currentLine.toString() + " in page " + pageName
-                        + " (no file attached).");
+                        + " without file.");
                 }
 
                 // we should save the data
                 if (simulation == false) {
-                    // TODO: fix this because it's very ugly but apparently that function exists like that only
-                    // there
                     new Document(newDoc, xcontext).save();
                     log(result, "Imported row " + currentLine.toString() + " in page [[" + pageName + "]].");
+                    stillDirty = false;
                 }
             }
         } else {
-            log(result, "Cannot import row " + currentLine.toString() + " because page " + pageName
-                + " already exists.");
+            if (debug || simulation) {
+                log(result, "Ready to import row " + currentLine.toString() + " in page " + pageName
+                    + " (no file attached).");
+            }
+
+            // we should save the data
+            if (simulation == false) {
+                new Document(newDoc, xcontext).save();
+                log(result, "Imported row " + currentLine.toString() + " in page [[" + pageName + "]].");
+                stillDirty = false;
+            }
         }
 
-        return newDoc;
+        return stillDirty;
     }
 
     /**
