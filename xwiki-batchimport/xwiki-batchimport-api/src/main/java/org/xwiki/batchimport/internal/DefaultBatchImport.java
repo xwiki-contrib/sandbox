@@ -238,8 +238,7 @@ public class DefaultBatchImport implements BatchImport
     }
 
     public DocumentReference getPageName(Map<String, String> data, String wiki, String defaultSpace,
-        String defaultPrefix, int rowIndex, List<DocumentReference> docNameList, boolean ignoreEmpty,
-        boolean convertToUpperCase, boolean clearNames)
+        String defaultPrefix, int rowIndex, List<DocumentReference> docNameList, boolean ignoreEmpty, boolean clearNames)
     {
         // TODO: in the original code the space code was copy-pasted here, not used from the function
         String space = getSpace(data, defaultSpace, clearNames);
@@ -255,13 +254,6 @@ public class DefaultBatchImport implements BatchImport
         if (clearNames) {
             XWikiContext xcontext = getXWikiContext();
             name = xcontext.getWiki().clearName(name, xcontext);
-        }
-
-        if (convertToUpperCase) {
-            if (debug) {
-                System.out.println("Converting the name to upper case.");
-            }
-            name = name.toUpperCase();
         }
 
         DocumentReference pageName = prepareDocumentReference(wiki, space, name);
@@ -407,7 +399,7 @@ public class DefaultBatchImport implements BatchImport
     }
 
     public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwrite,
-        boolean overwritefile, boolean simulation, boolean convertToUpperCase) throws IOException, XWikiException
+        boolean overwritefile, boolean simulation) throws IOException, XWikiException
     {
         XWikiContext xcontext = getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
@@ -549,7 +541,7 @@ public class DefaultBatchImport implements BatchImport
             }
             DocumentReference pageName =
                 getPageName(data, config.getWiki(), defaultSpace, defaultPrefix, rowIndex, docNameList, ignoreEmpty,
-                    convertToUpperCase, config.getClearName());
+                    config.getClearName());
             // check if the documents with an empty _name need to be created
             if (pageName != null) {
                 XWikiDocument newDoc = xwiki.getDocument(pageName, xcontext);

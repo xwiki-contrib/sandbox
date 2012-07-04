@@ -182,7 +182,7 @@
 #macro(doImportSimulation)
   == $msg.get('batchimport.import.importsimulation.title') ==
 
-  #set($result = $services.batchimport.doImport($importconfig, true, true, false, true, false))
+  #set($result = $services.batchimport.doImport($importconfig, true, true, false, true))
 
   #if($result)
     {{info}}$result{{/info}}
@@ -201,7 +201,7 @@
 #macro(doImport)
   == $msg.get('batchimport.import.import.title') ==
 
-  #set($result = $services.batchimport.doImport($importconfig, true, true, false, false, false))
+  #set($result = $services.batchimport.doImport($importconfig, true, true, false, false))
 
   #if($result)
     {{info}}$result{{/info}}

@@ -52,7 +52,10 @@ import com.xpn.xwiki.web.XWikiRequest;
 @Component("batchimport")
 public class BatchImportService implements ScriptService, BatchImport
 {
-    @Inject
+    /**
+     * Not injected since we want to be able to lookup this at runtime, changing the implementation dynamically (e.g.
+     * from groovy).
+     */
     private BatchImport batchImport;
 
     @Inject
@@ -273,7 +276,7 @@ public class BatchImportService implements ScriptService, BatchImport
     public List<String> getColumnHeaders(BatchImportConfiguration config)
     {
         try {
-            return batchImport.getColumnHeaders(config);
+            return getBatchImport().getColumnHeaders(config);
         } catch (IOException e) {
             LOGGER.error("Cannot get column headers for config: " + config.toString(), e);
             putExceptionInContext(e);
@@ -284,11 +287,10 @@ public class BatchImportService implements ScriptService, BatchImport
 
     @Override
     public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwrite,
-        boolean overwritefile, boolean simulation, boolean convertToUpperCase) throws IOException, XWikiException
+        boolean overwritefile, boolean simulation)
     {
         try {
-            return this.batchImport.doImport(config, withFiles, overwrite, overwritefile, simulation,
-                convertToUpperCase);
+            return this.getBatchImport().doImport(config, withFiles, overwrite, overwritefile, simulation);
         } catch (IOException e) {
             LOGGER.error("Could not execute import for config " + config.toString(), e);
             putExceptionInContext(e);
@@ -304,13 +306,36 @@ public class BatchImportService implements ScriptService, BatchImport
     public String deleteExistingDocuments(String className, String wiki, String space)
     {
         try {
-            return this.batchImport.deleteExistingDocuments(className, wiki, space);
+            return this.getBatchImport().deleteExistingDocuments(className, wiki, space);
         } catch (XWikiException e) {
             LOGGER.error("Could not delete existing documents for wiki=" + wiki + ", space=" + space + ", className="
                 + className, e);
             putExceptionInContext(e);
         }
         return null;
+    }
+
+    protected BatchImport getBatchImport()
+    {
+        if (this.batchImport == null) {
+            try {
+                this.batchImport = cm.lookup(BatchImport.class);
+            } catch (ComponentLookupException e) {
+                LOGGER.error("Could not find batch import implementation", e);
+            }
+        }
+
+        return this.batchImport;
+    }
+
+    /**
+     * Resets the internal implementation of the batch import, useful when changing the implementation from groovy, to
+     * be able to force this to reload its inner implementation.
+     */
+    public void resetBatchImportImplementation()
+    {
+        // nullify it, it will be loaded lazily on next call to #getBatchImport()
+        this.batchImport = null;
     }
 
     /**

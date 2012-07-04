@@ -52,7 +52,7 @@ public interface BatchImport
      * @throws XWikiException
      */
     public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwrite,
-        boolean overwritefile, boolean simulation, boolean convertToUpperCase) throws IOException, XWikiException;
+        boolean overwritefile, boolean simulation) throws IOException, XWikiException;
 
     /**
      * Deletes existing documents with objects of class className from space space, besides the template document, built
@@ -63,7 +63,7 @@ public interface BatchImport
      *            he'd better have the right to.
      * @param space space to delete from. If missing, the documents from all the spaces will be deleted
      * @return the log of the delete
-     * @throws XWikiException 
+     * @throws XWikiException
      */
     public String deleteExistingDocuments(String className, String wiki, String space) throws XWikiException;
 }
