@@ -185,7 +185,9 @@ public class DefaultBatchImport implements BatchImport
     {
         if (this.debug) {
             debugMessage += message + "\n";
-            System.out.println(message);
+            // yeah, debug with info here because debug are billions of billions and we cannot really understand
+            // anything from it
+            LOGGER.info(message);
         }
     }
 
