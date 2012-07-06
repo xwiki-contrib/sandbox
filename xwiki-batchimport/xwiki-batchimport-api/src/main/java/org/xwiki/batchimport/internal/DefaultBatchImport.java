@@ -176,16 +176,17 @@ public class DefaultBatchImport implements BatchImport
 
     public void log(StringBuffer result, String message)
     {
-        debugMessage += message + "\n";
         result.append(message);
         result.append("\n");
-        System.out.println(message);
+        debug(message);
     }
 
-    public void debug(StringBuffer result, String message)
+    public void debug(String message)
     {
-        debugMessage += message + "\n";
-        System.out.println(message);
+        if (this.debug) {
+            debugMessage += message + "\n";
+            System.out.println(message);
+        }
     }
 
     public Map<String, String> getDataOriginal(List<String> row, Map<String, List<String>> reverseMapping,
@@ -358,17 +359,15 @@ public class DefaultBatchImport implements BatchImport
     public boolean checkFile(ZipFile zipfile, String path)
     {
         if (zipfile == null) {
-            if (debug) {
-                System.out.println("Checking if file ${path} exists on disk");
-            }
+            debug("Checking if file " + path + " exists on disk");
+
             File file = new File(path);
             return file.exists();
         } else {
             String newpath = path;
             ZipEntry zipentry = zipfile.getEntry(newpath);
-            if (debug) {
-                System.out.println("Checking if file ${newpath} exists in zip");
-            }
+
+            debug("Checking if file " + newpath + " exists in zip");
             return (zipentry != null);
         }
     }
@@ -396,7 +395,7 @@ public class DefaultBatchImport implements BatchImport
     {
         File dirFile = new File(path);
         for (File file : dirFile.listFiles()) {
-            debug(new StringBuffer(), "Adding file " + file.getName());
+            debug("Adding file " + file.getName());
             byte[] filedata = Util.getFileContentAsBytes(file);
             addFile(newDoc, filedata, file.getName());
         }
@@ -412,10 +411,7 @@ public class DefaultBatchImport implements BatchImport
             filename = xcontext.getWiki().clearName(filename, false, true, xcontext);
 
             if (newDoc.getAttachment(filename) != null) {
-                if (debug) {
-                    System.out.println("Filename " + filename + " already exists in " + newDoc.getPrefixedFullName()
-                        + ".");
-                }
+                debug("Filename " + filename + " already exists in " + newDoc.getPrefixedFullName() + ".");
                 return;
             }
 
@@ -430,8 +426,7 @@ public class DefaultBatchImport implements BatchImport
             attachment.setDoc(newDoc);
             newDoc.saveAttachmentContent(attachment, xcontext);
         } catch (Throwable e) {
-            System.out.println("Filename " + filename + " could not be attached because of Exception: "
-                + e.getMessage());
+            debug("Filename " + filename + " could not be attached because of Exception: " + e.getMessage());
         }
     }
 
@@ -559,7 +554,7 @@ public class DefaultBatchImport implements BatchImport
                         Enumeration<ZipEntry> zipFileEntries = zipfile.getEntries();
                         while (zipFileEntries.hasMoreElements()) {
                             ZipEntry zipe = zipFileEntries.nextElement();
-                            System.out.println("Found zip entry: " + zipe.getName());
+                            debug("Found zip entry: " + zipe.getName());
                         }
                     }
                 } else {
@@ -591,24 +586,18 @@ public class DefaultBatchImport implements BatchImport
                 }
             }
 
-            if (debug) {
-                debug(result, "Headers are: " + headers);
-                debug(result, "Mapping is: " + mapping);
-            }
+            debug("Headers are: " + headers);
+            debug("Mapping is: " + mapping);
 
             while (currentLine != null) {
-                if (debug) {
-                    debug(result, "Processing row " + currentLine.toString() + ".");
-                }
+                debug("Processing row " + currentLine.toString() + ".");
 
                 Map<String, String> data = getData(currentLine, mapping, headers);
                 if (data == null) {
                     break;
                 }
 
-                if (debug) {
-                    debug(result, "Row " + currentLine.toString() + " data is: " + data.toString() + "");
-                }
+                debug("Row " + currentLine.toString() + " data is: " + data.toString() + "");
                 // generate page name
                 DocumentReference generatedDocName = getPageName(data, rowIndex, config, docNameList);
                 // process the row
@@ -839,7 +828,7 @@ public class DefaultBatchImport implements BatchImport
                             }
                             newDocObj.set(key, vallist, xcontext);
                         } else if (prop instanceof DateClass) {
-                            debug(result, "Found date " + value + " for key -" + key + "-");
+                            debug("Found date " + value + " for key -" + key + "-");
                             SimpleDateFormat sdf = new SimpleDateFormat(((DateClass) prop).getDateFormat());
                             try {
                                 newDocObj.set(key, sdf.parse(value), xcontext);
@@ -850,10 +839,10 @@ public class DefaultBatchImport implements BatchImport
                                     newDocObj.set(key, sdf.parse(value), xcontext);
                                 } catch (ParseException e) {
                                     // now we cannot do much more
-                                    debug(result, "Failed to parse date " + value + " for key " + key);
+                                    debug("Failed to parse date " + value + " for key " + key);
                                 }
                             }
-                            debug(result, "Date now is " + newDocObj.getDateValue(key) + " for key -" + key + "-");
+                            debug("Date now is " + newDocObj.getDateValue(key) + " for key -" + key + "-");
                             if (addtotags) {
                                 tagList.add(value.trim());
                             }
@@ -960,9 +949,7 @@ public class DefaultBatchImport implements BatchImport
                     // adding the file to the document
                     String fname = getFileName(data.get("doc.file"));
                     if (newDoc.getAttachment(fname) != null) {
-                        if (debug) {
-                            System.out.println("Filename " + fname + " already exists in " + fullName);
-                        }
+                        debug("Filename " + fname + " already exists in " + fullName);
 
                         // done here
                         // FIXME: this should depend on the overwrite file parameter or at least on the overwrite
