@@ -43,7 +43,6 @@ public interface BatchImport
      * 
      * @param config
      * @param withFiles
-     * @param overwrite
      * @param overwritefile
      * @param simulation
      * @param convertToUpperCase
@@ -51,8 +50,8 @@ public interface BatchImport
      * @throws IOException
      * @throws XWikiException
      */
-    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwrite,
-        boolean overwritefile, boolean simulation) throws IOException, XWikiException;
+    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
+        boolean simulation) throws IOException, XWikiException;
 
     /**
      * Deletes existing documents with objects of class className from space space, besides the template document, built

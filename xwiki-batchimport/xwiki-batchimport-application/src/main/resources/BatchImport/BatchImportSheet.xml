@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1325372400000</creationDate>
-<date>1341346110000</date>
-<contentUpdateDate>1341346110000</contentUpdateDate>
+<date>1341566538000</date>
+<contentUpdateDate>1341566538000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.import.title', [$doc.space])</title>
 <template></template>
@@ -60,14 +60,23 @@
 #end
 
 #macro(printBatchImportNonDefaultOptions $config)
+  ## selected file
   #if($config.attachmentReference)
     &lt;input type="hidden" name="batchimportattachmentref" value="$services.model.serialize($config.attachmentReference)" /&gt;
   #end
+  ## mapping options
   #if($config.fieldsMapping.size() &gt; 0)
     #foreach($fieldMapping in $config.fieldsMapping.entrySet())
       &lt;input type="hidden" name="batchimportmapping_${fieldMapping.key}" value="${fieldMapping.value}" /&gt;
     #end
   #end
+  ## overwrite options
+  #if($config.overwrite)
+    &lt;input type="hidden" name="batchimportoverwrite" value="$config.overwrite" /&gt;
+  #end
+  #if($config.docNameDeduplication)
+    &lt;input type="hidden" name="batchimportdocnamededuplication" value="$config.docNameDeduplication" /&gt;
+  #end  
 #end
 
 #macro(saveDataToPresetsObject)
@@ -138,7 +147,7 @@
           #set($attachmentExtension = "#printAttachmentExtension($attachment)")
           #if ($attachment.mimeType == "text/plain" || $attachmentExtension == ".csv" || $attachmentExtension == "" || $attachmentExtension == ".xls")
             #set($attachmentRef = $services.model.createAttachmentReference($doc.documentReference, $attachment.filename))
-            &lt;li&gt;&lt;input type="radio" name="batchimportattachmentref" value="$services.model.serialize($attachmentRef)" #if($velocityCount == 1 &amp;&amp; $justUploaded)checked="checked"#end #if(!$justUploaded &amp;&amp; $attachmentRef.equals($importconfig.attachmentReference))checked="checked"#end/&gt;$attachment.filename&lt;/attachment&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;input type="radio" name="batchimportattachmentref" value="$services.model.serialize($attachmentRef)" #if($velocityCount == 1 &amp;&amp; $justUploaded)checked="checked"#end #if(!$justUploaded &amp;&amp; $attachmentRef.equals($importconfig.attachmentReference))checked="checked"#end&gt;$attachment.filename&lt;/input&gt;&lt;/li&gt;
           #end
         #end
       &lt;/ul&gt;
@@ -174,7 +183,39 @@
     ## in order to prevent mappings coming from the object and not overwritten by the UI to be displayed here in hidden, we clean now the mapping of the importconfig (after we displayed it), so that the UI displayed above will always be right
     #set($discard = $importconfig.clearFieldsMapping())
     #printBatchImportNonDefaultOptions($importconfig)  
-    #displayDefaultButtons("choosefile", "importsimulation", "mapping")
+    #displayDefaultButtons("choosefile", "overwrite", "mapping")
+    &lt;/form&gt;
+  {{/html}}
+#end
+
+#macro(displayOverwriteChoices)
+  == $msg.get('batchimport.import.overwrite.title') ==
+  
+  {{html clean="false" wiki="false"}}
+    &lt;form action="" method="post"&gt;
+  {{/html}}
+
+    {{info}}$msg.get('batchimport.import.overwrite.deduplication.explanation'){{/info}}
+
+    {{html clean="false" wiki="false"}}
+    &lt;ul&gt;
+    #foreach($choice in ["SKIP", "UPDATE", "GENERATE_NEW"])
+      &lt;li&gt;&lt;input type="radio" name="batchimportdocnamededuplication" value="$choice" #if("$!importconfig.docNameDeduplication" == $choice)checked="checked"#end&gt;$msg.get("batchimport.import.overwrite.deduplication.option.${choice.toLowerCase()}")&lt;/input&gt;&lt;/li&gt;
+    #end
+    &lt;/ul&gt;
+    {{/html}}
+
+    {{info}}$msg.get('batchimport.import.overwrite.explanation'){{/info}}
+
+    {{html clean="false" wiki="false"}}
+    &lt;ul&gt;
+    #foreach($choice in ["SKIP", "UPDATE", "REPLACE", "GENERATE_NEW"])
+      &lt;li&gt;&lt;input type="radio" name="batchimportoverwrite" value="$choice" #if("$!importconfig.overwrite" == $choice)checked="checked"#end&gt;$msg.get("batchimport.import.overwrite.option.${choice.toLowerCase()}")&lt;/input&gt;&lt;/li&gt;
+    #end
+    &lt;/ul&gt;
+
+    #printBatchImportNonDefaultOptions($importconfig)
+    #displayDefaultButtons("mapping", "importsimulation", "overwrite")
     &lt;/form&gt;
   {{/html}}
 #end
@@ -182,7 +223,7 @@
 #macro(doImportSimulation)
   == $msg.get('batchimport.import.importsimulation.title') ==
 
-  #set($result = $services.batchimport.doImport($importconfig, true, true, false, true))
+  #set($result = $services.batchimport.doImport($importconfig, true, false, true))
 
   #if($result)
     {{info}}$result{{/info}}
@@ -193,7 +234,7 @@
   {{html clean="false" wiki="false"}}
     &lt;form action="" method="post"&gt;  
     #printBatchImportNonDefaultOptions($importconfig)
-    #displayDefaultButtons("mapping", "import", "importsimulation")
+    #displayDefaultButtons("overwrite", "import", "importsimulation")
     &lt;/form&gt;
   {{/html}}
 #end
@@ -201,13 +242,15 @@
 #macro(doImport)
   == $msg.get('batchimport.import.import.title') ==
 
-  #set($result = $services.batchimport.doImport($importconfig, true, true, false, false))
+  #set($result = $services.batchimport.doImport($importconfig, true, false, false))
 
   #if($result)
     {{info}}$result{{/info}}
   #else
     #displayLastException('import')
   #end
+  
+  [[$msg.get('batchimport.import.import.backtowebhome')&gt;&gt;${doc.space}.WebHome]]
 #end
 {{/velocity}}
 
@@ -242,6 +285,8 @@
 
 #if("$!request.step_mapping" != "")
   #displayColumnMapping()
+#elseif("$!request.step_overwrite" != "")
+  #displayOverwriteChoices()
 #elseif("$!request.step_importsimulation" != "")
   #doImportSimulation()
 #elseif("$!request.step_import" != "")

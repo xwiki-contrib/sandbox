@@ -51,7 +51,9 @@ public interface ImportFileIterator
     void resetFile(BatchImportConfiguration config) throws IOException;
 
     /**
-     * @return the next line in the set file, if the file has no more lines, this method should return null.
+     * @return the next line in the set file, if the file has no more lines, this method should return null. NOTE that
+     *         this method can return rows of variable length (e.g. depending on whether all the cells are filled in an
+     *         excel), caller must protect against this.
      * @throws IOException if the file cannot be read
      */
     public List<String> readNextLine() throws IOException;

@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.batchimport.BatchImport;
 import org.xwiki.batchimport.BatchImportConfiguration;
+import org.xwiki.batchimport.BatchImportConfiguration.Overwrite;
 import org.xwiki.batchimport.ImportFileIterator;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLookupException;
@@ -219,7 +220,7 @@ public class DefaultBatchImport implements BatchImport
             String xwikiField = fieldMapping.getKey();
             String header = fieldMapping.getValue();
             int valueIndex = headers.indexOf(header);
-            if (valueIndex >= 0) {
+            if (valueIndex >= 0 && valueIndex < row.size()) {
                 map.put(xwikiField, row.get(valueIndex));
             }
         }
@@ -241,9 +242,19 @@ public class DefaultBatchImport implements BatchImport
         return space;
     }
 
-    public DocumentReference getPageName(Map<String, String> data, String wiki, String defaultSpace,
-        String defaultPrefix, int rowIndex, List<DocumentReference> docNameList, boolean ignoreEmpty, boolean clearNames)
+    public DocumentReference getPageName(Map<String, String> data, int rowIndex, BatchImportConfiguration config,
+        List<DocumentReference> docNameList)
     {
+        // pagename prefix used to automatically generate page names, when _name is not provided
+        String defaultPrefix = config.getEmptyDocNamePrefix();
+        boolean ignoreEmpty = StringUtils.isEmpty(defaultPrefix);
+        // the default space to add pages in
+        String defaultSpace = config.getDefaultSpace();
+        // whether values in column doc.name should be passed through clearName before
+        boolean clearNames = config.getClearName();
+        // the wiki to add pages in
+        String wiki = config.getWiki();
+
         // TODO: in the original code the space code was copy-pasted here, not used from the function
         String space = getSpace(data, defaultSpace, clearNames);
 
@@ -255,6 +266,7 @@ public class DefaultBatchImport implements BatchImport
                 name = defaultPrefix + rowIndex;
             }
         }
+
         if (clearNames) {
             XWikiContext xcontext = getXWikiContext();
             name = xcontext.getWiki().clearName(name, xcontext);
@@ -262,14 +274,51 @@ public class DefaultBatchImport implements BatchImport
 
         DocumentReference pageName = prepareDocumentReference(wiki, space, name);
 
-        int counter = 0;
-        // TODO: the behaviour here needs to depend on a configuration, we could configure it to overwrite with new
-        // values than create a new document
-        while (docNameList.contains(pageName)) {
-            counter++;
-            pageName = prepareDocumentReference(wiki, space, name + counter);
+        // prepare the document name if it's duplicate and needs to be deduplicated
+        if (config.getDocNameDeduplication() == Overwrite.GENERATE_NEW && docNameList.contains(pageName)) {
+            String initialName = pageName.getName();
+            int counter = 0;
+            while (docNameList.contains(pageName)) {
+                counter++;
+                pageName = prepareDocumentReference(wiki, space, initialName + counter);
+            }
         }
-        docNameList.add(pageName);
+
+        return pageName;
+    }
+
+    /**
+     * Deduplicate page name amongst the documents that are on the same wiki.
+     * 
+     * @return the potentially deduplicated page name, according to the parameters in the config. Note that it can also
+     *         return the very same {@code pageName} parameter.
+     */
+    public DocumentReference maybeDeduplicatePageNameInWiki(DocumentReference pageName,
+        BatchImportConfiguration config, List<DocumentReference> savedDocuments, XWikiContext xcontext)
+    {
+        if (pageName == null) {
+            return pageName;
+        }
+
+        String wiki = pageName.getWikiReference().getName();
+        String space = pageName.getLastSpaceReference().getName();
+
+        // verify if it should be unique in the wiki and if it is
+        if (config.getOverwrite() == Overwrite.GENERATE_NEW) {
+            String deduplicatedName = pageName.getName();
+            int counter = 0;
+            // if the document exists already, generate a new name
+            while (xcontext.getWiki().exists(pageName, xcontext)) {
+                if (savedDocuments.contains(pageName) && config.getDocNameDeduplication() == Overwrite.UPDATE) {
+                    // if the document exists because it was saved this round and we're using deduplication strategy
+                    // update, leave this name, it's good
+                    break;
+                }
+                counter++;
+                pageName = prepareDocumentReference(wiki, space, deduplicatedName + "_" + counter);
+            }
+        }
+
         return pageName;
     }
 
@@ -364,13 +413,14 @@ public class DefaultBatchImport implements BatchImport
 
             if (newDoc.getAttachment(filename) != null) {
                 if (debug) {
-                    System.out.println("Filename ${filename} already exists in " + newDoc.getPrefixedFullName() + ".");
+                    System.out.println("Filename " + filename + " already exists in " + newDoc.getPrefixedFullName()
+                        + ".");
                 }
                 return;
             }
 
-            // TODO: I would be very surprised that this still works since we changed attachment manipulation in the
-            // mean time
+            // this is saving the document at this point. I don't know if it was like this when the code was written,
+            // but now it's like this.
             XWikiAttachment attachment = new XWikiAttachment();
             newDoc.getAttachmentList().add(attachment);
             attachment.setContent(filedata);
@@ -380,7 +430,8 @@ public class DefaultBatchImport implements BatchImport
             attachment.setDoc(newDoc);
             newDoc.saveAttachmentContent(attachment, xcontext);
         } catch (Throwable e) {
-            System.out.println("Filename ${filename} could not be attached because of Exception: " + e.getMessage());
+            System.out.println("Filename " + filename + " could not be attached because of Exception: "
+                + e.getMessage());
         }
     }
 
@@ -418,180 +469,223 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
-    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwrite,
-        boolean overwritefile, boolean simulation) throws IOException, XWikiException
+    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile, boolean simulation)
+        throws IOException, XWikiException
     {
         XWikiContext xcontext = getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
-        StringBuffer result = new StringBuffer();
 
-        // the file to import
-        ImportFileIterator metadatafilename = null;
         try {
-            metadatafilename = getImportFileIterator(config);
-        } catch (ComponentLookupException e) {
-            // TODO: log an exception here. Or, since the exception will be handled at the service level, we could throw
-            // IOException directly from the getFileIterator method
-            throw new IOException("Could not find an import file reader for the configuration: " + config.toString(), e);
-        }
-        // mapping from the class fields to source file columns
-        Map<String, String> mapping = config.getFieldsMapping();
+            StringBuffer result = new StringBuffer();
 
-        // -------------------- Not transformed to config yet, will not work ---------------------//
-        Document doc = new Document(xcontext.getDoc(), xcontext);
-        // attach files referred in the column _file to the document
-        boolean fileupload =
-            (Integer) doc.getValue("fileupload") == null || ((Integer) doc.getValue("fileupload")).equals(0) ? false
-                : true;
-        // use office importer to import the content from the column _file to the document content
-        boolean fileimport =
-            (Integer) doc.getValue("fileimport") == null || ((Integer) doc.getValue("fileimport")).equals(0) ? false
-                : true;
-        // directory or zip file where the referenced files are stored. Directory on disk.
-        String datadir = (String) doc.getValue("datafilename");
-        // path of the files inside the zip
-        String datadirprefix = (String) doc.getValue("datafileprefix");
-        // column in the xls that will turn into tags
-        // TODO: this tags needs to be reimplemented, now it works only with xwiki fields in the list: so you can add
-        // something in the tags only if you import it as well. You should be able to configure it to be a column in the
-        // csv / xls and that column needs to be handled as a list with the list separator.
-        List<String> fieldsfortags = getAsList((String) doc.getValue("fieldsfortags"), config.getListSeparator());
-        // -------------------- ----------------------------- ---------------------//
+            // the file to import
+            ImportFileIterator metadatafilename = null;
+            try {
+                metadatafilename = getImportFileIterator(config);
+            } catch (ComponentLookupException e) {
+                // IOException directly from the getFileIterator method
+                throw new IOException("Could not find an import file reader for the configuration: "
+                    + config.toString(), e);
+            }
+            // mapping from the class fields to source file columns
+            Map<String, String> mapping = config.getFieldsMapping();
 
-        // default space where to put the documents if no space is specified in the mapping
-        String defaultSpace = config.getDefaultSpace();
-        // pagename prefix used to automatically generate page names, when _name is not provided
-        String defaultPrefix = config.getEmptyDocNamePrefix();
-        boolean ignoreEmpty = StringUtils.isEmpty(defaultPrefix);
-        // class to map data to (objects of this class will be created)
-        BaseClass defaultClass =
-            xwiki.getXClass(
-                currentDocumentStringResolver.resolve(config.getMappingClassName(),
-                    StringUtils.isEmpty(config.getWiki()) ? null : new WikiReference(config.getWiki())), xcontext);
-        // default date format used to parse dates from the source file
-        String defaultDateFormat = config.getDefaultDateFormat();
-        if (StringUtils.isEmpty(defaultDateFormat)) {
-            // get it from preferences, hoping that it's set
-            defaultDateFormat = xcontext.getWiki().getXWikiPreference("dateformat", xcontext);
-        }
-        // whether this file has header row or not (whether first line needs to be imported or not)
-        boolean hasHeaderRow = config.hasHeaderRow();
-        // list of documents, used to check that a document was not already created.
-        // TODO: put this in a configuration, the behaviour for documents that already exist
-        List<DocumentReference> docNameList = new ArrayList<DocumentReference>();
+            // -------------------- Not transformed to config yet, will not work ---------------------//
+            Document doc = new Document(xcontext.getDoc(), xcontext);
+            // attach files referred in the column _file to the document
+            boolean fileupload =
+                (Integer) doc.getValue("fileupload") == null || ((Integer) doc.getValue("fileupload")).equals(0)
+                    ? false : true;
+            // use office importer to import the content from the column _file to the document content
+            boolean fileimport =
+                (Integer) doc.getValue("fileimport") == null || ((Integer) doc.getValue("fileimport")).equals(0)
+                    ? false : true;
+            // directory or zip file where the referenced files are stored. Directory on disk.
+            String datadir = (String) doc.getValue("datafilename");
+            // path of the files inside the zip
+            String datadirprefix = (String) doc.getValue("datafileprefix");
+            // column in the xls that will turn into tags
+            // TODO: this tags needs to be reimplemented, now it works only with xwiki fields in the list: so you can
+            // add something in the tags only if you import it as well. You should be able to configure it to be a
+            // column in the csv / xls and that column needs to be handled as a list with the list separator.
+            List<String> fieldsfortags = getAsList((String) doc.getValue("fieldsfortags"), config.getListSeparator());
+            // -------------------- ----------------------------- ---------------------//
 
-        ZipFile zipfile = null;
-        if (!fileupload || datadir == "") {
-            withFiles = false;
-        }
+            // class to map data to (objects of this class will be created)
+            BaseClass defaultClass =
+                xwiki.getXClass(
+                    currentDocumentStringResolver.resolve(config.getMappingClassName(),
+                        StringUtils.isEmpty(config.getWiki()) ? null : new WikiReference(config.getWiki())), xcontext);
+            // default date format used to parse dates from the source file
+            String defaultDateFormat = config.getDefaultDateFormat();
+            if (StringUtils.isEmpty(defaultDateFormat)) {
+                // get it from preferences, hoping that it's set
+                defaultDateFormat = xcontext.getWiki().getXWikiPreference("dateformat", xcontext);
+            }
+            // whether this file has header row or not (whether first line needs to be imported or not)
+            boolean hasHeaderRow = config.hasHeaderRow();
 
-        // check if the files in the datadir can be properly read
-        if (withFiles) {
-            // if it's a zip, try to read the zip
-            if (datadir.endsWith(".zip")) {
-                log(result, "Checking zip file ${datadir}");
-                zipfile = new ZipFile(new File(datadir), "cp437");
-                // TODO: what the hell is this, why are we putting it on empty?
-                datadir = "";
-                if (zipfile == null) {
-                    log(result, "Could not open zip file ${datadir}");
-                    return result.toString();
+            // list of document names, used to remember what are the document names that were generated from the
+            // document. Note that for multiple imports from the same document, this list should be identical.
+            List<DocumentReference> docNameList = new ArrayList<DocumentReference>();
+
+            // list of documents that were actually saved during this import, to know how to make proper replacements.
+            // Basically it serves to know if a document which is not new was saved before during this import or it was
+            // there before the import started. This prevents "replace" from deleting twice (if multiple rows with the
+            // same name are supposed to update each other) and allows to save multiple rows in the same document if
+            // overwrite is set to skip and the document is created during this import (in which case duplicate rows
+            // should not "skip" but "update").
+            List<DocumentReference> savedDocuments = new ArrayList<DocumentReference>();
+
+            ZipFile zipfile = null;
+            if (!fileupload || datadir == "") {
+                withFiles = false;
+            }
+
+            // check if the files in the datadir can be properly read
+            if (withFiles) {
+                // if it's a zip, try to read the zip
+                if (datadir.endsWith(".zip")) {
+                    log(result, "Checking zip file ${datadir}");
+                    zipfile = new ZipFile(new File(datadir), "cp437");
+                    // TODO: what the hell is this, why are we putting it on empty?
+                    datadir = "";
+                    if (zipfile == null) {
+                        log(result, "Could not open zip file ${datadir}");
+                        return result.toString();
+                    }
+
+                    if (debug) {
+                        Enumeration<ZipEntry> zipFileEntries = zipfile.getEntries();
+                        while (zipFileEntries.hasMoreElements()) {
+                            ZipEntry zipe = zipFileEntries.nextElement();
+                            System.out.println("Found zip entry: " + zipe.getName());
+                        }
+                    }
+                } else {
+                    // checking it as a directory
+                    log(result, "Checking data directory ${datadir}");
+                    File datad = new File(datadir);
+                    if (datad == null || !datad.isDirectory()) {
+                        log(result, "Could not open data directory ${datadir}");
+                        return result.toString();
+                    }
+                }
+            }
+
+            // start reading the rows and process them one by one
+            metadatafilename.resetFile(config);
+            List<String> currentLine = null;
+            int rowIndex = 0;
+            List<String> headers = null;
+            // if there is no header row the headers are the numbers of the columns as strings
+            if (hasHeaderRow) {
+                headers = getColumnHeaders(metadatafilename, hasHeaderRow);
+                currentLine = metadatafilename.readNextLine();
+                rowIndex = 1;
+            } else {
+                currentLine = metadatafilename.readNextLine();
+                headers = new ArrayList<String>();
+                for (int i = 0; i < currentLine.size(); i++) {
+                    headers.add(Integer.toString(i));
+                }
+            }
+
+            if (debug) {
+                debug(result, "Headers are: " + headers);
+                debug(result, "Mapping is: " + mapping);
+            }
+
+            while (currentLine != null) {
+                if (debug) {
+                    debug(result, "Processing row " + currentLine.toString() + ".");
+                }
+
+                Map<String, String> data = getData(currentLine, mapping, headers);
+                if (data == null) {
+                    break;
                 }
 
                 if (debug) {
-                    Enumeration<ZipEntry> zipFileEntries = zipfile.getEntries();
-                    while (zipFileEntries.hasMoreElements()) {
-                        ZipEntry zipe = zipFileEntries.nextElement();
-                        System.out.println("Found zip entry: " + zipe.getName());
+                    debug(result, "Row " + currentLine.toString() + " data is: " + data.toString() + "");
+                }
+                // generate page name
+                DocumentReference generatedDocName = getPageName(data, rowIndex, config, docNameList);
+                // process the row
+                if (generatedDocName != null) {
+                    // check if it's duplicated name
+                    boolean isDuplicateName = docNameList.contains(generatedDocName);
+                    if (!isDuplicateName) {
+                        docNameList.add(generatedDocName);
                     }
-                }
-            } else {
-                // checking it as a directory
-                log(result, "Checking data directory ${datadir}");
-                File datad = new File(datadir);
-                if (datad == null || !datad.isDirectory()) {
-                    log(result, "Could not open data directory ${datadir}");
-                    return result.toString();
-                }
-            }
-        }
-
-        // start reading the rows and process them one by one
-        metadatafilename.resetFile(config);
-        List<String> currentLine = null;
-        int rowIndex = 0;
-        List<String> headers = null;
-        // if there is no header row the headers are the numbers of the columns as strings
-        if (hasHeaderRow) {
-            headers = getColumnHeaders(metadatafilename, hasHeaderRow);
-            currentLine = metadatafilename.readNextLine();
-            rowIndex = 1;
-        } else {
-            currentLine = metadatafilename.readNextLine();
-            headers = new ArrayList<String>();
-            for (int i = 0; i < currentLine.size(); i++) {
-                headers.add(Integer.toString(i));
-            }
-        }
-
-        if (debug) {
-            debug(result, "Headers are: " + headers);
-            debug(result, "Mapping is: " + mapping);
-        }
-
-        while (currentLine != null) {
-            if (debug) {
-                debug(result, "Processing row " + currentLine.toString() + ".");
-            }
-
-            Map<String, String> data = getData(currentLine, mapping, headers);
-            if (data == null) {
-                break;
-            }
-
-            if (debug) {
-                debug(result, "Row " + currentLine.toString() + " data is: " + data.toString() + "");
-            }
-            DocumentReference pageName =
-                getPageName(data, config.getWiki(), defaultSpace, defaultPrefix, rowIndex, docNameList, ignoreEmpty,
-                    config.getClearName());
-            if (pageName != null) {
-                String serializedPageName = entityReferenceSerializer.serialize(pageName);
-                // marshal data to the document objects (this is also creating the document and handling overwrites)
-                XWikiDocument newDoc =
-                    this.marshalDataToDocumentObjects(pageName, data, currentLine, defaultClass, config, xcontext,
-                        overwrite, fieldsfortags, defaultDateFormat, result);
-                // if a new document was created and filled (meaning that overwrite is on the good value)...
-                if (newDoc != null) {
-                    if (withFiles) {
-                        // save the document, with its files. Saving is done in the same function as files saving there
-                        // are reasons to do multiple saves when saving attachments and importing office documents, so
-                        // we rely completely on files for saving.
-                        saveDocumentWithFiles(newDoc, data, currentLine, config, xcontext, overwrite, simulation,
-                            overwritefile, fileimport, datadir, datadirprefix, zipfile, result);
-                    } else {
-                        // no files handling it, we save it here manually
-                        if (!simulation) {
-                            new Document(newDoc, xcontext).save();
-                            log(result, "Imported row " + currentLine.toString() + " in page [[" + serializedPageName
-                                + "]].");
+                    // check that this pageName should be used from the pov of the already generated file names
+                    if (!(isDuplicateName && config.getDocNameDeduplication() == Overwrite.SKIP)) {
+                        // potentially deduplicate it on the wiki, if needed
+                        DocumentReference pageName =
+                            maybeDeduplicatePageNameInWiki(generatedDocName, config, savedDocuments, xcontext);
+                        // marshal data to the document objects (this is creating the document and handling overwrites)
+                        XWikiDocument newDoc =
+                            this.marshalDataToDocumentObjects(pageName, data, currentLine, defaultClass,
+                                isDuplicateName, savedDocuments.contains(pageName), config, xcontext, fieldsfortags,
+                                defaultDateFormat, result, simulation);
+                        // if a new document was created and filled, valid, with the proper overwrite
+                        if (newDoc != null) {
+                            // save the document ...
+                            if (withFiles) {
+                                // ... either with its files. Saving is done in the same function as files saving
+                                // there are reasons to do multiple saves when saving attachments and importing office
+                                // documents, so we rely completely on files for saving.
+                                // TODO: fix the overwrite parameter, for now pass false if it's set to anything else
+                                // besides skip
+                                saveDocumentWithFiles(newDoc, data, currentLine, config, xcontext,
+                                    config.getOverwrite() != Overwrite.SKIP, simulation, overwritefile, fileimport,
+                                    datadir, datadirprefix, zipfile, savedDocuments, result);
+                            } else {
+                                // ... or just save it: no files handling it, we save it here manually
+                                String serializedPageName = entityReferenceSerializer.serialize(pageName);
+                                if (!simulation) {
+                                    new Document(newDoc, xcontext).save();
+                                    log(result, "Imported row " + currentLine.toString() + " in page [["
+                                        + serializedPageName + "]].");
+                                } else {
+                                    // NOTE: when used with overwrite=GENERATE_NEW, this line here can yield results a
+                                    // bit different from the actual results during the import, since, if a document
+                                    // fails to save with an exception, the simulation thinks it actually saved, while
+                                    // the actual import knows it didn't.
+                                    log(result, "Ready to import row " + currentLine.toString() + " in page "
+                                        + serializedPageName + " without file.");
+                                }
+                                savedDocuments.add(newDoc.getDocumentReference());
+                            }
                         } else {
-                            log(result, "Ready to import row " + currentLine.toString() + " in page "
-                                + serializedPageName + " without file.");
+                            // newDoc is null
+                            // validation error during page generation, page generation and validation is responsible to
+                            // log
                         }
+                    } else {
+                        // pageName exists and the config is set to ignore
+                        log(result, "Ignore " + currentLine.toString() + " because page name was already used in this "
+                            + "import and configuration is set to skip used names.");
                     }
+                } else {
+                    // pageName is null
+                    log(result, "Ignore " + currentLine.toString()
+                        + " because page name is empty or could not be built.");
                 }
-            } else {
-                log(result, "Ignore " + currentLine.toString() + " because page name is empty or could not be built.");
+
+                // go to next line
+                currentLine = metadatafilename.readNextLine();
+                rowIndex++;
             }
 
-            currentLine = metadatafilename.readNextLine();
-            rowIndex++;
+            log(result, "Processing finished.");
+
+            return result.toString();
+        } finally {
+            // flush the cache because cache is an ugly bitch, preserving data between simulation and actual run, which
+            // then gets to be saved in the actual run
+            xwiki.flushCache(xcontext);
         }
-
-        log(result, "Processing finished.");
-
-        return result.toString();
     }
 
     @Override
@@ -652,19 +746,62 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
+    /**
+     * TODO: implement me
+     * 
+     * @return {@code true} if the data can be marshaled in the specified document, {@code false} otherwise
+     */
+    public boolean validatePageData(XWikiDocument newDoc, Map<String, String> data, BaseClass defaultClass,
+        String defaultDateFormat, boolean simulation, StringBuffer result)
+    {
+        return true;
+    }
+
     public XWikiDocument marshalDataToDocumentObjects(DocumentReference pageName, Map<String, String> data,
-        List<String> currentLine, BaseClass defaultClass, BatchImportConfiguration config, XWikiContext xcontext,
-        boolean overwrite, List<String> fieldsfortags, String defaultDateFormat, StringBuffer result)
-        throws XWikiException, IOException
+        List<String> currentLine, BaseClass defaultClass, boolean isRowUpdate, boolean wasAlreadySaved,
+        BatchImportConfiguration config, XWikiContext xcontext, List<String> fieldsfortags, String defaultDateFormat,
+        StringBuffer result, boolean simulation) throws XWikiException, IOException
     {
         XWiki xwiki = xcontext.getWiki();
         String defaultClassName = config.getMappingClassName();
         Map<String, String> mapping = config.getFieldsMapping();
         DocumentReference defaultClassReference = defaultClass.getReference();
         Character listseparator = config.getListSeparator();
+        Overwrite overwrite = config.getOverwrite();
+
+        String fullName = entityReferenceSerializer.serialize(pageName);
 
         XWikiDocument newDoc = xwiki.getDocument(pageName, xcontext);
-        if (newDoc.isNew() || overwrite) {
+        // if either the document is new
+        // or is not new but we're not supposed to skip
+        // or it's existing, we're supposed to skip but it was saved during this import and this is an update row
+        if (newDoc.isNew() || overwrite != Overwrite.SKIP || (wasAlreadySaved && isRowUpdate)) {
+
+            // validate the data to marshal in this page
+            boolean validationResult =
+                validatePageData(newDoc, data, defaultClass, defaultDateFormat, simulation, result);
+            if (!validationResult) {
+                return null;
+            }
+
+            // if document is not new and we're in replace mode, and the document was not already saved during this
+            // import, we remove it
+            if (!newDoc.isNew() && overwrite == Overwrite.REPLACE && !wasAlreadySaved) {
+                if (!simulation) {
+                    // delete, by getting a new document
+                    XWikiDocument newDoc2 = xwiki.getDocument(pageName, xcontext);
+                    new Document(newDoc2, xcontext).delete();
+                    // flush archive cache otherwise we cannot really re-save the document after
+                    xcontext.flushArchiveCache();
+                    // reload the reference so that it doesn't keep a reference to the old document
+                    newDoc = xwiki.getDocument(pageName, xcontext);
+
+                    log(result, "Removed document " + fullName + " to replace with line " + currentLine);
+                } else {
+                    log(result, "Removing document " + fullName + " to replace with line " + currentLine);
+                }
+            }
+
             BaseObject newDocObj = null;
             if (defaultClassName != null && defaultClassName != "") {
                 newDocObj = newDoc.getXObject(defaultClassReference);
@@ -672,7 +809,9 @@ public class DefaultBatchImport implements BatchImport
                     newDocObj = newDoc.newXObject(defaultClassReference, xcontext);
                 }
             }
-            // if no object, don't continue
+            // if no object, don't continue but it's kind of hard to have this happening here, since we would actually
+            // be validating this in the validate function. There is only one problem, namely when overwrite is REPLACE,
+            // and document would have already be deleted by here and won't be replaced by anything.
             if (newDocObj == null) {
                 return null;
             }
@@ -680,6 +819,8 @@ public class DefaultBatchImport implements BatchImport
             List<String> tagList = new ArrayList<String>();
             for (String key : mapping.keySet()) {
                 String value = data.get(key);
+                // TODO: implement proper handling of empty values, for now the test if value is empty is done only for
+                // object properties, but not for document metadata. This needs to depend on a parameter.
                 if (!key.startsWith("doc.")) {
                     PropertyInterface prop = defaultClass.get(key);
 
@@ -745,8 +886,9 @@ public class DefaultBatchImport implements BatchImport
             }
 
             // set tags, only if needed.
-            // TODO: fix this test here, maybe it should depend on the overwrite parameter: for now we overwrite
-            // it even with an empty tagList, if the fields for tags is set to something and that something is
+            // TODO: fix this test here, it should depend on an "empty overwrites" parameter, which should say whether
+            // an empty value is considered significant or not, which should also apply to properties: for now we
+            // overwrite it even with an empty tagList, if the fields for tags is set to something and that something is
             // void, maybe we shouldn't
             if (fieldsfortags != null && fieldsfortags.size() > 0) {
                 BaseObject newTagsObject =
@@ -774,7 +916,7 @@ public class DefaultBatchImport implements BatchImport
             }
 
         } else {
-            log(result, "Cannot import row " + currentLine.toString() + " because page " + pageName
+            log(result, "Cannot import row " + currentLine.toString() + " because page " + fullName
                 + " already exists.");
             return null;
         }
@@ -785,7 +927,7 @@ public class DefaultBatchImport implements BatchImport
     public void saveDocumentWithFiles(XWikiDocument newDoc, Map<String, String> data, List<String> currentLine,
         BatchImportConfiguration config, XWikiContext xcontext, boolean overwrite, boolean simulation,
         boolean overwritefile, boolean fileimport, String datadir, String datadirprefix, ZipFile zipfile,
-        StringBuffer result) throws XWikiException, ZipException, IOException
+        List<DocumentReference> savedDocuments, StringBuffer result) throws XWikiException, ZipException, IOException
     {
         String fullName = entityReferenceSerializer.serialize(newDoc.getDocumentReference());
 
@@ -806,6 +948,11 @@ public class DefaultBatchImport implements BatchImport
                 if (debug || simulation) {
                     log(result, "Ready to import row " + currentLine.toString() + "in page " + fullName
                         + " and imported file is ok.");
+                    // if we're simulating, pretend that we're saving this document here since normally it would be
+                    // saved in the block under which happens only in non-simulation mode
+                    if (simulation) {
+                        savedDocuments.add(newDoc.getDocumentReference());
+                    }
                 }
 
                 // Need to import file
@@ -822,6 +969,7 @@ public class DefaultBatchImport implements BatchImport
                         // one (since overwritefile seems to be about the behavior of the document content when
                         // there are files attached)
                         new Document(newDoc, xcontext).save();
+                        savedDocuments.add(newDoc.getDocumentReference());
                     } else {
                         boolean isDirectory = isDirectory(zipfile, path);
                         if (isDirectory) {
@@ -829,6 +977,7 @@ public class DefaultBatchImport implements BatchImport
 
                             // done here, we save pointed files in the file and we're done
                             new Document(newDoc, xcontext).save();
+                            savedDocuments.add(newDoc.getDocumentReference());
                         } else {
                             byte[] filedata = getFileData(zipfile, path);
                             if (filedata != null) {
@@ -840,6 +989,7 @@ public class DefaultBatchImport implements BatchImport
 
                                 // saving the document, in order to be able to do the import properly after
                                 new Document(newDoc, xcontext).save();
+                                savedDocuments.add(newDoc.getDocumentReference());
 
                                 // launching the openoffice conversion
                                 if (fileimport) {
@@ -898,8 +1048,8 @@ public class DefaultBatchImport implements BatchImport
                     + " because imported file " + path + " does not exist.");
                 // TODO: this will leave the document unsaved because of the inexistent file, which impacts the data set
                 // with the marshalDataToDocumentObjects function (because of the way doImport is written), so maybe
-                // this should be configured by an error handling setting (skip row or skip value, for example), just as
-                // we'll have for the object data
+                // this should be configured by an error handling setting (skip row or skip value, for example), the
+                // same as we should have for document data
             }
         } else {
             if (debug || simulation) {
@@ -912,6 +1062,7 @@ public class DefaultBatchImport implements BatchImport
                 new Document(newDoc, xcontext).save();
                 log(result, "Imported row " + currentLine.toString() + " in page [[" + fullName + "]].");
             }
+            savedDocuments.add(newDoc.getDocumentReference());
         }
     }
 

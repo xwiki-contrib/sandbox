@@ -48,6 +48,33 @@ public class BatchImportConfiguration extends HashMap<Object, Object>
     // TODO: maybe this should be read from the wiki encoding
     protected static final String DEFAULT_ENCODING = "UTF-8";
 
+    public static enum Overwrite
+    {
+        /**
+         * Don't replace existing data, skip duplicates. Note that when set as document name deduplication strategy,
+         * this causes the duplicate row to be skipped even if the first row was not saved because of errors, for
+         * example.
+         */
+        SKIP,
+        /**
+         * "Stack" rows together, as if they were the same row. When used as deduplication strategy, if there are
+         * multiple values set on the same column (by different rows), the last one will win.
+         */
+        UPDATE,
+        /**
+         * Replace the old document with the new one, that is, clear object, attachments, etc. <br />
+         * Does not apply as document name deduplication strategy, as it would mean the same thing as {@link #UPDATE},
+         * actually the setter is converting it to {@link #UPDATE}.
+         */
+        REPLACE,
+        /**
+         * Auto-generate a new document name every time an existing name is found. As doc name deduplication strategy,
+         * this will generate the same names for subsequent imports of the same file, as overwrite option, this will
+         * generate different names for subsequent imports, depending on the actual data on the wiki.<br />
+         */
+        GENERATE_NEW;
+    }
+
     public AttachmentReference getAttachmentReference()
     {
         return (AttachmentReference) this.get("attachmentref");
@@ -379,5 +406,67 @@ public class BatchImportConfiguration extends HashMap<Object, Object>
     public void setClearName(boolean clearName)
     {
         this.put("clearname", clearName);
+    }
+
+    /**
+     * @return How should new data be compared to data existing in the wiki, based on doc.name.
+     */
+    public Overwrite getOverwrite()
+    {
+        Overwrite outerOverwrite = (Overwrite) this.get("outeroverwrite");
+        if (outerOverwrite == null) {
+            return Overwrite.SKIP;
+        } else {
+            return outerOverwrite;
+        }
+    }
+
+    /**
+     * @return the strategy for document name deduplication, in case the chosen column mapped on doc.name is not unique.
+     *         Possible values are {@link Overwrite#SKIP} (to ignore the second row with the same doc.name),
+     *         {@link Overwrite#UPDATE} (to add data from the second row to the same document as the data from the first
+     *         row was added) and {@link Overwrite#GENERATE_NEW} (to generate a new name, unique per imported file --
+     *         but not necessary unique in the wiki).
+     */
+    public Overwrite getDocNameDeduplication()
+    {
+        Overwrite innerOverwrite = (Overwrite) this.get("inneroverwrite");
+        if (innerOverwrite == null) {
+            return Overwrite.SKIP;
+        } else {
+            return innerOverwrite;
+        }
+    }
+
+    public void setOverwrite(Overwrite overwrite)
+    {
+        this.put("outeroverwrite", overwrite);
+    }
+
+    public void setOverwrite(String overwrite)
+    {
+        try {
+            this.setOverwrite(Overwrite.valueOf(overwrite == null ? null : overwrite.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            this.setOverwrite(Overwrite.SKIP);
+        }
+    }
+
+    public void setDocNameDeduplication(Overwrite overwrite)
+    {
+        Overwrite normalizedValue = overwrite;
+        if (overwrite == Overwrite.REPLACE) {
+            normalizedValue = Overwrite.UPDATE;
+        }
+        this.put("inneroverwrite", normalizedValue);
+    }
+
+    public void setDocNameDeduplication(String overwrite)
+    {
+        try {
+            this.setDocNameDeduplication(Overwrite.valueOf(overwrite == null ? null : overwrite.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            this.setDocNameDeduplication(Overwrite.SKIP);
+        }
     }
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>BatchImport</web>
+<name>Translations</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1341566618000</creationDate>
+<date>1341576679000</date>
+<contentUpdateDate>1341576679000</contentUpdateDate>
+<version>1.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.1</syntaxId>
+<hidden>false</hidden>
+<content>batchimport.import.overwrite.title=Data deduplication and overwrite
+batchimport.import.overwrite.deduplication.explanation=If by any chance, the column chose for document name does not contain unique names, what should happen to the **duplicate rows**?
+batchimport.import.overwrite.deduplication.option.skip=Ignore
+batchimport.import.overwrite.deduplication.option.update=Update: use the data as part of the other rows with the same document name (if the same column is set on multiple rows, the last one will win).
+batchimport.import.overwrite.deduplication.option.generate_new=Generate a new document name, by adding a number at the end of the document name
+batchimport.import.overwrite.explanation=If then, for the document name built as indicated above, a document already exists in the wiki with that name, what should we to the **existing document in the wiki**?
+batchimport.import.overwrite.option.skip=Leave unchanged (ignore data from the file)
+batchimport.import.overwrite.option.update=Update with the data coming from the file (the fields mapped on the columns of the file will be updated, the rest will remain unchanged)
+batchimport.import.overwrite.option.replace=Replace with the data coming from the file (the existing document will be deleted and a new one will be created instead, containing only the data in the file)
+batchimport.import.overwrite.option.generate_new=Generate a new document name, by adding a number at the end of the document name built as indicated above. Note that 2 subsequent imports with this option checked will not yield the same results since the document names used depend on the documents existing on the wiki.
+
+</content></xwikidoc>

@@ -93,6 +93,9 @@ public class BatchImportService implements ScriptService, BatchImport
      *         <li><tt>batchimportdefaultspace</tt> for {@link BatchImportConfiguration#getDefaultSpace()}</li>
      *         <li><tt>batchimportemptydocnameprefix</tt> for {@link BatchImportConfiguration#getEmptyDocNamePrefix()}</li>
      *         <li><tt>batchimportdefaultdateformat</tt> for {@link BatchImportConfiguration#getDefaultDateFormat()}</li>
+     *         <li><tt>batchimportoverwrite</tt> for {@link BatchImportConfiguration#getOverwrite()}</li>
+     *         <li><tt>batchimportdocnamededuplication</tt> for
+     *         {@link BatchImportConfiguration#getDocNameDeduplication()}</li>
      *         </ul>
      *         TODO: this method misses some parameters of the config (that might or might not be passable as request
      *         parameters).
@@ -166,6 +169,16 @@ public class BatchImportService implements ScriptService, BatchImport
         String defaultDateFormat = request.getParameter("batchimportdefaultdateformat");
         if (!StringUtils.isEmpty(emptyDocNamePrefix)) {
             config.setDefaultDateFormat(defaultDateFormat);
+        }
+
+        String overwrite = request.getParameter("batchimportoverwrite");
+        if (!StringUtils.isEmpty(overwrite)) {
+            config.setOverwrite(overwrite);
+        }
+
+        String docNameDeduplication = request.getParameter("batchimportdocnamededuplication");
+        if (!StringUtils.isEmpty(docNameDeduplication)) {
+            config.setDocNameDeduplication(docNameDeduplication);
         }
 
         return config;
@@ -286,11 +299,10 @@ public class BatchImportService implements ScriptService, BatchImport
     }
 
     @Override
-    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwrite,
-        boolean overwritefile, boolean simulation)
+    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile, boolean simulation)
     {
         try {
-            return this.getBatchImport().doImport(config, withFiles, overwrite, overwritefile, simulation);
+            return this.getBatchImport().doImport(config, withFiles, overwritefile, simulation);
         } catch (IOException e) {
             LOGGER.error("Could not execute import for config " + config.toString(), e);
             putExceptionInContext(e);
