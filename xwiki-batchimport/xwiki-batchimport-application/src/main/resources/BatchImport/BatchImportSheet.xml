@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1325372400000</creationDate>
-<date>1341566538000</date>
-<contentUpdateDate>1341566538000</contentUpdateDate>
+<date>1341611414000</date>
+<contentUpdateDate>1341611414000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.import.title', [$doc.space])</title>
 <template></template>
@@ -174,6 +174,11 @@
       #foreach($prop in $applicationClass.properties)
         | $prop.prettyName | &lt;select name="batchimportmapping_${prop.name}"&gt;&lt;option value=""&gt;$msg.get('batchimport.import.mapping.none')&lt;/option&gt;#foreach($column in $columnsList)&lt;option name="$column" value="$column" #if("$!importconfig.fieldsMapping.get($prop.name)" == $column)selected="selected"#end&gt;$column&lt;/option&gt;#end&lt;/select&gt;
       #end
+      #foreach($standardField in $fieldsToMap)
+        #if($standardField != 'doc.name')
+          | $msg.get("batchimport.import.mapping.${standardField}") | &lt;select name="batchimportmapping_${standardField}"&gt;&lt;option value=""&gt;$msg.get('batchimport.import.mapping.none')&lt;/option&gt;#foreach($column in $columnsList)&lt;option name="$column" value="$column" #if("$!importconfig.fieldsMapping.get($standardField)" == $column)selected="selected"#end&gt;$column&lt;/option&gt;#end&lt;/select&gt;
+        #end
+      #end
     {{/html}}
   #else
     #displayLastException('mapping')
@@ -255,6 +260,8 @@
 {{/velocity}}
 
 {{velocity}}
+## all the possible filds to map
+#set($fieldsToMap = ['doc.name', 'doc.title', 'doc.space', 'doc.parent', 'doc.content', 'doc.file', 'doc.tags'])
 ## read the import config, the import steps will need it
 ## first from the stored class for preserving settings, then overwrite from the request
 #set($importconfig = $services.batchimport.readConfigurationFromObject($doc, "BatchImport.BatchImportClass"))
