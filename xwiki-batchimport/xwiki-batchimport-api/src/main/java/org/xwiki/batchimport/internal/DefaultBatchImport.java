@@ -732,7 +732,7 @@ public class DefaultBatchImport implements BatchImport
                     new Document(xwiki.getDocument(docToDeleteRef, xcontext), xcontext).delete();
                     log.logDelete("deleted", docToDelete, wiki);
                 } catch (XWikiException e) {
-                    log.logCritical("deletefail", docToDelete, wiki, e.getMessage());
+                    log.logCritical("deletefail", docToDelete, wiki, e);
                 }
             }
 

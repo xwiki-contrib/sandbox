@@ -66,8 +66,11 @@ public class DefaultBatchImportLogMessages
         prettyMessages.put("simimportnofile", "Line %s: Ready to import row %s in page %s (no file attached).");
         prettyMessages.put("importnofile", "Line %s: Imported row %s in page [[%s]].");
 
+        prettyMessages.put("importfail",
+            "Line %s: Failed to import line %s to document %s because of unknown error: \"%s\"");
+
         prettyMessages.put("deleted", "Deleted document %s from wiki %s");
-        prettyMessages.put("deletefail", "Could not delete document %s from wiki %s because: %s");
+        prettyMessages.put("deletefail", "Failed to delete document %s from wiki %s becauseof unknown error : \"%s\"");
     }
 
     public static String getPrettyMessage(String messageKey, Object... parameters)
