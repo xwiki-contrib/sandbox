@@ -327,7 +327,7 @@ public class BatchImportService implements ScriptService, BatchImport
     public BatchImportLog deleteExistingDocuments(String className, String wiki, String space, String logHint)
     {
         try {
-            return this.getBatchImport().deleteExistingDocuments(className, wiki, space, null);
+            return this.getBatchImport().deleteExistingDocuments(className, wiki, space, logHint);
         } catch (XWikiException e) {
             LOGGER.error("Could not delete existing documents for wiki=" + wiki + ", space=" + space + ", className="
                 + className, e);

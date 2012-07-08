@@ -176,23 +176,10 @@ public class DefaultBatchImport implements BatchImport
         return list;
     }
 
-    public void log(StringBuffer result, String message)
-    {
-        if (result != null) {
-            result.append(message);
-            result.append("\n");
-        }
-        if (this.log) {
-            // yeah, debug with info here because debug are billions of billions and we cannot really understand
-            // anything from it
-            LOGGER.warn(message);
-        }
-    }
-
     public void debug(String message)
     {
         if (this.debug) {
-            // yeah, debug with info here because debug are billions of billions and we cannot really understand
+            // yeah, debug with info here because "debug" are billions of billions and we cannot really understand
             // anything from it
             LOGGER.info(message);
         }
@@ -400,6 +387,7 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void addFiles(Document newDoc, String path) throws IOException
     {
         File dirFile = new File(path);
@@ -410,6 +398,7 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void addFile(Document newDoc, byte[] filedata, String filename)
     {
         try {
@@ -441,6 +430,7 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
+    @SuppressWarnings("deprecation")
     public byte[] getFileData(ZipFile zipfile, String path) throws ZipException, IOException
     {
         if (zipfile == null) {
@@ -519,7 +509,8 @@ public class DefaultBatchImport implements BatchImport
         // column in the xls that will turn into tags
         // TODO: this tags needs to be reimplemented, now it works only with xwiki fields in the list: so you can
         // add something in the tags only if you import it as well. You should be able to configure it to be a
-        // column in the csv / xls and that column needs to be handled as a list with the list separator.
+        // column in the csv / xls and that column needs to be handled as a list with the list separator. Implement as
+        // doc.tags
         List<String> fieldsfortags = getAsList((String) doc.getValue("fieldsfortags"), config.getListSeparator());
         // -------------------- ----------------------------- ---------------------//
 
@@ -569,6 +560,7 @@ public class DefaultBatchImport implements BatchImport
                 }
 
                 if (debug) {
+                    @SuppressWarnings("unchecked")
                     Enumeration<ZipEntry> zipFileEntries = zipfile.getEntries();
                     while (zipFileEntries.hasMoreElements()) {
                         ZipEntry zipe = zipFileEntries.nextElement();
@@ -608,8 +600,6 @@ public class DefaultBatchImport implements BatchImport
         debug("Mapping is: " + mapping);
 
         while (currentLine != null) {
-            // TODO: add try catch for xwiki exceptions on saving the document (and log critical, skip and go to next).
-
             debug("Processing row " + rowIndex + ".");
 
             Map<String, String> data = getData(currentLine, mapping, headers);
@@ -632,42 +622,49 @@ public class DefaultBatchImport implements BatchImport
                     // potentially deduplicate it on the wiki, if needed
                     DocumentReference pageName =
                         maybeDeduplicatePageNameInWiki(generatedDocName, config, savedDocuments, xcontext);
-                    // marshal data to the document objects (this is creating the document and handling overwrites)
-                    Document newDoc =
-                        this.marshalDataToDocumentObjects(pageName, data, currentLine, rowIndex, defaultClass,
-                            isDuplicateName, savedDocuments.contains(pageName), config, xcontext, fieldsfortags,
-                            defaultDateFormat, log, simulation);
-                    // if a new document was created and filled, valid, with the proper overwrite
-                    if (newDoc != null) {
-                        // save the document ...
-                        if (withFiles) {
-                            // ... either with its files. Saving is done in the same function as files saving
-                            // there are reasons to do multiple saves when saving attachments and importing office
-                            // documents, so we rely completely on files for saving.
-                            // TODO: fix the overwrite parameter, for now pass false if it's set to anything else
-                            // besides skip
-                            saveDocumentWithFiles(newDoc, data, currentLine, rowIndex, config, xcontext,
-                                config.getOverwrite() != Overwrite.SKIP, simulation, overwritefile, fileimport,
-                                datadir, datadirprefix, zipfile, savedDocuments, log);
-                        } else {
-                            // ... or just save it: no files handling it, we save it here manually
-                            String serializedPageName = entityReferenceSerializer.serialize(pageName);
-                            if (!simulation) {
-                                newDoc.save();
-                                log.logSave("import", rowIndex, currentLine, serializedPageName);
+                    // try catch here, in case a row fails to save because of xwiki issues, we go to next row
+                    try {
+                        // marshal data to the document objects (this is creating the document and handling overwrites)
+                        Document newDoc =
+                            this.marshalDataToDocumentObjects(pageName, data, currentLine, rowIndex, defaultClass,
+                                isDuplicateName, savedDocuments.contains(pageName), config, xcontext, fieldsfortags,
+                                defaultDateFormat, log, simulation);
+                        // if a new document was created and filled, valid, with the proper overwrite
+                        if (newDoc != null) {
+                            // save the document ...
+                            if (withFiles) {
+                                // ... either with its files. Saving is done in the same function as files saving
+                                // there are reasons to do multiple saves when saving attachments and importing office
+                                // documents, so we rely completely on files for saving.
+                                // TODO: fix the overwrite parameter, for now pass false if it's set to anything else
+                                // besides skip
+                                saveDocumentWithFiles(newDoc, data, currentLine, rowIndex, config, xcontext,
+                                    config.getOverwrite() != Overwrite.SKIP, simulation, overwritefile, fileimport,
+                                    datadir, datadirprefix, zipfile, savedDocuments, log);
                             } else {
-                                // NOTE: when used with overwrite=GENERATE_NEW, this line here can yield results a
-                                // bit different from the actual results during the import, since, if a document
-                                // fails to save with an exception, the simulation thinks it actually saved, while
-                                // the actual import knows it didn't.
-                                log.logSave("simimport", rowIndex, currentLine, serializedPageName);
+                                // ... or just save it: no files handling it, we save it here manually
+                                String serializedPageName = entityReferenceSerializer.serialize(pageName);
+                                if (!simulation) {
+                                    newDoc.save();
+                                    log.logSave("import", rowIndex, currentLine, serializedPageName);
+                                } else {
+                                    // NOTE: when used with overwrite=GENERATE_NEW, this line here can yield results a
+                                    // bit different from the actual results during the import, since, if a document
+                                    // fails to save with an exception, the simulation thinks it actually saved, while
+                                    // the actual import knows it didn't.
+                                    log.logSave("simimport", rowIndex, currentLine, serializedPageName);
+                                }
+                                savedDocuments.add(newDoc.getDocumentReference());
                             }
-                            savedDocuments.add(newDoc.getDocumentReference());
+                        } else {
+                            // newDoc is null
+                            // validation error during page generation, page generation and validation is responsible to
+                            // log
                         }
-                    } else {
-                        // newDoc is null
-                        // validation error during page generation, page generation and validation is responsible to
-                        // log
+                    } catch (XWikiException xwe) {
+                        log.logCritical("importfail", rowIndex, currentLine, pageName, xwe);
+                    } catch (IOException ioe) {
+                        log.logCritical("importfail", rowIndex, currentLine, pageName, ioe);
                     }
                 } else {
                     // pageName exists and the config is set to ignore
@@ -699,7 +696,7 @@ public class DefaultBatchImport implements BatchImport
         XWikiContext xcontext = getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
-        BatchImportLog log = getLog(null);
+        BatchImportLog log = getLog(logHint);
 
         String originalDatabase = xcontext.getDatabase();
         try {
@@ -769,7 +766,7 @@ public class DefaultBatchImport implements BatchImport
     public Document marshalDataToDocumentObjects(DocumentReference pageName, Map<String, String> data,
         List<String> currentLine, int rowIndex, BaseClass defaultClass, boolean isRowUpdate, boolean wasAlreadySaved,
         BatchImportConfiguration config, XWikiContext xcontext, List<String> fieldsfortags, String defaultDateFormat,
-        BatchImportLog log, boolean simulation) throws XWikiException, IOException
+        BatchImportLog log, boolean simulation) throws XWikiException
     {
         XWiki xwiki = xcontext.getWiki();
         String defaultClassName = config.getMappingClassName();

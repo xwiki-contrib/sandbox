@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1325372400000</creationDate>
-<date>1341748439000</date>
-<contentUpdateDate>1341748439000</contentUpdateDate>
+<date>1341760132000</date>
+<contentUpdateDate>1341760132000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.import.title', [$doc.space])</title>
 <template></template>
@@ -228,7 +228,7 @@
 #macro(doImportSimulation)
   == $msg.get('batchimport.import.importsimulation.title') ==
 
-  #set($result = $services.batchimport.doImport($importconfig, true, false, true))
+  #set($result = $services.batchimport.doImport($importconfig, true, false, true, "i18n"))
 
   #if($result)
     #if ($result.errorLog.length() &gt; 0)
@@ -255,7 +255,7 @@
 #macro(doImport)
   == $msg.get('batchimport.import.import.title') ==
 
-  #set($result = $services.batchimport.doImport($importconfig, true, false, false))
+  #set($result = $services.batchimport.doImport($importconfig, true, false, false, "i18n"))
 
   #if($result)
     #if ($result.errorLog.length() &gt; 0)

@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1340817971000</creationDate>
-<date>1341750663000</date>
-<contentUpdateDate>1341750663000</contentUpdateDate>
+<date>1341760249000</date>
+<contentUpdateDate>1341760249000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.delete.title', [$doc.space])</title>
 <template></template>
@@ -24,7 +24,7 @@
 <hidden>false</hidden>
 <content>{{velocity}}
 #if ("$!request.confirm" == "true" &amp;&amp; "$!request.classname" != "")
-  #set($result = $services.batchimport.deleteExistingDocuments("$!request.classname", "", $doc.space))
+  #set($result = $services.batchimport.deleteExistingDocuments("$!request.classname", "", $doc.space, "i18n"))
   #if ($result)
     {{info}}**$msg.get('batchimport.delete.success')**
     
