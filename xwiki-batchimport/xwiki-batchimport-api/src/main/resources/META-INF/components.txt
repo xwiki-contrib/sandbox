@@ -2,3 +2,5 @@ org.xwiki.batchimport.BatchImportService
 org.xwiki.batchimport.internal.DefaultBatchImport
 org.xwiki.batchimport.internal.iterators.CSVImportFileIterator
 org.xwiki.batchimport.internal.iterators.ExcelImportFileIterator
+org.xwiki.batchimport.internal.log.StringBatchImportLog
+org.xwiki.batchimport.internal.log.I18nStringBatchImportLog

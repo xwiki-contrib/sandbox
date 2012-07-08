@@ -22,6 +22,7 @@ package org.xwiki.batchimport;
 import java.io.IOException;
 import java.util.List;
 
+import org.xwiki.batchimport.log.BatchImportLog;
 import org.xwiki.component.annotation.ComponentRole;
 
 import com.xpn.xwiki.XWikiException;
@@ -50,7 +51,7 @@ public interface BatchImport
      * @throws IOException
      * @throws XWikiException
      */
-    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
+    public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
         boolean simulation) throws IOException, XWikiException;
 
     /**

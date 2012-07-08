@@ -29,6 +29,7 @@ import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xwiki.batchimport.log.BatchImportLog;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
@@ -299,7 +300,7 @@ public class BatchImportService implements ScriptService, BatchImport
     }
 
     @Override
-    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile, boolean simulation)
+    public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile, boolean simulation)
     {
         try {
             return this.getBatchImport().doImport(config, withFiles, overwritefile, simulation);

@@ -45,6 +45,9 @@ import org.xwiki.batchimport.BatchImport;
 import org.xwiki.batchimport.BatchImportConfiguration;
 import org.xwiki.batchimport.BatchImportConfiguration.Overwrite;
 import org.xwiki.batchimport.ImportFileIterator;
+import org.xwiki.batchimport.internal.log.StringBatchImportLog;
+import org.xwiki.batchimport.log.AbstractSavedDocumentsBatchImportLog;
+import org.xwiki.batchimport.log.BatchImportLog;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
@@ -90,9 +93,9 @@ public class DefaultBatchImport implements BatchImport
     @Inject
     protected ComponentManager cm;
 
-    protected String debugMessage = "";
-
     protected boolean debug = true;
+
+    protected boolean log = true;
 
     @Inject
     @Named("current/reference")
@@ -175,15 +178,20 @@ public class DefaultBatchImport implements BatchImport
 
     public void log(StringBuffer result, String message)
     {
-        result.append(message);
-        result.append("\n");
-        debug(message);
+        if (result != null) {
+            result.append(message);
+            result.append("\n");
+        }
+        if (this.log) {
+            // yeah, debug with info here because debug are billions of billions and we cannot really understand
+            // anything from it
+            LOGGER.warn(message);
+        }
     }
 
     public void debug(String message)
     {
         if (this.debug) {
-            debugMessage += message + "\n";
             // yeah, debug with info here because debug are billions of billions and we cannot really understand
             // anything from it
             LOGGER.info(message);
@@ -467,13 +475,24 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
-    public String doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile, boolean simulation)
-        throws IOException, XWikiException
+    public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
+        boolean simulation) throws IOException, XWikiException
     {
         XWikiContext xcontext = getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
         StringBuffer result = new StringBuffer();
+
+        BatchImportLog log;
+        try {
+            log = this.cm.lookup(BatchImportLog.class);
+        } catch (ComponentLookupException e1) {
+            LOGGER.warn("Could not lookup a log instance, instatiating one manually");
+            log = new StringBatchImportLog();
+        }
+        if (this.log) {
+            log.setConsoleLogger(LOGGER);
+        }
 
         // the file to import
         ImportFileIterator metadatafilename = null;
@@ -542,13 +561,14 @@ public class DefaultBatchImport implements BatchImport
         if (withFiles) {
             // if it's a zip, try to read the zip
             if (datadir.endsWith(".zip")) {
-                log(result, "Checking zip file ${datadir}");
-                zipfile = new ZipFile(new File(datadir), "cp437");
-                // TODO: what the hell is this, why are we putting it on empty?
-                datadir = "";
-                if (zipfile == null) {
-                    log(result, "Could not open zip file ${datadir}");
-                    return result.toString();
+                log.log("checkingzip", datadir);
+                try {
+                    zipfile = new ZipFile(new File(datadir), "cp437");
+                    // TODO: what the hell is this, why are we putting it on empty?
+                    datadir = "";
+                } catch (IOException e) {
+                    log.logError("cannotopenzip", datadir);
+                    return log;
                 }
 
                 if (debug) {
@@ -560,11 +580,11 @@ public class DefaultBatchImport implements BatchImport
                 }
             } else {
                 // checking it as a directory
-                log(result, "Checking data directory ${datadir}");
+                log.log("checkingdatadir", datadir);
                 File datad = new File(datadir);
                 if (datad == null || !datad.isDirectory()) {
-                    log(result, "Could not open data directory ${datadir}");
-                    return result.toString();
+                    log.logError("cannotopendatadir", datadir);
+                    return log;
                 }
             }
         }
@@ -591,7 +611,9 @@ public class DefaultBatchImport implements BatchImport
         debug("Mapping is: " + mapping);
 
         while (currentLine != null) {
-            debug("Processing row " + currentLine.toString() + ".");
+            // TODO: add try catch for xwiki exceptions on saving the document (and log critical, skip and go to next).
+
+            debug("Processing row " + rowIndex + ".");
 
             Map<String, String> data = getData(currentLine, mapping, headers);
             if (data == null) {
@@ -615,9 +637,9 @@ public class DefaultBatchImport implements BatchImport
                         maybeDeduplicatePageNameInWiki(generatedDocName, config, savedDocuments, xcontext);
                     // marshal data to the document objects (this is creating the document and handling overwrites)
                     Document newDoc =
-                        this.marshalDataToDocumentObjects(pageName, data, currentLine, defaultClass, isDuplicateName,
-                            savedDocuments.contains(pageName), config, xcontext, fieldsfortags, defaultDateFormat,
-                            result, simulation);
+                        this.marshalDataToDocumentObjects(pageName, data, currentLine, rowIndex, defaultClass,
+                            isDuplicateName, savedDocuments.contains(pageName), config, xcontext, fieldsfortags,
+                            defaultDateFormat, log, simulation);
                     // if a new document was created and filled, valid, with the proper overwrite
                     if (newDoc != null) {
                         // save the document ...
@@ -627,23 +649,21 @@ public class DefaultBatchImport implements BatchImport
                             // documents, so we rely completely on files for saving.
                             // TODO: fix the overwrite parameter, for now pass false if it's set to anything else
                             // besides skip
-                            saveDocumentWithFiles(newDoc, data, currentLine, config, xcontext,
+                            saveDocumentWithFiles(newDoc, data, currentLine, rowIndex, config, xcontext,
                                 config.getOverwrite() != Overwrite.SKIP, simulation, overwritefile, fileimport,
-                                datadir, datadirprefix, zipfile, savedDocuments, result);
+                                datadir, datadirprefix, zipfile, savedDocuments, log);
                         } else {
                             // ... or just save it: no files handling it, we save it here manually
                             String serializedPageName = entityReferenceSerializer.serialize(pageName);
                             if (!simulation) {
                                 newDoc.save();
-                                log(result, "Imported row " + currentLine.toString() + " in page [["
-                                    + serializedPageName + "]].");
+                                log.logSave("import", rowIndex, currentLine, serializedPageName);
                             } else {
                                 // NOTE: when used with overwrite=GENERATE_NEW, this line here can yield results a
                                 // bit different from the actual results during the import, since, if a document
                                 // fails to save with an exception, the simulation thinks it actually saved, while
                                 // the actual import knows it didn't.
-                                log(result, "Ready to import row " + currentLine.toString() + " in page "
-                                    + serializedPageName + " without file.");
+                                log.logSave("simimport", rowIndex, currentLine, serializedPageName);
                             }
                             savedDocuments.add(newDoc.getDocumentReference());
                         }
@@ -654,12 +674,11 @@ public class DefaultBatchImport implements BatchImport
                     }
                 } else {
                     // pageName exists and the config is set to ignore
-                    log(result, "Ignore " + currentLine.toString() + " because page name was already used in this "
-                        + "import and configuration is set to skip used names.");
+                    log.logSkip("ignoreduplicate", rowIndex, currentLine);
                 }
             } else {
                 // pageName is null
-                log(result, "Ignore " + currentLine.toString() + " because page name is empty or could not be built.");
+                log.logSkip("ignoreemptypagename", rowIndex, currentLine);
             }
 
             // go to next line
@@ -667,9 +686,13 @@ public class DefaultBatchImport implements BatchImport
             rowIndex++;
         }
 
-        log(result, "Processing finished.");
+        log.log("done");
+        // set saved documents to the log, if it knows how to accept them
+        if (log instanceof AbstractSavedDocumentsBatchImportLog) {
+            ((AbstractSavedDocumentsBatchImportLog) log).setSavedDocuments(savedDocuments);
+        }
 
-        return result.toString();
+        return log;
     }
 
     @Override
@@ -736,15 +759,15 @@ public class DefaultBatchImport implements BatchImport
      * @return {@code true} if the data can be marshaled in the specified document, {@code false} otherwise
      */
     public boolean validatePageData(Document newDoc, Map<String, String> data, BaseClass defaultClass,
-        String defaultDateFormat, boolean simulation, StringBuffer result)
+        String defaultDateFormat, boolean simulation, BatchImportLog log)
     {
         return true;
     }
 
     public Document marshalDataToDocumentObjects(DocumentReference pageName, Map<String, String> data,
-        List<String> currentLine, BaseClass defaultClass, boolean isRowUpdate, boolean wasAlreadySaved,
+        List<String> currentLine, int rowIndex, BaseClass defaultClass, boolean isRowUpdate, boolean wasAlreadySaved,
         BatchImportConfiguration config, XWikiContext xcontext, List<String> fieldsfortags, String defaultDateFormat,
-        StringBuffer result, boolean simulation) throws XWikiException, IOException
+        BatchImportLog log, boolean simulation) throws XWikiException, IOException
     {
         XWiki xwiki = xcontext.getWiki();
         String defaultClassName = config.getMappingClassName();
@@ -761,8 +784,7 @@ public class DefaultBatchImport implements BatchImport
         if (newDoc.isNew() || overwrite != Overwrite.SKIP || (wasAlreadySaved && isRowUpdate)) {
 
             // validate the data to marshal in this page
-            boolean validationResult =
-                validatePageData(newDoc, data, defaultClass, defaultDateFormat, simulation, result);
+            boolean validationResult = validatePageData(newDoc, data, defaultClass, defaultDateFormat, simulation, log);
             if (!validationResult) {
                 return null;
             }
@@ -777,9 +799,9 @@ public class DefaultBatchImport implements BatchImport
                     // reload the reference so that it doesn't keep a reference to the old document
                     newDoc = xwiki.getDocument(pageName, xcontext).newDocument(xcontext);
 
-                    log(result, "Removed document " + fullName + " to replace with line " + currentLine);
+                    log.logDelete("toreplace", rowIndex, currentLine, fullName);
                 } else {
-                    log(result, "Removing document " + fullName + " to replace with line " + currentLine);
+                    log.logDelete("simtoreplace", rowIndex, currentLine, fullName);
                 }
             }
 
@@ -887,8 +909,7 @@ public class DefaultBatchImport implements BatchImport
             }
 
         } else {
-            log(result, "Cannot import row " + currentLine.toString() + " because page " + fullName
-                + " already exists.");
+            log.logSkip("ignorealreadyexists", rowIndex, currentLine, fullName);
             return null;
         }
 
@@ -896,9 +917,9 @@ public class DefaultBatchImport implements BatchImport
     }
 
     public void saveDocumentWithFiles(Document newDoc, Map<String, String> data, List<String> currentLine,
-        BatchImportConfiguration config, XWikiContext xcontext, boolean overwrite, boolean simulation,
+        int rowIndex, BatchImportConfiguration config, XWikiContext xcontext, boolean overwrite, boolean simulation,
         boolean overwritefile, boolean fileimport, String datadir, String datadirprefix, ZipFile zipfile,
-        List<DocumentReference> savedDocuments, StringBuffer result) throws XWikiException, ZipException, IOException
+        List<DocumentReference> savedDocuments, BatchImportLog log) throws XWikiException, ZipException, IOException
     {
         String fullName = newDoc.getPrefixedFullName();
 
@@ -916,18 +937,14 @@ public class DefaultBatchImport implements BatchImport
 
         if (withFile) {
             if (fileOk) {
-                if (debug || simulation) {
-                    log(result, "Ready to import row " + currentLine.toString() + "in page " + fullName
-                        + " and imported file is ok.");
-                    // if we're simulating, pretend that we're saving this document here since normally it would be
-                    // saved in the block under which happens only in non-simulation mode
-                    if (simulation) {
-                        savedDocuments.add(newDoc.getDocumentReference());
-                    }
-                }
+                debug("Ready to import row " + currentLine.toString() + "in page " + fullName
+                    + " and imported file is ok.");
 
-                // Need to import file
-                if (simulation == false) {
+                // if we're simulating we don't actually import the file, we only pretend
+                if (simulation) {
+                    log.logSave("simimportfileok", rowIndex, currentLine, fullName, path);
+                    savedDocuments.add(newDoc.getDocumentReference());
+                } else {
                     // adding the file to the document
                     String fname = getFileName(data.get("doc.file"));
                     if (newDoc.getAttachment(fname) != null) {
@@ -939,6 +956,7 @@ public class DefaultBatchImport implements BatchImport
                         // there are files attached)
                         newDoc.save();
                         savedDocuments.add(newDoc.getDocumentReference());
+                        log.logSave("importduplicateattach", rowIndex, currentLine, fullName, path);
                     } else {
                         boolean isDirectory = isDirectory(zipfile, path);
                         if (isDirectory) {
@@ -947,6 +965,7 @@ public class DefaultBatchImport implements BatchImport
                             // done here, we save pointed files in the file and we're done
                             newDoc.save();
                             savedDocuments.add(newDoc.getDocumentReference());
+                            log.logSave("importfiledir", rowIndex, currentLine, fullName, path);
                         } else {
                             byte[] filedata = getFileData(zipfile, path);
                             if (filedata != null) {
@@ -982,12 +1001,9 @@ public class DefaultBatchImport implements BatchImport
                                         }
 
                                         if (!importResult) {
-                                            log(result, "Imported row " + currentLine.toString() + " in page [["
-                                                + fullName + "]] but failed importing office file " + path
-                                                + " into content.");
+                                            log.logSave("importofficefail", rowIndex, currentLine, fullName, path);
                                         } else {
-                                            log(result, "Imported row " + currentLine.toString() + " in page [["
-                                                + fullName + "]] and imported office file " + path + " into content.");
+                                            log.logSave("importoffice", rowIndex, currentLine, fullName, path);
                                         }
 
                                         // in case import was unsuccessful let's empty the content again
@@ -1003,34 +1019,30 @@ public class DefaultBatchImport implements BatchImport
                                         cleanUp();
                                     }
                                 } else {
-                                    log(result, "Imported row " + currentLine.toString() + " in page " + fullName
-                                        + " and did not need to import the office file.");
+                                    log.logSave("importnooffice", rowIndex, currentLine, fullName, path);
                                 }
                             } else {
-                                log(result, "Imported row " + currentLine.toString() + " in page [[" + fullName
-                                    + "]] and failed to read the office file.");
+                                log.logSave("importcannotreadfile", rowIndex, currentLine, fullName, path);
                             }
                         }
                     }
                 }
             } else {
-                log(result, "Cannot import row " + currentLine.toString() + " in page " + fullName
-                    + " because imported file " + path + " does not exist.");
+                log.logError("errornofile", rowIndex, currentLine, fullName, path);
                 // TODO: this will leave the document unsaved because of the inexistent file, which impacts the data set
                 // with the marshalDataToDocumentObjects function (because of the way doImport is written), so maybe
                 // this should be configured by an error handling setting (skip row or skip value, for example), the
                 // same as we should have for document data
             }
         } else {
-            if (debug || simulation) {
-                log(result, "Ready to import row " + currentLine.toString() + " in page " + fullName
-                    + " (no file attached).");
-            }
+            debug("Ready to import row " + currentLine.toString() + " in page " + fullName + " (no file attached).");
 
             // we should save the data
             if (simulation == false) {
                 newDoc.save();
-                log(result, "Imported row " + currentLine.toString() + " in page [[" + fullName + "]].");
+                log.logSave("importnofile", rowIndex, currentLine, fullName);
+            } else {
+                log.logSave("simimportnofile", rowIndex, currentLine, fullName);
             }
             savedDocuments.add(newDoc.getDocumentReference());
         }
