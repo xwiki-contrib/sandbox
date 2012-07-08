@@ -55,6 +55,19 @@ public interface BatchImport
         boolean simulation) throws IOException, XWikiException;
 
     /**
+     * @param config
+     * @param withFiles
+     * @param overwritefile
+     * @param simulation
+     * @param logHint
+     * @return
+     * @throws IOException
+     * @throws XWikiException
+     */
+    public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
+        boolean simulation, String logHint) throws IOException, XWikiException;
+
+    /**
      * Deletes existing documents with objects of class className from space space, besides the template document, built
      * with classNameTemplate or classTemplate.
      * 
@@ -62,8 +75,17 @@ public interface BatchImport
      * @param wiki the wiki on which to execute the operation. Note that since this will be done with the current user,
      *            he'd better have the right to.
      * @param space space to delete from. If missing, the documents from all the spaces will be deleted
+     * @param logHint the hint for the reporting log to use for this delete
      * @return the log of the delete
      * @throws XWikiException
      */
-    public String deleteExistingDocuments(String className, String wiki, String space) throws XWikiException;
+    public BatchImportLog deleteExistingDocuments(String className, String wiki, String space, String logHint)
+        throws XWikiException;
+
+    /**
+     * Same as {@link #deleteExistingDocuments(String, String, String, String)} but using the default log.
+     * 
+     * @see #deleteExistingDocuments(String, String, String, String)
+     */
+    public BatchImportLog deleteExistingDocuments(String className, String wiki, String space) throws XWikiException;
 }

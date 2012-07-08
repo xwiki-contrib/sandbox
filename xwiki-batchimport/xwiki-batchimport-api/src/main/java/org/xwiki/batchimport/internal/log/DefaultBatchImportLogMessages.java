@@ -65,6 +65,9 @@ public class DefaultBatchImportLogMessages
             "Line %s: Cannot import row %s in page %s because imported file %s does not exist.");
         prettyMessages.put("simimportnofile", "Line %s: Ready to import row %s in page %s (no file attached).");
         prettyMessages.put("importnofile", "Line %s: Imported row %s in page [[%s]].");
+
+        prettyMessages.put("deleted", "Deleted document %s from wiki %s");
+        prettyMessages.put("deletefail", "Could not delete document %s from wiki %s because: %s");
     }
 
     public static String getPrettyMessage(String messageKey, Object... parameters)

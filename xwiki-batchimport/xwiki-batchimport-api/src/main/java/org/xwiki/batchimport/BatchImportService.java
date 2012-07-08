@@ -300,10 +300,18 @@ public class BatchImportService implements ScriptService, BatchImport
     }
 
     @Override
-    public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile, boolean simulation)
+    public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
+        boolean simulation)
+    {
+        return this.doImport(config, withFiles, overwritefile, simulation, null);
+    }
+
+    @Override
+    public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
+        boolean simulation, String logHint)
     {
         try {
-            return this.getBatchImport().doImport(config, withFiles, overwritefile, simulation);
+            return this.getBatchImport().doImport(config, withFiles, overwritefile, simulation, logHint);
         } catch (IOException e) {
             LOGGER.error("Could not execute import for config " + config.toString(), e);
             putExceptionInContext(e);
@@ -316,16 +324,22 @@ public class BatchImportService implements ScriptService, BatchImport
     }
 
     @Override
-    public String deleteExistingDocuments(String className, String wiki, String space)
+    public BatchImportLog deleteExistingDocuments(String className, String wiki, String space, String logHint)
     {
         try {
-            return this.getBatchImport().deleteExistingDocuments(className, wiki, space);
+            return this.getBatchImport().deleteExistingDocuments(className, wiki, space, null);
         } catch (XWikiException e) {
             LOGGER.error("Could not delete existing documents for wiki=" + wiki + ", space=" + space + ", className="
                 + className, e);
             putExceptionInContext(e);
         }
         return null;
+    }
+
+    @Override
+    public BatchImportLog deleteExistingDocuments(String className, String wiki, String space) throws XWikiException
+    {
+        return this.deleteExistingDocuments(className, wiki, space, null);
     }
 
     protected BatchImport getBatchImport()

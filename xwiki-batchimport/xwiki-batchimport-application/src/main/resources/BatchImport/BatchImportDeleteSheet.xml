@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1340817971000</creationDate>
-<date>1341346187000</date>
-<contentUpdateDate>1341346187000</contentUpdateDate>
+<date>1341750663000</date>
+<contentUpdateDate>1341750663000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.delete.title', [$doc.space])</title>
 <template></template>
@@ -28,7 +28,7 @@
   #if ($result)
     {{info}}**$msg.get('batchimport.delete.success')**
     
-    $result{{/info}}
+    $result.fullLog{{/info}}
 
     {{html}}&lt;a href="$doc.getURL('view')"&gt;$msg.get('batchimport.delete.success.backtowebhome', [$doc.space])&lt;/a&gt;{{/html}}
   #else

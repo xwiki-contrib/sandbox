@@ -62,7 +62,7 @@ public interface BatchImportLog
 
     /**
      * All document deletes (for replaces) or from the
-     * {@link BatchImport#deleteExistingDocuments(String, String, String)} function.
+     * {@link BatchImport#deleteExistingDocuments(String, String, String, String)} function.
      */
     void logDelete(String messageKey, Object... parameters);
 

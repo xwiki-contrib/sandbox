@@ -475,24 +475,21 @@ public class DefaultBatchImport implements BatchImport
         }
     }
 
+    @Override
     public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
         boolean simulation) throws IOException, XWikiException
+    {
+        return this.doImport(config, withFiles, overwritefile, simulation, null);
+    }
+
+    public BatchImportLog doImport(BatchImportConfiguration config, boolean withFiles, boolean overwritefile,
+        boolean simulation, String logHint) throws IOException, XWikiException
     {
         XWikiContext xcontext = getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
-        StringBuffer result = new StringBuffer();
-
-        BatchImportLog log;
-        try {
-            log = this.cm.lookup(BatchImportLog.class);
-        } catch (ComponentLookupException e1) {
-            LOGGER.warn("Could not lookup a log instance, instatiating one manually");
-            log = new StringBatchImportLog();
-        }
-        if (this.log) {
-            log.setConsoleLogger(LOGGER);
-        }
+        // log to report how this import goes
+        BatchImportLog log = getLog(logHint);
 
         // the file to import
         ImportFileIterator metadatafilename = null;
@@ -696,12 +693,13 @@ public class DefaultBatchImport implements BatchImport
     }
 
     @Override
-    public String deleteExistingDocuments(String className, String wiki, String space) throws XWikiException
+    public BatchImportLog deleteExistingDocuments(String className, String wiki, String space, String logHint)
+        throws XWikiException
     {
         XWikiContext xcontext = getXWikiContext();
         XWiki xwiki = xcontext.getWiki();
 
-        StringBuffer result = new StringBuffer();
+        BatchImportLog log = getLog(null);
 
         String originalDatabase = xcontext.getDatabase();
         try {
@@ -735,22 +733,26 @@ public class DefaultBatchImport implements BatchImport
                     // this is the way to delete with the proper user (current user that is), as if the delete occurred
                     // from page
                     new Document(xwiki.getDocument(docToDeleteRef, xcontext), xcontext).delete();
-                    this.log(result, "Deleted document " + docToDelete + " from wiki " + wiki);
+                    log.logDelete("deleted", docToDelete, wiki);
                 } catch (XWikiException e) {
-                    this.log(result, "Could not delete document " + docToDelete + " from wiki " + wiki + " because: "
-                        + e.getMessage());
-                    LOGGER.warn("Could not delete document " + docToDelete + " from wiki " + wiki, e);
+                    log.logCritical("deletefail", docToDelete, wiki, e.getMessage());
                 }
             }
 
             // flush the version cache for the documents to work properly after
             xcontext.flushArchiveCache();
-            return result.toString();
+            return log;
         } finally {
             if (!StringUtils.isEmpty(wiki)) {
                 xcontext.setDatabase(originalDatabase);
             }
         }
+    }
+
+    @Override
+    public BatchImportLog deleteExistingDocuments(String className, String wiki, String space) throws XWikiException
+    {
+        return this.deleteExistingDocuments(className, wiki, space, null);
     }
 
     /**
@@ -1046,6 +1048,33 @@ public class DefaultBatchImport implements BatchImport
             }
             savedDocuments.add(newDoc.getDocumentReference());
         }
+    }
+
+    /**
+     * Prepares a log to put result in.
+     * 
+     * @param logHint the hint of the log that needs to be used
+     * @return the built log, looked up with the hint. If a logger cannot be looked up with the hint, a new instance is
+     *         created of type {@link StringBatchImportLog}, so that we can properly fallback on some implementation.
+     */
+    protected BatchImportLog getLog(String logHint)
+    {
+        BatchImportLog log;
+        try {
+            if (logHint != null) {
+                log = this.cm.lookup(BatchImportLog.class, logHint);
+            } else {
+                log = this.cm.lookup(BatchImportLog.class);
+            }
+        } catch (ComponentLookupException e1) {
+            LOGGER.warn("Could not lookup a log instance, instatiating one manually");
+            log = new StringBatchImportLog();
+        }
+        if (this.log) {
+            log.setConsoleLogger(LOGGER);
+        }
+
+        return log;
     }
 
     /**
