@@ -50,15 +50,15 @@ public class DefaultBatchImportLogMessages
         prettyMessages.put("ignorealreadyexists", "Line %s: Cannot import row %s because page %s already exists.");
         prettyMessages.put("simimportfileok", "Line %s: Ready to import row %s in page %s and imported file %s is ok.");
         prettyMessages.put("importduplicateattach",
-            "Line %s: Imported row %s in page %s without file %s since it already exists.");
+            "Line %s: Imported row %s in page [[%s]] without file %s since it already exists.");
         prettyMessages.put("importfiledir",
-            "Line %s: Imported row %s in page %s and attached all files in the %s directory.");
+            "Line %s: Imported row %s in page [[%s]] and attached all files in the %s directory.");
         prettyMessages.put("importofficefail",
             "Line %s: Imported row %s in page [[%s]] but failed importing office file %s into content.");
         prettyMessages.put("importoffice",
             "Line %s: Imported row %s in page [[%s]] and imported office file %s into content.");
         prettyMessages.put("importnooffice",
-            "Line %s: Imported row %s in page %s and did not need to import the office file.");
+            "Line %s: Imported row %s in page [[%s]] and did not need to import the office file.");
         prettyMessages.put("importcannotreadfile",
             "Line %s: Imported row %s in page [[%s]] and failed to read the office file.");
         prettyMessages.put("errornofile",
@@ -69,8 +69,33 @@ public class DefaultBatchImportLogMessages
         prettyMessages.put("importfail",
             "Line %s: Failed to import line %s to document %s because of unknown error: \"%s\"");
 
-        prettyMessages.put("deleted", "Deleted document %s from wiki %s");
+        prettyMessages.put("delete", "Deleted document %s from wiki %s");
         prettyMessages.put("deletefail", "Failed to delete document %s from wiki %s becauseof unknown error : \"%s\"");
+
+        // validation errors
+        prettyMessages.put("errorvalidationlength", "Line %1$s: Validation error on row %2$s: value \"%6$s\" "
+            + "on column \"%5$s\" is too long for field \"%4$s\" (max length is %7$s).");
+        prettyMessages.put("errorvalidationlengthdocfullname",
+            "Line %s: Validation error on row %s: full name of document (\"%s\") too long (max length is %s).");
+        prettyMessages.put("errorvalidationnoobject",
+            "Line %1$s: Validation error on row %2$s: cannot create object of type %4$s in document %3$s.");
+        prettyMessages.put("errorvalidationtypeboolean", "Line %1$s: Validation error on row %2$s: "
+            + "cannot convert value \"%6$s\" on column \"%5$s\" to boolean for field \"%4$s\" "
+            + "(accepted values are 'true', 'false', '1' or '0').");
+        prettyMessages.put("errorvalidationtypeinteger", "Line %1$s: Validation error on row %2$s: "
+            + "cannot convert value \"%6$s\" on column \"%5$s\" to integer for field \"%4$s\" "
+            + "(incorrect format or value out of range).");
+        prettyMessages.put("errorvalidationtypelong", "Line %1$s: Validation error on row %2$s: "
+            + "cannot convert value \"%6$s\" on column \"%5$s\" to long for field \"%4$s\" "
+            + "(incorrect format or value out of range).");
+        prettyMessages.put("errorvalidationtypefloat", "Line %1$s: Validation error on row %2$s: "
+            + "cannot convert value \"%6$s\" on column \"%5$s\" to float for field \"%4$s\" "
+            + "(incorrect format or value out of range).");
+        prettyMessages.put("errorvalidationtypedouble", "Line %1$s: Validation error on row %2$s: "
+            + "cannot convert value \"%6$s\" on column \"%5$s\" to double for field \"%4$s\" "
+            + "(incorrect format or value out of range).");
+        prettyMessages.put("errorvalidationtypedate", "Line %1$s: Validation error on row %2$s: "
+            + "cannot convert value \"%6$s\" on column \"%5$s\" to date for field \"%4$s\" (accepted format is %7$s).");
     }
 
     public static String getPrettyMessage(String messageKey, Object... parameters)

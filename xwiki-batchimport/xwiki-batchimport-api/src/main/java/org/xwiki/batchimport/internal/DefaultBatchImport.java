@@ -71,9 +71,14 @@ import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.PropertyInterface;
 import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.objects.classes.BooleanClass;
 import com.xpn.xwiki.objects.classes.DateClass;
 import com.xpn.xwiki.objects.classes.ListClass;
+import com.xpn.xwiki.objects.classes.NumberClass;
+import com.xpn.xwiki.objects.classes.StringClass;
+import com.xpn.xwiki.objects.classes.TextAreaClass;
 import com.xpn.xwiki.util.Util;
+import com.xpn.xwiki.web.Utils;
 
 /**
  * Default Batch import implementation, uses {@link ImportFileIterator}s to process the files to import, according to
@@ -107,6 +112,13 @@ public class DefaultBatchImport implements BatchImport
 
     @Inject
     protected EntityReferenceSerializer<String> entityReferenceSerializer;
+
+    /**
+     * We need this to prepare fullNames from references
+     */
+    @SuppressWarnings("unchecked")
+    private EntityReferenceSerializer<String> localEntityReferenceSerializer = Utils.getComponent(
+        EntityReferenceSerializer.class, "local");
 
     /**
      * {@inheritDoc}
@@ -519,6 +531,8 @@ public class DefaultBatchImport implements BatchImport
             xwiki.getXClass(
                 currentDocumentStringResolver.resolve(config.getMappingClassName(),
                     StringUtils.isEmpty(config.getWiki()) ? null : new WikiReference(config.getWiki())), xcontext);
+        // TODO: validate that mapping is correct on top of this class, issue an "Error" if not (more of a warning than
+        // an error): check that fields exist, etc
         // default date format used to parse dates from the source file
         String defaultDateFormat = config.getDefaultDateFormat();
         if (StringUtils.isEmpty(defaultDateFormat)) {
@@ -622,49 +636,70 @@ public class DefaultBatchImport implements BatchImport
                     // potentially deduplicate it on the wiki, if needed
                     DocumentReference pageName =
                         maybeDeduplicatePageNameInWiki(generatedDocName, config, savedDocuments, xcontext);
-                    // try catch here, in case a row fails to save because of xwiki issues, we go to next row
-                    try {
-                        // marshal data to the document objects (this is creating the document and handling overwrites)
-                        Document newDoc =
-                            this.marshalDataToDocumentObjects(pageName, data, currentLine, rowIndex, defaultClass,
-                                isDuplicateName, savedDocuments.contains(pageName), config, xcontext, fieldsfortags,
-                                defaultDateFormat, log, simulation);
-                        // if a new document was created and filled, valid, with the proper overwrite
-                        if (newDoc != null) {
-                            // save the document ...
-                            if (withFiles) {
-                                // ... either with its files. Saving is done in the same function as files saving
-                                // there are reasons to do multiple saves when saving attachments and importing office
-                                // documents, so we rely completely on files for saving.
-                                // TODO: fix the overwrite parameter, for now pass false if it's set to anything else
-                                // besides skip
-                                saveDocumentWithFiles(newDoc, data, currentLine, rowIndex, config, xcontext,
-                                    config.getOverwrite() != Overwrite.SKIP, simulation, overwritefile, fileimport,
-                                    datadir, datadirprefix, zipfile, savedDocuments, log);
-                            } else {
-                                // ... or just save it: no files handling it, we save it here manually
-                                String serializedPageName = entityReferenceSerializer.serialize(pageName);
-                                if (!simulation) {
-                                    newDoc.save();
-                                    log.logSave("import", rowIndex, currentLine, serializedPageName);
+                    // validate the page name (check if it fits in the xwiki db, length of fullName, etc)
+                    boolean pageNameValid =
+                        validatePageName(pageName, rowIndex, currentLine, mapping, data, simulation, log);
+                    if (pageNameValid) {
+                        // try catch here, in case a row fails to save because of xwiki issues, we go to next row
+                        try {
+                            // marshal data to the document objects (this is creating the document and handling
+                            // overwrites)
+                            Document newDoc =
+                                this.marshalDataToDocumentObjects(pageName, data, currentLine, rowIndex, defaultClass,
+                                    isDuplicateName, savedDocuments.contains(pageName), config, xcontext,
+                                    fieldsfortags, defaultDateFormat, log, simulation);
+                            // if a new document was created and filled, valid, with the proper overwrite
+                            if (newDoc != null) {
+                                // save the document ...
+                                if (withFiles) {
+                                    // ... either with its files. Saving is done in the same function as files saving
+                                    // there are reasons to do multiple saves when saving attachments and importing
+                                    // office
+                                    // documents, so we rely completely on files for saving.
+                                    // TODO: fix the overwrite parameter, for now pass false if it's set to anything
+                                    // else
+                                    // besides skip
+                                    saveDocumentWithFiles(newDoc, data, currentLine, rowIndex, config, xcontext,
+                                        config.getOverwrite() != Overwrite.SKIP, simulation, overwritefile, fileimport,
+                                        datadir, datadirprefix, zipfile, savedDocuments, log);
                                 } else {
-                                    // NOTE: when used with overwrite=GENERATE_NEW, this line here can yield results a
-                                    // bit different from the actual results during the import, since, if a document
-                                    // fails to save with an exception, the simulation thinks it actually saved, while
-                                    // the actual import knows it didn't.
-                                    log.logSave("simimport", rowIndex, currentLine, serializedPageName);
+                                    // ... or just save it: no files handling it, we save it here manually
+                                    String serializedPageName = entityReferenceSerializer.serialize(pageName);
+                                    if (!simulation) {
+                                        newDoc.save();
+                                        log.logSave("import", rowIndex, currentLine, serializedPageName);
+                                    } else {
+                                        // NOTE: when used with overwrite=GENERATE_NEW, this line here can yield results
+                                        // a
+                                        // bit different from the actual results during the import, since, if a document
+                                        // fails to save with an exception, the simulation thinks it actually saved,
+                                        // while
+                                        // the actual import knows it didn't.
+                                        log.logSave("simimport", rowIndex, currentLine, serializedPageName);
+                                    }
+                                    savedDocuments.add(newDoc.getDocumentReference());
                                 }
-                                savedDocuments.add(newDoc.getDocumentReference());
+                            } else {
+                                // newDoc is null
+                                // validation error during page generation, page generation and validation is
+                                // responsible to log
                             }
-                        } else {
-                            // newDoc is null
-                            // validation error during page generation, page generation and validation is responsible to
-                            // log
+                        } catch (XWikiException xwe) {
+                            log.logCritical("importfail", rowIndex, currentLine, pageName, xwe);
+                            LOGGER.warn("Failed to import line " + currentLine + " to document " + pageName, xwe);
+                        } catch (IOException ioe) {
+                            log.logCritical("importfail", rowIndex, currentLine, pageName, ioe);
+                            LOGGER.warn("Failed to import line " + currentLine + " to document " + pageName, ioe);
                         }
-                    } catch (XWikiException xwe) {
-                        log.logCritical("importfail", rowIndex, currentLine, pageName, xwe);
-                    } catch (IOException ioe) {
-                        log.logCritical("importfail", rowIndex, currentLine, pageName, ioe);
+                    } else {
+                        // page name not valid, doesn't fit in the db. If we're simulating, validate the rest as well to
+                        // show all errors at once
+                        if (simulation) {
+                            validatePageData(data, rowIndex, currentLine,
+                                this.entityReferenceSerializer.serialize(pageName), mapping, defaultClass,
+                                defaultDateFormat, config.getListSeparator(), simulation, log);
+                        }
+                        // don't log, the validation functions are logging
                     }
                 } else {
                     // pageName exists and the config is set to ignore
@@ -730,9 +765,10 @@ public class DefaultBatchImport implements BatchImport
                     // this is the way to delete with the proper user (current user that is), as if the delete occurred
                     // from page
                     new Document(xwiki.getDocument(docToDeleteRef, xcontext), xcontext).delete();
-                    log.logDelete("deleted", docToDelete, wiki);
+                    log.logDelete("delete", docToDelete, wiki);
                 } catch (XWikiException e) {
                     log.logCritical("deletefail", docToDelete, wiki, e);
+                    LOGGER.warn("Failed to delete document " + docToDelete + " from wiki " + wiki, e);
                 }
             }
 
@@ -752,15 +788,219 @@ public class DefaultBatchImport implements BatchImport
         return this.deleteExistingDocuments(className, wiki, space, null);
     }
 
-    /**
-     * TODO: implement me
-     * 
-     * @return {@code true} if the data can be marshaled in the specified document, {@code false} otherwise
-     */
-    public boolean validatePageData(Document newDoc, Map<String, String> data, BaseClass defaultClass,
-        String defaultDateFormat, boolean simulation, BatchImportLog log)
+    protected boolean checkLength(int rowIndex, List<String> currentLine, String fullName, String fieldName,
+        String column, String value, int maxLength, BatchImportLog log)
     {
+        if (value.length() > maxLength) {
+            log.logError("errorvalidationlength", rowIndex, currentLine, fullName, fieldName, column, value, maxLength);
+            return false;
+        }
         return true;
+    }
+
+    /**
+     * Check the length of this page name since, hibernate mapping wise, we only can put 255 characters on the fullName
+     * TODO: use simulation param to stop at first error
+     */
+    public boolean validatePageName(DocumentReference docName, int rowIndex, List<String> currentLine,
+        Map<String, String> mapping, Map<String, String> data, boolean simulation, BatchImportLog log)
+    {
+        boolean hasPageNameError = false;
+
+        String fullPrefixedName = this.entityReferenceSerializer.serialize(docName);
+
+        // check first doc.name, doc.space and then together. Display all even if redundant, so that user can see
+        hasPageNameError =
+            !checkLength(rowIndex, currentLine, fullPrefixedName, "doc.name", mapping.get("doc.name"),
+                docName.getName(), 255, log)
+                || hasPageNameError;
+
+        hasPageNameError =
+            !checkLength(rowIndex, currentLine, fullPrefixedName, "doc.space", mapping.get("doc.space"), docName
+                .getLastSpaceReference().getName(), 255, log)
+                || hasPageNameError;
+
+        String fullNameForDb = this.localEntityReferenceSerializer.serialize(docName);
+        if (fullNameForDb.length() > 255) {
+            log.logError("errorvalidationlengthdocfullname", rowIndex, currentLine, fullNameForDb, 255);
+            hasPageNameError = true;
+        }
+
+        return !hasPageNameError;
+    }
+
+    /**
+     * Validate that an object can be created in this document, to prevent continuing if it's not the case.
+     * 
+     * @throws XWikiException
+     */
+    public boolean validateCanCreateObject(Document newDoc, int rowIndex, List<String> currentLine,
+        BaseClass defaultClass, boolean simulation, BatchImportLog log)
+    {
+        // try to get the object of the class type in the document. If we cannot make it, then class is
+        // "invalid"
+        String className = this.entityReferenceSerializer.serialize(defaultClass.getDocumentReference());
+        com.xpn.xwiki.api.Object newDocObj = null;
+        newDocObj = newDoc.getObject(className);
+        if (newDocObj == null) {
+            try {
+                newDocObj = newDoc.newObject(className);
+            } catch (XWikiException e) {
+                log.logError("errorvalidationnoobject", rowIndex, currentLine, newDoc.getPrefixedFullName(), className);
+                // log the exception here, since it would be something that we need to debug and we would have no way
+                // otherwise
+                LOGGER.warn("Exception encountered while getting an object of class " + className + " for document "
+                    + newDoc.getDocumentReference(), e);
+                return false;
+            }
+        }
+        if (newDocObj == null) {
+            log.logError("errorvalidationnoobject", rowIndex, currentLine, newDoc.getPrefixedFullName(), className);
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean validatePageData(Map<String, String> data, int rowIndex, List<String> currentLine, String fullName,
+        Map<String, String> mapping, BaseClass defaultClass, String defaultDateFormat, Character listSeparator,
+        boolean simulation, BatchImportLog log)
+    {
+        // TODO: use the simulation parameter to stop early in the verification, if it's not simulation to stop on first
+        // error
+        boolean hasValidationError = false;
+
+        // now get all the fields in the data and check types and lengths
+        for (Map.Entry<String, String> dataEntry : data.entrySet()) {
+            String fieldName = dataEntry.getKey();
+            String column = mapping.get(fieldName);
+            String value = dataEntry.getValue();
+
+            // skip empty columns
+            if (StringUtils.isEmpty(value)) {
+                continue;
+            }
+            if (fieldName.startsWith("doc.")) {
+                // no restrictions, only restrictions are about length for title, parent,
+                if (fieldName.equals("doc.title")) {
+                    // limit at 255
+                    hasValidationError =
+                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)
+                            || hasValidationError;
+                }
+                if (fieldName.equals("doc.parent")) {
+                    // limit at 511
+                    hasValidationError =
+                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 511, log)
+                            || hasValidationError;
+                }
+                if (fieldName.equals("doc.content")) {
+                    // limit at 200000
+                    hasValidationError =
+                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 200000, log)
+                            || hasValidationError;
+                }
+                // TODO: check doc.tags (but I don't know exactly how). For now, doc.tags is not even collected in the
+                // data map, so we cannot check it here
+            } else {
+                // get the property from the class and validate it
+                PropertyInterface prop = defaultClass.get(fieldName);
+
+                if (prop instanceof StringClass && !(prop instanceof TextAreaClass)) {
+                    // check length, 255
+                    hasValidationError =
+                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)
+                            || hasValidationError;
+                }
+                // textarea
+                if (prop instanceof TextAreaClass) {
+                    // check length, 60 000
+                    hasValidationError =
+                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 60000, log)
+                            || hasValidationError;
+                }
+                // TODO: validate list properties, that each value is of proper length
+                // we start checking types now
+                if (prop instanceof BooleanClass) {
+                    // this is a bit annoying for boolean, but let's make it, otherwise it might be too magic
+                    if (!value.equalsIgnoreCase("true") && !value.equalsIgnoreCase("false")
+                        && !value.equalsIgnoreCase("0") && !value.equalsIgnoreCase("1")) {
+                        log.logError("errorvalidationtypeboolean", rowIndex, currentLine, fullName, fieldName, column,
+                            value);
+                        hasValidationError = true;
+                    }
+                }
+                if (prop instanceof NumberClass) {
+                    // we have 4 cases here, with type and length for each of them. I could use fromString, but it's
+                    // logging as if one has introduced the value from the UI, which I don't like.
+                    String ntype = ((NumberClass) prop).getNumberType();
+                    // FIXME: fix locale for number values, especially for floating point values.
+                    try {
+                        if (ntype.equals("integer")) {
+                            new Integer(value);
+                        } else if (ntype.equals("float")) {
+                            new Float(value);
+                        } else if (ntype.equals("double")) {
+                            new Double(value);
+                        } else {
+                            new Long(value);
+                        }
+                    } catch (NumberFormatException nfe) {
+                        hasValidationError = true;
+                        log.logError("errorvalidationtype" + ntype, rowIndex, currentLine, fullName, fieldName, column,
+                            value);
+                    }
+                    // TODO: check some intervals, for some values which are available in java, but not in mysql (java
+                    // takes more than mysql, iirc)
+                }
+
+                if (prop instanceof DateClass) {
+                    String datePropFormat = ((DateClass) prop).getDateFormat();
+                    SimpleDateFormat sdf = new SimpleDateFormat(datePropFormat);
+                    try {
+                        sdf.parse(value);
+                    } catch (ParseException exc) {
+                        // try to parse with the default date then
+                        sdf = new SimpleDateFormat(defaultDateFormat);
+                        try {
+                            sdf.parse(value);
+                        } catch (ParseException e) {
+                            // now we cannot do much more
+                            hasValidationError = true;
+                            log.logError("errorvalidationtypedate", rowIndex, currentLine, fullName, fieldName, column,
+                                value, datePropFormat);
+                        }
+                    }
+                }
+
+                if (prop instanceof ListClass) {
+                    if (((ListClass) prop).isMultiSelect()) {
+                        if (((ListClass) prop).isRelationalStorage()) {
+                            // check values one by one if they have appropriate length, namely 255
+                            // NOTE that this 255 is not mentioned anywhere, it's the mysql reality (5.1), observed on
+                            // my machine, since there is no explicit information in the hibernate file
+                            for (String splitValue : getAsList(value, listSeparator)) {
+                                hasValidationError =
+                                    !checkLength(rowIndex, currentLine, fullName, fieldName, column, splitValue, 255,
+                                        log) || hasValidationError;
+                            }
+                        } else {
+                            // stored as StringListProperty, limit at 60 000
+                            hasValidationError =
+                                !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 60000, log)
+                                    || hasValidationError;
+                        }
+                    } else {
+                        // stored as StringProperty, limit at 255
+                        hasValidationError =
+                            !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)
+                                || hasValidationError;
+                    }
+                }
+            }
+        }
+
+        return !hasValidationError;
     }
 
     public Document marshalDataToDocumentObjects(DocumentReference pageName, Map<String, String> data,
@@ -769,7 +1009,7 @@ public class DefaultBatchImport implements BatchImport
         BatchImportLog log, boolean simulation) throws XWikiException
     {
         XWiki xwiki = xcontext.getWiki();
-        String defaultClassName = config.getMappingClassName();
+        String className = this.entityReferenceSerializer.serialize(defaultClass.getDocumentReference());
         Map<String, String> mapping = config.getFieldsMapping();
         Character listseparator = config.getListSeparator();
         Overwrite overwrite = config.getOverwrite();
@@ -782,9 +1022,13 @@ public class DefaultBatchImport implements BatchImport
         // or it's existing, we're supposed to skip but it was saved during this import and this is an update row
         if (newDoc.isNew() || overwrite != Overwrite.SKIP || (wasAlreadySaved && isRowUpdate)) {
 
-            // validate the data to marshal in this page
-            boolean validationResult = validatePageData(newDoc, data, defaultClass, defaultDateFormat, simulation, log);
-            if (!validationResult) {
+            // validate the data to marshal in this page. Errors will be logged by the validation function
+            boolean validationResult =
+                validatePageData(data, rowIndex, currentLine, fullName, config.getFieldsMapping(), defaultClass,
+                    defaultDateFormat, listseparator, simulation, log);
+            boolean validateObjectCreation =
+                validateCanCreateObject(newDoc, rowIndex, currentLine, defaultClass, simulation, log);
+            if (!validationResult || !validateObjectCreation) {
                 return null;
             }
 
@@ -804,18 +1048,13 @@ public class DefaultBatchImport implements BatchImport
                 }
             }
 
+            // get the object, it should be non-null here since we validated that we can do that in the validation step
+            // above the removal. We need to do this here, under the removal, to be able to grab a fresh object if we
+            // needed to remove document.
             com.xpn.xwiki.api.Object newDocObj = null;
-            if (defaultClassName != null && defaultClassName != "") {
-                newDocObj = newDoc.getObject(defaultClassName);
-                if (newDocObj == null) {
-                    newDocObj = newDoc.newObject(defaultClassName);
-                }
-            }
-            // if no object, don't continue but it's kind of hard to have this happening here, since we would actually
-            // be validating this in the validate function. There is only one problem, namely when overwrite is REPLACE,
-            // and document would have already be deleted by here and won't be replaced by anything.
+            newDocObj = newDoc.getObject(className);
             if (newDocObj == null) {
-                return null;
+                newDocObj = newDoc.newObject(className);
             }
 
             List<String> tagList = new ArrayList<String>();
@@ -828,16 +1067,17 @@ public class DefaultBatchImport implements BatchImport
 
                     if (!StringUtils.isEmpty(value)) {
                         boolean addtotags = false;
+
+                        // TODO: add boolean handling since conversion is not that straightforward iirc
                         if (fieldsfortags.contains(key) || fieldsfortags.contains("ALL")) {
                             addtotags = true;
                         }
                         if (prop instanceof ListClass && (((ListClass) prop).isMultiSelect())) {
                             List<String> vallist = new ArrayList<String>();
-                            for (String listItem : getAsList(value, listseparator)) {
-                                vallist.add(listItem);
-                                if (addtotags) {
-                                    tagList.add(listItem);
-                                }
+                            List<String> splitValue = getAsList(value, listseparator);
+                            vallist.addAll(splitValue);
+                            if (addtotags) {
+                                tagList.addAll(splitValue);
                             }
                             newDocObj.set(key, vallist);
                         } else if (prop instanceof DateClass) {
@@ -996,7 +1236,7 @@ public class DefaultBatchImport implements BatchImport
                                                     .toIdString(), null, null, true);
                                         } catch (OfficeImporterException e) {
                                             LOGGER.warn("Failed to import content from office file " + fname
-                                                + " to document " + fullName);
+                                                + " to document " + fullName, e);
                                         }
 
                                         if (!importResult) {

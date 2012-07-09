@@ -173,13 +173,15 @@ public class BatchImportConfiguration extends HashMap<Object, Object>
      *         multiple imports, regardless of whether the columns order change or not. <br />
      *         There are a few special mapping fields, to configure mapping for various document metadata:
      *         <ul>
-     *         <li>doc.name : the name of the page (URL of the page in the space)</li>         
+     *         <li>doc.name : the name of the page (URL of the page in the space)</li>
      *         <li>doc.title : the title of the page</li>
      *         <li>doc.space : the name of the space</li>
      *         <li>doc.parent : parent field</li>
      *         <li>doc.content : the content of the page. Something useful is in the source file to set a column named
      *         "content" and put in that column "{{include document='CODESpace.MyClassSheet'}}".</li>
      *         <li>doc.file : declares a list of files attached to the page</li> </li>
+     *         <li>doc.tags : declares a list of columns (or a single multiple values column) to be marshaled to an
+     *         XWikiTags object. TODO: implement with this name</li> </li>
      *         </ul>
      *         <b>Note that this function returns a clone of the mapping, so putting directly in the map returned by
      *         this function will not alter the configuration's mapping. Use {@link #addAllFieldsMapping(Map)} and
