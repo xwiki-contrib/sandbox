@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1340817971000</creationDate>
-<date>1341760249000</date>
-<contentUpdateDate>1341760249000</contentUpdateDate>
+<date>1341848592000</date>
+<contentUpdateDate>1341848592000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.delete.title', [$doc.space])</title>
 <template></template>
@@ -54,7 +54,7 @@
   #set($livetableObjInWebHome = $spaceHome.getObject('AppWithinMinutes.LiveTableClass'))
   #set($classDocument = $livetableObjInWebHome.getProperty('class').value)
   #if ("$!classDocument" != "")
-    {{info}}$msg.get('batchimport.delete.confirmation.description'){{/info}}
+    {{info}}$msg.get('batchimport.delete.confirmation.description', [$doc.space]){{/info}}
 
     {{html}}
       &lt;form action="" method="post"&gt;

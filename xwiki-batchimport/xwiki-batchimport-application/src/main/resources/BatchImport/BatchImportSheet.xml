@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1325372400000</creationDate>
-<date>1341760132000</date>
-<contentUpdateDate>1341760132000</contentUpdateDate>
+<date>1341849192000</date>
+<contentUpdateDate>1341849192000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.import.title', [$doc.space])</title>
 <template></template>
@@ -234,7 +234,7 @@
     #if ($result.errorLog.length() &gt; 0)
       === $msg.get('batchimport.import.importsimulation.errorlog') ===
 
-      {{warn}}$result.errorLog{{/warn}}
+      {{warning}}$result.errorLog{{/warning}}
 
       === $msg.get('batchimport.import.importsimulation.fulllog') ===
     #end
@@ -261,7 +261,7 @@
     #if ($result.errorLog.length() &gt; 0)
       === $msg.get('batchimport.import.import.errorlog') ===
 
-      {{warn}}$result.errorLog{{/warn}}
+      {{warning}}$result.errorLog{{/warning}}
 
       === $msg.get('batchimport.import.import.fulllog') ===
     #end
@@ -271,7 +271,7 @@
     #displayLastException('import')
   #end
   
-  [[$msg.get('batchimport.import.import.backtowebhome')&gt;&gt;${doc.space}.WebHome]]
+  [[$msg.get('batchimport.import.import.backtowebhome', [$doc.space])&gt;&gt;${doc.space}.WebHome]]
 #end
 {{/velocity}}
 
