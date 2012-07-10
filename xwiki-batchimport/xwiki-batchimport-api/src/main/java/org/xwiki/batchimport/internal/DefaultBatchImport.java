@@ -240,7 +240,7 @@ public class DefaultBatchImport implements BatchImport
     public String getSpace(Map<String, String> data, String defaultSpace, boolean clearNames)
     {
         String space = data.get("doc.space");
-        if (space == null || space == "") {
+        if (StringUtils.isEmpty(space)) {
             space = defaultSpace;
         }
 
@@ -268,7 +268,7 @@ public class DefaultBatchImport implements BatchImport
         String space = getSpace(data, defaultSpace, clearNames);
 
         String name = data.get("doc.name");
-        if (name == null || name == "") {
+        if (StringUtils.isEmpty(name)) {
             if (ignoreEmpty) {
                 return null;
             } else {
@@ -345,13 +345,13 @@ public class DefaultBatchImport implements BatchImport
 
     public String getFilePath(String datadir, String datadirprefix, String filename)
     {
-        if (datadir == null || datadir == "" || datadir == ".") {
+        if (StringUtils.isEmpty(datadir) || datadir.equals(".")) {
             datadir = "";
         } else if (!datadir.endsWith("/")) {
             datadir = datadir + "/";
         }
 
-        if (datadirprefix == null || datadirprefix == "") {
+        if (StringUtils.isEmpty(datadirprefix)) {
             datadirprefix = "";
         } else if (!datadirprefix.endsWith("/")) {
             datadirprefix = datadirprefix + "/";
@@ -555,7 +555,7 @@ public class DefaultBatchImport implements BatchImport
         List<DocumentReference> savedDocuments = new ArrayList<DocumentReference>();
 
         ZipFile zipfile = null;
-        if (!fileupload || datadir == "") {
+        if (!fileupload || StringUtils.isEmpty(datadir)) {
             withFiles = false;
         }
 
@@ -1137,13 +1137,13 @@ public class DefaultBatchImport implements BatchImport
 
             // set a parent if a parent is empty after import
             // TODO: make this a config parameter
-            if (newDoc.getParent() == "") {
+            if (StringUtils.isEmpty(newDoc.getParent())) {
                 // to the webHome of its space
                 newDoc.setParent("WebHome");
             }
 
             // polish a bit the content of the document
-            if (newDoc.getContent().trim() == "") {
+            if (StringUtils.isEmpty(newDoc.getContent().trim())) {
                 newDoc.setContent("");
             }
 
@@ -1221,7 +1221,7 @@ public class DefaultBatchImport implements BatchImport
                                 // launching the openoffice conversion
                                 if (fileimport) {
                                     if (!fname.toLowerCase().endsWith(".pdf")
-                                        && (newDoc.getContent().trim() == "" || (overwrite && overwritefile))) {
+                                        && (StringUtils.isEmpty(newDoc.getContent().trim()) || (overwrite && overwritefile))) {
                                         boolean importResult = false;
 
                                         try {
@@ -1250,7 +1250,7 @@ public class DefaultBatchImport implements BatchImport
                                         Document newDoc2 =
                                             xcontext.getWiki().getDocument(newDoc.getDocumentReference(), xcontext)
                                                 .newDocument(xcontext);
-                                        if (newDoc2.getContent().trim() == "") {
+                                        if (StringUtils.isEmpty(newDoc2.getContent().trim())) {
                                             newDoc2.setContent("");
                                             newDoc2.save();
                                         }
