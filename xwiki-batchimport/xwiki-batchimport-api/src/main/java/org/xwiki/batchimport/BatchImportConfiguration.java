@@ -22,8 +22,10 @@ package org.xwiki.batchimport;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import org.apache.axis.utils.StringUtils;
 import org.xwiki.model.reference.AttachmentReference;
 
 /**
@@ -467,6 +469,34 @@ public class BatchImportConfiguration extends HashMap<Object, Object>
             this.setDocNameDeduplication(Overwrite.valueOf(overwrite == null ? null : overwrite.toUpperCase()));
         } catch (IllegalArgumentException e) {
             this.setDocNameDeduplication(Overwrite.SKIP);
+        }
+    }
+
+    /**
+     * @return the locale of the import, which will be used when processing data from the source file, especially to
+     *         parse numbers and dates.
+     */
+    public Locale getLocale()
+    {
+        return (Locale) this.get("locale");
+    }
+
+    public void setLocale(Locale locale)
+    {
+        this.put("locale", locale);
+    }
+
+    public void setLocale(String language)
+    {
+        if (!StringUtils.isEmpty(language)) {
+            this.setLocale(new Locale(language));
+        }
+    }
+
+    public void setLocale(String language, String country)
+    {
+        if (!StringUtils.isEmpty(language) && !StringUtils.isEmpty(country)) {
+            this.setLocale(new Locale(language, country));
         }
     }
 }

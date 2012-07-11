@@ -93,10 +93,12 @@ public class BatchImportService implements ScriptService, BatchImport
      *         {@link BatchImportConfiguration#getFieldsMapping()}.</li> *
      *         <li><tt>batchimportdefaultspace</tt> for {@link BatchImportConfiguration#getDefaultSpace()}</li>
      *         <li><tt>batchimportemptydocnameprefix</tt> for {@link BatchImportConfiguration#getEmptyDocNamePrefix()}</li>
-     *         <li><tt>batchimportdefaultdateformat</tt> for {@link BatchImportConfiguration#getDefaultDateFormat()}</li>
+     *         <li><tt>batchimportlocalelanguage</tt> for {@link BatchImportConfiguration#setLocale(String)</li> <li>
+     *         <tt>batchimportdefaultdateformat</tt><li><li> for {@link BatchImportConfiguration#getDefaultDateFormat()}</li>
      *         <li><tt>batchimportoverwrite</tt> for {@link BatchImportConfiguration#getOverwrite()}</li>
      *         <li><tt>batchimportdocnamededuplication</tt> for
      *         {@link BatchImportConfiguration#getDocNameDeduplication()}</li>
+     *         <li><tt>batchimportlistseparator</tt> for {@link BatchImportConfiguration#getListSeparator()</li>
      *         </ul>
      *         TODO: this method misses some parameters of the config (that might or might not be passable as request
      *         parameters).
@@ -167,6 +169,11 @@ public class BatchImportService implements ScriptService, BatchImport
             config.setEmptyDocNamePrefix(emptyDocNamePrefix);
         }
 
+        String localeLanguage = request.getParameter("batchimportlocalelanguage");
+        if (!StringUtils.isEmpty(localeLanguage)) {
+            config.setLocale(localeLanguage);
+        }
+
         String defaultDateFormat = request.getParameter("batchimportdefaultdateformat");
         if (!StringUtils.isEmpty(emptyDocNamePrefix)) {
             config.setDefaultDateFormat(defaultDateFormat);
@@ -180,6 +187,11 @@ public class BatchImportService implements ScriptService, BatchImport
         String docNameDeduplication = request.getParameter("batchimportdocnamededuplication");
         if (!StringUtils.isEmpty(docNameDeduplication)) {
             config.setDocNameDeduplication(docNameDeduplication);
+        }
+
+        String listSeparator = request.getParameter("batchimportlistseparator");
+        if (!StringUtils.isEmpty(listSeparator)) {
+            config.setListSeparator(listSeparator.charAt(0));
         }
 
         return config;

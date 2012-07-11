@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1325372400000</creationDate>
-<date>1341849192000</date>
-<contentUpdateDate>1341849192000</contentUpdateDate>
+<date>1341932860000</date>
+<contentUpdateDate>1341932860000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.import.title', [$doc.space])</title>
 <template></template>
@@ -70,13 +70,22 @@
       &lt;input type="hidden" name="batchimportmapping_${fieldMapping.key}" value="${fieldMapping.value}" /&gt;
     #end
   #end
+  #if($config.locale)
+    &lt;input type="hidden" name="batchimportlocalelanguage" size="2" value="$!importconfig.locale.language"/&gt;
+  #end
+  #if("$!config.defaultDateFormat" != "")
+    &lt;input type="hidden" name="batchimportdefaultdateformat" value="$!importconfig.defaultDateFormat"/&gt;
+  #end
+  #if("$!config.listseparator" != "")
+    &lt;input type="hidden" name="batchimportlistseparator" size="1" value="$importconfig.listSeparator"/&gt;
+  #end
   ## overwrite options
   #if($config.overwrite)
     &lt;input type="hidden" name="batchimportoverwrite" value="$config.overwrite" /&gt;
   #end
   #if($config.docNameDeduplication)
     &lt;input type="hidden" name="batchimportdocnamededuplication" value="$config.docNameDeduplication" /&gt;
-  #end  
+  #end
 #end
 
 #macro(saveDataToPresetsObject)
@@ -108,6 +117,7 @@
       #set($discard = $presetsObject.set('mapping', $mappingString))
       #set($madeChanges = true)
     #end
+    ## FIXME: add list separator save here and class
   #end
   ## FIXME: add the other properties to this save
   ## if any changes were made, save the presets
@@ -161,25 +171,42 @@
   == $msg.get('batchimport.import.mapping.title') ==
 
   #set($applicationClass = $xwiki.getClass($importconfig.mappingClassName))
-  
+
   {{html clean="false" wiki="false"}}
     &lt;form action="" method="post"&gt;
   {{/html}}
 
   #set($columnsList = $services.batchimport.getColumnHeaders($importconfig))
   #if ($columnsList)
-    {{html clean="false" wiki="true"}}
-      |=  $msg.get('batchimport.import.mapping.fields', [$doc.space]) |= $msg.get('batchimport.import.mapping.columns')
-      | $msg.get('batchimport.import.mapping.doc.name') | &lt;select name="batchimportmapping_doc.name"&gt;&lt;option value=""&gt;$msg.get('batchimport.import.mapping.none')&lt;/option&gt;#foreach($column in $columnsList)&lt;option name="$column" value="$column" #if("$!importconfig.fieldsMapping.get('doc.name')" == $column)selected="selected"#end&gt;$column&lt;/option&gt;#end&lt;/select&gt;
-      #foreach($prop in $applicationClass.properties)
-        | $prop.prettyName | &lt;select name="batchimportmapping_${prop.name}"&gt;&lt;option value=""&gt;$msg.get('batchimport.import.mapping.none')&lt;/option&gt;#foreach($column in $columnsList)&lt;option name="$column" value="$column" #if("$!importconfig.fieldsMapping.get($prop.name)" == $column)selected="selected"#end&gt;$column&lt;/option&gt;#end&lt;/select&gt;
-      #end
-      #foreach($standardField in $fieldsToMap)
-        #if($standardField != 'doc.name')
-          | $msg.get("batchimport.import.mapping.${standardField}") | &lt;select name="batchimportmapping_${standardField}"&gt;&lt;option value=""&gt;$msg.get('batchimport.import.mapping.none')&lt;/option&gt;#foreach($column in $columnsList)&lt;option name="$column" value="$column" #if("$!importconfig.fieldsMapping.get($standardField)" == $column)selected="selected"#end&gt;$column&lt;/option&gt;#end&lt;/select&gt;
+    {{container layoutStyle="columns"}}
+    ((({{html clean="false" wiki="true"}}
+        |=  $msg.get('batchimport.import.mapping.fields', [$doc.space]) |= $msg.get('batchimport.import.mapping.columns')
+        | $msg.get('batchimport.import.mapping.doc.name') | &lt;select name="batchimportmapping_doc.name"&gt;&lt;option value=""&gt;$msg.get('batchimport.import.mapping.none')&lt;/option&gt;#foreach($column in $columnsList)&lt;option name="$column" value="$column" #if("$!importconfig.fieldsMapping.get('doc.name')" == $column)selected="selected"#end&gt;$column&lt;/option&gt;#end&lt;/select&gt;
+        #foreach($prop in $applicationClass.properties)
+          | $prop.prettyName | &lt;select name="batchimportmapping_${prop.name}"&gt;&lt;option value=""&gt;$msg.get('batchimport.import.mapping.none')&lt;/option&gt;#foreach($column in $columnsList)&lt;option name="$column" value="$column" #if("$!importconfig.fieldsMapping.get($prop.name)" == $column)selected="selected"#end&gt;$column&lt;/option&gt;#end&lt;/select&gt;
         #end
-      #end
-    {{/html}}
+        #foreach($standardField in $fieldsToMap)
+          #if($standardField != 'doc.name')
+            | $msg.get("batchimport.import.mapping.${standardField}") | &lt;select name="batchimportmapping_${standardField}"&gt;&lt;option value=""&gt;$msg.get('batchimport.import.mapping.none')&lt;/option&gt;#foreach($column in $columnsList)&lt;option name="$column" value="$column" #if("$!importconfig.fieldsMapping.get($standardField)" == $column)selected="selected"#end&gt;$column&lt;/option&gt;#end&lt;/select&gt;
+          #end
+        #end
+      {{/html}})))
+    (((
+      {{html clean="false" wiki="true"}}
+        {{info}}$msg.get('batchimport.import.mapping.localelanguage.description'){{/info}}
+
+        $msg.get('batchimport.import.mapping.localelanguage'): &lt;input type="text" name="batchimportlocalelanguage" size="2" value="$!importconfig.locale.language"/&gt;
+        
+        {{info}}$msg.get('batchimport.import.mapping.defaultdateformat'){{/info}}
+
+        $msg.get('batchimport.import.mapping.defaultdateformat'): &lt;input type="text" name="batchimportdefaultdateformat" value="$!importconfig.defaultDateFormat"/&gt;
+
+        {{info}}$msg.get('batchimport.import.mapping.listseparator.description'){{/info}}
+
+        $msg.get('batchimport.import.mapping.listseparator'): &lt;input type="text" name="batchimportlistseparator" size="1" value="$importconfig.listSeparator"/&gt;
+      {{/html}}
+    )))
+    {{/container}}
   #else
     #displayLastException('mapping')
   #end

@@ -23,12 +23,16 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.ZipException;
@@ -533,12 +537,26 @@ public class DefaultBatchImport implements BatchImport
                     StringUtils.isEmpty(config.getWiki()) ? null : new WikiReference(config.getWiki())), xcontext);
         // TODO: validate that mapping is correct on top of this class, issue an "Error" if not (more of a warning than
         // an error): check that fields exist, etc
-        // default date format used to parse dates from the source file
+        // the locale of the data to read
+        Locale sourceLocale = config.getLocale();
+        // prepare the default date formatter to process the dates in this row
+        DateFormat defaultDateFormatter = null;
         String defaultDateFormat = config.getDefaultDateFormat();
         if (StringUtils.isEmpty(defaultDateFormat)) {
+            if (sourceLocale != null) {
+                defaultDateFormatter = DateFormat.getDateInstance(DateFormat.MEDIUM, sourceLocale);
+            }
             // get it from preferences, hoping that it's set
             defaultDateFormat = xcontext.getWiki().getXWikiPreference("dateformat", xcontext);
         }
+        defaultDateFormatter = new SimpleDateFormat(defaultDateFormat);
+
+        // and get a number formatter, we'll use this to process the numbers a bit.
+        NumberFormat numberFormatter = null;
+        if (sourceLocale != null) {
+            numberFormatter = NumberFormat.getInstance(sourceLocale);
+        }
+
         // whether this file has header row or not (whether first line needs to be imported or not)
         boolean hasHeaderRow = config.hasHeaderRow();
 
@@ -647,7 +665,7 @@ public class DefaultBatchImport implements BatchImport
                             Document newDoc =
                                 this.marshalDataToDocumentObjects(pageName, data, currentLine, rowIndex, defaultClass,
                                     isDuplicateName, savedDocuments.contains(pageName), config, xcontext,
-                                    fieldsfortags, defaultDateFormat, log, simulation);
+                                    fieldsfortags, defaultDateFormatter, numberFormatter, log, simulation);
                             // if a new document was created and filled, valid, with the proper overwrite
                             if (newDoc != null) {
                                 // save the document ...
@@ -695,9 +713,9 @@ public class DefaultBatchImport implements BatchImport
                         // page name not valid, doesn't fit in the db. If we're simulating, validate the rest as well to
                         // show all errors at once
                         if (simulation) {
-                            validatePageData(data, rowIndex, currentLine,
-                                this.entityReferenceSerializer.serialize(pageName), mapping, defaultClass,
-                                defaultDateFormat, config.getListSeparator(), simulation, log);
+                            parseAndValidatePageData(data, rowIndex, currentLine,
+                                this.entityReferenceSerializer.serialize(pageName), defaultClass, config,
+                                defaultDateFormatter, numberFormatter, simulation, log);
                         }
                         // don't log, the validation functions are logging
                     }
@@ -862,10 +880,15 @@ public class DefaultBatchImport implements BatchImport
         return true;
     }
 
-    public boolean validatePageData(Map<String, String> data, int rowIndex, List<String> currentLine, String fullName,
-        Map<String, String> mapping, BaseClass defaultClass, String defaultDateFormat, Character listSeparator,
-        boolean simulation, BatchImportLog log)
+    public Map<String, Object> parseAndValidatePageData(Map<String, String> data, int rowIndex,
+        List<String> currentLine, String fullName, BaseClass defaultClass, BatchImportConfiguration config,
+        DateFormat defaultDateFormatter, NumberFormat numberFormatter, boolean simulation, BatchImportLog log)
     {
+        Map<String, String> mapping = config.getFieldsMapping();
+        Character listSeparator = config.getListSeparator();
+
+        Map<String, Object> parsedData = new HashMap<String, Object>();
+
         // TODO: use the simulation parameter to stop early in the verification, if it's not simulation to stop on first
         // error
         boolean hasValidationError = false;
@@ -875,30 +898,37 @@ public class DefaultBatchImport implements BatchImport
             String fieldName = dataEntry.getKey();
             String column = mapping.get(fieldName);
             String value = dataEntry.getValue();
+            // this will be reassigned while validating formats, and added in the parsed data map at the end
+            Object parsedValue = value;
 
-            // skip empty columns
+            // skip empty columns -> put actual empty in the parsedData, so that we can distinguish null (== invalid)
+            // from empty ( == empty string)
             if (StringUtils.isEmpty(value)) {
+                parsedData.put(fieldName, "");
                 continue;
             }
             if (fieldName.startsWith("doc.")) {
                 // no restrictions, only restrictions are about length for title, parent,
                 if (fieldName.equals("doc.title")) {
                     // limit at 255
-                    hasValidationError =
-                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)
-                            || hasValidationError;
+                    if (!checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)) {
+                        hasValidationError = true;
+                        parsedValue = null;
+                    }
                 }
                 if (fieldName.equals("doc.parent")) {
                     // limit at 511
-                    hasValidationError =
-                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 511, log)
-                            || hasValidationError;
+                    if (!checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 511, log)) {
+                        hasValidationError = true;
+                        parsedValue = null;
+                    }
                 }
                 if (fieldName.equals("doc.content")) {
                     // limit at 200000
-                    hasValidationError =
-                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 200000, log)
-                            || hasValidationError;
+                    if (!checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 200000, log)) {
+                        hasValidationError = true;
+                        parsedValue = null;
+                    }
                 }
                 // TODO: check doc.tags (but I don't know exactly how). For now, doc.tags is not even collected in the
                 // data map, so we cannot check it here
@@ -908,19 +938,22 @@ public class DefaultBatchImport implements BatchImport
 
                 if (prop instanceof StringClass && !(prop instanceof TextAreaClass)) {
                     // check length, 255
-                    hasValidationError =
-                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)
-                            || hasValidationError;
+                    if (!checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)) {
+                        hasValidationError = true;
+                        parsedValue = null;
+                    }
                 }
                 // textarea
                 if (prop instanceof TextAreaClass) {
                     // check length, 60 000
-                    hasValidationError =
-                        !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 60000, log)
-                            || hasValidationError;
+                    if (!checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 60000, log)) {
+                        hasValidationError = true;
+                        parsedValue = null;
+                    }
                 }
-                // TODO: validate list properties, that each value is of proper length
-                // we start checking types now
+
+                // we start checking types now and actually parsing string values to something else, depending on the
+                // property type
                 if (prop instanceof BooleanClass) {
                     // this is a bit annoying for boolean, but let's make it, otherwise it might be too magic
                     if (!value.equalsIgnoreCase("true") && !value.equalsIgnoreCase("false")
@@ -928,25 +961,83 @@ public class DefaultBatchImport implements BatchImport
                         log.logError("errorvalidationtypeboolean", rowIndex, currentLine, fullName, fieldName, column,
                             value);
                         hasValidationError = true;
+                        parsedValue = null;
+                    } else {
+                        if (value.equalsIgnoreCase("1")) {
+                            parsedValue = Boolean.TRUE;
+                        } else {
+                            // this will be true only when the string is "true" so for both "0" and "false" it will be
+                            // false
+                            parsedValue = Boolean.parseBoolean(value);
+                        }
                     }
                 }
+
                 if (prop instanceof NumberClass) {
-                    // we have 4 cases here, with type and length for each of them. I could use fromString, but it's
-                    // logging as if one has introduced the value from the UI, which I don't like.
+                    // we have 4 cases here, with type and length for each of them
                     String ntype = ((NumberClass) prop).getNumberType();
-                    // FIXME: fix locale for number values, especially for floating point values.
+                    String numberString = value;
+                    if (numberFormatter != null && numberFormatter instanceof DecimalFormat) {
+                        // There is a number formatter, so we need to clean a bit the value before parsing it, from a
+                        // locale pov.
+                        // Note: We tried NumberFormat#parse, but it's very complicated since number format can stop
+                        // earlier than the end of a string if it's encountering a character it doesn't know, so for
+                        // locale french it would stop on a dot (123.45 will return 123 as answer). We can know if it
+                        // stopped earlier, but then we need to check why and make sense of the rest (is it an error or
+                        // we're fine with the fact that it stopped earlier? e.g. in the case of a percent, 123,34%,
+                        // it's ok that it stops earlier, we like it).
+                        // So nicer solution here, we'll just take some common symbols from the locale and remove them
+                        // or replace them with the standard number separator (e.g. decimal point always goes to .,
+                        // thousands separator always goes to nothing, same for percent, same for currencies) and then
+                        // parse this as a standard number.
+                        DecimalFormat numberDecimalFormatter = (DecimalFormat) numberFormatter;
+                        // decimal separator turns into dot
+                        numberString =
+                            numberString.replaceAll(Pattern.quote(((Character) numberDecimalFormatter
+                                .getDecimalFormatSymbols().getDecimalSeparator()).toString()), ".");
+                        // thousands separator turns into nothing
+                        numberString =
+                            numberString.replaceAll(Pattern.quote(((Character) numberDecimalFormatter
+                                .getDecimalFormatSymbols().getGroupingSeparator()).toString()), "");
+                        // currency turns into nothing
+                        numberString =
+                            numberString
+                                .replaceAll(
+                                    Pattern.quote(numberDecimalFormatter.getDecimalFormatSymbols().getCurrencySymbol()),
+                                    "");
+                        numberString =
+                            numberString.replaceAll(Pattern.quote(numberDecimalFormatter.getDecimalFormatSymbols()
+                                .getInternationalCurrencySymbol()), "");
+                        // percent, per mill turn into nothing
+                        numberString =
+                            numberString.replaceAll(Pattern.quote(((Character) numberDecimalFormatter
+                                .getDecimalFormatSymbols().getPercent()).toString()), "");
+                        numberString =
+                            numberString.replaceAll(Pattern.quote(((Character) numberDecimalFormatter
+                                .getDecimalFormatSymbols().getPerMill()).toString()), "");
+                        // minus turns into minus
+                        numberString =
+                            numberString.replaceAll(Pattern.quote(((Character) numberDecimalFormatter
+                                .getDecimalFormatSymbols().getMinusSign()).toString()), "-");
+                        // and remove all other spaces that might be left
+                        numberString = numberString.trim();
+                    }
+                    // I could use NumberClass#fromString, but it's logging as if one has introduced the value from
+                    // the UI, which I don't like.
                     try {
                         if (ntype.equals("integer")) {
-                            new Integer(value);
+                            parsedValue = new Integer(numberString);
                         } else if (ntype.equals("float")) {
-                            new Float(value);
+                            // FIXME: check that this constructor is not truncating when the value is too long
+                            parsedValue = new Float(numberString);
                         } else if (ntype.equals("double")) {
-                            new Double(value);
+                            parsedValue = new Double(numberString);
                         } else {
-                            new Long(value);
+                            parsedValue = new Long(numberString);
                         }
                     } catch (NumberFormatException nfe) {
                         hasValidationError = true;
+                        parsedValue = null;
                         log.logError("errorvalidationtype" + ntype, rowIndex, currentLine, fullName, fieldName, column,
                             value);
                     }
@@ -955,63 +1046,79 @@ public class DefaultBatchImport implements BatchImport
                 }
 
                 if (prop instanceof DateClass) {
+                    debug("Found date " + value + " for key -" + fieldName + "-");
                     String datePropFormat = ((DateClass) prop).getDateFormat();
                     SimpleDateFormat sdf = new SimpleDateFormat(datePropFormat);
                     try {
-                        sdf.parse(value);
+                        parsedValue = sdf.parse(value);
                     } catch (ParseException exc) {
                         // try to parse with the default date then
-                        sdf = new SimpleDateFormat(defaultDateFormat);
                         try {
-                            sdf.parse(value);
+                            parsedValue = defaultDateFormatter.parse(value);
                         } catch (ParseException e) {
                             // now we cannot do much more
                             hasValidationError = true;
+                            parsedValue = null;
                             log.logError("errorvalidationtypedate", rowIndex, currentLine, fullName, fieldName, column,
                                 value, datePropFormat);
+                            debug("Failed to parse date " + value + " for key " + fieldName);
                         }
                     }
                 }
 
                 if (prop instanceof ListClass) {
                     if (((ListClass) prop).isMultiSelect()) {
+                        List<String> listValues = getAsList(value, listSeparator);
+                        parsedValue = listValues;
                         if (((ListClass) prop).isRelationalStorage()) {
                             // check values one by one if they have appropriate length, namely 255
                             // NOTE that this 255 is not mentioned anywhere, it's the mysql reality (5.1), observed on
-                            // my machine, since there is no explicit information in the hibernate file
-                            for (String splitValue : getAsList(value, listSeparator)) {
-                                hasValidationError =
-                                    !checkLength(rowIndex, currentLine, fullName, fieldName, column, splitValue, 255,
-                                        log) || hasValidationError;
+                            // my machine, since there is no explicit information in the hibernate file for
+                            // xwikilistitems table
+                            for (String splitValue : listValues) {
+                                if (!checkLength(rowIndex, currentLine, fullName, fieldName, column, splitValue, 255,
+                                    log)) {
+                                    hasValidationError = true;
+                                    parsedValue = null;
+                                }
                             }
                         } else {
                             // stored as StringListProperty, limit at 60 000
-                            hasValidationError =
-                                !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 60000, log)
-                                    || hasValidationError;
+                            if (!checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 60000, log)) {
+                                hasValidationError = true;
+                                parsedValue = null;
+                            }
                         }
                     } else {
                         // stored as StringProperty, limit at 255
-                        hasValidationError =
-                            !checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)
-                                || hasValidationError;
+                        if (!checkLength(rowIndex, currentLine, fullName, fieldName, column, value, 255, log)) {
+                            hasValidationError = true;
+                            parsedValue = null;
+                        }
                     }
                 }
             }
+
+            // and finally put the data in the parsed data map
+            parsedData.put(fieldName, parsedValue);
         }
 
-        return !hasValidationError;
+        if (!hasValidationError) {
+            return parsedData;
+        } else {
+            return null;
+        }
     }
 
     public Document marshalDataToDocumentObjects(DocumentReference pageName, Map<String, String> data,
         List<String> currentLine, int rowIndex, BaseClass defaultClass, boolean isRowUpdate, boolean wasAlreadySaved,
-        BatchImportConfiguration config, XWikiContext xcontext, List<String> fieldsfortags, String defaultDateFormat,
-        BatchImportLog log, boolean simulation) throws XWikiException
+        BatchImportConfiguration config, XWikiContext xcontext, List<String> fieldsfortags,
+        DateFormat defaultDateFormatter, NumberFormat numberFormatter, BatchImportLog log, boolean simulation)
+        throws XWikiException
     {
         XWiki xwiki = xcontext.getWiki();
         String className = this.entityReferenceSerializer.serialize(defaultClass.getDocumentReference());
         Map<String, String> mapping = config.getFieldsMapping();
-        Character listseparator = config.getListSeparator();
         Overwrite overwrite = config.getOverwrite();
 
         String fullName = entityReferenceSerializer.serialize(pageName);
@@ -1023,12 +1130,12 @@ public class DefaultBatchImport implements BatchImport
         if (newDoc.isNew() || overwrite != Overwrite.SKIP || (wasAlreadySaved && isRowUpdate)) {
 
             // validate the data to marshal in this page. Errors will be logged by the validation function
-            boolean validationResult =
-                validatePageData(data, rowIndex, currentLine, fullName, config.getFieldsMapping(), defaultClass,
-                    defaultDateFormat, listseparator, simulation, log);
+            Map<String, Object> parsedRow =
+                parseAndValidatePageData(data, rowIndex, currentLine, fullName, defaultClass, config,
+                    defaultDateFormatter, numberFormatter, simulation, log);
             boolean validateObjectCreation =
                 validateCanCreateObject(newDoc, rowIndex, currentLine, defaultClass, simulation, log);
-            if (!validationResult || !validateObjectCreation) {
+            if (parsedRow == null || !validateObjectCreation) {
                 return null;
             }
 
@@ -1059,66 +1166,53 @@ public class DefaultBatchImport implements BatchImport
 
             List<String> tagList = new ArrayList<String>();
             for (String key : mapping.keySet()) {
-                String value = data.get(key);
+                Object value = parsedRow.get(key);
+                String stringValue = data.get(key);
                 // TODO: implement proper handling of empty values, for now the test if value is empty is done only for
                 // object properties, but not for document metadata. This needs to depend on a parameter.
                 if (!key.startsWith("doc.")) {
                     PropertyInterface prop = defaultClass.get(key);
 
-                    if (!StringUtils.isEmpty(value)) {
+                    if (!StringUtils.isEmpty(stringValue)) {
                         boolean addtotags = false;
 
-                        // TODO: add boolean handling since conversion is not that straightforward iirc
                         if (fieldsfortags.contains(key) || fieldsfortags.contains("ALL")) {
                             addtotags = true;
                         }
                         if (prop instanceof ListClass && (((ListClass) prop).isMultiSelect())) {
-                            List<String> vallist = new ArrayList<String>();
-                            List<String> splitValue = getAsList(value, listseparator);
-                            vallist.addAll(splitValue);
-                            if (addtotags) {
-                                tagList.addAll(splitValue);
+                            // make this check, although value should really be instanceof List at this point since it
+                            // was properly prepared by the parseAndValidatePageData function
+                            if (addtotags && value instanceof List) {
+                                tagList.addAll((List) value);
                             }
-                            newDocObj.set(key, vallist);
-                        } else if (prop instanceof DateClass) {
-                            debug("Found date " + value + " for key -" + key + "-");
-                            SimpleDateFormat sdf = new SimpleDateFormat(((DateClass) prop).getDateFormat());
-                            try {
-                                newDocObj.set(key, sdf.parse(value));
-                            } catch (ParseException exc) {
-                                // try to parse with the default date then
-                                sdf = new SimpleDateFormat(defaultDateFormat);
-                                try {
-                                    newDocObj.set(key, sdf.parse(value));
-                                } catch (ParseException e) {
-                                    // now we cannot do much more
-                                    debug("Failed to parse date " + value + " for key " + key);
-                                }
+                            newDocObj.set(key, value);
+                        } else if (prop instanceof BooleanClass && value instanceof Boolean) {
+                            // beautiful special case here, set for boolean properties expects number in xwiki, not
+                            // boolean, so let's just pass it properly.
+                            if ((Boolean) value) {
+                                newDocObj.set(key, 1);
+                            } else {
+                                newDocObj.set(key, 0);
                             }
-                            debug("Date now is " + newDocObj.get(key) + " for key -" + key + "-");
                             if (addtotags) {
-                                tagList.add(value.trim());
+                                tagList.add(stringValue);
                             }
                         } else {
                             newDocObj.set(key, value);
 
                             if (addtotags) {
-                                tagList.add(value.trim());
+                                tagList.add(stringValue);
                             }
                         }
                     }
                 } else if (key.equals("doc.file")) {
                     // ignore, will be handled by the file function
                 } else if (key.equals("doc.title")) {
-                    if (value.length() > 255) {
-                        newDoc.setTitle(value.substring(0, 255));
-                    } else {
-                        newDoc.setTitle(value);
-                    }
+                    newDoc.setTitle((String) value);
                 } else if (key.equals("doc.parent")) {
-                    newDoc.setParent(value);
+                    newDoc.setParent((String) value);
                 } else if (key.equals("doc.content")) {
-                    newDoc.setContent(value);
+                    newDoc.setContent((String) value);
                 }
             }
 
