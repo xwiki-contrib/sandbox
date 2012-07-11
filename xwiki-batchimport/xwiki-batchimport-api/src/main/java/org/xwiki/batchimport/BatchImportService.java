@@ -175,7 +175,7 @@ public class BatchImportService implements ScriptService, BatchImport
         }
 
         String defaultDateFormat = request.getParameter("batchimportdefaultdateformat");
-        if (!StringUtils.isEmpty(emptyDocNamePrefix)) {
+        if (!StringUtils.isEmpty(defaultDateFormat)) {
             config.setDefaultDateFormat(defaultDateFormat);
         }
 
