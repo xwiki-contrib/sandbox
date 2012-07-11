@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1341566618000</creationDate>
-<date>1341848979000</date>
-<contentUpdateDate>1341848979000</contentUpdateDate>
+<date>1342022644000</date>
+<contentUpdateDate>1342022644000</contentUpdateDate>
 <version>1.1</version>
 <title></title>
 <template></template>
@@ -23,105 +23,124 @@
 <syntaxId>xwiki/2.1</syntaxId>
 <hidden>false</hidden>
 <content>## wizard ##
-batchimport.import.title=Import data in application "{0}"
+batchimport.import.title=Importer des données dans l''application "{0}"
 ## Step upload file ##
-batchimport.import.choosefile.title=Choose a file
-batchimport.import.choosefile.uploadfile=Upload
+batchimport.import.choosefile.title=Sélection de la source
+batchimport.import.choosefile.uploadfile=Télécharger
 batchimport.import.choosefile.previous=None
-batchimport.import.choosefile.next=Select file
+batchimport.import.choosefile.next=Choisir ce fichier
 ## Step mapping ##
-batchimport.import.mapping.title=Column mapping
-batchimport.import.mapping.fields=Class fields
-batchimport.import.mapping.columns=Columns in the file
+batchimport.import.mapping.title=Associer les champs
+batchimport.import.mapping.fields=Champs de l'application
+batchimport.import.mapping.columns=Champs du fichier source
 batchimport.import.mapping.none=-
-batchimport.import.mapping.doc.name=Document name
-batchimport.import.mapping.doc.title=Document title
-batchimport.import.mapping.doc.space=Document space
-batchimport.import.mapping.doc.parent=Document parent
-batchimport.import.mapping.doc.content=Document content
-batchimport.import.mapping.doc.file=Document attachments
-batchimport.import.mapping.doc.tags=Document tags
-batchimport.import.mapping.error.exception=An error occurred while trying to read the columns from the file: 
-batchimport.import.mapping.error.noexception=An unknown error occurred while trying to read the columns from the file.
-batchimport.import.mapping.previous=Change file
-batchimport.import.mapping.next=Confirm mapping
+batchimport.import.mapping.doc.name=Nom du document
+batchimport.import.mapping.doc.title=Titre du document
+batchimport.import.mapping.doc.space=Espace du document
+batchimport.import.mapping.doc.parent=Parent du document
+batchimport.import.mapping.doc.content=Contenu du document
+batchimport.import.mapping.doc.file=Fichiers attachés au document
+batchimport.import.mapping.doc.tags=Tags du document
+batchimport.import.mapping.error.exception=Erreur(s) lors de la lecture d'un champ dans le fichier source: 
+batchimport.import.mapping.error.noexception=Erreur(s) inconnue(s) lors de la lecture d'un champ dans le fichier source.
+batchimport.import.mapping.localelanguage.description=By default, the columns mapped on application fields of type number are parsed as "unformatted" numbers (decimal separator is '.' (dot) and no other non-digit character is accepted). However, if your source file contains formatted numbers, you can indicate here the localization used to process these numbers (e.g. in French, a number would be written as "1 235,54", using comma as decimal separator and space to group hundreds together for integer values). Using a localization will also make percent values and per mill values be interpreted as numeric values (e.g. '60%' will become '60'). Language should be filled in by its two letter code, e.g. 'en', 'fr', 'de', etc.
+batchimport.import.mapping.localelanguage=Localization language
+batchimport.import.mapping.defaultdateformat.description=By default, if a column in the file is mapped on an application field of type date, the values in the column will try to be interpreted using the format specified in the date field. However, if you have values that are using a different format, you can specify here the fallback format to be used for values which cannot be interpreted using the format specified in the date field. Note that the format applies to individual values, not to a whole column (if a value on a column cannot be interpreted using the date format of the field, only that value will be interpreted using the format specified here, not all the values on that column). The format should given as a pattern by the rules described here http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html .
+batchimport.import.mapping.defaultdateformat=Default date format
+batchimport.import.mapping.listseparator.description=If a file column is mapped on an application field of type list with "multiple select" checked, the import system will try to interpret the value in the field as a potential list of values rather than a single value. The splitting of the value will be done using this character as ennumeration separator. By default, it is ',' (comma).
+batchimport.import.mapping.listseparator=List separator
+batchimport.import.mapping.previous=Redéfinir la source
+batchimport.import.mapping.next=Previsualiser l'association
+## Step mapping preview ##
+batchimport.import.preview.title=Preview of data mapping and parsing
+batchimport.import.preview.description=Following is a preview of the first 10 lines of the source file, with the values for the fields as they will be interpreted by the import system. A warning icon means that there is an error on processing that value and **the whole row will be skipped on import**, an empty cell means that there is no value in the input file for the column associated to that field. You can go back and forth between mapping and preview until you get the result you want. \\\\Note that the errors presented here refer to only the 10 first rows, if you need a complete verification of the file, advance to the import step and perform a simulation.
+batchimport.import.mapping.doc.reference=Document full name
+batchimport.import.preview.errorlog=Errors on data parsing (for the lines above)
+batchimport.import.preview.fulllog=Full log (for the lines above)
+batchimport.import.preview.error.exception=An error occurred while generating the data mapping preview.
+batchimport.import.preview.error.noexception=An unknown error occurred while generating the data mapping preview.
+batchimport.import.preview.previous=Retravailler les associations de champs
+batchimport.import.preview.next=Confirmer l'association
 ## Step overwrite ##
-batchimport.import.overwrite.title=Data deduplication and overwrite
-batchimport.import.overwrite.deduplication.explanation=If by any chance, the column chose for document name does not contain unique names, what should happen to the **duplicate rows**?
-batchimport.import.overwrite.deduplication.option.skip=Ignore
-batchimport.import.overwrite.deduplication.option.update=Update: use the data as part of the other rows with the same document name (if the same column is set on multiple rows, the last one will win).
-batchimport.import.overwrite.deduplication.option.generate_new=Generate a new document name, by adding a number at the end of the document name
-batchimport.import.overwrite.explanation=If then, for the document name built as indicated above, a document already exists in the wiki with that name, what should we to the **existing document in the wiki**?
-batchimport.import.overwrite.option.skip=Leave unchanged (ignore data from the file)
-batchimport.import.overwrite.option.update=Update with the data coming from the file (the fields mapped on the columns of the file will be updated, the rest will remain unchanged)
-batchimport.import.overwrite.option.replace=Replace with the data coming from the file (the existing document will be deleted and a new one will be created instead, containing only the data in the file)
-batchimport.import.overwrite.option.generate_new=Generate a new document name, by adding a number at the end of the document name built as indicated above. Note that 2 subsequent imports with this option checked will not yield the same results since the document names used depend on the documents existing on the wiki.
-batchimport.import.overwrite.previous=Change mapping
-batchimport.import.overwrite.next=Do an import simulation
+batchimport.import.overwrite.title=Configuration du type d'import des données
+batchimport.import.overwrite.deduplication.explanation=Si le nom de document n'est pas unique dans la source, que voulez-vous faire des **lignes redondantes**?
+batchimport.import.overwrite.deduplication.option.skip=Ignorer: Uniquement la première sera intégrée
+batchimport.import.overwrite.deduplication.option.update=Mettre à jour: intègre toutes les lignes dans l'ordre en écrasant à chaque fois avec les nouvelles données.
+batchimport.import.overwrite.deduplication.option.generate_new=Ajouter: créé un nouveau nom de document en y ajoutant un suffixe
+batchimport.import.overwrite.explanation=Si le document est déjà présent dans la base de donnée de l'application, que voulez-vous faire avec **le document éxistant**?
+batchimport.import.overwrite.option.skip=Ignorer: Aucune altération de la base de données
+batchimport.import.overwrite.option.update=Mettre à jour: Remplace les champs associés dans l'étape précédente par les nouvelles données sans modifier les champs non associés
+batchimport.import.overwrite.option.replace=Réinitialiser: Supprime la ligne de la base et la remplace par la nouvelle venant de la source
+batchimport.import.overwrite.option.generate_new=Ajouter: créé un nouveau nom de document en y ajoutant un suffixe.
+batchimport.import.overwrite.previous=Back to mapping preview
+batchimport.import.overwrite.next=Faire une simulation d'import
 ## Step simulation ##
-batchimport.import.importsimulation.title=Import simulation
-batchimport.import.importsimulation.errorlog=Errors
-batchimport.import.importsimulation.fulllog=Full log
-batchimport.import.importsimulation.error.exception=An error occurred while executing import simulation: 
-batchimport.import.importsimulation.error.noexception=An unknown error occurred while executing import simulation.
-batchimport.import.importsimulation.previous=Change overwrite options
-batchimport.import.importsimulation.next=Import
+batchimport.import.importsimulation.title=Simulation d'import
+batchimport.import.importsimulation.errorlog=Erreurs
+batchimport.import.importsimulation.fulllog=Log complet
+batchimport.import.importsimulation.error.exception=Erreur lors de la simulation: 
+batchimport.import.importsimulation.error.noexception=Erreur inconnue lors de la simulation.
+batchimport.import.importsimulation.previous=Changer les options d'import
+batchimport.import.importsimulation.next=Importer les données
 ## Step real import ## 
 batchimport.import.import.title=Import
-batchimport.import.import.errorlog=Errors
-batchimport.import.import.fulllog=Full log
-batchimport.import.import.error.exception=An error occurred while importing data: 
-batchimport.import.import.error.noexception=An unknown error occurred while importing data.
-batchimport.import.import.backtowebhome=Go to "{0} Welcome"
+batchimport.import.import.errorlog=Erreurs
+batchimport.import.import.fulllog=Log complet
+batchimport.import.import.error.exception=Erreur lors de l'import: 
+batchimport.import.import.error.noexception=Erreur inconnue lors de l'import.
+batchimport.import.import.backtowebhome=Retourner à l’accueil de "{0}"
 ## delete existing data ##
-batchimport.delete.title=Delete existing data of application "{0}"
-batchimport.delete.success=Successfully deleted data: 
-batchimport.delete.success.backtowebhome=Back to {0}
-batchimport.delete.error.exception=An error occurred while deleting data: 
-batchimport.delete.error.noexception=An unknown error occurred while deleting data.
-batchimport.delete.error.backtowebhome=Back to {0}
-batchimport.delete.confirmation.description=Are you sure you want to delete all the data of the application "{0}"?
-batchimport.delete.confirmation.submit=Delete
-batchimport.delete.confirmation.cancel=Cancel
-batchimport.delete.error.noclass=Cannot delete data: no type of data was specified.
+batchimport.delete.title=Suppression des données existantes de "{0}"
+batchimport.delete.success=Données supprimées: 
+batchimport.delete.success.backtowebhome=Retour à {0}
+batchimport.delete.error.exception=Erreur lors de la suppression des données: 
+batchimport.delete.error.noexception=Erreur inconnue lors de la suppression des données.
+batchimport.delete.error.backtowebhome=Retour à {0}
+batchimport.delete.confirmation.description=Êtes-vous sûr de vouloir supprimer toutes les données de l''application "{0}"?
+batchimport.delete.confirmation.submit=Supprimer tout
+batchimport.delete.confirmation.cancel=Annuler
+batchimport.delete.error.noclass=Les données n'ont pas pût être supprimées: aucun type de données n'a été spécifié.
 
 
 ## logs ##
-batchimport.log.checkingzip=Checking zip file {0}
-batchimport.log.cannotopenzip=Could not open zip file {0}
-batchimport.log.checkingdatadir=Checking data directory {0}
-batchimport.log.cannotopendatadir=Could not open data directory {0}
-batchimport.log.import=Line {0}: Imported row {1} in page [[{2}]] without file.
-batchimport.log.simimport=Line {0}: Ready to import row {1} in page {2} without file.
-batchimport.log.ignoreduplicate=Line {0}: Ignore {1} because page name was already used in this import.
-batchimport.log.ignoreemptypagename=Line {0}: Ignore {1} because page name is empty or could not be built.
-batchimport.log.done=Processing finished.
-batchimport.log.toreplace=Line {0}: Removed document {2} to replace with line {1}
-batchimport.log.simtoreplace=Line {0}: Removing document {2} to replace with line {1}
-batchimport.log.ignorealreadyexists=Line {0}: Cannot import row {1} because page {2} already exists.
-batchimport.log.simimportfileok=Line {0}: Ready to import row {1} in page {2} and imported file {3} is ok.
-batchimport.log.importduplicateattach=Line {0}: Imported row {1} in page [[{2}]] without file {3} since it already exists.
-batchimport.log.importfiledir=Line {0}: Imported row {1} in page [[{2}]] and attached all files in the {3} directory.
-batchimport.log.importofficefail=Line {0}: Imported row {1} in page [[{2}]] but failed importing office file {3} into content.
-batchimport.log.importoffice=Line {0}: Imported row {1} in page [[{2}]] and imported office file {3} into content.
-batchimport.log.importnooffice=Line {0}: Imported row {1} in page [[{2}]] and did not need to import the office file.
-batchimport.log.importcannotreadfile=Line {0}: Imported row {1} in page [[{2}]] and failed to read the office file.
-batchimport.log.errornofile=Line {0}: Cannot import row {1} in page {2} because imported file {3} does not exist.
-batchimport.log.simimportnofile=Line {0}: Ready to import row {1} in page {2} (no file attached).
-batchimport.log.importnofile=Line {0}: Imported row {1} in page [[{2}]].
+batchimport.log.checkingzip=Vérification du fichier zip {0}
+batchimport.log.cannotopenzip=Le fichier zip {0} n''a pas pût être ouvert
+batchimport.log.checkingdatadir=Vérification du répertoire de données {0}
+batchimport.log.cannotopendatadir=Le répertoire de données {0} n''a pas pût être ouvert
+batchimport.log.import={0}: colonne {1} dans la page [[{2}]] sans fichier.
+batchimport.log.simimport={0}: Prêt à l''import colonne {1} dans la page {2} sans fichier.
+batchimport.log.ignoreduplicate={0}: Ignorer {1} par ce que le nom du document existe déjà dans l''application.
+batchimport.log.ignoreemptypagename={0}: Ignorer {1} par ce que le nom du document est vide ou n''a pas pu être utilisé.
+batchimport.log.done=Processus terminé
+batchimport.log.toreplace={0}: Document {2} a été remplacé par le document {1}
+batchimport.log.simtoreplace={0}: Supression du document {2} pour le remplacer par le document {1}
+batchimport.log.ignorealreadyexists={0}: Impossible d''importer {1} par ce que le document {2} éxiste déjà.
+batchimport.log.simimportfileok={0}: Prêt à importer de {1} dans le document {2} et la source {3} est ok.
+batchimport.log.importduplicateattach={0}: Source {1} importée dans le document [[{2}]] sans le fichier {3} car il existe déjà.
+batchimport.log.importfiledir={0}: Source {1} importée dans le document [[{2}]] et tout les fichiers attaché dans le répertoire {3}.
+batchimport.log.importofficefail={0}: Source {1} importée dans le document [[{2}]] mais échec de l''import du fichier office {3} dans le contenue.
+batchimport.log.importoffice={0}: Source {1} importée dans le document [[{2}]] et import du fichier office {3} dans le contenue.
+batchimport.log.importnooffice={0}: Source {1} importée dans le document [[{2}]] et n''a pas eu besoin d''importer le fichier office.
+batchimport.log.importcannotreadfile={0}: Source {1} importée dans le document [[{2}]] et échec de lecture du fichier office.
+batchimport.log.errornofile={0}: Echec de l''import de la source {1} dans le document {2} par ce que le fichier importé {3} n''éxiste pas.
+batchimport.log.simimportnofile={0}: Prêt à importer {1} dans le document {2} (aucun fichier attaché).
+batchimport.log.importnofile={0}: Source {1} importée dans le document [[{2}]].
 
-batchimport.log.importfail=Line {0}: Failed to import line {1} to document {2} because of unknown error: "{3}"
+batchimport.log.importfail={0}: Echec de l''import de la ligne {1} dans le document {2} à cause d''une erreur inconnue: "{3}"
 
-batchimport.log.delete=Deleted document {0} from wiki {1}
-batchimport.log.deletefail=Failed to delete document {0} from wiki {1} becauseof unknown error : "{2}"
+batchimport.log.delete=Document {0} supprimé du wiki {1}
+batchimport.log.deletefail=Echec de la supression du document {0} du wiki {1} à cause d''une erreur inconnue: "{2}"
 
 ## validation errors ##
-batchimport.log.errorvalidationlength=Line {0}: Validation error on row {1}: value "{5}" on column "{4}" is too long for field "{3}" (max length is {6}).
-batchimport.log.errorvalidationlengthdocfullname=Line {0}: Validation error on row %s: full name of document (\"%s\") too long (max length is %s).
-batchimport.log.errorvalidationnoobject=Line {0}: Validation error on row {1}: cannot create object of type {3} in document {2}.
-batchimport.log.errorvalidationtypeboolean=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to boolean for field "{3}" (accepted values are ''true'', ''false'', ''1'' or ''0'').
-batchimport.log.errorvalidationtypeinteger=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to integer for field "{3}" (incorrect format or value out of range).
-batchimport.log.errorvalidationtypelong=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to long for field "{3}" (incorrect format or value out of range).
-batchimport.log.errorvalidationtypefloat=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to float for field "{3}" (incorrect format or value out of range).
-batchimport.log.errorvalidationtypedouble=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to double for field "{3}" (incorrect format or value out of range).
-batchimport.log.errorvalidationtypedate=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to date for field "{3}" (accepted format is {6}).</content></xwikidoc>
+batchimport.log.errorvalidationlength={0}: Erreur de validation sur la ligne {1}: valeur "{5}" de la colonne "{4}" est trop longue pour le champ "{3}" (La taille maximum est {6}).
+batchimport.log.errorvalidationlengthdocfullname={0}: Erreur de validation sur le champ {1}: nom complet du document (\"{2}\") trop long (La taille maximum est {3}).
+batchimport.log.errorvalidationnoobject={0}: Erreur de validation sur le champ {1}: impossible de créer l''object de type {3} dans le document {2}.
+batchimport.log.errorvalidationtypeboolean={0}: Erreur de validation sur le champ {1}: La valeur "{5}" de la colonne "{4}" ne peut pas être convertie en un booléen pour le champ "{3}" (Les valeurs acceptées sont ''true'', ''false'', ''1'' ou ''0'').
+batchimport.log.errorvalidationtypeinteger={0}: Erreur de validation sur le champ {1}: La valeur "{5}" de la colonne "{4}" ne peut pas être convertie en type "integer" pour le champ "{3}" (Format incorrect ou valeur en dehors des normes).
+batchimport.log.errorvalidationtypelong={0}: Erreur de validation sur le champ {1}: La valeur "{5}" de la colonne "{4}" ne peut pas être convertie en type "long" pour le champ "{3}" (Format incorrect ou valeur en dehors des normes).
+batchimport.log.errorvalidationtypefloat={0}: Erreur de validation sur le champ {1}: La valeur "{5}" de la colonne "{4}" ne peut pas être convertie en type "float" pour le champ "{3}" (Format incorrect ou valeur en dehors des normes).
+batchimport.log.errorvalidationtypedouble={0}: Erreur de validation sur le champ {1}: La valeur "{5}" de la colonne "{4}" ne peut pas être convertie en type "double" pour le champ "{3}" (Format incorrect ou valeur en dehors des normes).
+batchimport.log.errorvalidationtypedate={0}: Erreur de validation sur le champ {1}: La valeur "{5}" de la colonne "{4}" ne peut pas être convertie to date pour le champ "{3}" (accepted format is {6}).
+
+batchimport.log.donepreview=Generating mapping preview finished.
+</content></xwikidoc>

@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1325372400000</creationDate>
-<date>1341932860000</date>
-<contentUpdateDate>1341932860000</contentUpdateDate>
+<date>1342018983000</date>
+<contentUpdateDate>1342018983000</contentUpdateDate>
 <version>1.1</version>
 <title>$msg.get('batchimport.import.title', [$doc.space])</title>
 <template></template>
@@ -46,15 +46,15 @@
   #if ($lastDot &gt; 0)$filename.substring($lastDot)#end
 #end
 
-#macro(displayDefaultButtons $previousStep $nextStep $currentStep)
+#macro(displayDefaultButtons $previousStep $currentStep $nextStep)
   ## display the current step in hidden so that we know when to save the data in the class
   &lt;input type="hidden" name="referringstep" value="$currentStep" /&gt;
   &lt;div class="buttonwrapper"&gt;
     #if ("$!previousStep" != "")
-      &lt;input type="submit" value='$msg.get("batchimport.import.${currentStep}.previous")' name="step_${previousStep}" class="button previous" /&gt;  
+      &lt;input type="submit" value="$escapetool.xml($msg.get("batchimport.import.${currentStep}.previous"))" name="step_${previousStep}" class="button previous" /&gt;  
     #end  
     #if ("$!nextStep" != "")
-      &lt;input type="submit" value='$msg.get("batchimport.import.${currentStep}.next")' name="step_${nextStep}" class="button next" /&gt;  
+      &lt;input type="submit" value="$escapetool.xml($msg.get("batchimport.import.${currentStep}.next"))" name="step_${nextStep}" class="button next" /&gt;  
     #end
   &lt;/div&gt;  
 #end
@@ -162,7 +162,7 @@
         #end
       &lt;/ul&gt;
       #printBatchImportNonDefaultOptions($importconfig)      
-      #displayDefaultButtons("", "mapping", "choosefile")
+      #displayDefaultButtons("", "choosefile", "mapping")
     &lt;/form&gt;
   {{/html}}
 #end
@@ -197,7 +197,7 @@
 
         $msg.get('batchimport.import.mapping.localelanguage'): &lt;input type="text" name="batchimportlocalelanguage" size="2" value="$!importconfig.locale.language"/&gt;
         
-        {{info}}$msg.get('batchimport.import.mapping.defaultdateformat'){{/info}}
+        {{info}}$msg.get('batchimport.import.mapping.defaultdateformat.description'){{/info}}
 
         $msg.get('batchimport.import.mapping.defaultdateformat'): &lt;input type="text" name="batchimportdefaultdateformat" value="$!importconfig.defaultDateFormat"/&gt;
 
@@ -215,8 +215,57 @@
     ## in order to prevent mappings coming from the object and not overwritten by the UI to be displayed here in hidden, we clean now the mapping of the importconfig (after we displayed it), so that the UI displayed above will always be right
     #set($discard = $importconfig.clearFieldsMapping())
     #printBatchImportNonDefaultOptions($importconfig)  
-    #displayDefaultButtons("choosefile", "overwrite", "mapping")
+    #displayDefaultButtons("choosefile", "mapping", "preview")
     &lt;/form&gt;
+  {{/html}}
+#end
+
+#macro(displayParsedValue $property $parsedValue $applicationTemplateObject)
+  ## switch some cases here, depending on the type of data and the value
+  #if($parsedValue != $xwiki.null)#if($parsedValue.class.name.endsWith("List") &amp;&amp; "$!parsedValue" != ""){{html wiki="false" clean="false"}}&lt;ul&gt;#foreach($val in $parsedValue)&lt;li&gt;${val}&lt;/li&gt;#end&lt;/ul&gt;{{/html}}#elseif($parsedValue.class.name.endsWith("Boolean") &amp;&amp; "$!parsedValue" != "")#if($parsedValue)${applicationTemplateObject.set($property.name, 1)}#else${applicationTemplateObject.set($property.name, 0)}#end${applicationTemplateObject.display($property.name, 'view')}#else${applicationTemplateObject.set($property.name, $parsedValue)}${applicationTemplateObject.display($property.name, 'view')}#end#else{{warning}} {{/warning}}#end
+#end
+
+#macro(displayMappingPreview)
+  == $msg.get('batchimport.import.preview.title') ==
+  
+  {{info}}$msg.get('batchimport.import.preview.description'){{/info}}
+  
+  #set($result = $services.batchimport.getMappingPreview($importconfig, 10, "i18n"))
+
+  #if($result)
+    #set($applicationClass = $xwiki.getClass($importconfig.mappingClassName))
+    ## we need the stupid template here since we cannot get displayed pretty name otherwise (we need an object or protected API)
+    #set($applicationTemplate = $xwiki.getDocument("${importconfig.mappingClassName.substring(0, $importconfig.mappingClassName.indexOf('Class'))}Template"))
+    #set($applicationTemplateObject = $applicationTemplate.getObject($importconfig.mappingClassName)) 
+    #set($mappedProperties = $importconfig.fieldsMapping.keySet())
+    ## table head: all class properties which are mapped along with all standard properties which are mapped. Before all, built document reference
+    |= |=$msg.get('batchimport.import.mapping.doc.reference')#foreach($prop in $applicationClass.properties)#if($mappedProperties.contains($prop.name))|=$applicationTemplate.displayPrettyName($prop.name, $applicationTemplateObject)#end#end#foreach($standardProp in $fieldsToMap)#if($standardProp != "doc.name" &amp;&amp; $mappedProperties.contains($standardProp))|=$msg.get("batchimport.import.mapping.${standardProp}")#end#end
+
+    ## table body
+    #foreach($parsedRow in $result.parsedData)
+      ## all data in the same order
+      | $velocityCount |#if($parsedRow.get("doc.reference"))$!services.model.serialize($parsedRow.get("doc.reference"), "local")#else{{warning}} {{/warning}}#end#foreach($prop in $applicationClass.properties)#if($mappedProperties.contains($prop.name))|#displayParsedValue($prop, $parsedRow.get($prop.name), $applicationTemplateObject)#end#end#foreach($standardProp in $fieldsToMap)#if($standardProp != "doc.name" &amp;&amp; $mappedProperties.contains($standardProp))|$parsedRow.get($standardProp)#end#end
+
+    #end
+  
+    #if ($result.log.errorLog.length() &gt; 0)
+      === $msg.get('batchimport.import.preview.errorlog') ===
+
+      {{warning}}$result.log.errorLog{{/warning}}
+
+      === $msg.get('batchimport.import.preview.fulllog') ===
+    #end
+
+    {{info}}$result.log.fullLog{{/info}}
+  #else
+    #displayLastException('preview')
+  #end  
+
+  {{html clean="false" wiki="false"}}
+    &lt;form action="" method="post"&gt;
+    #printBatchImportNonDefaultOptions($importconfig)  
+    #displayDefaultButtons("mapping", "preview", "overwrite")
+    &lt;/form&gt;    
   {{/html}}
 #end
 
@@ -247,7 +296,7 @@
     &lt;/ul&gt;
 
     #printBatchImportNonDefaultOptions($importconfig)
-    #displayDefaultButtons("mapping", "importsimulation", "overwrite")
+    #displayDefaultButtons("preview", "overwrite", "importsimulation")
     &lt;/form&gt;
   {{/html}}
 #end
@@ -274,7 +323,7 @@
   {{html clean="false" wiki="false"}}
     &lt;form action="" method="post"&gt;  
     #printBatchImportNonDefaultOptions($importconfig)
-    #displayDefaultButtons("overwrite", "import", "importsimulation")
+    #displayDefaultButtons("overwrite", "importsimulation", "import")
     &lt;/form&gt;
   {{/html}}
 #end
@@ -335,6 +384,8 @@
 
 #if("$!request.step_mapping" != "")
   #displayColumnMapping()
+#elseif("$!request.step_preview" != "")
+  #displayMappingPreview()
 #elseif("$!request.step_overwrite" != "")
   #displayOverwriteChoices()
 #elseif("$!request.step_importsimulation" != "")

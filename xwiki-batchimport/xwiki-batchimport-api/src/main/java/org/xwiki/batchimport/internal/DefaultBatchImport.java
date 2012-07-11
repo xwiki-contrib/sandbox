@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -49,6 +50,7 @@ import org.xwiki.batchimport.BatchImport;
 import org.xwiki.batchimport.BatchImportConfiguration;
 import org.xwiki.batchimport.BatchImportConfiguration.Overwrite;
 import org.xwiki.batchimport.ImportFileIterator;
+import org.xwiki.batchimport.MappingPreviewResult;
 import org.xwiki.batchimport.internal.log.StringBatchImportLog;
 import org.xwiki.batchimport.log.AbstractSavedDocumentsBatchImportLog;
 import org.xwiki.batchimport.log.BatchImportLog;
@@ -177,6 +179,130 @@ public class DefaultBatchImport implements BatchImport
         }
 
         return columns;
+    }
+
+    @Override
+    public MappingPreviewResult getMappingPreview(BatchImportConfiguration config, int maxRows) throws IOException,
+        XWikiException
+    {
+        return this.getMappingPreview(config, maxRows, null);
+    }
+
+    @Override
+    public MappingPreviewResult getMappingPreview(BatchImportConfiguration config, int maxRows, String logHint)
+        throws IOException, XWikiException
+    {
+        XWikiContext xcontext = getXWikiContext();
+        XWiki xwiki = xcontext.getWiki();
+
+        // log to report how this import goes
+        BatchImportLog log = getLog(logHint);
+
+        // the file to import
+        ImportFileIterator metadatafilename = null;
+        try {
+            metadatafilename = getImportFileIterator(config);
+        } catch (ComponentLookupException e) {
+            // IOException directly from the getFileIterator method
+            throw new IOException("Could not find an import file reader for the configuration: " + config.toString(), e);
+        }
+        // mapping from the class fields to source file columns
+        Map<String, String> mapping = config.getFieldsMapping();
+
+        // class to map data to (objects of this class will be created)
+        BaseClass defaultClass =
+            xwiki.getXClass(
+                currentDocumentStringResolver.resolve(config.getMappingClassName(),
+                    StringUtils.isEmpty(config.getWiki()) ? null : new WikiReference(config.getWiki())), xcontext);
+        // TODO: validate that mapping is correct on top of this class, issue an "Error" if not (more of a warning than
+        // an error): check that fields exist, etc
+        // the locale of the data to read
+        Locale sourceLocale = config.getLocale();
+        // prepare the default date formatter to process the dates in this row
+        DateFormat defaultDateFormatter = null;
+        String defaultDateFormat = config.getDefaultDateFormat();
+        if (StringUtils.isEmpty(defaultDateFormat)) {
+            if (sourceLocale != null) {
+                defaultDateFormatter = DateFormat.getDateInstance(DateFormat.MEDIUM, sourceLocale);
+            }
+            // get it from preferences, hoping that it's set
+            defaultDateFormat = xcontext.getWiki().getXWikiPreference("dateformat", xcontext);
+        }
+        defaultDateFormatter = new SimpleDateFormat(defaultDateFormat);
+
+        // and get a number formatter, we'll use this to process the numbers a bit.
+        NumberFormat numberFormatter = null;
+        if (sourceLocale != null) {
+            numberFormatter = NumberFormat.getInstance(sourceLocale);
+        }
+
+        // whether this file has header row or not (whether first line needs to be imported or not)
+        boolean hasHeaderRow = config.hasHeaderRow();
+
+        // list of document names, used to remember what are the document names that were generated from the
+        // document. Note that for multiple imports from the same document, this list should be identical.
+        List<DocumentReference> docNameList = new ArrayList<DocumentReference>();
+
+        // the previewed rows: processed and validated
+        List<Map<String, Object>> previewRows = new LinkedList<Map<String, Object>>();
+
+        // start reading the rows and process them one by one
+        metadatafilename.resetFile(config);
+        List<String> currentLine = null;
+        int rowIndex = 0;
+        List<String> headers = null;
+        // if there is no header row the headers are the numbers of the columns as strings
+        if (hasHeaderRow) {
+            headers = getColumnHeaders(metadatafilename, hasHeaderRow);
+            currentLine = metadatafilename.readNextLine();
+            rowIndex = 1;
+        } else {
+            currentLine = metadatafilename.readNextLine();
+            headers = new ArrayList<String>();
+            for (int i = 0; i < currentLine.size(); i++) {
+                headers.add(Integer.toString(i));
+            }
+        }
+
+        while (currentLine != null) {
+            // break if we already did the rows
+            if (rowIndex > maxRows) {
+                break;
+            }
+
+            Map<String, String> data = getData(currentLine, mapping, headers);
+
+            // generate page name
+            DocumentReference generatedDocName = getPageName(data, rowIndex, config, docNameList);
+            boolean pageNameValid = true;
+            // process the row
+            if (generatedDocName != null) {
+                // check if it's duplicated name
+                boolean isDuplicateName = docNameList.contains(generatedDocName);
+                if (!isDuplicateName) {
+                    docNameList.add(generatedDocName);
+                }
+                // validate the page name (check if it fits in the xwiki db, length of fullName, etc)
+                pageNameValid = validatePageName(generatedDocName, rowIndex, currentLine, mapping, data, true, log);
+            }
+            Map<String, Object> parsedData =
+                parseAndValidatePageData(data, rowIndex, currentLine,
+                    this.entityReferenceSerializer.serialize(generatedDocName), defaultClass, config,
+                    defaultDateFormatter, numberFormatter, true, log, true);
+            // add the generated document reference in the parsed data
+            parsedData
+                .put("doc.reference", pageNameValid ? ((generatedDocName == null) ? "" : generatedDocName) : null);
+
+            previewRows.add(parsedData);
+
+            // go to next line
+            currentLine = metadatafilename.readNextLine();
+            rowIndex++;
+        }
+
+        log.log("donepreview");
+
+        return new MappingPreviewResult(previewRows, log);
     }
 
     protected List<String> getAsList(String fields, Character separator)
@@ -715,7 +841,7 @@ public class DefaultBatchImport implements BatchImport
                         if (simulation) {
                             parseAndValidatePageData(data, rowIndex, currentLine,
                                 this.entityReferenceSerializer.serialize(pageName), defaultClass, config,
-                                defaultDateFormatter, numberFormatter, simulation, log);
+                                defaultDateFormatter, numberFormatter, simulation, log, false);
                         }
                         // don't log, the validation functions are logging
                     }
@@ -882,7 +1008,8 @@ public class DefaultBatchImport implements BatchImport
 
     public Map<String, Object> parseAndValidatePageData(Map<String, String> data, int rowIndex,
         List<String> currentLine, String fullName, BaseClass defaultClass, BatchImportConfiguration config,
-        DateFormat defaultDateFormatter, NumberFormat numberFormatter, boolean simulation, BatchImportLog log)
+        DateFormat defaultDateFormatter, NumberFormat numberFormatter, boolean simulation, BatchImportLog log,
+        boolean forceReturnParsed)
     {
         Map<String, String> mapping = config.getFieldsMapping();
         Character listSeparator = config.getListSeparator();
@@ -1103,7 +1230,9 @@ public class DefaultBatchImport implements BatchImport
             parsedData.put(fieldName, parsedValue);
         }
 
-        if (!hasValidationError) {
+        // if either we don't have validation error or we force the return of the parsed data, return the data,
+        // otherwise null.
+        if (!hasValidationError || forceReturnParsed) {
             return parsedData;
         } else {
             return null;
@@ -1132,7 +1261,7 @@ public class DefaultBatchImport implements BatchImport
             // validate the data to marshal in this page. Errors will be logged by the validation function
             Map<String, Object> parsedRow =
                 parseAndValidatePageData(data, rowIndex, currentLine, fullName, defaultClass, config,
-                    defaultDateFormatter, numberFormatter, simulation, log);
+                    defaultDateFormatter, numberFormatter, simulation, log, false);
             boolean validateObjectCreation =
                 validateCanCreateObject(newDoc, rowIndex, currentLine, defaultClass, simulation, log);
             if (parsedRow == null || !validateObjectCreation) {

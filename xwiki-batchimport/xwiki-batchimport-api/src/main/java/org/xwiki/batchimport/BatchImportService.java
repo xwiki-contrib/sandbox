@@ -93,8 +93,8 @@ public class BatchImportService implements ScriptService, BatchImport
      *         {@link BatchImportConfiguration#getFieldsMapping()}.</li> *
      *         <li><tt>batchimportdefaultspace</tt> for {@link BatchImportConfiguration#getDefaultSpace()}</li>
      *         <li><tt>batchimportemptydocnameprefix</tt> for {@link BatchImportConfiguration#getEmptyDocNamePrefix()}</li>
-     *         <li><tt>batchimportlocalelanguage</tt> for {@link BatchImportConfiguration#setLocale(String)</li> <li>
-     *         <tt>batchimportdefaultdateformat</tt><li><li> for {@link BatchImportConfiguration#getDefaultDateFormat()}</li>
+     *         <li><tt>batchimportlocalelanguage</tt> for {@link BatchImportConfiguration#setLocale(String)}</li>
+     *         <li><tt>batchimportdefaultdateformat</tt> for {@link BatchImportConfiguration#getDefaultDateFormat()}</li>
      *         <li><tt>batchimportoverwrite</tt> for {@link BatchImportConfiguration#getOverwrite()}</li>
      *         <li><tt>batchimportdocnamededuplication</tt> for
      *         {@link BatchImportConfiguration#getDocNameDeduplication()}</li>
@@ -309,6 +309,29 @@ public class BatchImportService implements ScriptService, BatchImport
         }
 
         return null;
+    }
+
+    @Override
+    public MappingPreviewResult getMappingPreview(BatchImportConfiguration config, int maxRows, String logHint)
+        throws IOException
+    {
+        try {
+            return this.getBatchImport().getMappingPreview(config, maxRows, logHint);
+        } catch (IOException e) {
+            LOGGER.error("Could not get mapping preview for config " + config.toString(), e);
+            putExceptionInContext(e);
+        } catch (XWikiException e) {
+            LOGGER.error("Could not get mapping preview for config " + config.toString(), e);
+            putExceptionInContext(e);
+        }
+
+        return null;
+    }
+
+    @Override
+    public MappingPreviewResult getMappingPreview(BatchImportConfiguration config, int maxRows) throws IOException
+    {
+        return this.getMappingPreview(config, maxRows, null);
     }
 
     @Override

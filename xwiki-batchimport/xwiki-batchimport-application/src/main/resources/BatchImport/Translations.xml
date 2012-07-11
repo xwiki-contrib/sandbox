@@ -11,8 +11,8 @@
 <customClass></customClass>
 <contentAuthor>XWiki.Admin</contentAuthor>
 <creationDate>1341566618000</creationDate>
-<date>1341848979000</date>
-<contentUpdateDate>1341848979000</contentUpdateDate>
+<date>1342008411000</date>
+<contentUpdateDate>1342008411000</contentUpdateDate>
 <version>1.1</version>
 <title></title>
 <template></template>
@@ -43,8 +43,24 @@ batchimport.import.mapping.doc.file=Document attachments
 batchimport.import.mapping.doc.tags=Document tags
 batchimport.import.mapping.error.exception=An error occurred while trying to read the columns from the file: 
 batchimport.import.mapping.error.noexception=An unknown error occurred while trying to read the columns from the file.
+batchimport.import.mapping.localelanguage.description=By default, the columns mapped on application fields of type number are parsed as "unformatted" numbers (decimal separator is '.' (dot) and no other non-digit character is accepted). However, if your source file contains formatted numbers, you can indicate here the localization used to process these numbers (e.g. in French, a number would be written as "1 235,54", using comma as decimal separator and space to group hundreds together for integer values). Using a localization will also make percent values and per mill values be interpreted as numeric values (e.g. '60%' will become '60'). Language should be filled in by its two letter code, e.g. 'en', 'fr', 'de', etc.
+batchimport.import.mapping.localelanguage=Localization language
+batchimport.import.mapping.defaultdateformat.description=By default, if a column in the file is mapped on an application field of type date, the values in the column will try to be interpreted using the format specified in the date field. However, if you have values that are using a different format, you can specify here the fallback format to be used for values which cannot be interpreted using the format specified in the date field. Note that the format applies to individual values, not to a whole column (if a value on a column cannot be interpreted using the date format of the field, only that value will be interpreted using the format specified here, not all the values on that column). The format should given as a pattern by the rules described here http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html .
+batchimport.import.mapping.defaultdateformat=Default date format
+batchimport.import.mapping.listseparator.description=If a file column is mapped on an application field of type list with "multiple select" checked, the import system will try to interpret the value in the field as a potential list of values rather than a single value. The splitting of the value will be done using this character as ennumeration separator. By default, it is ',' (comma).
+batchimport.import.mapping.listseparator=List separator
 batchimport.import.mapping.previous=Change file
-batchimport.import.mapping.next=Confirm mapping
+batchimport.import.mapping.next=Preview mapping
+## Step mapping preview ##
+batchimport.import.preview.title=Preview of data mapping and parsing
+batchimport.import.preview.description=Following is a preview of the first 10 lines of the source file, with the values for the fields as they will be interpreted by the import system. A warning icon means that there is an error on processing that value and **the whole row will be skipped on import**, an empty cell means that there is no value in the input file for the column associated to that field. You can go back and forth between mapping and preview until you get the result you want. \\\\Note that the errors presented here refer to only the 10 first rows, if you need a complete verification of the file, advance to the import step and perform a simulation.
+batchimport.import.mapping.doc.reference=Document full name
+batchimport.import.preview.errorlog=Errors on data parsing (for the lines above)
+batchimport.import.preview.fulllog=Full log (for the lines above)
+batchimport.import.preview.error.exception=An error occurred while generating the data mapping preview.
+batchimport.import.preview.error.noexception=An unknown error occurred while generating the data mapping preview.
+batchimport.import.preview.previous=Change mapping
+batchimport.import.preview.next=Confirm mapping
 ## Step overwrite ##
 batchimport.import.overwrite.title=Data deduplication and overwrite
 batchimport.import.overwrite.deduplication.explanation=If by any chance, the column chose for document name does not contain unique names, what should happen to the **duplicate rows**?
@@ -56,7 +72,7 @@ batchimport.import.overwrite.option.skip=Leave unchanged (ignore data from the f
 batchimport.import.overwrite.option.update=Update with the data coming from the file (the fields mapped on the columns of the file will be updated, the rest will remain unchanged)
 batchimport.import.overwrite.option.replace=Replace with the data coming from the file (the existing document will be deleted and a new one will be created instead, containing only the data in the file)
 batchimport.import.overwrite.option.generate_new=Generate a new document name, by adding a number at the end of the document name built as indicated above. Note that 2 subsequent imports with this option checked will not yield the same results since the document names used depend on the documents existing on the wiki.
-batchimport.import.overwrite.previous=Change mapping
+batchimport.import.overwrite.previous=Back to mapping preview
 batchimport.import.overwrite.next=Do an import simulation
 ## Step simulation ##
 batchimport.import.importsimulation.title=Import simulation
@@ -117,11 +133,13 @@ batchimport.log.deletefail=Failed to delete document {0} from wiki {1} becauseof
 
 ## validation errors ##
 batchimport.log.errorvalidationlength=Line {0}: Validation error on row {1}: value "{5}" on column "{4}" is too long for field "{3}" (max length is {6}).
-batchimport.log.errorvalidationlengthdocfullname=Line {0}: Validation error on row %s: full name of document (\"%s\") too long (max length is %s).
+batchimport.log.errorvalidationlengthdocfullname=Line {0}: Validation error on row {1}: full name of document (\"{2}\") too long (max length is {3}).
 batchimport.log.errorvalidationnoobject=Line {0}: Validation error on row {1}: cannot create object of type {3} in document {2}.
 batchimport.log.errorvalidationtypeboolean=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to boolean for field "{3}" (accepted values are ''true'', ''false'', ''1'' or ''0'').
 batchimport.log.errorvalidationtypeinteger=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to integer for field "{3}" (incorrect format or value out of range).
 batchimport.log.errorvalidationtypelong=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to long for field "{3}" (incorrect format or value out of range).
 batchimport.log.errorvalidationtypefloat=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to float for field "{3}" (incorrect format or value out of range).
 batchimport.log.errorvalidationtypedouble=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to double for field "{3}" (incorrect format or value out of range).
-batchimport.log.errorvalidationtypedate=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to date for field "{3}" (accepted format is {6}).</content></xwikidoc>
+batchimport.log.errorvalidationtypedate=Line {0}: Validation error on row {1}: cannot convert value "{5}" on column "{4}" to date for field "{3}" (accepted format is {6}).
+
+batchimport.log.donepreview=Generating mapping preview finished.</content></xwikidoc>

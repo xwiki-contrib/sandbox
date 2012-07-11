@@ -40,6 +40,23 @@ public interface BatchImport
     List<String> getColumnHeaders(BatchImportConfiguration config) throws IOException;
 
     /**
+     * @param config the configuration which would be used for import afterwards. Overwrite settings don't need to be
+     *            set since preview is not necessarily about document name but more about data types parsing and
+     *            associations of columns with fields.
+     * @param maxRows the max number of processed rows to return
+     * @param logHint the hint of the log to be used for this preview
+     * @return the result of the preview, as described in {@link MappingPreviewResult}
+     */
+    MappingPreviewResult getMappingPreview(BatchImportConfiguration config, int maxRows, String logHint)
+        throws IOException, XWikiException;
+
+    /**
+     * Same as {@link #getMappingPreview(BatchImportConfiguration, int, String)} but using the default logger.
+     */
+    MappingPreviewResult getMappingPreview(BatchImportConfiguration config, int maxRows) throws IOException,
+        XWikiException;
+
+    /**
      * Actually imports the data.
      * 
      * @param config
