@@ -198,6 +198,25 @@
  * set of results serialized in JSON.
  *#
 #macro(gridresultexcel $className $collist $filterfrom $filterwhere)
+  ## push all fields in the livetable class (if any) in $collist, if the parameter says so
+  #if("$!{request.withAllFields}" == 'true' &amp;&amp; "$!className" != "")
+    ## create a new list, since we cannot add in $collist (UnsupportedOperation): might be because it's coming from a split or so...
+    #set($newCollist = [])
+    #set($discard = $newCollist.addAll($collist))
+    #foreach($col in $collist)
+      #if (!$newCollist.contains($col))
+        #set($discard = $newCollist.add($col))
+      #end
+    #end
+    #set($livetableClass = $xwiki.getDocument($className).getxWikiClass())
+    #foreach($livetableClassPropName in $livetableClass.propertyNames)
+      #if (!$newCollist.contains($livetableClassPropName))
+        #set($discard = $newCollist.add($livetableClassPropName))
+      #end
+    #end
+    #set($collist = $newCollist)
+  #end
+
  #set($calc = $xwiki.calc)
  #set($class = $xwiki.getClass($className)) 
  #if($calc)
@@ -293,7 +312,9 @@ $item $rowCount
            #end
            #set($fieldDisplayValue = "$!itemDoc.getValue($colname, $obj)")
            #if($fieldDisplayValue == '')
-             #set($fieldDisplayValue = $msg.get("${request.transprefix}emptyvalue"))
+             #if ($msg.get("${request.transprefix}emptyvalue") != "${request.transprefix}emptyvalue")
+               #set($fieldDisplayValue = $msg.get("${request.transprefix}emptyvalue"))
+             #end
            #else
             #set($fieldDisplayValue = "$!itemDoc.getRenderedContent($fieldDisplayValue, $!itemDoc.syntax.toIdString())")
             #set($xmlCleaner = $xwiki.parseGroovyFromPage('Macros.AddExcelExportToLivetableMacroGroovy'))

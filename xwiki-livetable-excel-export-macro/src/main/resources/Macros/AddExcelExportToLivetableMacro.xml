@@ -123,12 +123,14 @@ DFu2DkiUuIvKBBURUijAcmDDFTAoIYkRJEaXS0krzRgA8FIXADKCGhhAxFMMmQaBAAA7
 * Function that add EXPORT TO EXCEL function to the livetable
 */
 function addExportToExcelFunction(){
-  XWiki.widgets.LiveTable.exportToExcel = function (withPageName, withPageURL) {
+  XWiki.widgets.LiveTable.exportToExcel = function (withPageName, withPageURL, withAllFields) {
     var url = this.getUrl + '&amp;outputSyntaxType=excel&amp;reqNo=' + (++this.sendReqNo);
     if(withPageName)
       url += '&amp;withPageName=true';
     if(withPageURL)
       url += '&amp;withPageURL=true';
+    if(withAllFields)
+      url += '&amp;withAllFields=true';    
     if (this.filter) {                
          this.filters = this.filter.serializeFilters();
         if (this.filters != undefined &amp;&amp; this.filters != "") {
@@ -160,6 +162,45 @@ addExportToExcelFunction();</code>
 </property>
 <property>
 <use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.RequiredRightClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<level>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>level</name>
+<number>1</number>
+<picker>0</picker>
+<prettyName>level</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<sort>none</sort>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<values>edit|programming</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</level>
+</class>
+<name>Macros.AddExcelExportToLivetableMacro</name>
+<number>0</number>
+<className>XWiki.RequiredRightClass</className>
+<guid>c0400289-10c9-4fdc-b5a8-5af70b452b88</guid>
+<property>
+<level>programming</level>
 </property>
 </object>
 <object>
@@ -379,11 +420,9 @@ addExportToExcelFunction();</code>
 <property>
 <code>{{velocity}}
 #if($context.getAction()=='view' || $context.getAction()=='preview')
-
 $xwiki.jsx.use("Macros.AddExcelExportToLivetableMacro")
 $xwiki.ssx.use("Macros.AddExcelExportToLivetableMacro")
-
-{{html}}
+{{html clean="false"}}
 
 &lt;script language="javascript"&gt;
 
@@ -400,7 +439,7 @@ function addExcelButton(){
   var excel_span_title = new Element('span', {'class': 'xwiki-livetable-tools-text'});
   excel_span_title.update('$msg.get('xwiki.macro.exportexcellivetable.title') ');
   var excel_span_icon = new Element('span', {'class': 'xwiki-livetable-tools-excel', 'title':'$msg.get('xwiki.macro.exportexcellivetable.icontitle')'});
-  excel_span_icon.observe('click', function() { livetable.exportToExcel($xcontext.macro.params.withPageName, $xcontext.macro.params.withPageURL); });
+  excel_span_icon.observe('click', function() { livetable.exportToExcel($xcontext.macro.params.withPageName, $xcontext.macro.params.withPageURL, $xcontext.macro.params.withAllFields); });
   excel_span.appendChild(excel_span_title);
   excel_span.appendChild(excel_span_icon);
   cells[1].appendChild(excel_span);
@@ -411,7 +450,6 @@ document.observe("xwiki:dom:loaded", addExcelButton);
 &lt;/script&gt;
 
 {{/html}}
-
 #else
 **Macro: AddExcelExportToLivetableMacro**. Adds a button that enable excel export of the livetable. Works only in 'view' or 'preview' modes.
 #end
@@ -640,6 +678,72 @@ document.observe("xwiki:dom:loaded", addExcelButton);
 <name>withPageURL</name>
 </property>
 </object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>Macros.AddExcelExportToLivetableMacro</name>
+<number>3</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>b98310c7-5dda-41fc-bcb3-427b08b74cca</guid>
+<property>
+<defaultValue>false</defaultValue>
+</property>
+<property>
+<description>Set if you want to force the export of all the fields of the class of the livetable (if any class is selected), instead of just the ones displayed as columns in the displayed livetable.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>withAllFields</name>
+</property>
+</object>
 <content>**Version**: 1.6
 
 = Usage =
@@ -652,6 +756,7 @@ Where "{{code}}my-livetable{{/code}}" is your livetable's name.
 
 * {{code}}withPageName{{/code}} : add a 'wiki page name' to the excel sheet. (Default value = {{code}}'true'{{/code}})
 * {{code}}withPageURL{{/code}} : add a 'wiki page URL' to the excel sheet. (Default value = {{code}}'true'{{/code}})
+* {{code}}withAllFields{{/code}} : force adding all the fields of the class as columns in the excel sheet, even if they're not displayed in the livetable (Default value = {{code}}'false'{{/code}})
 
 = Installation =
 
