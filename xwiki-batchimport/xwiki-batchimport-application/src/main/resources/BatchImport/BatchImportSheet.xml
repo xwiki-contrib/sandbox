@@ -164,7 +164,7 @@
               #set($attachmentRef = $services.model.createAttachmentReference($doc.documentReference, $attachment.filename))
               &lt;li&gt;&lt;input type="radio" name="batchimportattachmentref" value="$services.model.serialize($attachmentRef)" #if($velocityCount == 1 &amp;&amp; $justUploaded)checked="checked"#end #if(!$justUploaded &amp;&amp; $attachmentRef.equals($importconfig.attachmentReference))checked="checked"#end /&gt;
                  &lt;span class="mime"&gt;#mimetypeimg($attachment.getMimeType().toLowerCase() $attachment.getFilename().toLowerCase())&lt;/span&gt; 
-                 &lt;span class="name"&gt;$attachment.filename &lt;/span&gt;
+                 &lt;span class="name"&gt;$attachment.filename&lt;/span&gt;&lt;span class="version"&gt; &lt;a href="$doc.getAttachmentURL(${attachment.filename}, 'viewattachrev')" title="$msg.get('core.viewers.attachments.showHistory')"&gt;$attachment.version&lt;/a&gt;&lt;/span&gt;
                  &lt;div class="meta"&gt;
                    &lt;span class="publisher"&gt;$msg.get('core.viewers.attachments.author', ["$!xwiki.getUserName($attachment.author)"]) &lt;/span&gt;&lt;span class="date"&gt;$msg.get('core.viewers.attachments.date', [$xwiki.formatDate($attachment.date)])&lt;/span&gt;&lt;span class="size"&gt;, #dynamicsize($attachment.filesize)&lt;/span&gt;
                  &lt;/div&gt;
