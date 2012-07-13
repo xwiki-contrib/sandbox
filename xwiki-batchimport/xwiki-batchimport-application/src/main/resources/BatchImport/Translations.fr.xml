@@ -26,11 +26,15 @@
 batchimport.import.title=Importer des données dans l''application "{0}"
 ## Step upload file ##
 batchimport.import.choosefile.title=Étape 1 : Sélection de la source
+batchimport.import.choosefile.description=Choose the file to import data from, accepted formats are CSV and Excel. You can upload a new file by using the upload file form under.
+batchimport.import.choosefile.fileupload=Upload a new file
+batchimport.import.choosefile.fileselect=Choose the file to import from
 batchimport.import.choosefile.uploadfile=Télécharger
 batchimport.import.choosefile.previous=None
 batchimport.import.choosefile.next=Choisir ce fichier
 ## Step mapping ##
 batchimport.import.mapping.title=Etape 2 : Associer les colonnes de la source aux propriétés de l'application
+batchimport.import.mapping.description=Choose how to fill in the data of the application from the columns in the uploaded file. Note that data types should match, i.e. the columns that you choose for numeric, date or boolean fields should be convertible to those types. Also see the options in the column to the right for some adjustments that can facilitate conversion. The next step offers a preview of the association and how the data in the source file will be processed, so you can do multiple back and forths until you are satisfied with the result.
 batchimport.import.mapping.fields=Propriétés de l'application
 batchimport.import.mapping.columns=Colonnes de la source
 batchimport.import.mapping.none=-
@@ -84,6 +88,7 @@ batchimport.import.importsimulation.previous=Changer les options d'import
 batchimport.import.importsimulation.next=Importer les données
 ## Step real import ## 
 batchimport.import.import.title=Étape 6 : Import
+batchimport.import.import.description=
 batchimport.import.import.errorlog=Erreurs
 batchimport.import.import.fulllog=Log complet
 batchimport.import.import.error.exception=Erreur lors de l'import: 

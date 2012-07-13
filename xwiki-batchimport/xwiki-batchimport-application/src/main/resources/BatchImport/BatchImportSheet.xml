@@ -129,12 +129,15 @@
 #macro(displayUploadFile)
   == $msg.get('batchimport.import.choosefile.title') ==
 
+  {{info}}$msg.get('batchimport.import.choosefile.description'){{/info}}
+
   ## upload form for files
   {{html clean="false"}}
     &lt;form method="post" enctype="multipart/form-data" action="$doc.getURL('upload')" /&gt;
       &lt;input type="hidden" value="$!{services.csrf.getToken()}" name="form_token" /&gt;
       &lt;input type="hidden" value="$doc.getURL('view', "sheet=$escapetool.url('BatchImport.BatchImportSheet')&amp;ref=upload")" name="xredirect" /&gt;
-      &lt;input type="file" class="uploadFileInput" size="40" value="" name="filepath"&gt;
+      &lt;label for="batchimportfileupload"&gt;$msg.get('batchimport.import.choosefile.fileupload'): &lt;/label&gt;
+      &lt;input type="file" class="uploadFileInput" size="40" value="" name="filepath" id="batchimportfileupload"&gt;
       &lt;span class="buttonwrapper"&gt;&lt;input type="submit" class="button" value="$msg.get('batchimport.import.choosefile.uploadfile')"&gt;&lt;/span&gt;
     &lt;/form&gt;
   {{/html}}
@@ -152,15 +155,24 @@
       #if("$!request.ref" == "upload")
         #set($justUploaded = true)
       #end
-      &lt;ul&gt;
-        #foreach($attachment in $sortedAttachments)
-          #set($attachmentExtension = "#printAttachmentExtension($attachment)")
-          #if ($attachment.mimeType == "text/plain" || $attachmentExtension == ".csv" || $attachmentExtension == "" || $attachmentExtension == ".xls")
-            #set($attachmentRef = $services.model.createAttachmentReference($doc.documentReference, $attachment.filename))
-            &lt;li&gt;&lt;input type="radio" name="batchimportattachmentref" value="$services.model.serialize($attachmentRef)" #if($velocityCount == 1 &amp;&amp; $justUploaded)checked="checked"#end #if(!$justUploaded &amp;&amp; $attachmentRef.equals($importconfig.attachmentReference))checked="checked"#end&gt;$attachment.filename&lt;/input&gt;&lt;/li&gt;
+      &lt;div class="chooseattachment"&gt;
+        $msg.get('batchimport.import.choosefile.fileselect'): 
+        &lt;ul class="attachmentlist"&gt;
+          #foreach($attachment in $sortedAttachments)
+            #set($attachmentExtension = "#printAttachmentExtension($attachment)")
+            #if ($attachment.mimeType == "text/plain" || $attachmentExtension == ".csv" || $attachmentExtension == "" || $attachmentExtension == ".xls")
+              #set($attachmentRef = $services.model.createAttachmentReference($doc.documentReference, $attachment.filename))
+              &lt;li&gt;&lt;input type="radio" name="batchimportattachmentref" value="$services.model.serialize($attachmentRef)" #if($velocityCount == 1 &amp;&amp; $justUploaded)checked="checked"#end #if(!$justUploaded &amp;&amp; $attachmentRef.equals($importconfig.attachmentReference))checked="checked"#end /&gt;
+                 &lt;span class="mime"&gt;#mimetypeimg($attachment.getMimeType().toLowerCase() $attachment.getFilename().toLowerCase())&lt;/span&gt; 
+                 &lt;span class="name"&gt;$attachment.filename &lt;/span&gt;
+                 &lt;div class="meta"&gt;
+                   &lt;span class="publisher"&gt;$msg.get('core.viewers.attachments.author', ["$!xwiki.getUserName($attachment.author)"]) &lt;/span&gt;&lt;span class="date"&gt;$msg.get('core.viewers.attachments.date', [$xwiki.formatDate($attachment.date)])&lt;/span&gt;&lt;span class="size"&gt;, #dynamicsize($attachment.filesize)&lt;/span&gt;
+                 &lt;/div&gt;
+              &lt;/li&gt;
+            #end
           #end
-        #end
-      &lt;/ul&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
       #printBatchImportNonDefaultOptions($importconfig)      
       #displayDefaultButtons("", "choosefile", "mapping")
     &lt;/form&gt;
@@ -169,6 +181,8 @@
 
 #macro(displayColumnMapping)
   == $msg.get('batchimport.import.mapping.title') ==
+
+  {{info}}$msg.get('batchimport.import.mapping.description'){{/info}}
 
   #set($applicationClass = $xwiki.getClass($importconfig.mappingClassName))
 
@@ -271,7 +285,7 @@
 
 #macro(displayOverwriteChoices)
   == $msg.get('batchimport.import.overwrite.title') ==
-  
+
   {{html clean="false" wiki="false"}}
     &lt;form action="" method="post"&gt;
   {{/html}}
@@ -330,6 +344,8 @@
 
 #macro(doImport)
   == $msg.get('batchimport.import.import.title') ==
+
+  $msg.get('batchimport.import.import.description')
 
   #set($result = $services.batchimport.doImport($importconfig, true, false, false, "i18n"))
 
