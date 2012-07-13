@@ -104,7 +104,22 @@
       #set($madeChanges = true)
     #end
   #elseif($referringStep == "mapping")
-    ## serialize and save the mapping in the classm only if different
+    ## save the classname only if different
+    #if ("$!importconfig.mappingClassName" != $presetsObject.getProperty('classname').value)
+      #set($discard = $presetsObject.set('classname', $importconfig.mappingClassName))
+      #set($madeChanges = true)
+    #end
+    ## save the listseparator only if different
+    #if ("$!importconfig.listSeparator" != $presetsObject.getProperty('listseparator').value)
+      #set($discard = $presetsObject.set('listseparator', "$!importconfig.listSeparator"))
+      #set($madeChanges = true)
+    #end
+    ## save the default space only if different
+    #if ("$!importconfig.defaultSpace" != $presetsObject.getProperty('space').value)
+      #set($discard = $presetsObject.set('space', $!importconfig.defaultSpace))
+      #set($madeChanges = true)
+    #end
+    ## serialize and save the mapping in the class only if different
     #set($mappingString = "")
     #foreach($fieldMapping in $importconfig.fieldsMapping.entrySet())
       #if ($mappingString != "")
@@ -117,10 +132,7 @@
       #set($discard = $presetsObject.set('mapping', $mappingString))
       #set($madeChanges = true)
     #end
-    ## FIXME: add list separator save here and class
   #end
-  ## FIXME: add the other properties to this save
-  ## if any changes were made, save the presets
   #if($madeChanges)
     $doc.save("Updated presets")
   #end
