@@ -277,12 +277,8 @@
     #if ($result.log.errorLog.length() &gt; 0)
       === $msg.get('batchimport.import.preview.errorlog') ===
 
-      {{warning}}$result.log.errorLog{{/warning}}
-
-      === $msg.get('batchimport.import.preview.fulllog') ===
+      (%class="importlogbox"%)((({{warning}}$result.log.errorLog{{/warning}})))
     #end
-
-    {{info}}$result.log.fullLog{{/info}}
   #else
     #displayLastException('preview')
   #end  
@@ -336,12 +332,12 @@
     #if ($result.errorLog.length() &gt; 0)
       === $msg.get('batchimport.import.importsimulation.errorlog') ===
 
-      {{warning}}$result.errorLog{{/warning}}
+      (%class="importlogbox"%)((({{warning}}$result.errorLog{{/warning}})))
 
       === $msg.get('batchimport.import.importsimulation.fulllog') ===
     #end
 
-    {{info}}$result.fullLog{{/info}}
+    (%class="importlogbox importfulllogbox"%)((({{info}}$result.fullLog{{/info}})))
   #else
     #displayLastException('importsimulation')
   #end
@@ -365,12 +361,12 @@
     #if ($result.errorLog.length() &gt; 0)
       === $msg.get('batchimport.import.import.errorlog') ===
 
-      {{warning}}$result.errorLog{{/warning}}
+      (%class="importlogbox"%)((({{warning}}$result.errorLog{{/warning}})))
 
       === $msg.get('batchimport.import.import.fulllog') ===
     #end
 
-    {{info}}$result.fullLog{{/info}}
+    (%class="importlogbox importfulllogbox"%)((({{info}}$result.fullLog{{/info}})))
   #else
     #displayLastException('import')
   #end
