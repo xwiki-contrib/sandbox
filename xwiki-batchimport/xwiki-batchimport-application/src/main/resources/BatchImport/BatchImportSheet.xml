@@ -22,9 +22,123 @@
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.1</syntaxId>
 <hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>BatchImport.BatchImportSheet</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>0ca265b0-f331-460d-9506-637d9c771902</guid>
+<property>
+<cache>long</cache>
+</property>
+<property>
+<code>#template('colorThemeInit.vm')
+
+.chooseattachment {
+  margin-top: 20px;
+}
+
+.attachmentlist {
+  list-style-type: none;
+}
+
+.attachmentlist .meta {
+  color: $theme.textPrimaryColor;
+  margin-left: 20px;
+}
+
+.importlogbox {
+  margin-bottom: 20px;
+}
+
+.importlogbox .box {
+  background-color: transparent;
+  box-shadow: none;
+}
+</code></property><property><name>Style for the import wizard</name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
 <content>{{include document="BatchImport.BatchImportMacros" /}}
 
 {{velocity}}
+## include the css from this page
+#set($discard = $xwiki.ssx.use("BatchImport.BatchImportSheet"))
 ## all the possible filds to map
 #set($fieldsToMap = ['doc.name', 'doc.title', 'doc.space', 'doc.parent', 'doc.content', 'doc.file', 'doc.tags'])
 ## read the import config, the import steps will need it
