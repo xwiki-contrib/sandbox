@@ -310,16 +310,22 @@ $item $rowCount
            #if($listtool.contains($propClass.getPropertyNames(), $colname))
              #set($propType = "$!{propClass.get($colname).type}")
            #end
-           #set($fieldDisplayValue = "$!itemDoc.getValue($colname, $obj)")
+           #set($fieldValue = "$!itemDoc.getValue($colname)") 
+           #set($fieldDisplayValue = "$!itemDoc.display($colname, 'view')")
+           #set($fieldDisplayValue = $fieldDisplayValue.replaceFirst($regextool.quote('{{html clean="false" wiki="false"}}'), '').replaceAll("$regextool.quote('{{/html}}')$", ''))
+           ## TODO: maybe we should force the separator for the list properties, to use some comma or something.
            #if($fieldDisplayValue == '')
              #if ($msg.get("${request.transprefix}emptyvalue") != "${request.transprefix}emptyvalue")
                #set($fieldDisplayValue = $msg.get("${request.transprefix}emptyvalue"))
              #end
-           #else
-            #set($fieldDisplayValue = "$!itemDoc.getRenderedContent($fieldDisplayValue, $!itemDoc.syntax.toIdString())")
-            #set($xmlCleaner = $xwiki.parseGroovyFromPage('Macros.AddExcelExportToLivetableMacroGroovy'))
-            #set($fieldDisplayValue = $xmlCleaner.getCleanText($fieldDisplayValue))            
-           #end           
+           #elseif($propType == 'BooleanClass')
+             ## export booleans as 1/0 not as the displayed value, since displayed value can be very formatted and we loose the initial purpose 
+             ## (+ we need to keep it "reimportable")
+             #set($fieldDisplayValue = "$fieldValue")
+           #elseif($propType == 'TextAreaClass')
+            ## reassign fieldDisplayValue to the property rendered in plain/1.0 syntax.
+            #set($fieldDisplayValue = "$!itemDoc.getRenderedContent($fieldValue, $itemDoc.syntax.toIdString(), 'plain/1.0')")
+           #end
            #set($ok = $calc.setLabelCell($sheet, $rowCount, $colCount, $fieldDisplayValue))    
            #set($colCount = $colCount + 1)
            ## reset to the default class
