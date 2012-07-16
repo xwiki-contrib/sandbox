@@ -27,14 +27,14 @@ batchimport.import.title=Importer des données dans l''application "{0}"
 ## Step upload file ##
 batchimport.import.choosefile.title=Étape 1 : Sélection de la source
 batchimport.import.choosefile.description=Choose the file to import data from, accepted formats are CSV and Excel. You can upload a new file by using the upload file form under.
-batchimport.import.choosefile.fileupload=Upload a new file
-batchimport.import.choosefile.fileselect=Choose the file to import from
+batchimport.import.choosefile.fileupload=Ajouter un fichier source
+batchimport.import.choosefile.fileselect=Choisir un fichier source à importer
 batchimport.import.choosefile.uploadfile=Télécharger
 batchimport.import.choosefile.previous=None
 batchimport.import.choosefile.next=Choisir ce fichier
 ## Step mapping ##
 batchimport.import.mapping.title=Etape 2 : Associer les colonnes de la source aux propriétés de l'application
-batchimport.import.mapping.description=Choose how to fill in the data of the application from the columns in the uploaded file. Note that data types should match, i.e. the columns that you choose for numeric, date or boolean fields should be convertible to those types. Also see the options in the column to the right for some adjustments that can facilitate conversion. The next step offers a preview of the association and how the data in the source file will be processed, so you can do multiple back and forths until you are satisfied with the result.
+batchimport.import.mapping.description=Sélectionner une colonne du tableau en face de chaque propriété de l'application pour les relier. Le nom du document va servir d'identifiant pour relier les lignes de la source aux  documents de l'application. Une propriété peut être intégrée plusieurs fois. Au cas où cela serait une erreur, il y a une page de test avant validation de l'import.
 batchimport.import.mapping.fields=Propriétés de l'application
 batchimport.import.mapping.columns=Colonnes de la source
 batchimport.import.mapping.none=-
@@ -47,45 +47,45 @@ batchimport.import.mapping.doc.file=Fichiers attachés au document
 batchimport.import.mapping.doc.tags=Tags du document
 batchimport.import.mapping.error.exception=Erreur(s) lors de la lecture d'un champ dans le fichier source: 
 batchimport.import.mapping.error.noexception=Erreur(s) inconnue(s) lors de la lecture d'un champ dans le fichier source.
-batchimport.import.mapping.localelanguage.description=Si l'import des champs de type nombre ne fonctionne pas, veuillez remplir votre indicatif linguistique afin d'en déduire le format à utiliser pour, par exemple, les séparateur des milliers, les séparateur des virgules, etc. Ex:'en', 'fr', 'de', etc.
+batchimport.import.mapping.localelanguage.description=Si l'import des champs de type nombre ne fonctionne pas, veuillez remplir votre indicatif linguistique afin d'en déduire le format à utiliser pour, par exemple, le séparateur des milliers, le séparateur des décimales, etc. Ex:'en', 'fr', 'de', etc.
 batchimport.import.mapping.localelanguage=Indicatif linguistique
-batchimport.import.mapping.defaultdateformat.description=Par défaut le format utilisé pour les dates est celui précisé dans l'application que vous avez créé. Si le format que vous utilisez dans la source n'est pas disponible par le biais de l'application, vous pouvez en redéfinir un en suivant les instructions disponibles //[[ici&gt;&gt;http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html]]//. Ex:'dd/MM/yyyy'
+batchimport.import.mapping.defaultdateformat.description=Par défaut le format utilisé pour les dates est celui précisé dans l'application que vous avez créée. Si le format que vous utilisez dans la source n'est pas disponible par le biais de l'application, vous pouvez en redéfinir un en suivant les instructions disponibles //[[ici&gt;&gt;http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html]]//. Ex:'dd/MM/yyyy'
 batchimport.import.mapping.defaultdateformat=Format des dates
 batchimport.import.mapping.listseparator.description=Si vous utilisez un champ de type "liste" dans l'application avec l'option "choix multiple", le séparateur à utiliser dans la source est par défaut une virgule (,). Si vous en utilisez un autre dans la source, veuillez remplir le champ ci-dessous.
 batchimport.import.mapping.listseparator=Séparateur de liste
 batchimport.import.mapping.previous=Redéfinir la source
-batchimport.import.mapping.next=Confirmer l'association
+batchimport.import.mapping.next=Tester les associations
 ## Step mapping preview ##
 batchimport.import.preview.title=Étape 3 : Tester le schéma
-batchimport.import.preview.description=10 lignes de votre fichier vont être testées. Veuillez vérifier que vos associations sont bonnes.
+batchimport.import.preview.description=10 lignes de votre fichier ont été testées. Veuillez vérifier que vos associations sont bonnes.
 batchimport.import.mapping.doc.reference=Nom du document
 batchimport.import.preview.errorlog=Erreurs
 batchimport.import.preview.fulllog=Log complet
-batchimport.import.preview.error.exception=An error occurred while generating the data mapping preview.
-batchimport.import.preview.error.noexception=An unknown error occurred while generating the data mapping preview.
+batchimport.import.preview.error.exception=Une erreur est survenue lors de la prévisualisation de l'association.
+batchimport.import.preview.error.noexception=Une erreur inconnue est survenue lors de la prévisualisation de l'association.
 batchimport.import.preview.previous=Modifier les associations
-batchimport.import.preview.next=Faire un test d'import complet
+batchimport.import.preview.next=Confirmer les associations
 ## Step overwrite ##
-batchimport.import.overwrite.title=Étape 4 : Configuration du type d'import des données
+batchimport.import.overwrite.title=Étape 4 : Configuration des collisions de documents
 batchimport.import.overwrite.deduplication.explanation=Si le nom de document n'est pas unique dans la source, que voulez-vous faire des **lignes redondantes**?
 batchimport.import.overwrite.deduplication.option.skip=Ignorer: Uniquement la première sera intégrée
 batchimport.import.overwrite.deduplication.option.update=Mettre à jour: Intègre toutes les lignes dans l'ordre en écrasant à chaque fois avec les nouvelles données.
 batchimport.import.overwrite.deduplication.option.generate_new=Ajouter: Créer un nouveau nom de document en y ajoutant un suffixe
-batchimport.import.overwrite.explanation=Si le document est déjà présent dans la base de donnée de l'application, que voulez-vous faire avec **le document existant**?
+batchimport.import.overwrite.explanation=Si le document est déjà présent dans la base de données de l'application, que voulez-vous faire avec **le document existant**?
 batchimport.import.overwrite.option.skip=Ignorer: Aucune altération de la base de données
 batchimport.import.overwrite.option.update=Mettre à jour: Remplace les champs associés dans l'étape précédente par les nouvelles données sans modifier les champs non associés
 batchimport.import.overwrite.option.replace=Réinitialiser: Supprime la ligne de la base et la remplace par la nouvelle venant de la source
 batchimport.import.overwrite.option.generate_new=Ajouter: créé un nouveau nom de document en y ajoutant un suffixe.
 batchimport.import.overwrite.previous=Retravailler les associations de champs
-batchimport.import.overwrite.next=Faire une simulation d'import
-# Step simulation ##
+batchimport.import.overwrite.next=Valider la configuration d'import et la tester
+## Step simulation ##
 batchimport.import.importsimulation.title=Étape 5 : Simulation d'import
 batchimport.import.importsimulation.errorlog=Erreurs
 batchimport.import.importsimulation.fulllog=Log complet
 batchimport.import.importsimulation.error.exception=Erreur lors de la simulation: 
 batchimport.import.importsimulation.error.noexception=Erreur inconnue lors de la simulation.
 batchimport.import.importsimulation.previous=Changer les options d'import
-batchimport.import.importsimulation.next=Importer les données
+batchimport.import.importsimulation.next=Procéder à l'import des données
 ## Step real import ## 
 batchimport.import.import.title=Étape 6 : Import
 batchimport.import.import.description=
