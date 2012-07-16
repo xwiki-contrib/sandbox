@@ -134,7 +134,7 @@
     #end
   #end
   #if($madeChanges)
-    $doc.save("Updated presets")
+    #set($discard = $doc.save("Updated presets"))
   #end
 #end
 
@@ -327,16 +327,12 @@
   == $msg.get('batchimport.import.importsimulation.title') ==
 
   #set($result = $services.batchimport.doImport($importconfig, true, false, true, "i18n"))
-
   #if($result)
     #if ($result.errorLog.length() &gt; 0)
       === $msg.get('batchimport.import.importsimulation.errorlog') ===
-
       (%class="importlogbox"%)((({{warning}}$result.errorLog{{/warning}})))
-
       === $msg.get('batchimport.import.importsimulation.fulllog') ===
     #end
-
     (%class="importlogbox importfulllogbox"%)((({{info}}$result.fullLog{{/info}})))
   #else
     #displayLastException('importsimulation')
@@ -356,16 +352,12 @@
   $msg.get('batchimport.import.import.description')
 
   #set($result = $services.batchimport.doImport($importconfig, true, false, false, "i18n"))
-
   #if($result)
     #if ($result.errorLog.length() &gt; 0)
       === $msg.get('batchimport.import.import.errorlog') ===
-
       (%class="importlogbox"%)((({{warning}}$result.errorLog{{/warning}})))
-
       === $msg.get('batchimport.import.import.fulllog') ===
     #end
-
     (%class="importlogbox importfulllogbox"%)((({{info}}$result.fullLog{{/info}})))
   #else
     #displayLastException('import')
