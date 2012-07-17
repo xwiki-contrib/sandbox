@@ -1018,7 +1018,7 @@ document.observe("xwiki:dom:loaded", function() {
             ## highjack some translations
             &lt;span class="checkboxactions hidden"&gt;$msg.get('core.importer.select'): &lt;span class="checkall"&gt;$msg.get('core.importer.selectAll')&lt;/span&gt; &lt;span class="uncheckall"&gt;$msg.get('core.importer.selectNone')&lt;/span&gt;&lt;/span&gt;
           #end
-          &lt;input type="checkbox" name="$checkboxName" value="$parent" class="hierarchynodecheckbox" #if($checked) checked="checked" #end /&gt;
+          #if(!$excludeCheckboxes.contains($parent))&lt;input type="checkbox" name="$checkboxName" value="$parent" class="hierarchynodecheckbox" #if($checked) checked="checked" #end /&gt;#end
         &lt;/span&gt;
       #end
     &lt;/div&gt;
@@ -1114,6 +1114,16 @@ document.observe("xwiki:dom:loaded", function() {
   #set($checked = false)
   #if("$!xcontext.macro.params.checked" == "true" || "$!xcontext.macro.params.checked" == "yes")
     #set($checked = true)
+  #end
+  #set($excludeCheckboxesString = "$!xcontext.macro.params.checkboxexcludes")
+  #set($excludeCheckboxesRaw = $excludeCheckboxesString.split(','))
+  ## clean a bit the list, remove empty strings and trim
+  #set($excludeCheckboxes = [])
+  #foreach($excludedCheckbox in $excludeCheckboxesRaw)
+    #set($excludedCheckbox = $excludedCheckbox.trim())
+    #if("$!$excludedCheckbox" != "")
+      #set($discard = $excludeCheckboxes.add($excludedCheckbox))
+    #end
   #end
 #end
 ## prepare query to get all pages according to criteria
@@ -2013,6 +2023,72 @@ document.observe("xwiki:dom:loaded", function() {
 </property>
 <property>
 <name>reorderable</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<defaultValue>
+<disabled>0</disabled>
+<name>defaultValue</name>
+<number>4</number>
+<prettyName>Parameter default value</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultValue>
+<description>
+<disabled>0</disabled>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.HierarchyMacro</name>
+<number>11</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>fcdbfdaf-4396-42b4-8ddd-781a006ed0d5</guid>
+<property>
+<defaultValue></defaultValue>
+</property>
+<property>
+<description>Comma separated list of pages to not display checkboxes for, if showcheckboxes is set to true. If showcheckboxes is set to false, this parameter is ignored.</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>checkboxexcludes</name>
 </property>
 </object>
 <content>Document that defines the hierarchy macro, which displays and allows to edit the documents hierarchy in a specific space (the standard parent-child relation) along with a special information, children order, which is saved in each parent to allow ordering its children as set by the user when displayed with this macro (and whenever some code which is aware of this information uses it).
