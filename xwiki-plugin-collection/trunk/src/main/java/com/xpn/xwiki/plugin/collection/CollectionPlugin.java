@@ -68,6 +68,8 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.notify.DocChangeRule;
 import com.xpn.xwiki.objects.classes.ListItem;
 import com.xpn.xwiki.pdf.impl.PdfExportImpl;
+import com.xpn.xwiki.pdf.api.PdfExport;
+import com.xpn.xwiki.pdf.api.PdfExport.ExportType;
 import com.xpn.xwiki.plugin.XWikiDefaultPlugin;
 import com.xpn.xwiki.plugin.XWikiPluginInterface;
 import com.xpn.xwiki.plugin.packaging.Package;
@@ -287,8 +289,8 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
             }
             // launching the export
             pdfexport.exportHtml(tcontent, context.getResponse()
-                .getOutputStream(), (type.equals("rtf")) ? PdfExportImpl.RTF
-                : PdfExportImpl.PDF, context);
+                .getOutputStream(), (type.equals("rtf")) ? PdfExport.ExportType.RTF
+                : PdfExport.ExportType.PDF, context);
         } finally {
             // cleaning temporary directories
             File[] filelist = tempdir.listFiles();
@@ -500,7 +502,7 @@ public class CollectionPlugin extends XWikiDefaultPlugin implements XWikiPluginI
            for (HeaderBlock headerBlock : childXdom.getChildrenByType(HeaderBlock.class, true)) {
              int clevel = headerBlock.getLevel().getAsInt();
              clevel += level;
-             if (clevel==7)
+             if (clevel>6)
               clevel = 6;
              HeaderBlock newHeaderBlock = new HeaderBlock(headerBlock.getChildren(), HeaderLevel.parseInt(clevel), headerBlock.getParameters(), headerBlock.getId());
              headerBlock.getParent().replaceChild(newHeaderBlock, headerBlock);
