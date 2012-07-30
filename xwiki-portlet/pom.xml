@@ -26,7 +26,7 @@
   <parent>
     <groupId>org.xwiki.platform</groupId>
     <artifactId>xwiki-platform-core</artifactId>
-    <version>3.5</version>
+    <version>3.5.1</version>
   </parent>
   <artifactId>xwiki-platform-portlet</artifactId>
   <name>XWiki Platform - Portlet</name>
