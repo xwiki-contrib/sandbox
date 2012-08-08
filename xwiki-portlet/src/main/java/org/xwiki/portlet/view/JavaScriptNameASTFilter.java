@@ -22,14 +22,14 @@ package org.xwiki.portlet.view;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.htmlunit.corejs.javascript.Token;
-import net.sourceforge.htmlunit.corejs.javascript.ast.AstNode;
-import net.sourceforge.htmlunit.corejs.javascript.ast.Name;
-import net.sourceforge.htmlunit.corejs.javascript.ast.NodeVisitor;
-import net.sourceforge.htmlunit.corejs.javascript.ast.ObjectProperty;
-import net.sourceforge.htmlunit.corejs.javascript.ast.PropertyGet;
-import net.sourceforge.htmlunit.corejs.javascript.ast.Scope;
-import net.sourceforge.htmlunit.corejs.javascript.ast.Symbol;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.NodeVisitor;
+import org.mozilla.javascript.ast.ObjectProperty;
+import org.mozilla.javascript.ast.PropertyGet;
+import org.mozilla.javascript.ast.Scope;
+import org.mozilla.javascript.ast.Symbol;
 
 /**
  * Name-spaces all global variable names.

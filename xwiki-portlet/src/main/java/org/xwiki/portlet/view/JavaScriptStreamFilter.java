@@ -25,11 +25,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sourceforge.htmlunit.corejs.javascript.CompilerEnvirons;
-import net.sourceforge.htmlunit.corejs.javascript.Parser;
-import net.sourceforge.htmlunit.corejs.javascript.ast.AstRoot;
-import net.sourceforge.htmlunit.corejs.javascript.ast.NodeVisitor;
-
+import org.mozilla.javascript.CompilerEnvirons;
+import org.mozilla.javascript.Parser;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.NodeVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

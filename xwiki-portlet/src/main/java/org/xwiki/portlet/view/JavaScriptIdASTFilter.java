@@ -22,12 +22,12 @@ package org.xwiki.portlet.view;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.htmlunit.corejs.javascript.Token;
-import net.sourceforge.htmlunit.corejs.javascript.ast.AstNode;
-import net.sourceforge.htmlunit.corejs.javascript.ast.FunctionCall;
-import net.sourceforge.htmlunit.corejs.javascript.ast.Name;
-import net.sourceforge.htmlunit.corejs.javascript.ast.NodeVisitor;
-import net.sourceforge.htmlunit.corejs.javascript.ast.StringLiteral;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.FunctionCall;
+import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.NodeVisitor;
+import org.mozilla.javascript.ast.StringLiteral;
 
 /**
  * Name-spaces all occurrences of HTML element identifiers inside the AST tree.
