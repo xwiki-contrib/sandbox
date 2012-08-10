@@ -45,6 +45,8 @@ public class JavaScriptStreamFilterTest extends AbstractStreamFilterTest
     public void testNamespaceHTMLElementIdentifiers()
     {
         assertFilterOutput("$('foo').value=7;", "x$('x-foo').value = 7;\n");
+        assertFilterOutput("document.getElementById('foo').appendChild(c);",
+            "document.getElementById('x-foo').appendChild(xc);\n");
         assertFilterOutput("var a=ID('foo')", "var xa = xID('x-foo');\n");
     }
 

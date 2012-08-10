@@ -27,6 +27,7 @@ import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NodeVisitor;
+import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.StringLiteral;
 
 /**
@@ -41,7 +42,7 @@ public class JavaScriptIdASTFilter implements NodeVisitor
      * identifier. Calls to this functions are rewritten so that the passed parameter matches the rewritten HTML element
      * identifiers.
      */
-    private static final List<String> ID_FUNCTION_NAMES = Arrays.asList("$", "ID");
+    private static final List<String> ID_FUNCTION_NAMES = Arrays.asList("$", "getElementById", "ID");
 
     /**
      * The string used to name-space all occurrences of HTML element identifiers inside the JavaScript code.
@@ -64,9 +65,7 @@ public class JavaScriptIdASTFilter implements NodeVisitor
     {
         if (node.getType() == Token.CALL) {
             FunctionCall call = (FunctionCall) node;
-            AstNode target = call.getTarget();
-            String functionName = target.getType() == Token.NAME ? ((Name) target).getIdentifier() : null;
-            if (ID_FUNCTION_NAMES.contains(functionName) && call.getArguments().size() == 1) {
+            if (call.getArguments().size() == 1 && ID_FUNCTION_NAMES.contains(getFunctionName(call))) {
                 AstNode argument = call.getArguments().get(0);
                 if (argument.getType() == Token.STRING) {
                     StringLiteral literal = (StringLiteral) argument;
@@ -76,5 +75,20 @@ public class JavaScriptIdASTFilter implements NodeVisitor
             }
         }
         return true;
+    }
+
+    /**
+     * @param call a function call
+     * @return the name of the called function
+     */
+    private String getFunctionName(FunctionCall call)
+    {
+        AstNode target = call.getTarget();
+        if (target.getType() == Token.NAME) {
+            return ((Name) target).getIdentifier();
+        } else if (target.getType() == Token.GETPROP) {
+            return ((PropertyGet) target).getProperty().getIdentifier();
+        }
+        return null;
     }
 }

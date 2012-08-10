@@ -42,7 +42,7 @@ public class JavaScriptNameASTFilter implements NodeVisitor
      * The list of predefined names that shouldn't be name-spaced.
      */
     private static final List<String> PREDEFINED_NAMES =
-        Arrays.asList("Boolean", "Number", "String", "Array", "Object", "Function", "RegExp", "Date", "Error",
+        Arrays.asList("Boolean", "Number", "String", "Array", "Object", "Function", "RegExp", "Date", "JSON", "Error",
             "EvalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError", "decodeURI",
             "decodeURIComponent", "encodeURI", "encodeURIComponent", "eval", "isFinite", "isNaN", "parseFloat",
             "parseInt", "Infinity", "Math", "NaN", "undefined", "window", "document", "navigator", "arguments", "Node",

@@ -83,6 +83,8 @@ public class HTMLStreamFilter implements StreamFilter
         try {
             XMLReader xmlReader = XMLReaderFactory.createXMLReader("org.cyberneko.html.parsers.SAXParser");
             xmlReader.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment", true);
+            xmlReader.setFeature("http://cyberneko.org/html/features/scanner/allow-selfclosing-iframe", true);
+            xmlReader.setFeature("http://cyberneko.org/html/features/scanner/allow-selfclosing-tags", true);
             xmlReader.setProperty("http://cyberneko.org/html/properties/names/elems", "match");
             xmlReader.setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
 
