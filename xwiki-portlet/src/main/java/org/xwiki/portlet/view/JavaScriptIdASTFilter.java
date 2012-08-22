@@ -21,6 +21,7 @@ package org.xwiki.portlet.view;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
@@ -45,6 +46,11 @@ public class JavaScriptIdASTFilter implements NodeVisitor
     private static final List<String> ID_FUNCTION_NAMES = Arrays.asList("$", "getElementById", "ID");
 
     /**
+     * A pattern that can be used to capture CSS id selectors.
+     */
+    private static final Pattern ID_SELECTOR_PATTERN = Pattern.compile("#([a-zA-Z][\\w\\-\\:\\.]*)");
+
+    /**
      * The string used to name-space all occurrences of HTML element identifiers inside the JavaScript code.
      */
     private final String namespace;
@@ -65,16 +71,52 @@ public class JavaScriptIdASTFilter implements NodeVisitor
     {
         if (node.getType() == Token.CALL) {
             FunctionCall call = (FunctionCall) node;
-            if (call.getArguments().size() == 1 && ID_FUNCTION_NAMES.contains(getFunctionName(call))) {
-                AstNode argument = call.getArguments().get(0);
-                if (argument.getType() == Token.STRING) {
-                    StringLiteral literal = (StringLiteral) argument;
-                    literal.setValue(String.format("%s-%s", namespace, literal.getValue()));
-                    return false;
-                }
+            if (namespaceIdArgument(call) || namespaceCSSSelectorArgument(call)) {
+                return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Checks if the called function expects and HTML element identifier and name-spaces the passed argument if it's a
+     * string literal.
+     * 
+     * @param call a function call
+     * @return {@code true} if the id argument has been name-spaced, {@code false} otherwise
+     */
+    private boolean namespaceIdArgument(FunctionCall call)
+    {
+        if (call.getArguments().size() == 1 && ID_FUNCTION_NAMES.contains(getFunctionName(call))) {
+            AstNode argument = call.getArguments().get(0);
+            if (argument.getType() == Token.STRING) {
+                StringLiteral literal = (StringLiteral) argument;
+                literal.setValue(String.format("%s-%s", namespace, literal.getValue()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the called function expects a CSS selector and name-spaces the HTML element identifiers found in the
+     * CSS selector argument if it's a string literal.
+     * 
+     * @param call a function call
+     * @return {@code true} if the CSS selector has been name-spaced, {@code false} otherwise
+     */
+    private boolean namespaceCSSSelectorArgument(FunctionCall call)
+    {
+        if (call.getArguments().size() == 1 && "$$".equals(getFunctionName(call))) {
+            AstNode argument = call.getArguments().get(0);
+            if (argument.getType() == Token.STRING) {
+                StringLiteral literal = (StringLiteral) argument;
+                literal.setValue(ID_SELECTOR_PATTERN.matcher(literal.getValue()).replaceAll(
+                    String.format("#%s-$1", namespace)));
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

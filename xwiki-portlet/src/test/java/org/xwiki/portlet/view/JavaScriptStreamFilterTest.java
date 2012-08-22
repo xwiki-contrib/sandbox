@@ -51,6 +51,16 @@ public class JavaScriptStreamFilterTest extends AbstractStreamFilterTest
     }
 
     /**
+     * Tests that HTML element identifiers are name-spaced in CSS selectors.
+     */
+    @Test
+    public void testNamespaceHTMLElementIdentifiersInCSSSelectors()
+    {
+        assertFilterOutput("$$('#list item').each(function(item){})",
+            "x$$('#x-list item').each(function(item) {\n});\n");
+    }
+
+    /**
      * Tests that a variable declaration AST node is properly decompiled.
      * 
      * @see https://bugzilla.mozilla.org/show_bug.cgi?id=491621
