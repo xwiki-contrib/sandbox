@@ -19,6 +19,11 @@
  */
 package org.xwiki.portlet.view;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -45,6 +50,17 @@ public class HTMLIdAttributeXMLFilter extends XMLFilterImpl
      * The name of the DIV HTML tag.
      */
     private static final String DIV = "div";
+
+    /**
+     * The list of HTML attributes that are of type ID, IDREF or IDREFS. We have to hard-code this list because the
+     * attribute type is not always properly determined (e.g. when the document type declaration is missing).
+     */
+    private static final List<String> ID_ATTRIBUTES = Arrays.asList(ID, "for", "headers");
+
+    /**
+     * The pattern used to split the value of a {@code IDREFS} attribute.
+     */
+    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
     /**
      * The string all element identifiers will be prefixed with.
@@ -77,7 +93,7 @@ public class HTMLIdAttributeXMLFilter extends XMLFilterImpl
         if (wrapOutput) {
             // Start the portlet output container.
             AttributesImpl attributes = new AttributesImpl();
-            attributes.addAttribute(null, ID, ID, "ID", namespace);
+            attributes.addAttribute(null, ID, ID, ID.toUpperCase(), namespace);
             super.startElement(null, DIV, DIV, attributes);
         }
     }
@@ -85,24 +101,28 @@ public class HTMLIdAttributeXMLFilter extends XMLFilterImpl
     @Override
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
     {
-        super.startElement(uri, localName, qName, rewriteURLFragment(rewriteId(atts)));
+        super.startElement(uri, localName, qName, rewriteURLFragment(rewriteIds(atts)));
     }
 
     /**
-     * Rewrites the id attribute if present in the given list of attributes.
+     * Rewrites the value of the {@link #ID_ATTRIBUTES} in the given list of attributes.
      * 
-     * @param atts the list of element attributes
-     * @return the given list of attributes where the value of the id attribute had been changed
+     * @param attributes the list of element attributes
+     * @return the given list of attributes where the value of the {@link #ID_ATTRIBUTES} have been changed
      */
-    private Attributes rewriteId(Attributes atts)
+    private Attributes rewriteIds(Attributes attributes)
     {
-        String id = atts.getValue(ID);
-        if (id != null) {
-            AttributesImpl newAtts = atts instanceof AttributesImpl ? (AttributesImpl) atts : new AttributesImpl(atts);
-            newAtts.setValue(atts.getIndex(ID), namespace(id));
-            return newAtts;
+        Attributes newAttributes = null;
+        for (String idAttribute : ID_ATTRIBUTES) {
+            int index = attributes.getIndex(idAttribute);
+            if (index >= 0) {
+                if (newAttributes == null) {
+                    newAttributes = attributes instanceof AttributesImpl ? attributes : new AttributesImpl(attributes);
+                }
+                ((AttributesImpl) newAttributes).setValue(index, namespace(attributes.getValue(index)));
+            }
         }
-        return atts;
+        return newAttributes != null ? newAttributes : attributes;
     }
 
     /**
@@ -130,7 +150,12 @@ public class HTMLIdAttributeXMLFilter extends XMLFilterImpl
      */
     private String namespace(String id)
     {
-        return namespace + "-" + id;
+        // Handle ID, IDREF and IDREFS attribute types uniformly.
+        String[] ids = WHITESPACE.split(id);
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = namespace + "-" + ids[i];
+        }
+        return StringUtils.join(ids, ' ');
     }
 
     @Override

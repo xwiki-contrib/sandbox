@@ -54,6 +54,11 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
     public void testNamespaceId()
     {
         assertFilterOutput("<p id=\"foo\">bar</p>", "<p id=\"x-foo\">bar</p>");
+        assertFilterOutput("<label id=\"one\" for=\"two\">Title</label><input id=\"two\"/>",
+            "<label id=\"x-one\" for=\"x-two\">Title</label><input id=\"x-two\"/>");
+        assertFilterOutput("<table><thead><tr><th headers=\"one two\">Test</th></tr></thead></table>",
+            "<table><thead><tr><th headers=\"x-one x-two\">Test</th></tr></thead></table>");
+        assertFilterOutput("<div id=\"\">content</div>", "<div id=\"x-\">content</div>");
     }
 
     /**
