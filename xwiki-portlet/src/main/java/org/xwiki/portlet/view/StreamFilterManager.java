@@ -27,12 +27,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.portlet.MimeResponse;
+import javax.portlet.PortletRequest;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.url.DefaultURLRewriter;
 import org.xwiki.portlet.url.DispatchURLFactory;
+import org.xwiki.portlet.url.URLRequestTypeMapper;
 import org.xwiki.portlet.url.URLRewriter;
 
 /**
@@ -48,9 +54,39 @@ public class StreamFilterManager
     private static final Logger LOGGER = LoggerFactory.getLogger(StreamFilterManager.class);
 
     /**
+     * The object used get the portlet request type associated with a servlet URL.
+     */
+    private static final URLRequestTypeMapper URL_REQUEST_TYPE_MAPPER = new URLRequestTypeMapper();
+
+    /**
      * The mapping between mime types and stream filters.
      */
     private final Map<String, StreamFilter> streamFilters = new HashMap<String, StreamFilter>();
+
+    /**
+     * Creates a new {@link StreamFilter} manager for the given servlet request.
+     * 
+     * @param request the servlet request whose response will be filtered
+     */
+    public StreamFilterManager(HttpServletRequest request)
+    {
+        this((PortletRequest) request.getAttribute("javax.portlet.request"), (MimeResponse) request
+            .getAttribute("javax.portlet.response"), getDispatchURL(request));
+    }
+
+    /**
+     * Creates a new {@link StreamFilter} manager for the given portlet request and response.
+     * 
+     * @param request the portlet request
+     * @param response the portlet response
+     * @param dispatchURL the URL where the request will be dispatched
+     */
+    public StreamFilterManager(PortletRequest request, MimeResponse response, String dispatchURL)
+    {
+        this(new DispatchURLFactory(response, URL_REQUEST_TYPE_MAPPER, dispatchURL), request.getContextPath(), response
+            .getNamespace(), PortletRequest.RESOURCE_PHASE.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE))
+            ? RequestType.RESOURCE : RequestType.RENDER);
+    }
 
     /**
      * Creates a new {@link StreamFilter} manager that uses the given portlet URL factory and the given portlet
@@ -69,6 +105,20 @@ public class StreamFilterManager
             requestType == RequestType.RENDER));
         streamFilters.put("text/css", new CSSStreamFilter(portletNamespace, urlRewriter));
         streamFilters.put("text/javascript", new JavaScriptStreamFilter(portletNamespace));
+    }
+
+    /**
+     * @param request a HTTP servlet request
+     * @return the corresponding dispatch URL
+     */
+    private static String getDispatchURL(HttpServletRequest request)
+    {
+        StringBuilder dispatchURL = new StringBuilder(request.getServletPath());
+        dispatchURL.append(StringUtils.defaultString(request.getPathInfo()));
+        if (request.getQueryString() != null) {
+            dispatchURL.append('?').append(request.getQueryString());
+        }
+        return dispatchURL.toString();
     }
 
     /**

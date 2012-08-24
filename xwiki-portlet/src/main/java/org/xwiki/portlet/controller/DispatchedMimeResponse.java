@@ -74,6 +74,15 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     private String contentType;
 
     /**
+     * The redirect location.
+     * <p>
+     * {@link #sendRedirect(String)} performs no operations if the request was dispatched from the {@code render} or
+     * {@code serveResource} method (see PLT.19.4.4 and PLT.19.4.5) so we simulate the redirects by dispatching the
+     * request on the server side.
+     */
+    private String redirect;
+
+    /**
      * Wraps the given servlet response that has been dispatched from a portlet's render or serve resource method.
      * 
      * @param response the response object to be wrapped
@@ -168,5 +177,20 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     {
         String type = super.getContentType();
         return type != null ? type : this.contentType;
+    }
+
+    @Override
+    public void sendRedirect(String location) throws IOException
+    {
+        redirect = location;
+        super.sendRedirect(location);
+    }
+
+    /**
+     * @return the redirect location
+     */
+    public String getRedirect()
+    {
+        return redirect;
     }
 }

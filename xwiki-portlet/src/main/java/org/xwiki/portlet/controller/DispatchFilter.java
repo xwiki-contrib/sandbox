@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.portlet.PortletRequest;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -30,13 +31,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.portlet.DispatchPortlet;
-import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.model.ResponseData;
 import org.xwiki.portlet.view.StreamFilterManager;
 
@@ -55,8 +56,8 @@ public class DispatchFilter implements Filter
 
     /**
      * The name of the request attribute that specifies if this filter has already been applied to the current request.
-     * This flag is required to prevent prevent processing the same request multiple times. The value of this request
-     * attribute is a string. The associated boolean value is determined using {@link Boolean#valueOf(String)}.
+     * This flag can be used to prevent processing the same request multiple times. The value of this request attribute
+     * is a {@link Boolean} value.
      */
     private static final String ATTRIBUTE_APPLIED = DispatchFilter.class.getName() + ".applied";
 
@@ -75,31 +76,33 @@ public class DispatchFilter implements Filter
         ServletException
     {
         if (request instanceof HttpServletRequest
-            && !Boolean.valueOf((String) request.getAttribute(ATTRIBUTE_APPLIED))) {
+            && Boolean.TRUE.equals(request.getAttribute(DispatchPortlet.ATTRIBUTE_DISPATCHED))) {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
-            RequestType requestType = (RequestType) request.getAttribute(DispatchPortlet.ATTRIBUTE_REQUEST_TYPE);
-            if (requestType != null) {
-                HttpServletResponse httpResponse = (HttpServletResponse) response;
-                // Prevent nested calls to this filter.
-                request.setAttribute(ATTRIBUTE_APPLIED, "true");
-                switch (requestType) {
-                    case ACTION:
-                        doAction(httpRequest, httpResponse, chain);
-                        break;
-                    case RENDER:
-                        doRender(httpRequest, httpResponse, chain);
-                        break;
-                    case RESOURCE:
-                        doResource(httpRequest, httpResponse, chain);
-                        break;
-                    default:
-                        // We should never get here.
-                        break;
-                }
-                // Allow multiple calls to this filter, as long as they are not nested. We need this because we
-                // transform redirects into dispatches and thus a request can be dispatched multiple times, but these
-                // dispatches shouldn't be nested.
-                request.removeAttribute(ATTRIBUTE_APPLIED);
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+            // Mark the request to know that the filter has been applied.
+            boolean applied = Boolean.TRUE.equals(request.getAttribute(ATTRIBUTE_APPLIED));
+            request.setAttribute(ATTRIBUTE_APPLIED, Boolean.TRUE);
+
+            boolean done = true;
+            PortletRequest portletRequest = (PortletRequest) request.getAttribute("javax.portlet.request");
+            String phase = (String) portletRequest.getAttribute(PortletRequest.LIFECYCLE_PHASE);
+            if (PortletRequest.RESOURCE_PHASE.equals(phase)) {
+                doResource(httpRequest, httpResponse, chain);
+            } else if (!applied && PortletRequest.RENDER_PHASE.equals(phase)) {
+                doRender(httpRequest, httpResponse, chain);
+            } else if (!applied && PortletRequest.ACTION_PHASE.equals(phase)) {
+                // During the action phase the response redirects are simulated with a request dispatcher but the
+                // dispatches are done one after another from the portlet so this filter is not called recursively.
+                // As a consequence we don't handle nested calls during the action phase.
+                doAction(httpRequest, httpResponse, chain);
+            } else {
+                done = false;
+            }
+
+            // Remove the marker to allow consecutive calls to this filter, as long as they are not nested.
+            request.removeAttribute(ATTRIBUTE_APPLIED);
+            if (done) {
                 return;
             }
         }
@@ -118,18 +121,10 @@ public class DispatchFilter implements Filter
     private void doAction(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws IOException, ServletException
     {
-        DispatchedRequest requestWrapper;
-        String redirectURL = (String) request.getAttribute(DispatchPortlet.ATTRIBUTE_REDIRECT_URL);
-        if (redirectURL != null) {
-            request.removeAttribute(DispatchPortlet.ATTRIBUTE_REDIRECT_URL);
-            requestWrapper = new DispatchedRequest(request, redirectURL);
-        } else {
-            // NOTE: Exposing the initial query string parameters on both action and render portlet requests can have
-            // unexpected side effects if the action and render portlet requests share the same client request. For the
-            // moment we expose the parameters only on action request.
-            requestWrapper = new DispatchedRequest(request, true);
-        }
-
+        // NOTE: Exposing the initial query string parameters on both action and render portlet requests can have
+        // unexpected side effects if the action and render portlet requests share the same client request. For the
+        // moment we expose the parameters only on action request.
+        HttpServletRequest requestWrapper = wrapRequest(request, true);
         DispatchedActionResponse responseWrapper = new DispatchedActionResponse(response);
         chain.doFilter(requestWrapper, responseWrapper);
         ResponseData responseData = responseWrapper.getResponseData();
@@ -159,13 +154,16 @@ public class DispatchFilter implements Filter
             response.setContentType(mimeType);
         }
 
-        StreamFilterManager streamFilterManager =
-            (StreamFilterManager) request.getAttribute(DispatchPortlet.ATTRIBUTE_STREAM_FILTER_MANAGER);
+        HttpServletRequest requestWrapper = wrapRequest(request, false);
+        StreamFilterManager streamFilterManager = new StreamFilterManager(requestWrapper);
         DispatchedMimeResponse responseWrapper =
             new DispatchedMimeResponse(response, streamFilterManager.getKnownMimeTypes());
-        chain.doFilter(new DispatchedRequest(request, false), responseWrapper);
+        chain.doFilter(requestWrapper, responseWrapper);
 
-        if (responseWrapper.isOutputIntercepted()) {
+        if (responseWrapper.getRedirect() != null) {
+            String dispatchURL = getDispatchURL(responseWrapper.getRedirect(), requestWrapper);
+            request.setAttribute(DispatchPortlet.ATTRIBUTE_REDIRECT_URL, dispatchURL);
+        } else if (responseWrapper.isOutputIntercepted()) {
             // Invalidate the current content length because the content is going to be transformed.
             response.setContentLength(-1);
             LOGGER.debug("Filtering " + request.getRequestURI());
@@ -187,6 +185,12 @@ public class DispatchFilter implements Filter
         throws IOException, ServletException
     {
         doRender(request, response, chain);
+
+        String dispatchURL = (String) request.getAttribute(DispatchPortlet.ATTRIBUTE_REDIRECT_URL);
+        if (dispatchURL != null) {
+            // Simulate the (forbidden) redirect with a forward.
+            request.getRequestDispatcher(dispatchURL).forward(wrapRequest(request, false), response);
+        }
     }
 
     @Override
@@ -245,5 +249,34 @@ public class DispatchFilter implements Filter
     {
         return expectedURL.getProtocol().equals(actualURL.getProtocol())
             && expectedURL.getAuthority().equals(actualURL.getAuthority());
+    }
+
+    /**
+     * Wraps the given request, optionally exposing the initial query string parameters.
+     * 
+     * @param request the request to be wrapped
+     * @param exposeInitialQueryStringParameters {@code true} to expose the initial query string parameters,
+     *            {@code false} otherwise
+     * @return the request wrapper
+     * @throws ServletException if wrapping the given request fails
+     */
+    private HttpServletRequest wrapRequest(HttpServletRequest request, boolean exposeInitialQueryStringParameters)
+        throws ServletException
+    {
+        String redirectURL = (String) request.getAttribute(DispatchPortlet.ATTRIBUTE_REDIRECT_URL);
+        if (redirectURL != null) {
+            request.removeAttribute(DispatchPortlet.ATTRIBUTE_REDIRECT_URL);
+            return new DispatchedRequest(request, redirectURL);
+        } else {
+            // Check if the request is not already wrapped.
+            ServletRequest wrappedRequest = request;
+            while (wrappedRequest instanceof HttpServletRequestWrapper) {
+                if (wrappedRequest instanceof DispatchedRequest) {
+                    return request;
+                }
+                wrappedRequest = ((HttpServletRequestWrapper) wrappedRequest).getRequest();
+            }
+            return new DispatchedRequest(request, exposeInitialQueryStringParameters);
+        }
     }
 }
