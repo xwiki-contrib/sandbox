@@ -129,7 +129,8 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
             }
         });
 
-        assertFilterOutput("<form action=\"v\"></form>", "<form action=\"w\"></form>");
+        assertFilterOutput("<form action=\"v\"></form>", "<form action=\"w\"><input "
+            + "name=\"org.xwiki.portlet.parameter.dispatchURL\" type=\"hidden\" value=\"v\"/></form>");
     }
 
     /**

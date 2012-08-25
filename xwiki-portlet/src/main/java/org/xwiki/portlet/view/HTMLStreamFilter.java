@@ -69,9 +69,7 @@ public class HTMLStreamFilter implements StreamFilter
     public HTMLStreamFilter(URLRewriter urlRewriter, String portletNamespace, boolean wrapOutput)
     {
         filters.add(new HTMLConditionalCommentsXMLFilter(urlRewriter));
-        if (wrapOutput) {
-            filters.add(new HTMLMetaDataXMLFilter(urlRewriter));
-        }
+        filters.add(new HTMLMetaDataXMLFilter(urlRewriter, !wrapOutput));
         filters.add(new HTMLIdAttributeXMLFilter(portletNamespace, wrapOutput));
         filters.add(new HTMLInlineCodeXMLFilter(urlRewriter, portletNamespace));
         filters.add(new HTMLURLAttributeXMLFilter(urlRewriter));
