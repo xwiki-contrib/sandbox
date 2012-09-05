@@ -1,0 +1,3 @@
+org.xwiki.contrib.authentication.jdbc.internal.DefaultJDBCConfiguration
+org.xwiki.contrib.authentication.jdbc.internal.DefaultUserSynchronizer
+org.xwiki.contrib.authentication.jdbc.internal.UserEventListener
