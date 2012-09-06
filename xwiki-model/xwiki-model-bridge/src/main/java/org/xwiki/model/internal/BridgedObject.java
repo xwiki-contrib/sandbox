@@ -34,8 +34,11 @@ import com.xpn.xwiki.objects.BaseObject;
 
 public class BridgedObject implements Object
 {
+    private BaseObject baseObject;
+
     public BridgedObject(BaseObject baseObject)
     {
+        this.baseObject = baseObject;
     }
 
     @Override public EntityIterator<Entity> getChildren(EntityType type)

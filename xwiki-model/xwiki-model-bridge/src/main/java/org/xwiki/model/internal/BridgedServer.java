@@ -37,7 +37,7 @@ public class BridgedServer implements Server
 
     private EntityManager entityManager;
 
-    public BridgedServer(XWikiContext xcontext, EntityManager entityManager)
+    public BridgedServer(EntityManager entityManager, XWikiContext xcontext)
     {
         this.xcontext = xcontext;
         this.entityManager = entityManager;

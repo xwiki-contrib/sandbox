@@ -52,7 +52,7 @@ public class BridgedEntityManager implements EntityManager
      */
     private Cache<Entity> modifiedEntityCache;
 
-    public BridgedEntityManager(XWikiContext xcontext, CacheManager cacheManager)
+    public BridgedEntityManager(CacheManager cacheManager, XWikiContext xcontext)
     {
         this.xcontext = xcontext;
 
@@ -84,16 +84,7 @@ public class BridgedEntityManager implements EntityManager
         EntityReference reference = uniqueReference.getReference();
         switch (reference.getType()) {
             case DOCUMENT:
-                try {
-                    // Since the old model API always return a XWikiDocument even if it doesn't exist, we need to check
-                    // if the document is new or not.
-                    XWikiDocument xdoc = getXWiki().getDocument(new DocumentReference(reference), getXWikiContext());
-                    if (!xdoc.isNew()) {
-                        result = (T) new BridgedDocument(xdoc);
-                    }
-                } catch (XWikiException e) {
-                    throw new ModelException("Error loading document [" + reference + "]", e);
-                }
+                result = (T) new BridgedDocument(getXWikiDocument(reference));
                 break;
             case SPACE:
                 // A space exists if there's at least one document in it.
@@ -113,26 +104,58 @@ public class BridgedEntityManager implements EntityManager
                 }
                 break;
             case OBJECT:
-                // First find the reference to the document containing the object (it's the parent of the passed
-                // reference).
-                EntityReference documentReference = reference.getParent();
-                // Load the parent document since objects are loaded at the same time in the old model
-                XWikiDocument xdoc;
-                try {
-                    xdoc = getXWiki().getDocument(new DocumentReference(documentReference), getXWikiContext());
-                } catch (XWikiException e) {
-                    throw new ModelException("Error loading document [" + documentReference + "]", e);
-                }
-                // Get the requested object if the document isn't new...
-                if (!xdoc.isNew()) {
-                    BaseObject object = xdoc.getXObject(new ObjectReference(reference));
-                    if (object != null) {
-                        result = (T) new BridgedObject(object);
+                result = (T) getXWikiObject(reference);
+                break;
+            case OBJECT_PROPERTY:
+                BaseObject xobject = getXWikiObject(reference.getParent());
+                if (xobject != null) {
+                    /*
+                    try {
+                        result = (T) new BridgedObjectProperty(xobject.get(reference.getName()));
+                    } catch (XWikiException e) {
+                        // TODDO
                     }
+                    */
                 }
                 break;
             default:
                 throw new ModelException("Not supported");
+        }
+
+        return result;
+    }
+
+    private BaseObject getXWikiObject(EntityReference reference)
+    {
+        BaseObject result = null;
+
+        // Find the reference to the document containing the object (it's the parent of the passed
+        // reference) and Load the parent document since objects are loaded at the same time in the old model.
+        XWikiDocument xdoc = getXWikiDocument(reference.getParent());
+        // Get the requested object if the document isn't new...
+        if (xdoc != null && !xdoc.isNew()) {
+            BaseObject object = xdoc.getXObject(new ObjectReference(reference));
+            if (object != null) {
+                result = object;
+            }
+        }
+
+        return result;
+    }
+
+    private XWikiDocument getXWikiDocument(EntityReference reference)
+    {
+        XWikiDocument result = null;
+
+        try {
+            // Since the old model API always return a XWikiDocument even if it doesn't exist, we need to check
+            // if the document is new or not.
+            XWikiDocument xdoc = getXWiki().getDocument(new DocumentReference(reference), getXWikiContext());
+            if (!xdoc.isNew()) {
+                result = xdoc;
+            }
+        } catch (XWikiException e) {
+            throw new ModelException("Error loading document [" + reference + "]", e);
         }
 
         return result;
@@ -143,7 +166,7 @@ public class BridgedEntityManager implements EntityManager
     {
         boolean result;
 
-        // TOdO: should we return true if the entity has been created but not saved in the DB?
+        // TODO: should we return true if the entity has been created but not saved in the DB?
 
         EntityReference reference = uniqueReference.getReference();
         switch (reference.getType()) {

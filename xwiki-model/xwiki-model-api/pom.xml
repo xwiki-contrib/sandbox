@@ -27,7 +27,7 @@
   <parent>
     <groupId>org.xwiki.platform</groupId>
     <artifactId>xwiki-platform-newmodel</artifactId>
-    <version>3.2-SNAPSHOT</version>
+    <version>4.2-SNAPSHOT</version>
   </parent>
   <artifactId>xwiki-platform-newmodel-api</artifactId>
   <name>XWiki Platform - New Model - API</name>

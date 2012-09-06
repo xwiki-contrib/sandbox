@@ -19,6 +19,7 @@
  */
 package org.xwiki.model.internal;
 
+import java.lang.reflect.Type;
 import java.net.URL;
 
 import org.jmock.Expectations;
@@ -43,14 +44,13 @@ public class BridgedEntityManagerTest extends AbstractBridgedComponentTestCase
     private BridgedEntityManager manager;
 
     @Before
-    public void setUp() throws Exception
+    public void configure() throws Exception
     {
-        super.setUp();
         final XWiki xwiki = getMockery().mock(XWiki.class);
         getContext().setWiki(xwiki);
 
-        this.manager = new BridgedEntityManager(getContext(),
-            getComponentManager().lookup(CacheManager.class));
+        CacheManager cacheManager = getComponentManager().getInstance((Type) CacheManager.class);
+        this.manager = new BridgedEntityManager(cacheManager, getContext());
     }
 
     @Test
