@@ -42,6 +42,11 @@ import org.xwiki.portlet.util.StringServletPrintWriter;
 public class DispatchedMimeResponse extends HttpServletResponseWrapper
 {
     /**
+     * The Content-Type HTTP header.
+     */
+    private static final String HEADER_CONTENT_TYPE = "Content-Type";
+
+    /**
      * The response output stream wrapper.
      */
     private ByteArrayServletOutputStream outputStreamWrapper;
@@ -192,5 +197,27 @@ public class DispatchedMimeResponse extends HttpServletResponseWrapper
     public String getRedirect()
     {
         return redirect;
+    }
+
+    @Override
+    public void setHeader(String name, String value)
+    {
+        super.setHeader(name, value);
+        // setHeader translates into PortletResponse#setProperty and the portal is allowed to filter the response
+        // headers (e.g. Pluto ignores the content type set by Restlet). It's safer to use the dedicated methods.
+        if (HEADER_CONTENT_TYPE.equals(name) && !StringUtils.equals(value, getContentType())) {
+            setContentType(value);
+        }
+    }
+
+    @Override
+    public void addHeader(String name, String value)
+    {
+        super.addHeader(name, value);
+        // addHeader translates into PortletResponse#addProperty and the portal is allowed to filter the response
+        // headers (e.g. Pluto ignores the content type set by Restlet). It's safer to use the dedicated methods.
+        if (HEADER_CONTENT_TYPE.equals(name) && !StringUtils.equals(value, getContentType())) {
+            setContentType(value);
+        }
     }
 }
