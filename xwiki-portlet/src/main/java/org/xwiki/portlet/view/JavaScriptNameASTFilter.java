@@ -46,9 +46,9 @@ public class JavaScriptNameASTFilter implements NodeVisitor
             "EvalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError", "decodeURI",
             "decodeURIComponent", "encodeURI", "encodeURIComponent", "eval", "isFinite", "isNaN", "parseFloat",
             "parseInt", "Infinity", "Math", "NaN", "undefined", "window", "document", "navigator", "arguments", "Node",
-            "Element", "HTMLElement", "Document", "Window", "Event", "Selection", "Range", "XPathResult",
+            "Element", "HTMLElement", "Document", "Window", "Event", "Selection", "Range", "Image", "XPathResult",
             "XMLHttpRequest", "DOMParser", "ActiveXObject", "self", "console", "alert", "confirm", "setTimeout",
-            "clearTimeout", "unescape", "location",
+            "clearTimeout", "setInterval", "clearInterval", "unescape", "location",
             /* Defined by SmartClient, used in the WYSIWYG editor's GWT code which is not transformed by this filter. */
             "isc",
             /* Defined by the GWT code of the WYSIWYG editor which is automatically converted to JavaScript and is not
