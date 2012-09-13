@@ -86,8 +86,16 @@ public class DispatchedRequest extends HttpServletRequestWrapper
 
         redirected = false;
 
+        Map<String, List<String>> queryStringParameters = new HashMap<String, List<String>>();
         if (exposeInitialQueryStringParameters) {
-            dispatchParametersStack.push(listToArray(parseInitialQueryString()));
+            queryStringParameters.putAll(parseInitialQueryString());
+        }
+        // When forwarding a request the query string parameters specified on the path used to create the request
+        // dispatcher have to be aggregated with the parameters of the forwarded request (PLT.19.1.1). Unfortunately not
+        // all portlet containers do this (e.g. WebSphere Portal 6.1.5.0).
+        queryStringParameters.putAll(parseQueryString());
+        if (!queryStringParameters.isEmpty()) {
+            dispatchParametersStack.push(listToArray(queryStringParameters));
         }
     }
 
@@ -388,6 +396,26 @@ public class DispatchedRequest extends HttpServletRequestWrapper
             }
         } else {
             return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Parses the query string parameters from {@link #getQueryString()}.
+     * 
+     * @return the map of query string parameters
+     * @throws ServletException if decoding the query string parameters fails
+     */
+    private Map<String, List<String>> parseQueryString() throws ServletException
+    {
+        String queryString = getQueryString();
+        if (queryString == null) {
+            return Collections.emptyMap();
+        } else {
+            try {
+                return queryStringParser.parse(queryString, getCharacterEncoding());
+            } catch (UnsupportedEncodingException e) {
+                throw new ServletException("Failed to decode the query string parameters.", e);
+            }
         }
     }
 }
