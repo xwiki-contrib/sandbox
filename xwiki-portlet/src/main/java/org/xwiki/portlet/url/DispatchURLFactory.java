@@ -108,7 +108,12 @@ public class DispatchURLFactory
         BaseURL url;
         switch (requestType) {
             case ACTION:
-                url = response.createActionURL();
+                // Resource type has priority over Action type and HTML forms can be submitted to both URL types.
+                if (urlRequestTypeMapper.getType(dispatchURL) == RequestType.RESOURCE) {
+                    url = response.createResourceURL();
+                } else {
+                    url = response.createActionURL();
+                }
                 break;
             case RENDER:
                 url = response.createRenderURL();
