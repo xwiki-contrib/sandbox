@@ -22,6 +22,7 @@ package org.xwiki.portlet.view;
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.portlet.DispatchPortlet;
 import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.url.URLRewriter;
 
@@ -129,8 +130,8 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
             }
         });
 
-        assertFilterOutput("<form action=\"v\"></form>", "<form action=\"w\"><input "
-            + "name=\"org.xwiki.portlet.parameter.dispatchURL\" type=\"hidden\" value=\"v\"/></form>");
+        assertFilterOutput("<form action=\"v\"></form>", "<form action=\"w\"><input " + "name=\""
+            + DispatchPortlet.PARAMETER_DISPATCH_URL + "\" type=\"hidden\" value=\"v\"/></form>");
     }
 
     /**
@@ -232,10 +233,13 @@ public class HTMLStreamFilterTest extends AbstractStreamFilterTest
             {
                 allowing(mockURLRewriter).rewrite("", RequestType.RESOURCE);
                 will(returnValue("resource/url"));
+
+                allowing(mockURLRewriter).rewrite("", RequestType.ACTION);
+                will(returnValue("action/url"));
             }
         });
 
-        assertFilterOutput("test",
-            "<div id=\"z\"><input id=\"z-resourceURL\" type=\"hidden\" value=\"resource/url\"/>test</div>");
+        assertFilterOutput("test", "<div id=\"z\"><input id=\"z-resourceURL\" type=\"hidden\" value=\"resource/url\"/>"
+            + "<input id=\"z-actionURL\" type=\"hidden\" value=\"action/url\"/>test</div>");
     }
 }

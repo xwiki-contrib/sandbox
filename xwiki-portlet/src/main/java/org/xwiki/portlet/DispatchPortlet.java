@@ -45,14 +45,24 @@ import org.xwiki.portlet.url.DispatchURLFactory;
 import org.xwiki.portlet.view.StreamFilterManager;
 
 /**
- * Dispatches portlet requests coming from a JSR286 compatible portal to the URL provided in the
- * {@link DispatchURLFactory#PARAMETER_DISPATCH_URL} request parameter. The dispatch target must be on the same context
- * path as the dispatch portlet.
+ * Dispatches portlet requests coming from a JSR286 compatible portal to the URL provided either in the
+ * {@link #PARAMETER_DISPATCH_URL} request parameter on in the {@link DispatchURLFactory#PARAMETER_DISPATCH_URL} URL
+ * parameter. The dispatch target must be on the same context path as the dispatch portlet.
  * 
  * @version $Id$
  */
 public class DispatchPortlet extends GenericPortlet
 {
+    /**
+     * The name of the portlet request parameter holding the URL to dispatch the request to. Unlike
+     * {@link DispatchURLFactory#PARAMETER_DISPATCH_URL} which is a URL parameter set on the server side, this is a
+     * request parameter received from the client side as part of the post body data. When determining the dispatch URL,
+     * if present, this request parameter overwrites the URL parameter.
+     * 
+     * @see DispatchURLFactory#PARAMETER_DISPATCH_URL
+     */
+    public static final String PARAMETER_DISPATCH_URL = "org.xwiki.portlet.request.parameter.dispatchURL";
+
     /**
      * The key to access the data of a dispatched response from the session.
      */
@@ -208,9 +218,15 @@ public class DispatchPortlet extends GenericPortlet
      */
     private String getDispatchURL(PortletRequest request)
     {
-        String dispatchURL = request.getParameter(DispatchURLFactory.PARAMETER_DISPATCH_URL);
+        // First check the request parameter (received from the client side).
+        String dispatchURL = request.getParameter(PARAMETER_DISPATCH_URL);
         if (StringUtils.isEmpty(dispatchURL)) {
-            dispatchURL = getDefaultDispatchURL(request.getPreferences());
+            // Then check the URL parameter previously set on the server side when the request URL was created.
+            dispatchURL = request.getParameter(DispatchURLFactory.PARAMETER_DISPATCH_URL);
+            // Fall-back on the default dispatch URL specified in the portlet preferences.
+            if (StringUtils.isEmpty(dispatchURL)) {
+                dispatchURL = getDefaultDispatchURL(request.getPreferences());
+            }
         }
         // Remove the context path. This is required for dispatch URLs received from the client side.
         dispatchURL = StringUtils.removeStart(dispatchURL, request.getContextPath());

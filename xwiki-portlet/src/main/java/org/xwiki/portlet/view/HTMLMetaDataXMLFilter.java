@@ -24,6 +24,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.XMLFilterImpl;
+import org.xwiki.portlet.DispatchPortlet;
 import org.xwiki.portlet.model.RequestType;
 import org.xwiki.portlet.url.URLRewriter;
 
@@ -94,9 +95,9 @@ public class HTMLMetaDataXMLFilter extends XMLFilterImpl
         super.startDocument();
 
         if (!fragment) {
-            // Make the resource URL available to client side scripts. The resource URL could be used to create portlet
-            // URLs from the client side. Use this URL to send AJAX requests.
+            // Make the resource and action URLs available to client side scripts. Use these URLs to send AJAX requests.
             outputMetaData("resourceURL", urlRewriter.rewrite("", RequestType.RESOURCE), true, false);
+            outputMetaData("actionURL", urlRewriter.rewrite("", RequestType.ACTION), true, false);
         }
     }
 
@@ -111,7 +112,7 @@ public class HTMLMetaDataXMLFilter extends XMLFilterImpl
             // request must be send to a ResourceURL (to avoid having the portal HTML mark-up in the response). We pass
             // the original form action URL in a hidden input element so that the form can be correctly submitted to the
             // 'resourceURL' previously generated in #startDocument().
-            outputMetaData("org.xwiki.portlet.parameter.dispatchURL", atts.getValue("action"), false, true);
+            outputMetaData(DispatchPortlet.PARAMETER_DISPATCH_URL, atts.getValue("action"), false, true);
         }
     }
 

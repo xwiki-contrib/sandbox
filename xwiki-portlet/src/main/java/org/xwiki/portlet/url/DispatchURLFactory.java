@@ -35,7 +35,7 @@ public class DispatchURLFactory
     /**
      * The name of the portlet URL parameter holding the URL to dispatch the request to.
      */
-    public static final String PARAMETER_DISPATCH_URL = "org.xwiki.portlet.parameter.dispatchURL";
+    public static final String PARAMETER_DISPATCH_URL = "org.xwiki.portlet.url.parameter.dispatchURL";
 
     /**
      * The object used to create the portlet URLs.
@@ -87,13 +87,14 @@ public class DispatchURLFactory
     }
 
     /**
+     * Creates a dispatch URL with the specified type that targets the current page.
+     * 
      * @param requestType the type of URL to create
      * @return a dispatch URL with the specified type, pointing to the current page
      */
     public BaseURL createURL(RequestType requestType)
     {
-        // (PLT.13.6) Resource URLs preserve the current render parameters (including the default dispatch URL).
-        return createURL(requestType == RequestType.RESOURCE ? null : defaultDispatchURL, requestType);
+        return createURL(defaultDispatchURL, requestType);
     }
 
     /**
@@ -105,11 +106,19 @@ public class DispatchURLFactory
      */
     public BaseURL createURL(String dispatchURL, RequestType requestType)
     {
+        // We remove the fragment identifier from the dispatch URL. It would have been nice if we could add the fragment
+        // identifier to the created portlet URL but the portlet specification doesn't support it so we just ignore it.
+        String actualDispatchURL = StringUtils.substringBefore(dispatchURL, "#");
+        if (StringUtils.isEmpty(actualDispatchURL)) {
+            actualDispatchURL = defaultDispatchURL;
+        }
+        RequestType actualRequestType =
+            requestType != null ? requestType : urlRequestTypeMapper.getType(actualDispatchURL);
         BaseURL url;
-        switch (requestType) {
+        switch (actualRequestType) {
             case ACTION:
                 // Resource type has priority over Action type and HTML forms can be submitted to both URL types.
-                if (urlRequestTypeMapper.getType(dispatchURL) == RequestType.RESOURCE) {
+                if (urlRequestTypeMapper.getType(actualDispatchURL) == RequestType.RESOURCE) {
                     url = response.createResourceURL();
                 } else {
                     url = response.createActionURL();
@@ -126,11 +135,8 @@ public class DispatchURLFactory
                 break;
         }
         // (PLT.13.6) Resource URLs preserve the current render parameters (including the default dispatch URL).
-        if (requestType != RequestType.RESOURCE || !StringUtils.isEmpty(dispatchURL)) {
-            // We remove the fragment identifier from the dispatch URL. It would have been nice if we could add the
-            // fragment identifier to the created portlet URL but the portlet specification doesn't support it so we
-            // just ignore the portlet identifier.
-            url.setParameter(PARAMETER_DISPATCH_URL, StringUtils.substringBefore(dispatchURL, "#"));
+        if (actualRequestType != RequestType.RESOURCE || !actualDispatchURL.equals(defaultDispatchURL)) {
+            url.setParameter(PARAMETER_DISPATCH_URL, actualDispatchURL);
         }
         return url;
     }
