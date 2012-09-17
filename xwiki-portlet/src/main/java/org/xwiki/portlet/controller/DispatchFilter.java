@@ -76,25 +76,24 @@ public class DispatchFilter implements Filter
         ServletException
     {
         if (request instanceof HttpServletRequest
-            && Boolean.TRUE.equals(request.getAttribute(DispatchPortlet.ATTRIBUTE_DISPATCHED))) {
+            && Boolean.TRUE.equals(request.getAttribute(DispatchPortlet.ATTRIBUTE_DISPATCHED))
+            && !Boolean.TRUE.equals(request.getAttribute(ATTRIBUTE_APPLIED))) {
+            // Mark the request to know that the filter has been applied.
+            request.setAttribute(ATTRIBUTE_APPLIED, Boolean.TRUE);
+
             HttpServletRequest httpRequest = (HttpServletRequest) request;
             HttpServletResponse httpResponse = (HttpServletResponse) response;
-
-            // Mark the request to know that the filter has been applied.
-            boolean applied = Boolean.TRUE.equals(request.getAttribute(ATTRIBUTE_APPLIED));
-            request.setAttribute(ATTRIBUTE_APPLIED, Boolean.TRUE);
 
             boolean done = true;
             PortletRequest portletRequest = (PortletRequest) request.getAttribute("javax.portlet.request");
             String phase = (String) portletRequest.getAttribute(PortletRequest.LIFECYCLE_PHASE);
             if (PortletRequest.RESOURCE_PHASE.equals(phase)) {
                 doResource(httpRequest, httpResponse, chain);
-            } else if (!applied && PortletRequest.RENDER_PHASE.equals(phase)) {
+            } else if (PortletRequest.RENDER_PHASE.equals(phase)) {
                 doRender(httpRequest, httpResponse, chain);
-            } else if (!applied && PortletRequest.ACTION_PHASE.equals(phase)) {
+            } else if (PortletRequest.ACTION_PHASE.equals(phase)) {
                 // During the action phase the response redirects are simulated with a request dispatcher but the
                 // dispatches are done one after another from the portlet so this filter is not called recursively.
-                // As a consequence we don't handle nested calls during the action phase.
                 doAction(httpRequest, httpResponse, chain);
             } else {
                 done = false;
@@ -189,6 +188,8 @@ public class DispatchFilter implements Filter
         String dispatchURL = (String) request.getAttribute(DispatchPortlet.ATTRIBUTE_REDIRECT_URL);
         if (dispatchURL != null) {
             // Simulate the (forbidden) redirect with a forward.
+            // Remove the marker to allow this filter to be called recursively.
+            request.removeAttribute(ATTRIBUTE_APPLIED);
             request.getRequestDispatcher(dispatchURL).forward(wrapRequest(request, false), response);
         }
     }
