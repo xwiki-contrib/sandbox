@@ -59,4 +59,11 @@ public class StringServletPrintWriter extends PrintWriter
     {
         return new StringReader(((StringWriter) out).toString());
     }
+
+    @Override
+    public void close()
+    {
+        // Do nothing on close because we're using a StringWriter and also because we want to preserve the content to be
+        // filtered even after the writer is closed.
+    }
 }
