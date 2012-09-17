@@ -243,6 +243,9 @@ public class URLRequestTypeMapper
      */
     public RequestType getType(String contextFreeURL)
     {
+        if (contextFreeURL == null) {
+            return null;
+        }
         for (Map.Entry<RequestType, List<URLMatcher>> entry : matchers.entrySet()) {
             for (URLMatcher matcher : entry.getValue()) {
                 if (matcher.matches(contextFreeURL)) {
