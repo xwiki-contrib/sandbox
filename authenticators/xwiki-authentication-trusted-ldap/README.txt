@@ -17,7 +17,7 @@ If SSO fail, it tries standard LDAP authentication.
 # xwiki.authentication.trustedldap.remoteUserParser=(.+)@(.+)
 
 #-# Indicate which of the regexp group correspond to which LDAP properties
-#-# The following LDAP properties are supported: login, ldap_server, ldap_base_DN
+#-# The following LDAP properties are supported: login, password, ldap_server, ldap_base_DN
 # xwiki.authentication.trustedldap.remoteUserMapping.1=login
 # xwiki.authentication.trustedldap.remoteUserMapping.2=ldap_server,ldap_base_DN
 
