@@ -22,7 +22,7 @@ If SSO fail, it tries standard LDAP authentication.
 # xwiki.authentication.trustedldap.remoteUserMapping.2=ldap_server,ldap_base_DN
 
 #-# Indicate how to convert each found property
-# xwiki.authentication.trustedldap.remoteUserMapping.host=MYDOMAIN=my.domain.com|MYDOMAIN2=my.domain2.com
+# xwiki.authentication.trustedldap.remoteUserMapping.ldap_server=MYDOMAIN=my.domain.com|MYDOMAIN2=my.domain2.com
 # xwiki.authentication.trustedldap.remoteUserMapping.ldap_base_DN=MYDOMAIN=dc=my,dc=domain,dc=com|MYDOMAIN2=dc=my,dc=domain2,dc=com
 
 #-# For all LDAP related configuration refer to standard LDAP authenticator documentation
