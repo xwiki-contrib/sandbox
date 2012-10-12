@@ -11,16 +11,20 @@
   <version>1.0-SNAPSHOT</version>
   <description>XWiki SSO authentication based servlet/portlet api and LDAP</description>
   <properties>
-    <platform.core.version>2.2.6</platform.core.version>
+    <platform.core.version>3.5.1</platform.core.version>
   </properties>
   <dependencies>
     <dependency>
-      <groupId>com.xpn.xwiki.platform</groupId>
-      <artifactId>xwiki-core</artifactId>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${platform.core.version}</version>
       <scope>provided</scope>
     </dependency>
-
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+ 
      <!-- Tests -->
     <dependency>
       <groupId>jmock</groupId>
@@ -52,15 +56,15 @@
       <version>4.5</version>
       <scope>test</scope>
     </dependency>
-        <dependency>
+    <dependency>
       <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-core-shared-tests</artifactId>
+      <artifactId>xwiki-platform-test</artifactId>
       <version>${platform.core.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.xpn.xwiki.platform</groupId>
-      <artifactId>xwiki-core</artifactId>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${platform.core.version}</version>
       <type>test-jar</type>
       <scope>test</scope>

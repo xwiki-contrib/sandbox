@@ -430,7 +430,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         LDAPProfileXClass ldapProfileClass = new LDAPProfileXClass(context);
 
-        XWikiDocument userProfile = getUserProfileByUid(validXWikiUserName, ldapUid, context);
+        XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, ldapUid, context);
 
         // get DN from existing XWiki user
         String ldapDn = ldapProfileClass.getDn(userProfile);
@@ -444,7 +444,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         // if we still don't have a dn, search for it. Also get the attributes, we might need
         // them
         if (ldapDn == null) {
-            searchAttributes = ldapUtils.searchUserAttributesByUid(ldapUid, getAttributeNameTable(context));
+            searchAttributes = ldapUtils.searchUserAttributesByUid(ldapUid, ldapUtils.getAttributeNameTable(context));
 
             if (searchAttributes != null) {
                 for (XWikiLDAPSearchAttribute searchAttribute : searchAttributes) {
