@@ -160,4 +160,13 @@ public class CSSStreamFilterTest extends AbstractStreamFilterTest
                 + "-ms-filter: \"progid:DXImageTransform.Microsoft.gradient"
                 + "(startColorStr='#FFFFFF',EndColorStr='#FAFAFA')\" }");
     }
+
+    /**
+     * Tests how selectors that include pseudo-elements like :after are rewritten.
+     */
+    @Test
+    public void testRewritePseudoElementSelector()
+    {
+        assertFilterOutput("a:after{content:'?'}", "*#x a:after { content: \"?\" }");
+    }
 }
