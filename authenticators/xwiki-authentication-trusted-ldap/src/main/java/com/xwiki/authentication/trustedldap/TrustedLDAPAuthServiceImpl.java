@@ -16,9 +16,7 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
  */
-
 package com.xwiki.authentication.trustedldap;
 
 import java.io.UnsupportedEncodingException;
@@ -34,9 +32,9 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.securityfilter.realm.SimplePrincipal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.novell.ldap.LDAPException;
 import com.xpn.xwiki.XWikiContext;
@@ -55,7 +53,7 @@ import com.xpn.xwiki.web.XWikiRequest;
 public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 {
     /** LogFactory <code>LOGGER</code>. */
-    private static final Log LOG = LogFactory.getLog(TrustedLDAPAuthServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TrustedLDAPAuthServiceImpl.class);
 
     private TrustedLDAPConfig config = null;
 

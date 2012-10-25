@@ -16,9 +16,7 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
  */
-
 package com.xwiki.authentication.trustedldap;
 
 import java.util.Collections;
@@ -26,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xwiki.authentication.Config;
@@ -35,7 +33,7 @@ import com.xwiki.authentication.Config;
 public class TrustedLDAPConfig extends Config
 {
     /** LogFactory <code>LOGGER</code>. */
-    private static final Log LOG = LogFactory.getLog(TrustedLDAPConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrustedLDAPConfig.class);
 
     protected static final String PREF_KEY = "trustedldap";
 

@@ -16,9 +16,7 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
  */
-
 package com.xwiki.authentication;
 
 import java.util.Arrays;
@@ -29,9 +27,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.xpn.xwiki.XWikiContext;
 
@@ -45,7 +43,7 @@ public class Config
     /**
      * LogFactory <code>LOGGER</code>.
      */
-    private static final Log LOG = LogFactory.getLog(Config.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
     private final String prefPrefix;
 
@@ -68,7 +66,7 @@ public class Config
         try {
             param = context.getWiki().getXWikiPreference(prefPrefix + "_" + name, context);
         } catch (Exception e) {
-            LOG.error("Faile to get preference [" + prefPrefix + "_" + name + "]", e);
+            LOGGER.error("Faile to get preference [" + prefPrefix + "_" + name + "]", e);
         }
 
         if (StringUtils.isEmpty(param)) {
@@ -77,7 +75,7 @@ public class Config
             try {
                 param = context.getWiki().Param(confPrefix + "." + name);
             } catch (Exception e) {
-                LOG.error("Failed to get property [" + confPrefix + "." + name + "] from configuration file", e);
+                LOGGER.error("Failed to get property [" + confPrefix + "." + name + "] from configuration file", e);
             }
         }
 
@@ -122,7 +120,7 @@ public class Config
 
                         mappings.put(forceLowerCaseKey ? key.toLowerCase() : key, value);
                     } else {
-                        LOG.warn("Error parsing " + name + " attribute in xwiki.cfg: " + fieldStr);
+                        LOGGER.warn("Error parsing " + name + " attribute in xwiki.cfg: " + fieldStr);
                     }
                 }
             }
@@ -148,7 +146,7 @@ public class Config
                     int splitIndex = mapping.indexOf('=');
 
                     if (splitIndex < 1) {
-                        LOG.error("Error parsing [" + name + "] attribute: " + mapping);
+                        LOGGER.error("Error parsing [" + name + "] attribute: " + mapping);
                     } else {
                         String leftProperty =
                             left ? mapping.substring(0, splitIndex) : mapping.substring(splitIndex + 1);
@@ -164,8 +162,8 @@ public class Config
 
                         rightCollection.add(rightProperty);
 
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("[" + name + "] mapping found: " + leftProperty + " " + rightCollection);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("[" + name + "] mapping found: " + leftProperty + " " + rightCollection);
                         }
                     }
                 }
