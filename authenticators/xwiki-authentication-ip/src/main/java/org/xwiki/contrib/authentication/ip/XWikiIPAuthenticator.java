@@ -21,6 +21,8 @@ package org.xwiki.contrib.authentication.ip;
 
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -29,7 +31,6 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
 import com.xpn.xwiki.user.api.XWikiUser;
-import com.xpn.xwiki.web.XWikiRequest;
 
 /**
  * Authentication based on IP address.
@@ -48,9 +49,16 @@ public class XWikiIPAuthenticator extends XWikiAuthServiceImpl
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
-        final XWikiRequest req = context.getRequest();
+        final HttpServletRequest req = context.getRequest().getHttpServletRequest();
 
-        final String realName = req.getRemoteAddr();
+        final String proxy = context.getWiki().Param("xwiki.authentication.ip.proxy", null);
+        final String realName;
+        if (proxy != null && proxy.equals(req.getRemoteAddr())) {
+            realName = req.getHeader("x-forwarded-for");
+        } else {
+            realName = req.getRemoteAddr();
+        }
+
         final String name = INVALID_CHARS.matcher(realName).replaceAll("_");
         final String fullName = "XWiki." + name;
 

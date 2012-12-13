@@ -11,6 +11,12 @@ When you open a wiki page, you're automatically logged in as your IP address wit
 Add this: `xwiki.authentication.authclass=org.xwiki.contrib.authentication.ip.XWikiIPAuthenticator`
 4. Restart the wiki and you will be automatically logged in as your IP address.
 
+## Reverse proxy support
+
+Set this: `xwiki.authentication.ip.proxy=<ip address of your proxy>`
+You can check the IP address of your proxy as XWiki sees it with this:
+`{{velocity}}$xcontext.getRequest().getHttpServletRequest().getRemoteAddr(){{/velocity}}`
+
 ## Q&A
 
 * OMG IP Addresses are so insecure!?!!1
@@ -18,7 +24,6 @@ Add this: `xwiki.authentication.authclass=org.xwiki.contrib.authentication.ip.XW
 
 * What about logging in normally while it's running?
  * todo
-
 
 ## Todo
 
