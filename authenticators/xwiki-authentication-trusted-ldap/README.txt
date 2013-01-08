@@ -14,14 +14,18 @@ If SSO fail, it tries standard LDAP authentication.
 == xwiki.cfg file ==
 
 #-# A Java regexp used to parse the remote user provided by JAAS
+#
 # xwiki.authentication.trustedldap.remoteUserParser=(.+)@(.+)
 
 #-# Indicate which of the regexp group correspond to which LDAP properties
-#-# The following LDAP properties are supported: login, password, ldap_server, ldap_base_DN
+#-# The following LDAP properties are supported:
+#-#   login, password, ldap_server, ldap_base_DN, ldap_bind_DN, ldap_bind_pass
+#
 # xwiki.authentication.trustedldap.remoteUserMapping.1=login
 # xwiki.authentication.trustedldap.remoteUserMapping.2=ldap_server,ldap_base_DN
 
 #-# Indicate how to convert each found property
+#
 # xwiki.authentication.trustedldap.remoteUserMapping.ldap_server=MYDOMAIN=my.domain.com|MYDOMAIN2=my.domain2.com
 # xwiki.authentication.trustedldap.remoteUserMapping.ldap_base_DN=MYDOMAIN=dc=my,dc=domain,dc=com|MYDOMAIN2=dc=my,dc=domain2,dc=com
 
