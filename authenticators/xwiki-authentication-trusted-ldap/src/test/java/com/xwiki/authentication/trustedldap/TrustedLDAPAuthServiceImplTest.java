@@ -27,7 +27,6 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.xpn.xwiki.XWiki;
@@ -46,7 +45,7 @@ public class TrustedLDAPAuthServiceImplTest extends AbstractBridgedComponentTest
 
     private TrustedLDAPAuthServiceImpl authenticator;
 
-    @Before
+    @Override
     public void setUp() throws Exception
     {
         super.setUp();

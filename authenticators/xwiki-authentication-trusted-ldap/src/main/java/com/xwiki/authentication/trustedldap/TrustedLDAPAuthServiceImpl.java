@@ -21,6 +21,7 @@ package com.xwiki.authentication.trustedldap;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -334,9 +335,15 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         String ldapUserName = remoteUserLdapConfiguration.get("login");
         String password = remoteUserLdapConfiguration.get("password");
 
+        String remoteUser_bind_DN = remoteUserLdapConfiguration.get("bind_DN");
+        String remoteUser_bind_pass = remoteUserLdapConfiguration.get("bind_pass");
+
         // allow to use the given user and password also as the LDAP bind user and password
-        String bindDN = config.getLDAPBindDN(ldapUserName, password, context);
-        String bindPassword = config.getLDAPBindPassword(ldapUserName, password, context);
+        String bindDN =
+            config.getLDAPBindDN(remoteUser_bind_DN != null ? remoteUser_bind_DN : ldapUserName, password, context);
+        String bindPassword =
+            config.getLDAPBindPassword(remoteUser_bind_pass != null ? remoteUser_bind_pass : ldapUserName, password,
+                context);
 
         boolean bind;
         if ("1".equals(config.getLDAPParam("ldap_ssl", "0", context))) {
@@ -352,6 +359,17 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
 
         return bind;
+    }
+
+    private String getLDAPBindDN(XWikiLDAPConfig config, String login, String password, XWikiContext context)
+    {
+        return MessageFormat.format(config.getLDAPBindDN(context), XWikiLDAPConnection.escapeLDAPDNValue(login),
+            XWikiLDAPConnection.escapeLDAPDNValue(password));
+    }
+
+    private String getLDAPBindPassword(XWikiLDAPConfig config, String login, String password, XWikiContext context)
+    {
+        return MessageFormat.format(config.getLDAPBindPassword(context), login, password);
     }
 
     public Principal authenticateSSOInContext(String login, String password, boolean local, XWikiContext context)

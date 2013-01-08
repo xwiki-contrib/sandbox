@@ -19,6 +19,7 @@
  */
 package com.xwiki.authentication.trustedldap;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.plugin.ldap.XWikiLDAPConfig;
+import com.xpn.xwiki.plugin.ldap.XWikiLDAPConnection;
 import com.xwiki.authentication.Config;
 
 public class TrustedLDAPConfig extends Config
@@ -65,5 +68,28 @@ public class TrustedLDAPConfig extends Config
     {
         return getMapParam("remoteUserMapping." + propertyName, '|', Collections.<String, String> emptyMap(),
             forceLowerCaseKey, context);
+    }
+
+    public String getLDAPBindDN(Map<String, String> remoteUserLdapConfiguration, XWikiContext context)
+    {
+        String login = remoteUserLdapConfiguration.get("login");
+        String password = remoteUserLdapConfiguration.get("password");
+
+        String remoteUser_bind_DN = remoteUserLdapConfiguration.get("ldap_bind_DN");
+
+        return MessageFormat.format(remoteUser_bind_DN != null ? remoteUser_bind_DN : XWikiLDAPConfig.getInstance()
+            .getLDAPBindDN(context), XWikiLDAPConnection.escapeLDAPDNValue(login), XWikiLDAPConnection
+            .escapeLDAPDNValue(password));
+    }
+
+    public String getLDAPBindPassword(Map<String, String> remoteUserLdapConfiguration, XWikiContext context)
+    {
+        String login = remoteUserLdapConfiguration.get("login");
+        String password = remoteUserLdapConfiguration.get("password");
+
+        String remoteUser_bind_pass = remoteUserLdapConfiguration.get("ldap_bind_pass");
+
+        return MessageFormat.format(remoteUser_bind_pass != null ? remoteUser_bind_pass : XWikiLDAPConfig.getInstance()
+            .getLDAPBindPassword(context), login, password);
     }
 }
