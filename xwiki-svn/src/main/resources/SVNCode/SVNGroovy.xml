@@ -3,7 +3,7 @@
 <web>SVNCode</web>
 <name>SVNGroovy</name>
 <language></language>
-<defaultLanguage>en</defaultLanguage>
+<defaultLanguage></defaultLanguage>
 <translation>0</translation>
 <parent></parent>
 <creator>XWiki.Admin</creator>
@@ -25,8 +25,8 @@
 <filename>trilead.jar</filename>
 <filesize>251371</filesize>
 <author>XWiki.LudovicDubost</author>
-<date>1271847891000</date>
-<version>1.1</version>
+<date>1358498104000</date>
+<version>1.2</version>
 <comment></comment><content>UEsDBBQACAAIAEScCDkAAAAAAAAAAAAAAAAJAAQATUVUQS1JTkYv/soAAAMAUEsHCAAAAAACAAAA
 AAAAAFBLAwQUAAgACABEnAg5AAAAAAAAAAAAAAAAFAAAAE1FVEEtSU5GL01BTklGRVNULk1G803M
 y0xLLS7RDUstKs7Mz7NSMNQz4OVyLkpNLElN0XWqBAmY6BnFG1ooaASX5in4ZiYX5RdXFpek5hYr
@@ -4442,8 +4442,8 @@ AA==
 <filename>svnkit.jar</filename>
 <filesize>1848854</filesize>
 <author>XWiki.LudovicDubost</author>
-<date>1271847891000</date>
-<version>1.1</version>
+<date>1358498105000</date>
+<version>1.2</version>
 <comment></comment><content>UEsDBAoAAAAAAHelezsAAAAAAAAAAAAAAAAJAAQATUVUQS1JTkYv/soAAFBLAwQKAAAACAB2pXs7
 9q/Fx1wAAABqAAAAFAAAAE1FVEEtSU5GL01BTklGRVNULk1G803My0xLLS7RDUstKs7Mz7NSMNQz
 4OVyzEMScSxITM5IVQCKASXNQdLORamJJakpuk6VIPUmekbxhua6SQZmChrBpXkKvpnJRfnFlcUl
@@ -36954,7 +36954,7 @@ public class SVNLogReader {
          sstatus += "${key};${stat.xwikiversion};${stat.xwikihash};${stat.svnversion}\n";
        }
        // only save if changed
-       if (status!=configdoc.getValue("status")) {
+       if (configdoc.getValue("saveStatus") &amp;&amp; status!=configdoc.getValue("status")) {
         configdoc.set("status", sstatus);
         configdoc.save();
        }

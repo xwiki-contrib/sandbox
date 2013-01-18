@@ -50,7 +50,115 @@
 <defaultEditMode></defaultEditMode>
 </property>
 </object>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>SVNCode.SVNConfigSheet</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>79528e03-c010-4234-82d3-0499580832ab</guid>
+<property>
+<cache>long</cache>
+</property>
+<property>
+<code>#template('colorThemeInit.vm')
+
+.diff {
+overflow: auto;
+white-space: normal;
+}
+
+.diffaddword {
+color: $theme.notificationSuccessColor;
+}
+
+.diffremoveword {
+color: $theme.notificationErrorColor;
+text-decoration: line-through;
+}</code>
+</property>
+<property>
+<name></name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
 <content>{{velocity}}
+$xwiki.ssx.use('SVNCode.SVNConfigSheet')##
+
 #if ("$!request.action" == "compare")
 = $msg.get('svn.configsheet.compare.title'): $request.page =
 #else
@@ -144,14 +252,14 @@ function tsuggest(field) {
 &lt;/form&gt;
 {{/html}}
 #elseif($request.export)
-#set($pagelist = $xwiki.arrayList)
+#set($pagelist = $util.arrayList)
 #foreach($page in $request.getParameterValues("page"))
 #set($ok = $pagelist.add($page))
 #end
 $svnr.exportPages($doc.name, $pagelist)
 #set($ok = $context.setFinished(true))
 #elseif($request.update)
-#set($pagelist = $xwiki.arrayList)
+#set($pagelist = $util.arrayList)
 #foreach($page in $request.getParameterValues("page"))
 #set($ok = $pagelist.add($page))
 #end
@@ -169,7 +277,7 @@ $msg.get("svn.configsheet.pagesupdated")
 #elseif($request.action=="commit" &amp;&amp; $request.confirm=="1")
 $msg.get("svn.configsheet.committingpages"):
 
-#set($pagelist = $xwiki.arrayList)
+#set($pagelist = $util.arrayList)
 #foreach($page in $request.getParameterValues("page"))
  * $page
 #set($ok = $pagelist.add($page))

@@ -61,6 +61,8 @@ SVNCode.SVNConfigClass_defaultdate=Default date
 SVNCode.SVNConfigClass_defaultdate_tooltip=Date to set all pages we commit to
 SVNCode.SVNConfigClass_defaultuser=Default user
 SVNCode.SVNConfigClass_defaultuser_tooltip=User to set all pages we commit to
+SVNCode.SVNConfigClass_saveStatus=Save Status
+SVNCode.SVNConfigClass_defaultspace_tooltip=Status to save on commit
 
 
 </content></xwikidoc>
