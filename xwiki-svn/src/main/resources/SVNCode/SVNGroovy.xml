@@ -37310,7 +37310,7 @@ public class SVNLogReader {
            pageList.add(pagedoc);
         }
 
-        def editor = repository.getCommitEditor(message, null);
+        def editor = repository.getCommitEditor(message.replaceAll("\\r",""), null);
         def committedPages = new ArrayList();
         def commitInfo = null;
 
