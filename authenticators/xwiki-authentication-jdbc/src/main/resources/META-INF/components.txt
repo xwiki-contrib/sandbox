@@ -1,3 +1,6 @@
 org.xwiki.contrib.authentication.jdbc.internal.DefaultJDBCConfiguration
 org.xwiki.contrib.authentication.jdbc.internal.DefaultUserSynchronizer
 org.xwiki.contrib.authentication.jdbc.internal.UserEventListener
+org.xwiki.contrib.authentication.jdbc.internal.PBKDF2PasswordHasher
+org.xwiki.contrib.authentication.jdbc.internal.Sha1Base64PasswordHasher
+org.xwiki.contrib.authentication.jdbc.internal.PlaintextPasswordHasher

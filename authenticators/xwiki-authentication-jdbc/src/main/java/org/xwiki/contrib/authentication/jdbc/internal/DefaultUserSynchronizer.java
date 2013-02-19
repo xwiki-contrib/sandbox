@@ -19,6 +19,8 @@
  */
 package org.xwiki.contrib.authentication.jdbc.internal;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -30,8 +32,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
@@ -163,14 +163,15 @@ public class DefaultUserSynchronizer implements UserSynchronizer
         return password;
     }
 
-    private Map<String, String> getXWikiUserProperties(XWikiDocument userDocument)
+    @SuppressWarnings("unchecked")
+    private Map<String, String> getXWikiUserProperties(XWikiDocument userDocument) throws NoSuchAlgorithmException,
+        InvalidKeySpecException
     {
         Map<String, String> userProperties = new HashMap<String, String>();
         userProperties.put("login", userDocument.getDocumentReference().getName());
         String password = getRequestPassword();
         if (password != null) {
             userProperties.put("password", password);
-            userProperties.put("passwordsha1base64", Base64.encodeBase64String(DigestUtils.sha(password)));
         }
 
         // object fields

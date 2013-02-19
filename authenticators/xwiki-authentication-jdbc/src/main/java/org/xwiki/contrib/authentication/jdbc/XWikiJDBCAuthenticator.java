@@ -26,12 +26,11 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.securityfilter.realm.SimplePrincipal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.contrib.authentication.jdbc.internal.JDBCConfiguration;
 import org.xwiki.contrib.authentication.jdbc.internal.UserSynchronizer;
 import org.xwiki.model.reference.DocumentReference;
@@ -44,7 +43,8 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
 import com.xpn.xwiki.web.Utils;
 
 /**
- * Authentication based on HTTP auth on a configured URL.
+ * Authentication based on HTTP auth on a configured URL. The authenticators are managed by an old XWiki framework and
+ * are not loaded as components whatever you do, it needs to be refactored but for now it's all we got.
  * 
  * @version $Id$
  */
@@ -53,14 +53,20 @@ public class XWikiJDBCAuthenticator extends XWikiAuthServiceImpl
     /**
      * Logging tool.
      */
-    private static final Log LOG = LogFactory.getLog(XWikiJDBCAuthenticator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XWikiJDBCAuthenticator.class);
 
+    @SuppressWarnings("deprecation")
     private JDBCConfiguration configuration = Utils.getComponent(JDBCConfiguration.class);
 
+    @SuppressWarnings("deprecation")
     private UserSynchronizer userSynchronizer = Utils.getComponent(UserSynchronizer.class);
 
+    @SuppressWarnings("deprecation")
     private EntityReferenceSerializer<String> compactWikiSerializer = Utils.getComponent(
         EntityReferenceSerializer.TYPE_STRING, "compactwiki");
+
+    @SuppressWarnings("deprecation")
+    private ComponentManager componentManager = Utils.getComponentManager();
 
     @Override
     public Principal authenticate(String username, String password, XWikiContext context) throws XWikiException
@@ -99,14 +105,13 @@ public class XWikiJDBCAuthenticator extends XWikiAuthServiceImpl
         String[] selectQueryParameters = this.configuration.getSelectParameters();
 
         Connection connection = this.userSynchronizer.getConnection();
+
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(selectQuery);
 
             Map<String, String> fields = new HashMap<String, String>();
             fields.put("login", login);
-            fields.put("password", password);
-            fields.put("passwordsha1base64", Base64.encodeBase64String(DigestUtils.sha(password)));
 
             int index = 1;
             for (String field : selectQueryParameters) {
@@ -116,6 +121,18 @@ public class XWikiJDBCAuthenticator extends XWikiAuthServiceImpl
             ResultSet resultSet = statement.executeQuery();
 
             if (!resultSet.next()) {
+                LOG.debug("SELECT query did not return any rows");
+                return null;
+            }
+
+            // check password
+            String dbPassword = resultSet.getString(configuration.getPasswordColumn());
+
+            PasswordHasher passwordHasher =
+                componentManager.getInstance(PasswordHasher.class, configuration.getPasswordHasher());
+
+            if (!passwordHasher.verify(dbPassword, password)) {
+                LOG.debug("Incorrect password for user {}", login);
                 return null;
             }
 

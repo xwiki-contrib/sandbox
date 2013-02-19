@@ -17,44 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.authentication.jdbc.internal;
-
-import java.util.Properties;
+package org.xwiki.contrib.authentication.jdbc;
 
 import org.xwiki.component.annotation.Role;
 
+/**
+ * Interface for all password hashing objects (e.g. salted SHA1, PBKDF2, etc.).
+ * 
+ * @author Petr Praus
+ */
 @Role
-public interface JDBCConfiguration
+public interface PasswordHasher
 {
-    void checkDriver() throws InstantiationException, IllegalAccessException, ClassNotFoundException;
-
-    String getConnectionURL();
-
-    Properties getConnectionProperties();
-
-    String getPasswordColumn();
-
-    String getQuery(String type);
-
-    String[] getQueryParameters(String type);
-
-    String getSelectQuery();
-
-    String[] getSelectParameters();
-
-    String[] getSelectMapping();
-
-    String getUpdateQuery();
-
-    String[] getUpdateParameters();
-
-    String getInsertQuery();
-
-    String[] getInsertParameters();
-
-    String getDeleteQuery();
-
-    String[] getDeleteParameters();
-
-    String getPasswordHasher();
+    /**
+     * @param suppliedPassword Password harvested from the user (plaintext)
+     * @param dbPassword User's hashed password+params from the database, possible
+     * @return true if hash of suppliedPassword matches the password from the database
+     */
+    boolean verify(String dbPassword, String suppliedPassword);
+    
+    /**
+     * @param password to be hashed
+     * @return hashed password
+     */
+    String create(String password);
 }

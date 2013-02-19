@@ -23,32 +23,60 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-platform-core</artifactId>
-    <version>4.1.3</version>
-  </parent>
-  <properties>
-    <!-- Too lazy to fix them right now. -->
-    <xwiki.checkstyle.skip>true</xwiki.checkstyle.skip>
-  </properties>
-  <groupId>org.xwiki.contrib.authentication</groupId>
-  <artifactId>xwiki-authentication-jdbc</artifactId>
-  <name>XWiki Authentication JDBC</name>
-  <version>1.0-SNAPSHOT</version>
-  <description>XWiki authentication based on custom database trough JDBC API</description>
-  <dependencies>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-oldcore</artifactId>
-      <version>${platform.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-  </dependencies>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.xwiki.platform</groupId>
+		<artifactId>xwiki-platform-core</artifactId> 
+		<version>4.4.1</version>
+	</parent>
+	
+	<groupId>org.xwiki.contrib.authentication</groupId>
+	<artifactId>xwiki-authentication-jdbc</artifactId>
+	<name>XWiki Authentication JDBC</name>
+	<version>1.0</version>
+	<description>XWiki authentication based on custom database trough JDBC API</description>
+	<dependencies>
+		<dependency>
+			<groupId>org.xwiki.platform</groupId>
+			<artifactId>xwiki-platform-oldcore</artifactId>
+			<version>${commons.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+	        <groupId>org.slf4j</groupId>
+	        <artifactId>slf4j-api</artifactId>
+	    </dependency>
+		<dependency>
+	        <groupId>org.apache.commons</groupId>
+	        <artifactId>commons-lang3</artifactId>
+	    </dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<!-- Note: The 2.4 version is not technically correct as 2.4 corresponds 
+				to a specification # and is not an implementation version. The central repo 
+				would need to be fixed... -->
+			<!-- It should always be provided, otherwise containers will complain 
+				about it. -->
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<distributionManagement>
+		<site>
+			<id>maven.xwiki.org</id>
+			<url>scp://maven.xwiki.org/home/maven/public_html/site</url>
+		</site>
+		<repository>
+			<id>maven.xwiki.org</id>
+			<name>XWiki Maven2 Remote Repository for Releases</name>
+			<url>scp://maven.xwiki.org/home/maven/public_html/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.xwiki.org</id>
+			<name>XWiki Maven2 Development Repository for Snapshots</name>
+			<url>scp://maven.xwiki.org/home/maven/public_html/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>

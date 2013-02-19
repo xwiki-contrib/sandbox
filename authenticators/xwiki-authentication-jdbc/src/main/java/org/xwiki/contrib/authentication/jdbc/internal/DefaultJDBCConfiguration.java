@@ -76,6 +76,12 @@ public class DefaultJDBCConfiguration implements JDBCConfiguration, Initializabl
     }
 
     @Override
+    public String getPasswordColumn()
+    {
+        return this.configurationSource.getProperty(CONFIGURATION_PREFIX + "select.password_column", String.class);
+    }
+
+    @Override
     public String getQuery(String type)
     {
         return this.configurationSource.getProperty(CONFIGURATION_PREFIX + type + ".query", String.class);
@@ -147,5 +153,10 @@ public class DefaultJDBCConfiguration implements JDBCConfiguration, Initializabl
     public String[] getDeleteParameters()
     {
         return getQueryParameters("delete");
+    }
+
+    public String getPasswordHasher()
+    {
+        return configurationSource.getProperty(CONFIGURATION_PREFIX + "password_hasher", String.class);
     }
 }

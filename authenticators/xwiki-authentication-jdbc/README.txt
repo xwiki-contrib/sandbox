@@ -8,6 +8,8 @@ xwiki.authentication.authclass=org.xwiki.contrib.authentication.jdbc.XWikiJDBCAu
 
 ## The JDBC driver class to use
 authentication.jdbc.connection.driver_class=com.mysql.jdbc.Driver
+OR
+authentication.jdbc.connection.driver_class=org.postgresql.Driver
 
 #-# The JDBC connection URL
 authentication.jdbc.connection.url=jdbc:mysql://localhost/database?useServerPrepStmts=false&useUnicode=true&characterEncoding=UTF-8
@@ -16,14 +18,23 @@ authentication.jdbc.connection.url=jdbc:mysql://localhost/database?useServerPrep
 authentication.jdbc.connection.properties=user=xwiki
 authentication.jdbc.connection.properties=password=xwiki
 
+## Choosing your password hashing scheme
+authentication.jdbc.password_hasher=sha1base64
+OR
+authentication.jdbc.password_hasher=pbkdf2
+OR
+authentication.jdbc.password_hasher=plaintext
+
 ## SELECT QUERY
 
-#-# The query to use to validate and get user information at the same time
+#-# The query to retrieve user information from the database including the password which will be compared against the password provided by user and hashed by a selected hashing class
 authentication.jdbc.select.query=select mail\, name from users where login=? and active = 1 and (? IS NULL or password=concat('{SHA1}'\, ?))
 #-# The well knows information to replace the ? with
 authentication.jdbc.select.parameters=login,passwordsha1base64,passwordsha1base64
-#-# Mapping between the index in the JDBS select query result and the XWikiUsers xobject fields
+#-# Mapping between the index in the JDBC select query result and the XWikiUsers xobject fields
 authentication.jdbc.select.mapping=email,name
+#-# The name of the column in the select query that contains the password
+authentication.jdbc.select.password_column=password
 
 ## INSERT QUERY
 
@@ -45,6 +56,12 @@ authentication.jdbc.update.parameters=email,name,passwordsha1base64,passwordsha1
 authentication.jdbc.delete.query=DELETE from users WHERE login=?
 #-# The well knows information to replace the ? with
 authentication.jdbc.delete.parameters=login
+
+= Creating your own password hashing implementation
+1. Implement interface org.xwiki.contrib.authentication.jdbc.PasswordHasher
+2. Make your custom hashing class into a component, add @Component, @Singleton annotation to the class
+3. Name your class using @Named("hashing_scheme_name"), this name will be used in the property authentication.jdbc.password_hasher
+4. Add full package name of the class to components.txt in META-INF directory, e.g. org.xwiki.contrib.authentication.jdbc.internal.Sha1Base64PasswordHasher
 
 = Provided properties
 

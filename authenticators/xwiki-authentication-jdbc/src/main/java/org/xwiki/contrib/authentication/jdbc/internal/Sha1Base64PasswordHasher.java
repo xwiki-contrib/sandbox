@@ -19,42 +19,33 @@
  */
 package org.xwiki.contrib.authentication.jdbc.internal;
 
-import java.util.Properties;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
-import org.xwiki.component.annotation.Role;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.authentication.jdbc.PasswordHasher;
 
-@Role
-public interface JDBCConfiguration
+/**
+ * Simple password hasher: digest password with SHA-1 and store it in Base64.
+ */
+@Component
+@Singleton
+@Named("sha1base64")
+public class Sha1Base64PasswordHasher implements PasswordHasher
 {
-    void checkDriver() throws InstantiationException, IllegalAccessException, ClassNotFoundException;
 
-    String getConnectionURL();
+    @Override
+    public boolean verify(String dbPassword, String suppliedPassword)
+    {
+        return dbPassword.equals(create(suppliedPassword));
+    }
+    
+    @Override
+    public String create(String password)
+    {
+        return Base64.encodeBase64String(DigestUtils.sha1(password));
+    }
 
-    Properties getConnectionProperties();
-
-    String getPasswordColumn();
-
-    String getQuery(String type);
-
-    String[] getQueryParameters(String type);
-
-    String getSelectQuery();
-
-    String[] getSelectParameters();
-
-    String[] getSelectMapping();
-
-    String getUpdateQuery();
-
-    String[] getUpdateParameters();
-
-    String getInsertQuery();
-
-    String[] getInsertParameters();
-
-    String getDeleteQuery();
-
-    String[] getDeleteParameters();
-
-    String getPasswordHasher();
 }
