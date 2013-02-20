@@ -30,7 +30,7 @@
 		<artifactId>xwiki-platform-core</artifactId> 
 		<version>4.4.1</version>
 	</parent>
-	
+
 	<groupId>org.xwiki.contrib.authentication</groupId>
 	<artifactId>xwiki-authentication-jdbc</artifactId>
 	<name>XWiki Authentication JDBC</name>
@@ -63,20 +63,12 @@
 		</dependency>
 	</dependencies>
 
-	<distributionManagement>
-		<site>
-			<id>maven.xwiki.org</id>
-			<url>scp://maven.xwiki.org/home/maven/public_html/site</url>
-		</site>
-		<repository>
-			<id>maven.xwiki.org</id>
-			<name>XWiki Maven2 Remote Repository for Releases</name>
-			<url>scp://maven.xwiki.org/home/maven/public_html/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>maven.xwiki.org</id>
-			<name>XWiki Maven2 Development Repository for Snapshots</name>
-			<url>scp://maven.xwiki.org/home/maven/public_html/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <developers>
+      <developer>
+        <name>Thomas Mortagne</name>
+      </developer>
+      <developer>
+        <name>Petr Praus</name>
+      </developer>
+    </developers>
 </project>
