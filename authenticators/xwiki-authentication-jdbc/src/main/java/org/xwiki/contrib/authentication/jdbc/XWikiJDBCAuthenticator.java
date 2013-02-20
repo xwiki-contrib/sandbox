@@ -43,8 +43,7 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
 import com.xpn.xwiki.web.Utils;
 
 /**
- * Authentication based on HTTP auth on a configured URL. The authenticators are managed by an old XWiki framework and
- * are not loaded as components whatever you do, it needs to be refactored but for now it's all we got.
+ * Authentication on custom database using JDBC.
  * 
  * @version $Id$
  */
