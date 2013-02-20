@@ -65,10 +65,15 @@
 
     <developers>
       <developer>
+        <id>tmortagne</id>
         <name>Thomas Mortagne</name>
+        <email>thomas.mortagne at xwiki.com</email>
+        <timezone>+1</timezone>
       </developer>
       <developer>
+        <id>Petr Praus</id>
         <name>Petr Praus</name>
+        <email>petr at praus.net</email>
       </developer>
     </developers>
 </project>

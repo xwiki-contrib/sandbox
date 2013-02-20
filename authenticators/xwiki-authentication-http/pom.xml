@@ -52,4 +52,13 @@
       <artifactId>httpclient</artifactId>
     </dependency>
   </dependencies>
+
+  <developers>
+    <developer>
+      <id>tmortagne</id>
+      <name>Thomas Mortagne</name>
+      <email>thomas.mortagne at xwiki.com</email>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
 </project>
