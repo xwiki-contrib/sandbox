@@ -124,15 +124,18 @@ public class XWikiJDBCAuthenticator extends XWikiAuthServiceImpl
                 return null;
             }
 
-            // check password
-            String dbPassword = resultSet.getString(configuration.getPasswordColumn());
-
-            PasswordHasher passwordHasher =
-                componentManager.getInstance(PasswordHasher.class, configuration.getPasswordHasher());
-
-            if (!passwordHasher.verify(dbPassword, password)) {
-                LOG.debug("Incorrect password for user {}", login);
-                return null;
+            String passwordColumn = configuration.getPasswordColumn();
+            if (passwordColumn != null) {
+                // check password
+                String dbPassword = resultSet.getString(passwordColumn);
+    
+                PasswordHasher passwordHasher =
+                    componentManager.getInstance(PasswordHasher.class, configuration.getPasswordHasher());
+    
+                if (!passwordHasher.verify(dbPassword, password)) {
+                    LOG.debug("Incorrect password for user {}", login);
+                    return null;
+                }
             }
 
             // Sync properties
