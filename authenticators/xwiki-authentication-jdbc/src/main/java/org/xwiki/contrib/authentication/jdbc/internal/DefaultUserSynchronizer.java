@@ -32,6 +32,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
@@ -172,6 +174,7 @@ public class DefaultUserSynchronizer implements UserSynchronizer
         String password = getRequestPassword();
         if (password != null) {
             userProperties.put("password", password);
+            userProperties.put("passwordsha1base64", Base64.encodeBase64String(DigestUtils.sha1(password)));
         }
 
         // object fields
