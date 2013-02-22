@@ -114,6 +114,7 @@ public class XWikiJDBCAuthenticator extends XWikiAuthServiceImpl
             Map<String, String> fields = new HashMap<String, String>();
             fields.put("login", login);
             fields.put("password", password);
+            // FIXME: crappy hack mostly here because MySQL 5 does not support it natively
             fields.put("passwordsha1base64", Base64.encodeBase64String(DigestUtils.sha1(password)));
 
             int index = 1;
