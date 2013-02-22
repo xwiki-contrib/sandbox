@@ -28,9 +28,9 @@ authentication.jdbc.password_hasher=plaintext
 ## SELECT QUERY
 
 #-# The query to retrieve user information from the database including the password which will be compared against the password provided by user and hashed by a selected hashing class
-authentication.jdbc.select.query=select mail\, name from users where login=? and active = 1 and (? IS NULL or password=concat('{SHA1}'\, ?))
+authentication.jdbc.select.query=select mail\, name from users where login=? and active = 1 and (? IS NULL or password=?)
 #-# The well knows information to replace the ? with
-authentication.jdbc.select.parameters=login,passwordsha1base64,passwordsha1base64
+authentication.jdbc.select.parameters=login,password,password
 #-# Mapping between the index in the JDBC select query result and the XWikiUsers xobject fields
 authentication.jdbc.select.mapping=email,name
 #-# The name of the column in the select query that contains the password
@@ -39,16 +39,16 @@ authentication.jdbc.select.password_column=password
 ## INSERT QUERY
 
 #-# The query to use to insert a new JDBC user when a new XWiki user has been created
-authentication.jdbc.insert.query=INSERT INTO users (login\, password\, mail\, name\, home\, uid\, creation_date\, modification_time\, active\, level) SELECT ?\, concat('{SHA1}'\, ?)\, ?\, ?\, CONCAT('/data/users/'\, ?)\, max(uid) + 1\, now()\, now()\, 1\, 0 from users
+authentication.jdbc.insert.query=INSERT INTO users (login\, password\, mail\, name\, home\, uid\, creation_date\, modification_time\, active\, level) SELECT ?\, ?\, ?\, ?\, CONCAT('/data/users/'\, ?)\, max(uid) + 1\, now()\, now()\, 1\, 0 from users
 #-# The well knows information to replace the ? with
-authentication.jdbc.insert.parameters=login,passwordsha1base64,email,name,login
+authentication.jdbc.insert.parameters=login,password,email,name,login
 
 ## UPDATE QUERY
 
 #-# The query to use to update JDBC user when the XWiki user has been modified
-authentication.jdbc.update.query=UPDATE users SET mail=?\, name=?\, password=IF(? IS NULL\, password\, concat('{SHA1}'\, ?))\, modification_time=now() WHERE login=?
+authentication.jdbc.update.query=UPDATE users SET mail=?\, name=?\, password=IF(? IS NULL\, password\, ?)\, modification_time=now() WHERE login=?
 #-# The well knows information to replace the ? with
-authentication.jdbc.update.parameters=email,name,passwordsha1base64,passwordsha1base64,login
+authentication.jdbc.update.parameters=email,name,password,password,login
 
 ## DELETE QUERY
 
@@ -65,12 +65,20 @@ authentication.jdbc.delete.parameters=login
 
 = Provided properties
 
+authentication:
+* login: login entered in the login form
+* password: password entered in the login form
+
+save:
 * all XWiki.XWikiUsers fields (email, first_name...)
-* login: the id of the user (the name of the XWiki document or what the user typed in the login form)
+* login: the id of the user (the name of the XWiki document)
 * name: a combination of the XWiki.XWikiUsers first_name and last_name fields
-* passwordsha1base64: the passwords provided by the user encoded with SH1 and then converted in BASE64
+
+creation:
+* all the save properties
+* password: password entered in the register form
 
 = TODO
 
 * more encrypted passwords
-* add support for more than just string properties
+* add support for more than just String properties
