@@ -22,8 +22,11 @@ package com.xwiki.authentication.headers;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -37,7 +40,9 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
  * <p>
  * Some parameters can be used to customized its behavior in xwiki.cfg:
  * <ul>
- * <li>xwiki.authentication.headers.auth_field: if this header filed has any value the authentication is apply,
+ * <li>xwiki.authentication.headers.secret_field: if the header field has any value, it's validated against
+ * xwiki.authentication.headers.secret_value value</li>
+ * <li>xwiki.authentication.headers.auth_field: if this header field has any value the authentication is apply,
  * otherwise it's trying standard XWiki authentication. The default field is <code>{@value #DEFAULT_AUTH_FIELD}</code>.</li>
  * <li>xwiki.authentication.headers.id_field: the value in header containing the string to use when creating the XWiki
  * user profile page. The default field is the same as auth field.</li>
@@ -49,10 +54,8 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
  */
 public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
 {
-    /**
-     * Logging tool.
-     */
-    private static final Log LOG = LogFactory.getLog(XWikiHeadersAuthenticator.class);
+    /** LogFactory <code>LOGGER</code>. */
+    private static final Logger LOG = LoggerFactory.getLogger(XWikiHeadersAuthenticator.class);
 
     private static final String DEFAULT_AUTH_FIELD = "remote_user";
 
@@ -70,18 +73,38 @@ public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
-        String auth = getAuthFieldValue(context);
+        LOG.debug("Headers auth started");
+        String secretField = getSecretFieldName(context);
+
+        if (!StringUtils.isEmpty(secretField)) {
+            String headerSecretValue = getSecretFieldHeaderValue(context);
+
+            if (headerSecretValue == null || !headerSecretValue.equals(getSecretFieldValue(context))) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Secret header value in header [" + secretField + "] is not valid");
+                }
+
+                return null;
+            }
+        }
+
+        LOG.debug("Headers auth after secret");
+        String auth = getAuthFieldHeaderValue(context);
+
+        LOG.debug("Headers auth field value: " + auth);
 
         // if no user is provided try standard XWiki authentication
-        if ((auth == null) || auth.equals("")) {
+        if (StringUtils.isEmpty(auth)) {
             return super.checkAuth(context);
         }
 
-        String id = getIdFieldValue(context);
+        String id = getIdFieldHeaderValue(context);
 
         // convert user id as XWiki does not support '.' in characters
         String validUserName = getValidUserName(id);
         String validUserFullName = "XWiki." + validUserName;
+
+        LOG.debug("Headers auth username: " + validUserFullName);
 
         String database = context.getDatabase();
         try {
@@ -98,8 +121,7 @@ public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
                 Map<String, String> extended = getExtendedInformations(context);
                 extended.put("active", "1");
 
-                context.getWiki().createUser(validUserName, extended, "XWiki.XWikiUsers",
-                    "#includeForm(\"XWiki.XWikiUserSheet\")", "edit", context);
+                context.getWiki().createUser(validUserName, extended, "edit", context);
 
                 // mark that we have created the user in the session
                 context.getRequest().getSession().setAttribute("xwikiheadersauthenticator", validUserFullName);
@@ -157,16 +179,16 @@ public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
     public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
         throws XWikiException
     {
-        String auth = getAuthFieldValue(context);
+        String auth = getAuthFieldHeaderValue(context);
 
-        if ((auth == null) || auth.equals("")) {
+        if (StringUtils.isEmpty(auth)) {
             return super.checkAuth(context);
         } else {
             return checkAuth(context);
         }
     }
 
-    private String getIdFieldValue(XWikiContext context)
+    private String getIdFieldHeaderValue(XWikiContext context)
     {
         return context.getRequest().getHeader(getIdFieldName(context));
     }
@@ -176,7 +198,7 @@ public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
         return context.getWiki().Param("xwiki.authentication.headers.id_field", DEFAULT_ID_FIELD);
     }
 
-    private String getAuthFieldValue(XWikiContext context)
+    private String getAuthFieldHeaderValue(XWikiContext context)
     {
         return context.getRequest().getHeader(getAuthFieldName(context));
     }
@@ -184,6 +206,21 @@ public class XWikiHeadersAuthenticator extends XWikiAuthServiceImpl
     private String getAuthFieldName(XWikiContext context)
     {
         return context.getWiki().Param("xwiki.authentication.headers.auth_field", DEFAULT_AUTH_FIELD);
+    }
+
+    private String getSecretFieldName(XWikiContext context)
+    {
+        return context.getWiki().Param("xwiki.authentication.headers.secret_field", null);
+    }
+
+    private String getSecretFieldValue(XWikiContext context)
+    {
+        return context.getWiki().Param("xwiki.authentication.headers.secret_value", null);
+    }
+
+    private String getSecretFieldHeaderValue(XWikiContext context)
+    {
+        return context.getRequest().getHeader(getSecretFieldName(context));
     }
 
     private Map<String, String> getExtendedInformations(XWikiContext context)
