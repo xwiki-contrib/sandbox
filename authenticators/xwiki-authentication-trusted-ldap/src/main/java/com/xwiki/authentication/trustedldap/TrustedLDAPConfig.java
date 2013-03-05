@@ -35,9 +35,6 @@ import com.xwiki.authentication.Config;
 
 public class TrustedLDAPConfig extends Config
 {
-    /** LogFactory <code>LOGGER</code>. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TrustedLDAPConfig.class);
-
     protected static final String PREF_KEY = "trustedldap";
 
     protected static final String CONF_KEY = "xwiki.authentication.trustedldap";
@@ -70,6 +67,26 @@ public class TrustedLDAPConfig extends Config
             forceLowerCaseKey, context);
     }
 
+    public String getLDAPServer(Map<String, String> remoteUserLdapConfiguration, XWikiContext context)
+    {
+        String ldapServer = remoteUserLdapConfiguration.get("ldap_server");
+        if (ldapServer == null) {
+            ldapServer = XWikiLDAPConfig.getInstance().getLDAPParam("ldap_server", "localhost", context);
+        }
+
+        return ldapServer;
+    }
+    
+    public String getLDAPBaseDN(Map<String, String> remoteUserLdapConfiguration, XWikiContext context)
+    {
+        String ldapBaseDN = remoteUserLdapConfiguration.get("ldap_base_DN");
+        if (ldapBaseDN == null) {
+            ldapBaseDN = XWikiLDAPConfig.getInstance().getLDAPParam("ldap_base_DN", "", context);
+        }
+
+        return ldapBaseDN;
+    }
+    
     public String getLDAPBindDN(Map<String, String> remoteUserLdapConfiguration, XWikiContext context)
     {
         String login = remoteUserLdapConfiguration.get("login");

@@ -142,6 +142,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
      * 
      * @see com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl#checkAuth(com.xpn.xwiki.XWikiContext)
      */
+    @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
         XWikiUser user = null;
@@ -165,6 +166,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
      * @see com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl#checkAuth(java.lang.String, java.lang.String,
      *      java.lang.String, com.xpn.xwiki.XWikiContext)
      */
+    @Override
     public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
         throws XWikiException
     {
@@ -252,6 +254,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         return user;
     }
 
+    @Override
     public Principal authenticate(String login, String password, XWikiContext context) throws XWikiException
     {
         Principal principal = null;
@@ -327,23 +330,11 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         // open LDAP
         int ldapPort = config.getLDAPPort(context);
-        String ldapHost = remoteUserLdapConfiguration.get("ldap_server");
-        if (ldapHost == null) {
-            ldapHost = config.getLDAPParam("ldap_server", "localhost", context);
-        }
-
-        String ldapUserName = remoteUserLdapConfiguration.get("login");
-        String password = remoteUserLdapConfiguration.get("password");
-
-        String remoteUser_bind_DN = remoteUserLdapConfiguration.get("bind_DN");
-        String remoteUser_bind_pass = remoteUserLdapConfiguration.get("bind_pass");
+        String ldapHost = getConfig().getLDAPServer(remoteUserLdapConfiguration, context);
 
         // allow to use the given user and password also as the LDAP bind user and password
-        String bindDN =
-            config.getLDAPBindDN(remoteUser_bind_DN != null ? remoteUser_bind_DN : ldapUserName, password, context);
-        String bindPassword =
-            config.getLDAPBindPassword(remoteUser_bind_pass != null ? remoteUser_bind_pass : ldapUserName, password,
-                context);
+        String bindDN = getConfig().getLDAPBindDN(remoteUserLdapConfiguration, context);
+        String bindPassword = getConfig().getLDAPBindPassword(remoteUserLdapConfiguration, context);;
 
         boolean bind;
         if ("1".equals(config.getLDAPParam("ldap_ssl", "0", context))) {
@@ -359,17 +350,6 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
 
         return bind;
-    }
-
-    private String getLDAPBindDN(XWikiLDAPConfig config, String login, String password, XWikiContext context)
-    {
-        return MessageFormat.format(config.getLDAPBindDN(context), XWikiLDAPConnection.escapeLDAPDNValue(login),
-            XWikiLDAPConnection.escapeLDAPDNValue(password));
-    }
-
-    private String getLDAPBindPassword(XWikiLDAPConfig config, String login, String password, XWikiContext context)
-    {
-        return MessageFormat.format(config.getLDAPBindPassword(context), login, password);
     }
 
     public Principal authenticateSSOInContext(String login, String password, boolean local, XWikiContext context)
@@ -427,9 +407,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         ldapUtils.setGroupClasses(config.getGroupClasses(context));
         ldapUtils.setGroupMemberFields(config.getGroupMemberFields(context));
         ldapUtils.setUserSearchFormatString(config.getLDAPParam("ldap_user_search_fmt", "({0}={1})", context));
-
-        ldapUtils.setBaseDN(remoteUserLdapConfiguration.containsKey("ldap_base_DN") ? remoteUserLdapConfiguration
-            .get("ldap_base_DN") : config.getLDAPParam("ldap_base_DN", "", context));
+        ldapUtils.setBaseDN(getConfig().getLDAPBaseDN(remoteUserLdapConfiguration, context));
 
         // ////////////////////////////////////////////////////////////////////
         // bind to LDAP
