@@ -133,11 +133,19 @@ public class TrustedLDAPAuthServiceImplTest extends AbstractBridgedComponentTest
         }});
         
         Map<String, String> ldapConfiguration = this.authenticator.parseRemoteUser("user@domain", getContext());
-        
+
         Assert.assertEquals("user", ldapConfiguration.get("login"));
         Assert.assertEquals("my.domain.com", ldapConfiguration.get("ldap_server"));
         Assert.assertEquals("dc=my,dc=domain,dc=com", ldapConfiguration.get("ldap_base_DN"));
         Assert.assertEquals("cn=bind,dc=my,dc=domain,dc=com", ldapConfiguration.get("ldap_bind_DN"));
         Assert.assertEquals("password", ldapConfiguration.get("ldap_bind_pass"));
+        
+        ldapConfiguration = this.authenticator.parseRemoteUser("user@domain2", getContext());
+
+        Assert.assertEquals("user", ldapConfiguration.get("login"));
+        Assert.assertEquals("my.domain2.com", ldapConfiguration.get("ldap_server"));
+        Assert.assertEquals("dc=my,dc=domain2,dc=com", ldapConfiguration.get("ldap_base_DN"));
+        Assert.assertEquals("cn=bind,dc=my,dc=domain2,dc=com", ldapConfiguration.get("ldap_bind_DN"));
+        Assert.assertEquals("password2", ldapConfiguration.get("ldap_bind_pass"));
     }
 }
