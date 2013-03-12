@@ -21,7 +21,6 @@ package com.xwiki.authentication.trustedldap;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +55,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
     /** LogFactory <code>LOGGER</code>. */
     private static final Logger LOGGER = LoggerFactory.getLogger(TrustedLDAPAuthServiceImpl.class);
 
-    private TrustedLDAPConfig config = null;
+    private TrustedLDAPConfig config;
 
     protected String encryptText(String text, XWikiContext context)
     {
@@ -137,11 +136,6 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl#checkAuth(com.xpn.xwiki.XWikiContext)
-     */
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
@@ -155,17 +149,11 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             user = super.checkAuth(context);
         }
 
-        LOGGER.debug("XWikiUser: " + user);
+        LOGGER.debug("XWikiUser: {}", user);
 
         return user;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl#checkAuth(java.lang.String, java.lang.String,
-     *      java.lang.String, com.xpn.xwiki.XWikiContext)
-     */
     @Override
     public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
         throws XWikiException
@@ -182,7 +170,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             user = super.checkAuth(username, password, rememberme, context);
         }
 
-        LOGGER.debug("XWikiUser: " + user);
+        LOGGER.debug("XWikiUser: {}", user);
 
         return user;
     }
@@ -193,7 +181,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         LOGGER.debug("checkAuth");
 
-        LOGGER.debug("Action: " + context.getAction());
+        LOGGER.debug("Action: {}", context.getAction());
         if (context.getAction().startsWith("logout")) {
             cookie = getCookie("XWIKISSOAUTHINFO", context);
             if (cookie != null) {
@@ -272,7 +260,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             context.setDatabase(wikiName);
         }
 
-        // Falback on LDAP authenticator
+        // Fallback on LDAP authenticator
         if (principal == null) {
             principal = super.authenticate(login, password, context);
         }
@@ -288,7 +276,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         Pattern remoteUserParser = getConfig().getRemoteUserParser(context);
 
-        LOGGER.debug("remoteUserParser: " + remoteUserParser);
+        LOGGER.debug("remoteUserParser: {}", remoteUserParser);
 
         if (remoteUserParser != null) {
             Matcher marcher = remoteUserParser.matcher(ssoRemoteUser);
@@ -334,7 +322,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         // allow to use the given user and password also as the LDAP bind user and password
         String bindDN = getConfig().getLDAPBindDN(remoteUserLDAPConfiguration, context);
-        String bindPassword = getConfig().getLDAPBindPassword(remoteUserLDAPConfiguration, context);;
+        String bindPassword = getConfig().getLDAPBindPassword(remoteUserLDAPConfiguration, context);
 
         LOGGER.debug("Bind DN: {}", bindDN);
 
@@ -372,13 +360,14 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             checkAuth = true;
 
             if (ssoRemoteUser == null) {
-                LOGGER.warn("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
+                LOGGER
+                    .warn("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
 
                 return null;
             }
         }
 
-        LOGGER.debug("request remote user: " + ssoRemoteUser);
+        LOGGER.debug("request remote user: {}", ssoRemoteUser);
 
         // ////////////////////////////////////////////////////////////////////
         // Extract LDAP informations from remote user
@@ -394,8 +383,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         String ldapUid = remoteUserLDAPConfiguration.get("login");
         String validXWikiUserName = ldapUid.replace(".", "");
 
-        LOGGER.debug("ldapUid: " + ldapUid);
-        LOGGER.debug("validXWikiUserName: " + validXWikiUserName);
+        LOGGER.debug("ldapUid: {}", ldapUid);
+        LOGGER.debug("validXWikiUserName: {}", validXWikiUserName);
 
         // ////////////////////////////////////////////////////////////////////
         // LDAP
@@ -404,11 +393,11 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         XWikiLDAPConnection connector = new XWikiLDAPConnection();
         XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector);
 
-        XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
-        ldapUtils.setUidAttributeName(config.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UID, "cn", context));
-        ldapUtils.setGroupClasses(config.getGroupClasses(context));
-        ldapUtils.setGroupMemberFields(config.getGroupMemberFields(context));
-        ldapUtils.setUserSearchFormatString(config.getLDAPParam("ldap_user_search_fmt", "({0}={1})", context));
+        XWikiLDAPConfig ldapConfig = XWikiLDAPConfig.getInstance();
+        ldapUtils.setUidAttributeName(ldapConfig.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UID, "cn", context));
+        ldapUtils.setGroupClasses(ldapConfig.getGroupClasses(context));
+        ldapUtils.setGroupMemberFields(ldapConfig.getGroupMemberFields(context));
+        ldapUtils.setUserSearchFormatString(ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})", context));
         ldapUtils.setBaseDN(getConfig().getLDAPBaseDN(remoteUserLDAPConfiguration, context));
 
         // ////////////////////////////////////////////////////////////////////
@@ -431,9 +420,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         // get DN from existing XWiki user
         String ldapDn = ldapProfileClass.getDn(userProfile);
 
-        if (LOGGER.isDebugEnabled() && ldapDn != null) {
-            LOGGER.debug("Found user dn with the user object: " + ldapDn);
-        }
+        LOGGER.debug("Found user dn with the user object: {}", ldapDn);
 
         List<XWikiLDAPSearchAttribute> searchAttributes = null;
 
@@ -460,8 +447,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         // if using form user/password, validate it
         if (checkAuth) {
-            if ("1".equals(config.getLDAPParam("ldap_validate_password", "0", context))) {
-                String passwordField = config.getLDAPParam("ldap_password_field", "userPassword", context);
+            if ("1".equals(ldapConfig.getLDAPParam("ldap_validate_password", "0", context))) {
+                String passwordField = ldapConfig.getLDAPParam("ldap_password_field", "userPassword", context);
                 if (!connector.checkPassword(ldapDn, password, passwordField)) {
                     LOGGER.debug("Password comparison failed, are you really sure you need validate_password ?"
                         + " If you don't enable it, it does not mean user credentials are not validated."
@@ -473,15 +460,15 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                             + ldapDn);
                 }
             } else {
-                String bindDNFormat = config.getLDAPBindDN(context);
-                String bindDN = config.getLDAPBindDN(ldapUid, password, context);
+                String bindDNFormat = getConfig().getLDAPBindDNFormat(remoteUserLDAPConfiguration, context);
+                String bindDN = getConfig().getLDAPBindDN(remoteUserLDAPConfiguration, context);
 
                 if (bindDNFormat.equals(bindDN)) {
                     // Validate user credentials
                     connector.bind(ldapDn, password);
 
                     // Rebind admin user
-                    connector.bind(bindDN, config.getLDAPBindPassword(ldapUid, password, context));
+                    connector.bind(bindDN, getConfig().getLDAPBindPassword(remoteUserLDAPConfiguration, context));
                 }
             }
         }

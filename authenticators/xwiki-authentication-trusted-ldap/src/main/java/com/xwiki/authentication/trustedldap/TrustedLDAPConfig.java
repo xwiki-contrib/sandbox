@@ -76,7 +76,7 @@ public class TrustedLDAPConfig extends Config
 
         return ldapServer;
     }
-    
+
     public String getLDAPBaseDN(Map<String, String> remoteUserLDAPConfiguration, XWikiContext context)
     {
         String ldapBaseDN = remoteUserLDAPConfiguration.get("ldap_base_DN");
@@ -86,17 +86,23 @@ public class TrustedLDAPConfig extends Config
 
         return ldapBaseDN;
     }
-    
+
+    public String getLDAPBindDNFormat(Map<String, String> remoteUserLDAPConfiguration, XWikiContext context)
+    {
+        String remoteUser_bind_DN = remoteUserLDAPConfiguration.get("ldap_bind_DN");
+
+        return remoteUser_bind_DN != null ? remoteUser_bind_DN : XWikiLDAPConfig.getInstance().getLDAPBindDN(context);
+    }
+
     public String getLDAPBindDN(Map<String, String> remoteUserLDAPConfiguration, XWikiContext context)
     {
         String login = remoteUserLDAPConfiguration.get("login");
         String password = remoteUserLDAPConfiguration.get("password");
 
-        String remoteUser_bind_DN = remoteUserLDAPConfiguration.get("ldap_bind_DN");
+        String format = getLDAPBindDNFormat(remoteUserLDAPConfiguration, context);
 
-        return MessageFormat.format(remoteUser_bind_DN != null ? remoteUser_bind_DN : XWikiLDAPConfig.getInstance()
-            .getLDAPBindDN(context), XWikiLDAPConnection.escapeLDAPDNValue(login), XWikiLDAPConnection
-            .escapeLDAPDNValue(password));
+        return MessageFormat.format(format, XWikiLDAPConnection.escapeLDAPDNValue(login),
+            XWikiLDAPConnection.escapeLDAPDNValue(password));
     }
 
     public String getLDAPBindPassword(Map<String, String> remoteUserLDAPConfiguration, XWikiContext context)
