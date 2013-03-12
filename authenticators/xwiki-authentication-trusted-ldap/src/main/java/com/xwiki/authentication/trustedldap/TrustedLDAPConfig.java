@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.plugin.ldap.XWikiLDAPConfig;
 import com.xpn.xwiki.plugin.ldap.XWikiLDAPConnection;
@@ -100,7 +97,7 @@ public class TrustedLDAPConfig extends Config
         String password = remoteUserLDAPConfiguration.get("password");
 
         String format = getLDAPBindDNFormat(remoteUserLDAPConfiguration, context);
-
+        
         return MessageFormat.format(format, XWikiLDAPConnection.escapeLDAPDNValue(login),
             XWikiLDAPConnection.escapeLDAPDNValue(password));
     }

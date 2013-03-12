@@ -50,6 +50,14 @@ xwiki.authentication.authclass=com.xwiki.authentication.trustedldap.TrustedLDAPA
 
 = Troubleshoot =
 
+== Debug log ==
+
+<!-- Standard LDAP debugging -->
+<logger name="com.xpn.xwiki.plugin.ldap" level="trace"/>
+<logger name="com.xpn.xwiki.user.impl.LDAP" level="trace"/>
+<!-- Trusted LDAP debugging -->
+<logger name="com.xwiki.authentication.trustedldap" level="trace"/>
+
 = TODO =
 
 * generic support of LDAP property in remoteUserMapping configuration
