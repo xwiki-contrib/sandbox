@@ -54,7 +54,7 @@ import com.xpn.xwiki.web.XWikiRequest;
 public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 {
     /** LogFactory <code>LOGGER</code>. */
-    private static final Logger LOG = LoggerFactory.getLogger(TrustedLDAPAuthServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrustedLDAPAuthServiceImpl.class);
 
     private TrustedLDAPConfig config = null;
 
@@ -73,10 +73,10 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                 String encoded = new String(Base64.encodeBase64(encrypted));
                 return encoded.replaceAll("=", "_");
             } else {
-                LOG.error("Encryption key not defined");
+                LOGGER.error("Encryption key not defined");
             }
         } catch (Exception e) {
-            LOG.error("Failed to encrypt text", e);
+            LOGGER.error("Failed to encrypt text", e);
         }
 
         return null;
@@ -97,10 +97,10 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                 String decoded = new String(cipher.doFinal(encrypted));
                 return decoded;
             } else {
-                LOG.error("Encryption key not defined");
+                LOGGER.error("Encryption key not defined");
             }
         } catch (Exception e) {
-            LOG.error("Failed to decrypt text", e);
+            LOGGER.error("Failed to decrypt text", e);
         }
 
         return null;
@@ -155,7 +155,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             user = super.checkAuth(context);
         }
 
-        LOG.debug("XWikiUser: " + user);
+        LOGGER.debug("XWikiUser: " + user);
 
         return user;
     }
@@ -177,12 +177,12 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         }
 
         if (user == null) {
-            LOG.debug("Fallback on standard LDAP authenticator");
+            LOGGER.debug("Fallback on standard LDAP authenticator");
 
             user = super.checkAuth(username, password, rememberme, context);
         }
 
-        LOG.debug("XWikiUser: " + user);
+        LOGGER.debug("XWikiUser: " + user);
 
         return user;
     }
@@ -191,9 +191,9 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
     {
         Cookie cookie;
 
-        LOG.debug("checkAuth");
+        LOGGER.debug("checkAuth");
 
-        LOG.debug("Action: " + context.getAction());
+        LOGGER.debug("Action: " + context.getAction());
         if (context.getAction().startsWith("logout")) {
             cookie = getCookie("XWIKISSOAUTHINFO", context);
             if (cookie != null) {
@@ -206,18 +206,18 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         Principal principal = null;
 
-        if (LOG.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             Cookie[] cookies = context.getRequest().getCookies();
             if (cookies != null) {
                 for (Cookie c : cookies) {
-                    LOG.debug("CookieList: " + c.getName() + " => " + c.getValue());
+                    LOGGER.debug("CookieList: " + c.getName() + " => " + c.getValue());
                 }
             }
         }
 
         cookie = getCookie("XWIKISSOAUTHINFO", context);
         if (cookie != null) {
-            LOG.debug("Found Cookie");
+            LOGGER.debug("Found Cookie");
             String uname = decryptText(cookie.getValue(), context);
             if (uname != null) {
                 principal = new SimplePrincipal(uname);
@@ -233,7 +233,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                 return null;
             }
 
-            LOG.debug("Saving auth cookie");
+            LOGGER.debug("Saving auth cookie");
             String encuname =
                 encryptText(principal.getName().contains(":") ? principal.getName() : context.getDatabase() + ":"
                     + principal.getName(), context);
@@ -249,7 +249,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
                     context.getDatabase().length() + 1) : principal.getName());
         }
 
-        LOG.debug("XWikiUser=" + user);
+        LOGGER.debug("XWikiUser=" + user);
 
         return user;
     }
@@ -267,7 +267,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
             principal = authenticateSSOInContext(login, password, wikiName.equals(context.getMainXWiki()), context);
         } catch (Exception e) {
-            LOG.debug("Failed to authenticate with SSO", e);
+            LOGGER.debug("Failed to authenticate with SSO", e);
         } finally {
             context.setDatabase(wikiName);
         }
@@ -288,7 +288,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
 
         Pattern remoteUserParser = getConfig().getRemoteUserParser(context);
 
-        LOG.debug("remoteUserParser: " + remoteUserParser);
+        LOGGER.debug("remoteUserParser: " + remoteUserParser);
 
         if (remoteUserParser != null) {
             Matcher marcher = remoteUserParser.matcher(ssoRemoteUser);
@@ -323,25 +323,27 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         return converted != null ? converted : propertyValue;
     }
 
-    public boolean open(XWikiLDAPConnection connector, Map<String, String> remoteUserLdapConfiguration,
+    public boolean open(XWikiLDAPConnection connector, Map<String, String> remoteUserLDAPConfiguration,
         XWikiContext context) throws XWikiLDAPException
     {
         XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
 
         // open LDAP
         int ldapPort = config.getLDAPPort(context);
-        String ldapHost = getConfig().getLDAPServer(remoteUserLdapConfiguration, context);
+        String ldapHost = getConfig().getLDAPServer(remoteUserLDAPConfiguration, context);
 
         // allow to use the given user and password also as the LDAP bind user and password
-        String bindDN = getConfig().getLDAPBindDN(remoteUserLdapConfiguration, context);
-        String bindPassword = getConfig().getLDAPBindPassword(remoteUserLdapConfiguration, context);;
+        String bindDN = getConfig().getLDAPBindDN(remoteUserLDAPConfiguration, context);
+        String bindPassword = getConfig().getLDAPBindPassword(remoteUserLDAPConfiguration, context);;
+
+        LOGGER.debug("Bind DN: {}", bindDN);
 
         boolean bind;
         if ("1".equals(config.getLDAPParam("ldap_ssl", "0", context))) {
             String keyStore = config.getLDAPParam("ldap_ssl.keystore", "", context);
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Connecting to LDAP using SSL");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Connecting to LDAP using SSL");
             }
 
             bind = connector.open(ldapHost, ldapPort, bindDN, bindPassword, keyStore, true, context);
@@ -355,7 +357,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
     public Principal authenticateSSOInContext(String login, String password, boolean local, XWikiContext context)
         throws XWikiException, UnsupportedEncodingException, LDAPException
     {
-        LOG.debug("Authenticate SSO");
+        LOGGER.debug("Authenticate SSO");
 
         XWikiRequest request = context.getRequest();
 
@@ -370,30 +372,30 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             checkAuth = true;
 
             if (ssoRemoteUser == null) {
-                LOG.warn("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
+                LOGGER.warn("Failed to resolve remote user. It usually mean that no SSO information has been provided to XWiki.");
 
                 return null;
             }
         }
 
-        LOG.debug("request remote user: " + ssoRemoteUser);
+        LOGGER.debug("request remote user: " + ssoRemoteUser);
 
         // ////////////////////////////////////////////////////////////////////
         // Extract LDAP informations from remote user
         // ////////////////////////////////////////////////////////////////////
 
-        Map<String, String> remoteUserLdapConfiguration = parseRemoteUser(ssoRemoteUser, context);
+        Map<String, String> remoteUserLDAPConfiguration = parseRemoteUser(ssoRemoteUser, context);
 
         // provide form password
-        if (!remoteUserLdapConfiguration.containsKey("password")) {
-            remoteUserLdapConfiguration.put("password", password);
+        if (!remoteUserLDAPConfiguration.containsKey("password")) {
+            remoteUserLDAPConfiguration.put("password", password);
         }
 
-        String ldapUid = remoteUserLdapConfiguration.get("login");
+        String ldapUid = remoteUserLDAPConfiguration.get("login");
         String validXWikiUserName = ldapUid.replace(".", "");
 
-        LOG.debug("ldapUid: " + ldapUid);
-        LOG.debug("validXWikiUserName: " + validXWikiUserName);
+        LOGGER.debug("ldapUid: " + ldapUid);
+        LOGGER.debug("validXWikiUserName: " + validXWikiUserName);
 
         // ////////////////////////////////////////////////////////////////////
         // LDAP
@@ -407,13 +409,13 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         ldapUtils.setGroupClasses(config.getGroupClasses(context));
         ldapUtils.setGroupMemberFields(config.getGroupMemberFields(context));
         ldapUtils.setUserSearchFormatString(config.getLDAPParam("ldap_user_search_fmt", "({0}={1})", context));
-        ldapUtils.setBaseDN(getConfig().getLDAPBaseDN(remoteUserLdapConfiguration, context));
+        ldapUtils.setBaseDN(getConfig().getLDAPBaseDN(remoteUserLDAPConfiguration, context));
 
         // ////////////////////////////////////////////////////////////////////
         // bind to LDAP
         // ////////////////////////////////////////////////////////////////////
 
-        if (!open(connector, remoteUserLdapConfiguration, context)) {
+        if (!open(connector, remoteUserLDAPConfiguration, context)) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                 "Bind to LDAP server failed.");
         }
@@ -429,8 +431,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         // get DN from existing XWiki user
         String ldapDn = ldapProfileClass.getDn(userProfile);
 
-        if (LOG.isDebugEnabled() && ldapDn != null) {
-            LOG.debug("Found user dn with the user object: " + ldapDn);
+        if (LOGGER.isDebugEnabled() && ldapDn != null) {
+            LOGGER.debug("Found user dn with the user object: " + ldapDn);
         }
 
         List<XWikiLDAPSearchAttribute> searchAttributes = null;
@@ -461,7 +463,7 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
             if ("1".equals(config.getLDAPParam("ldap_validate_password", "0", context))) {
                 String passwordField = config.getLDAPParam("ldap_password_field", "userPassword", context);
                 if (!connector.checkPassword(ldapDn, password, passwordField)) {
-                    LOG.debug("Password comparison failed, are you really sure you need validate_password ?"
+                    LOGGER.debug("Password comparison failed, are you really sure you need validate_password ?"
                         + " If you don't enable it, it does not mean user credentials are not validated."
                         + " The goal of this property is to bypass standard LDAP bind"
                         + " which is usually bad unless you really know what you do.");
@@ -506,10 +508,10 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         try {
             syncGroupsMembership(userProfile.getFullName(), ldapDn, isNewUser, ldapUtils, context);
         } catch (XWikiException e) {
-            LOG.error("Failed to synchronise user's groups membership", e);
+            LOGGER.error("Failed to synchronise user's groups membership", e);
         }
 
-        LOG.debug("Principal=" + principal);
+        LOGGER.debug("Principal=" + principal);
 
         return principal;
     }

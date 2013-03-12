@@ -66,7 +66,7 @@ public class Config
         try {
             param = context.getWiki().getXWikiPreference(prefPrefix + "_" + name, context);
         } catch (Exception e) {
-            LOGGER.error("Faile to get preference [" + prefPrefix + "_" + name + "]", e);
+            LOGGER.error("Faile to get preference [{}]", this.prefPrefix + "_" + name, e);
         }
 
         if (StringUtils.isEmpty(param)) {
@@ -75,7 +75,7 @@ public class Config
             try {
                 param = context.getWiki().Param(confPrefix + "." + name);
             } catch (Exception e) {
-                LOGGER.error("Failed to get property [" + confPrefix + "." + name + "] from configuration file", e);
+                LOGGER.error("Failed to get property [{}] from configuration file", this.confPrefix + "." + name, e);
             }
         }
 
@@ -120,7 +120,7 @@ public class Config
 
                         mappings.put(forceLowerCaseKey ? key.toLowerCase() : key, value);
                     } else {
-                        LOGGER.warn("Error parsing " + name + " attribute in xwiki.cfg: " + fieldStr);
+                        LOGGER.warn("Error parsing [{}] attribute in xwiki.cfg: {}", name, fieldStr);
                     }
                 }
             }
@@ -146,7 +146,7 @@ public class Config
                     int splitIndex = mapping.indexOf('=');
 
                     if (splitIndex < 1) {
-                        LOGGER.error("Error parsing [" + name + "] attribute: " + mapping);
+                        LOGGER.error("Error parsing [{}] attribute: {}", name, mapping);
                     } else {
                         String leftProperty =
                             left ? mapping.substring(0, splitIndex) : mapping.substring(splitIndex + 1);
@@ -162,9 +162,7 @@ public class Config
 
                         rightCollection.add(rightProperty);
 
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("[" + name + "] mapping found: " + leftProperty + " " + rightCollection);
-                        }
+                        LOGGER.debug("[{}] mapping found: {}", name, leftProperty + " " + rightCollection);
                     }
                 }
             }
