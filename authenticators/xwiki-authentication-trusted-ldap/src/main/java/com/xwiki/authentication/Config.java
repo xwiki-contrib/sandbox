@@ -79,6 +79,8 @@ public class Config
             }
         }
 
+        LOGGER.debug("Param [{}]: {}", name, param);
+
         return param;
     }
 

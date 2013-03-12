@@ -306,6 +306,9 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
     private String convertRemoteUserMapping(String propertyName, String propertyValue, XWikiContext context)
     {
         Map<String, String> hostConvertor = getConfig().getRemoteUserMapping(propertyName, true, context);
+
+        LOGGER.debug("hostConvertor: {}", hostConvertor);
+
         String converted = hostConvertor.get(propertyValue.toLowerCase());
 
         return converted != null ? converted : propertyValue;
@@ -374,6 +377,8 @@ public class TrustedLDAPAuthServiceImpl extends XWikiLDAPAuthServiceImpl
         // ////////////////////////////////////////////////////////////////////
 
         Map<String, String> remoteUserLDAPConfiguration = parseRemoteUser(ssoRemoteUser, context);
+
+        LOGGER.debug("remoteUserLDAPConfiguration: {}", remoteUserLDAPConfiguration);
 
         // provide form password
         if (!remoteUserLDAPConfiguration.containsKey("password")) {
