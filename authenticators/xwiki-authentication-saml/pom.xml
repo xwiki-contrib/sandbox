@@ -28,7 +28,7 @@
   <parent>
     <artifactId>xwiki</artifactId>
     <groupId>org.xwiki.platform</groupId>
-    <version>30</version>
+    <version>34</version>
   </parent>
   <groupId>com.xwiki.authentication</groupId>
   <artifactId>xwiki-authentication-saml</artifactId>
@@ -39,13 +39,13 @@
     <dependency>
       <groupId>com.xpn.xwiki.platform</groupId>
       <artifactId>xwiki-core</artifactId>
-      <version>2.3.2</version>
+      <version>2.4.4</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml</artifactId>
-      <version>2.2.3</version>
+      <version>2.5.1-1</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
