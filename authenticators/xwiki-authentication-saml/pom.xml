@@ -46,7 +46,6 @@
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml</artifactId>
       <version>2.5.1-1</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
