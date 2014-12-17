@@ -44,6 +44,7 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
@@ -633,11 +634,11 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
         for (String field : userFields) {
             String value = userData.get(field);
-            if (value != null && value.length() > 0) {
+            if (StringUtils.isNotBlank(value)) {
                 if (capitalize) {
-                    userName += value.substring(0, 1).toUpperCase() + ((value.length() > 1) ? value.substring(1) : "");
+                    userName += StringUtils.trim(StringUtils.capitalize(value));
                 } else {
-                    userName += value;
+                    userName += StringUtils.trim(value);
                 }
             }
         }
