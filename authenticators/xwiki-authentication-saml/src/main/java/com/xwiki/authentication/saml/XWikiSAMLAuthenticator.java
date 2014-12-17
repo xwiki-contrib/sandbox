@@ -48,15 +48,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
+import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.AttributeStatement;
+import org.opensaml.saml2.core.AuthnContext;
 import org.opensaml.saml2.core.AuthnContextClassRef;
 import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.EncryptedAttribute;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDPolicy;
+import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.impl.AuthnContextClassRefBuilder;
@@ -205,23 +208,20 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
         // Create an issuer Object
         IssuerBuilder issuerBuilder = new IssuerBuilder();
-        Issuer issuer = issuerBuilder.buildObject("urn:oasis:names:tc:SAML:2.0:assertion", "Issuer", "samlp");
+        Issuer issuer = issuerBuilder.buildObject();
         issuer.setValue(getSAMLIssuer(context));
 
         // Create NameIDPolicy
         NameIDPolicyBuilder nameIdPolicyBuilder = new NameIDPolicyBuilder();
         NameIDPolicy nameIdPolicy = nameIdPolicyBuilder.buildObject();
-        nameIdPolicy.setFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent");
+        nameIdPolicy.setFormat(NameIDType.PERSISTENT);
         nameIdPolicy.setSPNameQualifier(getSAMLNameQualifier(context));
         nameIdPolicy.setAllowCreate(true);
 
         // Create AuthnContextClassRef
         AuthnContextClassRefBuilder authnContextClassRefBuilder = new AuthnContextClassRefBuilder();
-        AuthnContextClassRef authnContextClassRef =
-            authnContextClassRefBuilder.buildObject("urn:oasis:names:tc:SAML:2.0:assertion",
-                "AuthnContextClassRef", "saml");
-        authnContextClassRef
-            .setAuthnContextClassRef("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
+        AuthnContextClassRef authnContextClassRef = authnContextClassRefBuilder.buildObject();
+        authnContextClassRef.setAuthnContextClassRef(AuthnContext.PPT_AUTHN_CTX);
 
         // Create RequestedAuthnContext
         RequestedAuthnContextBuilder requestedAuthnContextBuilder = new RequestedAuthnContextBuilder();
@@ -232,12 +232,11 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
         DateTime issueInstant = new DateTime();
         AuthnRequestBuilder authRequestBuilder = new AuthnRequestBuilder();
-        AuthnRequest authRequest =
-            authRequestBuilder.buildObject("urn:oasis:names:tc:SAML:2.0:protocol", "AuthnRequest", "samlp");
+        AuthnRequest authRequest = authRequestBuilder.buildObject();
         authRequest.setForceAuthn(false);
         authRequest.setIsPassive(false);
         authRequest.setIssueInstant(issueInstant);
-        authRequest.setProtocolBinding("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
+        authRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
         authRequest.setAssertionConsumerServiceURL(getSAMLAuthenticatorURL(context));
         authRequest.setIssuer(issuer);
         authRequest.setNameIDPolicy(nameIdPolicy);
