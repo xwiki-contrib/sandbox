@@ -160,9 +160,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         try {
             DefaultBootstrap.bootstrap();
         } catch (ConfigurationException e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Failed to bootstrap saml module");
-            }
+            LOG.error("Failed to bootstrap saml module");
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER,
                 XWikiException.ERROR_XWIKI_USER_INIT,
                 "Failed to bootstrap saml module");
@@ -170,9 +168,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
         // Generate ID
         String randId = RandomStringUtils.randomAlphanumeric(42);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Random ID: " + randId);
-        }
+        LOG.debug("Random ID: [{}]", randId);
 
         String sourceurl = request.getParameter("xredirect");
         if (sourceurl == null) {
@@ -241,9 +237,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         MarshallerFactory mfact = Configuration.getMarshallerFactory();
         Marshaller marshaller = mfact.getMarshaller(authRequest);
         if (marshaller == null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Failed to get marshaller for [{}]", authRequest);
-            }
+            LOG.error("Failed to get marshaller for [{}]", authRequest);
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER,
                 XWikiException.ERROR_XWIKI_USER_INIT,
                 "Failed to get marshaller for " + authRequest);
@@ -262,14 +256,9 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
                 deflaterOutputStream.close();
                 samlRequest = Base64.encodeBytes(byteArrayOutputStream.toByteArray(), Base64.DONT_BREAK_LINES);
                 samlRequest = URLEncoder.encode(samlRequest, XWiki.DEFAULT_ENCODING);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Converted AuthRequest: [{}}", messageXML);
-                    // LOG.debug("samlRequest: " + samlRequest);
-                }
+                LOG.debug("Converted AuthRequest: [{}}", messageXML);
             } catch (Exception e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Failed to marshaller request for [{}]", authRequest);
-                }
+                LOG.error("Failed to marshaller request for [{}]", authRequest);
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER,
                     XWikiException.ERROR_XWIKI_USER_INIT,
                     "Failed to marshaller request for " + authRequest);
@@ -277,9 +266,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
             String actionURL = getSAMLAuthenticatorURL(context);
             String url = actionURL + "?SAMLRequest=" + samlRequest;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Saml request sent to [{}]", url);
-            }
+            LOG.info("Saml request sent to [{}]", url);
             try {
                 response.sendRedirect(url);
                 context.setFinished(true);
@@ -305,14 +292,10 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         }
 
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Reading SAML Response");
-            }
+            LOG.debug("Reading SAML Response");
             samlResponse = new String(Base64.decode(samlResponse), "UTF-8");
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("SAML Response is [{}]", samlResponse);
-            }
+            LOG.debug("SAML Response is [{}]", samlResponse);
 
             // Get parser pool manager
             BasicParserPool ppMgr = new BasicParserPool();
@@ -330,9 +313,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
             // reading cert
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             String cert = getSAMLCertificate(context);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Verification signature using certificate [{}]", cert);
-            }
+            LOG.debug("Verification signature using certificate [{}]", cert);
             InputStream sis = this.environment.getResourceAsStream(cert);
             X509Certificate certificate = (X509Certificate) cf.generateCertificate(sis);
             sis.close();
@@ -348,9 +329,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
             boolean isValidDate = true;
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Reading SAML User data");
-            }
+            LOG.debug("Reading SAML User data");
 
             // Verify assertions
             for (Assertion a : response.getAssertions()) {
@@ -380,23 +359,17 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
             String samlid2 = (String) request.getSession().getAttribute("saml_id");
             if (isValidDate == false) {
                 // invalid ID
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("SAML Dates are invalid");
-                }
+                LOG.error("SAML Dates are invalid");
                 return false;
             }
             if (!samlid1.equals(samlid2)) {
                 // invalid ID
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("SAML ID do not match [{}] - [{}]", samlid1, samlid2);
-                }
+                LOG.error("SAML ID do not match [{}] - [{}]", samlid1, samlid2);
                 return false;
             }
         } catch (Exception e1) {
             // failed to read SAMLResponse
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Failed Reading SAML Response", e1);
-            }
+            LOG.error("Failed Reading SAML Response", e1);
             return false;
         }
 
@@ -420,22 +393,16 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
         if (list.size() == 0) {
             // User does not exist. Let's generate a unique page name
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Did not find XWiki User. Generating it.");
-            }
+            LOG.debug("Did not find XWiki User. Generating it.");
             String userName = generateXWikiUsername(userData, context);
             if (userName.equals("")) {
                 userName = "user";
             }
             validUserName = context.getWiki().getUniquePageName("XWiki", userName, context);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Generated XWiki User Name [{}]", validUserName);
-            }
+            LOG.debug("Generated XWiki User Name [{}]", validUserName);
         } else {
             validUserName = list.get(0);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Found XWiki User [{}]", validUserName);
-            }
+            LOG.debug("Found XWiki User [{}]", validUserName);
         }
         // we found a user or generated a unique user name
         if (validUserName != null) {
@@ -450,9 +417,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
                 XWiki xwiki = context.getWiki();
                 // test if user already exists
                 if (!xwiki.exists(userReference, context)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Need to create user [{}]", userReference);
-                    }
+                    LOG.debug("Need to create user [{}]", userReference);
 
                     // create user
                     userData.put("active", "1");
@@ -466,19 +431,14 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
                     int result = context.getWiki().createUser(validUserName, userData, PROFILE_PARENT,
                         content, syntax, "edit", context);
                     if (result < 0) {
-                        if (LOG.isErrorEnabled()) {
-                            LOG.error("Failed to create user [{}] with code [{}]", userReference, result);
-                        }
+                        LOG.error("Failed to create user [{}] with code [{}]", userReference, result);
                         return false;
                     }
                     XWikiDocument userDoc = context.getWiki().getDocument(userReference, context);
                     BaseObject obj = userDoc.newXObject(SAML_XCLASS, context);
                     obj.set("nameid", nameID, context);
                     context.getWiki().saveDocument(userDoc, context);
-
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("User [{}] has been successfully created", userReference);
-                    }
+                    LOG.debug("User [{}] has been successfully created", userReference);
                 } else {
                     XWikiDocument userDoc = context.getWiki().getDocument(userReference, context);
                     BaseObject userObj = userDoc.getXObject(USER_XCLASS);
@@ -498,26 +458,19 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
                     if (updated == true) {
                         context.getWiki().saveDocument(userDoc, context);
-
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("User [{}] has been successfully updated", userReference);
-                        }
+                        LOG.debug("User [{}] has been successfully updated", userReference);
                     }
 
                 }
             } catch (Exception e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Failed to create user [{}]", userReference, e);
-                }
+                LOG.error("Failed to create user [{}]", userReference, e);
                 return false;
             } finally {
                 context.setDatabase(database);
             }
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Setting authentication in session for user [{}]" + validUserName);
-        }
+        LOG.debug("Setting authentication in session for user [{}]" + validUserName);
 
         // mark that we have authenticated the user in the session
         if (userReference != null) {
@@ -530,9 +483,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         // need to redirect now
         try {
             String sourceurl = (String) request.getSession().getAttribute("saml_url");
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Redirecting after valid authentication to [{}]", sourceurl);
-            }
+            LOG.debug("Redirecting after valid authentication to [{}]", sourceurl);
             context.getResponse().sendRedirect(sourceurl);
             context.setFinished(true);
             return true;
@@ -562,17 +513,13 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
             // check standard authentication
             if (context.getRequest().getCookie("username") != null || context.getAction().equals("logout")
                 || context.getAction().startsWith("login")) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Fallback to standard authentication");
-                }
+                LOG.debug("Fallback to standard authentication");
                 return super.checkAuth(context);
             }
 
             return null;
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Found authentication of user [{}]", samlUserName);
-            }
+            LOG.debug("Found authentication of user [{}]", samlUserName);
             if (context.isMainWiki()) {
                 return new XWikiUser(samlUserName);
             } else {
