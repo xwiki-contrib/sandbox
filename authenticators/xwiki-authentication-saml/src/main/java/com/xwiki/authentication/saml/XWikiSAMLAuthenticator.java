@@ -97,25 +97,42 @@ import com.xpn.xwiki.web.XWikiRequest;
 import com.xpn.xwiki.web.XWikiResponse;
 
 /**
- * Authentication based on HTTP headers.
- * <p>
- * Some parameters can be used to customized its behavior in xwiki.cfg:
- * <ul>
- * <li>xwiki.authentication.headers.auth_field: if this header filed has any value the authentication is apply,
- * otherwise it's trying standard XWiki authentication. The default field is <code>{@value #DEFAULT_AUTH_FIELD}</code>.</li>
- * <li>xwiki.authentication.headers.id_field: the value in header containing the string to use when creating the XWiki
- * user profile page. The default field is the same as auth field.</li>
- * <li>xwiki.authentication.headers.fields_mapping: mapping between HTTP header values and XWiki user profile values.
- * The default mapping is <code>{@value #DEFAULT_FILEDS_MAPPING}.</code></li>
- * </ul>
+ * Authentication using a SAML server. The following parameters are needed for customizing its behavior in xwiki.cfg:
+ * <dl>
+ * <dt>xwiki.authentication.saml.cert</dt>
+ * <dd>path to certificate file, relative to the webapp directory</dd>
+ * <dd>required; example: {@code /WEB-INF/cert.txt}</dd>
+ * <dt>xwiki.authentication.saml.authurl</dt>
+ * <dd>identity provider URL</dd>
+ * <dd>required; example: {@code https://www.ip-url.fr/}</dd>
+ * <dt>xwiki.authentication.saml.issuer</dt>
+ * <dd>service provider URL</dd>
+ * <dd>required; example: {@code www.sp-url.com}</dd>
+ * <dt>xwiki.authentication.saml.namequalifier</dt>
+ * <dd>the {@code SPNameQualifier} value</dd>
+ * <dd>required; example: {@code www.sp-url.com}</dd>
+ * <dt>xwiki.authentication.saml.fields_mapping</dt>
+ * <dd>mapping between {@code XWikiUsers} fields and SAML fields</dd>
+ * <dd>optional; default value: {@code email=mail,first_name=givenName,last_name=sn}</dd>
+ * <dt>xwiki.authentication.saml.id_field</dt>
+ * <dd>the name of the SAML field containing the SAML user identifier</dd>
+ * <dd>optional; default value: {@code userPrincipalName}</dd>
+ * <dt>xwiki.authentication.saml.auth_field</dt>
+ * <dd>the name of the attribute used to cache the authentication result in the current session</dd>
+ * <dd>optional; default value: {@code saml_user}</dd>
+ * <dt>xwiki.authentication.saml.xwiki_user_rule</dt>
+ * <dd>list of fields to use for generating an XWiki username</dd>
+ * <dd>optional; default value: {@code first_name,last_name}</dd>
+ * <dt>xwiki.authentication.saml.xwiki_user_rule_capitalize</dt>
+ * <dd>capitalize each field value when generating the username</dd>
+ * <dd>optional; default value: {@code 1}; any other value is treated as {@code false}</dd>
+ * </dl>
  *
  * @version $Id$
  */
 public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 {
-    /**
-     * Logging tool.
-     */
+    /** Logging helper object. */
     private static final Logger LOG = LoggerFactory.getLogger(XWikiSAMLAuthenticator.class);
 
     private static final String DEFAULT_AUTH_FIELD = "saml_user";
@@ -604,8 +621,8 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
     }
 
     /**
-     * @param context the XWiki context.
-     * @return the fields to use to generate the xwiki user name
+     * @param context the XWiki context
+     * @return the fields to use to generate the username
      */
     private String[] getXWikiUsernameRule(XWikiContext context)
     {
@@ -615,8 +632,8 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
     }
 
     /**
-     * @param context the XWiki context.
-     * @return true if the fields should be capitalized
+     * @param context the XWiki context
+     * @return {@code true} if the fields should be capitalized
      */
     private boolean getXWikiUsernameRuleCapitalization(XWikiContext context)
     {
@@ -646,7 +663,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
     }
 
     /**
-     * @param context the XWiki context.
+     * @param context the XWiki context
      * @return the mapping between HTTP header fields names and XWiki user profile fields names.
      */
     private Map<String, String> getFieldMapping(XWikiContext context)
