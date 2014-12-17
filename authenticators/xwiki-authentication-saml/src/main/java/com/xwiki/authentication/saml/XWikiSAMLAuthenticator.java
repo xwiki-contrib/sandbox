@@ -34,8 +34,6 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
@@ -71,6 +69,8 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.util.XMLHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -105,7 +105,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
     /**
      * Logging tool.
      */
-    private static final Log LOG = LogFactory.getLog(XWikiSAMLAuthenticator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XWikiSAMLAuthenticator.class);
 
     private static final String DEFAULT_AUTH_FIELD = "saml_user";
 

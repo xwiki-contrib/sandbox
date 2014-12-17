@@ -26,26 +26,37 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>xwiki</artifactId>
-    <groupId>org.xwiki.platform</groupId>
-    <version>34</version>
+    <groupId>org.xwiki.commons</groupId>
+    <artifactId>xwiki-commons-pom</artifactId>
+    <version>6.3</version>
   </parent>
-  <groupId>com.xwiki.authentication</groupId>
-  <artifactId>xwiki-authentication-saml</artifactId>
+  <groupId>org.xwiki.contrib.authentication</groupId>
+  <artifactId>xwiki-authenticator-saml</artifactId>
   <name>xwiki-authentication-saml</name>
   <version>1.0-SNAPSHOT</version>
   <description>XWiki authentication using SAML</description>
   <dependencies>
     <dependency>
-      <groupId>com.xpn.xwiki.platform</groupId>
-      <artifactId>xwiki-core</artifactId>
-      <version>2.4.4</version>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-oldcore</artifactId>
+      <version>${project.parent.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml</artifactId>
-      <version>2.5.1-1</version>
+      <version>2.6.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
