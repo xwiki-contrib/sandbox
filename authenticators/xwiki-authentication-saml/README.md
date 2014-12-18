@@ -1,0 +1,1 @@
+Moved to https://github.com/xwiki-contrib/authenticator-saml
