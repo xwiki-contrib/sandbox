@@ -138,34 +138,46 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
     /** Logging helper object. */
     private static final Logger LOG = LoggerFactory.getLogger(XWikiSAMLAuthenticator.class);
 
+    /** The default name of the attribute used to cache the authentication result in the current session. */
     private static final String DEFAULT_AUTH_FIELD = "saml_user";
 
+    /** The default name of the SAML field containing the SAML user identifier. */
     private static final String DEFAULT_ID_FIELD = "userPrincipalName";
 
+    /** The default mapping between {@code XWikiUsers} fields and SAML fields. */
     private static final String DEFAULT_FIELDS_MAPPING = "email=mail,first_name=givenName,last_name=sn";
 
+    /** The default list of fields to use for generating an XWiki username. */
     private static final String DEFAULT_XWIKI_USERNAME_RULE = "first_name,last_name";
 
+    /** By default, capitalize each field when generating the username. */
     private static final String DEFAULT_XWIKI_USERNAME_RULE_CAPITALIZE = "1";
 
+    /** The document set as the parent of new XWiki user profiles. */
     private static final EntityReference PROFILE_PARENT = new EntityReference("XWikiUsers", EntityType.DOCUMENT,
         new EntityReference(XWiki.SYSTEM_SPACE, EntityType.SPACE));
 
+    /** Custom XClass used for storing the original ID of the remote user. */
     private static final EntityReference SAML_XCLASS = new EntityReference("SAMLAuthClass", EntityType.DOCUMENT,
         new EntityReference(XWiki.SYSTEM_SPACE, EntityType.SPACE));
 
+    /** The XClass used for storing XWiki user profiles. */
     private static final EntityReference USER_XCLASS = PROFILE_PARENT;
 
+    /** Provides access to the environment, used for reading the configured IdP certificate. */
     @SuppressWarnings("deprecation")
     Environment environment = Utils.getComponent(Environment.class);
 
+    /** Configuration for the default space and document. */
     @SuppressWarnings("deprecation")
     ModelConfiguration defaultReference = Utils.getComponent(ModelConfiguration.class);
 
+    /** Resolves partial serialized references into full document references. */
     @SuppressWarnings("deprecation")
     private DocumentReferenceResolver<String> currentMixedDocumentReferenceResolver =
         Utils.getComponent(DocumentReferenceResolver.TYPE_STRING, "currentmixed");
 
+    /** Serializes references so that they don't contain the current wiki. */
     @SuppressWarnings("deprecation")
     private EntityReferenceSerializer<String> compactStringEntityReferenceSerializer =
         Utils.getComponent(EntityReferenceSerializer.TYPE_STRING, "compactwiki");
@@ -273,12 +285,11 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
                 deflaterOutputStream.close();
                 samlRequest = Base64.encodeBytes(byteArrayOutputStream.toByteArray(), Base64.DONT_BREAK_LINES);
                 samlRequest = URLEncoder.encode(samlRequest, XWiki.DEFAULT_ENCODING);
-                LOG.debug("Converted AuthRequest: [{}}", messageXML);
+                LOG.debug("Converted AuthRequest: [{}]", messageXML);
             } catch (Exception e) {
-                LOG.error("Failed to marshaller request for [{}]", authRequest);
+                LOG.error("Failed to marshall request for [{}]", authRequest);
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER,
-                    XWikiException.ERROR_XWIKI_USER_INIT,
-                    "Failed to marshaller request for " + authRequest);
+                    XWikiException.ERROR_XWIKI_USER_INIT, "Failed to marshall request for " + authRequest);
             }
 
             String actionURL = getSAMLAuthenticatorURL(context);
