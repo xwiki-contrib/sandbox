@@ -210,7 +210,6 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
                     this.defaultReference.getDefaultReferenceValue(EntityType.SPACE),
                     this.defaultReference.getDefaultReferenceValue(EntityType.DOCUMENT)), "view", context);
             } else {
-                context.getWiki();
                 sourceurl = XWiki.getRequestURL(request).toString();
             }
         }
@@ -255,10 +254,9 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         authRequest.setRequestedAuthnContext(requestedAuthnContext);
         authRequest.setID(randId);
         authRequest.setVersion(SAMLVersion.VERSION_20);
-        String stringRep = authRequest.toString();
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("New AuthnRequestImpl: [{}]", stringRep);
+            LOG.debug("New AuthnRequestImpl: [{}]", authRequest.toString());
             LOG.debug("Assertion Consumer Service URL: [{}]", authRequest.getAssertionConsumerServiceURL());
         }
 
