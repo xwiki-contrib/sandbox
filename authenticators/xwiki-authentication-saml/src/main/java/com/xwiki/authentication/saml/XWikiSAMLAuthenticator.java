@@ -301,6 +301,53 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         }
     }
 
+    @Override
+    public XWikiUser checkAuth(XWikiContext context) throws XWikiException
+    {
+        // check in the session if the user is already authenticated
+        String samlUserName = (String) context.getRequest().getSession().getAttribute(getAuthFieldName(context));
+        if (samlUserName == null) {
+            // check if we have a SAML Response to verify
+            if (checkSAMLResponse(context)) {
+                return null;
+            }
+
+            // check standard authentication
+            if (context.getRequest().getCookie("username") != null || context.getAction().equals("logout")
+                || context.getAction().startsWith("login")) {
+                LOG.debug("Fallback to standard authentication");
+                return super.checkAuth(context);
+            }
+
+            return null;
+        } else {
+            LOG.debug("Found authentication of user [{}]", samlUserName);
+            if (context.isMainWiki()) {
+                return new XWikiUser(samlUserName);
+            } else {
+                return new XWikiUser(context.getMainXWiki() + ":" + samlUserName);
+            }
+        }
+    }
+
+    public String getValidUserName(String userName)
+    {
+        return userName.replace('.', '=').replace('@', '_');
+    }
+
+    @Override
+    public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
+        throws XWikiException
+    {
+        String auth = getAuthFieldValue(context);
+
+        if ((auth == null) || auth.equals("")) {
+            return super.checkAuth(context);
+        } else {
+            return checkAuth(context);
+        }
+    }
+
     private boolean checkSAMLResponse(XWikiContext context) throws XWikiException
     {
         // read from SAMLResponse
@@ -513,53 +560,6 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
             e.printStackTrace();
         }
         return false;
-    }
-
-    @Override
-    public XWikiUser checkAuth(XWikiContext context) throws XWikiException
-    {
-        // check in the session if the user is already authenticated
-        String samlUserName = (String) context.getRequest().getSession().getAttribute(getAuthFieldName(context));
-        if (samlUserName == null) {
-            // check if we have a SAML Response to verify
-            if (checkSAMLResponse(context)) {
-                return null;
-            }
-
-            // check standard authentication
-            if (context.getRequest().getCookie("username") != null || context.getAction().equals("logout")
-                || context.getAction().startsWith("login")) {
-                LOG.debug("Fallback to standard authentication");
-                return super.checkAuth(context);
-            }
-
-            return null;
-        } else {
-            LOG.debug("Found authentication of user [{}]", samlUserName);
-            if (context.isMainWiki()) {
-                return new XWikiUser(samlUserName);
-            } else {
-                return new XWikiUser(context.getMainXWiki() + ":" + samlUserName);
-            }
-        }
-    }
-
-    public String getValidUserName(String userName)
-    {
-        return userName.replace('.', '=').replace('@', '_');
-    }
-
-    @Override
-    public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
-        throws XWikiException
-    {
-        String auth = getAuthFieldValue(context);
-
-        if ((auth == null) || auth.equals("")) {
-            return super.checkAuth(context);
-        } else {
-            return checkAuth(context);
-        }
     }
 
     private String getSAMLCertificate(XWikiContext context)
