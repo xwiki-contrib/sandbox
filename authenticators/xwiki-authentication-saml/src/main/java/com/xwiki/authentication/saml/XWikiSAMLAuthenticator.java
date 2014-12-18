@@ -182,7 +182,8 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
     private EntityReferenceSerializer<String> compactStringEntityReferenceSerializer =
         Utils.getComponent(EntityReferenceSerializer.TYPE_STRING, "compactwiki");
 
-    private Map<String, String> userMappings;
+    /** The configured mapping between XWikiUsers fields and SAML fields. */
+    private Map<String, String> userPropertiesMapping;
 
     @Override
     public void showLogin(XWikiContext context) throws XWikiException
@@ -660,8 +661,8 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
      */
     private Map<String, String> getFieldMapping(XWikiContext context)
     {
-        if (this.userMappings == null) {
-            this.userMappings = new HashMap<String, String>();
+        if (this.userPropertiesMapping == null) {
+            this.userPropertiesMapping = new HashMap<String, String>();
 
             String fieldMapping =
                 context.getWiki().Param("xwiki.authentication.saml.fields_mapping", DEFAULT_FIELDS_MAPPING);
@@ -671,16 +672,16 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
             for (String field2 : fields) {
                 String[] field = field2.split("=");
                 if (2 == field.length) {
-                    String xwikiattr = field[0].trim();
-                    String headerattr = field[1].trim();
+                    String xwikiPropertyName = field[0].trim();
+                    String samlAttributeName = field[1].trim();
 
-                    this.userMappings.put(headerattr, xwikiattr);
+                    this.userPropertiesMapping.put(samlAttributeName, xwikiPropertyName);
                 } else {
                     LOG.error("Error parsing SAML fields_mapping attribute in xwiki.cfg: [{}]", field2);
                 }
             }
         }
 
-        return this.userMappings;
+        return this.userPropertiesMapping;
     }
 }
