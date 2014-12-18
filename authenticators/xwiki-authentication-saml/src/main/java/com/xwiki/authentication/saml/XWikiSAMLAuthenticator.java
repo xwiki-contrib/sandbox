@@ -166,11 +166,11 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
 
     /** Provides access to the environment, used for reading the configured IdP certificate. */
     @SuppressWarnings("deprecation")
-    Environment environment = Utils.getComponent(Environment.class);
+    private Environment environment = Utils.getComponent(Environment.class);
 
     /** Configuration for the default space and document. */
     @SuppressWarnings("deprecation")
-    ModelConfiguration defaultReference = Utils.getComponent(ModelConfiguration.class);
+    private ModelConfiguration defaultReference = Utils.getComponent(ModelConfiguration.class);
 
     /** Resolves partial serialized references into full document references. */
     @SuppressWarnings("deprecation")
@@ -308,7 +308,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
      *
      * @see com.xpn.xwiki.user.impl.xwiki.AppServerTrustedAuthServiceImpl#checkSAMLResponse(com.xpn.xwiki.XWikiContext)
      */
-    public boolean checkSAMLResponse(XWikiContext context) throws XWikiException
+    private boolean checkSAMLResponse(XWikiContext context) throws XWikiException
     {
         // read from SAMLResponse
         XWikiRequest request = context.getRequest();
