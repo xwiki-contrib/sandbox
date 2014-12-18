@@ -306,7 +306,7 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
         // check in the session if the user is already authenticated
-        String samlUserName = (String) context.getRequest().getSession().getAttribute(getAuthFieldName(context));
+        String samlUserName = getAuthFieldValue(context);
         if (samlUserName == null) {
             // check if we have a SAML Response to verify
             if (checkSAMLResponse(context)) {
@@ -331,18 +331,13 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         }
     }
 
-    public String getValidUserName(String userName)
-    {
-        return userName.replace('.', '=').replace('@', '_');
-    }
-
     @Override
     public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
         throws XWikiException
     {
         String auth = getAuthFieldValue(context);
 
-        if ((auth == null) || auth.equals("")) {
+        if (StringUtils.isEmpty(auth)) {
             return super.checkAuth(context);
         } else {
             return checkAuth(context);
