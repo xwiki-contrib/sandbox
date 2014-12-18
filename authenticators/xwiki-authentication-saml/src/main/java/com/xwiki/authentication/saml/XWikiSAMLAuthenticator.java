@@ -301,11 +301,6 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see com.xpn.xwiki.user.impl.xwiki.AppServerTrustedAuthServiceImpl#checkSAMLResponse(com.xpn.xwiki.XWikiContext)
-     */
     private boolean checkSAMLResponse(XWikiContext context) throws XWikiException
     {
         // read from SAMLResponse
@@ -520,11 +515,6 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see com.xpn.xwiki.user.impl.xwiki.AppServerTrustedAuthServiceImpl#checkAuth(com.xpn.xwiki.XWikiContext)
-     */
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
@@ -559,12 +549,6 @@ public class XWikiSAMLAuthenticator extends XWikiAuthServiceImpl
         return userName.replace('.', '=').replace('@', '_');
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see com.xpn.xwiki.user.impl.xwiki.AppServerTrustedAuthServiceImpl#checkAuth(java.lang.String, java.lang.String,
-     *      java.lang.String, com.xpn.xwiki.XWikiContext)
-     */
     @Override
     public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
         throws XWikiException
